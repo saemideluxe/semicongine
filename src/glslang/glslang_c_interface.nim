@@ -1,15 +1,37 @@
+# required to link the GLSL compiler
+when defined(release):
+  {.passl: "-Lthirdparty/glslang/lib/release" .}
+else:
+  {.passl: "-Lthirdparty/glslang/lib/debug" .}
+{.passl: "-Lthirdparty/spirv-tools/lib/" .}
+
+{.passl: "-lglslang" .}
+{.passl: "-lglslang-default-resource-limits" .}
+{.passl: "-lHLSL" .}
+{.passl: "-lMachineIndependent" .}
+{.passl: "-lGenericCodeGen" .}
+{.passl: "-lOSDependent" .}
+{.passl: "-lOGLCompiler" .}
+{.passl: "-lSPIRV" .}
+{.passl: "-lSPIRV-Tools-opt" .}
+
+{.passl: "-lSPIRV-Tools" .}
+{.passl: "-lSPIRV-Tools-diff" .}
+{.passl: "-lSPIRV-Tools-fuzz" .}
+{.passl: "-lSPIRV-Tools-link" .}
+{.passl: "-lSPIRV-Tools-lint" .}
+{.passl: "-lSPIRV-Tools-opt" .}
+{.passl: "-lSPIRV-Tools-reduce" .}
+
+{.passl: "-lstdc++" .}
+{.passl: "-lm" .}
+
 import
   glslang_c_shader_types
 
-type
-  glslang_shader_s = object
-  glslang_program_s = object
-  glslang_shader_t* = glslang_shader_s
-  glslang_program_t* = glslang_program_s
-
-##  TLimits counterpart
-
-type
+type 
+  glslang_shader_t* {.nodecl incompleteStruct.} = object
+  glslang_program_t* {.nodecl incompleteStruct.} = object
   glslang_limits_t* {.bycopy.} = object
     non_inductive_for_loops*: bool
     while_loops*: bool
@@ -20,11 +42,6 @@ type
     general_sampler_indexing*: bool
     general_variable_indexing*: bool
     general_constant_matrix_vector_indexing*: bool
-
-
-##  TBuiltInResource counterpart
-
-type
   glslang_resource_t* {.bycopy.} = object
     max_lights*: cint
     max_clip_planes*: cint
@@ -129,7 +146,6 @@ type
     max_mesh_view_count_ext*: cint
     maxDualSourceDrawBuffersEXT*: cint
     limits*: glslang_limits_t
-
   glslang_input_t* {.bycopy.} = object
     language*: glslang_source_t
     stage*: glslang_stage_t
@@ -137,7 +153,6 @@ type
     client_version*: glslang_target_client_version_t
     target_language*: glslang_target_language_t
     target_language_version*: glslang_target_language_version_t
-    ##  Shader source code
     code*: cstring
     default_version*: cint
     default_profile*: glslang_profile_t
@@ -145,49 +160,19 @@ type
     forward_compatible*: cint
     messages*: glslang_messages_t
     resource*: ptr glslang_resource_t
-
-
-##  Inclusion result structure allocated by C include_local/include_system callbacks
-
-type
   glsl_include_result_t* {.bycopy.} = object
     ##  Header file name or NULL if inclusion failed
     header_name*: cstring
     ##  Header contents or NULL
     header_data*: cstring
     header_length*: csize_t
-
-
-##  Callback for local file inclusion
-
-type
-  glsl_include_local_func* = proc (ctx: pointer; header_name: cstring;
-                                includer_name: cstring; include_depth: csize_t): ptr glsl_include_result_t
-
-##  Callback for system file inclusion
-
-type
-  glsl_include_system_func* = proc (ctx: pointer; header_name: cstring;
-                                 includer_name: cstring; include_depth: csize_t): ptr glsl_include_result_t
-
-##  Callback for include result destruction
-
-type
-  glsl_free_include_result_func* = proc (ctx: pointer;
-                                      result: ptr glsl_include_result_t): cint
-
-##  Collection of callbacks for GLSL preprocessor
-
-type
+  glsl_include_local_func* = proc (ctx: pointer; header_name: cstring; includer_name: cstring; include_depth: csize_t): ptr glsl_include_result_t
+  glsl_include_system_func* = proc (ctx: pointer; header_name: cstring; includer_name: cstring; include_depth: csize_t): ptr glsl_include_result_t
+  glsl_free_include_result_func* = proc (ctx: pointer; result: ptr glsl_include_result_t): cint
   glsl_include_callbacks_t* {.bycopy.} = object
     include_system*: glsl_include_system_func
     include_local*: glsl_include_local_func
     free_include_result*: glsl_free_include_result_func
-
-
-##  SpvOptions counterpart
-
-type
   glslang_spv_options_t* {.bycopy.} = object
     generate_debug_info*: bool
     strip_debug_info*: bool
@@ -197,7 +182,6 @@ type
     validate*: bool
     emit_nonsemantic_shader_debug_info*: bool
     emit_nonsemantic_shader_debug_source*: bool
-
 
 proc glslang_initialize_process*(): cint {.importc.}
 proc glslang_finalize_process*() {.importc.}

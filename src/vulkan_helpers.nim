@@ -1,6 +1,9 @@
+import std/tables
 import std/strutils
-import std/enumerate
-import vulkan
+
+import ./glslang/glslang
+import ./vulkan
+
 
 when defined(release):
   const ENABLEVULKANVALIDATIONLAYERS = false
@@ -16,6 +19,7 @@ template checkVkResult*(call: untyped) =
 
 proc VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
+
 
 proc getInstanceExtensions*(): seq[string] =
   var extensionCount: uint32
@@ -167,3 +171,24 @@ proc getVulcanDevice*(
   )
   checkVkResult vkCreateDevice(physicalDevice, addr(deviceCreateInfo), nil, addr(result[0]))
   vkGetDeviceQueue(result[0], selectedQueueFamily, 0'u32, addr(result[1]));
+
+proc createShaderStage*(device: VkDevice, stage: VkShaderStageFlagBits, shader: string): VkPipelineShaderStageCreateInfo =
+  const VK_GLSL_MAP = {
+    VK_SHADER_STAGE_VERTEX_BIT: GLSLANG_STAGE_VERTEX,
+    VK_SHADER_STAGE_FRAGMENT_BIT: GLSLANG_STAGE_FRAGMENT,
+  }.toTable()
+  var code = compileGLSLToSPIRV(VK_GLSL_MAP[stage], shader, "<memory-shader>")
+  var createInfo = VkShaderModuleCreateInfo(
+    sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+    codeSize: code.len.uint,
+    pCode: addr(code[0]),
+  )
+  var shaderModule: VkShaderModule
+  checkVkResult vkCreateShaderModule(device, addr(createInfo), nil, addr(shaderModule))
+
+  var vertShaderStageInfo = VkPipelineShaderStageCreateInfo(
+    sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+    stage: stage,
+    module: shaderModule,
+    pName: "main", # entry point for shader
+  )
