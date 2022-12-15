@@ -5,8 +5,30 @@ import ./vulkan_helpers
 import ./xlib_helpers
 
 import ./glslang/glslang
-import ./glslang/glslang_c_shader_types
 
+var vertexShaderCode: string = """#version 450
+layout(location = 0) out vec3 fragColor;
+vec3 colors[3] = vec3[](
+    vec3(1.0, 0.0, 0.0),
+    vec3(0.0, 1.0, 0.0),
+    vec3(0.0, 0.0, 1.0)
+);
+vec2 positions[3] = vec2[](
+  vec2(0.0, -0.5),
+  vec2(0.5, 0.5),
+  vec2(-0.5, 0.5)
+);
+void main() {
+  gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+  fragColor = colors[gl_VertexIndex];
+}"""
+
+var fragmentShaderCode: string = """#version 450
+layout(location = 0) out vec4 outColor;
+layout(location = 0) in vec3 fragColor;
+void main() {
+  outColor = vec4(fragColor, 1.0);
+}"""
 
 import
   x11/xlib,
@@ -15,6 +37,8 @@ import
 const VULKAN_VERSION = VK_MAKE_API_VERSION(0'u32, 1'u32, 2'u32, 0'u32)
 
 type
+  GraphicsPipeline = object
+    shaderStages*: seq[VkPipelineShaderStageCreateInfo]
   QueueFamily = object
     properties*: VkQueueFamilyProperties
     hasSurfaceSupport*: bool
@@ -45,6 +69,7 @@ type
     display*: PDisplay
     window*: x.Window
     vulkan*: Vulkan
+    pipeline*: GraphicsPipeline
 
 
 proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[PhyscialDevice] =
@@ -57,7 +82,7 @@ proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[Phy
     device.presentModes = getDeviceSurfacePresentModes(vulkanPhysicalDevice, surface)
 
     for i, queueFamilyProperty in enumerate(getQueueFamilies(vulkanPhysicalDevice)):
-      var hasSurfaceSupport: VkBool32 = VkBool32(false)
+      var hasSurfaceSupport: VkBool32 = VK_FALSE
       checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkanPhysicalDevice, uint32(i), surface, addr(hasSurfaceSupport))
       device.queueFamilies.add(QueueFamily(properties: queueFamilyProperty, hasSurfaceSupport: bool(hasSurfaceSupport)))
 
@@ -146,7 +171,7 @@ proc igniteEngine*(): Engine =
     preTransform: result.vulkan.activePhysicalDevice.surfaceCapabilities.currentTransform,
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
     presentMode: result.vulkan.selectedPresentationMode,
-    clipped: VkBool32(true),
+    clipped: VK_TRUE,
     oldSwapchain: VkSwapchainKHR(0),
   )
   checkVkResult vkCreateSwapchainKHR(result.vulkan.device, addr(swapchainCreateInfo), nil, addr(result.vulkan.swapChain))
@@ -175,15 +200,47 @@ proc igniteEngine*(): Engine =
       ),
     )
     checkVkResult vkCreateImageView(result.vulkan.device, addr(imageViewCreateInfo), nil, addr(result.vulkan.swapImageViews[i]))
-    echo compileShaderToSPIRV_Vulkan(GLSLANG_STAGE_VERTEX, """#version 450
-vec2 positions[3] = vec2[](
-    vec2(0.0, -0.5),
-    vec2(0.5, 0.5),
-    vec2(-0.5, 0.5)
-);
-void main() {
-    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
-}""", "<memory-shader>")
+
+  # init shader system
+  checkGlslangResult glslang_initialize_process()
+
+  # load shaders
+  result.pipeline.shaderStages.add(createShaderStage(result.vulkan.device, VK_SHADER_STAGE_VERTEX_BIT, vertexShaderCode))
+  result.pipeline.shaderStages.add(createShaderStage(result.vulkan.device, VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderCode))
+
+  # create graphis pipeline
+  var dynamicStates = [VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR]
+  var dynamicState = VkPipelineDynamicStateCreateInfo(
+    sType: VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+    dynamicStateCount: uint32(dynamicStates.len),
+    pDynamicStates: addr(dynamicStates[0]),
+  )
+  var vertexInputInfo = VkPipelineVertexInputStateCreateInfo(
+    sType: VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+    vertexBindingDescriptionCount: 0,
+    pVertexBindingDescriptions: nil,
+    vertexAttributeDescriptionCount: 0,
+    pVertexAttributeDescriptions: nil,
+  )
+  var inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
+    sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+    topology: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+    primitiveRestartEnable: VK_FALSE,
+  )
+
+  # setup viewport
+  var viewport = VkViewport(
+    x: 0.0,
+    y: 0.0,
+    width: (float) result.vulkan.selectedExtent.width,
+    height: (float) result.vulkan.selectedExtent.height,
+    minDepth: 0.0,
+    maxDepth: 1.0,
+  )
+  var scissor = VkRect2D(
+    offset: VkOffset2D(x: 0, y: 0),
+    extent: result.vulkan.selectedExtent
+  )
 
 
 proc fullThrottle*(engine: Engine) =
@@ -207,6 +264,9 @@ proc fullThrottle*(engine: Engine) =
       discard
 
 proc trash*(engine: Engine) =
+  for shaderStage in engine.pipeline.shaderStages:
+    vkDestroyShaderModule(engine.vulkan.device, shaderStage.module, nil);
+  glslang_finalize_process()
   vkDestroySwapchainKHR(engine.vulkan.device, engine.vulkan.swapChain, nil);
   vkDestroySurfaceKHR(engine.vulkan.instance, engine.vulkan.surface, nil);
   vkDestroyDevice(engine.vulkan.device, nil)

@@ -47,6 +47,7 @@ type
   ANativeWindow = ptr object
   CAMetalLayer = ptr object
   AHardwareBuffer = ptr object
+  VkBool32* = distinct uint32
 
 # Enums
 const
@@ -63,8 +64,8 @@ const
   VK_REMAINING_ARRAY_LAYERS* = (not 0'u32)
   VK_WHOLE_SIZE* = (not 0'u64)
   VK_ATTACHMENT_UNUSED* = (not 0'u32)
-  VK_TRUE* = 1
-  VK_FALSE* = 0
+  VK_TRUE* = VkBool32(1)
+  VK_FALSE* = VkBool32(0)
   VK_QUEUE_FAMILY_IGNORED* = (not 0'u32)
   VK_QUEUE_FAMILY_EXTERNAL* = (not 0'u32) - 1
   VK_QUEUE_FAMILY_EXTERNAL_KHR* = VK_QUEUE_FAMILY_EXTERNAL
@@ -1226,7 +1227,6 @@ const vkApiVersion1_2* = vkMakeVersion(1, 2, 0)
 
 type
   VkSampleMask* = distinct uint32
-  VkBool32* = distinct uint32
   VkFlags* = distinct uint32
   VkDeviceSize* = distinct uint64
   VkDeviceAddress* = distinct uint64
