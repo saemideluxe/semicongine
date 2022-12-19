@@ -1,7 +1,10 @@
 import
   x11/xlib,
   x11/xutil,
-  x11/x
+  x11/x,
+  x11/keysym
+
+export keysym
 
 var deleteMessage*: Atom
 
@@ -11,6 +14,7 @@ template checkXlibResult*(call: untyped) =
     raise newException(Exception, "Xlib error: " & astToStr(call) & " returned " & $value)
 
 proc xlibInit*(): (PDisplay, Window) =
+  checkXlibResult XInitThreads()
   let display = XOpenDisplay(nil)
   if display == nil:
     quit "Failed to open display"
@@ -26,7 +30,7 @@ proc xlibInit*(): (PDisplay, Window) =
   checkXlibResult XSelectInput(display, window, ButtonPressMask or KeyPressMask or ExposureMask)
   checkXlibResult XMapWindow(display, window)
 
-  deleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", false.XBool)
+  deleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", XBool(false))
   checkXlibResult XSetWMProtocols(display, window, addr(deleteMessage), 1)
 
   return (display, window)

@@ -1,9 +1,20 @@
-# required to link the GLSL compiler
+import std/strformat
+
+when defined(linux):
+  const platform = "linux"
+when defined(windows):
+  const platform = "windows"
+
+
 when defined(release):
-  {.passl: "-Lthirdparty/glslang/lib/release" .}
+  const libversion = "release"
 else:
-  {.passl: "-Lthirdparty/glslang/lib/debug" .}
-{.passl: "-Lthirdparty/spirv-tools/lib/" .}
+  const libversion = "debug"
+
+
+# required to link the GLSL compiler
+{.passl: &"-Lthirdparty/lib/glslang/{platform}_{libversion}" .}
+{.passl: &"-Lthirdparty/lib/spirv-tools/{platform}_{libversion}" .}
 
 {.passl: "-lglslang" .}
 {.passl: "-lglslang-default-resource-limits" .}
@@ -14,7 +25,6 @@ else:
 {.passl: "-lOGLCompiler" .}
 {.passl: "-lSPIRV" .}
 {.passl: "-lSPIRV-Tools-opt" .}
-
 {.passl: "-lSPIRV-Tools" .}
 {.passl: "-lSPIRV-Tools-diff" .}
 {.passl: "-lSPIRV-Tools-fuzz" .}

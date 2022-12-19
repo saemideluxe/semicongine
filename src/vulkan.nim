@@ -91,6 +91,7 @@ type
     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL = 6
     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL = 7
     VK_IMAGE_LAYOUT_PREINITIALIZED = 8
+    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR = 1000001002,
   VkAttachmentLoadOp* {.size: int32.sizeof.} = enum
     VK_ATTACHMENT_LOAD_OP_LOAD = 0
     VK_ATTACHMENT_LOAD_OP_CLEAR = 1
@@ -508,7 +509,9 @@ type
     VK_STRUCTURE_TYPE_LOADER_INSTANCE_CREATE_INFO = 47
     VK_STRUCTURE_TYPE_LOADER_DEVICE_CREATE_INFO = 48
     VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR = 1000001000 # added by sam
+    VK_STRUCTURE_TYPE_PRESENT_INFO_KHR = 1000001001 # added by sam
     VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR = 1000004000 # added by sam
+    VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT = 1000128004 # added by sam
   VkSubpassContents* {.size: int32.sizeof.} = enum
     VK_SUBPASS_CONTENTS_INLINE = 0
     VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS = 1
@@ -10635,18 +10638,18 @@ proc loadVK_MVK_macos_surface*() =
   vkCreateMacOSSurfaceMVK = cast[proc(instance: VkInstance, pCreateInfo: ptr VkMacOSSurfaceCreateInfoMVK , pAllocator: ptr VkAllocationCallbacks , pSurface: ptr VkSurfaceKHR ): VkResult {.stdcall.}](vkGetProc("vkCreateMacOSSurfaceMVK"))
 
 # Load VK_EXT_debug_utils
-proc loadVK_EXT_debug_utils*() =
-  vkSetDebugUtilsObjectNameEXT = cast[proc(device: VkDevice, pNameInfo: ptr VkDebugUtilsObjectNameInfoEXT ): VkResult {.stdcall.}](vkGetProc("vkSetDebugUtilsObjectNameEXT"))
-  vkSetDebugUtilsObjectTagEXT = cast[proc(device: VkDevice, pTagInfo: ptr VkDebugUtilsObjectTagInfoEXT ): VkResult {.stdcall.}](vkGetProc("vkSetDebugUtilsObjectTagEXT"))
-  vkQueueBeginDebugUtilsLabelEXT = cast[proc(queue: VkQueue, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetProc("vkQueueBeginDebugUtilsLabelEXT"))
-  vkQueueEndDebugUtilsLabelEXT = cast[proc(queue: VkQueue): void {.stdcall.}](vkGetProc("vkQueueEndDebugUtilsLabelEXT"))
-  vkQueueInsertDebugUtilsLabelEXT = cast[proc(queue: VkQueue, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetProc("vkQueueInsertDebugUtilsLabelEXT"))
-  vkCmdBeginDebugUtilsLabelEXT = cast[proc(commandBuffer: VkCommandBuffer, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetProc("vkCmdBeginDebugUtilsLabelEXT"))
-  vkCmdEndDebugUtilsLabelEXT = cast[proc(commandBuffer: VkCommandBuffer): void {.stdcall.}](vkGetProc("vkCmdEndDebugUtilsLabelEXT"))
-  vkCmdInsertDebugUtilsLabelEXT = cast[proc(commandBuffer: VkCommandBuffer, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetProc("vkCmdInsertDebugUtilsLabelEXT"))
-  vkCreateDebugUtilsMessengerEXT = cast[proc(instance: VkInstance, pCreateInfo: ptr VkDebugUtilsMessengerCreateInfoEXT , pAllocator: ptr VkAllocationCallbacks , pMessenger: ptr VkDebugUtilsMessengerEXT ): VkResult {.stdcall.}](vkGetProc("vkCreateDebugUtilsMessengerEXT"))
-  vkDestroyDebugUtilsMessengerEXT = cast[proc(instance: VkInstance, messenger: VkDebugUtilsMessengerEXT, pAllocator: ptr VkAllocationCallbacks ): void {.stdcall.}](vkGetProc("vkDestroyDebugUtilsMessengerEXT"))
-  vkSubmitDebugUtilsMessageEXT = cast[proc(instance: VkInstance, messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT, messageTypes: VkDebugUtilsMessageTypeFlagsEXT, pCallbackData: ptr VkDebugUtilsMessengerCallbackDataEXT ): void {.stdcall.}](vkGetProc("vkSubmitDebugUtilsMessageEXT"))
+proc loadVK_EXT_debug_utils*(instance: VkInstance) =
+  vkSetDebugUtilsObjectNameEXT = cast[proc(device: VkDevice, pNameInfo: ptr VkDebugUtilsObjectNameInfoEXT ): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkSetDebugUtilsObjectNameEXT"))
+  vkSetDebugUtilsObjectTagEXT = cast[proc(device: VkDevice, pTagInfo: ptr VkDebugUtilsObjectTagInfoEXT ): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkSetDebugUtilsObjectTagEXT"))
+  vkQueueBeginDebugUtilsLabelEXT = cast[proc(queue: VkQueue, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkQueueBeginDebugUtilsLabelEXT"))
+  vkQueueEndDebugUtilsLabelEXT = cast[proc(queue: VkQueue): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkQueueEndDebugUtilsLabelEXT"))
+  vkQueueInsertDebugUtilsLabelEXT = cast[proc(queue: VkQueue, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkQueueInsertDebugUtilsLabelEXT"))
+  vkCmdBeginDebugUtilsLabelEXT = cast[proc(commandBuffer: VkCommandBuffer, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkCmdBeginDebugUtilsLabelEXT"))
+  vkCmdEndDebugUtilsLabelEXT = cast[proc(commandBuffer: VkCommandBuffer): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkCmdEndDebugUtilsLabelEXT"))
+  vkCmdInsertDebugUtilsLabelEXT = cast[proc(commandBuffer: VkCommandBuffer, pLabelInfo: ptr VkDebugUtilsLabelEXT ): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkCmdInsertDebugUtilsLabelEXT"))
+  vkCreateDebugUtilsMessengerEXT = cast[proc(instance: VkInstance, pCreateInfo: ptr VkDebugUtilsMessengerCreateInfoEXT , pAllocator: ptr VkAllocationCallbacks , pMessenger: ptr VkDebugUtilsMessengerEXT ): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"))
+  vkDestroyDebugUtilsMessengerEXT = cast[proc(instance: VkInstance, messenger: VkDebugUtilsMessengerEXT, pAllocator: ptr VkAllocationCallbacks ): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"))
+  vkSubmitDebugUtilsMessageEXT = cast[proc(instance: VkInstance, messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT, messageTypes: VkDebugUtilsMessageTypeFlagsEXT, pCallbackData: ptr VkDebugUtilsMessengerCallbackDataEXT ): void {.stdcall.}](vkGetInstanceProcAddr(instance, "vkSubmitDebugUtilsMessageEXT"))
 
 # Load VK_ANDROID_external_memory_android_hardware_buffer
 proc loadVK_ANDROID_external_memory_android_hardware_buffer*() =
