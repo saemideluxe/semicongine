@@ -2,6 +2,6 @@ import engine
 
 
 when isMainModule:
-  let myengine = igniteEngine()
+  var myengine = igniteEngine()
   myengine.fullThrottle()
   myengine.trash()
