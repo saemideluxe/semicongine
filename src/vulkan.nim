@@ -516,6 +516,7 @@ type
     VK_SUBPASS_CONTENTS_INLINE = 0
     VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS = 1
   VkResult* {.size: int32.sizeof.} = enum
+    VK_ERROR_OUT_OF_DATE_KHR = -1000001004 # added by sam
     VK_ERROR_UNKNOWN = -13
     VK_ERROR_FRAGMENTED_POOL = -12
     VK_ERROR_FORMAT_NOT_SUPPORTED = -11
@@ -535,6 +536,7 @@ type
     VK_EVENT_SET = 3
     VK_EVENT_RESET = 4
     VK_INCOMPLETE = 5
+    VK_SUBOPTIMAL_KHR = 1000001003, # added by sam
   VkDynamicState* {.size: int32.sizeof.} = enum
     VK_DYNAMIC_STATE_VIEWPORT = 0
     VK_DYNAMIC_STATE_SCISSOR = 1
