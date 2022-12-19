@@ -16,8 +16,8 @@ template checkVkResult*(call: untyped) =
   when defined(release):
     discard call
   else:
-    let value = call
     debug(&"CALLING vulkan: {astToStr(call)}")
+    let value = call
     if value != VK_SUCCESS:
       raise newException(Exception, "Vulkan error: " & astToStr(call) & " returned " & $value)
 
@@ -30,6 +30,12 @@ proc filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[VkSurfaceFor
   for format in formats:
     if format.format == VK_FORMAT_B8G8R8A8_SRGB and format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR:
       result.add(format)
+
+proc getSuitableSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): VkSurfaceFormatKHR =
+  let usableSurfaceFormats = filterForSurfaceFormat(formats)
+  if len(usableSurfaceFormats) == 0:
+    raise newException(Exception, "No suitable surface formats found")
+  return usableSurfaceFormats[0]
 
 
 proc cleanString*(str: openArray[char]): string =
