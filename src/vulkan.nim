@@ -4,8 +4,12 @@
 ## ====
 ## WARNING: This is a generated file. Do not edit
 ## Any edits will be overwritten by the generator.
-import x11/xlib
-import x11/x
+
+when defined(linux):
+  import x11/x
+  import x11/xlib
+when defined(windows):
+  import winim
 
 var vkGetProc: proc(procName: cstring): pointer {.cdecl.}
 
@@ -13,6 +17,7 @@ import dynlib
 
 when defined(windows):
   {. emit: """#define VK_USE_PLATFORM_WIN32_KHR""" .}
+  # {.passl: gorge("pkg-config --libs vulkan").}
   const vkDLL = "vulkan-1.dll"
 elif defined(linux):
   {.passl: gorge("pkg-config --libs vulkan").}
@@ -511,6 +516,7 @@ type
     VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR = 1000001000 # added by sam
     VK_STRUCTURE_TYPE_PRESENT_INFO_KHR = 1000001001 # added by sam
     VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR = 1000004000 # added by sam
+    VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR = 1000009000 # added by sam
     VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT = 1000128004 # added by sam
   VkSubpassContents* {.size: int32.sizeof.} = enum
     VK_SUBPASS_CONTENTS_INLINE = 0
@@ -1191,20 +1197,26 @@ type
 
 # Types
 
+# stub types if we are on the wrong platform, so we don't need to "when" all platform functions
+when not defined(linux):
+  type
+    Display* = ptr object
+    VisualID* = ptr object
+    Window* = ptr object
+when not defined(windows):
+  type
+    HINSTANCE* = ptr object
+    HWND* = ptr object
+    HMONITOR* = ptr object
+    HANDLE* = ptr object
+    SECURITY_ATTRIBUTES* = ptr object
+    DWORD* = ptr object
+    LPCWSTR* = ptr object
+
 type
-  # Display* = ptr object
-  VisualID* = ptr object
-  # Window* = ptr object
   RROutput* = ptr object
   wl_display* = ptr object
   wl_surface* = ptr object
-  HINSTANCE* = ptr object
-  HWND* = ptr object
-  HMONITOR* = ptr object
-  HANDLE* = ptr object
-  SECURITY_ATTRIBUTES* = ptr object
-  DWORD* = ptr object
-  LPCWSTR* = ptr object
   xcb_connection_t* = ptr object
   xcb_visualid_t* = ptr object
   xcb_window_t* = ptr object
