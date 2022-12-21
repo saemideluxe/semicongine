@@ -5,6 +5,7 @@ import std/logging
 
 import ./glslang/glslang
 import ./vulkan
+import ./window
 
 when defined(release):
   const ENABLEVULKANVALIDATIONLAYERS* = false
@@ -21,6 +22,8 @@ template checkVkResult*(call: untyped) =
     if value != VK_SUCCESS:
       raise newException(Exception, "Vulkan error: " & astToStr(call) & " returned " & $value)
 
+func addrOrNil[T](obj: var openArray[T]): ptr T =
+  if obj.len > 0: addr(obj[0]) else: nil
 
 proc VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
@@ -48,7 +51,7 @@ proc getInstanceExtensions*(): seq[string] =
   var extensionCount: uint32
   checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), nil)
   var extensions = newSeq[VkExtensionProperties](extensionCount)
-  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), addr(extensions[0]))
+  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), addrOrNil(extensions))
 
   for extension in extensions:
     result.add(cleanString(extension.extensionName))
@@ -58,7 +61,7 @@ proc getDeviceExtensions*(device: VkPhysicalDevice): seq[string] =
   var extensionCount: uint32
   checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(extensionCount), nil)
   var extensions = newSeq[VkExtensionProperties](extensionCount)
-  checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(extensionCount), addr(extensions[0]))
+  checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(extensionCount), addrOrNil(extensions))
 
   for extension in extensions:
     result.add(cleanString(extension.extensionName))
@@ -68,7 +71,7 @@ proc getValidationLayers*(): seq[string] =
   var n_layers: uint32
   checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), nil)
   var layers = newSeq[VkLayerProperties](n_layers)
-  checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), addr(layers[0]))
+  checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), addrOrNil(layers))
 
   for layer in layers:
     result.add(cleanString(layer.layerName))
@@ -78,35 +81,35 @@ proc getVulkanPhysicalDevices*(instance: VkInstance): seq[VkPhysicalDevice] =
   var n_devices: uint32
   checkVkResult vkEnumeratePhysicalDevices(instance, addr(n_devices), nil)
   result = newSeq[VkPhysicalDevice](n_devices)
-  checkVkResult vkEnumeratePhysicalDevices(instance, addr(n_devices), addr(result[0]))
+  checkVkResult vkEnumeratePhysicalDevices(instance, addr(n_devices), addrOrNil(result))
 
 
 proc getQueueFamilies*(device: VkPhysicalDevice): seq[VkQueueFamilyProperties] =
   var n_queuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), nil)
   result = newSeq[VkQueueFamilyProperties](n_queuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), addr(result[0]))
+  vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), addrOrNil(result))
 
 
 proc getDeviceSurfaceFormats*(device: VkPhysicalDevice, surface: VkSurfaceKHR): seq[VkSurfaceFormatKHR] =
   var n_formats: uint32
   checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), nil);
   result = newSeq[VkSurfaceFormatKHR](n_formats)
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), addr(result[0]))
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), addrOrNil(result))
 
 
 proc getDeviceSurfacePresentModes*(device: VkPhysicalDevice, surface: VkSurfaceKHR): seq[VkPresentModeKHR] =
   var n_modes: uint32
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), nil);
   result = newSeq[VkPresentModeKHR](n_modes)
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), addr(result[0]))
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), addrOrNil(result))
 
 
 proc getSwapChainImages*(device: VkDevice, swapChain: VkSwapchainKHR): seq[VkImage] =
   var n_images: uint32
   checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), nil);
   result = newSeq[VkImage](n_images)
-  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addr(result[0]));
+  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addrOrNil(result));
 
 
 proc getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
@@ -161,7 +164,7 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
     sType: VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
     pApplicationInfo: addr(appinfo),
     enabledLayerCount: usableLayers.len.uint32,
-    ppEnabledLayerNames: cast[ptr UncheckedArray[cstring]](addr(usableLayers[0])),
+    ppEnabledLayerNames: cast[ptr UncheckedArray[cstring]](addrOrNil(usableLayers)),
     enabledExtensionCount: requiredExtensions.len.uint32,
     ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(requiredExtensions))
   )
@@ -196,7 +199,7 @@ proc getVulcanDevice*(
   var deviceCreateInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     queueCreateInfoCount: uint32(queueCreateInfo.len),
-    pQueueCreateInfos: addr(queueCreateInfo[0]),
+    pQueueCreateInfos: addrOrNil(queueCreateInfo),
     pEnabledFeatures: addr(features),
     enabledExtensionCount: requiredExtensions.len.uint32,
     ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(requiredExtensions))
@@ -214,7 +217,7 @@ proc createShaderStage*(device: VkDevice, stage: VkShaderStageFlagBits, shader: 
   var createInfo = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     codeSize: uint(code.len * sizeof(uint32)),
-    pCode: addr(code[0]),
+    pCode: addrOrNil(code),
   )
   var shaderModule: VkShaderModule
   checkVkResult vkCreateShaderModule(device, addr(createInfo), nil, addr(shaderModule))
@@ -234,3 +237,23 @@ proc debugCallback*(
 ): VkBool32 {.cdecl.} =
   echo &"{messageSeverity}: {VkDebugUtilsMessageTypeFlagBitsEXT(messageTypes)}: {pCallbackData.pMessage}"
   return VK_FALSE
+
+proc getSurfaceCapabilities*(device: VkPhysicalDevice, surface: VkSurfaceKHR): VkSurfaceCapabilitiesKHR =
+    checkVkResult device.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(surface, addr(result))
+
+when defined(linux):
+  proc createVulkanSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
+    var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(
+      sType: VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
+      dpy: window.display,
+      window: window.window,
+    )
+    checkVkResult vkCreateXlibSurfaceKHR(instance, addr(surfaceCreateInfo), nil, addr(result))
+when defined(windows):
+  proc createVulkanSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
+    var surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR(
+      sType: VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+      hinstance: window.hinstance,
+      hwnd: window.hwnd,
+    )
+    checkVkResult vkCreateWin32SurfaceKHR(instance, addr(surfaceCreateInfo), nil, addr(result))

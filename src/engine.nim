@@ -6,7 +6,8 @@ import std/logging
 
 import ./vulkan
 import ./vulkan_helpers
-import ./xlib_helpers
+import ./window
+import ./events
 
 import ./glslang/glslang
 
@@ -40,10 +41,6 @@ void main() {
   outColor = vec4(fragColor, 1.0);
 }"""
 
-import
-  x11/xlib,
-  x11/x
-
 const VULKAN_VERSION = VK_MAKE_API_VERSION(0'u32, 1'u32, 2'u32, 0'u32)
 
 type
@@ -62,8 +59,6 @@ type
     shaderStages*: seq[VkPipelineShaderStageCreateInfo]
     layout*: VkPipelineLayout
     pipeline*: VkPipeline
-    viewport*: VkViewport
-    scissor*: VkRect2D
   QueueFamily = object
     properties*: VkQueueFamilyProperties
     hasSurfaceSupport*: bool
@@ -73,8 +68,7 @@ type
     properties*: VkPhysicalDeviceProperties
     features*: VkPhysicalDeviceFeatures
     queueFamilies*: seq[QueueFamily]
-    surfaceCapabilities*: VkSurfaceCapabilitiesKHR
-    surfaceFormats: seq[VkSurfaceFormatKHR]
+    formats: seq[VkSurfaceFormatKHR]
     presentModes: seq[VkPresentModeKHR]
   Vulkan* = object
     debugMessenger: VkDebugUtilsMessengerEXT
@@ -93,22 +87,17 @@ type
     imageAvailableSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     renderFinishedSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     inFlightFences*: array[MAX_FRAMES_IN_FLIGHT, VkFence]
-  Window* = object
-    display*: PDisplay
-    window*: x.Window
   Engine* = object
     vulkan*: Vulkan
-    window: Window
-
+    window: NativeWindow
 
 proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[PhysicalDevice] =
   for vulkanPhysicalDevice in getVulkanPhysicalDevices(instance):
     var device = PhysicalDevice(device: vulkanPhysicalDevice, extensions: getDeviceExtensions(vulkanPhysicalDevice))
     vkGetPhysicalDeviceProperties(vulkanPhysicalDevice, addr(device.properties))
     vkGetPhysicalDeviceFeatures(vulkanPhysicalDevice, addr(device.features))
-    checkVkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkanPhysicalDevice, surface, addr(device.surfaceCapabilities))
-    device.surfaceFormats = getDeviceSurfaceFormats(vulkanPhysicalDevice, surface)
-    device.presentModes = getDeviceSurfacePresentModes(vulkanPhysicalDevice, surface)
+    device.formats = vulkanPhysicalDevice.getDeviceSurfaceFormats(surface)
+    device.presentModes = vulkanPhysicalDevice.getDeviceSurfacePresentModes(surface)
 
     debug(&"Physical device nr {int(vulkanPhysicalDevice)} {cleanString(device.properties.deviceName)}")
     for i, queueFamilyProperty in enumerate(getQueueFamilies(vulkanPhysicalDevice)):
@@ -121,7 +110,7 @@ proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[Phy
 
 proc filterForDevice(devices: seq[PhysicalDevice]): seq[(PhysicalDevice, uint32, uint32)] =
   for device in devices:
-    if not (device.surfaceFormats.len > 0 and device.presentModes.len > 0 and "VK_KHR_swapchain" in device.extensions):
+    if not (device.formats.len > 0 and device.presentModes.len > 0 and "VK_KHR_swapchain" in device.extensions):
       continue
     var graphicsQueueFamily = high(uint32)
     var presentationQueueFamily = high(uint32)
@@ -137,11 +126,12 @@ proc filterForDevice(devices: seq[PhysicalDevice]): seq[(PhysicalDevice, uint32,
     debug(&"Viable device: {cleanString(device.properties.deviceName)} (graphics queue family {graphicsQueueFamily}, presentation queue family {presentationQueueFamily})")
 
 
-proc getFrameDimension(window: Window, capabilities: VkSurfaceCapabilitiesKHR): VkExtent2D =
+proc getFrameDimension(window: NativeWindow, device: VkPhysicalDevice, surface: VkSurfaceKHR): VkExtent2D =
+  let capabilities = device.getSurfaceCapabilities(surface)
   if capabilities.currentExtent.width != high(uint32):
     return capabilities.currentExtent
   else:
-    let (width, height) = window.display.xlibFramebufferSize(window.window)
+    let (width, height) = window.size()
     return VkExtent2D(
       width: min(max(uint32(width), capabilities.minImageExtent.width), capabilities.maxImageExtent.width),
       height: min(max(uint32(height), capabilities.minImageExtent.height), capabilities.maxImageExtent.height),
@@ -165,14 +155,6 @@ proc setupDebugLog(instance: VkInstance): VkDebugUtilsMessengerEXT =
   )
   checkVkResult instance.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result))
 
-proc createVulkanSurface(instance: VkInstance, window: Window): VkSurfaceKHR =
-  var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(
-    sType: VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-    dpy: window.display,
-    window: window.window,
-  )
-  checkVkResult vkCreateXlibSurfaceKHR(instance, addr(surfaceCreateInfo), nil, addr(result))
-
 proc setupVulkanDeviceAndQueues(instance: VkInstance, surface: VkSurfaceKHR): Device =
   let usableDevices = instance.getAllPhysicalDevices(surface).filterForDevice()
   if len(usableDevices) == 0:
@@ -191,12 +173,14 @@ proc setupVulkanDeviceAndQueues(instance: VkInstance, surface: VkSurfaceKHR): De
   )
 
 proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice, surface: VkSurfaceKHR, dimension: VkExtent2D, surfaceFormat: VkSurfaceFormatKHR): Swapchain =
+
+  let capabilities = physicalDevice.device.getSurfaceCapabilities(surface)
   var selectedPresentationMode = getPresentMode(physicalDevice.presentModes)
   # setup swapchain
   var swapchainCreateInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: surface,
-    minImageCount: max(physicalDevice.surfaceCapabilities.minImageCount + 1, physicalDevice.surfaceCapabilities.maxImageCount),
+    minImageCount: max(capabilities.minImageCount + 1, capabilities.maxImageCount),
     imageFormat: surfaceFormat.format,
     imageColorSpace: surfaceFormat.colorSpace,
     imageExtent: dimension,
@@ -204,7 +188,7 @@ proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice, surface: V
     imageUsage: VkImageUsageFlags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT),
     # VK_SHARING_MODE_CONCURRENT no supported (i.e cannot use different queue families for  drawing to swap surface?)
     imageSharingMode: VK_SHARING_MODE_EXCLUSIVE,
-    preTransform: physicalDevice.surfaceCapabilities.currentTransform,
+    preTransform: capabilities.currentTransform,
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
     presentMode: selectedPresentationMode,
     clipped: VK_TRUE,
@@ -308,24 +292,10 @@ proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPas
     )
 
   # setup viewport
-  result.viewport = VkViewport(
-    x: 0.0,
-    y: 0.0,
-    width: (float) frameDimension.width,
-    height: (float) frameDimension.height,
-    minDepth: 0.0,
-    maxDepth: 1.0,
-  )
-  result.scissor = VkRect2D(
-    offset: VkOffset2D(x: 0, y: 0),
-    extent: frameDimension
-  )
   var viewportState = VkPipelineViewportStateCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
     viewportCount: 1,
-    pViewports: addr(result.viewport),
     scissorCount: 1,
-    pScissors: addr(result.scissor),
   )
 
   # rasterizerization config
@@ -426,13 +396,18 @@ proc setupFramebuffers(device: VkDevice, swapchain: var Swapchain, renderPass: V
     )
     checkVkResult device.vkCreateFramebuffer(addr(framebufferInfo), nil, addr(result[i]))
   
+proc trash(device: VkDevice, swapchain: Swapchain, framebuffers: seq[VkFramebuffer]) =
+  for framebuffer in framebuffers:
+    device.vkDestroyFramebuffer(framebuffer, nil)
+  for imageview in swapchain.imageviews:
+    device.vkDestroyImageView(imageview, nil)
+  device.vkDestroySwapchainKHR(swapchain.swapchain, nil)
+
 proc recreateSwapchain(vulkan: Vulkan): (Swapchain, seq[VkFramebuffer]) =
+  debug(&"Recreate swapchain with dimension {vulkan.frameDimension}")
   checkVkResult vulkan.device.device.vkDeviceWaitIdle()
-  for framebuffer in vulkan.framebuffers:
-    vulkan.device.device.vkDestroyFramebuffer(framebuffer, nil)
-  for imageview in vulkan.swapchain.imageviews:
-    vulkan.device.device.vkDestroyImageView(imageview, nil)
-  vulkan.device.device.vkDestroySwapchainKHR(vulkan.swapchain.swapchain, nil)
+
+  vulkan.device.device.trash(vulkan.swapchain, vulkan.framebuffers)
 
   result[0] = vulkan.device.device.setupSwapChain(
     vulkan.device.physicalDevice,
@@ -483,8 +458,7 @@ proc setupSyncPrimitives(device: VkDevice): (
 
 proc igniteEngine*(): Engine =
 
-  # init X11 window
-  (result.window.display, result.window.window) = xlibInit()
+  result.window = createWindow("Hello triangle")
 
   # setup vulkan functions
   vkLoad1_0()
@@ -500,8 +474,8 @@ proc igniteEngine*(): Engine =
   result.vulkan.device = result.vulkan.instance.setupVulkanDeviceAndQueues(result.vulkan.surface)
 
   # get basic frame information
-  result.vulkan.surfaceFormat = result.vulkan.device.physicalDevice.surfaceFormats.getSuitableSurfaceFormat()
-  result.vulkan.frameDimension = result.window.getFrameDimension(result.vulkan.device.physicalDevice.surfaceCapabilities)
+  result.vulkan.surfaceFormat = result.vulkan.device.physicalDevice.formats.getSuitableSurfaceFormat()
+  result.vulkan.frameDimension = result.window.getFrameDimension(result.vulkan.device.physicalDevice.device, result.vulkan.surface)
 
   # setup swapchain and render pipeline
   result.vulkan.swapchain = result.vulkan.device.device.setupSwapChain(
@@ -530,14 +504,12 @@ proc igniteEngine*(): Engine =
   ) = result.vulkan.device.device.setupSyncPrimitives()
 
 
-proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer) =
-  var beginInfo = VkCommandBufferBeginInfo(
-    sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-    pInheritanceInfo: nil,
-  )
-  checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
-
+proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D) =
   var
+    beginInfo = VkCommandBufferBeginInfo(
+      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+      pInheritanceInfo: nil,
+    )
     clearColor = VkClearValue(color: VkClearColorValue(float32: [0.2'f, 0.2'f, 0.2'f, 1.0'f]))
     renderPassInfo = VkRenderPassBeginInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -545,26 +517,34 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline,
       framebuffer: framebuffer,
       renderArea: VkRect2D(
         offset: VkOffset2D(x: 0, y: 0),
-        extent: VkExtent2D(
-          width: uint32(pipeline.viewport.width),
-          height: uint32(pipeline.viewport.height)
-        ),
+        extent: frameDimension,
       ),
       clearValueCount: 1,
       pClearValues: addr(clearColor),
     )
+    viewport = VkViewport(
+      x: 0.0,
+      y: 0.0,
+      width: (float) frameDimension.width,
+      height: (float) frameDimension.height,
+      minDepth: 0.0,
+      maxDepth: 1.0,
+    )
+    scissor = VkRect2D(
+      offset: VkOffset2D(x: 0, y: 0),
+      extent: frameDimension
+    )
+  checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
   commandBuffer.vkCmdBeginRenderPass(addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
-  commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
-
-  commandBuffer.vkCmdSetViewport(firstViewport=0, viewportCount=1, addr(pipeline.viewport))
-  commandBuffer.vkCmdSetScissor(firstScissor=0, scissorCount=1, addr(pipeline.scissor))
+  commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline)
+  commandBuffer.vkCmdSetViewport(firstViewport=0, viewportCount=1, addr(viewport))
+  commandBuffer.vkCmdSetScissor(firstScissor=0, scissorCount=1, addr(scissor))
   commandBuffer.vkCmdDraw(vertexCount=3, instanceCount=1, firstVertex=0, firstInstance=0)
   commandBuffer.vkCmdEndRenderPass()
   checkVkResult commandBuffer.vkEndCommandBuffer()
 
-proc drawFrame(window: Window, vulkan: var Vulkan, currentFrame: int) =
+proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resized: bool) =
   checkVkResult vulkan.device.device.vkWaitForFences(1, addr(vulkan.inFlightFences[currentFrame]), VK_TRUE, high(uint64))
-  checkVkResult vulkan.device.device.vkResetFences(1, addr(vulkan.inFlightFences[currentFrame]))
   var bufferImageIndex: uint32
   let nextImageResult = vulkan.device.device.vkAcquireNextImageKHR(
     vulkan.swapchain.swapchain,
@@ -574,12 +554,15 @@ proc drawFrame(window: Window, vulkan: var Vulkan, currentFrame: int) =
     addr(bufferImageIndex)
   )
   if nextImageResult == VK_ERROR_OUT_OF_DATE_KHR:
-    vulkan.frameDimension = window.getFrameDimension(vulkan.device.physicalDevice.surfaceCapabilities)
+    vulkan.frameDimension = window.getFrameDimension(vulkan.device.physicalDevice.device, vulkan.surface)
     (vulkan.swapchain, vulkan.framebuffers) = vulkan.recreateSwapchain()
     return
+  elif not (nextImageResult in [VK_SUCCESS, VK_SUBOPTIMAL_KHR]):
+    raise newException(Exception, "Vulkan error: vkAcquireNextImageKHR returned " & $nextImageResult)
+  checkVkResult vulkan.device.device.vkResetFences(1, addr(vulkan.inFlightFences[currentFrame]))
 
   checkVkResult vulkan.commandBuffers[currentFrame].vkResetCommandBuffer(VkCommandBufferResetFlags(0))
-  vulkan.renderPass.recordCommandBuffer(vulkan.pipeline, vulkan.commandBuffers[currentFrame], vulkan.framebuffers[bufferImageIndex])
+  vulkan.renderPass.recordCommandBuffer(vulkan.pipeline.pipeline, vulkan.commandBuffers[currentFrame], vulkan.framebuffers[bufferImageIndex], vulkan.frameDimension)
   var
     waitSemaphores = [vulkan.imageAvailableSemaphores[currentFrame]]
     waitStages = [VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)]
@@ -607,50 +590,45 @@ proc drawFrame(window: Window, vulkan: var Vulkan, currentFrame: int) =
   )
   let presentResult = vkQueuePresentKHR(vulkan.device.presentationQueue, addr(presentInfo))
 
-  if presentResult == VK_ERROR_OUT_OF_DATE_KHR or presentResult == VK_SUBOPTIMAL_KHR:
-    vulkan.frameDimension = window.getFrameDimension(vulkan.device.physicalDevice.surfaceCapabilities)
+  if presentResult == VK_ERROR_OUT_OF_DATE_KHR or presentResult == VK_SUBOPTIMAL_KHR or resized:
+    vulkan.frameDimension = window.getFrameDimension(vulkan.device.physicalDevice.device, vulkan.surface)
     (vulkan.swapchain, vulkan.framebuffers) = vulkan.recreateSwapchain()
-    return
 
 
 proc fullThrottle*(engine: var Engine) =
   var
-    event: XEvent
     killed = false
     currentFrame = 0
+    resized = false
 
   while not killed:
-    while engine.window.display.XPending() > 0 and not killed:
-      discard engine.window.display.XNextEvent(addr(event))
-      case event.theType
-      of ClientMessage:
-        if cast[Atom](event.xclient.data.l[0]) == deleteMessage:
+    for event in engine.window.pendingEvents():
+      case event.eventType:
+        of Quit:
           killed = true
-      of KeyPress:
-        let key = XLookupKeysym(cast[PXKeyEvent](addr(event)), 0)
-        if key == XK_Escape:
-          killed = true
-      of ConfigureNotify:
-        engine.vulkan.frameDimension = engine.window.getFrameDimension(engine.vulkan.device.physicalDevice.surfaceCapabilities)
-        (engine.vulkan.swapchain, engine.vulkan.framebuffers) = engine.vulkan.recreateSwapchain()
-      else:
-        discard
-    engine.window.drawFrame(engine.vulkan, currentFrame)
+        of ResizedWindow:
+          resized = true
+        of KeyDown:
+          echo event
+          if event.key == Escape:
+            killed = true
+        else:
+          discard
+    engine.window.drawFrame(engine.vulkan, currentFrame, resized)
+    resized = false
     currentFrame = (currentFrame + 1) mod MAX_FRAMES_IN_FLIGHT;
   checkVkResult engine.vulkan.device.device.vkDeviceWaitIdle()
 
-
 proc trash*(engine: Engine) =
+  engine.vulkan.device.device.trash(engine.vulkan.swapchain, engine.vulkan.framebuffers)
   checkVkResult engine.vulkan.device.device.vkDeviceWaitIdle()
+
   for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
     engine.vulkan.device.device.vkDestroySemaphore(engine.vulkan.imageAvailableSemaphores[i], nil)
     engine.vulkan.device.device.vkDestroySemaphore(engine.vulkan.renderFinishedSemaphores[i], nil)
     engine.vulkan.device.device.vkDestroyFence(engine.vulkan.inFlightFences[i], nil)
 
   engine.vulkan.device.device.vkDestroyCommandPool(engine.vulkan.commandPool, nil)
-  for framebuffer in engine.vulkan.framebuffers:
-    engine.vulkan.device.device.vkDestroyFramebuffer(framebuffer, nil)
-
   engine.vulkan.device.device.vkDestroyPipeline(engine.vulkan.pipeline.pipeline, nil)
   engine.vulkan.device.device.vkDestroyPipelineLayout(engine.vulkan.pipeline.layout, nil)
   engine.vulkan.device.device.vkDestroyRenderPass(engine.vulkan.renderPass, nil)
@@ -658,14 +636,10 @@ proc trash*(engine: Engine) =
   for shaderStage in engine.vulkan.pipeline.shaderStages:
     engine.vulkan.device.device.vkDestroyShaderModule(shaderStage.module, nil)
 
-  for imageview in engine.vulkan.swapchain.imageviews:
-    engine.vulkan.device.device.vkDestroyImageView(imageview, nil)
-  engine.vulkan.device.device.vkDestroySwapchainKHR(engine.vulkan.swapchain.swapchain, nil)
   engine.vulkan.instance.vkDestroySurfaceKHR(engine.vulkan.surface, nil)
   engine.vulkan.device.device.vkDestroyDevice(nil)
   when ENABLEVULKANVALIDATIONLAYERS:
     engine.vulkan.instance.vkDestroyDebugUtilsMessengerEXT(engine.vulkan.debugMessenger, nil)
   glslang_finalize_process()
   engine.vulkan.instance.vkDestroyInstance(nil)
-  checkXlibResult engine.window.display.XDestroyWindow(engine.window.window)
-  discard engine.window.display.XCloseDisplay() # always returns 0
+  engine.window.trash()

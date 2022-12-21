@@ -3,43 +3,67 @@ COMPILE_OPTIONS := --path:src --mm:orc --experimental:strictEffects --threads:on
 DEBUG_OPTIONS := --debugger:native --checks:on --assertions:on
 RELEASE_OPTIONS := -d:release --checks:off --assertions:off
 
-build/debug/linux:
-	mkdir -p $@
-build/debug/linux/test: build/debug/linux ${SOURCES}
+# build
+build/debug/linux/test: ${SOURCES}
+	mkdir -p $$( dirname $@ )
 	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/test.nim
-
-build/release/linux:
-	mkdir -p $@
-build/release/linux/test: build/release/linux ${SOURCES}
+build/release/linux/test: ${SOURCES}
+	mkdir -p $$( dirname $@ )
+	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/test.nim
+build/debug/windows/test:  ${SOURCES}
+	mkdir -p $$( dirname $@ )
+	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/test.nim
+build/release/windows/test: ${SOURCES}
+	mkdir -p $$( dirname $@ )
 	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/test.nim
 
-# not working yet, need to implement windows window-API
-# build/debug/windows:
-	# mkdir -p $@
-# build/debug/windows/test: build/debug/windows ${SOURCES}
-	# nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -d:mingw -o:$@ examples/test.nim
-# build/release/windows:
-	# mkdir -p $@
-# build/release/windows/test: build/release/windows ${SOURCES}
-	# nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -d:mingw -o:$@ examples/test.nim
-thirdparty:
-	echo https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/windows-msvc-2017-release/continuous/1885/20221216-081805/install.zip
-	echo https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/windows-msvc-2017-release/continuous/1885/20221216-081805/install.zip
+build_all: build/debug/linux/test build/release/linux/test build/debug/windows/test build/release/windows/test
 
-SPIRV_TOOLS_LINUX_DEBUG:
-	wget https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/linux-gcc-release/continuous/1889/20221216-081754/install.tgz
-SPIRV_TOOLS_LINUX_DEBUG:
-	wget https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/linux-gcc-debug/continuous/1899/20221216-081758/install.tgz
-SPIRV_TOOLS_WINDOWS_DEBUG:
-	wget https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/windows-msvc-2017-debug/continuous/1599/20221216-081803/install.zip
-SPIRV_TOOLS_WINDOWS_RELEASE:
-	wget https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/windows-msvc-2017-release/continuous/1885/20221216-081805/install.zip
+# publish
+publish_linux_debug: build/debug/linux/test
+	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/debug/
+publish_linux_release: build/release/linux/test
+	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/release/
+publish_windows_debug: build/debug/linux/test
+	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/debug/
+publish_windows_release: build/release/linux/test
+	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/release/
 
-GLSL_LINUX_DEBUG:
-	wget
-GLSL_LINUX_RELEASE:
-	wget
-GLSL_WINDOWS_DEBUG:
-	wget
-GLSL_WINDOWS_RELEASE:
-	wget
+publish_all: publish_linux_debug publish_linux_release publish_windows_debug publish_windows_release
+
+
+# download thirdparty-libraries
+
+thirdparty/lib/glslang/linux_debug:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Debug.zip
+	uzip glslang-master-linux-Debug.zip
+thirdparty/lib/glslang/linux_release:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
+	unzip glslang-master-linux-Release.zip
+thirdparty/lib/glslang/windows_debug:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-windows-x64-Debug.zip
+	unzip glslang-master-windows-x64-Debug.zip
+thirdparty/lib/glslang/windows_release:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-windows-x64-Release.zip
+	unzip glslang-master-windows-x64-Release.zip
+
+thirdparty/lib/spirv-tools/linux_debug:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/linux-gcc-debug/continuous/1899/20221216-081758/install.tgz
+	tar -xf $@/install.tgz
+thirdparty/lib/spirv-tools/linux_release:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/linux-gcc-release/continuous/1889/20221216-081754/install.tgz
+	tar -xf $@/install.tgz
+thirdparty/lib/spirv-tools/windows_debug:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/windows-msvc-2017-debug/continuous/1599/20221216-081803/install.zip
+	unzip $@/install.zip
+thirdparty/lib/spirv-tools/windows_release:
+	mkdir -p $@
+	wget --directory-prefix=$@ https://storage.googleapis.com/spirv-tools/artifacts/prod/graphics_shader_compiler/spirv-tools/windows-msvc-2017-release/continuous/1885/20221216-081805/install.zip
+	unzip $@/install.zip
