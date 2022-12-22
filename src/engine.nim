@@ -137,23 +137,24 @@ proc getFrameDimension(window: NativeWindow, device: VkPhysicalDevice, surface: 
       height: min(max(uint32(height), capabilities.minImageExtent.height), capabilities.maxImageExtent.height),
     )
 
-proc setupDebugLog(instance: VkInstance): VkDebugUtilsMessengerEXT =
-  var createInfo = VkDebugUtilsMessengerCreateInfoEXT(
-    sType: VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-    messageSeverity: VkDebugUtilsMessageSeverityFlagsEXT(
-      ord(VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) or
-      ord(VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) or
-      ord(VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-    ),
-    messageType: VkDebugUtilsMessageTypeFlagsEXT(
-      ord(VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) or
-      ord(VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) or
-      ord(VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
-    ),
-    pfnUserCallback: debugCallback,
-    pUserData: nil,
-  )
-  checkVkResult instance.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result))
+when not defined(release):
+  proc setupDebugLog(instance: VkInstance): VkDebugUtilsMessengerEXT =
+    var createInfo = VkDebugUtilsMessengerCreateInfoEXT(
+      sType: VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+      messageSeverity: VkDebugUtilsMessageSeverityFlagsEXT(
+        ord(VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) or
+        ord(VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) or
+        ord(VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+      ),
+      messageType: VkDebugUtilsMessageTypeFlagsEXT(
+        ord(VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) or
+        ord(VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) or
+        ord(VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
+      ),
+      pfnUserCallback: debugCallback,
+      pUserData: nil,
+    )
+    checkVkResult instance.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result))
 
 proc setupVulkanDeviceAndQueues(instance: VkInstance, surface: VkSurfaceKHR): Device =
   let usableDevices = instance.getAllPhysicalDevices(surface).filterForDevice()
@@ -468,7 +469,7 @@ proc igniteEngine*(): Engine =
 
   # create vulkan instance
   result.vulkan.instance = createVulkanInstance(VULKAN_VERSION)
-  when ENABLEVULKANVALIDATIONLAYERS:
+  when not defined(release):
     result.vulkan.debugMessenger = result.vulkan.instance.setupDebugLog()
   result.vulkan.surface = result.vulkan.instance.createVulkanSurface(result.window)
   result.vulkan.device = result.vulkan.instance.setupVulkanDeviceAndQueues(result.vulkan.surface)

@@ -2,6 +2,7 @@ SOURCES := $(shell find src -name '*.nim')
 COMPILE_OPTIONS := --path:src --mm:orc --experimental:strictEffects --threads:on
 DEBUG_OPTIONS := --debugger:native --checks:on --assertions:on
 RELEASE_OPTIONS := -d:release --checks:off --assertions:off
+WINDOWS_OPTIONS := -d:mingw
 
 # build
 build/debug/linux/test: ${SOURCES}
@@ -12,12 +13,15 @@ build/release/linux/test: ${SOURCES}
 	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/test.nim
 build/debug/windows/test:  ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/test.nim
+	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_OPTIONS} -o:$@ examples/test.nim
 build/release/windows/test: ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/test.nim
+	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_OPTIONS} -o:$@ examples/test.nim
 
-build_all: build/debug/linux/test build/release/linux/test build/debug/windows/test build/release/windows/test
+build_all_linux: build/debug/linux/test build/release/linux/test
+build_all_windows: build/debug/windows/test build/release/windows/test
+
+build_all: build_all_linux build_all_windows
 
 # publish
 publish_linux_debug: build/debug/linux/test
@@ -37,7 +41,7 @@ publish_all: publish_linux_debug publish_linux_release publish_windows_debug pub
 thirdparty/lib/glslang/linux_debug:
 	mkdir -p $@
 	wget --directory-prefix=$@ https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Debug.zip
-	uzip glslang-master-linux-Debug.zip
+	unzip glslang-master-linux-Debug.zip
 thirdparty/lib/glslang/linux_release:
 	mkdir -p $@
 	wget --directory-prefix=$@ https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
