@@ -2,24 +2,24 @@ import std/tables
 import std/strutils
 import std/strformat
 import std/logging
+import std/macros
 
 import ./glslang/glslang
 import ./vulkan
 import ./window
 
-when defined(release):
-  const ENABLEVULKANVALIDATIONLAYERS* = false
-else:
-  const ENABLEVULKANVALIDATIONLAYERS* = true
+
+const ENABLEVULKANVALIDATIONLAYERS* = not defined(release)
 
 
 template checkVkResult*(call: untyped) =
   when defined(release):
     discard call
   else:
-    debug(&"CALLING vulkan: {astToStr(call)}")
+    debug "CALLING vulkan: ", astToStr(call)
     let value = call
     if value != VK_SUCCESS:
+      error "Vulkan error: ",  astToStr(call),  " returned ", $value
       raise newException(Exception, "Vulkan error: " & astToStr(call) & " returned " & $value)
 
 func addrOrNil[T](obj: var openArray[T]): ptr T =
@@ -128,17 +128,27 @@ proc getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
 
 
 proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
-  var requiredExtensions = [
-    "VK_EXT_acquire_xlib_display".cstring,
-    "VK_EXT_direct_mode_display".cstring,
-    "VK_KHR_display".cstring,
-    "VK_KHR_surface".cstring,
-    "VK_KHR_xlib_surface".cstring,
-    "VK_EXT_debug_utils".cstring,
-  ]
+
+  when defined(linux):
+    var requiredExtensions = [
+      # "VK_EXT_acquire_xlib_display".cstring,
+      # "VK_EXT_direct_mode_display".cstring,
+      # "VK_KHR_display".cstring,
+      "VK_KHR_surface".cstring,
+      "VK_KHR_xlib_surface".cstring,
+      "VK_EXT_debug_utils".cstring,
+    ]
+  when defined(windows):
+    var requiredExtensions = [
+      "VK_KHR_win32_surface".cstring,
+      #"VK_KHR_display".cstring,
+      "VK_KHR_surface".cstring,
+      "VK_EXT_debug_utils".cstring,
+    ]
+  
   let availableExtensions = getInstanceExtensions()
   for extension in requiredExtensions:
-    assert $extension in availableExtensions
+    assert $extension in availableExtensions, $extension
 
   let desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring, "VK_LAYER_MESA_overlay".cstring]
   let availableLayers = getValidationLayers()
@@ -171,7 +181,10 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result))
 
   loadVK_KHR_surface()
-  loadVK_KHR_xlib_surface()
+  when defined(linux):
+    loadVK_KHR_xlib_surface()
+  when defined(windows):
+    loadVK_KHR_win32_surface()
   loadVK_KHR_swapchain()
   when ENABLEVULKANVALIDATIONLAYERS:
     loadVK_EXT_debug_utils(result)

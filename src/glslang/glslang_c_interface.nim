@@ -13,28 +13,55 @@ else:
 
 
 # required to link the GLSL compiler
-{.passl: &"-Lthirdparty/lib/glslang/{platform}_{libversion}" .}
-{.passl: &"-Lthirdparty/lib/spirv-tools/{platform}_{libversion}" .}
+when defined(linux):
+  {.passl: &"-Lthirdparty/lib/glslang/{platform}_{libversion}" .}
+  {.passl: &"-Lthirdparty/lib/spirv-tools/{platform}_{libversion}" .}
+  {.passl: "-lglslang" .}
+  {.passl: "-lglslang-default-resource-limits" .}
+  {.passl: "-lHLSL" .}
+  {.passl: "-lMachineIndependent" .}
+  {.passl: "-lGenericCodeGen" .}
+  {.passl: "-lOSDependent" .}
+  {.passl: "-lOGLCompiler" .}
+  {.passl: "-lSPIRV" .}
+  {.passl: "-lSPIRV-Tools-opt" .}
+  {.passl: "-lSPIRV-Tools" .}
+  {.passl: "-lSPIRV-Tools-diff" .}
+  {.passl: "-lSPIRV-Tools-fuzz" .}
+  {.passl: "-lSPIRV-Tools-link" .}
+  {.passl: "-lSPIRV-Tools-lint" .}
+  {.passl: "-lSPIRV-Tools-opt" .}
+  {.passl: "-lSPIRV-Tools-reduce" .}
 
-{.passl: "-lglslang" .}
-{.passl: "-lglslang-default-resource-limits" .}
-{.passl: "-lHLSL" .}
-{.passl: "-lMachineIndependent" .}
-{.passl: "-lGenericCodeGen" .}
-{.passl: "-lOSDependent" .}
-{.passl: "-lOGLCompiler" .}
-{.passl: "-lSPIRV" .}
-{.passl: "-lSPIRV-Tools-opt" .}
-{.passl: "-lSPIRV-Tools" .}
-{.passl: "-lSPIRV-Tools-diff" .}
-{.passl: "-lSPIRV-Tools-fuzz" .}
-{.passl: "-lSPIRV-Tools-link" .}
-{.passl: "-lSPIRV-Tools-lint" .}
-{.passl: "-lSPIRV-Tools-opt" .}
-{.passl: "-lSPIRV-Tools-reduce" .}
+  {.passl: "-lstdc++" .}
+  {.passl: "-lm" .}
+when defined(windows):
+  when libversion == "release":
+    const LIB_POSTFIX = ".lib"
+  when libversion == "debug":
+    const LIB_POSTFIX = "d.lib"
+  
+  {.passl: "/link" .}
+  {.passl: &"/LIBPATH:./thirdparty/lib/glslang/{platform}_{libversion}" .}
+  {.passl: &"/LIBPATH:./thirdparty/lib/spirv-tools/{platform}_{libversion}" .}
+  {.passl: "glslang" & LIB_POSTFIX .}
+  {.passl: "glslang-default-resource-limits" & LIB_POSTFIX .}
+  {.passl: "HLSL" & LIB_POSTFIX .}
+  {.passl: "MachineIndependent" & LIB_POSTFIX .}
+  {.passl: "GenericCodeGen" & LIB_POSTFIX .}
+  {.passl: "OSDependent" & LIB_POSTFIX .}
+  {.passl: "OGLCompiler" & LIB_POSTFIX .}
+  {.passl: "SPIRV" & LIB_POSTFIX .}
+  {.passl: "SPIRV-Tools-opt.lib" .}
+  {.passl: "SPIRV-Tools.lib" .}
+  {.passl: "SPIRV-Tools-diff.lib" .}
+  {.passl: "SPIRV-Tools-fuzz.lib" .}
+  {.passl: "SPIRV-Tools-link.lib" .}
+  {.passl: "SPIRV-Tools-lint.lib" .}
+  {.passl: "SPIRV-Tools-opt.lib" .}
+  {.passl: "SPIRV-Tools-reduce.lib" .}
 
-{.passl: "-lstdc++" .}
-{.passl: "-lm" .}
+
 
 import
   glslang_c_shader_types

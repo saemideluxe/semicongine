@@ -1,8 +1,9 @@
 SOURCES := $(shell find src -name '*.nim')
-COMPILE_OPTIONS := --path:src --mm:orc --experimental:strictEffects --threads:on
+COMPILE_OPTIONS := --path:src --mm:orc --experimental:strictEffects --threads:on --app:gui
 DEBUG_OPTIONS := --debugger:native --checks:on --assertions:on
 RELEASE_OPTIONS := -d:release --checks:off --assertions:off
-WINDOWS_OPTIONS := -d:mingw
+WINDOWS_DEBUG_OPTIONS := --cc:vcc --passC:'/MDd' --passL:'ucrtd.lib' 
+WINDOWS_RELEASE_OPTIONS := --cc:vcc --passC:'/MD' --passL:'ucrt.lib' 
 
 # build
 build/debug/linux/test: ${SOURCES}
@@ -11,15 +12,15 @@ build/debug/linux/test: ${SOURCES}
 build/release/linux/test: ${SOURCES}
 	mkdir -p $$( dirname $@ )
 	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/test.nim
-build/debug/windows/test:  ${SOURCES}
+build/debug/windows/test.exe:  ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_OPTIONS} -o:$@ examples/test.nim
-build/release/windows/test: ${SOURCES}
+	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/test.nim
+build/release/windows/test.exe: ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_OPTIONS} -o:$@ examples/test.nim
+	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/test.nim
 
 build_all_linux: build/debug/linux/test build/release/linux/test
-build_all_windows: build/debug/windows/test build/release/windows/test
+build_all_windows: build/debug/windows/test.exe build/release/windows/test.exe
 
 build_all: build_all_linux build_all_windows
 
