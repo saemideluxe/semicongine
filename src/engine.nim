@@ -557,7 +557,6 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resi
   if nextImageResult == VK_ERROR_OUT_OF_DATE_KHR:
     vulkan.frameDimension = window.getFrameDimension(vulkan.device.physicalDevice.device, vulkan.surface)
     (vulkan.swapchain, vulkan.framebuffers) = vulkan.recreateSwapchain()
-    return
   elif not (nextImageResult in [VK_SUCCESS, VK_SUBOPTIMAL_KHR]):
     raise newException(Exception, "Vulkan error: vkAcquireNextImageKHR returned " & $nextImageResult)
   checkVkResult vulkan.device.device.vkResetFences(1, addr(vulkan.inFlightFences[currentFrame]))
@@ -642,5 +641,5 @@ proc trash*(engine: Engine) =
   when ENABLEVULKANVALIDATIONLAYERS:
     engine.vulkan.instance.vkDestroyDebugUtilsMessengerEXT(engine.vulkan.debugMessenger, nil)
   glslang_finalize_process()
-  engine.vulkan.instance.vkDestroyInstance(nil)
   engine.window.trash()
+  engine.vulkan.instance.vkDestroyInstance(nil)
