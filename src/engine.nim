@@ -12,6 +12,7 @@ import ./events
 import ./glslang/glslang
 
 const MAX_FRAMES_IN_FLIGHT = 2
+const DEBUG_LOG = not defined(release)
 
 var logger = newConsoleLogger()
 addHandler(logger)
@@ -137,7 +138,7 @@ proc getFrameDimension(window: NativeWindow, device: VkPhysicalDevice, surface: 
       height: min(max(uint32(height), capabilities.minImageExtent.height), capabilities.maxImageExtent.height),
     )
 
-when not defined(release):
+when DEBUG_LOG:
   proc setupDebugLog(instance: VkInstance): VkDebugUtilsMessengerEXT =
     var createInfo = VkDebugUtilsMessengerCreateInfoEXT(
       sType: VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -422,8 +423,6 @@ proc recreateSwapchain(vulkan: Vulkan): (Swapchain, seq[VkFramebuffer]) =
     vulkan.frameDimension
   )
 
-  # createFramebuffers();
-
 
 proc setupCommandBuffers(device: VkDevice, graphicsQueueFamily: uint32): (VkCommandPool, array[MAX_FRAMES_IN_FLIGHT, VkCommandBuffer]) =
   # set up command buffer
@@ -465,11 +464,12 @@ proc igniteEngine*(): Engine =
   vkLoad1_0()
   vkLoad1_1()
   vkLoad1_2()
+
   checkGlslangResult glslang_initialize_process()
 
   # create vulkan instance
   result.vulkan.instance = createVulkanInstance(VULKAN_VERSION)
-  when not defined(release):
+  when DEBUG_LOG:
     result.vulkan.debugMessenger = result.vulkan.instance.setupDebugLog()
   result.vulkan.surface = result.vulkan.instance.createVulkanSurface(result.window)
   result.vulkan.device = result.vulkan.instance.setupVulkanDeviceAndQueues(result.vulkan.surface)
@@ -639,7 +639,7 @@ proc trash*(engine: Engine) =
 
   engine.vulkan.instance.vkDestroySurfaceKHR(engine.vulkan.surface, nil)
   engine.vulkan.device.device.vkDestroyDevice(nil)
-  when ENABLEVULKANVALIDATIONLAYERS:
+  when DEBUG_LOG:
     engine.vulkan.instance.vkDestroyDebugUtilsMessengerEXT(engine.vulkan.debugMessenger, nil)
   glslang_finalize_process()
   engine.vulkan.instance.vkDestroyInstance(nil)

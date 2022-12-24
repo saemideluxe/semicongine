@@ -30,15 +30,7 @@ let vkHandleDLL = loadLib(vkDLL)
 if isNil(vkHandleDLL):
   quit("could not load: " & vkDLL)
 
-let vkGetProcAddress = cast[proc(s: cstring): pointer {.stdcall.}](symAddr(vkHandleDLL, "vkGetInstanceProcAddr"))
-if vkGetProcAddress == nil:
-  quit("failed to load `vkGetInstanceProcAddr` from " & vkDLL)
-
 vkGetProc = proc(procName: cstring): pointer {.cdecl.} =
-  when defined(windows):
-    result = vkGetProcAddress(procName)
-    if result != nil:
-      return
   result = symAddr(vkHandleDLL, procName)
   if result == nil:
     raiseInvalidLibrary(procName)
