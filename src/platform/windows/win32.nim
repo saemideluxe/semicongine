@@ -7,6 +7,8 @@ type
     hinstance*: HINSTANCE
     hwnd*: HWND
 
+var currentEvents: seq[Event]
+
 template checkWin32Result*(call: untyped) =
   let value = call
   if value != 0:
@@ -15,7 +17,7 @@ template checkWin32Result*(call: untyped) =
 proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.stdcall.} =
   case uMsg
   of WM_DESTROY:
-    discard
+    currentEvents.add(Event(eventType: events.EventType.Quit))
   else:
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 
@@ -25,12 +27,15 @@ proc createWindow*(title: string): NativeWindow =
   var
     windowClassName = T"EngineWindowClass"
     windowName = T(title)
-    windowClass = WNDCLASS(
+    windowClass = WNDCLASSEX(
+      cbSize: UINT(WNDCLASSEX.sizeof),
       lpfnWndProc: WindowHandler,
       hInstance: result.hInstance,
       lpszClassName: windowClassName,
     )
-  RegisterClass(addr(windowClass))
+  
+  if(RegisterClassEx(addr(windowClass)) == 0):
+    raise newException(Exception, "Unable to register window class")
 
   result.hwnd = CreateWindowEx(
       DWORD(0),
@@ -44,10 +49,10 @@ proc createWindow*(title: string): NativeWindow =
       nil
     )
 
-  discard ShowWindow(result.hwnd, 0)
+  discard ShowWindow(result.hwnd, 1)
 
 proc trash*(window: NativeWindow) =
-  PostQuitMessage(0)
+  discard
 
 proc size*(window: NativeWindow): (int, int) =
   var rect: RECT
@@ -55,4 +60,8 @@ proc size*(window: NativeWindow): (int, int) =
   (int(rect.right - rect.left), int(rect.bottom - rect.top))
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
-  result
+  currentEvents = newSeq[Event]()
+  var msg: MSG
+  while PeekMessage(addr(msg), window.hwnd, 0, 0, PM_REMOVE):
+    DispatchMessage(addr(msg))
+  return currentEvents
