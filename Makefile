@@ -6,32 +6,35 @@ WINDOWS_DEBUG_OPTIONS := --cc:vcc --passC:'/MDd' --passL:'ucrtd.lib'
 WINDOWS_RELEASE_OPTIONS := --cc:vcc --passC:'/MD' --passL:'ucrt.lib' 
 
 # build
-build/debug/linux/test: ${SOURCES}
+build/debug/linux/hello_triangle: ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/test.nim
-build/release/linux/test: ${SOURCES}
+	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
+build/release/linux/hello_triangle: ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/test.nim
-build/debug/windows/test.exe:  ${SOURCES}
+	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
+build/debug/windows/hello_triangle.exe:  ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/test.nim
-build/release/windows/test.exe: ${SOURCES}
+	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
+build/release/windows/hello_triangle.exe: ${SOURCES}
 	mkdir -p $$( dirname $@ )
-	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/test.nim
+	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
 
-build_all_linux: build/debug/linux/test build/release/linux/test
-build_all_windows: build/debug/windows/test.exe build/release/windows/test.exe
+build_all_linux: build/debug/linux/hello_triangle build/release/linux/hello_triangle
+build_all_windows: build/debug/windows/hello_triangle.exe build/release/windows/hello_triangle.exe
 
 build_all: build_all_linux build_all_windows
 
+clean:
+	rm -rf build
+
 # publish
-publish_linux_debug: build/debug/linux/test
+publish_linux_debug: build/debug/linux/hello_triangle
 	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/debug/
-publish_linux_release: build/release/linux/test
+publish_linux_release: build/release/linux/hello_triangle
 	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/release/
-publish_windows_debug: build/debug/linux/test
+publish_windows_debug: build/debug/linux/hello_triangle
 	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/debug/
-publish_windows_release: build/release/linux/test
+publish_windows_release: build/release/linux/hello_triangle
 	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/release/
 
 publish_all: publish_linux_debug publish_linux_release publish_windows_debug publish_windows_release

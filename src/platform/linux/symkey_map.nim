@@ -2,7 +2,7 @@ import std/tables
 export tables
 
 import x11/keysym
-import x11/x
+# import x11/x
 
 import ../../events
 
