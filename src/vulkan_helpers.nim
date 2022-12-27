@@ -129,32 +129,23 @@ proc getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
 
 proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
 
+  var requiredExtensions = @["VK_KHR_surface".cstring]
   when defined(linux):
-    var requiredExtensions = [
-      # "VK_EXT_acquire_xlib_display".cstring,
-      # "VK_EXT_direct_mode_display".cstring,
-      # "VK_KHR_display".cstring,
-      "VK_KHR_surface".cstring,
-      "VK_KHR_xlib_surface".cstring,
-      "VK_EXT_debug_utils".cstring,
-    ]
+    requiredExtensions.add("VK_KHR_xlib_surface".cstring)
   when defined(windows):
-    var requiredExtensions = [
-      "VK_KHR_win32_surface".cstring,
-      #"VK_KHR_display".cstring,
-      "VK_KHR_surface".cstring,
-      "VK_EXT_debug_utils".cstring,
-    ]
+    requiredExtensions.add("VK_KHR_win32_surface".cstring)
+  when ENABLEVULKANVALIDATIONLAYERS:
+    requiredExtensions.add("VK_EXT_debug_utils".cstring)
   
   let availableExtensions = getInstanceExtensions()
   for extension in requiredExtensions:
     assert $extension in availableExtensions, $extension
 
-  let desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring, "VK_LAYER_MESA_overlay".cstring]
   let availableLayers = getValidationLayers()
   var usableLayers = newSeq[cstring]()
 
   when ENABLEVULKANVALIDATIONLAYERS:
+    const desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring, "VK_LAYER_MESA_overlay".cstring]
     for layer in desiredLayers:
       if $layer in availableLayers:
         usableLayers.add(layer)
@@ -176,7 +167,7 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
     enabledLayerCount: usableLayers.len.uint32,
     ppEnabledLayerNames: cast[ptr UncheckedArray[cstring]](addrOrNil(usableLayers)),
     enabledExtensionCount: requiredExtensions.len.uint32,
-    ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(requiredExtensions))
+    ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(requiredExtensions[0]))
   )
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result))
 
