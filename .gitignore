@@ -1,9 +1,13 @@
+# nim directories
 nimcache/
 nimblecache/
 htmldocs/
 
+# custom build and download directories
 build/
 thirdparty/
-
 testresults/
 testresults.html
+
+# from windows build
+*.pdb
