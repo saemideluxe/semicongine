@@ -4,3 +4,6 @@ htmldocs/
 
 build/
 thirdparty/
+
+testresults/
+testresults.html
