@@ -5,27 +5,41 @@ RELEASE_OPTIONS := -d:release --checks:off --assertions:off
 WINDOWS_DEBUG_OPTIONS := --cc:vcc --passC:'/MDd' --passL:'ucrtd.lib' 
 WINDOWS_RELEASE_OPTIONS := --cc:vcc --passC:'/MD' --passL:'ucrt.lib' 
 
-# build
-build/debug/linux/hello_triangle: ${SOURCES}
-	mkdir -p $$( dirname $@ )
+make_dirs: 
+	mkdir -p build/debug/linux
+	mkdir -p build/release/linux
+	mkdir -p build/debug/windows
+	mkdir -p build/release/windows
+
+# build hello_triangle
+build/debug/linux/hello_triangle: ${SOURCES} make_dirs
 	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
-build/release/linux/hello_triangle: ${SOURCES}
-	mkdir -p $$( dirname $@ )
+build/release/linux/hello_triangle: ${SOURCES} make_dirs
 	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
-build/debug/windows/hello_triangle.exe:  ${SOURCES}
-	mkdir -p $$( dirname $@ )
+build/debug/windows/hello_triangle.exe:  ${SOURCES} make_dirs
 	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
-build/release/windows/hello_triangle.exe: ${SOURCES}
-	mkdir -p $$( dirname $@ )
+build/release/windows/hello_triangle.exe: ${SOURCES} make_dirs
 	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
 
 build_all_linux: build/debug/linux/hello_triangle build/release/linux/hello_triangle
 build_all_windows: build/debug/windows/hello_triangle.exe build/release/windows/hello_triangle.exe
-
 build_all: build_all_linux build_all_windows
+
+# build maths (for testing)
+build/debug/linux/maths: ${SOURCES} make_dirs
+	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/maths.nim
+build/release/linux/maths: ${SOURCES} make_dirs
+	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/maths.nim
+build/debug/windows/maths.exe:  ${SOURCES} make_dirs
+	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/maths.nim
+build/release/windows/maths.exe: ${SOURCES} make_dirs
+	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/maths.nim
 
 clean:
 	rm -rf build
+
+tests:
+	testament p tests/
 
 # publish
 publish_linux_debug: build/debug/linux/hello_triangle
