@@ -1,3 +1,4 @@
+import std/random
 import std/math
 import std/strutils
 import std/macros
@@ -12,6 +13,9 @@ type
   Vec* = Vec2|Vec3|Vec4
 
 # define some often used constants
+func ConstOne2[T: SomeNumber](): auto {.compiletime.} = Vec2[T]([T(1), T(1)])
+func ConstOne3[T: SomeNumber](): auto {.compiletime.} = Vec3[T]([T(1), T(1), T(1)])
+func ConstOne4[T: SomeNumber](): auto {.compiletime.} = Vec4[T]([T(1), T(1), T(1), T(1)])
 func ConstX[T: SomeNumber](): auto {.compiletime.} = Vec3[T]([T(1), T(0), T(0)])
 func ConstY[T: SomeNumber](): auto {.compiletime.} = Vec3[T]([T(0), T(1), T(0)])
 func ConstZ[T: SomeNumber](): auto {.compiletime.} = Vec3[T]([T(0), T(0), T(1)])
@@ -20,11 +24,11 @@ func ConstG[T: SomeNumber](): auto {.compiletime.} = Vec3[T]([T(0), T(1), T(0)])
 func ConstB[T: SomeNumber](): auto {.compiletime.} = Vec3[T]([T(0), T(0), T(1)])
 
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
-# Also for Y, Z, R, G, B
+# Also for Y, Z, R, G, B and One
 # not sure if this is necessary or even a good idea...
 macro generateAllConsts() =
   result = newStmtList()
-  for component in ["X", "Y", "Z", "R", "G", "B"]:
+  for component in ["X", "Y", "Z", "R", "G", "B", "One2", "One3", "One4"]:
     for theType in ["int", "int8", "int16", "int32", "int64", "float", "float32", "float64"]:
       var typename = theType[0 .. 0]
       if theType[^2].isDigit:
@@ -43,6 +47,9 @@ generateAllConsts()
 const X* = ConstX[float]()
 const Y* = ConstY[float]()
 const Z* = ConstZ[float]()
+const One2* = ConstOne2[float]()
+const One3* = ConstOne3[float]()
+const One4* = ConstOne4[float]()
 
 func newVec2*[T](x, y: T): auto = Vec2([x, y])
 func newVec3*[T](x, y, z: T): auto = Vec3([x, y, z])
@@ -201,3 +208,16 @@ macro createVectorAttribAccessorFuncs() =
             result.add(vectorAttributeAccessor(i & j & k & l))
 
 createVectorAttribAccessorFuncs()
+
+# call e.g. Vec2[int]().randomized() to get a random matrix
+template makeRandomInit(mattype: typedesc) =
+    proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
+      for i in 0 ..< result.len:
+        result[i] = rand(low(typeof(m[0])) .. high(typeof(m[0])))
+    proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
+      for i in 0 ..< result.len:
+        result[i] = rand(1.0)
+
+makeRandomInit(Vec2)
+makeRandomInit(Vec3)
+makeRandomInit(Vec4)

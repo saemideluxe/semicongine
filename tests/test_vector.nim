@@ -2,7 +2,6 @@ import random
 import math
 
 import vector
-import matrix
 
 
 proc echoInfo(v: Vec) =
@@ -170,86 +169,5 @@ proc testVector() =
   echo "Z: ", Zi
 
 
-template withAllIntegerMats(stuff: untyped) =
-  stuff(Mat22[int32])
-  stuff(Mat23[int32])
-  stuff(Mat32[int32])
-  stuff(Mat33[int32])
-  stuff(Mat34[int32])
-  stuff(Mat43[int32])
-  stuff(Mat44[int32])
-  stuff(Mat22[int64])
-  stuff(Mat23[int64])
-  stuff(Mat32[int64])
-  stuff(Mat33[int64])
-  stuff(Mat34[int64])
-  stuff(Mat43[int64])
-  stuff(Mat44[int64])
-
-template withAllFloatMats(stuff: untyped) =
-  stuff(Mat22[float32])
-  stuff(Mat23[float32])
-  stuff(Mat32[float32])
-  stuff(Mat33[float32])
-  stuff(Mat34[float32])
-  stuff(Mat43[float32])
-  stuff(Mat44[float32])
-  stuff(Mat22[float64])
-  stuff(Mat23[float64])
-  stuff(Mat32[float64])
-  stuff(Mat33[float64])
-  stuff(Mat34[float64])
-  stuff(Mat43[float64])
-  stuff(Mat44[float64])
-
-template withAllMats(stuff: untyped) =
-  stuff(Mat22[int])
-  stuff(Mat23[int])
-  stuff(Mat32[int])
-  stuff(Mat33[int])
-  stuff(Mat34[int])
-  stuff(Mat43[int])
-  stuff(Mat44[int])
-  stuff(Mat22[float])
-  stuff(Mat23[float])
-  stuff(Mat32[float])
-  stuff(Mat33[float])
-  stuff(Mat34[float])
-  stuff(Mat43[float])
-  stuff(Mat44[float])
-
-template testTranspose(t: typedesc) =
-  echo "testTranspose: ", t
-  let m = t().randomized()
-  assert m == m.transposed().transposed()
-
-template testAssignI(t: typedesc) =
-  echo "testAssignI: ", t
-  var m = t()
-  for i in 0 ..< t.data.len:
-    m[rand(0 ..< m.rowCount), rand(0 ..< m.columnCount)] = rand(0'i32 .. 100'i32)
-
-template testAssignF(t: typedesc) =
-  echo "testAssignF: ", t
-  var m = t()
-  for i in 0 ..< t.data.len:
-    m[rand(0 ..< m.rowCount), rand(0 ..< m.columnCount)] = rand(100'f)
-
-template testRowCols(t: typedesc) =
-  echo "testRowCols: ", t
-  var m = t().randomized()
-  for i in 0 ..< m.rowCount:
-    echo m.row(i)
-  for i in 0 ..< m.columnCount:
-    echo m.col(i)
-
-
-proc testMatrix() =
-  withAllMats(testTranspose)
-  withAllIntegerMats(testAssignI)
-  withAllFloatMats(testAssignF)
-  withAllMats(testRowCols)
-
 randomize()
 testVector()
-testMatrix()
