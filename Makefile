@@ -53,6 +53,8 @@ clean:
 	rm -rf build
 	# clean thirdparty too?
 
+.PHONY: tests
+
 # tests
 tests:
 	testament p tests/
