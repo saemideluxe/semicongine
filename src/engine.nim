@@ -8,6 +8,9 @@ import ./vulkan
 import ./vulkan_helpers
 import ./window
 import ./events
+import ./math/vector
+import ./shader
+import ./vertex
 
 import ./glslang/glslang
 
@@ -18,24 +21,56 @@ var logger = newConsoleLogger()
 addHandler(logger)
 
 
-var vertexShaderCode: string = """#version 450
-layout(location = 0) out vec3 fragColor;
-vec3 colors[3] = vec3[](
-    vec3(1.0, 0.0, 0.0),
-    vec3(0.0, 1.0, 0.0),
-    vec3(0.0, 0.0, 1.0)
-);
-vec2 positions[3] = vec2[](
-  vec2(0.0, -0.5),
-  vec2(0.5, 0.5),
-  vec2(-0.5, 0.5)
-);
-void main() {
-  gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
-  fragColor = colors[gl_VertexIndex];
-}"""
+type
+  MyVertex = object
+    position: VertexAttribute[Vec2[float32]]
+    color: VertexAttribute[Vec3[float32]]
 
-var fragmentShaderCode: string = """#version 450
+const vertices = [
+    (Vec2([ 0.0'f32, -0.5'f32]), Vec3([1.0'f32, 0.0'f32, 0.0'f32])),
+    (Vec2([ 0.5'f32,  0.5'f32]), Vec3([0.0'f32, 1.0'f32, 0.0'f32])),
+    (Vec2([-0.5'f32,  0.5'f32]), Vec3([0.0'f32, 0.0'f32, 1.0'f32]))
+]
+
+
+proc getBindingDescription(binding: int): auto =
+  VkVertexInputBindingDescription(
+    binding: uint32(binding),
+    stride: uint32(sizeof(vertices[0])),
+    inputRate: VK_VERTEX_INPUT_RATE_VERTEX, # VK_VERTEX_INPUT_RATE_INSTANCE for instances
+  )
+
+proc getAttributeDescriptions(binding: int): auto =
+  [
+    VkVertexInputAttributeDescription(
+      binding: 0'u32,
+      location: 0,
+      format: VK_FORMAT_R32G32_SFLOAT,
+      offset: 0,
+    ),
+    VkVertexInputAttributeDescription(
+      binding: 0'u32,
+      location: 1,
+      format: VK_FORMAT_R32G32B32_SFLOAT,
+      offset: uint32(sizeof(Vec2)), # use offsetOf?
+    ),
+  ]
+
+var vertexShaderCode = """
+#version 450
+
+layout(location = 0) in vec2 inPosition;
+layout(location = 1) in vec3 inColor;
+
+layout(location = 0) out vec3 fragColor;
+
+void main() {
+    gl_Position = vec4(inPosition, 0.0, 1.0);
+    fragColor = inColor;
+}
+"""
+
+var fragmentShaderCode = """#version 450
 layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec3 fragColor;
 void main() {
@@ -57,7 +92,7 @@ type
     images: seq[VkImage]
     imageviews: seq[VkImageView]
   RenderPipeline = object
-    shaderStages*: seq[VkPipelineShaderStageCreateInfo]
+    shaders*: seq[ShaderProgram]
     layout*: VkPipelineLayout
     pipeline*: VkPipeline
   QueueFamily = object
@@ -265,11 +300,9 @@ proc setupRenderPass(device: VkDevice, format: VkFormat): VkRenderPass =
   checkVkResult device.vkCreateRenderPass(addr(renderPassCreateInfo), nil, addr(result))
 
 proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPass: VkRenderPass): RenderPipeline =
-  # (seq[VkPipelineShaderStageCreateInfo], VkViewport, VkRect2D, VkPipelineLayout, VkPipeline) =
-
   # load shaders
-  result.shaderStages.add(device.createShaderStage(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderCode))
-  result.shaderStages.add(device.createShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderCode))
+  result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderCode))
+  result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderCode))
 
   var
     # define which parts can be dynamic (pipeline is fixed after setup)
@@ -279,13 +312,16 @@ proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPas
       dynamicStateCount: uint32(dynamicStates.len),
       pDynamicStates: addr(dynamicStates[0]),
     )
+    vertexbindings = generateInputVertexBinding[MyVertex]()
+    attributebindings = generateInputAttributeBinding[MyVertex]()
+
     # define input data format
     vertexInputInfo = VkPipelineVertexInputStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-      vertexBindingDescriptionCount: 0,
-      pVertexBindingDescriptions: nil,
-      vertexAttributeDescriptionCount: 0,
-      pVertexAttributeDescriptions: nil,
+      vertexBindingDescriptionCount: uint32(vertexbindings.len),
+      pVertexBindingDescriptions: addr(vertexbindings[0]),
+      vertexAttributeDescriptionCount: uint32(attributebindings.len),
+      pVertexAttributeDescriptions: addr(attributebindings[0]),
     )
     inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
@@ -358,10 +394,13 @@ proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPas
     )
   checkVkResult device.vkCreatePipelineLayout(addr(pipelineLayoutInfo), nil, addr(result.layout))
 
+  var stages: seq[VkPipelineShaderStageCreateInfo]
+  for shader in result.shaders:
+    stages.add(shader.shader)
   var pipelineInfo = VkGraphicsPipelineCreateInfo(
     sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-    stageCount: 2,
-    pStages: addr(result.shaderStages[0]),
+    stageCount: uint32(stages.len),
+    pStages: addr(stages[0]),
     pVertexInputState: addr(vertexInputInfo),
     pInputAssemblyState: addr(inputAssembly),
     pViewportState: addr(viewportState),
@@ -633,8 +672,8 @@ proc trash*(engine: Engine) =
   engine.vulkan.device.device.vkDestroyPipelineLayout(engine.vulkan.pipeline.layout, nil)
   engine.vulkan.device.device.vkDestroyRenderPass(engine.vulkan.renderPass, nil)
 
-  for shaderStage in engine.vulkan.pipeline.shaderStages:
-    engine.vulkan.device.device.vkDestroyShaderModule(shaderStage.module, nil)
+  for shader in engine.vulkan.pipeline.shaders:
+    engine.vulkan.device.device.vkDestroyShaderModule(shader.shader.module, nil)
 
   engine.vulkan.instance.vkDestroySurfaceKHR(engine.vulkan.surface, nil)
   engine.vulkan.device.device.vkDestroyDevice(nil)
