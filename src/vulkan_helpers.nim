@@ -4,7 +4,6 @@ import std/strformat
 import std/logging
 import std/macros
 
-import ./glslang/glslang
 import ./vulkan
 import ./window
 
@@ -16,7 +15,11 @@ template checkVkResult*(call: untyped) =
   when defined(release):
     discard call
   else:
-    debug "CALLING vulkan: ", astToStr(call)
+    # yes, a bit cheap, but this is only for nice debug output
+    var callstr = astToStr(call).replace("\n", "")
+    while callstr.find("  ") >= 0:
+      callstr = callstr.replace("  ", " ")
+    debug "CALLING vulkan: ", callstr
     let value = call
     if value != VK_SUCCESS:
       error "Vulkan error: ",  astToStr(call),  " returned ", $value
@@ -25,23 +28,23 @@ template checkVkResult*(call: untyped) =
 func addrOrNil[T](obj: var openArray[T]): ptr T =
   if obj.len > 0: addr(obj[0]) else: nil
 
-proc VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =
+func VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
 
 
-proc filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[VkSurfaceFormatKHR] =
+func filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[VkSurfaceFormatKHR] =
   for format in formats:
     if format.format == VK_FORMAT_B8G8R8A8_SRGB and format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR:
       result.add(format)
 
-proc getSuitableSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): VkSurfaceFormatKHR =
+func getSuitableSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): VkSurfaceFormatKHR =
   let usableSurfaceFormats = filterForSurfaceFormat(formats)
   if len(usableSurfaceFormats) == 0:
     raise newException(Exception, "No suitable surface formats found")
   return usableSurfaceFormats[0]
 
 
-proc cleanString*(str: openArray[char]): string =
+func cleanString*(str: openArray[char]): string =
   for i in 0 ..< len(str):
     if str[i] == char(0):
       result = join(str[0 ..< i])
@@ -112,7 +115,7 @@ proc getSwapChainImages*(device: VkDevice, swapChain: VkSwapchainKHR): seq[VkIma
   checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addrOrNil(result));
 
 
-proc getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
+func getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
   let preferredModes = [
     VK_PRESENT_MODE_MAILBOX_KHR, # triple buffering
     VK_PRESENT_MODE_FIFO_RELAXED_KHR, # double duffering
@@ -211,27 +214,6 @@ proc getVulcanDevice*(
   checkVkResult vkCreateDevice(physicalDevice, addr(deviceCreateInfo), nil, addr(result[0]))
   vkGetDeviceQueue(result[0], graphicsQueueFamily, 0'u32, addr(result[1]));
   vkGetDeviceQueue(result[0], presentationQueueFamily, 0'u32, addr(result[2]));
-
-proc createShaderStage*(device: VkDevice, stage: VkShaderStageFlagBits, shader: string): VkPipelineShaderStageCreateInfo =
-  const VK_GLSL_MAP = {
-    VK_SHADER_STAGE_VERTEX_BIT: GLSLANG_STAGE_VERTEX,
-    VK_SHADER_STAGE_FRAGMENT_BIT: GLSLANG_STAGE_FRAGMENT,
-  }.toTable()
-  var code = compileGLSLToSPIRV(VK_GLSL_MAP[stage], shader, "<memory-shader>")
-  var createInfo = VkShaderModuleCreateInfo(
-    sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-    codeSize: uint(code.len * sizeof(uint32)),
-    pCode: addrOrNil(code),
-  )
-  var shaderModule: VkShaderModule
-  checkVkResult vkCreateShaderModule(device, addr(createInfo), nil, addr(shaderModule))
-
-  return VkPipelineShaderStageCreateInfo(
-    sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-    stage: stage,
-    module: shaderModule,
-    pName: "main", # entry point for shader
-  )
 
 proc debugCallback*(
   messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
