@@ -1,5 +1,4 @@
 SOURCES := $(shell find src -name '*.nim')
-COMPILE_OPTIONS := --path:src --mm:orc --experimental:strictEffects --threads:on --app:gui
 DEBUG_OPTIONS := --debugger:native --checks:on --assertions:on
 RELEASE_OPTIONS := -d:release --checks:off --assertions:off
 WINDOWS_DEBUG_OPTIONS := --cc:vcc --passC:'/MDd' --passL:'ucrtd.lib'
@@ -28,21 +27,15 @@ WINE_NIM := WINEPATH="${CL_DIR}" wine ./build/nim_windows/nim-${WINE_NIM_VERSION
 # end of HACK-----------------------------------------------------------
 
 
-make_dirs: 
-	mkdir -p build/debug/linux
-	mkdir -p build/release/linux
-	mkdir -p build/debug/windows
-	mkdir -p build/release/windows
-
 # build hello_triangle
-build/debug/linux/hello_triangle: ${SOURCES} make_dirs
-	nim c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
-build/release/linux/hello_triangle: ${SOURCES} make_dirs
-	nim c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
-build/debug/windows/hello_triangle.exe:  ${SOURCES} make_dirs build/nim_windows
-	${WINE_NIM} c ${COMPILE_OPTIONS} ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
-build/release/windows/hello_triangle.exe: ${SOURCES} make_dirs build/nim_windows
-	${WINE_NIM} c ${COMPILE_OPTIONS} ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
+build/debug/linux/hello_triangle: ${SOURCES}
+	nim build_linux_debug ${DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
+build/release/linux/hello_triangle: ${SOURCES}
+	nim build_linux_release c ${RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
+build/debug/windows/hello_triangle.exe:  ${SOURCES} build/nim_windows
+	${WINE_NIM} c ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
+build/release/windows/hello_triangle.exe: ${SOURCES} build/nim_windows
+	${WINE_NIM} c ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
 
 build_all_linux: build/debug/linux/hello_triangle build/release/linux/hello_triangle
 build_all_windows: build/debug/windows/hello_triangle.exe build/release/windows/hello_triangle.exe

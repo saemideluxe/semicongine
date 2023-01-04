@@ -11,6 +11,7 @@ import ./events
 import ./math/vector
 import ./shader
 import ./vertex
+import ./buffer
 
 import ./glslang/glslang
 
@@ -26,35 +27,26 @@ type
     position: VertexAttribute[Vec2[float32]]
     color: VertexAttribute[Vec3[float32]]
 
-const vertices = [
-    (Vec2([ 0.0'f32, -0.5'f32]), Vec3([1.0'f32, 0.0'f32, 0.0'f32])),
-    (Vec2([ 0.5'f32,  0.5'f32]), Vec3([0.0'f32, 1.0'f32, 0.0'f32])),
-    (Vec2([-0.5'f32,  0.5'f32]), Vec3([0.0'f32, 0.0'f32, 1.0'f32]))
-]
-
-
-proc getBindingDescription(binding: int): auto =
-  VkVertexInputBindingDescription(
-    binding: uint32(binding),
-    stride: uint32(sizeof(vertices[0])),
-    inputRate: VK_VERTEX_INPUT_RATE_VERTEX, # VK_VERTEX_INPUT_RATE_INSTANCE for instances
-  )
-
-proc getAttributeDescriptions(binding: int): auto =
+var vertices = (
   [
-    VkVertexInputAttributeDescription(
-      binding: 0'u32,
-      location: 0,
-      format: VK_FORMAT_R32G32_SFLOAT,
-      offset: 0,
-    ),
-    VkVertexInputAttributeDescription(
-      binding: 0'u32,
-      location: 1,
-      format: VK_FORMAT_R32G32B32_SFLOAT,
-      offset: uint32(sizeof(Vec2)), # use offsetOf?
-    ),
+    Vec2([-0.5'f32, -0.5'f32]),
+    Vec2([ 0.5'f32,  0.5'f32]),
+    Vec2([-0.5'f32,  0.5'f32]),
+
+    Vec2([ 0.0'f32, -0.7'f32]),
+    Vec2([ 0.6'f32,  0.1'f32]),
+    Vec2([ 0.3'f32,  0.4'f32]),
+  ],
+  [
+    Vec3([1.0'f32, 1.0'f32, 0.0'f32]),
+    Vec3([0.0'f32, 1.0'f32, 0.0'f32]),
+    Vec3([0.0'f32, 1.0'f32, 1.0'f32]),
+
+    Vec3([1.0'f32, 1.0'f32, 0.0'f32]),
+    Vec3([1.0'f32, 0.0'f32, 0.0'f32]),
+    Vec3([0.0'f32, 1.0'f32, 1.0'f32]),
   ]
+)
 
 var vertexShaderCode = """
 #version 450
@@ -81,10 +73,10 @@ const VULKAN_VERSION = VK_MAKE_API_VERSION(0'u32, 1'u32, 2'u32, 0'u32)
 
 type
   Device = object
+    device: VkDevice
     physicalDevice: PhysicalDevice
     graphicsQueueFamily: uint32
     presentationQueueFamily: uint32
-    device: VkDevice
     graphicsQueue: VkQueue
     presentationQueue: VkQueue
   Swapchain = object
@@ -123,6 +115,8 @@ type
     imageAvailableSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     renderFinishedSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     inFlightFences*: array[MAX_FRAMES_IN_FLIGHT, VkFence]
+    bufferA*: Buffer
+    bufferB*: Buffer
   Engine* = object
     vulkan*: Vulkan
     window: NativeWindow
@@ -542,9 +536,16 @@ proc igniteEngine*(): Engine =
     result.vulkan.renderFinishedSemaphores,
     result.vulkan.inFlightFences,
   ) = result.vulkan.device.device.setupSyncPrimitives()
+  result.vulkan.bufferA = result.vulkan.device.device.InitBuffer(result.vulkan.device.physicalDevice.device, uint64(sizeof(vertices[0])), VertexBuffer)
+  result.vulkan.bufferB = result.vulkan.device.device.InitBuffer(result.vulkan.device.physicalDevice.device, uint64(sizeof(vertices[1])), VertexBuffer)
+  var d: pointer
+  result.vulkan.bufferA.withMapping(d):
+    copyMem(d, addr(vertices[0]), sizeof(vertices[0]))
+  result.vulkan.bufferB.withMapping(d):
+    copyMem(d, addr(vertices[1]), sizeof(vertices[1]))
 
 
-proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D) =
+proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D, engine: var Engine) =
   var
     beginInfo = VkCommandBufferBeginInfo(
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -576,14 +577,19 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, command
     )
   checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
   commandBuffer.vkCmdBeginRenderPass(addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
-  commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline)
   commandBuffer.vkCmdSetViewport(firstViewport=0, viewportCount=1, addr(viewport))
   commandBuffer.vkCmdSetScissor(firstScissor=0, scissorCount=1, addr(scissor))
-  commandBuffer.vkCmdDraw(vertexCount=3, instanceCount=1, firstVertex=0, firstInstance=0)
+  commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline)
+
+  var
+    vertexBuffers = [engine.vulkan.bufferA.vkBuffer, engine.vulkan.bufferB.vkBuffer]
+    offsets = [VkDeviceSize(0), VkDeviceSize(0)]
+  commandBuffer.vkCmdBindVertexBuffers(firstBinding=0'u32, bindingCount=2'u32, pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
+  commandBuffer.vkCmdDraw(vertexCount=uint32(vertices[0].len), instanceCount=1'u32, firstVertex=0'u32, firstInstance=0'u32)
   commandBuffer.vkCmdEndRenderPass()
   checkVkResult commandBuffer.vkEndCommandBuffer()
 
-proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resized: bool) =
+proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resized: bool, engine: var Engine) =
   checkVkResult vulkan.device.device.vkWaitForFences(1, addr(vulkan.inFlightFences[currentFrame]), VK_TRUE, high(uint64))
   var bufferImageIndex: uint32
   let nextImageResult = vulkan.device.device.vkAcquireNextImageKHR(
@@ -601,7 +607,7 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resi
   checkVkResult vulkan.device.device.vkResetFences(1, addr(vulkan.inFlightFences[currentFrame]))
 
   checkVkResult vulkan.commandBuffers[currentFrame].vkResetCommandBuffer(VkCommandBufferResetFlags(0))
-  vulkan.renderPass.recordCommandBuffer(vulkan.pipeline.pipeline, vulkan.commandBuffers[currentFrame], vulkan.framebuffers[bufferImageIndex], vulkan.frameDimension)
+  vulkan.renderPass.recordCommandBuffer(vulkan.pipeline.pipeline, vulkan.commandBuffers[currentFrame], vulkan.framebuffers[bufferImageIndex], vulkan.frameDimension, engine)
   var
     waitSemaphores = [vulkan.imageAvailableSemaphores[currentFrame]]
     waitStages = [VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)]
@@ -653,12 +659,14 @@ proc fullThrottle*(engine: var Engine) =
             killed = true
         else:
           discard
-    engine.window.drawFrame(engine.vulkan, currentFrame, resized)
+    engine.window.drawFrame(engine.vulkan, currentFrame, resized, engine)
     resized = false
     currentFrame = (currentFrame + 1) mod MAX_FRAMES_IN_FLIGHT;
   checkVkResult engine.vulkan.device.device.vkDeviceWaitIdle()
 
-proc trash*(engine: Engine) =
+proc trash*(engine: var Engine) =
+  `=destroy` engine.vulkan.bufferA
+  `=destroy` engine.vulkan.bufferB
   engine.vulkan.device.device.trash(engine.vulkan.swapchain, engine.vulkan.framebuffers)
   checkVkResult engine.vulkan.device.device.vkDeviceWaitIdle()
 
