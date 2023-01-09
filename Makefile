@@ -1,8 +1,4 @@
 SOURCES := $(shell find src -name '*.nim')
-DEBUG_OPTIONS := --debugger:native --checks:on --assertions:on
-RELEASE_OPTIONS := -d:release --checks:off --assertions:off
-WINDOWS_DEBUG_OPTIONS := --cc:vcc --passC:'/MDd' --passL:'ucrtd.lib'
-WINDOWS_RELEASE_OPTIONS := --cc:vcc --passC:'/MD' --passL:'ucrt.lib'
 
 # HACK to get cross-compilation working --------------------------------
 
@@ -29,13 +25,22 @@ WINE_NIM := WINEPATH="${CL_DIR}" wine ./build/nim_windows/nim-${WINE_NIM_VERSION
 
 # build hello_triangle
 build/debug/linux/hello_triangle: ${SOURCES}
-	nim build_linux_debug ${DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
+	nim build_linux_debug -o:$@ examples/hello_triangle.nim
 build/release/linux/hello_triangle: ${SOURCES}
-	nim build_linux_release c ${RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
-build/debug/windows/hello_triangle.exe:  ${SOURCES} build/nim_windows
-	${WINE_NIM} c ${DEBUG_OPTIONS} ${WINDOWS_DEBUG_OPTIONS} -o:$@ examples/hello_triangle.nim
+	nim build_linux_release -o:$@ examples/hello_triangle.nim
+build/debug/windows/hello_triangle.exe: ${SOURCES} build/nim_windows
+	${WINE_NIM} build_windows_debug -o:$@ examples/hello_triangle.nim
 build/release/windows/hello_triangle.exe: ${SOURCES} build/nim_windows
-	${WINE_NIM} c ${RELEASE_OPTIONS} ${WINDOWS_RELEASE_OPTIONS} -o:$@ examples/hello_triangle.nim
+	${WINE_NIM} build_windows_release -o:$@ examples/hello_triangle.nim
+
+build/debug/linux/alotof_triangles: ${SOURCES}
+	nim build_linux_debug -o:$@ examples/alotof_triangles.nim
+build/release/linux/alotof_triangles: ${SOURCES}
+	nim build_linux_release -o:$@ examples/alotof_triangles.nim
+build/debug/windows/alotof_triangles.exe: ${SOURCES} build/nim_windows
+	${WINE_NIM} build_windows_debug -o:$@ examples/alotof_triangles.nim
+build/release/windows/alotof_triangles.exe: ${SOURCES} build/nim_windows
+	${WINE_NIM} build_windows_release -o:$@ examples/alotof_triangles.nim
 
 build_all_linux: build/debug/linux/hello_triangle build/release/linux/hello_triangle
 build_all_windows: build/debug/windows/hello_triangle.exe build/release/windows/hello_triangle.exe

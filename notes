@@ -1,7 +1,4 @@
-For implementation of font rendering:
-https://developer.apple.com/fonts/TrueType-Reference-Manual/
-
-ideas:
+Game ideas:
 - mining-game with structure simulation, crashing mineshafts, etc.
 - top-down 2d shooter (wild west?) with one room per scene, fixed camera
 - Top-down 2d shooter with autoshoot (-> what is the challenge? position? cover? effects?)
@@ -14,10 +11,16 @@ Subsystems:
 
 High prio:
 - Texture handling
-- Input handling (X11, Win32)
-- Audio (?)
 - Mesh files (Wavefront OBJ, MTL)
-- Image files (BMP)
+- Image files (BMP RGB + BMP Graysscale for transparency)
+
+- Input handling (X11, Win32)
+
+- Config files (std/parsecfg)
+
 - Audio files (WAV)
-- Config files (TOML)
-- Resource-packs (ZIP)
+- Audio (Alsa, Windows Waveform API?)
+- Text rendering
+
+TODO:
+- move all of Makefile to config.nims
