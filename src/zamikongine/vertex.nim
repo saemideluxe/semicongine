@@ -9,7 +9,12 @@ import ./vulkan
 type
   VertexAttributeType = SomeNumber|Vec
   VertexAttribute*[T:VertexAttributeType] = object
+    data*: seq[T]
 
+template rawAttributeType(v: VertexAttribute): auto = get(genericParams(typeof(v)), 0)
+
+func datasize*(attribute: VertexAttribute): uint64 =
+  uint64(sizeof(rawAttributeType(attribute))) * uint64(attribute.data.len)
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
 func nLocationSlots[T: VertexAttributeType](): int =
@@ -110,9 +115,16 @@ func getGLSLType[T: VertexAttributeType](): string =
   elif T is Vec4[float32]: "vec4"
   elif T is Vec4[float64]: "dvec4"
 
-template rawAttributeType(v: VertexAttribute): auto = get(genericParams(typeof(v)), 0)
 
-func generateGLSL[T](): string =
+func VertexCount*[T](t: T): uint32 =
+  for name, value in t.fieldPairs:
+    when typeof(value) is VertexAttribute:
+      if result == 0:
+        result = uint32(value.data.len)
+      else:
+        assert result == uint32(value.data.len)
+
+func generateGLSLDeclarations*[T](): string =
   var stmtList: seq[string]
   var i = 0
   for name, value in T().fieldPairs:
@@ -154,26 +166,3 @@ func generateInputAttributeBinding*[T](bindingoffset: int = 0, locationoffset: i
       )
       location += nLocationSlots[rawAttributeType(value)]()
       binding += 1
-
-func getBindingDescription(binding: int): auto =
-  VkVertexInputBindingDescription(
-    binding: uint32(binding),
-    stride: 0, # either sizeof of vertex (array of structs) or of attribute (struct of arrays)
-    inputRate: VK_VERTEX_INPUT_RATE_VERTEX, # VK_VERTEX_INPUT_RATE_INSTANCE for instances
-  )
-
-func getAttributeDescriptions(binding: int): auto =
-  [
-    VkVertexInputAttributeDescription(
-      binding: 0'u32,
-      location: 0,
-      format: VK_FORMAT_R32G32_SFLOAT,
-      offset: 0,
-    ),
-    VkVertexInputAttributeDescription(
-      binding: 0'u32,
-      location: 1,
-      format: VK_FORMAT_R32G32B32_SFLOAT,
-      offset: uint32(sizeof(Vec2)), # use offsetOf?
-    ),
-  ]

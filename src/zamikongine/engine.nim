@@ -1,3 +1,4 @@
+import std/sequtils
 import std/typetraits
 import std/strformat
 import std/enumerate
@@ -8,10 +9,11 @@ import ./vulkan
 import ./vulkan_helpers
 import ./window
 import ./events
-import ./math/vector
 import ./shader
 import ./vertex
 import ./buffer
+import ./thing
+import ./mesh
 
 import ./glslang/glslang
 
@@ -21,53 +23,6 @@ const DEBUG_LOG = not defined(release)
 var logger = newConsoleLogger()
 addHandler(logger)
 
-
-type
-  MyVertex = object
-    position: VertexAttribute[Vec2[float32]]
-    color: VertexAttribute[Vec3[float32]]
-
-var vertices = (
-  [
-    Vec2([-0.5'f32, -0.5'f32]),
-    Vec2([ 0.5'f32,  0.5'f32]),
-    Vec2([-0.5'f32,  0.5'f32]),
-
-    Vec2([ 0.0'f32, -0.7'f32]),
-    Vec2([ 0.6'f32,  0.1'f32]),
-    Vec2([ 0.3'f32,  0.4'f32]),
-  ],
-  [
-    Vec3([1.0'f32, 1.0'f32, 0.0'f32]),
-    Vec3([0.0'f32, 1.0'f32, 0.0'f32]),
-    Vec3([0.0'f32, 1.0'f32, 1.0'f32]),
-
-    Vec3([1.0'f32, 1.0'f32, 0.0'f32]),
-    Vec3([1.0'f32, 0.0'f32, 0.0'f32]),
-    Vec3([0.0'f32, 1.0'f32, 1.0'f32]),
-  ]
-)
-
-var vertexShaderCode = """
-#version 450
-
-layout(location = 0) in vec2 inPosition;
-layout(location = 1) in vec3 inColor;
-
-layout(location = 0) out vec3 fragColor;
-
-void main() {
-    gl_Position = vec4(inPosition, 0.0, 1.0);
-    fragColor = inColor;
-}
-"""
-
-var fragmentShaderCode = """#version 450
-layout(location = 0) out vec4 outColor;
-layout(location = 0) in vec3 fragColor;
-void main() {
-  outColor = vec4(fragColor, 1.0);
-}"""
 
 const VULKAN_VERSION = VK_MAKE_API_VERSION(0'u32, 1'u32, 2'u32, 0'u32)
 
@@ -115,11 +70,12 @@ type
     imageAvailableSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     renderFinishedSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     inFlightFences*: array[MAX_FRAMES_IN_FLIGHT, VkFence]
-    bufferA*: Buffer
-    bufferB*: Buffer
+    vertexBuffers: seq[(seq[Buffer], uint32)]
+    indexedVertexBuffers: seq[(seq[Buffer], Buffer, uint32, VkIndexType)]
   Engine* = object
-    vulkan*: Vulkan
+    vulkan: Vulkan
     window: NativeWindow
+    currentscenedata: ref Thing
 
 proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[PhysicalDevice] =
   for vulkanPhysicalDevice in getVulkanPhysicalDevices(instance):
@@ -293,10 +249,10 @@ proc setupRenderPass(device: VkDevice, format: VkFormat): VkRenderPass =
     )
   checkVkResult device.vkCreateRenderPass(addr(renderPassCreateInfo), nil, addr(result))
 
-proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPass: VkRenderPass): RenderPipeline =
+proc setupRenderPipeline[T](device: VkDevice, frameDimension: VkExtent2D, renderPass: VkRenderPass, vertexShader, fragmentShader: string): RenderPipeline =
   # load shaders
-  result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderCode))
-  result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderCode))
+  result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_VERTEX_BIT, vertexShader))
+  result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader))
 
   var
     # define which parts can be dynamic (pipeline is fixed after setup)
@@ -306,8 +262,8 @@ proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPas
       dynamicStateCount: uint32(dynamicStates.len),
       pDynamicStates: addr(dynamicStates[0]),
     )
-    vertexbindings = generateInputVertexBinding[MyVertex]()
-    attributebindings = generateInputAttributeBinding[MyVertex]()
+    vertexbindings = generateInputVertexBinding[T]()
+    attributebindings = generateInputAttributeBinding[T]()
 
     # define input data format
     vertexInputInfo = VkPipelineVertexInputStateCreateInfo(
@@ -386,7 +342,7 @@ proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPas
       pushConstantRangeCount: 0,
       pPushConstantRanges: nil,
     )
-  checkVkResult device.vkCreatePipelineLayout(addr(pipelineLayoutInfo), nil, addr(result.layout))
+  checkVkResult vkCreatePipelineLayout(device, addr(pipelineLayoutInfo), nil, addr(result.layout))
 
   var stages: seq[VkPipelineShaderStageCreateInfo]
   for shader in result.shaders:
@@ -409,7 +365,8 @@ proc setupRenderPipeline(device: VkDevice, frameDimension: VkExtent2D, renderPas
     basePipelineHandle: VkPipeline(0),
     basePipelineIndex: -1,
   )
-  checkVkResult device.vkCreateGraphicsPipelines(
+  checkVkResult vkCreateGraphicsPipelines(
+    device,
     VkPipelineCache(0),
     1,
     addr(pipelineInfo),
@@ -519,13 +476,11 @@ proc igniteEngine*(): Engine =
     result.vulkan.surfaceFormat
   )
   result.vulkan.renderPass = result.vulkan.device.device.setupRenderPass(result.vulkan.surfaceFormat.format)
-  result.vulkan.pipeline = result.vulkan.device.device.setupRenderPipeline(result.vulkan.frameDimension, result.vulkan.renderPass)
   result.vulkan.framebuffers = result.vulkan.device.device.setupFramebuffers(
     result.vulkan.swapchain,
     result.vulkan.renderPass,
     result.vulkan.frameDimension
   )
-  
   (
     result.vulkan.commandPool,
     result.vulkan.commandBuffers,
@@ -536,14 +491,21 @@ proc igniteEngine*(): Engine =
     result.vulkan.renderFinishedSemaphores,
     result.vulkan.inFlightFences,
   ) = result.vulkan.device.device.setupSyncPrimitives()
-  result.vulkan.bufferA = result.vulkan.device.device.InitBuffer(result.vulkan.device.physicalDevice.device, uint64(sizeof(vertices[0])), VertexBuffer)
-  result.vulkan.bufferB = result.vulkan.device.device.InitBuffer(result.vulkan.device.physicalDevice.device, uint64(sizeof(vertices[1])), VertexBuffer)
-  var d: pointer
-  result.vulkan.bufferA.withMapping(d):
-    copyMem(d, addr(vertices[0]), sizeof(vertices[0]))
-  result.vulkan.bufferB.withMapping(d):
-    copyMem(d, addr(vertices[1]), sizeof(vertices[1]))
 
+
+proc setupPipeline*[T: object, U: uint16|uint32](engine: var Engine, scenedata: ref Thing, vertexShader, fragmentShader: string) =
+  engine.currentscenedata = scenedata
+  engine.vulkan.pipeline = setupRenderPipeline[T](
+    engine.vulkan.device.device,
+    engine.vulkan.frameDimension,
+    engine.vulkan.renderPass,
+    vertexShader,
+    fragmentShader,
+  )
+  for mesh in partsOfType[ref Mesh[T]](engine.currentscenedata):
+    engine.vulkan.vertexBuffers.add createVertexBuffers(mesh[], engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+  for mesh in partsOfType[ref IndexedMesh[T, U]](engine.currentscenedata):
+    engine.vulkan.indexedVertexBuffers.add createIndexedVertexBuffers(mesh[], engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
 proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D, engine: var Engine) =
   var
@@ -581,11 +543,28 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, command
   commandBuffer.vkCmdSetScissor(firstScissor=0, scissorCount=1, addr(scissor))
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline)
 
-  var
-    vertexBuffers = [engine.vulkan.bufferA.vkBuffer, engine.vulkan.bufferB.vkBuffer]
-    offsets = [VkDeviceSize(0), VkDeviceSize(0)]
-  commandBuffer.vkCmdBindVertexBuffers(firstBinding=0'u32, bindingCount=2'u32, pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
-  commandBuffer.vkCmdDraw(vertexCount=uint32(vertices[0].len), instanceCount=1'u32, firstVertex=0'u32, firstInstance=0'u32)
+  for (vertexBufferSet, vertexCount) in engine.vulkan.vertexBuffers:
+    var
+      vertexBuffers: seq[VkBuffer]
+      offsets: seq[VkDeviceSize]
+    for buffer in vertexBufferSet:
+      vertexBuffers.add buffer.vkBuffer
+      offsets.add VkDeviceSize(0)
+
+    commandBuffer.vkCmdBindVertexBuffers(firstBinding=0'u32, bindingCount=2'u32, pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
+    commandBuffer.vkCmdDraw(vertexCount=vertexCount, instanceCount=1'u32, firstVertex=0'u32, firstInstance=0'u32)
+
+  for (vertexBufferSet, indexBuffer, indicesCount, indexType) in engine.vulkan.indexedVertexBuffers:
+    var
+      vertexBuffers: seq[VkBuffer]
+      offsets: seq[VkDeviceSize]
+    for buffer in vertexBufferSet:
+      vertexBuffers.add buffer.vkBuffer
+      offsets.add VkDeviceSize(0)
+
+    commandBuffer.vkCmdBindVertexBuffers(firstBinding=0'u32, bindingCount=2'u32, pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
+    commandBuffer.vkCmdBindIndexBuffer(indexBuffer.vkBuffer, VkDeviceSize(0), indexType);
+    commandBuffer.vkCmdDrawIndexed(indicesCount, 1, 0, 0, 0);
   commandBuffer.vkCmdEndRenderPass()
   checkVkResult commandBuffer.vkEndCommandBuffer()
 
@@ -665,8 +644,13 @@ proc fullThrottle*(engine: var Engine) =
   checkVkResult engine.vulkan.device.device.vkDeviceWaitIdle()
 
 proc trash*(engine: var Engine) =
-  `=destroy` engine.vulkan.bufferA
-  `=destroy` engine.vulkan.bufferB
+  for (bufferset, cnt) in engine.vulkan.vertexBuffers.mitems:
+    for buffer in bufferset.mitems:
+      buffer.trash()
+  for (bufferset, indexbuffer, cnt, t) in engine.vulkan.indexedVertexBuffers.mitems:
+    indexbuffer.trash()
+    for buffer in bufferset.mitems:
+      buffer.trash()
   engine.vulkan.device.device.trash(engine.vulkan.swapchain, engine.vulkan.framebuffers)
   checkVkResult engine.vulkan.device.device.vkDeviceWaitIdle()
 

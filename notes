@@ -7,3 +7,17 @@ ideas:
 - Top-down 2d shooter with autoshoot (-> what is the challenge? position? cover? effects?)
 - Clean up something
 - Defend house (embassy?), against burglar, enemies, receive guests
+- Typing game, mechanics ala "cook, serve, delicious" but different theme, maybe war, coffee serving, 
+  -> add spin on it somehow?
+
+Subsystems:
+
+High prio:
+- Texture handling
+- Input handling (X11, Win32)
+- Audio (?)
+- Mesh files (Wavefront OBJ, MTL)
+- Image files (BMP)
+- Audio files (WAV)
+- Config files (TOML)
+- Resource-packs (ZIP)

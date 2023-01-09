@@ -20,13 +20,15 @@ proc compilerFlagsRelease() =
   switch("assertions", "off")
 
 task build_linux_debug, "build linux debug":
-  compilerFlags()
+  # compilerFlags()
   compilerFlagsDebug()
   buildbase.joinPath("debug/linux").mkDir()
   setCommand "c"
 
 task build_linux_release, "build linux release":
-  compilerFlags()
+  # compilerFlags()
   compilerFlagsRelease()
   buildbase.joinPath("release/linux").mkDir()
   setCommand "c"
+
+compilerFlags()
