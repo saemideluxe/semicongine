@@ -12,6 +12,11 @@ type
   Vec4*[T: SomeNumber] = array[4, T]
   Vec* = Vec2|Vec3|Vec4
 
+converter toVec2*[T: SomeNumber](orig: Vec3[T]|Vec4[T]): Vec2[T] =
+  Vec2[T]([orig[0], orig[1]])
+converter toVec3*[T: SomeNumber](orig: Vec4[T]): Vec3[T] =
+  Vec2[T]([orig[0], orig[1], orig[2]])
+
 # define some often used constants
 func ConstOne2[T: SomeNumber](): auto {.compiletime.} = Vec2[T]([T(1), T(1)])
 func ConstOne3[T: SomeNumber](): auto {.compiletime.} = Vec3[T]([T(1), T(1), T(1)])

@@ -12,6 +12,28 @@ type
     vertexData*: T
     indices*: seq[array[3, U]]
 
+func createUberMesh*[T](meshes: openArray[Mesh[T]]): Mesh[T] =
+  for mesh in meshes:
+    for srcname, srcvalue in mesh.vertexData.fieldPairs:
+      when typeof(srcvalue) is VertexAttribute:
+        for dstname, dstvalue in result.vertexData.fieldPairs:
+          when srcname == dstname:
+            dstvalue.data.add srcvalue.data
+
+func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[IndexedMesh[T, U]]): IndexedMesh[T, U] =
+  var indexoffset = U(0)
+  for mesh in meshes:
+    for srcname, srcvalue in mesh.vertexData.fieldPairs:
+      when typeof(srcvalue) is VertexAttribute:
+        for dstname, dstvalue in result.vertexData.fieldPairs:
+          when srcname == dstname:
+            dstvalue.data.add srcvalue.data
+      var indexdata: seq[array[3, U]]
+      for i in mesh.indices:
+        indexdata.add [i[0] + indexoffset, i[1] + indexoffset, i[2] + indexoffset]
+      result.indices.add indexdata
+    indexoffset += U(mesh.vertexData.VertexCount)
+
 func getVkIndexType[T: object, U: uint16|uint32](m: IndexedMesh[T, U]): VkIndexType =
   when U is uint16: VK_INDEX_TYPE_UINT16
   elif U is uint32: VK_INDEX_TYPE_UINT32

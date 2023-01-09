@@ -502,10 +502,17 @@ proc setupPipeline*[T: object, U: uint16|uint32](engine: var Engine, scenedata: 
     vertexShader,
     fragmentShader,
   )
+  var allmeshes: seq[Mesh[T]]
   for mesh in partsOfType[ref Mesh[T]](engine.currentscenedata):
-    engine.vulkan.vertexBuffers.add createVertexBuffers(mesh[], engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+    allmeshes.add(mesh[])
+  var ubermesh = createUberMesh(allmeshes)
+  engine.vulkan.vertexBuffers.add createVertexBuffers(ubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+
+  var allindexedmeshes: seq[IndexedMesh[T, U]]
   for mesh in partsOfType[ref IndexedMesh[T, U]](engine.currentscenedata):
-    engine.vulkan.indexedVertexBuffers.add createIndexedVertexBuffers(mesh[], engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+    allindexedmeshes.add(mesh[])
+  var indexedubermesh = createUberMesh(allindexedmeshes)
+  engine.vulkan.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
 proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D, engine: var Engine) =
   var
