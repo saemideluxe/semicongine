@@ -15,8 +15,6 @@ import ./buffer
 import ./thing
 import ./mesh
 
-import ./glslang/glslang
-
 const MAX_FRAMES_IN_FLIGHT = 2
 const DEBUG_LOG = not defined(release)
 
@@ -455,8 +453,6 @@ proc igniteEngine*(): Engine =
   vkLoad1_1()
   vkLoad1_2()
 
-  checkGlslangResult glslang_initialize_process()
-
   # create vulkan instance
   result.vulkan.instance = createVulkanInstance(VULKAN_VERSION)
   when DEBUG_LOG:
@@ -505,14 +501,16 @@ proc setupPipeline*[T: object, U: uint16|uint32](engine: var Engine, scenedata: 
   var allmeshes: seq[Mesh[T]]
   for mesh in partsOfType[ref Mesh[T]](engine.currentscenedata):
     allmeshes.add(mesh[])
-  var ubermesh = createUberMesh(allmeshes)
-  engine.vulkan.vertexBuffers.add createVertexBuffers(ubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+  if allmeshes.len > 0:
+    var ubermesh = createUberMesh(allmeshes)
+    engine.vulkan.vertexBuffers.add createVertexBuffers(ubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
   var allindexedmeshes: seq[IndexedMesh[T, U]]
   for mesh in partsOfType[ref IndexedMesh[T, U]](engine.currentscenedata):
     allindexedmeshes.add(mesh[])
-  var indexedubermesh = createUberMesh(allindexedmeshes)
-  engine.vulkan.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+  if allindexedmeshes.len > 0:
+    var indexedubermesh = createUberMesh(allindexedmeshes)
+    engine.vulkan.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
 proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: VkPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D, engine: var Engine) =
   var
@@ -678,6 +676,5 @@ proc trash*(engine: var Engine) =
   engine.vulkan.device.device.vkDestroyDevice(nil)
   when DEBUG_LOG:
     engine.vulkan.instance.vkDestroyDebugUtilsMessengerEXT(engine.vulkan.debugMessenger, nil)
-  glslang_finalize_process()
   engine.window.trash()
   engine.vulkan.instance.vkDestroyInstance(nil)

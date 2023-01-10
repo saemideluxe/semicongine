@@ -149,9 +149,11 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
 
   when ENABLEVULKANVALIDATIONLAYERS:
     const desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring, "VK_LAYER_MESA_overlay".cstring]
-    for layer in desiredLayers:
-      if $layer in availableLayers:
-        usableLayers.add(layer)
+  else:
+    const desiredLayers = ["VK_LAYER_MESA_overlay".cstring]
+  for layer in desiredLayers:
+    if $layer in availableLayers:
+      usableLayers.add(layer)
 
   echo "Available validation layers: ", availableLayers
   echo "Using validation layers: ", usableLayers

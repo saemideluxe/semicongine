@@ -1,10 +1,11 @@
+import std/osproc
+import std/strformat
 import std/strutils
 import std/tables
 
 import ./vulkan_helpers
 import ./vulkan
 import ./vertex
-import ./glslang/glslang
 
 type
   ShaderProgram* = object
@@ -12,15 +13,38 @@ type
     programType*: VkShaderStageFlagBits
     shader*: VkPipelineShaderStageCreateInfo
 
+func stage2string(stage: VkShaderStageFlagBits): string =
+  case stage
+  of VK_SHADER_STAGE_VERTEX_BIT: "vert"
+  of VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT: "tesc"
+  of VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT: "tese"
+  of VK_SHADER_STAGE_GEOMETRY_BIT: "geom"
+  of VK_SHADER_STAGE_FRAGMENT_BIT: "frag"
+  of VK_SHADER_STAGE_ALL_GRAPHICS: ""
+  of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
+  of VK_SHADER_STAGE_ALL: ""
+
+proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] =
+  let stagename = stage2string(stage)
+  let (output, exitCode) = execCmdEx(command=fmt"./glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename}", input=shaderSource)
+  if exitCode != 0:
+    raise newException(Exception, output)
+  let shaderbinary = readFile fmt"{stagename}.spv"
+  var i = 0
+  while i < shaderbinary.len:
+    result.add(
+      (uint32(shaderbinary[i + 0]) shl  0) or
+      (uint32(shaderbinary[i + 1]) shl  8) or
+      (uint32(shaderbinary[i + 2]) shl 16) or
+      (uint32(shaderbinary[i + 3]) shl 24)
+    )
+    i += 4
+
 proc initShaderProgram*(device: VkDevice, programType: VkShaderStageFlagBits, shader: string, entryPoint: string="main"): ShaderProgram =
   result.entryPoint = entryPoint
   result.programType = programType
 
-  const VK_GLSL_MAP = {
-    VK_SHADER_STAGE_VERTEX_BIT: GLSLANG_STAGE_VERTEX,
-    VK_SHADER_STAGE_FRAGMENT_BIT: GLSLANG_STAGE_FRAGMENT,
-  }.toTable()
-  var code = compileGLSLToSPIRV(VK_GLSL_MAP[result.programType], shader, "<memory-shader>")
+  var code = compileGLSLToSPIRV(result.programType, shader, result.entryPoint)
   var createInfo = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     codeSize: uint(code.len * sizeof(uint32)),
