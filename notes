@@ -11,7 +11,7 @@ Subsystems:
 
 High prio:
 - Texture handling
-- Mesh files (Wavefront OBJ, MTL)
+- Mesh files (Wavefront OBJ, MTL) (use something from sketchfab to get started, e.g. https://sketchfab.com/nigelgoh)
 - Image files (BMP RGB + BMP Graysscale for transparency)
 
 - Input handling (X11, Win32)
