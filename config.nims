@@ -44,14 +44,16 @@ task build_linux_release, "build linux release":
 task build_windows_debug, "build windows debug":
   compilerFlags()
   compilerFlagsDebug()
-  compilerFlagsDebugWindows()
+  # compilerFlagsDebugWindows()
+  switch("define", "mingw")
   buildbase.joinPath("debug/windows").mkDir()
   setCommand "c"
 
 task build_windows_release, "build windows release":
   compilerFlags()
   compilerFlagsRelease()
-  compilerFlagsReleaseWindows()
+  # compilerFlagsReleaseWindows()
+  switch("define", "mingw")
   buildbase.joinPath("release/windows").mkDir()
   setCommand "c"
 

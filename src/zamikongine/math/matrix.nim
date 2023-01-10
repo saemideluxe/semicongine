@@ -339,6 +339,48 @@ func transposed*[T](m: Mat44[T]): Mat44[T] = Mat44[T](data: [
   m[0, 3], m[1, 3], m[2, 3], m[3, 3],
 ])
 
+func translate2d*[T](x, y: T): Mat33[T] = Mat33[T](data: [
+  T(1), T(0), x,
+  T(0), T(1), y,
+  T(0), T(0), T(1),
+])
+func scale2d*[T](sx, sy: T): Mat33[T] = Mat33[T](data: [
+  sx, T(0), T(0),
+  T(0), sy, T(0),
+  T(0), T(0), T(1),
+])
+func rotate2d*[T](angle: T): Mat33[T] = Mat33[T](data: [
+  cos(angle), -sin(angle), T(0),
+  sin(angle), cos(angle), T(0),
+  T(0), T(0), T(1),
+])
+func translate3d*[T](x, y, z: T): Mat44[T] = Mat44[T](data: [
+  T(1), T(0), T(0), x,
+  T(0), T(1), T(0), y,
+  T(0), T(0), T(1), z,
+  T(0), T(0), T(0), T(1),
+])
+func scale3d*[T](sx, sy, sz: T): Mat44[T] = Mat44[T](data: [
+  sx, T(0), T(0), T(0),
+  T(0), sy, T(0), T(0),
+  T(0), T(0), sz, T(0),
+  T(0), T(0),  T(0), T(1),
+])
+func rotate3d*[T](angle: T, a: Vec3[T]): Mat44[T] =
+  let
+    cosa = cos(angle)
+    sina = sin(angle)
+    x = a.x
+    y = a.y
+    z = a.z
+  Mat44[T](data: [
+    x * x * (1 - cosa) + cosa,     y * x * (1 - cosa) - z * sina, z * x * (1 - cosa) + y * sina, T(0),
+    x * y * (1 - cosa) + z * sina, y * y * (1 - cosa) + cosa,     z * y * (1 - cosa) - x * sina, T(0),
+    x * z * (1 - cosa) - y * sina, y * z * (1 - cosa) + x * sina, z * z * (1 - cosa) + cosa,     T(0),
+    T(0),                             T(0),                             T(0),                             1,
+  ])
+
+
 # call e.g. Mat32[int]().randomized() to get a random matrix
 template makeRandomInit(mattype: typedesc) =
     proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
