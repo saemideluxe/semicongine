@@ -1,13 +1,19 @@
 SOURCES := $(shell find src -name '*.nim')
 
+# compilation requirements
+examples/glslangValidator: thirdparty/bin/linux/glslangValidator
+	cp $< examples
+examples/glslangValidator.exe: thirdparty/bin/windows/glslangValidator.exe
+	cp $< examples
+
 # build hello_triangle
-build/debug/linux/hello_triangle: ${SOURCES} thirdparty/bin/linux
+build/debug/linux/hello_triangle: ${SOURCES} examples/glslangValidator
 	nim build_linux_debug -o:$@ examples/hello_triangle.nim
-build/release/linux/hello_triangle: ${SOURCES} thirdparty/bin/linux
+build/release/linux/hello_triangle: ${SOURCES} examples/glslangValidator
 	nim build_linux_release -o:$@ examples/hello_triangle.nim
-build/debug/windows/hello_triangle.exe: ${SOURCES} thirdparty/bin/windows
+build/debug/windows/hello_triangle.exe: ${SOURCES} examples/glslangValidator.exe
 	nim build_windows_debug -o:$@ examples/hello_triangle.nim
-build/release/windows/hello_triangle.exe: ${SOURCES} thirdparty/bin/windows
+build/release/windows/hello_triangle.exe: ${SOURCES} examples/glslangValidator.exe
 	nim build_windows_release -o:$@ examples/hello_triangle.nim
 
 build_all_linux_hello_triangle: build/debug/linux/hello_triangle build/release/linux/hello_triangle
@@ -15,13 +21,13 @@ build_all_windows_hello_triangle: build/debug/windows/hello_triangle.exe build/r
 build_all_hello_triangle: build_all_linux_hello_triangle build_all_windows_hello_triangle
 
 # build alotof_triangles
-build/debug/linux/alotof_triangles: ${SOURCES} thirdparty/bin/linux
+build/debug/linux/alotof_triangles: ${SOURCES} examples/glslangValidator
 	nim build_linux_debug -o:$@ examples/alotof_triangles.nim
-build/release/linux/alotof_triangles: ${SOURCES} thirdparty/bin/linux
+build/release/linux/alotof_triangles: ${SOURCES} examples/glslangValidator
 	nim build_linux_release -o:$@ examples/alotof_triangles.nim
-build/debug/windows/alotof_triangles.exe: ${SOURCES} thirdparty/bin/windows
+build/debug/windows/alotof_triangles.exe: ${SOURCES} examples/glslangValidator.exe
 	nim build_windows_debug -o:$@ examples/alotof_triangles.nim
-build/release/windows/alotof_triangles.exe: ${SOURCES} thirdparty/bin/windows
+build/release/windows/alotof_triangles.exe: ${SOURCES} examples/glslangValidator.exe
 	nim build_windows_release -o:$@ examples/alotof_triangles.nim
 
 build_all_linux_alotof_triangles: build/debug/linux/alotof_triangles build/release/linux/alotof_triangles
@@ -34,10 +40,6 @@ clean:
 	rm -rf thirdparty
 
 .PHONY: tests
-.PHONY: glslang-master-linux-Debug.zip
-.PHONY: glslang-master-linux-Release.zip
-.PHONY: glslang-master-windows-x64-Debug.zip
-.PHONY: glslang-master-windows-x64-Release.zip
 
 # tests
 tests:
@@ -71,15 +73,15 @@ publish_all_alotof_triangles: publish_all_linux_alotof_triangles publish_all_win
 
 # download thirdparty-libraries
 
-thirdparty/bin/linux: glslang-master-linux-Release.zip
-	mkdir -p $@
-	cd $@ && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/$<
-	cd $@ && unzip $<
-	cd $@ && mv bin/* .
-	cd $@ && rm -rf $< bin lib include
-thirdparty/bin/windows: glslang-master-windows-x64-Release.zip
-	mkdir -p $@
-	cd $@ && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/$<
-	cd $@ && unzip $<
-	cd $@ && mv bin/* .
-	cd $@ && rm -rf $< bin lib include
+thirdparty/bin/linux/glslangValidator:
+	mkdir -p $$( dirname $@ )
+	cd $$( dirname $@ ) && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip
+	cd $$( dirname $@ ) && unzip *.zip
+	cd $$( dirname $@ ) && mv bin/* .
+	cd $$( dirname $@ ) && rm -rf *.zip bin lib include
+thirdparty/bin/windows/glslangValidator.exe:
+	mkdir -p $$( dirname $@ )
+	cd $$( dirname $@ ) && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-windows-x64-Release.zip
+	cd $$( dirname $@ ) && unzip *.zip
+	cd $$( dirname $@ ) && mv bin/* .
+	cd $$( dirname $@ ) && rm -rf *.zip bin lib include

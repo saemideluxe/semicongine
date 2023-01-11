@@ -1,4 +1,3 @@
-import std/tempfiles
 import std/strformat
 import std/strutils
 import std/tables
@@ -27,13 +26,22 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_ALL: ""
 
 proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
+  # TODO: compiles only on linux for now (because we don't have compile-time functionality in std/tempfile)
   let stagename = stage2string(stage)
-  let (tmpfile, tmpfilename) = createTempFile("shader", stage2string(stage))
-  tmpfile.close()
-  let (output, exitCode) = gorgeEx(command=fmt"{querySetting(projectPath)}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {tmpfilename}", input=shaderSource)
+
+  let (tmpfile, exitCode) = gorgeEx(command=fmt"mktemp --tmpdir shader_XXXXXXX.{stagename}")
   if exitCode != 0:
+    raise newException(Exception, tmpfile)
+
+  let (output, exitCode_glsl) = gorgeEx(command=fmt"{querySetting(projectPath)}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {tmpfile}", input=shaderSource)
+  if exitCode_glsl != 0:
     raise newException(Exception, output)
-  let shaderbinary = staticRead tmpfilename
+  let shaderbinary = staticRead tmpfile
+
+  let (output_rm, exitCode_rm) = gorgeEx(command=fmt"rm {tmpfile}")
+  if exitCode_rm != 0:
+    raise newException(Exception, output_rm)
+
   var i = 0
   while i < shaderbinary.len:
     result.add(
