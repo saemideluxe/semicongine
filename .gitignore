@@ -11,3 +11,7 @@ testresults.html
 
 # from windows build
 *.pdb
+
+# for builds in general
+examples/glslangValidator
+examples/glslangValidator.exe
