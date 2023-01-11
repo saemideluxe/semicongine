@@ -39,37 +39,14 @@ clean:
 	rm -rf build
 	rm -rf thirdparty
 
-.PHONY: tests
-
 # tests
+.PHONY: tests
 tests:
 	testament p tests/
 
 # publish
-publish_linux_debug_hello_triangle: build/debug/linux/hello_triangle
-	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/debug/
-publish_linux_release_hello_triangle: build/release/linux/hello_triangle
-	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/release/
-publish_windows_debug_hello_triangle: build/debug/linux/hello_triangle.exe
-	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/debug/
-publish_windows_release_hello_triangle: build/release/linux/hello_triangle.exe
-	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/release/
-publish_all_linux_hello_triangle: publish_linux_debug_hello_triangle publish_linux_release_hello_triangle
-publish_all_windows_hello_triangle: publish_windows_debug_hello_triangle publish_windows_release_hello_triangle
-publish_all_alotof_hello_triangle: publish_all_linux_hello_triangle publish_all_windows_hello_triangle
-
-publish_linux_debug_alotof_triangles: build/debug/linux/alotof_triangles
-	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/debug/
-publish_linux_release_alotof_triangles: build/release/linux/alotof_triangles
-	scp $< basx.dev:/var/www/public.basx.dev/joni/linux/release/
-publish_windows_debug_alotof_triangles: build/debug/linux/alotof_triangles.exe
-	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/debug/
-publish_windows_release_alotof_triangles: build/release/linux/alotof_triangles.exe
-	scp $< basx.dev:/var/www/public.basx.dev/joni/windows/release/
-publish_all_linux_alotof_triangles: publish_linux_debug_alotof_triangles publish_linux_release_alotof_triangles
-publish_all_windows_alotof_triangles: publish_windows_debug_alotof_triangles publish_windows_release_alotof_triangles
-publish_all_alotof_triangles: publish_all_linux_alotof_triangles publish_all_windows_alotof_triangles
-
+publish:
+	rsync -rv build/ basx.dev:/var/www/public.basx.dev/zamikongine
 
 # download thirdparty-libraries
 
