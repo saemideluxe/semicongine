@@ -14,14 +14,14 @@ type
 # vertex data (types must match the above VertexAttributes)
 const
   triangle_pos = @[
-    Vec2([-0.5'f32, -0.5'f32]),
+    Vec2([ 0.0'f32, -0.5'f32]),
     Vec2([ 0.5'f32,  0.5'f32]),
     Vec2([-0.5'f32,  0.5'f32]),
   ]
   triangle_color = @[
-    Vec3([1.0'f32, 1.0'f32, 0.0'f32]),
+    Vec3([1.0'f32, 0.0'f32, 0.0'f32]),
     Vec3([0.0'f32, 1.0'f32, 0.0'f32]),
-    Vec3([0.0'f32, 1.0'f32, 1.0'f32]),
+    Vec3([0.0'f32, 0.0'f32, 1.0'f32]),
   ]
 
 when isMainModule:

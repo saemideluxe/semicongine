@@ -1,7 +1,9 @@
-import std/osproc
+import std/tempfiles
 import std/strformat
 import std/strutils
 import std/tables
+import std/compilesettings
+
 
 import ./vulkan_helpers
 import ./vulkan
@@ -13,7 +15,7 @@ type
     programType*: VkShaderStageFlagBits
     shader*: VkPipelineShaderStageCreateInfo
 
-func stage2string(stage: VkShaderStageFlagBits): string =
+func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   case stage
   of VK_SHADER_STAGE_VERTEX_BIT: "vert"
   of VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT: "tesc"
@@ -24,12 +26,14 @@ func stage2string(stage: VkShaderStageFlagBits): string =
   of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
   of VK_SHADER_STAGE_ALL: ""
 
-proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] =
+proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
   let stagename = stage2string(stage)
-  let (output, exitCode) = execCmdEx(command=fmt"./glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename}", input=shaderSource)
+  let (tmpfile, tmpfilename) = createTempFile("shader", stage2string(stage))
+  tmpfile.close()
+  let (output, exitCode) = gorgeEx(command=fmt"{querySetting(projectPath)}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {tmpfilename}", input=shaderSource)
   if exitCode != 0:
     raise newException(Exception, output)
-  let shaderbinary = readFile fmt"{stagename}.spv"
+  let shaderbinary = staticRead tmpfilename
   var i = 0
   while i < shaderbinary.len:
     result.add(
@@ -40,11 +44,12 @@ proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
     )
     i += 4
 
-proc initShaderProgram*(device: VkDevice, programType: VkShaderStageFlagBits, shader: string, entryPoint: string="main"): ShaderProgram =
+proc initShaderProgram*(device: VkDevice, programType: static VkShaderStageFlagBits, shader: static string, entryPoint: static string="main"): ShaderProgram =
   result.entryPoint = entryPoint
   result.programType = programType
 
-  var code = compileGLSLToSPIRV(result.programType, shader, result.entryPoint)
+  const constcode = compileGLSLToSPIRV(programType, shader, entryPoint)
+  var code = constcode
   var createInfo = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     codeSize: uint(code.len * sizeof(uint32)),
@@ -60,7 +65,7 @@ proc initShaderProgram*(device: VkDevice, programType: VkShaderStageFlagBits, sh
     pName: cstring(result.entryPoint), # entry point for shader
   )
 
-func generateVertexShaderCode*[T](entryPoint, positionAttrName, colorAttrName: static string): string =
+func generateVertexShaderCode*[T](entryPoint, positionAttrName, colorAttrName: static string): string {.compileTime.} =
   var lines: seq[string]
   lines.add "#version 450"
   lines.add generateGLSLDeclarations[T]()
@@ -75,7 +80,7 @@ func generateVertexShaderCode*[T](entryPoint, positionAttrName, colorAttrName: s
   lines.add "}"
   return lines.join("\n")
 
-func generateFragmentShaderCode*[T](entryPoint: static string): string =
+func generateFragmentShaderCode*[T](entryPoint: static string): string {.compileTime.} =
   var lines: seq[string]
   lines.add "#version 450"
   lines.add "layout(location = 0) in vec3 fragColor;"

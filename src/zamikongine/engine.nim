@@ -1,4 +1,3 @@
-import std/sequtils
 import std/typetraits
 import std/strformat
 import std/enumerate
@@ -247,7 +246,7 @@ proc setupRenderPass(device: VkDevice, format: VkFormat): VkRenderPass =
     )
   checkVkResult device.vkCreateRenderPass(addr(renderPassCreateInfo), nil, addr(result))
 
-proc setupRenderPipeline[T](device: VkDevice, frameDimension: VkExtent2D, renderPass: VkRenderPass, vertexShader, fragmentShader: string): RenderPipeline =
+proc setupRenderPipeline[T](device: VkDevice, frameDimension: VkExtent2D, renderPass: VkRenderPass, vertexShader, fragmentShader: static string): RenderPipeline =
   # load shaders
   result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_VERTEX_BIT, vertexShader))
   result.shaders.add(device.initShaderProgram(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader))
@@ -489,7 +488,7 @@ proc igniteEngine*(): Engine =
   ) = result.vulkan.device.device.setupSyncPrimitives()
 
 
-proc setupPipeline*[T: object, U: uint16|uint32](engine: var Engine, scenedata: ref Thing, vertexShader, fragmentShader: string) =
+proc setupPipeline*[T: object, U: uint16|uint32](engine: var Engine, scenedata: ref Thing, vertexShader, fragmentShader: static string) =
   engine.currentscenedata = scenedata
   engine.vulkan.pipeline = setupRenderPipeline[T](
     engine.vulkan.device.device,

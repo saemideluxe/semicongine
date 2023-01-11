@@ -31,8 +31,6 @@ type
   MatMM* = Mat22|Mat33|Mat44
   MatMN* = Mat23|Mat32|Mat34|Mat43
   Mat* = MatMM|MatMN
-  IntegerMat = Mat22[SomeInteger]|Mat33[SomeInteger]|Mat44[SomeInteger]|Mat23[SomeInteger]|Mat32[SomeInteger]|Mat34[SomeInteger]|Mat43[SomeInteger]
-  FloatMat = Mat22[SomeFloat]|Mat33[SomeFloat]|Mat44[SomeFloat]|Mat23[SomeFloat]|Mat32[SomeFloat]|Mat34[SomeFloat]|Mat43[SomeFloat]
 
 func unit22[T: SomeNumber](): auto {.compiletime.} = Mat22[T](data:[
   T(1), T(0),
@@ -204,31 +202,6 @@ proc createVecMatMultiplicationOperator(matType: typedesc, vecType: typedesc): N
     resultVec
   )
    
-proc createVecMatMultiplicationOperator1(vecType: typedesc, matType: typedesc): NimNode =
-  var data = nnkBracket.newTree()
-  for i in 0 ..< matType.columnCount:
-    data.add(newCall(
-      ident("sum"),
-      infix(
-        ident("v"),
-        "*",
-        newCall(newDotExpr(ident("m"), ident("col")), newLit(i))
-      )
-    ))
-  let resultVec = nnkObjConstr.newTree(
-    nnkBracketExpr.newTree(ident(vecType.name), ident("float")),
-    nnkExprColonExpr.newTree(ident("data"), data)
-  )
-
-  return nnkFuncDef.newTree(
-    ident("test"),
-    newEmptyNode(),
-    newEmptyNode(),
-    newEmptyNode(),
-    newEmptyNode(),
-    newEmptyNode(),
-    resultVec,
-  )
 
 proc createMatScalarOperator(matType: typedesc, op: string): NimNode =
   result = newStmtList()
