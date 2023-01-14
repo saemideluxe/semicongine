@@ -7,12 +7,16 @@ import std/compilesettings
 import ./vulkan_helpers
 import ./vulkan
 import ./vertex
+import ./math/vector
 
 type
-  ShaderProgram* = object
+  AllowedUniformType = SomeNumber|Vec
+  UniformSlot *[T:AllowedUniformType] = object
+  ShaderProgram*[Uniforms] = object
     entryPoint*: string
     programType*: VkShaderStageFlagBits
     shader*: VkPipelineShaderStageCreateInfo
+    uniforms*: Uniforms
 
 func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   case stage
@@ -26,9 +30,11 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_ALL: ""
 
 proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
-  # TODO: compiles only on linux for now (because we don't have compile-time functionality in std/tempfile)
   let stagename = stage2string(stage)
 
+  # TODO: compiles only on linux for now (because we don't have compile-time functionality in std/tempfile)
+  if not defined(linux):
+    raise newException(Exception, "Compilation is currently only supported on linux (need mktemp command), sorry!")
   let (tmpfile, exitCode) = gorgeEx(command=fmt"mktemp --tmpdir shader_XXXXXXX.{stagename}")
   if exitCode != 0:
     raise newException(Exception, tmpfile)
@@ -52,7 +58,7 @@ proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
     )
     i += 4
 
-proc initShaderProgram*(device: VkDevice, programType: static VkShaderStageFlagBits, shader: static string, entryPoint: static string="main"): ShaderProgram =
+proc initShaderProgram*[T](device: VkDevice, programType: static VkShaderStageFlagBits, shader: static string, entryPoint: static string="main"): ShaderProgram[T] =
   result.entryPoint = entryPoint
   result.programType = programType
 
@@ -73,22 +79,25 @@ proc initShaderProgram*(device: VkDevice, programType: static VkShaderStageFlagB
     pName: cstring(result.entryPoint), # entry point for shader
   )
 
-func generateVertexShaderCode*[T](entryPoint, positionAttrName, colorAttrName: static string): string {.compileTime.} =
+func generateVertexShaderCode*[VertexType](entryPoint, positionAttrName, colorAttrName: static string): string {.compileTime.} =
   var lines: seq[string]
   lines.add "#version 450"
-  lines.add generateGLSLDeclarations[T]()
+  # lines.add "layout(binding = 0) uniform UniformBufferObject { float dt; } ubo;"
+  lines.add generateGLSLDeclarations[VertexType]()
   lines.add "layout(location = 0) out vec3 fragColor;"
   lines.add "void " & entryPoint & "() {"
 
-  for name, value in T().fieldPairs:
+  for name, value in VertexType().fieldPairs:
     when typeof(value) is VertexAttribute and name == positionAttrName:
-      lines.add "    gl_Position = vec4(" & name & ", 0.0, 1.0);"
+      # lines.add "    vec2 tmp = " & name & " * ubo.dt;"
+      lines.add "    vec2 tmp = " & name & ";"
+      lines.add "    gl_Position = vec4(tmp, 0.0, 1.0);"
     when typeof(value) is VertexAttribute and name == colorAttrName:
       lines.add "    fragColor = " & name & ";"
   lines.add "}"
   return lines.join("\n")
 
-func generateFragmentShaderCode*[T](entryPoint: static string): string {.compileTime.} =
+func generateFragmentShaderCode*[VertexType](entryPoint: static string): string {.compileTime.} =
   var lines: seq[string]
   lines.add "#version 450"
   lines.add "layout(location = 0) in vec3 fragColor;"

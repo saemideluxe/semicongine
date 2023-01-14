@@ -1,3 +1,4 @@
+import std/times
 import std/math
 import std/random
 
@@ -14,6 +15,9 @@ type
     position11: VertexAttribute[Vec2[float32]]
     color22: VertexAttribute[Vec3[float32]]
 
+proc globalUpdate(engine: var Engine, dt: Duration) =
+  discard
+
 proc randomtransform(): Mat33[float32] =
   let randomscale = scale2d(float32(rand(1.0) + 0.5), float32(rand(1.0) + 0.5))
   let randomrotate = rotate2d(float32(rand(2 * PI)))
@@ -22,7 +26,7 @@ proc randomtransform(): Mat33[float32] =
 
 when isMainModule:
   randomize()
-  var myengine = igniteEngine()
+  var myengine = igniteEngine("A lot of triangles")
   const baseTriangle = [
     Vec3([-0.1'f32, -0.1'f32, 1'f32]),
     Vec3([ 0.1'f32,  0.1'f32, 1'f32]),
@@ -34,6 +38,7 @@ when isMainModule:
   for i in 1 .. 300:
     var randommesh = new Mesh[VertexDataA]
     # TODO: create randomized position11 from baseTriangle with random transformation matrix
+    let randomcolor1 = Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
     let transform1 = randomtransform()
     randommesh.vertexData = VertexDataA(
       position11: VertexAttribute[Vec2[float32]](
@@ -44,14 +49,11 @@ when isMainModule:
         ]
       ),
       color22: VertexAttribute[Vec3[float32]](
-        data: @[
-          Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))]),
-          Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))]),
-          Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))]),
-        ]
+        data: @[randomcolor1, randomcolor1, randomcolor1]
       )
     )
 
+    let randomcolor2 = Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
     let transform2 = randomtransform()
     var randomindexedmesh = new IndexedMesh[VertexDataA, uint16]
     randomindexedmesh.vertexData = VertexDataA(
@@ -63,11 +65,7 @@ when isMainModule:
         ]
       ),
       color22: VertexAttribute[Vec3[float32]](
-        data: @[
-          Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))]),
-          Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))]),
-          Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))]),
-        ]
+        data: @[randomcolor2, randomcolor2, randomcolor2]
       )
     )
     randomindexedmesh.indices = @[[0'u16, 1'u16, 2'u16]]
@@ -76,11 +74,12 @@ when isMainModule:
     childthing.parts.add randomindexedmesh
     scene.children.add childthing
 
-  setupPipeline[VertexDataA, uint16](
+  var pipeline = setupPipeline[VertexDataA, float32, float32, uint16](
     myengine,
     scene,
     generateVertexShaderCode[VertexDataA]("main", "position11", "color22"),
     generateFragmentShaderCode[VertexDataA]("main"),
   )
-  myengine.fullThrottle()
+  myengine.run(pipeline, globalUpdate)
+  pipeline.trash()
   myengine.trash()

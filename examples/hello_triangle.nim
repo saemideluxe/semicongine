@@ -1,15 +1,26 @@
+import std/times
+
 import zamikongine/engine
 import zamikongine/math/vector
 import zamikongine/vertex
 import zamikongine/mesh
 import zamikongine/thing
 import zamikongine/shader
+import zamikongine/buffer
 
 type
   # define type of vertex
   VertexDataA = object
     position: VertexAttribute[Vec2[float32]]
     color: VertexAttribute[Vec3[float32]]
+  UniformType = float32
+
+proc globalUpdate(engine: var Engine, dt: Duration) =
+  # var t = float32(dt.inNanoseconds) / 1_000_000_000'f32
+  # for buffer in engine.vulkan.uniformBuffers:
+    # buffer.updateData(t)
+
+  echo dt
 
 # vertex data (types must match the above VertexAttributes)
 const
@@ -25,7 +36,7 @@ const
   ]
 
 when isMainModule:
-  var myengine = igniteEngine()
+  var myengine = igniteEngine("Hello triangle")
 
   # build a mesh
   var trianglemesh = new Mesh[VertexDataA]
@@ -39,12 +50,13 @@ when isMainModule:
   triangle.parts.add trianglemesh
 
   # upload data, prepare shaders, etc
-  setupPipeline[VertexDataA, uint16](
+  var pipeline = setupPipeline[VertexDataA, UniformType, float32, uint16](
     myengine,
     triangle,
     generateVertexShaderCode[VertexDataA]("main", "position", "color"),
     generateFragmentShaderCode[VertexDataA]("main"),
   )
   # show something
-  myengine.fullThrottle()
+  myengine.run(pipeline, globalUpdate)
+  pipeline.trash()
   myengine.trash()
