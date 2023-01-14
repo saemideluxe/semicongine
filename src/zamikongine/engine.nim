@@ -24,6 +24,10 @@ addHandler(logger)
 
 
 const VULKAN_VERSION = VK_MAKE_API_VERSION(0'u32, 1'u32, 2'u32, 0'u32)
+const ENGINE_NAME = "zamkongine"
+const ENGINE_VERSION = "0.1"
+const BUILD_VERSION = ENGINE_VERSION & '-' & gorge("git log -1 --format=format:'%H'")
+echo "Engine: " & ENGINE_NAME & " " & BUILD_VERSION
 
 type
   Device = object
@@ -37,15 +41,17 @@ type
     swapchain: VkSwapchainKHR
     images: seq[VkImage]
     imageviews: seq[VkImageView]
-  RenderPipeline[T] = object
+  RenderPipeline*[VertexType, Uniforms] = object
     device*: VkDevice
-    shaders*: seq[ShaderProgram[T]]
+    shaders*: seq[ShaderProgram[VertexType, Uniforms]]
     layout*: VkPipelineLayout
     pipeline*: VkPipeline
-    uniformLayout*: VkDescriptorSetLayout
     vertexBuffers*: seq[(seq[Buffer], uint32)]
     indexedVertexBuffers*: seq[(seq[Buffer], Buffer, uint32, VkIndexType)]
+    descriptorSetLayout*: VkDescriptorSetLayout
     uniformBuffers*: array[MAX_FRAMES_IN_FLIGHT, Buffer]
+    descriptorPool*: VkDescriptorPool
+    descriptors: array[MAX_FRAMES_IN_FLIGHT, VkDescriptorSet]
   QueueFamily = object
     properties*: VkQueueFamilyProperties
     hasSurfaceSupport*: bool
@@ -250,11 +256,11 @@ proc setupRenderPass(device: VkDevice, format: VkFormat): VkRenderPass =
     )
   checkVkResult device.vkCreateRenderPass(addr(renderPassCreateInfo), nil, addr(result))
 
-proc initRenderPipeline[VertextType, T](device: VkDevice, frameDimension: VkExtent2D, renderPass: VkRenderPass, vertexShader, fragmentShader: static string): RenderPipeline[T] =
+proc initRenderPipeline[VertexType, Uniforms](device: VkDevice, frameDimension: VkExtent2D, renderPass: VkRenderPass, vertexShader, fragmentShader: static string): RenderPipeline[VertexType, Uniforms] =
   # load shaders
   result.device = device
-  result.shaders.add(initShaderProgram[T](device, VK_SHADER_STAGE_VERTEX_BIT, vertexShader))
-  result.shaders.add(initShaderProgram[T](device, VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader))
+  result.shaders.add(initShaderProgram[VertexType, Uniforms](device, VK_SHADER_STAGE_VERTEX_BIT, vertexShader))
+  result.shaders.add(initShaderProgram[VertexType, Uniforms](device, VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader))
 
   var
     # define which parts can be dynamic (pipeline is fixed after setup)
@@ -264,8 +270,8 @@ proc initRenderPipeline[VertextType, T](device: VkDevice, frameDimension: VkExte
       dynamicStateCount: uint32(dynamicStates.len),
       pDynamicStates: addr(dynamicStates[0]),
     )
-    vertexbindings = generateInputVertexBinding[VertextType]()
-    attributebindings = generateInputAttributeBinding[VertextType]()
+    vertexbindings = generateInputVertexBinding[VertexType]()
+    attributebindings = generateInputAttributeBinding[VertexType]()
 
     # define input data format
     vertexInputInfo = VkPipelineVertexInputStateCreateInfo(
@@ -336,13 +342,13 @@ proc initRenderPipeline[VertextType, T](device: VkDevice, frameDimension: VkExte
       blendConstants: [0.0'f, 0.0'f, 0.0'f, 0.0'f],
     )
 
-  result.uniformLayout = device.createUniformDescriptorLayout(VkShaderStageFlags(VK_SHADER_STAGE_VERTEX_BIT), 0)
+  result.descriptorSetLayout = device.createUniformDescriptorLayout(VkShaderStageFlags(VK_SHADER_STAGE_VERTEX_BIT), 0)
   var 
     # "globals" that go into the shader, uniforms etc.
     pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
       setLayoutCount: 1,
-      pSetLayouts: addr(result.uniformLayout),
+      pSetLayouts: addr(result.descriptorSetLayout),
       pushConstantRangeCount: 0,
       pPushConstantRanges: nil,
     )
@@ -495,9 +501,9 @@ proc igniteEngine*(windowTitle: string): Engine =
   ) = result.vulkan.device.device.setupSyncPrimitives()
 
 
-proc setupPipeline*[VertexType, UniformType, T: object, IndexType: uint16|uint32](engine: var Engine, scenedata: ref Thing, vertexShader, fragmentShader: static string): RenderPipeline[T] =
+proc setupPipeline*[VertexType, UniformType: object, IndexType: uint16|uint32](engine: var Engine, scenedata: ref Thing, vertexShader, fragmentShader: static string): RenderPipeline[VertexType, UniformType] =
   engine.currentscenedata = scenedata
-  result = initRenderPipeline[VertexType, T](
+  result = initRenderPipeline[VertexType, UniformType](
     engine.vulkan.device.device,
     engine.vulkan.frameDimension,
     engine.vulkan.renderPass,
@@ -510,7 +516,7 @@ proc setupPipeline*[VertexType, UniformType, T: object, IndexType: uint16|uint32
     allmeshes.add(mesh[])
   if allmeshes.len > 0:
     var ubermesh = createUberMesh(allmeshes)
-    result.vertexBuffers.add createVertexBuffers(ubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+    result.vertexBuffers.add createVertexBuffers(ubermesh, result.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
   # vertex buffers with indexes
   var allindexedmeshes: seq[IndexedMesh[VertexType, IndexType]]
@@ -518,18 +524,62 @@ proc setupPipeline*[VertexType, UniformType, T: object, IndexType: uint16|uint32
     allindexedmeshes.add(mesh[])
   if allindexedmeshes.len > 0:
     var indexedubermesh = createUberMesh(allindexedmeshes)
-    result.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, engine.vulkan.device.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+    result.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, result.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
   # uniform buffers
   result.uniformBuffers = createUniformBuffers[MAX_FRAMES_IN_FLIGHT, UniformType](
-    engine.vulkan.device.device,
+    result.device,
     engine.vulkan.device.physicalDevice.device
   )
 
+  var
+    poolSize = VkDescriptorPoolSize(
+      `type`: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      descriptorCount: uint32(MAX_FRAMES_IN_FLIGHT),
+    )
+    poolInfo = VkDescriptorPoolCreateInfo(
+      sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+      poolSizeCount: 1,
+      pPoolSizes: addr(poolSize),
+      maxSets: uint32(MAX_FRAMES_IN_FLIGHT),
+    )
+  checkVkResult vkCreateDescriptorPool(result.device, addr(poolInfo), nil, addr(result.descriptorPool))
 
-proc runPipeline(commandBuffer: VkCommandBuffer, pipeline: RenderPipeline) =
+  var layouts: array[MAX_FRAMES_IN_FLIGHT, VkDescriptorSetLayout]
+  for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
+    layouts[i] = result.descriptorSetLayout
+  var allocInfo = VkDescriptorSetAllocateInfo(
+    sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+    descriptorPool: result.descriptorPool,
+    descriptorSetCount: uint32(MAX_FRAMES_IN_FLIGHT),
+    pSetLayouts: addr(layouts[0]),
+  )
+
+  checkVkResult vkAllocateDescriptorSets(result.device, addr(allocInfo), addr(result.descriptors[0]))
+
+  var bufferInfos: array[MAX_FRAMES_IN_FLIGHT, array[1, VkDescriptorBufferInfo]] # because we use only one Uniform atm
+  for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
+    bufferInfos[i][0] = VkDescriptorBufferInfo(
+      buffer: result.uniformBuffers[i].vkBuffer,
+      offset: VkDeviceSize(0),
+      range: VkDeviceSize(sizeof(UniformType)),
+    )
+    var descriptorWrite = VkWriteDescriptorSet(
+        sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        dstSet: result.descriptors[i],
+        dstBinding: 0,
+        dstArrayElement: 0,
+        descriptorType: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        descriptorCount: 1,
+        pBufferInfo: cast[ptr ptr VkDescriptorBufferInfo](addr(bufferInfos[i][0])),
+      )
+    vkUpdateDescriptorSets(result.device, 1, addr(descriptorWrite), 0, nil)
+
+
+proc runPipeline(commandBuffer: VkCommandBuffer, pipeline: var RenderPipeline, currentFrame: int) =
   vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
 
+  vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout, 0, 1, addr(pipeline.descriptors[currentFrame]), 0, nil)
   for (vertexBufferSet, vertexCount) in pipeline.vertexBuffers:
     var
       vertexBuffers: seq[VkBuffer]
@@ -550,10 +600,10 @@ proc runPipeline(commandBuffer: VkCommandBuffer, pipeline: RenderPipeline) =
       offsets.add VkDeviceSize(0)
 
     vkCmdBindVertexBuffers(commandBuffer, firstBinding=0'u32, bindingCount=2'u32, pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer.vkBuffer, VkDeviceSize(0), indexType);
-    vkCmdDrawIndexed(commandBuffer, indicesCount, 1, 0, 0, 0);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer.vkBuffer, VkDeviceSize(0), indexType)
+    vkCmdDrawIndexed(commandBuffer, indicesCount, 1, 0, 0, 0)
 
-proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: RenderPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D) =
+proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline, commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer, frameDimension: VkExtent2D, currentFrame: int) =
   var
     beginInfo = VkCommandBufferBeginInfo(
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -588,11 +638,11 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: RenderPipeline, com
     vkCmdBeginRenderPass(commandBuffer, addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
     vkCmdSetViewport(commandBuffer, firstViewport=0, viewportCount=1, addr(viewport))
     vkCmdSetScissor(commandBuffer, firstScissor=0, scissorCount=1, addr(scissor))
-    runPipeline(commandBuffer, pipeline)
+    runPipeline(commandBuffer, pipeline, currentFrame)
     vkCmdEndRenderPass(commandBuffer)
   checkVkResult vkEndCommandBuffer(commandBuffer)
 
-proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resized: bool, pipeline: RenderPipeline) =
+proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resized: bool, pipeline: var RenderPipeline) =
   checkVkResult vkWaitForFences(vulkan.device.device, 1, addr(vulkan.inFlightFences[currentFrame]), VK_TRUE, high(uint64))
   var bufferImageIndex: uint32
   let nextImageResult = vkAcquireNextImageKHR(
@@ -611,7 +661,7 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resi
   checkVkResult vkResetFences(vulkan.device.device, 1, addr(vulkan.inFlightFences[currentFrame]))
 
   checkVkResult vkResetCommandBuffer(vulkan.commandBuffers[currentFrame], VkCommandBufferResetFlags(0))
-  vulkan.renderPass.recordCommandBuffer(pipeline, vulkan.commandBuffers[currentFrame], vulkan.framebuffers[bufferImageIndex], vulkan.frameDimension)
+  vulkan.renderPass.recordCommandBuffer(pipeline, vulkan.commandBuffers[currentFrame], vulkan.framebuffers[bufferImageIndex], vulkan.frameDimension, currentFrame)
   var
     waitSemaphores = [vulkan.imageAvailableSemaphores[currentFrame]]
     waitStages = [VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)]
@@ -644,7 +694,7 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resi
     (vulkan.swapchain, vulkan.framebuffers) = vulkan.recreateSwapchain()
 
 
-proc run*(engine: var Engine, pipeline: RenderPipeline, globalUpdate: proc(engine: var Engine, dt: Duration)) =
+proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(engine: var Engine, dt: float32)) =
   var
     killed = false
     currentFrame = 0
@@ -670,7 +720,7 @@ proc run*(engine: var Engine, pipeline: RenderPipeline, globalUpdate: proc(engin
     # game logic update
     let
       now = getTime()
-      dt = now - lastUpdate
+      dt = float32(float64((now - lastUpdate).inNanoseconds) / 1_000_000_000'f64)
     lastUpdate = now
     engine.globalUpdate(dt)
     for entity in allEntities(engine.currentscenedata):
@@ -679,11 +729,12 @@ proc run*(engine: var Engine, pipeline: RenderPipeline, globalUpdate: proc(engin
     # submit frame for drawing
     engine.window.drawFrame(engine.vulkan, currentFrame, resized, pipeline)
     resized = false
-    currentFrame = (currentFrame + 1) mod MAX_FRAMES_IN_FLIGHT;
+    currentFrame = (currentFrame + 1) mod MAX_FRAMES_IN_FLIGHT
   checkVkResult vkDeviceWaitIdle(engine.vulkan.device.device)
 
 proc trash*(pipeline: var RenderPipeline) =
-  vkDestroyDescriptorSetLayout(pipeline.device, pipeline.uniformLayout, nil);
+  vkDestroyDescriptorPool(pipeline.device, pipeline.descriptorPool, nil)
+  vkDestroyDescriptorSetLayout(pipeline.device, pipeline.descriptorSetLayout, nil)
   vkDestroyPipeline(pipeline.device, pipeline.pipeline, nil)
   vkDestroyPipelineLayout(pipeline.device, pipeline.layout, nil)
   for shader in pipeline.shaders:

@@ -1,8 +1,12 @@
 import std/times
+import std/strutils
+import std/enumerate
 
 import zamikongine/engine
 import zamikongine/math/vector
+import zamikongine/math/matrix
 import zamikongine/vertex
+import zamikongine/descriptor
 import zamikongine/mesh
 import zamikongine/thing
 import zamikongine/shader
@@ -11,16 +15,27 @@ import zamikongine/buffer
 type
   # define type of vertex
   VertexDataA = object
-    position: VertexAttribute[Vec2[float32]]
-    color: VertexAttribute[Vec3[float32]]
-  UniformType = float32
+    position: PositionAttribute[Vec2[float32]]
+    color: ColorAttribute[Vec3[float32]]
+  Uniforms = object
+    mat: Descriptor[Mat44[float32]]
+    dt: Descriptor[float32]
 
-proc globalUpdate(engine: var Engine, dt: Duration) =
-  # var t = float32(dt.inNanoseconds) / 1_000_000_000'f32
-  # for buffer in engine.vulkan.uniformBuffers:
-    # buffer.updateData(t)
+var pipeline: RenderPipeline[VertexDataA, Uniforms]
 
-  echo dt
+var pos = 0'f32;
+var uniforms = Uniforms(
+  mat: Descriptor[Mat44[float32]](value: Unit44f32),
+  dt: Descriptor[float32](value: 0'f32),
+)
+var scaledir = 1'f32
+proc globalUpdate(engine: var Engine, dt: float32) =
+  uniforms.mat.value = uniforms.mat.value * scale3d(1 + scaledir * dt, 1 + scaledir * dt, 0'f32)
+  if uniforms.mat.value[0, 0] > 2'f32 or uniforms.mat.value[0, 0] < 0.5'f32:
+    scaledir = - scaledir
+  for buffer in pipeline.uniformBuffers:
+    buffer.updateData(uniforms)
+  echo uniforms.mat.value
 
 # vertex data (types must match the above VertexAttributes)
 const
@@ -41,8 +56,8 @@ when isMainModule:
   # build a mesh
   var trianglemesh = new Mesh[VertexDataA]
   trianglemesh.vertexData = VertexDataA(
-    position: VertexAttribute[Vec2[float32]](data: triangle_pos),
-    color: VertexAttribute[Vec3[float32]](data: triangle_color),
+    position: PositionAttribute[Vec2[float32]](data: triangle_pos),
+    color: ColorAttribute[Vec3[float32]](data: triangle_color),
   )
   # build a single-object scene graph
   var triangle = new Thing
@@ -50,11 +65,26 @@ when isMainModule:
   triangle.parts.add trianglemesh
 
   # upload data, prepare shaders, etc
-  var pipeline = setupPipeline[VertexDataA, UniformType, float32, uint16](
+  const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms](
+    # have 1 at:
+    # [2][0] [0][3]
+    # "out_position = vec4(in_position[0] + uniforms.mat[0][0], in_position[1] + uniforms.mat[0][0], 0, 1);"
+    "out_position = uniforms.mat * vec4(in_position, 0, 1);"
+    # "out_position = vec4(in_position, 0, 1);"
+  )
+  const fragmentShader = generateFragmentShaderCode[VertexDataA]()
+  static:
+    echo "--------------"
+    for (i, line) in enumerate(vertexShader.splitLines()):
+      echo $(i + 1) & " " & line
+    echo "--------------"
+    echo fragmentShader
+    echo "--------------"
+  pipeline = setupPipeline[VertexDataA, Uniforms, uint16](
     myengine,
     triangle,
-    generateVertexShaderCode[VertexDataA]("main", "position", "color"),
-    generateFragmentShaderCode[VertexDataA]("main"),
+    vertexShader,
+    fragmentShader
   )
   # show something
   myengine.run(pipeline, globalUpdate)
