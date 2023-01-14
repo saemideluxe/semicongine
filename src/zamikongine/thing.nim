@@ -10,7 +10,7 @@ type
     children*: seq[ref Thing]
     parts*: seq[ref Part]
 
-method update*(thing: ref Thing, dt: Duration) {.base.} = discard
+method update*(thing: ref Thing, dt: float32) {.base.} = discard
 
 iterator partsOfType*[T: ref Part](root: ref Thing): T =
   var queue = @[root]

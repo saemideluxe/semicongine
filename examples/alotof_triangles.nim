@@ -1,21 +1,26 @@
 import std/times
+import std/strutils
 import std/math
 import std/random
+import std/enumerate
 
 import zamikongine/engine
 import zamikongine/math/vector
 import zamikongine/math/matrix
 import zamikongine/vertex
+import zamikongine/descriptor
 import zamikongine/mesh
 import zamikongine/thing
 import zamikongine/shader
 
 type
   VertexDataA = object
-    position11: VertexAttribute[Vec2[float32]]
-    color22: VertexAttribute[Vec3[float32]]
+    position11: PositionAttribute[Vec2[float32]]
+    color22: ColorAttribute[Vec3[float32]]
+  Uniforms = object
+    dt: Descriptor[float32]
 
-proc globalUpdate(engine: var Engine, dt: Duration) =
+proc globalUpdate(engine: var Engine, dt: float32) =
   discard
 
 proc randomtransform(): Mat33[float32] =
@@ -41,14 +46,14 @@ when isMainModule:
     let randomcolor1 = Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
     let transform1 = randomtransform()
     randommesh.vertexData = VertexDataA(
-      position11: VertexAttribute[Vec2[float32]](
+      position11: PositionAttribute[Vec2[float32]](
         data: @[
           Vec2[float32](transform1 * baseTriangle[0]),
           Vec2[float32](transform1 * baseTriangle[1]),
           Vec2[float32](transform1 * baseTriangle[2]),
         ]
       ),
-      color22: VertexAttribute[Vec3[float32]](
+      color22: ColorAttribute[Vec3[float32]](
         data: @[randomcolor1, randomcolor1, randomcolor1]
       )
     )
@@ -57,14 +62,14 @@ when isMainModule:
     let transform2 = randomtransform()
     var randomindexedmesh = new IndexedMesh[VertexDataA, uint16]
     randomindexedmesh.vertexData = VertexDataA(
-      position11: VertexAttribute[Vec2[float32]](
+      position11: PositionAttribute[Vec2[float32]](
         data: @[
           Vec2[float32](transform2 * baseTriangle[0]),
           Vec2[float32](transform2 * baseTriangle[1]),
           Vec2[float32](transform2 * baseTriangle[2]),
         ]
       ),
-      color22: VertexAttribute[Vec3[float32]](
+      color22: ColorAttribute[Vec3[float32]](
         data: @[randomcolor2, randomcolor2, randomcolor2]
       )
     )
@@ -74,11 +79,20 @@ when isMainModule:
     childthing.parts.add randomindexedmesh
     scene.children.add childthing
 
-  var pipeline = setupPipeline[VertexDataA, float32, float32, uint16](
+  const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms]()
+  const fragmentShader = generateFragmentShaderCode[VertexDataA]()
+  static:
+    echo "--------------"
+    for (i, line) in enumerate(vertexShader.splitLines()):
+      echo $(i + 1) & " " & line
+    echo "--------------"
+    echo fragmentShader
+    echo "--------------"
+  var pipeline = setupPipeline[VertexDataA, float32, uint16](
     myengine,
     scene,
-    generateVertexShaderCode[VertexDataA]("main", "position11", "color22"),
-    generateFragmentShaderCode[VertexDataA]("main"),
+    vertexShader,
+    fragmentShader
   )
   myengine.run(pipeline, globalUpdate)
   pipeline.trash()

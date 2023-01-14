@@ -1,8 +1,8 @@
 import random
 import math
 
-import vector
-import matrix
+import zamikongine/math/vector
+import zamikongine/math/matrix
 
 
 proc echoInfo(v: Vec) =

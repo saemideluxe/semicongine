@@ -84,7 +84,7 @@ template withMapping*(buffer: Buffer, data: pointer, body: untyped): untyped =
   body
   vkUnmapMemory(buffer.device, buffer.memory)
 
-# note: does not work with seq
+# note: does not work with seq, because of sizeof
 proc updateData*[T](buffer: Buffer, data: var T) =
   if buffer.persistentMapping:
     copyMem(buffer.mapped, addr(data), sizeof(T))

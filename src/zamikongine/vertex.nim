@@ -4,17 +4,26 @@ import std/strformat
 import std/typetraits
 
 import ./math/vector
+import ./math/matrix
 import ./vulkan
+import ./glsl_helpers
 
 type
   VertexAttributeType = SomeNumber|Vec
-  VertexAttribute*[T:VertexAttributeType] = object
+  AttributePurpose* = enum
+    Unknown, Position Color
+  GenericAttribute*[T:VertexAttributeType] = object
     data*: seq[T]
+  PositionAttribute*[T:VertexAttributeType] = object
+    data*: seq[T]
+  ColorAttribute*[T:VertexAttributeType] = object
+    data*: seq[T]
+  VertexAttribute* = GenericAttribute|PositionAttribute|ColorAttribute
 
-template rawAttributeType(v: VertexAttribute): auto = get(genericParams(typeof(v)), 0)
+template getAttributeType*(v: VertexAttribute): auto = get(genericParams(typeof(v)), 0)
 
 func datasize*(attribute: VertexAttribute): uint64 =
-  uint64(sizeof(rawAttributeType(attribute))) * uint64(attribute.data.len)
+  uint64(sizeof(getAttributeType(attribute))) * uint64(attribute.data.len)
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
 func nLocationSlots[T: VertexAttributeType](): int =
@@ -66,54 +75,6 @@ func getVkFormat[T: VertexAttributeType](): VkFormat =
   elif T is Vec4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
   elif T is Vec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
 
-func getGLSLType[T: VertexAttributeType](): string =
-  # todo: likely not correct as we would need to enable some 
-  # extensions somewhere (Vulkan/GLSL compiler?) to have 
-  # everything work as intended. Or maybe the GPU driver does
-  # some automagic conversion stuf..
-  when T is uint8:         "uint"
-  elif T is int8:          "int"
-  elif T is uint16:        "uint"
-  elif T is int16:         "int"
-  elif T is uint32:        "uint"
-  elif T is int32:         "int"
-  elif T is uint64:        "uint"
-  elif T is int64:         "int"
-  elif T is float32:       "float"
-  elif T is float64:       "double"
-
-  elif T is Vec2[uint8]:   "uvec2"
-  elif T is Vec2[int8]:    "ivec2"
-  elif T is Vec2[uint16]:  "uvec2"
-  elif T is Vec2[int16]:   "ivec2"
-  elif T is Vec2[uint32]:  "uvec2"
-  elif T is Vec2[int32]:   "ivec2"
-  elif T is Vec2[uint64]:  "uvec2"
-  elif T is Vec2[int64]:   "ivec2"
-  elif T is Vec2[float32]: "vec2"
-  elif T is Vec2[float64]: "dvec2"
-
-  elif T is Vec3[uint8]:   "uvec3"
-  elif T is Vec3[int8]:    "ivec3"
-  elif T is Vec3[uint16]:  "uvec3"
-  elif T is Vec3[int16]:   "ivec3"
-  elif T is Vec3[uint32]:  "uvec3"
-  elif T is Vec3[int32]:   "ivec3"
-  elif T is Vec3[uint64]:  "uvec3"
-  elif T is Vec3[int64]:   "ivec3"
-  elif T is Vec3[float32]: "vec3"
-  elif T is Vec3[float64]: "dvec3"
-
-  elif T is Vec4[uint8]:   "uvec4"
-  elif T is Vec4[int8]:    "ivec4"
-  elif T is Vec4[uint16]:  "uvec4"
-  elif T is Vec4[int16]:   "ivec4"
-  elif T is Vec4[uint32]:  "uvec4"
-  elif T is Vec4[int32]:   "ivec4"
-  elif T is Vec4[uint64]:  "uvec4"
-  elif T is Vec4[int64]:   "ivec4"
-  elif T is Vec4[float32]: "vec4"
-  elif T is Vec4[float64]: "dvec4"
 
 
 func VertexCount*[T](t: T): uint32 =
@@ -124,15 +85,15 @@ func VertexCount*[T](t: T): uint32 =
       else:
         assert result == uint32(value.data.len)
 
-func generateGLSLDeclarations*[T](): string =
+func generateGLSLVertexDeclarations*[T](): string =
   var stmtList: seq[string]
   var i = 0
   for name, value in T().fieldPairs:
     when typeof(value) is VertexAttribute:
-      let glsltype = getGLSLType[rawAttributeType(value)]()
+      let glsltype = getGLSLType[getAttributeType(value)]()
       let n = name
       stmtList.add(&"layout(location = {i}) in {glsltype} {n};")
-      i += nLocationSlots[rawAttributeType(value)]()
+      i += nLocationSlots[getAttributeType(value)]()
 
   return stmtList.join("\n")
 
@@ -144,7 +105,7 @@ func generateInputVertexBinding*[T](bindingoffset: int = 0, locationoffset: int 
       result.add(
         VkVertexInputBindingDescription(
           binding: uint32(binding),
-          stride: uint32(sizeof(rawAttributeType(value))),
+          stride: uint32(sizeof(getAttributeType(value))),
           inputRate: VK_VERTEX_INPUT_RATE_VERTEX, # VK_VERTEX_INPUT_RATE_INSTANCE for instances
         )
       )
@@ -160,9 +121,9 @@ func generateInputAttributeBinding*[T](bindingoffset: int = 0, locationoffset: i
         VkVertexInputAttributeDescription(
           binding: uint32(binding),
           location: uint32(location),
-          format: getVkFormat[rawAttributeType(value)](),
+          format: getVkFormat[getAttributeType(value)](),
           offset: 0,
         )
       )
-      location += nLocationSlots[rawAttributeType(value)]()
+      location += nLocationSlots[getAttributeType(value)]()
       binding += 1
