@@ -7,13 +7,13 @@ examples/glslangValidator.exe: thirdparty/bin/windows/glslangValidator.exe
 	cp $< examples
 
 # build hello_triangle
-build/debug/linux/hello_triangle: ${SOURCES} examples/glslangValidator
+build/debug/linux/hello_triangle: ${SOURCES} examples/hello_triangle.nim examples/glslangValidator
 	nim build_linux_debug -o:$@ examples/hello_triangle.nim
-build/release/linux/hello_triangle: ${SOURCES} examples/glslangValidator
+build/release/linux/hello_triangle: ${SOURCES} examples/hello_triangle.nim examples/glslangValidator
 	nim build_linux_release -o:$@ examples/hello_triangle.nim
-build/debug/windows/hello_triangle.exe: ${SOURCES} examples/glslangValidator.exe
+build/debug/windows/hello_triangle.exe: ${SOURCES} examples/hello_triangle.nim examples/glslangValidator.exe
 	nim build_windows_debug -o:$@ examples/hello_triangle.nim
-build/release/windows/hello_triangle.exe: ${SOURCES} examples/glslangValidator.exe
+build/release/windows/hello_triangle.exe: ${SOURCES} examples/hello_triangle.nim examples/glslangValidator.exe
 	nim build_windows_release -o:$@ examples/hello_triangle.nim
 
 build_all_linux_hello_triangle: build/debug/linux/hello_triangle build/release/linux/hello_triangle
@@ -21,13 +21,13 @@ build_all_windows_hello_triangle: build/debug/windows/hello_triangle.exe build/r
 build_all_hello_triangle: build_all_linux_hello_triangle build_all_windows_hello_triangle
 
 # build alotof_triangles
-build/debug/linux/alotof_triangles: ${SOURCES} examples/glslangValidator
+build/debug/linux/alotof_triangles: ${SOURCES} examples/alotof_triangles.nim examples/glslangValidator
 	nim build_linux_debug -o:$@ examples/alotof_triangles.nim
-build/release/linux/alotof_triangles: ${SOURCES} examples/glslangValidator
+build/release/linux/alotof_triangles: ${SOURCES} examples/alotof_triangles.nim examples/glslangValidator
 	nim build_linux_release -o:$@ examples/alotof_triangles.nim
-build/debug/windows/alotof_triangles.exe: ${SOURCES} examples/glslangValidator.exe
+build/debug/windows/alotof_triangles.exe: ${SOURCES} examples/alotof_triangles.nim examples/glslangValidator.exe
 	nim build_windows_debug -o:$@ examples/alotof_triangles.nim
-build/release/windows/alotof_triangles.exe: ${SOURCES} examples/glslangValidator.exe
+build/release/windows/alotof_triangles.exe: ${SOURCES} examples/alotof_triangles.nim examples/glslangValidator.exe
 	nim build_windows_release -o:$@ examples/alotof_triangles.nim
 
 build_all_linux_alotof_triangles: build/debug/linux/alotof_triangles build/release/linux/alotof_triangles
