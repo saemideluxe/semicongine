@@ -6,6 +6,7 @@ type
     None = 0
     TransferSrc = VK_BUFFER_USAGE_TRANSFER_SRC_BIT
     TransferDst = VK_BUFFER_USAGE_TRANSFER_DST_BIT
+    UniformBuffer = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT
     IndexBuffer = VK_BUFFER_USAGE_INDEX_BUFFER_BIT
     VertexBuffer = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
   Buffer* = object
@@ -15,6 +16,8 @@ type
     memoryRequirements*: VkMemoryRequirements
     memory*: VkDeviceMemory
     bufferTypes*: set[BufferType]
+    persistentMapping: bool
+    mapped: pointer
 
 proc trash*(buffer: var Buffer) =
   assert int64(buffer.vkBuffer) != 0
@@ -37,9 +40,10 @@ proc InitBuffer*(
   physicalDevice: VkPhysicalDevice,
   size: uint64,
   bufferTypes: set[BufferType],
-  properties: set[VkMemoryPropertyFlagBits]
+  properties: set[VkMemoryPropertyFlagBits],
+  persistentMapping: bool = false
 ): Buffer =
-  result = Buffer(device: device, size: size, bufferTypes: bufferTypes)
+  result = Buffer(device: device, size: size, bufferTypes: bufferTypes, persistentMapping: persistentMapping)
   var usageFlags = 0
   for usage in bufferTypes:
     usageFlags = ord(usageFlags) or ord(usage)
@@ -63,13 +67,31 @@ proc InitBuffer*(
   )
   checkVkResult result.device.vkAllocateMemory(addr(allocInfo), nil, addr(result.memory))
   checkVkResult result.device.vkBindBufferMemory(result.vkBuffer, result.memory, VkDeviceSize(0))
+  if persistentMapping:
+    checkVkResult vkMapMemory(
+      result.device,
+      result.memory,
+      offset=VkDeviceSize(0),
+      VkDeviceSize(result.size),
+      VkMemoryMapFlags(0),
+      addr(result.mapped)
+    )
 
 
 template withMapping*(buffer: Buffer, data: pointer, body: untyped): untyped =
+  assert not buffer.persistentMapping
   checkVkResult vkMapMemory(buffer.device, buffer.memory, offset=VkDeviceSize(0), VkDeviceSize(buffer.size), VkMemoryMapFlags(0), addr(data))
   body
   vkUnmapMemory(buffer.device, buffer.memory)
 
+# note: does not work with seq
+proc updateData*[T](buffer: Buffer, data: var T) =
+  if buffer.persistentMapping:
+    copyMem(buffer.mapped, addr(data), sizeof(T))
+  else:
+    var p: pointer
+    buffer.withMapping(p):
+      copyMem(p, addr(data), sizeof(T))
 
 proc copyBuffer*(commandPool: VkCommandPool, queue: VkQueue, src, dst: Buffer, size: uint64) =
   assert uint64(src.device) == uint64(dst.device)
