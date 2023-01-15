@@ -17,6 +17,7 @@ type
   VertexDataA = object
     position: PositionAttribute[Vec2[float32]]
     color: ColorAttribute[Vec3[float32]]
+    id: InstanceAttribute[Vec3[float32]]
 
 var pipeline: RenderPipeline[VertexDataA, void]
 
@@ -44,6 +45,7 @@ when isMainModule:
   trianglemesh.vertexData = VertexDataA(
     position: PositionAttribute[Vec2[float32]](data: triangle_pos),
     color: ColorAttribute[Vec3[float32]](data: triangle_color),
+    id: InstanceAttribute[Vec3[float32]](data: @[Vec3[float32]([0.5'f32, 0.5'f32, 0.5'f32])]),
   )
   # build a single-object scene graph
   var triangle = new Thing
@@ -51,9 +53,7 @@ when isMainModule:
   triangle.parts.add trianglemesh
 
   # upload data, prepare shaders, etc
-  const vertexShader = generateVertexShaderCode[VertexDataA, void](
-    # "out_position = uniforms.mat * vec4(in_position, 0, 1);"
-  )
+  const vertexShader = generateVertexShaderCode[VertexDataA, void]()
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
   pipeline = setupPipeline[VertexDataA, void, uint16](
     myengine,

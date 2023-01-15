@@ -18,7 +18,9 @@ type
     data*: seq[T]
   ColorAttribute*[T:Vec] = object
     data*: seq[T]
-  VertexAttribute* = GenericAttribute|PositionAttribute|ColorAttribute
+  InstanceAttribute*[T:Vec] = object
+    data*: seq[T]
+  VertexAttribute* = GenericAttribute|PositionAttribute|ColorAttribute|InstanceAttribute
 
 template getAttributeType*(v: VertexAttribute): auto = get(genericParams(typeof(v)), 0)
 
@@ -27,7 +29,11 @@ func datasize*(attribute: VertexAttribute): uint64 =
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
 func nLocationSlots[T: VertexAttributeType](): int =
-  when (T is Vec3[float64] or T is Vec3[uint64] or T is Vec4[float64] or T is Vec4[float64]):
+  when (T is Mat44[float64]):
+    8
+  elif (T is Mat44[float32]):
+    4
+  elif (T is Vec3[float64] or T is Vec3[uint64] or T is Vec4[float64] or T is Vec4[float64]):
     2
   else:
     1
@@ -79,16 +85,11 @@ func getVkFormat[T: VertexAttributeType](): VkFormat =
 
 func VertexCount*[T](t: T): uint32 =
   for name, value in t.fieldPairs:
-    when typeof(value) is VertexAttribute:
+    when typeof(value) is VertexAttribute and not (typeof(value) is InstanceAttribute):
       if result == 0:
         result = uint32(value.data.len)
       else:
         assert result == uint32(value.data.len)
-
-func VertexAttributesCount*[T](): uint32 =
-  for name, value in T().fieldPairs:
-    when typeof(value) is VertexAttribute:
-      result += 1
 
 func generateGLSLVertexDeclarations*[T](): string =
   var stmtList: seq[string]
@@ -106,12 +107,21 @@ func generateInputVertexBinding*[T](bindingoffset: int = 0, locationoffset: int 
   # packed attribute data, not interleaved (aks "struct of arrays")
   var binding = bindingoffset
   for name, value in T().fieldPairs:
-    when typeof(value) is VertexAttribute:
+    when typeof(value) is InstanceAttribute:
       result.add(
         VkVertexInputBindingDescription(
           binding: uint32(binding),
           stride: uint32(sizeof(getAttributeType(value))),
-          inputRate: VK_VERTEX_INPUT_RATE_VERTEX, # VK_VERTEX_INPUT_RATE_INSTANCE for instances
+          inputRate: VK_VERTEX_INPUT_RATE_INSTANCE,
+        )
+      )
+      binding += 1
+    elif typeof(value) is VertexAttribute:
+      result.add(
+        VkVertexInputBindingDescription(
+          binding: uint32(binding),
+          stride: uint32(sizeof(getAttributeType(value))),
+          inputRate: VK_VERTEX_INPUT_RATE_VERTEX,
         )
       )
       binding += 1

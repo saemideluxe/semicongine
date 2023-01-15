@@ -105,5 +105,5 @@ task publish, "publish all build":
   exec("rsync -rv build/ basx.dev:/var/www/public.basx.dev/zamikongine")
 
 
-if getCommand() == "c":
+if getCommand() in ["c", "compile", "r", "dump", "check"]:
   compilerFlags()
