@@ -17,7 +17,8 @@ Game ideas:
 
 Rendering:
 
-- [ ] Uniforms
+- [x] Uniforms
+- [ ] Per-instance vertex attributes
 - [ ] Textures
 - [ ] Depth buffering
 

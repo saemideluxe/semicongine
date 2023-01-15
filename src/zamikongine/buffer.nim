@@ -21,9 +21,11 @@ type
 
 proc trash*(buffer: var Buffer) =
   assert int64(buffer.vkBuffer) != 0
-  assert int64(buffer.memory) != 0
   vkDestroyBuffer(buffer.device, buffer.vkBuffer, nil)
   buffer.vkBuffer = VkBuffer(0)
+  if buffer.size == 0: # for zero-size buffers there are no memory allocations
+    return
+  assert int64(buffer.memory) != 0
   vkFreeMemory(buffer.device, buffer.memory, nil)
   buffer.memory = VkDeviceMemory(0)
 
@@ -65,7 +67,8 @@ proc InitBuffer*(
     allocationSize: result.memoryRequirements.size,
     memoryTypeIndex: result.findMemoryType(physicalDevice, VkMemoryPropertyFlags(memoryProperties))
   )
-  checkVkResult result.device.vkAllocateMemory(addr(allocInfo), nil, addr(result.memory))
+  if result.size > 0:
+    checkVkResult result.device.vkAllocateMemory(addr(allocInfo), nil, addr(result.memory))
   checkVkResult result.device.vkBindBufferMemory(result.vkBuffer, result.memory, VkDeviceSize(0))
   if persistentMapping:
     checkVkResult vkMapMemory(

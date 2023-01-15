@@ -1,5 +1,4 @@
 {.experimental: "codeReordering".}
-import std/times
 
 type
   Part* = object of RootObj
