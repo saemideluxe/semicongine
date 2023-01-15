@@ -18,7 +18,7 @@ Game ideas:
 Rendering:
 
 - [x] Uniforms
-- [x]  Per-instance vertex attributes
+- [x] Per-instance vertex attributes (required to be able to draw scene graph)
 - [ ] Textures
 - [ ] Depth buffering
 
@@ -38,8 +38,10 @@ Asset handling:
 - [ ] Audio files (WAV)
 
 Other:
-- [ ] Input handling (X11, Win32)
-- [ ] Config files ala *.ini files (std/parsecfg)
+- [ ] Input handling
+  - [ ] X11
+  - [ ] Win32
+- [ ] Config files ala *.ini files (use std/parsecfg)
 - [ ] Audio (Alsa, Windows Waveform API?)
 
 Features:
