@@ -104,6 +104,21 @@ task clean, "remove all build files":
 task publish, "publish all build":
   exec("rsync -rv build/ basx.dev:/var/www/public.basx.dev/zamikongine")
 
+task glslangValidator, "Download glslangValidator (required for linux compilation)":
+  let dirname="/tmp/glslang_download"
+  exec &"mkdir -p {dirname}"
+  exec &"cd {dirname} && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip"
+  exec &"cd {dirname} && unzip *.zip"
+  exec &"mv {dirname}/bin/glslangValidator examples/"
+  exec &"rm -rf {dirname}"
+
+task glslangValidator_exe, "Download glslangValidator.exe (required for windows compilation)":
+  let dirname="/tmp/glslang_download"
+  exec &"mkdir -p {dirname}"
+  exec &"cd {dirname} && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-windows-x64-Release.zip"
+  exec &"cd {dirname} && unzip *.zip"
+  exec &"mv {dirname}/bin/glslangValidator.exe examples/"
+  exec &"rm -rf {dirname}"
 
 if getCommand() in ["c", "compile", "r", "dump", "check"]:
   compilerFlags()

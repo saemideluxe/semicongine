@@ -18,7 +18,7 @@ Game ideas:
 Rendering:
 
 - [x] Uniforms
-- [ ] Per-instance vertex attributes
+- [x]  Per-instance vertex attributes
 - [ ] Textures
 - [ ] Depth buffering
 
@@ -27,9 +27,10 @@ Quality improvments:
 - [ ] Mipmaps 
 - [ ] Multisampling 
 - [ ] Better scenegraph API
+- [ ] Instanced drawing
 
 Build-system:
-- [ ] move all of Makefile to config.nims
+- [x] move all of Makefile to config.nims
 
 Asset handling:
 - [ ] Mesh files (Wavefront OBJ, MTL) (use something from sketchfab to get started, e.g. https://sketchfab.com/nigelgoh)
