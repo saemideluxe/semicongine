@@ -14,9 +14,9 @@ type
     Unknown, Position Color
   GenericAttribute*[T:VertexAttributeType] = object
     data*: seq[T]
-  PositionAttribute*[T:VertexAttributeType] = object
+  PositionAttribute*[T:Vec] = object
     data*: seq[T]
-  ColorAttribute*[T:VertexAttributeType] = object
+  ColorAttribute*[T:Vec] = object
     data*: seq[T]
   VertexAttribute* = GenericAttribute|PositionAttribute|ColorAttribute
 
@@ -84,6 +84,11 @@ func VertexCount*[T](t: T): uint32 =
         result = uint32(value.data.len)
       else:
         assert result == uint32(value.data.len)
+
+func VertexAttributesCount*[T](): uint32 =
+  for name, value in T().fieldPairs:
+    when typeof(value) is VertexAttribute:
+      result += 1
 
 func generateGLSLVertexDeclarations*[T](): string =
   var stmtList: seq[string]

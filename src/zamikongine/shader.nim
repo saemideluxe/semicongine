@@ -35,8 +35,6 @@ proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
   let stagename = stage2string(stage)
 
   # TODO: compiles only on linux for now (because we don't have compile-time functionality in std/tempfile)
-  if not defined(linux):
-    raise newException(Exception, "Compilation is currently only supported on linux (need mktemp command), sorry!")
   let (tmpfile, exitCode) = gorgeEx(command=fmt"mktemp --tmpdir shader_XXXXXXX.{stagename}")
   if exitCode != 0:
     raise newException(Exception, tmpfile)

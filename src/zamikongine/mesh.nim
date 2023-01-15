@@ -4,6 +4,7 @@ import ./vulkan
 import ./thing
 import ./buffer
 import ./vertex
+import ./math/vector
 
 type
   Mesh*[T] = object of Part
@@ -101,3 +102,10 @@ proc createIndexedVertexBuffers*(
   result[2] = uint32(mesh.indices.len * mesh.indices[0].len)
 
   result[3] = getVkIndexType(mesh)
+
+func squareData*[T:SomeFloat](): auto = PositionAttribute[Vec2[T]](
+  data: @[Vec2[T]([T(0), T(0)]), Vec2[T]([T(0), T(1)]), Vec2[T]([T(1), T(1)]), Vec2[T]([T(1), T(0)])]
+)
+func squareIndices*[T:uint16|uint32](): auto = seq[array[3, T]](
+  @[[T(1), T(0), T(3)], [T(2), T(1), T(3)], ]
+)

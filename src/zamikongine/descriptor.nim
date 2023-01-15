@@ -33,8 +33,8 @@ proc createUniformDescriptorLayout*(device: VkDevice, shaderStage: VkShaderStage
     )
   checkVkResult device.vkCreateDescriptorSetLayout(addr(layoutInfo), nil, addr(result))
 
-proc createUniformBuffers*[nBuffers: static int, T](device: VkDevice, physicalDevice: VkPhysicalDevice): array[nBuffers, Buffer] =
-  let size = sizeof(T)
+proc createUniformBuffers*[nBuffers: static int, Uniforms](device: VkDevice, physicalDevice: VkPhysicalDevice): array[nBuffers, Buffer] =
+  let size = sizeof(Uniforms)
   for i in 0 ..< nBuffers:
     var buffer = InitBuffer(
       device,
@@ -51,14 +51,15 @@ template getDescriptorType*(v: Descriptor): auto = get(genericParams(typeof(v)),
 func generateGLSLUniformDeclarations*[Uniforms](binding: int = 0): string {.compileTime.} =
   var stmtList: seq[string]
 
-  let uniformTypeName = name(Uniforms).toUpper()
-  let uniformInstanceName = name(Uniforms).toLower()
-  stmtList.add(&"layout(binding = {binding}) uniform {uniformTypeName} {{")
-  for fieldname, value in Uniforms().fieldPairs:
-    when typeof(value) is Descriptor:
-      let glsltype = getGLSLType[getDescriptorType(value)]()
-      let n = fieldname
-      stmtList.add(&"    {glsltype} {n};")
-  stmtList.add(&"}} {uniformInstanceName};")
+  when not (Uniforms is void):
+    let uniformTypeName = name(Uniforms).toUpper()
+    let uniformInstanceName = name(Uniforms).toLower()
+    stmtList.add(&"layout(binding = {binding}) uniform {uniformTypeName} {{")
+    for fieldname, value in Uniforms().fieldPairs:
+      when typeof(value) is Descriptor:
+        let glsltype = getGLSLType[getDescriptorType(value)]()
+        let n = fieldname
+        stmtList.add(&"    {glsltype} {n};")
+    stmtList.add(&"}} {uniformInstanceName};")
 
   return stmtList.join("\n")

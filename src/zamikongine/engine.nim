@@ -501,7 +501,7 @@ proc igniteEngine*(windowTitle: string): Engine =
   ) = result.vulkan.device.device.setupSyncPrimitives()
 
 
-proc setupPipeline*[VertexType, UniformType: object, IndexType: uint16|uint32](engine: var Engine, scenedata: ref Thing, vertexShader, fragmentShader: static string): RenderPipeline[VertexType, UniformType] =
+proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: var Engine, scenedata: ref Thing, vertexShader, fragmentShader: static string): RenderPipeline[VertexType, UniformType] =
   engine.currentscenedata = scenedata
   result = initRenderPipeline[VertexType, UniformType](
     engine.vulkan.device.device,
@@ -576,7 +576,7 @@ proc setupPipeline*[VertexType, UniformType: object, IndexType: uint16|uint32](e
     vkUpdateDescriptorSets(result.device, 1, addr(descriptorWrite), 0, nil)
 
 
-proc runPipeline(commandBuffer: VkCommandBuffer, pipeline: var RenderPipeline, currentFrame: int) =
+proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer, pipeline: var RenderPipeline[VertexType, Uniforms], currentFrame: int) =
   vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
 
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout, 0, 1, addr(pipeline.descriptors[currentFrame]), 0, nil)
@@ -588,7 +588,7 @@ proc runPipeline(commandBuffer: VkCommandBuffer, pipeline: var RenderPipeline, c
       vertexBuffers.add buffer.vkBuffer
       offsets.add VkDeviceSize(0)
 
-    vkCmdBindVertexBuffers(commandBuffer, firstBinding=0'u32, bindingCount=2'u32, pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
+    vkCmdBindVertexBuffers(commandBuffer, firstBinding=0'u32, bindingCount=uint32(vertexBuffers.len), pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
     vkCmdDraw(commandBuffer, vertexCount=vertexCount, instanceCount=1'u32, firstVertex=0'u32, firstInstance=0'u32)
 
   for (vertexBufferSet, indexBuffer, indicesCount, indexType) in pipeline.indexedVertexBuffers:
@@ -599,7 +599,7 @@ proc runPipeline(commandBuffer: VkCommandBuffer, pipeline: var RenderPipeline, c
       vertexBuffers.add buffer.vkBuffer
       offsets.add VkDeviceSize(0)
 
-    vkCmdBindVertexBuffers(commandBuffer, firstBinding=0'u32, bindingCount=2'u32, pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
+    vkCmdBindVertexBuffers(commandBuffer, firstBinding=0'u32, bindingCount=uint32(vertexBuffers.len), pBuffers=addr(vertexBuffers[0]), pOffsets=addr(offsets[0]))
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer.vkBuffer, VkDeviceSize(0), indexType)
     vkCmdDrawIndexed(commandBuffer, indicesCount, 1, 0, 0, 0)
 
