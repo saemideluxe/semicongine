@@ -1,4 +1,4 @@
-# included in zamikongine/vulkan_helpers
+# included in vulkan_helpers
 const REQUIRED_PLATFORM_EXTENSIONS = @["VK_KHR_xlib_surface".cstring]
 
 proc load_platform_extensions() =

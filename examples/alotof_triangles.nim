@@ -4,14 +4,14 @@ import std/math
 import std/random
 import std/enumerate
 
-import zamikongine/engine
-import zamikongine/math/vector
-import zamikongine/math/matrix
-import zamikongine/vertex
-import zamikongine/descriptor
-import zamikongine/mesh
-import zamikongine/thing
-import zamikongine/shader
+import semicongine/engine
+import semicongine/math/vector
+import semicongine/math/matrix
+import semicongine/vertex
+import semicongine/descriptor
+import semicongine/mesh
+import semicongine/thing
+import semicongine/shader
 
 type
   VertexDataA = object
