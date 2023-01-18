@@ -1,6 +1,4 @@
 when defined(linux):
-  import ./platform/linux/xlib
-  export xlib
+  include ./platform/linux/xlib
 elif defined(windows):
-  import ./platform/windows/win32
-  export win32
+  include ./platform/windows/win32

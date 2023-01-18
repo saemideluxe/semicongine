@@ -5,6 +5,8 @@ import std/macros
 import std/typetraits
 import std/tables
 
+export math
+
 
 type
   Vec2*[T: SomeNumber] = array[2, T]

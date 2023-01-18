@@ -6,6 +6,8 @@ import std/typetraits
 
 import ./vector
 
+export math
+
 type
   # layout is row-first
   # having an object instead of directly aliasing the array seems a bit ugly at
@@ -15,19 +17,19 @@ type
   #
   # Though, great news is that objects have zero overhead!
   Mat22*[T: SomeNumber] = object
-    data: array[4, T]
+    data*: array[4, T]
   Mat23*[T: SomeNumber] = object
-    data: array[6, T]
+    data*: array[6, T]
   Mat32*[T: SomeNumber] = object
-    data: array[6, T]
+    data*: array[6, T]
   Mat33*[T: SomeNumber] = object
-    data: array[9, T]
+    data*: array[9, T]
   Mat34*[T: SomeNumber] = object
-    data: array[12, T]
+    data*: array[12, T]
   Mat43*[T: SomeNumber] = object
-    data: array[12, T]
+    data*: array[12, T]
   Mat44*[T: SomeNumber] = object
-    data: array[16, T]
+    data*: array[16, T]
   MatMM* = Mat22|Mat33|Mat44
   MatMN* = Mat23|Mat32|Mat34|Mat43
   Mat* = MatMM|MatMN
@@ -343,14 +345,14 @@ func rotate3d*[T](angle: T, a: Vec3[T]): Mat44[T] =
   let
     cosa = cos(angle)
     sina = sin(angle)
-    x = a.x
-    y = a.y
-    z = a.z
+    x = a[0]
+    y = a[1]
+    z = a[2]
   Mat44[T](data: [
     x * x * (1 - cosa) + cosa,     y * x * (1 - cosa) - z * sina, z * x * (1 - cosa) + y * sina, T(0),
     x * y * (1 - cosa) + z * sina, y * y * (1 - cosa) + cosa,     z * y * (1 - cosa) - x * sina, T(0),
     x * z * (1 - cosa) - y * sina, y * z * (1 - cosa) + x * sina, z * z * (1 - cosa) + cosa,     T(0),
-    T(0),                             T(0),                             T(0),                             1,
+    T(0),                          T(0),                          T(0),                          T(1),
   ])
 
 
@@ -370,3 +372,20 @@ makeRandomInit(Mat33)
 makeRandomInit(Mat34)
 makeRandomInit(Mat43)
 makeRandomInit(Mat44)
+
+func perspective*[T: SomeFloat](fovy, aspect, zNear, zFar: T): Mat44[T] =
+  let tanHalfFovy = tan(fovy / T(2))
+  return Mat44[T](data:[
+    T(1) / (aspect * tanHalfFovy), T(0),               T(0),                     T(0),
+    T(0),                          T(1) / tanHalfFovy, T(0),                     T(0),
+    T(0),                          T(0),               T(zFar / (zFar - zNear)), T(-(zFar * zNear) / (zFar - zNear)),
+    T(0),                          T(0),               T(1),                     T(1),
+  ])
+
+func ortho*[T: SomeFloat](left, right, bottom, top, zNear, zFar: T): Mat44[T] =
+  Mat44[T](data:[
+    T(2) / (right - left), T(0),                  T(0),                  -(right + left) / (right - left),
+    T(0),                  T(2) / (top - bottom), T(0),                  -(top + bottom) / (top - bottom),
+    T(0),                  T(0),                  T(1) / (zFar - zNear), -zNear / (zFar - zNear),
+    T(0),                  T(0),                  T(1),                  T(1),
+  ])

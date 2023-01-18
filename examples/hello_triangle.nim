@@ -55,7 +55,7 @@ when isMainModule:
   # upload data, prepare shaders, etc
   const vertexShader = generateVertexShaderCode[VertexDataA, void]()
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
-  pipeline = setupPipeline[VertexDataA, void, uint16](
+  pipeline = setupPipeline[VertexDataA, void, void](
     myengine,
     triangle,
     vertexShader,
