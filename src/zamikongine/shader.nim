@@ -1,8 +1,9 @@
+import std/os
+import std/hashes
 import std/strformat
 import std/strutils
 import std/tables
 import std/compilesettings
-
 
 import ./vulkan_helpers
 import ./glsl_helpers
@@ -31,20 +32,22 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
   of VK_SHADER_STAGE_ALL: ""
 
-proc compileGLSLToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
-  let stagename = stage2string(stage)
+proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: static string, entrypoint: string): seq[uint32] {.compileTime.} =
+  const
+    stagename = stage2string(stage)
+    shaderHash = hash(shaderSource)
+    # cross compilation for windows workaround, sorry computer
+    shaderout = getTempDir().replace("\\", "/") & "/" & fmt"shader_{shaderHash}.{stagename}"
+    projectPath = querySetting(projectPath)
 
-  # TODO: compiles only on linux for now (because we don't have compile-time functionality in std/tempfile)
-  let (tmpfile, exitCode) = gorgeEx(command=fmt"mktemp --tmpdir shader_XXXXXXX.{stagename}")
-  if exitCode != 0:
-    raise newException(Exception, tmpfile)
-
-  let (output, exitCode_glsl) = gorgeEx(command=fmt"{querySetting(projectPath)}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {tmpfile}", input=shaderSource)
+  let (output, exitCode_glsl) = gorgeEx(command=fmt"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderout}", input=shaderSource)
   if exitCode_glsl != 0:
     raise newException(Exception, output)
-  let shaderbinary = staticRead tmpfile
+  if output == "": # this happens when the nim was invoked with "check" instead of "compile/c", as it prevents the gorgeEx command to really run. However, there is hope, see https://github.com/nim-lang/RFCs/issues/430
+    return result
+  let shaderbinary = staticRead shaderout
 
-  let (output_rm, exitCode_rm) = gorgeEx(command=fmt"rm {tmpfile}")
+  let (output_rm, exitCode_rm) = gorgeEx(command=fmt"rm {shaderout}")
   if exitCode_rm != 0:
     raise newException(Exception, output_rm)
 

@@ -7,10 +7,6 @@ import std/macros
 import ./vulkan
 import ./window
 
-
-const ENABLEVULKANVALIDATIONLAYERS* = not defined(release)
-
-
 template checkVkResult*(call: untyped) =
   when defined(release):
     discard call
@@ -24,6 +20,14 @@ template checkVkResult*(call: untyped) =
     if value != VK_SUCCESS:
       error "Vulkan error: ",  astToStr(call),  " returned ", $value
       raise newException(Exception, "Vulkan error: " & astToStr(call) & " returned " & $value)
+
+# the included code need checkVkResult, therefore having the template above
+when defined(linux):
+  include ./platform/linux/vulkan
+when defined(windows):
+  include ./platform/windows/vulkan
+
+const ENABLEVULKANVALIDATIONLAYERS* = not defined(release)
 
 func addrOrNil[T](obj: var openArray[T]): ptr T =
   if obj.len > 0: addr(obj[0]) else: nil
@@ -132,11 +136,7 @@ func getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
 
 proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
 
-  var requiredExtensions = @["VK_KHR_surface".cstring]
-  when defined(linux):
-    requiredExtensions.add("VK_KHR_xlib_surface".cstring)
-  when defined(windows):
-    requiredExtensions.add("VK_KHR_win32_surface".cstring)
+  var requiredExtensions = @["VK_KHR_surface".cstring] & REQUIRED_PLATFORM_EXTENSIONS
   when ENABLEVULKANVALIDATIONLAYERS:
     requiredExtensions.add("VK_EXT_debug_utils".cstring)
   
@@ -177,10 +177,7 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result))
 
   loadVK_KHR_surface()
-  when defined(linux):
-    loadVK_KHR_xlib_surface()
-  when defined(windows):
-    loadVK_KHR_win32_surface()
+  load_platform_extensions()
   loadVK_KHR_swapchain()
   when ENABLEVULKANVALIDATIONLAYERS:
     loadVK_EXT_debug_utils(result)
@@ -228,20 +225,3 @@ proc debugCallback*(
 
 proc getSurfaceCapabilities*(device: VkPhysicalDevice, surface: VkSurfaceKHR): VkSurfaceCapabilitiesKHR =
     checkVkResult device.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(surface, addr(result))
-
-when defined(linux):
-  proc createVulkanSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
-    var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(
-      sType: VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-      dpy: window.display,
-      window: window.window,
-    )
-    checkVkResult vkCreateXlibSurfaceKHR(instance, addr(surfaceCreateInfo), nil, addr(result))
-when defined(windows):
-  proc createVulkanSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
-    var surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR(
-      sType: VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-      hinstance: window.hinstance,
-      hwnd: window.hwnd,
-    )
-    checkVkResult vkCreateWin32SurfaceKHR(instance, addr(surfaceCreateInfo), nil, addr(result))

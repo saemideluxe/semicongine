@@ -8,22 +8,29 @@
 when defined(linux):
   import x11/x
   import x11/xlib
+  const vkDLL = "libvulkan.so.1"
+else:
+  type
+    Display* = ptr object
+    VisualID* = ptr object
+    Window* = ptr object
+
 when defined(windows):
+  const vkDLL = "vulkan-1.dll"
   import winim
+else:
+  type
+    HINSTANCE* = ptr object
+    HWND* = ptr object
+    HMONITOR* = ptr object
+    HANDLE* = ptr object
+    SECURITY_ATTRIBUTES* = ptr object
+    DWORD* = ptr object
+    LPCWSTR* = ptr object
 
 var vkGetProc: proc(procName: cstring): pointer {.cdecl.}
 
 import dynlib
-
-when defined(windows):
-  {. emit: """#define VK_USE_PLATFORM_WIN32_KHR""" .}
-  const vkDLL = "vulkan-1.dll"
-elif defined(linux):
-  {.passl: gorge("pkg-config --libs vulkan").}
-  {. emit: """#define VK_USE_PLATFORM_X11_KHR""" .}
-  const vkDLL = "libvulkan.so.1"
-else:
-  raise quit("Unsupported platform")
 
 let vkHandleDLL = loadLib(vkDLL)
 if isNil(vkHandleDLL):
@@ -1187,22 +1194,6 @@ type
     VK_TOOL_PURPOSE_MODIFYING_FEATURES_BIT_EXT = 16
 
 # Types
-
-# stub types if we are on the wrong platform, so we don't need to "when" all platform functions
-when not defined(linux):
-  type
-    Display* = ptr object
-    VisualID* = ptr object
-    Window* = ptr object
-when not defined(windows):
-  type
-    HINSTANCE* = ptr object
-    HWND* = ptr object
-    HMONITOR* = ptr object
-    HANDLE* = ptr object
-    SECURITY_ATTRIBUTES* = ptr object
-    DWORD* = ptr object
-    LPCWSTR* = ptr object
 
 type
   RROutput* = ptr object

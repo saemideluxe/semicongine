@@ -42,7 +42,6 @@ when isMainModule:
 
   for i in 1 .. 300:
     var randommesh = new Mesh[VertexDataA]
-    # TODO: create randomized position11 from baseTriangle with random transformation matrix
     let randomcolor1 = Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
     let transform1 = randomtransform()
     randommesh.vertexData = VertexDataA(
@@ -81,13 +80,6 @@ when isMainModule:
 
   const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms]()
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
-  static:
-    echo "--------------"
-    for (i, line) in enumerate(vertexShader.splitLines()):
-      echo $(i + 1) & " " & line
-    echo "--------------"
-    echo fragmentShader
-    echo "--------------"
   var pipeline = setupPipeline[VertexDataA, float32, uint16](
     myengine,
     scene,

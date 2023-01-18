@@ -120,5 +120,5 @@ task glslangValidator_exe, "Download glslangValidator.exe (required for windows 
   exec &"mv {dirname}/bin/glslangValidator.exe examples/"
   exec &"rm -rf {dirname}"
 
-if getCommand() in ["c", "compile", "r", "dump", "check"]:
+if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
   compilerFlags()

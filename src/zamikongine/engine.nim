@@ -79,10 +79,20 @@ type
     imageAvailableSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     renderFinishedSemaphores*: array[MAX_FRAMES_IN_FLIGHT, VkSemaphore]
     inFlightFences*: array[MAX_FRAMES_IN_FLIGHT, VkFence]
+  Input* = object
+    keysDown*: set[Key]
+    keysPressed*: set[Key]
+    keysReleased*: set[Key]
+    mouseDown*: set[MouseButton]
+    mousePressed*: set[MouseButton]
+    mouseReleased*: set[MouseButton]
+    mouseX*: int
+    mouseY*: int
   Engine* = object
     vulkan*: Vulkan
     window*: NativeWindow
     currentscenedata*: ref Thing
+    input*: Input
 
 proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[PhysicalDevice] =
   for vulkanPhysicalDevice in getVulkanPhysicalDevices(instance):
@@ -518,13 +528,14 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: v
     var ubermesh = createUberMesh(allmeshes)
     result.vertexBuffers.add createVertexBuffers(ubermesh, result.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
-  # vertex buffers with indexes
-  var allindexedmeshes: seq[IndexedMesh[VertexType, IndexType]]
-  for mesh in partsOfType[ref IndexedMesh[VertexType, IndexType]](engine.currentscenedata):
-    allindexedmeshes.add(mesh[])
-  if allindexedmeshes.len > 0:
-    var indexedubermesh = createUberMesh(allindexedmeshes)
-    result.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, result.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
+  when not IndexType is void:
+    # vertex buffers with indexes
+    var allindexedmeshes: seq[IndexedMesh[VertexType, IndexType]]
+    for mesh in partsOfType[ref IndexedMesh[VertexType, IndexType]](engine.currentscenedata):
+      allindexedmeshes.add(mesh[])
+    if allindexedmeshes.len > 0:
+      var indexedubermesh = createUberMesh(allindexedmeshes)
+      result.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, result.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
   # uniform buffers
   result.uniformBuffers = createUniformBuffers[MAX_FRAMES_IN_FLIGHT, UniformType](
@@ -704,16 +715,31 @@ proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(e
   while not killed:
 
     # process input
+    engine.input.keysPressed = {}
+    engine.input.keysReleased = {}
+    engine.input.mousePressed = {}
+    engine.input.mouseReleased = {}
     for event in engine.window.pendingEvents():
       case event.eventType:
         of Quit:
           killed = true
         of ResizedWindow:
           resized = true
-        of KeyDown:
-          echo event
-          if event.key == Escape:
-            killed = true
+        of KeyPressed:
+          engine.input.keysPressed.incl event.key
+          engine.input.keysDown.incl event.key
+        of KeyReleased:
+          engine.input.keysReleased.incl event.key
+          engine.input.keysDown.excl event.key
+        of MousePressed:
+          engine.input.mousePressed.incl event.button
+          engine.input.mouseDown.incl event.button
+        of MouseReleased:
+          engine.input.mouseReleased.incl event.button
+          engine.input.mouseDown.excl event.button
+        of MouseMoved:
+          engine.input.mouseX = event.x
+          engine.input.mouseY = event.y
         else:
           discard
 

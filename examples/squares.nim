@@ -33,7 +33,7 @@ proc globalUpdate(engine: var Engine, dt: float32) =
 
 when isMainModule:
   randomize()
-  var myengine = igniteEngine("A lot of triangles")
+  var myengine = igniteEngine("Squares")
   const
     COLUMNS = 10
     ROWS = 10
