@@ -416,6 +416,8 @@ proc trash(device: VkDevice, swapchain: Swapchain, framebuffers: seq[VkFramebuff
   device.vkDestroySwapchainKHR(swapchain.swapchain, nil)
 
 proc recreateSwapchain(vulkan: Vulkan): (Swapchain, seq[VkFramebuffer]) =
+  if vulkan.frameDimension.width == 0 or vulkan.frameDimension.height == 0:
+    return (vulkan.swapchain, vulkan.framebuffers)
   debug(&"Recreate swapchain with dimension {vulkan.frameDimension}")
   checkVkResult vulkan.device.device.vkDeviceWaitIdle()
 
@@ -538,10 +540,11 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: v
       result.indexedVertexBuffers.add createIndexedVertexBuffers(indexedubermesh, result.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
   # uniform buffers
-  result.uniformBuffers = createUniformBuffers[MAX_FRAMES_IN_FLIGHT, UniformType](
-    result.device,
-    engine.vulkan.device.physicalDevice.device
-  )
+  when not (UniformType is void):
+    result.uniformBuffers = createUniformBuffers[MAX_FRAMES_IN_FLIGHT, UniformType](
+      result.device,
+      engine.vulkan.device.physicalDevice.device
+    )
 
   var
     poolSize = VkDescriptorPoolSize(
@@ -568,23 +571,24 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: v
 
   checkVkResult vkAllocateDescriptorSets(result.device, addr(allocInfo), addr(result.descriptors[0]))
 
-  var bufferInfos: array[MAX_FRAMES_IN_FLIGHT, array[1, VkDescriptorBufferInfo]] # because we use only one Uniform atm
-  for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
-    bufferInfos[i][0] = VkDescriptorBufferInfo(
-      buffer: result.uniformBuffers[i].vkBuffer,
-      offset: VkDeviceSize(0),
-      range: VkDeviceSize(sizeof(UniformType)),
-    )
-    var descriptorWrite = VkWriteDescriptorSet(
-        sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        dstSet: result.descriptors[i],
-        dstBinding: 0,
-        dstArrayElement: 0,
-        descriptorType: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        descriptorCount: 1,
-        pBufferInfo: cast[ptr ptr VkDescriptorBufferInfo](addr(bufferInfos[i][0])),
+  when not (UniformType is void):
+    var bufferInfos: array[MAX_FRAMES_IN_FLIGHT, array[1, VkDescriptorBufferInfo]] # because we use only one Uniform atm
+    for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
+      bufferInfos[i][0] = VkDescriptorBufferInfo(
+        buffer: result.uniformBuffers[i].vkBuffer,
+        offset: VkDeviceSize(0),
+        range: VkDeviceSize(sizeof(UniformType)),
       )
-    vkUpdateDescriptorSets(result.device, 1, addr(descriptorWrite), 0, nil)
+      var descriptorWrite = VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: result.descriptors[i],
+          dstBinding: 0,
+          dstArrayElement: 0,
+          descriptorType: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+          descriptorCount: 1,
+          pBufferInfo: cast[ptr ptr VkDescriptorBufferInfo](addr(bufferInfos[i][0])),
+        )
+      vkUpdateDescriptorSets(result.device, 1, addr(descriptorWrite), 0, nil)
 
 
 proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer, pipeline: var RenderPipeline[VertexType, Uniforms], currentFrame: int) =

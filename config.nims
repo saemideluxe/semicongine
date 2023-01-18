@@ -42,21 +42,25 @@ task single_linux_release, "build linux release":
 task single_windows_debug, "build windows debug":
   compilerFlags()
   compilerFlagsDebug()
-  # for some the --define:mingw does not work from inside here...
-  # so we need to set it when calling the task and use "/" to prevent
-  # the use of backslash while crosscompiling
-  switch("define", "mingw")
   switch("outdir", BUILDBASE & "/" & DEBUG & "/" & WINDOWS)
   setCommand "c"
   mkDir(BUILDBASE & "/" & DEBUG & "/" & WINDOWS)
+
 
 task single_windows_release, "build windows release":
   compilerFlags()
   compilerFlagsRelease()
   switch("outdir", BUILDBASE & "/" & RELEASE & "/" & WINDOWS)
-  switch("define", "mingw")
   setCommand "c"
   mkDir(BUILDBASE & "/" & RELEASE & "/" & WINDOWS)
+
+task single_crosscompile_windows_debug, "build crosscompile windows debug":
+  switch("define", "mingw")
+  single_windows_debugTask()
+
+task single_crosscompile_windows_release, "build crosscompile windows release":
+  switch("define", "mingw")
+  single_windows_releaseTask()
 
 task build_all_linux_debug, "build all examples with linux/debug":
   for file in listFiles("examples"):
@@ -120,9 +124,6 @@ task glslangValidator_exe, "Download glslangValidator.exe (required for windows 
   exec &"mv {dirname}/bin/glslangValidator.exe examples/"
   exec &"rm -rf {dirname}"
 
-if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
-  compilerFlags()
-
 task run_all , "Run all binaries":
   for file in listFiles("build/debug/linux"):
     exec file
@@ -132,3 +133,6 @@ task run_all , "Run all binaries":
     exec &"wine {file}"
   for file in listFiles("build/release/windows"):
     exec &"wine {file}"
+
+if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
+  compilerFlags()
