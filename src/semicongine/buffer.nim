@@ -20,14 +20,12 @@ type
     mapped: pointer
 
 proc trash*(buffer: var Buffer) =
-  assert int64(buffer.vkBuffer) != 0
-  vkDestroyBuffer(buffer.device, buffer.vkBuffer, nil)
-  buffer.vkBuffer = VkBuffer(0)
-  if buffer.size == 0: # for zero-size buffers there are no memory allocations
-    return
-  assert int64(buffer.memory) != 0
-  vkFreeMemory(buffer.device, buffer.memory, nil)
-  buffer.memory = VkDeviceMemory(0)
+  if int64(buffer.vkBuffer) != 0:
+    vkDestroyBuffer(buffer.device, buffer.vkBuffer, nil)
+    buffer.vkBuffer = VkBuffer(0)
+  if int64(buffer.memory) != 0:
+    vkFreeMemory(buffer.device, buffer.memory, nil)
+    buffer.memory = VkDeviceMemory(0)
 
 proc findMemoryType(buffer: Buffer, physicalDevice: VkPhysicalDevice, properties: VkMemoryPropertyFlags): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
