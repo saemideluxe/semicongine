@@ -33,6 +33,8 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_ALL: ""
 
 proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: static string, entrypoint: string): seq[uint32] {.compileTime.} =
+  when defined(nimcheck): # will not run if nimcheck is running
+    return result
   const
     stagename = stage2string(stage)
     shaderHash = hash(shaderSource)
@@ -43,8 +45,6 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
   let (output, exitCode_glsl) = gorgeEx(command=fmt"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderout}", input=shaderSource)
   if exitCode_glsl != 0:
     raise newException(Exception, output)
-  if output == "": # this happens when the nim was invoked with "check" instead of "compile/c", as it prevents the gorgeEx command to really run. However, there is hope, see https://github.com/nim-lang/RFCs/issues/430
-    return result
   let shaderbinary = staticRead shaderout
 
   let (output_rm, exitCode_rm) = gorgeEx(command=fmt"rm {shaderout}")
