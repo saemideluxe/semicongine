@@ -528,7 +528,7 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: v
     var ubermesh = createUberMesh(allmeshes)
     result.vertexBuffers.add createVertexBuffers(ubermesh, result.device, engine.vulkan.device.physicalDevice.device, engine.vulkan.commandPool, engine.vulkan.device.graphicsQueue)
 
-  when not IndexType is void:
+  when not (IndexType is void):
     # vertex buffers with indexes
     var allindexedmeshes: seq[IndexedMesh[VertexType, IndexType]]
     for mesh in partsOfType[ref IndexedMesh[VertexType, IndexType]](engine.currentscenedata):

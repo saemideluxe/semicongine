@@ -53,7 +53,6 @@ proc globalUpdate(engine: var Engine, dt: float32) =
   uniforms.projection.value = perspective(float32(PI / 4), float32(engine.vulkan.frameDimension.width) / float32(engine.vulkan.frameDimension.height), 0.1'f32, 100'f32)
   for buffer in pipeline.uniformBuffers:
     buffer.updateData(uniforms)
-  echo uniforms.projection.value
 
 const
   TopLeftFront =     Vec3([ -0.5'f32, -0.5'f32, -0.5'f32])
@@ -83,8 +82,10 @@ const
   ]
 var
   tris: seq[array[3, uint16]]
-# for i in 0'u16 ..< 6'u16:
-  #  let off = i * 4
+for i in 0'u16 ..< 6'u16:
+  let off = i * 4
+  tris.add [off + 0'u16, off + 1'u16, off + 2'u16]
+  tris.add [off + 2'u16, off + 3'u16, off + 0'u16]
 var off = 0'u16 * 4
 # tris.add [off + 0'u16, off + 1'u16, off + 2'u16]
 # tris.add [off + 2'u16, off + 3'u16, off + 0'u16]
