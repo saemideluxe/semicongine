@@ -102,7 +102,7 @@ task clean, "remove all build files":
   exec(&"rm -rf {BUILDBASE}")
 
 task publish, "publish all build":
-  exec("rsync -rv build/ basx.dev:/var/www/public.basx.dev/zamikongine")
+  exec("rsync -rv build/ basx.dev:/var/www/public.basx.dev/semcongine")
 
 task glslangValidator, "Download glslangValidator (required for linux compilation)":
   let dirname="/tmp/glslang_download"
