@@ -68,7 +68,6 @@ when isMainModule:
       indices[squareIndex * 2 + 0] = [uint16(vertIndex + 0), uint16(vertIndex + 1), uint16(vertIndex + 2)]
       indices[squareIndex * 2 + 1] = [uint16(vertIndex + 2), uint16(vertIndex + 3), uint16(vertIndex + 0)]
 
-  var scene = new Thing
 
   type PIndexedMesh = ref IndexedMesh[VertexDataA, uint16] # required so we can use ctor with ref/on heap
   var squaremesh = PIndexedMesh(
@@ -79,6 +78,7 @@ when isMainModule:
     ),
     indices: @indices
   )
+  var scene = new Thing
   var childthing = new Thing
   childthing.parts.add squaremesh
   scene.children.add childthing
@@ -93,11 +93,6 @@ when isMainModule:
     """
   )
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
-  static:
-    echo "--------------"
-    for (i, line) in enumerate(vertexShader.splitLines()):
-      echo $(i + 1) & " " & line
-    echo "--------------"
   pipeline = setupPipeline[VertexDataA, Uniforms, uint16](
     myengine,
     scene,

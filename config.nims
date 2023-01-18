@@ -122,3 +122,13 @@ task glslangValidator_exe, "Download glslangValidator.exe (required for windows 
 
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
   compilerFlags()
+
+task run_all , "Run all binaries":
+  for file in listFiles("build/debug/linux"):
+    exec file
+  for file in listFiles("build/release/linux"):
+    exec file
+  for file in listFiles("build/debug/windows"):
+    exec &"wine {file}"
+  for file in listFiles("build/release/windows"):
+    exec &"wine {file}"
