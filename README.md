@@ -6,6 +6,14 @@ Hi there
 This is a very simplistic little game engine, mainly trying to wrap around vulkan and the operating system's windowing, input and audio system.
 This is using the last programming language you will ever need, [Nim](https://nim-lang.org/)
 
+Building
+--------
+
+Run ```nim help``` to see a list of available build commands.
+
+It is required to download the glslangValidator binary into the ```examples/``` directory in order to be able to build.
+There is a nim command for this that works on linux.
+
 Compilation on Windows
 ----------------------
 
@@ -15,6 +23,8 @@ For compilation with vcc/ls, install additionaly (with Visual Studio Build Tools
 - Windows Universal C Runtime (some important files)
 - Windows CRT SDK (some important header files)
 - Some version of MSVC (the compiler)
+
+glslangValidator cannot yet be downloaded automatically on windows, check config.nim for instructions.
 
 Roadmap
 -------
