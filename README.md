@@ -6,6 +6,16 @@ Hi there
 This is a very simplistic little game engine, mainly trying to wrap around vulkan and the operating system's windowing, input and audio system.
 This is using the last programming language you will ever need, [Nim](https://nim-lang.org/)
 
+Compilation on Windows
+----------------------
+
+Requires a Windows SDK to be installed (e.g. via Visual Studio Build Tools).
+Also, using Nim on Windows with mingw seems to be way faster than with vcc/lc.
+For compilation with vcc/ls, install additionaly (with Visual Studio Build Tools):
+- Windows Universal C Runtime (some important files)
+- Windows CRT SDK (some important header files)
+- Some version of MSVC (the compiler)
+
 Roadmap
 -------
 
