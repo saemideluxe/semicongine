@@ -75,7 +75,7 @@ proc createWindow*(title: string): NativeWindow =
       DWORD(0),
       windowClassName,
       windowName,
-      DWORD(WS_OVERLAPPEDWINDOW),
+      DWORD(WS_POPUP or WS_THICKFRAME or WS_SYSMENU or WS_MAXIMIZEBOX or WS_MINIMIZEBOX),
       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
       HMENU(0),
       HINSTANCE(0),
@@ -100,5 +100,6 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
   var msg: MSG
   # fill queue
   while PeekMessage(addr(msg), window.hwnd, 0, 0, PM_REMOVE):
+    TranslateMessage(addr(msg))
     DispatchMessage(addr(msg))
   return currentEvents
