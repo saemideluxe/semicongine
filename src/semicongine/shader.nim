@@ -39,14 +39,14 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
     stagename = stage2string(stage)
     shaderHash = hash(shaderSource)
     # cross compilation for windows workaround, sorry computer
-    shaderfile = getTempDir().replace("\\", "/") & "/" & fmt"shader_{shaderHash}.{stagename}"
+    shaderfile = getTempDir() / fmt"shader_{shaderHash}.{stagename}"
     projectPath = querySetting(projectPath)
 
   let (output, exitCode_glsl) = gorgeEx(command=fmt"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}", input=shaderSource)
   if exitCode_glsl != 0:
     raise newException(Exception, output)
   let shaderbinary = staticRead shaderfile
-  removeFile(shaderfile)
+  # removeFile(shaderfile) TODO: remove file at compile time?
 
   var i = 0
   while i < shaderbinary.len:
