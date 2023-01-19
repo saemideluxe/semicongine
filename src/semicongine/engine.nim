@@ -180,11 +180,13 @@ proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice, surface: V
 
   let capabilities = physicalDevice.device.getSurfaceCapabilities(surface)
   var selectedPresentationMode = getPresentMode(physicalDevice.presentModes)
+  var imageCount = capabilities.minImageCount + 1
+  imageCount = max(min(capabilities.maxImageCount, imageCount), 1)
   # setup swapchain
   var swapchainCreateInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: surface,
-    minImageCount: max(capabilities.minImageCount + 1, capabilities.maxImageCount),
+    minImageCount: imageCount,
     imageFormat: surfaceFormat.format,
     imageColorSpace: surfaceFormat.colorSpace,
     imageExtent: dimension,
