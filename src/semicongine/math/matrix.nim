@@ -382,10 +382,10 @@ func perspective*[T: SomeFloat](fovy, aspect, zNear, zFar: T): Mat44[T] =
     T(0),                          T(0),               T(1),                     T(1),
   ])
 
-func ortho*[T: SomeFloat](left, right, bottom, top, zNear, zFar: T): Mat44[T] =
+func ortho*[T: SomeFloat](left, right, top, bottom, zNear, zFar: T): Mat44[T] =
   Mat44[T](data:[
     T(2) / (right - left), T(0),                  T(0),                  -(right + left) / (right - left),
-    T(0),                  T(2) / (top - bottom), T(0),                  -(top + bottom) / (top - bottom),
+    T(0),                  T(2) / (bottom - top), T(0),                  -(bottom + top) / (bottom - top),
     T(0),                  T(0),                  T(1) / (zFar - zNear), -zNear / (zFar - zNear),
-    T(0),                  T(0),                  T(1),                  T(1),
+    T(0),                  T(0),                  T(1),                   T(1),
   ])
