@@ -13,7 +13,6 @@ proc compilerFlags() =
   switch("mm", "orc")
   switch("experimental", "strictEffects")
   switch("threads", "on")
-  switch("app", "gui")
 
 proc compilerFlagsDebug() =
   switch("debugger", "native")
@@ -24,6 +23,7 @@ proc compilerFlagsRelease() =
   switch("define", "release")
   switch("checks", "off")
   switch("assertions", "off")
+  switch("app", "gui")
 
 task single_linux_debug, "build linux debug":
   compilerFlags()
