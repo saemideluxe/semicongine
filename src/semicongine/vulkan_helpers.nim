@@ -100,21 +100,21 @@ proc getQueueFamilies*(device: VkPhysicalDevice): seq[VkQueueFamilyProperties] =
 
 proc getDeviceSurfaceFormats*(device: VkPhysicalDevice, surface: VkSurfaceKHR): seq[VkSurfaceFormatKHR] =
   var n_formats: uint32
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), nil);
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), nil)
   result = newSeq[VkSurfaceFormatKHR](n_formats)
   checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), addrOrNil(result))
 
 
 proc getDeviceSurfacePresentModes*(device: VkPhysicalDevice, surface: VkSurfaceKHR): seq[VkPresentModeKHR] =
   var n_modes: uint32
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), nil);
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), nil)
   result = newSeq[VkPresentModeKHR](n_modes)
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), addrOrNil(result))
 
 
 proc getSwapChainImages*(device: VkDevice, swapChain: VkSwapchainKHR): seq[VkImage] =
   var n_images: uint32
-  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), nil);
+  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), nil)
   result = newSeq[VkImage](n_images)
   checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addr(result[0]))
 
@@ -211,8 +211,8 @@ proc getVulcanDevice*(
     ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(requiredExtensions))
   )
   checkVkResult vkCreateDevice(physicalDevice, addr(deviceCreateInfo), nil, addr(result[0]))
-  vkGetDeviceQueue(result[0], graphicsQueueFamily, 0'u32, addr(result[1]));
-  vkGetDeviceQueue(result[0], presentationQueueFamily, 0'u32, addr(result[2]));
+  vkGetDeviceQueue(result[0], graphicsQueueFamily, 0'u32, addr(result[1]))
+  vkGetDeviceQueue(result[0], presentationQueueFamily, 0'u32, addr(result[2]))
 
 proc debugCallback*(
   messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,

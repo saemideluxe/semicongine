@@ -711,18 +711,17 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resi
 
 proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(engine: var Engine, dt: float32)) =
   var
-    killed = false
     currentFrame = 0
     resized = false
     lastUpdate = getTime()
 
-  while not killed:
-
+  while true:
     # process input
     engine.input.keysPressed = {}
     engine.input.keysReleased = {}
     engine.input.mousePressed = {}
     engine.input.mouseReleased = {}
+    var killed = false
     for event in engine.window.pendingEvents():
       case event.eventType:
         of Quit:
@@ -746,6 +745,8 @@ proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(e
           engine.input.mouseY = event.y
         else:
           discard
+    if killed: # at least on windows we should return immediately as swapchain recreation will fail after kill
+      break
 
     # game logic update
     let
