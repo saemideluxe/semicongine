@@ -106,8 +106,6 @@ task clean, "remove all build files":
   exec(&"rm -rf {BUILDBASE}")
 
 task publish, "publish all build":
-  exec("rsync -rv build/ basx.dev:/var/www/public.basx.dev/semicongine")
-
   for file in listFiles("build/debug/linux"):
     exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/linux/")
   for file in listFiles("build/release/linux"):
