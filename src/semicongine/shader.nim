@@ -45,8 +45,12 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
   let (output, exitCode_glsl) = gorgeEx(command=fmt"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}", input=shaderSource)
   if exitCode_glsl != 0:
     raise newException(Exception, output)
-  let shaderbinary = staticRead shaderfile
-  # removeFile(shaderfile) TODO: remove file at compile time?
+
+  when defined(mingw): # required for crosscompilation, path separators get messed up
+    let shaderbinary = staticRead shaderfile.replace("\\", "/")
+  else:
+    let shaderbinary = staticRead shaderfile
+  # removeFile(shaderfile) TODO: remove file at compile time? how to do in cross-platform consistent way?
 
   var i = 0
   while i < shaderbinary.len:

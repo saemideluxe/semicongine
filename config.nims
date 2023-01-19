@@ -108,6 +108,15 @@ task clean, "remove all build files":
 task publish, "publish all build":
   exec("rsync -rv build/ basx.dev:/var/www/public.basx.dev/semicongine")
 
+  for file in listFiles("build/debug/linux"):
+    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/linux/")
+  for file in listFiles("build/release/linux"):
+    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/linux/")
+  for file in listFiles("build/debug/windows"):
+    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/windows/")
+  for file in listFiles("build/release/windows"):
+    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/windows/")
+
 task glslangValidator, "Download glslangValidator (required for linux compilation)":
   let dirname="/tmp/glslang_download"
   exec &"mkdir -p {dirname}"
