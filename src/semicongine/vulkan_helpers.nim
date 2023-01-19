@@ -116,7 +116,7 @@ proc getSwapChainImages*(device: VkDevice, swapChain: VkSwapchainKHR): seq[VkIma
   var n_images: uint32
   checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), nil);
   result = newSeq[VkImage](n_images)
-  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addrOrNil(result));
+  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addr(result[0]))
 
 
 func getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
