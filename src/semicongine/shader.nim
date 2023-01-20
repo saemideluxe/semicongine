@@ -13,7 +13,7 @@ import ./descriptor
 import ./math/vector
 
 type
-  AllowedUniformType = SomeNumber|Vec
+  AllowedUniformType = SomeNumber|TVec
   UniformSlot *[T:AllowedUniformType] = object
   ShaderProgram*[VertexType, Uniforms] = object
     entryPoint*: string
@@ -102,11 +102,11 @@ func generateVertexShaderCode*[VertexType, Uniforms](
     when typeof(value) is PositionAttribute:
       let glsltype = getGLSLType[getAttributeType(value)]()
       lines.add &"    {glsltype} in_position = " & name & ";"
-      if getAttributeType(value) is Vec2:
+      if getAttributeType(value) is TVec2:
         lines.add "    vec4 out_position = vec4(in_position, 0.0, 1.0);"
-      elif getAttributeType(value) is Vec3:
+      elif getAttributeType(value) is TVec3:
         lines.add "    vec4 out_position = vec4(in_position, 1.0);"
-      elif getAttributeType(value) is Vec4:
+      elif getAttributeType(value) is TVec4:
         lines.add "    vec4 out_position = in_position;"
       hasPosition += 1
     when typeof(value) is ColorAttribute:

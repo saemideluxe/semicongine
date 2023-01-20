@@ -7,12 +7,12 @@ import semicongine
 type
   # define type of vertex
   VertexDataA = object
-    position: PositionAttribute[Vec2[float32]]
-    color: ColorAttribute[Vec3[float32]]
-    translate: InstanceAttribute[Vec2[float32]]
+    position: PositionAttribute[TVec2[float32]]
+    color: ColorAttribute[TVec3[float32]]
+    iscursor: GenericAttribute[int32]
   Uniforms = object
     projection: Descriptor[Mat44[float32]]
-    cursor: Descriptor[Vec2[float32]]
+    cursor: Descriptor[TVec2[float32]]
 
 var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
@@ -35,20 +35,20 @@ proc globalUpdate(engine: var Engine, dt: float32) =
 # vertex data (types must match the above VertexAttributes)
 const
   shape = @[
-    Vec2([-  1'f32, -  1'f32]),
-    Vec2([   1'f32, -  1'f32]),
-    Vec2([-0.3'f32, -0.3'f32]),
-    Vec2([-0.3'f32, -0.3'f32]),
-    Vec2([-  1'f32,    1'f32]),
-    Vec2([-  1'f32, -  1'f32]),
+    TVec2([-  1'f32, -  1'f32]),
+    TVec2([   1'f32, -  1'f32]),
+    TVec2([-0.3'f32, -0.3'f32]),
+    TVec2([-0.3'f32, -0.3'f32]),
+    TVec2([-  1'f32,    1'f32]),
+    TVec2([-  1'f32, -  1'f32]),
   ]
   colors = @[
-    Vec3([1'f32, 0'f32, 0'f32]),
-    Vec3([1'f32, 0'f32, 0'f32]),
-    Vec3([1'f32, 0'f32, 0'f32]),
-    Vec3([0.8'f32, 0'f32, 0'f32]),
-    Vec3([0.8'f32, 0'f32, 0'f32]),
-    Vec3([0.8'f32, 0'f32, 0'f32]),
+    TVec3([1'f32, 0'f32, 0'f32]),
+    TVec3([1'f32, 0'f32, 0'f32]),
+    TVec3([1'f32, 0'f32, 0'f32]),
+    TVec3([0.8'f32, 0'f32, 0'f32]),
+    TVec3([0.8'f32, 0'f32, 0'f32]),
+    TVec3([0.8'f32, 0'f32, 0'f32]),
   ]
 
 when isMainModule:
@@ -56,14 +56,14 @@ when isMainModule:
 
   # build a single-object scene graph
   var cursor = new Thing
-  var cursorpart = new Mesh[VertexDataA]
-  cursorpart.vertexData = VertexDataA(
-    position: PositionAttribute[Vec2[float32]](data: shape),
-    color: ColorAttribute[Vec3[float32]](data: colors),
-    translate: InstanceAttribute[Vec2[float32]](data: @[Vec2[float32]([100'f32, 100'f32])]),
+  var cursormesh = new Mesh[VertexDataA]
+  cursormesh.vertexData = VertexDataA(
+    position: PositionAttribute[TVec2[float32]](data: shape),
+    color: ColorAttribute[TVec3[float32]](data: colors),
+    iscursor: GenericAttribute[int32](data: @[1'i32, 1'i32, 1'i32, 1'i32, 1'i32, 1'i32]),
   )
   # transform the cursor a bit to make it look nice
-  for i in 0 ..< cursorpart.vertexData.position.data.len:
+  for i in 0 ..< cursormesh.vertexData.position.data.len:
     let cursorscale = (
       scale2d(20'f32, 20'f32) *
       translate2d(1'f32, 1'f32) *
@@ -71,16 +71,24 @@ when isMainModule:
       scale2d(0.5'f32, 1'f32) *
       rotate2d(float32(PI) / 4'f32)
     )
-    let pos = Vec3[float32]([cursorpart.vertexData.position.data[i][0], cursorpart.vertexData.position.data[i][1], 1'f32])
-    cursorpart.vertexData.position.data[i] = (cursorscale * pos).xy
-  cursor.parts.add cursorpart
+    let pos = TVec3[float32]([cursormesh.vertexData.position.data[i][0], cursormesh.vertexData.position.data[i][1], 1'f32])
+    cursormesh.vertexData.position.data[i] = (cursorscale * pos).xy
+  cursor.parts.add cursormesh
+
+  var box = new Thing
+  var boxmesh = new Mesh[VertexDataA]
+  boxmesh.vertexData = VertexDataA(
+    position: PositionAttribute[TVec2[float32]](data: shape),
+    color: ColorAttribute[TVec3[float32]](data: colors),
+    iscursor: GenericAttribute[int32](data: @[1'i32, 1'i32, 1'i32, 1'i32, 1'i32, 1'i32]),
+  )
 
   var scene = new Thing
   scene.children.add cursor
 
   # upload data, prepare shaders, etc
   const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms]("""
-    out_position = uniforms.projection * vec4(in_position + uniforms.cursor, 0, 1);
+    out_position = uniforms.projection * vec4(in_position + (uniforms.cursor * iscursor), 0, 1);
   """)
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
   echo vertexShader

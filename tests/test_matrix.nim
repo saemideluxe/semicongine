@@ -1,11 +1,11 @@
 import random
 import math
 
-import zamikongine/math/vector
-import zamikongine/math/matrix
+import semicongine/math/vector
+import semicongine/math/matrix
 
 
-proc echoInfo(v: Vec) =
+proc echoInfo(v: TVec) =
   echo v
   echo "  Length: ", v.length
   echo "  Normlized: ", v.normalized

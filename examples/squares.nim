@@ -8,8 +8,8 @@ import semicongine
 
 type
   VertexDataA = object
-    position11: PositionAttribute[Vec2[float32]]
-    color22: ColorAttribute[Vec3[float32]]
+    position11: PositionAttribute[TVec2[float32]]
+    color22: ColorAttribute[TVec3[float32]]
     index: GenericAttribute[uint32]
   Uniforms = object
     t: Descriptor[float32]
@@ -32,8 +32,8 @@ when isMainModule:
     WIDTH = 2'f32 / COLUMNS
     HEIGHT = 2'f32 / ROWS
   var
-    vertices: array[COLUMNS * ROWS * 4, Vec2[float32]]
-    colors: array[COLUMNS * ROWS * 4, Vec3[float32]]
+    vertices: array[COLUMNS * ROWS * 4, TVec2[float32]]
+    colors: array[COLUMNS * ROWS * 4, TVec3[float32]]
     iValues: array[COLUMNS * ROWS * 4, uint32]
     indices: array[COLUMNS * ROWS * 2, array[3, uint16]]
 
@@ -42,13 +42,13 @@ when isMainModule:
       let
         y: float32 = (row * 2 / COLUMNS) - 1
         x: float32 = (col * 2 / ROWS) - 1
-        color = Vec3[float32]([(x + 1) / 2, (y + 1) / 2, 0'f32])
+        color = TVec3[float32]([(x + 1) / 2, (y + 1) / 2, 0'f32])
         squareIndex = row * COLUMNS + col
         vertIndex = squareIndex * 4
-      vertices[vertIndex + 0] = Vec2[float32]([x, y])
-      vertices[vertIndex + 1] = Vec2[float32]([x + WIDTH, y])
-      vertices[vertIndex + 2] = Vec2[float32]([x + WIDTH, y + HEIGHT])
-      vertices[vertIndex + 3] = Vec2[float32]([x, y + HEIGHT])
+      vertices[vertIndex + 0] = TVec2[float32]([x, y])
+      vertices[vertIndex + 1] = TVec2[float32]([x + WIDTH, y])
+      vertices[vertIndex + 2] = TVec2[float32]([x + WIDTH, y + HEIGHT])
+      vertices[vertIndex + 3] = TVec2[float32]([x, y + HEIGHT])
       colors[vertIndex + 0] = color
       colors[vertIndex + 1] = color
       colors[vertIndex + 2] = color
@@ -64,8 +64,8 @@ when isMainModule:
   type PIndexedMesh = ref IndexedMesh[VertexDataA, uint16] # required so we can use ctor with ref/on heap
   var squaremesh = PIndexedMesh(
     vertexData: VertexDataA(
-      position11: PositionAttribute[Vec2[float32]](data: @vertices),
-      color22: ColorAttribute[Vec3[float32]](data: @colors),
+      position11: PositionAttribute[TVec2[float32]](data: @vertices),
+      color22: ColorAttribute[TVec3[float32]](data: @colors),
       index: GenericAttribute[uint32](data: @iValues),
     ),
     indices: @indices

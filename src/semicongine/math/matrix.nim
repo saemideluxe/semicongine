@@ -130,21 +130,21 @@ func `$`*(v: Mat44[SomeNumber]): string = toString[Mat44[SomeNumber]](v)
 func `[]`*[T: Mat](m: T, row, col: int): auto = m.data[col + row * T.columnCount]
 proc `[]=`*[T: Mat, U](m: var T, row, col: int, value: U) = m.data[col + row * T.columnCount] = value
 
-func row*[T: Mat22](m: T, i: 0..1): auto = Vec2([m[i, 0], m[i, 1]])
-func row*[T: Mat32](m: T, i: 0..2): auto = Vec2([m[i, 0], m[i, 1]])
-func row*[T: Mat23](m: T, i: 0..1): auto = Vec3([m[i, 0], m[i, 1], m[i, 2]])
-func row*[T: Mat33](m: T, i: 0..2): auto = Vec3([m[i, 0], m[i, 1], m[i, 2]])
-func row*[T: Mat43](m: T, i: 0..3): auto = Vec3([m[i, 0], m[i, 1], m[i, 2]])
-func row*[T: Mat34](m: T, i: 0..2): auto = Vec4([m[i, 0], m[i, 1], m[i, 2], m[i, 3]])
-func row*[T: Mat44](m: T, i: 0..3): auto = Vec4([m[i, 0], m[i, 1], m[i, 2], m[i, 3]])
+func row*[T: Mat22](m: T, i: 0..1): auto = TVec2([m[i, 0], m[i, 1]])
+func row*[T: Mat32](m: T, i: 0..2): auto = TVec2([m[i, 0], m[i, 1]])
+func row*[T: Mat23](m: T, i: 0..1): auto = TVec3([m[i, 0], m[i, 1], m[i, 2]])
+func row*[T: Mat33](m: T, i: 0..2): auto = TVec3([m[i, 0], m[i, 1], m[i, 2]])
+func row*[T: Mat43](m: T, i: 0..3): auto = TVec3([m[i, 0], m[i, 1], m[i, 2]])
+func row*[T: Mat34](m: T, i: 0..2): auto = TVec4([m[i, 0], m[i, 1], m[i, 2], m[i, 3]])
+func row*[T: Mat44](m: T, i: 0..3): auto = TVec4([m[i, 0], m[i, 1], m[i, 2], m[i, 3]])
 
-func col*[T: Mat22](m: T, i: 0..1): auto = Vec2([m[0, i], m[1, i]])
-func col*[T: Mat23](m: T, i: 0..2): auto = Vec2([m[0, i], m[1, i]])
-func col*[T: Mat32](m: T, i: 0..1): auto = Vec3([m[0, i], m[1, i], m[2, i]])
-func col*[T: Mat33](m: T, i: 0..2): auto = Vec3([m[0, i], m[1, i], m[2, i]])
-func col*[T: Mat34](m: T, i: 0..3): auto = Vec3([m[0, i], m[1, i], m[2, i]])
-func col*[T: Mat43](m: T, i: 0..2): auto = Vec4([m[0, i], m[1, i], m[2, i], m[3, i]])
-func col*[T: Mat44](m: T, i: 0..3): auto = Vec4([m[0, i], m[1, i], m[2, i], m[3, i]])
+func col*[T: Mat22](m: T, i: 0..1): auto = TVec2([m[0, i], m[1, i]])
+func col*[T: Mat23](m: T, i: 0..2): auto = TVec2([m[0, i], m[1, i]])
+func col*[T: Mat32](m: T, i: 0..1): auto = TVec3([m[0, i], m[1, i], m[2, i]])
+func col*[T: Mat33](m: T, i: 0..2): auto = TVec3([m[0, i], m[1, i], m[2, i]])
+func col*[T: Mat34](m: T, i: 0..3): auto = TVec3([m[0, i], m[1, i], m[2, i]])
+func col*[T: Mat43](m: T, i: 0..2): auto = TVec4([m[0, i], m[1, i], m[2, i], m[3, i]])
+func col*[T: Mat44](m: T, i: 0..3): auto = TVec4([m[0, i], m[1, i], m[2, i], m[3, i]])
 
 proc createMatMatMultiplicationOperator(leftType: typedesc, rightType: typedesc, outType: typedesc): NimNode =
   var data = nnkBracket.newTree()
@@ -271,9 +271,9 @@ macro createAllMultiplicationOperators() =
   result.add(createMatMatMultiplicationOperator(Mat44, Mat43, Mat43))
   result.add(createMatMatMultiplicationOperator(Mat44, Mat44, Mat44))
 
-  result.add(createVecMatMultiplicationOperator(Mat22, Vec2))
-  result.add(createVecMatMultiplicationOperator(Mat33, Vec3))
-  result.add(createVecMatMultiplicationOperator(Mat44, Vec4))
+  result.add(createVecMatMultiplicationOperator(Mat22, TVec2))
+  result.add(createVecMatMultiplicationOperator(Mat33, TVec3))
+  result.add(createVecMatMultiplicationOperator(Mat44, TVec4))
 
 createAllMultiplicationOperators()
 
@@ -341,7 +341,7 @@ func scale3d*[T](sx, sy, sz: T): Mat44[T] = Mat44[T](data: [
   T(0), T(0), sz, T(0),
   T(0), T(0),  T(0), T(1),
 ])
-func rotate3d*[T](angle: T, a: Vec3[T]): Mat44[T] =
+func rotate3d*[T](angle: T, a: TVec3[T]): Mat44[T] =
   let
     cosa = cos(angle)
     sina = sin(angle)
