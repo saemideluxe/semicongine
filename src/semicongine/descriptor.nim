@@ -13,7 +13,7 @@ import ./glsl_helpers
 # TODO: check for alignment in uniform blocks
 #
 type
-  DescriptorType = SomeNumber|Vec|Mat
+  DescriptorType = SomeNumber|TVec|Mat
   Descriptor*[T:DescriptorType] = object
     value*: T
 

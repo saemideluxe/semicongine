@@ -8,8 +8,8 @@ import semicongine
 
 type
   VertexDataA = object
-    position11: PositionAttribute[Vec2[float32]]
-    color22: ColorAttribute[Vec3[float32]]
+    position11: PositionAttribute[TVec2[float32]]
+    color22: ColorAttribute[TVec3[float32]]
   Uniforms = object
     dt: Descriptor[float32]
 
@@ -26,42 +26,42 @@ when isMainModule:
   randomize()
   var myengine = igniteEngine("A lot of triangles")
   const baseTriangle = [
-    Vec3([-0.1'f32, -0.1'f32, 1'f32]),
-    Vec3([ 0.1'f32,  0.1'f32, 1'f32]),
-    Vec3([-0.1'f32,  0.1'f32, 1'f32]),
+    TVec3([-0.1'f32, -0.1'f32, 1'f32]),
+    TVec3([ 0.1'f32,  0.1'f32, 1'f32]),
+    TVec3([-0.1'f32,  0.1'f32, 1'f32]),
   ]
 
   var scene = new Thing
 
   for i in 1 .. 300:
     var randommesh = new Mesh[VertexDataA]
-    let randomcolor1 = Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
+    let randomcolor1 = TVec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
     let transform1 = randomtransform()
     randommesh.vertexData = VertexDataA(
-      position11: PositionAttribute[Vec2[float32]](
+      position11: PositionAttribute[TVec2[float32]](
         data: @[
-          Vec2[float32](transform1 * baseTriangle[0]),
-          Vec2[float32](transform1 * baseTriangle[1]),
-          Vec2[float32](transform1 * baseTriangle[2]),
+          TVec2[float32](transform1 * baseTriangle[0]),
+          TVec2[float32](transform1 * baseTriangle[1]),
+          TVec2[float32](transform1 * baseTriangle[2]),
         ]
       ),
-      color22: ColorAttribute[Vec3[float32]](
+      color22: ColorAttribute[TVec3[float32]](
         data: @[randomcolor1, randomcolor1, randomcolor1]
       )
     )
 
-    let randomcolor2 = Vec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
+    let randomcolor2 = TVec3([float32(rand(1)), float32(rand(1)), float32(rand(1))])
     let transform2 = randomtransform()
     var randomindexedmesh = new IndexedMesh[VertexDataA, uint16]
     randomindexedmesh.vertexData = VertexDataA(
-      position11: PositionAttribute[Vec2[float32]](
+      position11: PositionAttribute[TVec2[float32]](
         data: @[
-          Vec2[float32](transform2 * baseTriangle[0]),
-          Vec2[float32](transform2 * baseTriangle[1]),
-          Vec2[float32](transform2 * baseTriangle[2]),
+          TVec2[float32](transform2 * baseTriangle[0]),
+          TVec2[float32](transform2 * baseTriangle[1]),
+          TVec2[float32](transform2 * baseTriangle[2]),
         ]
       ),
-      color22: ColorAttribute[Vec3[float32]](
+      color22: ColorAttribute[TVec3[float32]](
         data: @[randomcolor2, randomcolor2, randomcolor2]
       )
     )

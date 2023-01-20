@@ -9,16 +9,16 @@ import ./vulkan
 import ./glsl_helpers
 
 type
-  VertexAttributeType = SomeNumber|Vec
+  VertexAttributeType = SomeNumber|TVec
   AttributePurpose* = enum
     Unknown, Position Color
   GenericAttribute*[T:VertexAttributeType] = object
     data*: seq[T]
-  PositionAttribute*[T:Vec] = object
+  PositionAttribute*[T:TVec] = object
     data*: seq[T]
-  ColorAttribute*[T:Vec] = object
+  ColorAttribute*[T:TVec] = object
     data*: seq[T]
-  InstanceAttribute*[T:Vec] = object
+  InstanceAttribute*[T:TVec] = object
     data*: seq[T]
   VertexAttribute* = GenericAttribute|PositionAttribute|ColorAttribute|InstanceAttribute
 
@@ -33,7 +33,7 @@ func nLocationSlots[T: VertexAttributeType](): int =
     8
   elif (T is Mat44[float32]):
     4
-  elif (T is Vec3[float64] or T is Vec3[uint64] or T is Vec4[float64] or T is Vec4[float64]):
+  elif (T is TVec3[float64] or T is TVec3[uint64] or T is TVec4[float64] or T is TVec4[float64]):
     2
   else:
     1
@@ -50,36 +50,36 @@ func getVkFormat[T: VertexAttributeType](): VkFormat =
   elif T is int64:         VK_FORMAT_R64_SINT
   elif T is float32:       VK_FORMAT_R32_SFLOAT
   elif T is float64:       VK_FORMAT_R64_SFLOAT
-  elif T is Vec2[uint8]:   VK_FORMAT_R8G8_UINT
-  elif T is Vec2[int8]:    VK_FORMAT_R8G8_SINT
-  elif T is Vec2[uint16]:  VK_FORMAT_R16G16_UINT
-  elif T is Vec2[int16]:   VK_FORMAT_R16G16_SINT
-  elif T is Vec2[uint32]:  VK_FORMAT_R32G32_UINT
-  elif T is Vec2[int32]:   VK_FORMAT_R32G32_SINT
-  elif T is Vec2[uint64]:  VK_FORMAT_R64G64_UINT
-  elif T is Vec2[int64]:   VK_FORMAT_R64G64_SINT
-  elif T is Vec2[float32]: VK_FORMAT_R32G32_SFLOAT
-  elif T is Vec2[float64]: VK_FORMAT_R64G64_SFLOAT
-  elif T is Vec3[uint8]:   VK_FORMAT_R8G8B8_UINT
-  elif T is Vec3[int8]:    VK_FORMAT_R8G8B8_SINT
-  elif T is Vec3[uint16]:  VK_FORMAT_R16G16B16_UINT
-  elif T is Vec3[int16]:   VK_FORMAT_R16G16B16_SINT
-  elif T is Vec3[uint32]:  VK_FORMAT_R32G32B32_UINT
-  elif T is Vec3[int32]:   VK_FORMAT_R32G32B32_SINT
-  elif T is Vec3[uint64]:  VK_FORMAT_R64G64B64_UINT
-  elif T is Vec3[int64]:   VK_FORMAT_R64G64B64_SINT
-  elif T is Vec3[float32]: VK_FORMAT_R32G32B32_SFLOAT
-  elif T is Vec3[float64]: VK_FORMAT_R64G64B64_SFLOAT
-  elif T is Vec4[uint8]:   VK_FORMAT_R8G8B8A8_UINT
-  elif T is Vec4[int8]:    VK_FORMAT_R8G8B8A8_SINT
-  elif T is Vec4[uint16]:  VK_FORMAT_R16G16B16A16_UINT
-  elif T is Vec4[int16]:   VK_FORMAT_R16G16B16A16_SINT
-  elif T is Vec4[uint32]:  VK_FORMAT_R32G32B32A32_UINT
-  elif T is Vec4[int32]:   VK_FORMAT_R32G32B32A32_SINT
-  elif T is Vec4[uint64]:  VK_FORMAT_R64G64B64A64_UINT
-  elif T is Vec4[int64]:   VK_FORMAT_R64G64B64A64_SINT
-  elif T is Vec4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
-  elif T is Vec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
+  elif T is TVec2[uint8]:   VK_FORMAT_R8G8_UINT
+  elif T is TVec2[int8]:    VK_FORMAT_R8G8_SINT
+  elif T is TVec2[uint16]:  VK_FORMAT_R16G16_UINT
+  elif T is TVec2[int16]:   VK_FORMAT_R16G16_SINT
+  elif T is TVec2[uint32]:  VK_FORMAT_R32G32_UINT
+  elif T is TVec2[int32]:   VK_FORMAT_R32G32_SINT
+  elif T is TVec2[uint64]:  VK_FORMAT_R64G64_UINT
+  elif T is TVec2[int64]:   VK_FORMAT_R64G64_SINT
+  elif T is TVec2[float32]: VK_FORMAT_R32G32_SFLOAT
+  elif T is TVec2[float64]: VK_FORMAT_R64G64_SFLOAT
+  elif T is TVec3[uint8]:   VK_FORMAT_R8G8B8_UINT
+  elif T is TVec3[int8]:    VK_FORMAT_R8G8B8_SINT
+  elif T is TVec3[uint16]:  VK_FORMAT_R16G16B16_UINT
+  elif T is TVec3[int16]:   VK_FORMAT_R16G16B16_SINT
+  elif T is TVec3[uint32]:  VK_FORMAT_R32G32B32_UINT
+  elif T is TVec3[int32]:   VK_FORMAT_R32G32B32_SINT
+  elif T is TVec3[uint64]:  VK_FORMAT_R64G64B64_UINT
+  elif T is TVec3[int64]:   VK_FORMAT_R64G64B64_SINT
+  elif T is TVec3[float32]: VK_FORMAT_R32G32B32_SFLOAT
+  elif T is TVec3[float64]: VK_FORMAT_R64G64B64_SFLOAT
+  elif T is TVec4[uint8]:   VK_FORMAT_R8G8B8A8_UINT
+  elif T is TVec4[int8]:    VK_FORMAT_R8G8B8A8_SINT
+  elif T is TVec4[uint16]:  VK_FORMAT_R16G16B16A16_UINT
+  elif T is TVec4[int16]:   VK_FORMAT_R16G16B16A16_SINT
+  elif T is TVec4[uint32]:  VK_FORMAT_R32G32B32A32_UINT
+  elif T is TVec4[int32]:   VK_FORMAT_R32G32B32A32_SINT
+  elif T is TVec4[uint64]:  VK_FORMAT_R64G64B64A64_UINT
+  elif T is TVec4[int64]:   VK_FORMAT_R64G64B64A64_SINT
+  elif T is TVec4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
+  elif T is TVec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
 
 
 

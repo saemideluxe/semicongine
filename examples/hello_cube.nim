@@ -17,8 +17,8 @@ import semicongine
 type
   # define type of vertex
   VertexDataA = object
-    position: PositionAttribute[Vec3[float32]]
-    color: ColorAttribute[Vec3[float32]]
+    position: PositionAttribute[TVec3[float32]]
+    color: ColorAttribute[TVec3[float32]]
   Uniforms = object
     model: Descriptor[Mat44[float32]]
     view: Descriptor[Mat44[float32]]
@@ -47,14 +47,14 @@ proc globalUpdate(engine: var Engine, dt: float32) =
     buffer.updateData(uniforms)
 
 const
-  TopLeftFront =     Vec3([ -0.5'f32, -0.5'f32, -0.5'f32])
-  TopRightFront =    Vec3([  0.5'f32, -0.5'f32, -0.5'f32])
-  BottomRightFront = Vec3([  0.5'f32,  0.5'f32, -0.5'f32])
-  BottomLeftFront =  Vec3([ -0.5'f32,  0.5'f32, -0.5'f32])
-  TopLeftBack =      Vec3([  0.5'f32, -0.5'f32,  0.5'f32])
-  TopRightBack =     Vec3([ -0.5'f32, -0.5'f32,  0.5'f32])
-  BottomRightBack =  Vec3([ -0.5'f32,  0.5'f32,  0.5'f32])
-  BottomLeftBack =   Vec3([  0.5'f32,  0.5'f32,  0.5'f32])
+  TopLeftFront =     TVec3([ -0.5'f32, -0.5'f32, -0.5'f32])
+  TopRightFront =    TVec3([  0.5'f32, -0.5'f32, -0.5'f32])
+  BottomRightFront = TVec3([  0.5'f32,  0.5'f32, -0.5'f32])
+  BottomLeftFront =  TVec3([ -0.5'f32,  0.5'f32, -0.5'f32])
+  TopLeftBack =      TVec3([  0.5'f32, -0.5'f32,  0.5'f32])
+  TopRightBack =     TVec3([ -0.5'f32, -0.5'f32,  0.5'f32])
+  BottomRightBack =  TVec3([ -0.5'f32,  0.5'f32,  0.5'f32])
+  BottomLeftBack =   TVec3([  0.5'f32,  0.5'f32,  0.5'f32])
 const
   cube_pos = @[
     TopLeftFront, TopRightFront, BottomRightFront, BottomLeftFront, # front
@@ -97,8 +97,8 @@ when isMainModule:
   # build a mesh
   var trianglemesh = new IndexedMesh[VertexDataA, uint16]
   trianglemesh.vertexData = VertexDataA(
-    position: PositionAttribute[Vec3[float32]](data: cube_pos),
-    color: ColorAttribute[Vec3[float32]](data: cube_color),
+    position: PositionAttribute[TVec3[float32]](data: cube_pos),
+    color: ColorAttribute[TVec3[float32]](data: cube_color),
   )
   trianglemesh.indices = tris
   # build a single-object scene graph

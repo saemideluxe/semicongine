@@ -1,10 +1,10 @@
 import random
 import math
 
-import vector
+import semicongine/math/vector
 
 
-proc echoInfo(v: Vec) =
+proc echoInfo(v: TVec) =
   echo v
   echo "  Length: ", v.length
   echo "  Normlized: ", v.normalized

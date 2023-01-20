@@ -42,6 +42,7 @@ Rendering:
 - [ ] Mipmaps 
 - [ ] Multisampling 
 - [~] Instanced drawing (using it currently but number of instances is hardcoded to 1
+- [ ] Fullscreen mode + switch between modes
 
 Build-system:
 - [x] move all of Makefile to config.nims

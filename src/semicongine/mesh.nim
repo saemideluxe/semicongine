@@ -103,8 +103,8 @@ proc createIndexedVertexBuffers*(
 
   result[3] = getVkIndexType(mesh)
 
-func squareData*[T:SomeFloat](): auto = PositionAttribute[Vec2[T]](
-  data: @[Vec2[T]([T(0), T(0)]), Vec2[T]([T(0), T(1)]), Vec2[T]([T(1), T(1)]), Vec2[T]([T(1), T(0)])]
+func squareData*[T:SomeFloat](): auto = PositionAttribute[TVec2[T]](
+  data: @[TVec2[T]([T(0), T(0)]), TVec2[T]([T(0), T(1)]), TVec2[T]([T(1), T(1)]), TVec2[T]([T(1), T(0)])]
 )
 func squareIndices*[T:uint16|uint32](): auto = seq[array[3, T]](
   @[[T(0), T(1), T(3)], [T(2), T(1), T(3)]]
