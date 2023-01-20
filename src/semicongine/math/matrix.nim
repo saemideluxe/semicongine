@@ -31,13 +31,13 @@ type
   TMat44*[T: SomeNumber] = object
     data*: array[16, T]
   TMat* = TMat22|TMat33|TMat44|TMat23|TMat32|TMat34|TMat43
-  Mat22 = TMat22[float32]
-  Mat23 = TMat22[float32]
-  Mat32 = TMat22[float32]
-  Mat33 = TMat22[float32]
-  Mat34 = TMat22[float32]
-  Mat43 = TMat22[float32]
-  Mat44 = TMat22[float32]
+  Mat22* = TMat22[float32]
+  Mat23* = TMat23[float32]
+  Mat32* = TMat32[float32]
+  Mat33* = TMat33[float32]
+  Mat34* = TMat34[float32]
+  Mat43* = TMat43[float32]
+  Mat44* = TMat44[float32]
 
 func unit22[T: SomeNumber](): auto {.compiletime.} = TMat22[T](data:[
   T(1), T(0),

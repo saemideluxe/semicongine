@@ -7,12 +7,12 @@ import semicongine
 type
   # define type of vertex
   VertexDataA = object
-    position: PositionAttribute[TVec2[float32]]
-    color: ColorAttribute[TVec3[float32]]
+    position: PositionAttribute[Vec2]
+    color: ColorAttribute[Vec3]
     iscursor: GenericAttribute[int32]
   Uniforms = object
-    projection: Descriptor[TMat44[float32]]
-    cursor: Descriptor[TVec2[float32]]
+    projection: Descriptor[Mat44]
+    cursor: Descriptor[Vec2]
 
 var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
@@ -35,20 +35,20 @@ proc globalUpdate(engine: var Engine, dt: float32) =
 # vertex data (types must match the above VertexAttributes)
 const
   shape = @[
-    TVec2([-  1'f32, -  1'f32]),
-    TVec2([   1'f32, -  1'f32]),
-    TVec2([-0.3'f32, -0.3'f32]),
-    TVec2([-0.3'f32, -0.3'f32]),
-    TVec2([-  1'f32,    1'f32]),
-    TVec2([-  1'f32, -  1'f32]),
+    Vec2([-  1'f32, -  1'f32]),
+    Vec2([   1'f32, -  1'f32]),
+    Vec2([-0.3'f32, -0.3'f32]),
+    Vec2([-0.3'f32, -0.3'f32]),
+    Vec2([-  1'f32,    1'f32]),
+    Vec2([-  1'f32, -  1'f32]),
   ]
   colors = @[
-    TVec3([1'f32, 0'f32, 0'f32]),
-    TVec3([1'f32, 0'f32, 0'f32]),
-    TVec3([1'f32, 0'f32, 0'f32]),
-    TVec3([0.8'f32, 0'f32, 0'f32]),
-    TVec3([0.8'f32, 0'f32, 0'f32]),
-    TVec3([0.8'f32, 0'f32, 0'f32]),
+    Vec3([1'f32, 0'f32, 0'f32]),
+    Vec3([1'f32, 0'f32, 0'f32]),
+    Vec3([1'f32, 0'f32, 0'f32]),
+    Vec3([0.8'f32, 0'f32, 0'f32]),
+    Vec3([0.8'f32, 0'f32, 0'f32]),
+    Vec3([0.8'f32, 0'f32, 0'f32]),
   ]
 
 when isMainModule:
@@ -58,8 +58,8 @@ when isMainModule:
   var cursor = new Thing
   var cursormesh = new Mesh[VertexDataA]
   cursormesh.vertexData = VertexDataA(
-    position: PositionAttribute[TVec2[float32]](data: shape),
-    color: ColorAttribute[TVec3[float32]](data: colors),
+    position: PositionAttribute[Vec2](data: shape),
+    color: ColorAttribute[Vec3](data: colors),
     iscursor: GenericAttribute[int32](data: @[1'i32, 1'i32, 1'i32, 1'i32, 1'i32, 1'i32]),
   )
   # transform the cursor a bit to make it look nice
@@ -71,15 +71,15 @@ when isMainModule:
       scale2d(0.5'f32, 1'f32) *
       rotate2d(float32(PI) / 4'f32)
     )
-    let pos = TVec3[float32]([cursormesh.vertexData.position.data[i][0], cursormesh.vertexData.position.data[i][1], 1'f32])
+    let pos = Vec3([cursormesh.vertexData.position.data[i][0], cursormesh.vertexData.position.data[i][1], 1'f32])
     cursormesh.vertexData.position.data[i] = (cursorscale * pos).xy
   cursor.parts.add cursormesh
 
   var box = new Thing
   var boxmesh = new Mesh[VertexDataA]
   boxmesh.vertexData = VertexDataA(
-    position: PositionAttribute[TVec2[float32]](data: shape),
-    color: ColorAttribute[TVec3[float32]](data: colors),
+    position: PositionAttribute[Vec2](data: shape),
+    color: ColorAttribute[Vec3](data: colors),
     iscursor: GenericAttribute[int32](data: @[1'i32, 1'i32, 1'i32, 1'i32, 1'i32, 1'i32]),
   )
 

@@ -17,12 +17,12 @@ import semicongine
 type
   # define type of vertex
   VertexDataA = object
-    position: PositionAttribute[TVec3[float32]]
-    color: ColorAttribute[TVec3[float32]]
+    position: PositionAttribute[Vec3]
+    color: ColorAttribute[Vec3]
   Uniforms = object
-    model: Descriptor[TMat44[float32]]
-    view: Descriptor[TMat44[float32]]
-    projection: Descriptor[TMat44[float32]]
+    model: Descriptor[Mat44]
+    view: Descriptor[Mat44]
+    projection: Descriptor[Mat44]
 
 var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
@@ -36,7 +36,7 @@ proc globalUpdate(engine: var Engine, dt: float32) =
   uniforms.model.value = translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t, Yf32) #  * rotate3d(float32(PI), Yf32)
 
   uniforms.view.value = Unit44f32
-  uniforms.projection.value = TMat44[float32](data:[
+  uniforms.projection.value = Mat44(data:[
     ratio, 0'f32, 0'f32, 0'f32,
     0'f32, 1'f32, 0'f32, 0'f32,
     0'f32, 0'f32, 1'f32, 0'f32,
@@ -47,14 +47,14 @@ proc globalUpdate(engine: var Engine, dt: float32) =
     buffer.updateData(uniforms)
 
 const
-  TopLeftFront =     TVec3([ -0.5'f32, -0.5'f32, -0.5'f32])
-  TopRightFront =    TVec3([  0.5'f32, -0.5'f32, -0.5'f32])
-  BottomRightFront = TVec3([  0.5'f32,  0.5'f32, -0.5'f32])
-  BottomLeftFront =  TVec3([ -0.5'f32,  0.5'f32, -0.5'f32])
-  TopLeftBack =      TVec3([  0.5'f32, -0.5'f32,  0.5'f32])
-  TopRightBack =     TVec3([ -0.5'f32, -0.5'f32,  0.5'f32])
-  BottomRightBack =  TVec3([ -0.5'f32,  0.5'f32,  0.5'f32])
-  BottomLeftBack =   TVec3([  0.5'f32,  0.5'f32,  0.5'f32])
+  TopLeftFront =     Vec3([ -0.5'f32, -0.5'f32, -0.5'f32])
+  TopRightFront =    Vec3([  0.5'f32, -0.5'f32, -0.5'f32])
+  BottomRightFront = Vec3([  0.5'f32,  0.5'f32, -0.5'f32])
+  BottomLeftFront =  Vec3([ -0.5'f32,  0.5'f32, -0.5'f32])
+  TopLeftBack =      Vec3([  0.5'f32, -0.5'f32,  0.5'f32])
+  TopRightBack =     Vec3([ -0.5'f32, -0.5'f32,  0.5'f32])
+  BottomRightBack =  Vec3([ -0.5'f32,  0.5'f32,  0.5'f32])
+  BottomLeftBack =   Vec3([  0.5'f32,  0.5'f32,  0.5'f32])
 const
   cube_pos = @[
     TopLeftFront, TopRightFront, BottomRightFront, BottomLeftFront, # front
@@ -97,8 +97,8 @@ when isMainModule:
   # build a mesh
   var trianglemesh = new IndexedMesh[VertexDataA, uint16]
   trianglemesh.vertexData = VertexDataA(
-    position: PositionAttribute[TVec3[float32]](data: cube_pos),
-    color: ColorAttribute[TVec3[float32]](data: cube_color),
+    position: PositionAttribute[Vec3](data: cube_pos),
+    color: ColorAttribute[Vec3](data: cube_color),
   )
   trianglemesh.indices = tris
   # build a single-object scene graph
