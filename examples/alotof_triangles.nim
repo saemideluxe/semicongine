@@ -16,7 +16,7 @@ type
 proc globalUpdate(engine: var Engine, dt: float32) =
   discard
 
-proc randomtransform(): Mat33[float32] =
+proc randomtransform(): TMat33[float32] =
   let randomscale = scale2d(float32(rand(1.0) + 0.5), float32(rand(1.0) + 0.5))
   let randomrotate = rotate2d(float32(rand(2 * PI)))
   let randomtranslate = translate2d(float32(rand(1.6) - 0.8), float32(rand(1.6) - 0.8))

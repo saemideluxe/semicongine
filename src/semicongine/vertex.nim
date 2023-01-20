@@ -29,9 +29,9 @@ func datasize*(attribute: VertexAttribute): uint64 =
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
 func nLocationSlots[T: VertexAttributeType](): int =
-  when (T is Mat44[float64]):
+  when (T is TMat44[float64]):
     8
-  elif (T is Mat44[float32]):
+  elif (T is TMat44[float32]):
     4
   elif (T is TVec3[float64] or T is TVec3[uint64] or T is TVec4[float64] or T is TVec4[float64]):
     2

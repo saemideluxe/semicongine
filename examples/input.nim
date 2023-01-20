@@ -11,7 +11,7 @@ type
     color: ColorAttribute[TVec3[float32]]
     iscursor: GenericAttribute[int32]
   Uniforms = object
-    projection: Descriptor[Mat44[float32]]
+    projection: Descriptor[TMat44[float32]]
     cursor: Descriptor[TVec2[float32]]
 
 var
