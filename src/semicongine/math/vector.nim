@@ -13,9 +13,9 @@ type
   TVec3*[T: SomeNumber] = array[3, T]
   TVec4*[T: SomeNumber] = array[4, T]
   TVec* = TVec2|TVec3|TVec4
-  Vec2 = TVec2[float32]
-  Vec3 = TVec3[float32]
-  Vec4 = TVec4[float32]
+  Vec2* = TVec2[float32]
+  Vec3* = TVec3[float32]
+  Vec4* = TVec4[float32]
 
 converter toVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
   TVec2[T]([orig[0], orig[1]])
