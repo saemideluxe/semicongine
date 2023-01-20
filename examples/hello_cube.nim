@@ -20,9 +20,9 @@ type
     position: PositionAttribute[TVec3[float32]]
     color: ColorAttribute[TVec3[float32]]
   Uniforms = object
-    model: Descriptor[Mat44[float32]]
-    view: Descriptor[Mat44[float32]]
-    projection: Descriptor[Mat44[float32]]
+    model: Descriptor[TMat44[float32]]
+    view: Descriptor[TMat44[float32]]
+    projection: Descriptor[TMat44[float32]]
 
 var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
@@ -36,7 +36,7 @@ proc globalUpdate(engine: var Engine, dt: float32) =
   uniforms.model.value = translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t, Yf32) #  * rotate3d(float32(PI), Yf32)
 
   uniforms.view.value = Unit44f32
-  uniforms.projection.value = Mat44[float32](data:[
+  uniforms.projection.value = TMat44[float32](data:[
     ratio, 0'f32, 0'f32, 0'f32,
     0'f32, 1'f32, 0'f32, 0'f32,
     0'f32, 0'f32, 1'f32, 0'f32,
