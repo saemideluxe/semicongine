@@ -8,14 +8,16 @@ import semicongine/thing
 import semicongine/shader
 import semicongine/buffer
 import semicongine/events
+import semicongine/window
 
 export vector
 export matrix
 export engine
 export vertex
 export descriptor
-export mesh
 export thing
+export mesh
 export shader
 export buffer
 export events
+export window

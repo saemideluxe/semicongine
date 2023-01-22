@@ -41,8 +41,7 @@ proc createUniformBuffers*[nBuffers: static int, Uniforms](device: VkDevice, phy
       physicalDevice,
       uint64(size),
       {UniformBuffer},
-      {VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT},
-      persistentMapping=true,
+      {HostVisible, HostCoherent},
     )
     result[i] = buffer
 

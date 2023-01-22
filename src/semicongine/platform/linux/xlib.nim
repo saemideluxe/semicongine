@@ -1,3 +1,4 @@
+import std/options
 import
   x11/xlib,
   x11/xutil,
@@ -7,6 +8,7 @@ import
 import x11/x
 
 import ../../events
+import ../../math/vector
 
 import ./symkey_map
 
@@ -92,3 +94,28 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
       result.add Event(eventType: ResizedWindow)
     else:
       discard
+
+proc getMousePosition*(window: NativeWindow): Option[Vec2] =
+  var
+    root: Window
+    win: Window
+    rootX: cint
+    rootY: cint
+    winX: cint
+    winY: cint
+    mask: cuint
+    onscreen = XQueryPointer(
+      window.display,
+      window.window,
+      addr(root),
+      addr(win),
+      addr(rootX),
+      addr(rootX),
+      addr(winX),
+      addr(winY),
+      addr(mask),
+    )
+  if onscreen == 0:
+    return none(Vec2)
+  return some(Vec2([float32(winX), float32(winY)]))
+

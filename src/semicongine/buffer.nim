@@ -1,3 +1,5 @@
+import std/typetraits
+
 import ./vulkan
 import ./vulkan_helpers
 
@@ -9,17 +11,24 @@ type
     UniformBuffer = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT
     IndexBuffer = VK_BUFFER_USAGE_INDEX_BUFFER_BIT
     VertexBuffer = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+  MemoryProperty* = enum
+    DeviceLocal = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    HostVisible = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+    HostCoherent = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+  MemoryProperties* = set[MemoryProperty]
   Buffer* = object
     device*: VkDevice
     vkBuffer*: VkBuffer
     size*: uint64
     memoryRequirements*: VkMemoryRequirements
+    memoryProperties*: MemoryProperties
     memory*: VkDeviceMemory
     bufferTypes*: set[BufferType]
-    persistentMapping: bool
-    mapped: pointer
+    data*: pointer
 
 proc trash*(buffer: var Buffer) =
+  if int64(buffer.vkBuffer) != 0 and int64(buffer.memory) != 0:
+    vkUnmapMemory(buffer.device, buffer.memory)
   if int64(buffer.vkBuffer) != 0:
     vkDestroyBuffer(buffer.device, buffer.vkBuffer, nil)
     buffer.vkBuffer = VkBuffer(0)
@@ -27,12 +36,13 @@ proc trash*(buffer: var Buffer) =
     vkFreeMemory(buffer.device, buffer.memory, nil)
     buffer.memory = VkDeviceMemory(0)
 
-proc findMemoryType(buffer: Buffer, physicalDevice: VkPhysicalDevice, properties: VkMemoryPropertyFlags): uint32 =
+proc findMemoryType(buffer: Buffer, physicalDevice: VkPhysicalDevice, properties: MemoryProperties): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(physicalDevice, addr(physicalProperties))
 
   for i in 0'u32 ..< physicalProperties.memoryTypeCount:
-    if bool(buffer.memoryRequirements.memoryTypeBits and (1'u32 shl i)) and (uint32(physicalProperties.memoryTypes[i].propertyFlags) and uint32(properties)) == uint32(properties):
+    if bool(buffer.memoryRequirements.memoryTypeBits and (1'u32 shl i)):
+      if (uint32(physicalProperties.memoryTypes[i].propertyFlags) and cast[uint32](properties)) == cast[uint32](properties):
         return i
 
 proc InitBuffer*(
@@ -40,10 +50,9 @@ proc InitBuffer*(
   physicalDevice: VkPhysicalDevice,
   size: uint64,
   bufferTypes: set[BufferType],
-  properties: set[VkMemoryPropertyFlagBits],
-  persistentMapping: bool = false
+  properties: MemoryProperties,
 ): Buffer =
-  result = Buffer(device: device, size: size, bufferTypes: bufferTypes, persistentMapping: persistentMapping)
+  result = Buffer(device: device, size: size, bufferTypes: bufferTypes, memoryProperties: properties)
   var usageFlags = 0
   for usage in bufferTypes:
     usageFlags = ord(usageFlags) or ord(usage)
@@ -56,46 +65,28 @@ proc InitBuffer*(
   checkVkResult vkCreateBuffer(result.device, addr(bufferInfo), nil, addr(result.vkBuffer))
   vkGetBufferMemoryRequirements(result.device, result.vkBuffer, addr(result.memoryRequirements))
 
-  var memoryProperties = 0'u32
-  for prop in properties:
-    memoryProperties = memoryProperties or uint32(prop)
-
   var allocInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     allocationSize: result.memoryRequirements.size,
-    memoryTypeIndex: result.findMemoryType(physicalDevice, VkMemoryPropertyFlags(memoryProperties))
+    memoryTypeIndex: result.findMemoryType(physicalDevice, properties)
   )
   if result.size > 0:
     checkVkResult result.device.vkAllocateMemory(addr(allocInfo), nil, addr(result.memory))
   checkVkResult result.device.vkBindBufferMemory(result.vkBuffer, result.memory, VkDeviceSize(0))
-  if persistentMapping:
-    checkVkResult vkMapMemory(
-      result.device,
-      result.memory,
-      offset=VkDeviceSize(0),
-      VkDeviceSize(result.size),
-      VkMemoryMapFlags(0),
-      addr(result.mapped)
-    )
+  checkVkResult vkMapMemory(
+    result.device,
+    result.memory,
+    offset=VkDeviceSize(0),
+    VkDeviceSize(result.size),
+    VkMemoryMapFlags(0),
+    addr(result.data)
+  )
 
 
-template withMapping*(buffer: Buffer, data: pointer, body: untyped): untyped =
-  assert not buffer.persistentMapping
-  checkVkResult vkMapMemory(buffer.device, buffer.memory, offset=VkDeviceSize(0), VkDeviceSize(buffer.size), VkMemoryMapFlags(0), addr(data))
-  body
-  vkUnmapMemory(buffer.device, buffer.memory)
-
-# note: does not work with seq, because of sizeof
-proc updateData*[T](buffer: Buffer, data: var T) =
-  if buffer.persistentMapping:
-    copyMem(buffer.mapped, addr(data), sizeof(T))
-  else:
-    var p: pointer
-    buffer.withMapping(p):
-      copyMem(p, addr(data), sizeof(T))
-
-proc copyBuffer*(commandPool: VkCommandPool, queue: VkQueue, src, dst: Buffer, size: uint64) =
+proc transferBuffer*(commandPool: VkCommandPool, queue: VkQueue, src, dst: Buffer, size: uint64) =
   assert uint64(src.device) == uint64(dst.device)
+  assert TransferSrc in src.bufferTypes
+  assert TransferDst in dst.bufferTypes
   var
     allocInfo = VkCommandBufferAllocateInfo(
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -124,3 +115,4 @@ proc copyBuffer*(commandPool: VkCommandPool, queue: VkQueue, src, dst: Buffer, s
   checkVkResult vkQueueSubmit(queue, 1, addr(submitInfo), VkFence(0))
   checkVkResult vkQueueWaitIdle(queue)
   vkFreeCommandBuffers(src.device, commandPool, 1, addr(commandBuffer))
+

@@ -26,9 +26,12 @@ proc echoCross[T, U](v1: T, v2: U) =
 proc randVec2I(): auto = newVec2(rand(1 .. 10), rand(1 .. 10))
 proc randVec2F(): auto = newVec2(rand(10'f) + 0.01, rand(10'f) + 0.01)
 proc randVec3I(): auto = newVec3(rand(1 .. 10), rand(1 .. 10), rand(1 .. 10))
-proc randVec3F(): auto = newVec3(rand(10'f) + 0.01, rand(10'f) + 0.01, rand(10'f) + 0.01)
-proc randVec4I(): auto = newVec4(rand(1 .. 10), rand(1 .. 10), rand(1 .. 10), rand(1 .. 10))
-proc randVec4F(): auto = newVec4(rand(10'f) + 0.01, rand(10'f) + 0.01, rand(10'f) + 0.01, rand(10'f) + 0.01)
+proc randVec3F(): auto = newVec3(rand(10'f) + 0.01, rand(10'f) + 0.01, rand(
+    10'f) + 0.01)
+proc randVec4I(): auto = newVec4(rand(1 .. 10), rand(1 .. 10), rand(1 .. 10),
+    rand(1 .. 10))
+proc randVec4F(): auto = newVec4(rand(10'f) + 0.01, rand(10'f) + 0.01, rand(
+    10'f) + 0.01, rand(10'f) + 0.01)
 
 
 proc testVector() =
@@ -133,6 +136,13 @@ proc testVector() =
   echo "int2float ", to[float](randVec3I())
   echo "float2int ", to[int](randVec3F())
   echo "int2float ", to[float](randVec3I())
+
+  echo "V3I.x: ", randVec3I().x
+  echo "V3I.y: ", randVec3I().y
+  echo "V3F.z: ", randVec3F().z
+  echo "V3I.r: ", randVec3I().r
+  echo "V3I.g: ", randVec3I().g
+  echo "V3F.b: ", randVec3F().b
 
   echo "V2I.xx: ", randVec2I().xx
   echo "V2I.yx: ", randVec2I().xy
