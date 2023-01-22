@@ -6,11 +6,10 @@
 #
 #
 #
-#
-#
+
+
 import std/times
 import std/strutils
-import std/enumerate
 
 import semicongine
 
@@ -26,35 +25,38 @@ type
 
 var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
-  uniforms:Uniforms
+  uniforms: Uniforms
   t: float32
 
 
 proc globalUpdate(engine: var Engine, dt: float32) =
-  let ratio = float32(engine.vulkan.frameDimension.height) / float32(engine.vulkan.frameDimension.width)
+  let ratio = float32(engine.vulkan.frameDimension.height) / float32(
+      engine.vulkan.frameDimension.width)
   t += dt
-  uniforms.model.value = translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t, Yf32) #  * rotate3d(float32(PI), Yf32)
+  uniforms.model.value = translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t,
+      Yf32) #  * rotate3d(float32(PI), Yf32)
 
   uniforms.view.value = Unit44f32
-  uniforms.projection.value = Mat44(data:[
+  uniforms.projection.value = Mat44(data: [
     ratio, 0'f32, 0'f32, 0'f32,
     0'f32, 1'f32, 0'f32, 0'f32,
     0'f32, 0'f32, 1'f32, 0'f32,
     0'f32, 0'f32, 0'f32, 1'f32,
   ])
-  uniforms.projection.value = perspective(float32(PI / 4), float32(engine.vulkan.frameDimension.width) / float32(engine.vulkan.frameDimension.height), 0.1'f32, 100'f32)
-  for buffer in pipeline.uniformBuffers:
-    buffer.updateData(uniforms)
+  uniforms.projection.value = perspective(float32(PI / 4), float32(
+      engine.vulkan.frameDimension.width) / float32(
+      engine.vulkan.frameDimension.height), 0.1'f32, 100'f32)
+  pipeline.updateUniformValues(uniforms)
 
 const
-  TopLeftFront =     Vec3([ -0.5'f32, -0.5'f32, -0.5'f32])
-  TopRightFront =    Vec3([  0.5'f32, -0.5'f32, -0.5'f32])
-  BottomRightFront = Vec3([  0.5'f32,  0.5'f32, -0.5'f32])
-  BottomLeftFront =  Vec3([ -0.5'f32,  0.5'f32, -0.5'f32])
-  TopLeftBack =      Vec3([  0.5'f32, -0.5'f32,  0.5'f32])
-  TopRightBack =     Vec3([ -0.5'f32, -0.5'f32,  0.5'f32])
-  BottomRightBack =  Vec3([ -0.5'f32,  0.5'f32,  0.5'f32])
-  BottomLeftBack =   Vec3([  0.5'f32,  0.5'f32,  0.5'f32])
+  TopLeftFront = Vec3([-0.5'f32, -0.5'f32, -0.5'f32])
+  TopRightFront = Vec3([0.5'f32, -0.5'f32, -0.5'f32])
+  BottomRightFront = Vec3([0.5'f32, 0.5'f32, -0.5'f32])
+  BottomLeftFront = Vec3([-0.5'f32, 0.5'f32, -0.5'f32])
+  TopLeftBack = Vec3([0.5'f32, -0.5'f32, 0.5'f32])
+  TopRightBack = Vec3([-0.5'f32, -0.5'f32, 0.5'f32])
+  BottomRightBack = Vec3([-0.5'f32, 0.5'f32, 0.5'f32])
+  BottomLeftBack = Vec3([0.5'f32, 0.5'f32, 0.5'f32])
 const
   cube_pos = @[
     TopLeftFront, TopRightFront, BottomRightFront, BottomLeftFront, # front
@@ -78,18 +80,6 @@ for i in 0'u16 ..< 6'u16:
   let off = i * 4
   tris.add [off + 0'u16, off + 1'u16, off + 2'u16]
   tris.add [off + 2'u16, off + 3'u16, off + 0'u16]
-var off = 0'u16 * 4
-# tris.add [off + 0'u16, off + 1'u16, off + 2'u16]
-# tris.add [off + 2'u16, off + 3'u16, off + 0'u16]
-# off = 1'u16 * 4
-# tris.add [off + 0'u16, off + 1'u16, off + 2'u16]
-# tris.add [off + 2'u16, off + 3'u16, off + 0'u16]
-# off = 4'u16 * 4
-# tris.add [off + 0'u16, off + 1'u16, off + 2'u16]
-# tris.add [off + 2'u16, off + 3'u16, off + 0'u16]
-# off = 3'u16 * 4
-# tris.add [off + 0'u16, off + 1'u16, off + 2'u16]
-# tris.add [off + 2'u16, off + 3'u16, off + 0'u16]
 
 when isMainModule:
   var myengine = igniteEngine("Hello cube")
@@ -101,10 +91,7 @@ when isMainModule:
     color: ColorAttribute[Vec3](data: cube_color),
   )
   trianglemesh.indices = tris
-  # build a single-object scene graph
-  var triangle = new Thing
-  # add the triangle mesh to the object
-  triangle.parts.add trianglemesh
+  var cube = newThing("cube", trianglemesh)
 
   # upload data, prepare shaders, etc
   const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms]("""
@@ -113,7 +100,7 @@ when isMainModule:
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
   pipeline = setupPipeline[VertexDataA, Uniforms, uint16](
     myengine,
-    triangle,
+    cube,
     vertexShader,
     fragmentShader
   )

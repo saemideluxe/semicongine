@@ -1,3 +1,4 @@
+import std/options
 import std/macros
 import std/strutils
 import std/strformat
@@ -6,20 +7,31 @@ import std/typetraits
 import ./math/vector
 import ./math/matrix
 import ./vulkan
+import ./buffer
 import ./glsl_helpers
 
 type
-  VertexAttributeType = SomeNumber|TVec
-  AttributePurpose* = enum
-    Unknown, Position Color
+  VertexAttributeType = SomeNumber|TVec|TMat
+  # useOnDeviceMemory can be used to make sure the attribute buffer memory will
+  # be on the device. Data will be faster to access but much slower to update
   GenericAttribute*[T:VertexAttributeType] = object
     data*: seq[T]
+    buffer*: Buffer
+    useOnDeviceMemory*: bool
   PositionAttribute*[T:TVec] = object
     data*: seq[T]
+    buffer*: Buffer
+    useOnDeviceMemory*: bool
   ColorAttribute*[T:TVec] = object
     data*: seq[T]
-  InstanceAttribute*[T:TVec] = object
+    buffer*: Buffer
+    useOnDeviceMemory*: bool
+  GenericInstanceAttribute*[T:VertexAttributeType] = object
     data*: seq[T]
+    buffer*: Buffer
+    useOnDeviceMemory*: bool
+  ModelTransformAttribute* = GenericInstanceAttribute[Mat44]
+  InstanceAttribute* = GenericInstanceAttribute|ModelTransformAttribute
   VertexAttribute* = GenericAttribute|PositionAttribute|ColorAttribute|InstanceAttribute
 
 template getAttributeType*(v: VertexAttribute): auto = get(genericParams(typeof(v)), 0)
@@ -29,14 +41,12 @@ func datasize*(attribute: VertexAttribute): uint64 =
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
 func nLocationSlots[T: VertexAttributeType](): int =
-  when (T is TMat44[float64]):
-    8
-  elif (T is TMat44[float32]):
-    4
-  elif (T is TVec3[float64] or T is TVec3[uint64] or T is TVec4[float64] or T is TVec4[float64]):
+  when (T is TVec3[float64] or T is TVec3[uint64] or T is TVec4[float64] or T is TVec4[float64]):
     2
-  else:
+  elif T is SomeNumber or T is TVec:
     1
+  else:
+    {.error: "Unsupported vertex attribute type".}
 
 # numbers
 func getVkFormat[T: VertexAttributeType](): VkFormat =
@@ -80,6 +90,7 @@ func getVkFormat[T: VertexAttributeType](): VkFormat =
   elif T is TVec4[int64]:   VK_FORMAT_R64G64B64A64_SINT
   elif T is TVec4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
   elif T is TVec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
+  else: {.error: "Unsupported vertex attribute type".}
 
 
 
@@ -90,6 +101,12 @@ func VertexCount*[T](t: T): uint32 =
         result = uint32(value.data.len)
       else:
         assert result == uint32(value.data.len)
+
+func hasAttributeType*[T, AT](t: T): uint32 =
+  for name, value in t.fieldPairs:
+    when typeof(value) is AT:
+      return true
+  return false
 
 func generateGLSLVertexDeclarations*[T](): string =
   var stmtList: seq[string]

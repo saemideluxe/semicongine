@@ -81,9 +81,9 @@ macro generateAllConsts() =
 
 generateAllConsts()
 
-const Unit22* = unit22[float]()
-const Unit33* = unit33[float]()
-const Unit44* = unit44[float]()
+const Unit22* = unit22[float32]()
+const Unit33* = unit33[float32]()
+const Unit44* = unit44[float32]()
 
 template rowCount*(m: typedesc): int =
   when m is TMat22: 2

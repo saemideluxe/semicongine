@@ -189,7 +189,7 @@ proc vectorAttributeAccessor(accessor: string): NimNode =
   if accessorvalue.len == 0:
     raise newException(Exception, "empty attribute")
   elif accessorvalue.len == 1:
-    ret = nnkBracket.newTree(ident("value"), newLit(ACCESSOR_INDICES[accessorvalue[0]]))
+    ret = nnkBracketExpr.newTree(ident("value"), newLit(ACCESSOR_INDICES[accessorvalue[0]]))
   if accessorvalue.len > 1:
     var attrs = nnkBracket.newTree()
     for attrname in accessorvalue:

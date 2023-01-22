@@ -41,8 +41,10 @@ Rendering:
 - [ ] Depth buffering
 - [ ] Mipmaps 
 - [ ] Multisampling 
-- [~] Instanced drawing (using it currently but number of instances is hardcoded to 1
+- [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per mesh)
 - [ ] Fullscreen mode + switch between modes
+- [ ] Fixed framerate
+- [ ] Allow multipel Uniform blocks
 
 Build-system:
 - [x] move all of Makefile to config.nims
@@ -71,3 +73,4 @@ Advanced features:
 - [ ] Animation system
 - [ ] Sprite system
 - [ ] Particle system
+- [ ] Query and display rendering information from Vulkan

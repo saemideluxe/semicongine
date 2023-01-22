@@ -9,7 +9,6 @@ type
   VertexDataA = object
     position: PositionAttribute[Vec2]
     color: ColorAttribute[Vec3]
-    id: InstanceAttribute[Vec3]
 
 var pipeline: RenderPipeline[VertexDataA, void]
 
@@ -19,9 +18,9 @@ proc globalUpdate(engine: var Engine, dt: float32) =
 # vertex data (types must match the above VertexAttributes)
 const
   triangle_pos = @[
-    Vec2([ 0.0'f32, -0.5'f32]),
-    Vec2([ 0.5'f32,  0.5'f32]),
-    Vec2([-0.5'f32,  0.5'f32]),
+    Vec2([0.0'f32, -0.5'f32]),
+    Vec2([0.5'f32, 0.5'f32]),
+    Vec2([-0.5'f32, 0.5'f32]),
   ]
   triangle_color = @[
     Vec3([1.0'f32, 0.0'f32, 0.0'f32]),
@@ -37,12 +36,9 @@ when isMainModule:
   trianglemesh.vertexData = VertexDataA(
     position: PositionAttribute[Vec2](data: triangle_pos),
     color: ColorAttribute[Vec3](data: triangle_color),
-    id: InstanceAttribute[Vec3](data: @[Vec3([0.5'f32, 0.5'f32, 0.5'f32])]),
   )
   # build a single-object scene graph
-  var triangle = new Thing
-  # add the triangle mesh to the object
-  triangle.parts.add trianglemesh
+  var triangle = newThing("triangle", trianglemesh)
 
   # upload data, prepare shaders, etc
   const vertexShader = generateVertexShaderCode[VertexDataA, void]()

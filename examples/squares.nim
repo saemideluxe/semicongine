@@ -2,7 +2,6 @@ import std/times
 import std/strutils
 import std/math
 import std/random
-import std/enumerate
 
 import semicongine
 
@@ -20,8 +19,7 @@ var
 
 proc globalUpdate(engine: var Engine, dt: float32) =
   uniformdata.t.value += dt
-  for buffer in pipeline.uniformBuffers:
-    buffer.updateData(uniformdata)
+  pipeline.updateUniformValues(uniformdata)
 
 when isMainModule:
   randomize()
@@ -57,11 +55,14 @@ when isMainModule:
       iValues[vertIndex + 1] = uint32(squareIndex)
       iValues[vertIndex + 2] = uint32(squareIndex)
       iValues[vertIndex + 3] = uint32(squareIndex)
-      indices[squareIndex * 2 + 0] = [uint16(vertIndex + 0), uint16(vertIndex + 1), uint16(vertIndex + 2)]
-      indices[squareIndex * 2 + 1] = [uint16(vertIndex + 2), uint16(vertIndex + 3), uint16(vertIndex + 0)]
+      indices[squareIndex * 2 + 0] = [uint16(vertIndex + 0), uint16(vertIndex +
+          1), uint16(vertIndex + 2)]
+      indices[squareIndex * 2 + 1] = [uint16(vertIndex + 2), uint16(vertIndex +
+          3), uint16(vertIndex + 0)]
 
 
-  type PIndexedMesh = ref IndexedMesh[VertexDataA, uint16] # required so we can use ctor with ref/on heap
+  type PIndexedMesh = ref IndexedMesh[VertexDataA,
+      uint16] # required so we can use ctor with ref/on heap
   var squaremesh = PIndexedMesh(
     vertexData: VertexDataA(
       position11: PositionAttribute[Vec2](data: @vertices),
@@ -70,10 +71,7 @@ when isMainModule:
     ),
     indices: @indices
   )
-  var scene = new Thing
-  var childthing = new Thing
-  childthing.parts.add squaremesh
-  scene.children.add childthing
+  var scene = newThing("scene", newThing("squares", squaremesh))
 
   const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms](
     """

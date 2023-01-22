@@ -1,7 +1,9 @@
+import std/options
 import winim
 
 import ./virtualkey_map
 import ../../events
+import ../../math/vector
 
 type
   NativeWindow* = object
@@ -103,3 +105,10 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     TranslateMessage(addr(msg))
     DispatchMessage(addr(msg))
   return currentEvents
+
+proc getMousePosition*(window: NativeWindow): Option[Vec2] =
+  var p: POINT
+  let res = GetCursorPos(addr(p))
+  if res:
+    return some(Vec2([float32(p.x), float32(p.y)]))
+  return none(Vec2)
