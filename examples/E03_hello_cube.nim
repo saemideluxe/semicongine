@@ -30,8 +30,8 @@ var
 
 
 proc globalUpdate(engine: var Engine, dt: float32) =
-  let ratio = float32(engine.vulkan.frameDimension.height) / float32(
-      engine.vulkan.frameDimension.width)
+  let ratio = float32(engine.vulkan.frameSize.y) / float32(
+      engine.vulkan.frameSize.x)
   t += dt
   uniforms.model.value = translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t,
       Yf32) #  * rotate3d(float32(PI), Yf32)
@@ -44,9 +44,9 @@ proc globalUpdate(engine: var Engine, dt: float32) =
     0'f32, 0'f32, 0'f32, 1'f32,
   ])
   uniforms.projection.value = perspective(float32(PI / 4), float32(
-      engine.vulkan.frameDimension.width) / float32(
-      engine.vulkan.frameDimension.height), 0.1'f32, 100'f32)
-  pipeline.updateUniformValues(uniforms)
+      engine.vulkan.frameSize.x) / float32(
+      engine.vulkan.frameSize.y), 0.1'f32, 100'f32)
+  engine.vulkan.device.updateUniformData(pipeline, uniforms)
 
 const
   TopLeftFront = Vec3([-0.5'f32, -0.5'f32, -0.5'f32])
