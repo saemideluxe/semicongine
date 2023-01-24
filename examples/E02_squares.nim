@@ -19,7 +19,7 @@ var
 
 proc globalUpdate(engine: var Engine, dt: float32) =
   uniformdata.t.value += dt
-  pipeline.updateUniformValues(uniformdata)
+  engine.vulkan.device.updateUniformData(pipeline, uniformdata)
 
 when isMainModule:
   randomize()
@@ -61,7 +61,7 @@ when isMainModule:
           3), uint16(vertIndex + 0)]
 
 
-  type PIndexedMesh = ref IndexedMesh[VertexDataA,
+  type PIndexedMesh = IndexedMesh[VertexDataA,
       uint16] # required so we can use ctor with ref/on heap
   var squaremesh = PIndexedMesh(
     vertexData: VertexDataA(

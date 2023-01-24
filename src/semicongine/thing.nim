@@ -25,9 +25,6 @@ func newTransform*(mat: Mat44): Transform =
   result = new Transform
   result.mat = mat
 
-method update*(thing: Thing, dt: float32) {.base.} = discard
-method update*(part: Part, dt: float32) {.base.} = discard
-
 proc add*(thing: Thing, child: Thing) =
   child.parent = thing
   thing.children.add child
@@ -43,12 +40,13 @@ proc add*(thing: Thing, parts: seq[Part]) =
     part.thing = thing
     thing.parts.add part
 
-func newThing*(name: string=""): Thing =
+func newThing*(name: string = ""): Thing =
   result = new Thing
   result.name = name
   if result.name == "":
     result.name = &"Thing[{$(cast[ByteAddress](result))}]"
-func newThing*(name: string, firstChild: Thing, children: varargs[Thing]): Thing =
+func newThing*(name: string, firstChild: Thing, children: varargs[
+    Thing]): Thing =
   result = new Thing
   result.add firstChild
   for child in children:
@@ -73,7 +71,7 @@ func getModelTransform*(thing: Thing): Mat44 =
       if part of Transform:
         result = Transform(part).mat * result
     currentThing = currentThing.parent
-    
+
 iterator allPartsOfType*[T: Part](root: Thing): T =
   var queue = @[root]
   while queue.len > 0:
@@ -131,3 +129,17 @@ iterator allThings*(root: Thing): Thing =
     for child in next.children:
       queue.add child
     yield next
+
+method update*(thing: Thing, dt: float32) {.base.} =
+  echo "The update"
+  let transform = thing.getModelTransform()
+  for part in thing.parts:
+    echo "  The part ", part
+    for name, value in part[].fieldPairs:
+      echo "    attribute ", name
+      when typeof(value) is ModelTransformAttribute:
+        value.data = @[transform.transposed()]
+        echo "updated stuff"
+
+method update*(part: Part, dt: float32) {.base.} = discard
+
