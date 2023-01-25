@@ -130,16 +130,5 @@ iterator allThings*(root: Thing): Thing =
       queue.add child
     yield next
 
-method update*(thing: Thing, dt: float32) {.base.} =
-  echo "The update"
-  let transform = thing.getModelTransform()
-  for part in thing.parts:
-    echo "  The part ", part
-    for name, value in part[].fieldPairs:
-      echo "    attribute ", name
-      when typeof(value) is ModelTransformAttribute:
-        value.data = @[transform.transposed()]
-        echo "updated stuff"
-
+method update*(thing: Thing, dt: float32) {.base.} = discard
 method update*(part: Part, dt: float32) {.base.} = discard
-

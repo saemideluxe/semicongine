@@ -199,6 +199,11 @@ proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice,
   var imageCount = capabilities.minImageCount + 1
   if capabilities.maxImageCount > 0:
     imageCount = min(capabilities.maxImageCount, imageCount)
+  # TODO: fix when dimension is zero
+  var extent = VkExtent2D(
+    width: if dimension[0] > 0: dimension[0] else: 1,
+    height: if dimension[1] > 0: dimension[1] else: 1,
+  )
   # setup swapchain
   var swapchainCreateInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
@@ -206,10 +211,10 @@ proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice,
     minImageCount: imageCount,
     imageFormat: surfaceFormat.format,
     imageColorSpace: surfaceFormat.colorSpace,
-    imageExtent: VkExtent2D(width: dimension[0], height: dimension[1]),
+    imageExtent: extent,
     imageArrayLayers: 1,
     imageUsage: VkImageUsageFlags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT),
-    # VK_SHARING_MODE_CONCURRENT no supported (i.e cannot use different queue families for  drawing to swap surface?)
+    # VK_SHARING_MODE_CONCURRENT no supported (i.e cannot use different queue families for drawing to swap surface?)
     imageSharingMode: VK_SHARING_MODE_EXCLUSIVE,
     preTransform: capabilities.currentTransform,
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
