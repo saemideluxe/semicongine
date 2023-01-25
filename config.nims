@@ -116,7 +116,7 @@ task publish, "publish all build":
     exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/windows/")
 
 task glslangValidator, "Download glslangValidator (required for linux compilation)":
-  let dirname="/tmp/glslang_download"
+  let dirname = "/tmp/glslang_download"
   exec &"mkdir -p {dirname}"
   exec &"cd {dirname} && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-Release.zip"
   exec &"cd {dirname} && unzip *.zip"
@@ -124,14 +124,14 @@ task glslangValidator, "Download glslangValidator (required for linux compilatio
   exec &"rm -rf {dirname}"
 
 task glslangValidator_exe, "Download glslangValidator.exe (required for windows compilation)":
-  let dirname="/tmp/glslang_download"
+  let dirname = "/tmp/glslang_download"
   exec &"mkdir -p {dirname}"
   exec &"cd {dirname} && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-windows-x64-Release.zip"
   exec &"cd {dirname} && unzip *.zip"
   exec &"mv {dirname}/bin/glslangValidator.exe examples/"
   exec &"rm -rf {dirname}"
 
-task run_all , "Run all binaries":
+task run_all, "Run all binaries":
   for file in listFiles("build/debug/linux"):
     exec file
   for file in listFiles("build/release/linux"):

@@ -22,7 +22,8 @@ func createUberMesh*[T](meshes: openArray[Mesh[T]]): Mesh[T] =
           when srcname == dstname:
             dstvalue.data.add srcvalue.data
 
-func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[IndexedMesh[T, U]]): IndexedMesh[T, U] =
+func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[IndexedMesh[
+    T, U]]): IndexedMesh[T, U] =
   var indexoffset = U(0)
   for mesh in meshes:
     for srcname, srcvalue in mesh.vertexData.fieldPairs:
@@ -36,10 +37,11 @@ func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[IndexedMesh[
       result.indices.add indexdata
     indexoffset += U(mesh.vertexData.VertexCount)
 
-func getVkIndexType[T: object, U: uint16|uint32](m: IndexedMesh[T, U]): VkIndexType =
+func getVkIndexType[T: object, U: uint16|uint32](m: IndexedMesh[T,
+    U]): VkIndexType =
   when U is uint16: VK_INDEX_TYPE_UINT16
   elif U is uint32: VK_INDEX_TYPE_UINT32
-      
+
 proc createVertexBuffers*[M: Mesh|IndexedMesh](
   mesh: M,
   device: VkDevice,
@@ -52,12 +54,15 @@ proc createVertexBuffers*[M: Mesh|IndexedMesh](
     when typeof(value) is VertexAttribute:
       assert value.data.len > 0
       var flags = if value.useOnDeviceMemory: {TransferSrc} else: {VertexBuffer}
-      var stagingBuffer = device.InitBuffer(physicalDevice, value.datasize, flags, {HostVisible, HostCoherent})
+      var stagingBuffer = device.InitBuffer(physicalDevice, value.datasize,
+          flags, {HostVisible, HostCoherent})
       copyMem(stagingBuffer.data, addr(value.data[0]), value.datasize)
 
       if value.useOnDeviceMemory:
-        var finalBuffer = device.InitBuffer(physicalDevice, value.datasize, {TransferDst, VertexBuffer}, {DeviceLocal})
-        transferBuffer(commandPool, queue, stagingBuffer, finalBuffer, value.datasize)
+        var finalBuffer = device.InitBuffer(physicalDevice, value.datasize, {
+            TransferDst, VertexBuffer}, {DeviceLocal})
+        transferBuffer(commandPool, queue, stagingBuffer, finalBuffer,
+            value.datasize)
         stagingBuffer.trash()
         result[0].add(finalBuffer)
         value.buffer = finalBuffer
@@ -73,14 +78,17 @@ proc createIndexBuffer*(
   queue: VkQueue,
   useDeviceLocalBuffer: bool = true # decides if data is transfered to the fast device-local memory or not
 ): Buffer =
-  let bufferSize = uint64(mesh.indices.len * sizeof(get(genericParams(typeof(mesh.indices)), 0)))
+  let bufferSize = uint64(mesh.indices.len * sizeof(get(genericParams(typeof(
+      mesh.indices)), 0)))
   let flags = if useDeviceLocalBuffer: {TransferSrc} else: {IndexBuffer}
 
-  var stagingBuffer = device.InitBuffer(physicalDevice, bufferSize, flags, {HostVisible, HostCoherent})
+  var stagingBuffer = device.InitBuffer(physicalDevice, bufferSize, flags, {
+      HostVisible, HostCoherent})
   copyMem(stagingBuffer.data, addr(mesh.indices[0]), bufferSize)
 
   if useDeviceLocalBuffer:
-    var finalBuffer = device.InitBuffer(physicalDevice, bufferSize, {TransferDst, IndexBuffer}, {DeviceLocal})
+    var finalBuffer = device.InitBuffer(physicalDevice, bufferSize, {
+        TransferDst, IndexBuffer}, {DeviceLocal})
     transferBuffer(commandPool, queue, stagingBuffer, finalBuffer, bufferSize)
     stagingBuffer.trash()
     return finalBuffer
@@ -95,15 +103,27 @@ proc createIndexedVertexBuffers*(
   queue: VkQueue,
   useDeviceLocalBufferForIndices: bool = true # decides if data is transfered to the fast device-local memory or not
 ): (seq[Buffer], Buffer, uint32, VkIndexType) =
-  result[0] = createVertexBuffers(mesh, device, physicalDevice, commandPool, queue)[0]
-  result[1] = createIndexBuffer(mesh, device, physicalDevice, commandPool, queue, useDeviceLocalBufferForIndices)
+  result[0] = createVertexBuffers(mesh, device, physicalDevice, commandPool,
+      queue)[0]
+  result[1] = createIndexBuffer(mesh, device, physicalDevice, commandPool,
+      queue, useDeviceLocalBufferForIndices)
   result[2] = uint32(mesh.indices.len * mesh.indices[0].len)
 
   result[3] = getVkIndexType(mesh)
 
-func squareData*[T:SomeFloat](): auto = PositionAttribute[TVec2[T]](
-  data: @[TVec2[T]([T(0), T(0)]), TVec2[T]([T(0), T(1)]), TVec2[T]([T(1), T(1)]), TVec2[T]([T(1), T(0)])]
+func squareData*[T: SomeFloat](): auto = PositionAttribute[TVec2[T]](
+  data: @[TVec2[T]([T(0), T(0)]), TVec2[T]([T(0), T(1)]), TVec2[T]([T(1), T(
+      1)]), TVec2[T]([T(1), T(0)])]
 )
-func squareIndices*[T:uint16|uint32](): auto = seq[array[3, T]](
+func squareIndices*[T: uint16|uint32](): auto = seq[array[3, T]](
   @[[T(0), T(1), T(3)], [T(2), T(1), T(3)]]
 )
+
+method update*(mesh: Mesh, dt: float32) =
+  echo "The update"
+  echo mesh.thing.getModelTransform()
+  echo mesh.vertexData
+method update*(mesh: IndexedMesh, dt: float32) =
+  echo "The update"
+  echo mesh.thing.getModelTransform()
+  echo mesh.vertexData
