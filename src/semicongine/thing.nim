@@ -1,17 +1,15 @@
 import std/strformat
 import std/typetraits
 
-import ./vertex
 import ./math/matrix
 
 type
   Part* = ref object of RootObj
-    thing: Thing
-  Transform* = ref object of Part
-    mat: Mat44
+    thing*: Thing
 
   Thing* = ref object of RootObj
     name*: string
+    transform*: Mat44 # todo: cache transform + only update VBO when transform changed
     parent*: Thing
     children*: seq[Thing]
     parts*: seq[Part]
@@ -19,11 +17,6 @@ type
 
 func `$`*(thing: Thing): string = thing.name
 method `$`*(part: Part): string {.base.} = &"{part.thing} -> Part"
-method `$`*(part: Transform): string = &"{part.thing} -> Transform"
-
-func newTransform*(mat: Mat44): Transform =
-  result = new Transform
-  result.mat = mat
 
 proc add*(thing: Thing, child: Thing) =
   child.parent = thing
@@ -43,6 +36,7 @@ proc add*(thing: Thing, parts: seq[Part]) =
 func newThing*(name: string = ""): Thing =
   result = new Thing
   result.name = name
+  result.transform = Unit44
   if result.name == "":
     result.name = &"Thing[{$(cast[ByteAddress](result))}]"
 func newThing*(name: string, firstChild: Thing, children: varargs[
@@ -52,6 +46,7 @@ func newThing*(name: string, firstChild: Thing, children: varargs[
   for child in children:
     result.add child
   result.name = name
+  result.transform = Unit44
   if result.name == "":
     result.name = &"Thing[{$(cast[ByteAddress](result))}]"
 proc newThing*(name: string, firstPart: Part, parts: varargs[Part]): Thing =
@@ -62,14 +57,13 @@ proc newThing*(name: string, firstPart: Part, parts: varargs[Part]): Thing =
     result.add part
   if result.name == "":
     result.name = &"Thing[{$(cast[ByteAddress](result))}]"
+  result.transform = Unit44
 
 func getModelTransform*(thing: Thing): Mat44 =
   result = Unit44
   var currentThing = thing
   while currentThing != nil:
-    for part in currentThing.parts:
-      if part of Transform:
-        result = Transform(part).mat * result
+    result = currentThing.transform * result
     currentThing = currentThing.parent
 
 iterator allPartsOfType*[T: Part](root: Thing): T =
@@ -79,8 +73,8 @@ iterator allPartsOfType*[T: Part](root: Thing): T =
     for part in thing.parts:
       if part of T:
         yield T(part)
-    for child in thing.children:
-      queue.insert(child, 0)
+    for i in countdown(thing.children.len - 1, 0):
+      queue.add thing.children[i]
 
 func firstWithName*(root: Thing, name: string): Thing =
   var queue = @[root]
@@ -129,6 +123,3 @@ iterator allThings*(root: Thing): Thing =
     for child in next.children:
       queue.add child
     yield next
-
-method update*(thing: Thing, dt: float32) {.base.} = discard
-method update*(part: Part, dt: float32) {.base.} = discard

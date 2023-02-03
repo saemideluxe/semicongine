@@ -15,8 +15,8 @@ import ./shader
 import ./vertex
 import ./buffer
 import ./thing
-import ./mesh
 import ./descriptor
+import ./mesh
 
 const MAX_FRAMES_IN_FLIGHT = 2
 const DEBUG_LOG = not defined(release)
@@ -50,8 +50,7 @@ type
     shaders*: seq[ShaderProgram[VertexType, Uniforms]]
     layout*: VkPipelineLayout
     pipeline*: VkPipeline
-    vertexBuffers*: seq[(seq[Buffer], uint32)]
-    indexedVertexBuffers*: seq[(seq[Buffer], Buffer, uint32, VkIndexType)]
+    vertexBuffers*: seq[(seq[Buffer], bool, Buffer, uint32, VkIndexType)]
     descriptorSetLayout*: VkDescriptorSetLayout
     uniformBuffers*: array[MAX_FRAMES_IN_FLIGHT, Buffer]
     descriptorPool*: VkDescriptorPool
@@ -94,6 +93,17 @@ type
     window*: NativeWindow
     currentscenedata*: Thing
     input*: Input
+
+
+method update*(thing: Thing, engine: Engine, dt: float32) {.base.} = discard
+method update*(part: Part, engine: Engine, dt: float32) {.base.} = discard
+
+method update*[T, U](mesh: Mesh[T, U], engine: Engine, dt: float32) =
+  let transform = @[mesh.thing.getModelTransform().transposed()]
+  for name, value in mesh.vertexData.fieldPairs:
+    when value is ModelTransformAttribute:
+      value.data = transform
+      engine.vulkan.device.updateVertexData(value)
 
 proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[
     PhysicalDevice] =
@@ -199,7 +209,7 @@ proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice,
   var imageCount = capabilities.minImageCount + 1
   if capabilities.maxImageCount > 0:
     imageCount = min(capabilities.maxImageCount, imageCount)
-  # TODO: fix when dimension is zero
+  # TODO: something not working on window..., likely the extent
   var extent = VkExtent2D(
     width: if dimension[0] > 0: dimension[0] else: 1,
     height: if dimension[1] > 0: dimension[1] else: 1,
@@ -573,19 +583,11 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](
     fragmentShader,
   )
 
-  # vertex buffers
-  for mesh in allPartsOfType[Mesh[VertexType]](engine.currentscenedata):
-    result.vertexBuffers.add createVertexBuffers(mesh, result.device,
-        engine.vulkan.device.physicalDevice.device,
+  for mesh in allPartsOfType[Mesh[VertexType, IndexType]](
+      engine.currentscenedata):
+    result.vertexBuffers.add createIndexedVertexBuffers(mesh,
+        result.device, engine.vulkan.device.physicalDevice.device,
         engine.vulkan.device.commandPool, engine.vulkan.device.graphicsQueue)
-
-  # vertex buffers with indexes
-  when not (IndexType is void):
-    for mesh in allPartsOfType[IndexedMesh[VertexType, IndexType]](
-        engine.currentscenedata):
-      result.indexedVertexBuffers.add createIndexedVertexBuffers(mesh,
-          result.device, engine.vulkan.device.physicalDevice.device,
-          engine.vulkan.device.commandPool, engine.vulkan.device.graphicsQueue)
 
   # uniform buffers
   when not (UniformType is void):
@@ -680,7 +682,9 @@ proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer,
 
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
       pipeline.layout, 0, 1, addr(pipeline.descriptors[currentFrame]), 0, nil)
-  for (vertexBufferSet, vertexCount) in pipeline.vertexBuffers:
+
+  for (vertexBufferSet, indexed, indexBuffer, count, indexType) in
+    pipeline.vertexBuffers:
     var
       vertexBuffers: seq[VkBuffer]
       offsets: seq[VkDeviceSize]
@@ -690,24 +694,13 @@ proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer,
 
     vkCmdBindVertexBuffers(commandBuffer, firstBinding = 0'u32,
         bindingCount = uint32(vertexBuffers.len), pBuffers = addr(vertexBuffers[
-        0]), pOffsets = addr(offsets[0]))
-    vkCmdDraw(commandBuffer, vertexCount = vertexCount, instanceCount = 1'u32,
-        firstVertex = 0'u32, firstInstance = 0'u32)
-
-  for (vertexBufferSet, indexBuffer, indicesCount, indexType) in
-    pipeline.indexedVertexBuffers:
-    var
-      vertexBuffers: seq[VkBuffer]
-      offsets: seq[VkDeviceSize]
-    for buffer in vertexBufferSet:
-      vertexBuffers.add buffer.vkBuffer
-      offsets.add VkDeviceSize(0)
-
-    vkCmdBindVertexBuffers(commandBuffer, firstBinding = 0'u32,
-        bindingCount = uint32(vertexBuffers.len), pBuffers = addr(vertexBuffers[
-        0]), pOffsets = addr(offsets[0]))
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer.vkBuffer, VkDeviceSize(0), indexType)
-    vkCmdDrawIndexed(commandBuffer, indicesCount, 1, 0, 0, 0)
+            0]), pOffsets = addr(offsets[0]))
+    if indexed:
+      vkCmdBindIndexBuffer(commandBuffer, indexBuffer.vkBuffer, VkDeviceSize(0), indexType)
+      vkCmdDrawIndexed(commandBuffer, count, 1, 0, 0, 0)
+    else:
+      vkCmdDraw(commandBuffer, vertexCount = count, instanceCount = 1,
+          firstVertex = 0, firstInstance = 0)
 
 proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline,
     commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer,
@@ -858,8 +851,8 @@ proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(
     engine.globalUpdate(dt)
     for thing in allThings(engine.currentscenedata):
       for part in thing.parts:
-        part.update(dt)
-      thing.update(dt)
+        update(part, engine, dt)
+      update(thing, engine, dt)
 
     # submit frame for drawing
     engine.window.drawFrame(engine.vulkan, currentFrame, resized, pipeline)
@@ -875,11 +868,10 @@ proc trash*(pipeline: var RenderPipeline) =
   for shader in pipeline.shaders:
     vkDestroyShaderModule(pipeline.device, shader.shader.module, nil)
 
-  for (bufferset, cnt) in pipeline.vertexBuffers.mitems:
-    for buffer in bufferset.mitems:
-      buffer.trash()
-  for (bufferset, indexbuffer, cnt, t) in pipeline.indexedVertexBuffers.mitems:
-    indexbuffer.trash()
+  for (bufferset, indexed, indexbuffer, cnt, t) in
+    pipeline.vertexBuffers.mitems:
+    if indexed:
+      indexbuffer.trash()
     for buffer in bufferset.mitems:
       buffer.trash()
   for buffer in pipeline.uniformBuffers.mitems:
