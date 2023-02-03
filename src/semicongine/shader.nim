@@ -14,7 +14,7 @@ import ./math/vector
 
 type
   AllowedUniformType = SomeNumber|TVec
-  UniformSlot *[T:AllowedUniformType] = object
+  UniformSlot *[T: AllowedUniformType] = object
   ShaderProgram*[VertexType, Uniforms] = object
     entryPoint*: string
     programType*: VkShaderStageFlagBits
@@ -32,7 +32,9 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
   of VK_SHADER_STAGE_ALL: ""
 
-proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: static string, entrypoint: string): seq[uint32] {.compileTime.} =
+proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
+    shaderSource: static string, entrypoint: string): seq[
+    uint32] {.compileTime.} =
   when defined(nimcheck): # will not run if nimcheck is running
     return result
   const
@@ -42,7 +44,9 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
     shaderfile = getTempDir() / fmt"shader_{shaderHash}.{stagename}"
     projectPath = querySetting(projectPath)
 
-  let (output, exitCode_glsl) = gorgeEx(command=fmt"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}", input=shaderSource)
+  let (output, exitCode_glsl) = gorgeEx(
+      command = fmt"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}",
+      input = shaderSource)
   if exitCode_glsl != 0:
     raise newException(Exception, output)
 
@@ -55,14 +59,16 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
   var i = 0
   while i < shaderbinary.len:
     result.add(
-      (uint32(shaderbinary[i + 0]) shl  0) or
-      (uint32(shaderbinary[i + 1]) shl  8) or
+      (uint32(shaderbinary[i + 0]) shl 0) or
+      (uint32(shaderbinary[i + 1]) shl 8) or
       (uint32(shaderbinary[i + 2]) shl 16) or
       (uint32(shaderbinary[i + 3]) shl 24)
     )
     i += 4
 
-proc initShaderProgram*[VertexType, Uniforms](device: VkDevice, programType: static VkShaderStageFlagBits, shader: static string, entryPoint: static string="main"): ShaderProgram[VertexType, Uniforms] =
+proc initShaderProgram*[VertexType, Uniforms](device: VkDevice,
+    programType: static VkShaderStageFlagBits, shader: static string,
+    entryPoint: static string = "main"): ShaderProgram[VertexType, Uniforms] =
   result.entryPoint = entryPoint
   result.programType = programType
 
@@ -93,7 +99,7 @@ func generateVertexShaderCode*[VertexType, Uniforms](
   lines.add "layout(row_major) uniform;"
   lines.add generateGLSLUniformDeclarations[Uniforms]()
   lines.add generateGLSLVertexDeclarations[VertexType]()
-  lines.add "layout(location = 0) out vec3 fragColor;"
+  lines.add "layout(location = 0) out vec4 fragColor;"
   lines.add "void " & entryPoint & "() {"
 
   var hasPosition = 0
@@ -112,7 +118,10 @@ func generateVertexShaderCode*[VertexType, Uniforms](
     when typeof(value) is ColorAttribute:
       let glsltype = getGLSLType[getAttributeType(value)]()
       lines.add &"    {glsltype} in_color = " & name & ";"
-      lines.add &"    {glsltype} out_color = in_color;";
+      if getAttributeType(value) is TVec3:
+        lines.add &"    vec4 out_color = vec4(in_color, 1);";
+      elif getAttributeType(value) is TVec4:
+        lines.add &"    vec4 out_color = in_color;";
       hasColor += 1
 
   lines.add shaderBody
@@ -133,13 +142,13 @@ func generateFragmentShaderCode*[VertexType](
   var lines: seq[string]
   lines.add "#version " & glslVersion
   lines.add "layout(row_major) uniform;"
-  lines.add "layout(location = 0) in vec3 fragColor;"
+  lines.add "layout(location = 0) in vec4 fragColor;"
   lines.add "layout(location = 0) out vec4 outColor;"
   lines.add "void " & entryPoint & "() {"
-  lines.add "    vec3 in_color = fragColor;"
-  lines.add "    vec3 out_color = in_color;"
+  lines.add "    vec4 in_color = fragColor;"
+  lines.add "    vec4 out_color = in_color;"
   lines.add shaderBody
-  lines.add "    outColor = vec4(out_color, 1.0);"
+  lines.add "    outColor = out_color;"
   lines.add "}"
 
   return lines.join("\n")

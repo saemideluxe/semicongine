@@ -8,22 +8,17 @@ import ./vertex
 import ./math/vector
 
 type
-  Mesh*[T] = ref object of Part
+  # TODO: make single mesh type, with case-of attribute for indices
+  Mesh*[T: object, U: uint16|uint32] = ref object of Part
     vertexData*: T
-  IndexedMesh*[T: object, U: uint16|uint32] = ref object of Part
-    vertexData*: T
-    indices*: seq[array[3, U]]
+    case indexed*: bool
+    of true:
+      indices*: seq[array[3, U]]
+    of false:
+      discard
 
-func createUberMesh*[T](meshes: openArray[Mesh[T]]): Mesh[T] =
-  for mesh in meshes:
-    for srcname, srcvalue in mesh.vertexData.fieldPairs:
-      when typeof(srcvalue) is VertexAttribute:
-        for dstname, dstvalue in result.vertexData.fieldPairs:
-          when srcname == dstname:
-            dstvalue.data.add srcvalue.data
-
-func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[IndexedMesh[
-    T, U]]): IndexedMesh[T, U] =
+func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[Mesh[
+    T, U]]): Mesh[T, U] =
   var indexoffset = U(0)
   for mesh in meshes:
     for srcname, srcvalue in mesh.vertexData.fieldPairs:
@@ -37,12 +32,12 @@ func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[IndexedMesh[
       result.indices.add indexdata
     indexoffset += U(mesh.vertexData.VertexCount)
 
-func getVkIndexType[T: object, U: uint16|uint32](m: IndexedMesh[T,
+func getVkIndexType[T: object, U: uint16|uint32](m: Mesh[T,
     U]): VkIndexType =
   when U is uint16: VK_INDEX_TYPE_UINT16
   elif U is uint32: VK_INDEX_TYPE_UINT32
 
-proc createVertexBuffers*[M: Mesh|IndexedMesh](
+proc createVertexBuffers*[M: Mesh](
   mesh: M,
   device: VkDevice,
   physicalDevice: VkPhysicalDevice,
@@ -71,7 +66,7 @@ proc createVertexBuffers*[M: Mesh|IndexedMesh](
         value.buffer = stagingBuffer
 
 proc createIndexBuffer*(
-  mesh: IndexedMesh,
+  mesh: Mesh,
   device: VkDevice,
   physicalDevice: VkPhysicalDevice,
   commandPool: VkCommandPool,
@@ -96,20 +91,23 @@ proc createIndexBuffer*(
     return stagingBuffer
 
 proc createIndexedVertexBuffers*(
-  mesh: IndexedMesh,
+  mesh: Mesh,
   device: VkDevice,
   physicalDevice: VkPhysicalDevice,
   commandPool: VkCommandPool,
   queue: VkQueue,
   useDeviceLocalBufferForIndices: bool = true # decides if data is transfered to the fast device-local memory or not
-): (seq[Buffer], Buffer, uint32, VkIndexType) =
+): (seq[Buffer], bool, Buffer, uint32, VkIndexType) =
   result[0] = createVertexBuffers(mesh, device, physicalDevice, commandPool,
       queue)[0]
-  result[1] = createIndexBuffer(mesh, device, physicalDevice, commandPool,
-      queue, useDeviceLocalBufferForIndices)
-  result[2] = uint32(mesh.indices.len * mesh.indices[0].len)
-
-  result[3] = getVkIndexType(mesh)
+  result[1] = mesh.indexed
+  if mesh.indexed:
+    result[2] = createIndexBuffer(mesh, device, physicalDevice, commandPool,
+        queue, useDeviceLocalBufferForIndices)
+    result[3] = uint32(mesh.indices.len * mesh.indices[0].len)
+    result[4] = getVkIndexType(mesh)
+  else:
+    result[3] = uint32(mesh.vertexData.VertexCount)
 
 func squareData*[T: SomeFloat](): auto = PositionAttribute[TVec2[T]](
   data: @[TVec2[T]([T(0), T(0)]), TVec2[T]([T(0), T(1)]), TVec2[T]([T(1), T(
@@ -118,12 +116,3 @@ func squareData*[T: SomeFloat](): auto = PositionAttribute[TVec2[T]](
 func squareIndices*[T: uint16|uint32](): auto = seq[array[3, T]](
   @[[T(0), T(1), T(3)], [T(2), T(1), T(3)]]
 )
-
-method update*(mesh: Mesh, dt: float32) =
-  echo "The update"
-  echo mesh.thing.getModelTransform()
-  echo mesh.vertexData
-method update*(mesh: IndexedMesh, dt: float32) =
-  echo "The update"
-  echo mesh.thing.getModelTransform()
-  echo mesh.vertexData
