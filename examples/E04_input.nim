@@ -1,4 +1,5 @@
 import std/tables
+import std/enumerate
 import std/strutils
 import std/typetraits
 import std/times
@@ -32,35 +33,40 @@ const
     Vec4([0.8'f32, 0'f32, 0'f32, 1'f32]),
     Vec4([0.8'f32, 0'f32, 0'f32, 1'f32]),
   ]
-  # row width is 15, should sum up
+  # keyboard layout, specifying rows with key widths, negative numbers are empty spaces
   keyrows = (
-    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 3.0],
-    [1.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.8],
-    [1.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.2],
-    [2.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-    [3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 3.0],
-    [1.5, 1.5, 1.5, 6, 1.5, 1.5, 1.5],
+    [1.0, -0.6, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0,
+        1.0, 1.0, -0.1, 1.0, 1.0, 1.0],
+    [1.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.8, -0.1,
+        1.0, 1.0, 1.0],
+    [1.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.5, 1.0,
+        1.0, 1.0],
+    [2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    [2.6, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.8, -1.3, 1.0],
+    [1.5, 1.5, 1.5, 6, 1.5, 1.5, -1.2, 1.5, -0.1, 1.0, 1.0, 1.0],
   )
-  rowWidth = 900
-  keyHeight = 50'f32
+  keyDimension = 50'f32
   keyGap = 10'f32
   baseColor = Vec4([1'f32, 0'f32, 0'f32, 0'f32])
   activeColor = Vec4([1'f32, 1'f32, 1'f32, 0'f32])
-  keyMap = {
-    Escape: 0, F1: 1, F2: 2, F3: 3, F4: 4, F5: 5, F6: 6, F7: 7, F8: 8, F9: 9,
-    F10: 10, F11: 11, F12: 12,
-    NumberRowExtra1: 13, `1`: 14, `2`: 15, `3`: 16, `4`: 17, `5`: 18, `6`: 19,
-    `7`: 20, `8`: 21, `9`: 22, `0`: 23, NumberRowExtra2: 24,
-    NumberRowExtra3: 25, Backspace: 26,
-    Tab: 27, Q: 28, W: 29, Key.E: 30, R: 31, T: 32, Key.Y: 33, U: 34, I: 35, O: 36,
-    P: 37, LetterRow1Extra1: 38, LetterRow1Extra2: 39, LetterRow1Extra3: 40,
-    CapsLock: 41, A: 42, S: 43, D: 44, F: 45, G: 46, H: 47, J: 48, K: 49, L: 50,
-    LetterRow2Extra1: 51, LetterRow2Extra2: 52,
-    ShiftL: 53, Key.Z: 54, Key.X: 55, C: 56, V: 57, B: 58, N: 59, M: 60,
-    LetterRow3Extra1: 61, LetterRow3Extra2: 62, LetterRow3Extra3: 63,
-    ShiftR: 64,
-    CtrlL: 65, SuperL: 66, AltL: 67, Space: 68, AltR: 69, SuperR: 70, CtrlR: 71,
-  }.toTable
+  keyIndices = [
+    Escape, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, PrintScreen,
+    ScrollLock, Pause,
+
+    NumberRowExtra1, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `0`,
+
+    NumberRowExtra2, NumberRowExtra3, Backspace, Insert, Home, PageUp,
+    Tab, Q, W, Key.E, R, T, Key.Y, U, I, O, P, LetterRow1Extra1,
+    LetterRow1Extra2, Delete, End, PageDown,
+
+    CapsLock, A, S, D, F, G, H, J, K, L, LetterRow2Extra1, LetterRow2Extra2,
+    LetterRow2Extra3, Enter,
+
+    ShiftL, Key.Z, Key.X, C, V, B, N, M, LetterRow3Extra1, LetterRow3Extra2,
+    LetterRow3Extra3, ShiftR, Up,
+
+    CtrlL, SuperL, AltL, Space, AltR, SuperR, CtrlR, Left, Down, Right
+  ]
 
 var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
@@ -68,26 +74,36 @@ var
   scene: Thing
   keyvertexpos: seq[Vec3]
   keyvertexcolor: seq[Vec4]
-  keyindices: seq[array[3, uint16]]
+  keymeshindices: seq[array[3, uint16]]
   rowpos = Vec2([0'f32, 0'f32])
   i = 0'u16
+  firstRow = true
+  rowWidth = 0'f32
 for row in keyrows.fields:
-  let
-    rowSpacePx = rowWidth - (row.len - 1) * keyGap
-    rowSpace = sum(row)
   for key in row:
-    let keySpace = float32((key / rowSpace) * rowSpacePx)
-    keyvertexpos.add Vec3([rowpos[0], rowpos[1], 0'f32])
-    keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1], 0'f32])
-    keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1] + keyHeight, 0'f32])
-    keyvertexpos.add Vec3([rowpos[0], rowpos[1] + keyHeight, 0'f32])
-    keyvertexcolor.add [baseColor, baseColor, baseColor, baseColor]
-    keyindices.add [i, i + 1, i + 2]
-    keyindices.add [i + 2, i + 3, i]
-    rowpos[0] += keySpace + keyGap
-    i += 4
+    let keySpace = float32(keyDimension * key)
+    if key > 0:
+      if keyIndices[i div 4] == Enter:
+        keyvertexpos.add Vec3([rowpos[0], rowpos[1] - keyDimension - keyGap, 0'f32])
+        keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1] - keyDimension -
+            keyGap, 0'f32])
+      else:
+        keyvertexpos.add Vec3([rowpos[0], rowpos[1], 0'f32])
+        keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1], 0'f32])
+      keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1] + keyDimension, 0'f32])
+      keyvertexpos.add Vec3([rowpos[0], rowpos[1] + keyDimension, 0'f32])
+      keyvertexcolor.add [baseColor, baseColor, baseColor, baseColor]
+      keymeshindices.add [i, i + 1, i + 2]
+      keymeshindices.add [i + 2, i + 3, i]
+      rowpos[0] += keySpace + keyGap
+      i += 4
+    else:
+      rowpos[0] += -keySpace + keyGap
+  if firstRow:
+    rowWidth = rowpos[0]
   rowpos[0] = 0
-  rowpos[1] += keyHeight + keyGap
+  rowpos[1] += keyDimension + keyGap * (if firstRow: 2'f32 else: 1'f32)
+  firstRow = false
 
 
 proc globalUpdate(engine: var Engine, dt: float32) =
@@ -105,11 +121,12 @@ proc globalUpdate(engine: var Engine, dt: float32) =
         2'f32, 0.1'f32)
   scene.firstWithName("cursor").transform = mousePos
   scene.firstWithName("keyboard-center").transform = center
+  scene.firstWithName("background").transform = scale3d(float32(winsize[0]),
+      float32(winsize[1]), 0'f32)
   var mesh = Mesh[VertexDataA, uint16](scene.firstWithName("keyboard").parts[0])
   var hadUpdate = false
-  for key, index in keyMap.pairs:
+  for (index, key) in enumerate(keyIndices):
     if key in engine.input.keysPressed:
-      echo "Pressed ", key
       let baseIndex = index * 4
       mesh.vertexData.color.data[baseIndex + 0] = activeColor
       mesh.vertexData.color.data[baseIndex + 1] = activeColor
@@ -117,7 +134,6 @@ proc globalUpdate(engine: var Engine, dt: float32) =
       mesh.vertexData.color.data[baseIndex + 3] = activeColor
       hadUpdate = true
     if key in engine.input.keysReleased:
-      echo "Released ", key
       let baseIndex = index * 4
       mesh.vertexData.color.data[baseIndex + 0] = baseColor
       mesh.vertexData.color.data[baseIndex + 1] = baseColor
@@ -131,6 +147,7 @@ proc globalUpdate(engine: var Engine, dt: float32) =
 when isMainModule:
   var myengine = igniteEngine("Input")
 
+  # cursor
   var cursormesh = new Mesh[VertexDataA, uint16]
   cursormesh.vertexData = VertexDataA(
     position: PositionAttribute[Vec3](data: arrow, useOnDeviceMemory: true),
@@ -150,6 +167,7 @@ when isMainModule:
         cursormesh.vertexData.position.data[i][1], 0'f32])
     cursormesh.vertexData.position.data[i] = (cursorscale * pos)
 
+  # keyboard
   var keyboardmesh = new Mesh[VertexDataA, uint16]
   keyboardmesh.indexed = true
   keyboardmesh.vertexData = VertexDataA(
@@ -158,12 +176,33 @@ when isMainModule:
     color: ColorAttribute[Vec4](data: keyvertexcolor),
     transform: ModelTransformAttribute(data: @[Unit44]),
   )
-  keyboardmesh.indices = keyindices
+  keyboardmesh.indices = keymeshindices
+
+  # background
+  var backgroundmesh = new Mesh[VertexDataA, uint16]
+  backgroundmesh.indexed = true
+  backgroundmesh.indices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]]
+  backgroundmesh.vertexData = VertexDataA(
+    position: PositionAttribute[Vec3](data: @[
+      Vec3([0'f32, 0'f32, 0'f32]),
+      Vec3([1'f32, 0'f32, 0'f32]),
+      Vec3([1'f32, 1'f32, 0'f32]),
+      Vec3([0'f32, 1'f32, 0'f32]),
+    ], useOnDeviceMemory: true),
+    color: ColorAttribute[Vec4](data: @[
+      baseColor * 0.5'f32,
+      baseColor * 0.5'f32,
+      baseColor * 0.5'f32,
+      baseColor * 0.5'f32,
+    ]),
+    transform: ModelTransformAttribute(data: @[Unit44]),
+  )
 
   scene = newThing("scene")
+  scene.add newThing("background", backgroundmesh)
   let keyboard = newThing("keyboard", keyboardmesh)
   keyboard.transform = translate3d(-float32(rowWidth) / 2'f32, -float32(
-      tupleLen(keyRows) * (keyHeight + keyGap) - keyGap) / 2'f32, 0'f32)
+      tupleLen(keyRows) * (keyDimension + keyGap) - keyGap) / 2'f32, 0'f32)
   scene.add newThing("keyboard-center", keyboard)
   scene.add newThing("cursor", cursormesh)
 
