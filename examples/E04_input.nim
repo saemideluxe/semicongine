@@ -25,14 +25,6 @@ const
     Vec3([-1'f32, 1'f32, 0'f32]),
     Vec3([-1'f32, -1'f32, 0'f32]),
   ]
-  arrow_colors = @[
-    Vec4([1'f32, 0'f32, 0'f32, 1'f32]),
-    Vec4([1'f32, 0'f32, 0'f32, 1'f32]),
-    Vec4([1'f32, 0'f32, 0'f32, 1'f32]),
-    Vec4([0.8'f32, 0'f32, 0'f32, 1'f32]),
-    Vec4([0.8'f32, 0'f32, 0'f32, 1'f32]),
-    Vec4([0.8'f32, 0'f32, 0'f32, 1'f32]),
-  ]
   # keyboard layout, specifying rows with key widths, negative numbers are empty spaces
   keyrows = (
     [1.0, -0.6, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0,
@@ -47,9 +39,21 @@ const
   )
   keyDimension = 50'f32
   keyGap = 10'f32
-  backgroundColor = Vec4([1'f32, 0.3'f32, 0.3'f32, 0'f32])
-  baseColor = Vec4([1'f32, 0'f32, 0'f32, 0'f32])
-  activeColor = Vec4([1'f32, 1'f32, 1'f32, 0'f32])
+  backgroundColor = Vec4([0.6705882352941176'f32, 0.6078431372549019'f32,
+      0.5882352941176471'f32, 0'f32])
+  baseColor = Vec4([0.9411764705882353'f32, 0.9058823529411765'f32,
+      0.8470588235294118'f32, 0'f32])
+  activeColor = Vec4([0.6509803921568628'f32, 0.22745098039215686'f32,
+      0.3137254901960784'f32, 0'f32])
+
+  arrow_colors = @[
+    baseColor * 0.9'f32,
+    baseColor * 0.9'f32,
+    baseColor * 0.9'f32,
+    baseColor * 0.8'f32,
+    baseColor * 0.8'f32,
+    baseColor * 0.8'f32,
+  ]
   keyIndices = [
     Escape, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, PrintScreen,
     ScrollLock, Pause,
@@ -116,7 +120,8 @@ proc globalUpdate(engine: var Engine, dt: float32) =
   engine.vulkan.device.updateUniformData(pipeline, uniforms)
 
   let
-    mousePos = translate3d(engine.input.mousePos.x, engine.input.mousePos.y, 0'f32)
+    mousePos = translate3d(engine.input.mousePos.x + 20,
+        engine.input.mousePos.y + 20, 0'f32)
     winsize = engine.window.size
     center = translate3d(float32(winsize[0]) / 2'f32, float32(winsize[1]) /
         2'f32, 0.1'f32)
