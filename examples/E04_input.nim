@@ -47,6 +47,7 @@ const
   )
   keyDimension = 50'f32
   keyGap = 10'f32
+  backgroundColor = Vec4([1'f32, 0.3'f32, 0.3'f32, 0'f32])
   baseColor = Vec4([1'f32, 0'f32, 0'f32, 0'f32])
   activeColor = Vec4([1'f32, 1'f32, 1'f32, 0'f32])
   keyIndices = [
@@ -190,10 +191,10 @@ when isMainModule:
       Vec3([0'f32, 1'f32, 0'f32]),
     ], useOnDeviceMemory: true),
     color: ColorAttribute[Vec4](data: @[
-      baseColor * 0.5'f32,
-      baseColor * 0.5'f32,
-      baseColor * 0.5'f32,
-      baseColor * 0.5'f32,
+      backgroundColor,
+      backgroundColor,
+      backgroundColor,
+      backgroundColor,
     ]),
     transform: ModelTransformAttribute(data: @[Unit44]),
   )
