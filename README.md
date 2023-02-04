@@ -56,7 +56,7 @@ Asset handling:
 
 Quality improvments:
 
-- [ ] Better scenegraph API
+- [x] Better scenegraph API
 - [ ] Better rendering pipeline API
 
 Other:
