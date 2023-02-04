@@ -77,7 +77,7 @@ proc size*(window: NativeWindow): (int, int) =
 proc pendingEvents*(window: NativeWindow): seq[Event] =
   var
     event: XEvent
-    serials: Table[culong, seq[Event]]
+    serials: Table[culong, Table[int, seq[Event]]]
   while window.display.XPending() > 0:
     discard window.display.XNextEvent(addr(event))
     case event.theType
@@ -87,16 +87,22 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     of KeyPress:
       let keyevent = cast[PXKeyEvent](addr(event))
       let xkey = int(keyevent.keycode)
+      # ugly, but required to catch auto-repeat keys of X11
       if not (keyevent.serial in serials):
-        serials[keyevent.serial] = newSeq[Event]()
-      serials[keyevent.serial].add(Event(eventType: KeyPressed,
+        serials[keyevent.serial] = initTable[int, seq[Event]]()
+      if not (xkey in serials[keyevent.serial]):
+        serials[keyevent.serial][xkey] = newSeq[Event]()
+      serials[keyevent.serial][xkey].add(Event(eventType: KeyPressed,
           key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN)))
     of KeyRelease:
       let keyevent = cast[PXKeyEvent](addr(event))
       let xkey = int(keyevent.keycode)
+      # ugly, but required to catch auto-repeat keys of X11
       if not (keyevent.serial in serials):
-        serials[keyevent.serial] = newSeq[Event]()
-      serials[keyevent.serial].add Event(eventType: KeyReleased,
+        serials[keyevent.serial] = initTable[int, seq[Event]]()
+      if not (xkey in serials[keyevent.serial]):
+        serials[keyevent.serial][xkey] = newSeq[Event]()
+      serials[keyevent.serial][xkey].add Event(eventType: KeyReleased,
           key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN))
     of ButtonPress:
       let button = int(cast[PXButtonEvent](addr(event)).button)
@@ -113,9 +119,11 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
       result.add Event(eventType: ResizedWindow)
     else:
       discard
-  for (serial, events) in serials.pairs:
-    if events.len == 1:
-      result.add events[0]
+  # little hack to work around X11 auto-repeat keys
+  for (serial, keys) in serials.pairs:
+    for (key, events) in keys.pairs:
+      if events.len == 1:
+        result.add events[0]
 
 
 proc getMousePosition*(window: NativeWindow): Option[Vec2] =
