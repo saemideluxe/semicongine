@@ -85,7 +85,8 @@ when isMainModule:
   var myengine = igniteEngine("Hello cube")
 
   # build a mesh
-  var trianglemesh = new IndexedMesh[VertexDataA, uint16]
+  var trianglemesh = new Mesh[VertexDataA, uint16]
+  trianglemesh.indexed = true
   trianglemesh.vertexData = VertexDataA(
     position: PositionAttribute[Vec3](data: cube_pos),
     color: ColorAttribute[Vec3](data: cube_color),
