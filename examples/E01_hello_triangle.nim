@@ -32,7 +32,7 @@ when isMainModule:
   var myengine = igniteEngine("Hello triangle")
 
   # build a mesh
-  var trianglemesh = new Mesh[VertexDataA]
+  var trianglemesh = new Mesh[VertexDataA, uint16]
   trianglemesh.vertexData = VertexDataA(
     position: PositionAttribute[Vec2](data: triangle_pos),
     color: ColorAttribute[Vec3](data: triangle_color),
@@ -43,7 +43,7 @@ when isMainModule:
   # upload data, prepare shaders, etc
   const vertexShader = generateVertexShaderCode[VertexDataA, void]()
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
-  pipeline = setupPipeline[VertexDataA, void, void](
+  pipeline = setupPipeline[VertexDataA, void, uint16](
     myengine,
     triangle,
     vertexShader,

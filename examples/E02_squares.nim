@@ -61,7 +61,7 @@ when isMainModule:
           3), uint16(vertIndex + 0)]
 
 
-  type PIndexedMesh = IndexedMesh[VertexDataA,
+  type PIndexedMesh = Mesh[VertexDataA,
       uint16] # required so we can use ctor with ref/on heap
   var squaremesh = PIndexedMesh(
     vertexData: VertexDataA(
@@ -69,6 +69,7 @@ when isMainModule:
       color22: ColorAttribute[Vec3](data: @colors),
       index: GenericAttribute[uint32](data: @iValues),
     ),
+    indexed: true,
     indices: @indices
   )
   var scene = newThing("scene", newThing("squares", squaremesh))
@@ -79,10 +80,12 @@ when isMainModule:
     float t = sin(uniforms.t * 0.5) * 0.5 + 0.5;
     float v = min(1, max(0, pow(pos_weight - t, 2)));
     v = pow(1 - v, 3000);
-    out_color = vec3(in_color.r, in_color.g, v * 0.5);
+    out_color = vec4(in_color.r, in_color.g, v * 0.5, 1.0);
     """
   )
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
+  static:
+    echo vertexShader
   pipeline = setupPipeline[VertexDataA, Uniforms, uint16](
     myengine,
     scene,
