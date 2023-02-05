@@ -43,7 +43,7 @@ Rendering:
 - [ ] Multisampling 
 - [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per mesh)
 - [ ] Fullscreen mode + switch between modes
-- [ ] Fixed framerate
+- [x] Fixed framerate
 - [ ] Allow multipel Uniform blocks
 
 Build-system:
