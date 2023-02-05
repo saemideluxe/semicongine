@@ -109,10 +109,17 @@ proc createIndexedVertexBuffers*(
   else:
     result[3] = uint32(mesh.vertexData.VertexCount)
 
-func squareData*[T: SomeFloat](): auto = PositionAttribute[TVec2[T]](
-  data: @[TVec2[T]([T(0), T(0)]), TVec2[T]([T(0), T(1)]), TVec2[T]([T(1), T(
-      1)]), TVec2[T]([T(1), T(0)])]
-)
-func squareIndices*[T: uint16|uint32](): auto = seq[array[3, T]](
-  @[[T(0), T(1), T(3)], [T(2), T(1), T(3)]]
-)
+func quad*[VertexType, VecType, T](): Mesh[VertexType, uint16] =
+  result = new Mesh[VertexType, uint16]
+  result.indexed = true
+  result.indices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]]
+  result.vertexData = VertexType()
+  for attrname, value in result.vertexData.fieldPairs:
+    when typeof(value) is PositionAttribute:
+      value.data = @[
+        VecType([T(-0.5), T(-0.5), T(0)]),
+        VecType([T(+0.5), T(-0.5), T(0)]),
+        VecType([T(+0.5), T(+0.5), T(0)]),
+        VecType([T(-0.5), T(+0.5), T(0)]),
+      ]
+      value.useOnDeviceMemory = true

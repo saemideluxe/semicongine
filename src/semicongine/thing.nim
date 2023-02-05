@@ -16,7 +16,11 @@ type
 
 
 func `$`*(thing: Thing): string = thing.name
-method `$`*(part: Part): string {.base.} = &"{part.thing} -> Part"
+method `$`*(part: Part): string {.base.} =
+  if part.thing != nil:
+    &"{part.thing} -> Part"
+  else:
+    &"Standalone Part"
 
 proc add*(thing: Thing, child: Thing) =
   child.parent = thing
