@@ -3,9 +3,7 @@ import std/tables
 import
   x11/xlib,
   x11/xutil,
-  x11/keysym,
-  x11/xinput,
-  x11/xinput2
+  x11/keysym
 import x11/x
 
 import ../../events
@@ -141,7 +139,7 @@ proc getMousePosition*(window: NativeWindow): Option[Vec2] =
       addr(root),
       addr(win),
       addr(rootX),
-      addr(rootX),
+      addr(rootY),
       addr(winX),
       addr(winY),
       addr(mask),
