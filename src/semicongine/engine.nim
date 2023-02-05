@@ -1,4 +1,5 @@
 import std/options
+import std/os
 import std/times
 import std/typetraits
 import std/strformat
@@ -55,6 +56,7 @@ type
     uniformBuffers*: array[MAX_FRAMES_IN_FLIGHT, Buffer]
     descriptorPool*: VkDescriptorPool
     descriptors: array[MAX_FRAMES_IN_FLIGHT, VkDescriptorSet]
+    clearColor*: Vec4
   QueueFamily = object
     properties*: VkQueueFamilyProperties
     hasSurfaceSupport*: bool
@@ -93,12 +95,13 @@ type
     window*: NativeWindow
     currentscenedata*: Thing
     input*: Input
+    fps*: uint
 
 
-method update*(thing: Thing, engine: Engine, dt: float32) {.base.} = discard
-method update*(part: Part, engine: Engine, dt: float32) {.base.} = discard
+method update*(thing: Thing, engine: Engine, t, dt: float32) {.base.} = discard
+method update*(part: Part, engine: Engine, t, dt: float32) {.base.} = discard
 
-method update*[T, U](mesh: Mesh[T, U], engine: Engine, dt: float32) =
+method update*[T, U](mesh: Mesh[T, U], engine: Engine, t, dt: float32) =
   let transform = @[mesh.thing.getModelTransform().transposed()]
   for name, value in mesh.vertexData.fieldPairs:
     when value is ModelTransformAttribute:
@@ -710,8 +713,8 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline,
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
       pInheritanceInfo: nil,
     )
-    clearColor = VkClearValue(color: VkClearColorValue(float32: [0.2'f, 0.2'f,
-        0.2'f, 1.0'f]))
+    clearColor = VkClearValue(color: VkClearColorValue(
+        float32: pipeline.clearColor))
     renderPassInfo = VkRenderPassBeginInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
       renderPass: renderPass,
@@ -806,12 +809,17 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int,
     (vulkan.swapchain, vulkan.framebuffers) = vulkan.recreateSwapchain()
 
 
+func frametime(engine: Engine): auto =
+  if engine.fps == 0: 0'f
+  else: 1'f / float32(engine.fps)
+
 proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(
-    engine: var Engine, dt: float32)) =
+    engine: var Engine, t, dt: float32)) =
   var
     currentFrame = 0
     resized = false
-    lastUpdate = getTime()
+    lastUpdate = cpuTime()
+    lastframe = 0'f
 
   while true:
     # process input
@@ -845,19 +853,22 @@ proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(
 
     # game logic update
     let
-      now = getTime()
-      dt = float32(float64((now - lastUpdate).inNanoseconds) / 1_000_000_000'f64)
+      now = cpuTime()
+      dt = now - lastUpdate
     lastUpdate = now
-    engine.globalUpdate(dt)
+    engine.globalUpdate(now, dt)
     for thing in allThings(engine.currentscenedata):
       for part in thing.parts:
-        update(part, engine, dt)
-      update(thing, engine, dt)
+        update(part, engine, now, dt)
+      update(thing, engine, now, dt)
 
     # submit frame for drawing
-    engine.window.drawFrame(engine.vulkan, currentFrame, resized, pipeline)
+    if engine.fps == 0 or (now - lastframe >= engine.frametime): # framerate limit
+      engine.window.drawFrame(engine.vulkan, currentFrame, resized, pipeline)
+      lastframe = now
     resized = false
     currentFrame = (currentFrame + 1) mod MAX_FRAMES_IN_FLIGHT
+
   checkVkResult vkDeviceWaitIdle(engine.vulkan.device.device)
 
 proc trash*(pipeline: var RenderPipeline) =

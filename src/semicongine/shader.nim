@@ -141,10 +141,11 @@ func generateVertexShaderCode*[VertexType, Uniforms](
       elif getAttributeType(value) is TVec4:
         lines.add &"    vec4 out_color = in_color;";
       hasColor += 1
-  let uniformBlockName = name(Uniforms).toLower()
-  for attrname, value in Uniforms().fieldPairs:
-    when typeof(value) is ViewProjectionTransform:
-      lines.add "out_position = " & uniformBlockName & "." & attrname & " * out_position;"
+  when not (Uniforms is void):
+    let uniformBlockName = name(Uniforms).toLower()
+    for attrname, value in Uniforms().fieldPairs:
+      when typeof(value) is ViewProjectionTransform:
+        lines.add "out_position = " & uniformBlockName & "." & attrname & " * out_position;"
 
   lines.add shaderBody
   lines.add "    gl_Position = out_position;"
