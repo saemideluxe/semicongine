@@ -1,4 +1,5 @@
 import std/os
+import std/typetraits
 import std/hashes
 import std/strformat
 import std/strutils
@@ -20,6 +21,15 @@ type
     programType*: VkShaderStageFlagBits
     shader*: VkPipelineShaderStageCreateInfo
     uniforms*: Uniforms
+
+proc staticExecChecked(command: string, input = ""): string {.compileTime.} =
+  let (output, exitcode) = gorgeEx(
+      command = command,
+      input = input)
+  if exitcode != 0:
+    raise newException(Exception, output)
+  return output
+
 
 func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   case stage
@@ -44,17 +54,21 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
     shaderfile = getTempDir() / fmt"shader_{shaderHash}.{stagename}"
     projectPath = querySetting(projectPath)
 
-  let (output, exitCode_glsl) = gorgeEx(
+  discard staticExecChecked(
       command = fmt"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}",
-      input = shaderSource)
-  if exitCode_glsl != 0:
-    raise newException(Exception, output)
+      input = shaderSource
+  )
 
   when defined(mingw): # required for crosscompilation, path separators get messed up
     let shaderbinary = staticRead shaderfile.replace("\\", "/")
   else:
     let shaderbinary = staticRead shaderfile
-  # removeFile(shaderfile) TODO: remove file at compile time? how to do in cross-platform consistent way?
+  when defined(linux) or defined(mingw):
+    discard staticExecChecked(command = fmt"rm {shaderfile}")
+  elif defined(windows):
+    discard staticExecChecked(command = fmt"del {shaderfile}")
+  else:
+    raise newException(Exception, "Unsupported operating system")
 
   var i = 0
   while i < shaderbinary.len:
@@ -102,12 +116,14 @@ func generateVertexShaderCode*[VertexType, Uniforms](
   lines.add "layout(location = 0) out vec4 fragColor;"
   lines.add "void " & entryPoint & "() {"
 
+  var viewprojection = ""
+
   var hasPosition = 0
   var hasColor = 0
-  for name, value in VertexType().fieldPairs:
+  for attrname, value in VertexType().fieldPairs:
     when typeof(value) is PositionAttribute:
       let glsltype = getGLSLType[getAttributeType(value)]()
-      lines.add &"    {glsltype} in_position = " & name & ";"
+      lines.add &"    {glsltype} in_position = " & attrname & ";"
       if getAttributeType(value) is TVec2:
         lines.add "    vec4 out_position = vec4(in_position, 0.0, 1.0);"
       elif getAttributeType(value) is TVec3:
@@ -115,14 +131,20 @@ func generateVertexShaderCode*[VertexType, Uniforms](
       elif getAttributeType(value) is TVec4:
         lines.add "    vec4 out_position = in_position;"
       hasPosition += 1
+    when typeof(value) is ModelTransformAttribute:
+      lines.add &"    out_position = " & attrname & " * out_position;"
     when typeof(value) is ColorAttribute:
       let glsltype = getGLSLType[getAttributeType(value)]()
-      lines.add &"    {glsltype} in_color = " & name & ";"
+      lines.add &"    {glsltype} in_color = " & attrname & ";"
       if getAttributeType(value) is TVec3:
         lines.add &"    vec4 out_color = vec4(in_color, 1);";
       elif getAttributeType(value) is TVec4:
         lines.add &"    vec4 out_color = in_color;";
       hasColor += 1
+  let uniformBlockName = name(Uniforms).toLower()
+  for attrname, value in Uniforms().fieldPairs:
+    when typeof(value) is ViewProjectionTransform:
+      lines.add "out_position = " & uniformBlockName & "." & attrname & " * out_position;"
 
   lines.add shaderBody
   lines.add "    gl_Position = out_position;"

@@ -1,4 +1,3 @@
-import std/tables
 import std/enumerate
 import std/strutils
 import std/typetraits
@@ -14,7 +13,7 @@ type
     color: ColorAttribute[Vec4]
     transform: ModelTransformAttribute
   Uniforms = object
-    projection: Descriptor[Mat44]
+    projection: ViewProjectionTransform
 
 const
   arrow = @[
@@ -213,9 +212,7 @@ when isMainModule:
   scene.add newThing("cursor", cursormesh)
 
   # upload data, prepare shaders, etc
-  const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms]("""
-    out_position = uniforms.projection * transform * vec4(position, 1);
-  """)
+  const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms]()
   const fragmentShader = generateFragmentShaderCode[VertexDataA]()
   pipeline = setupPipeline[VertexDataA, Uniforms, uint16](
     myengine,

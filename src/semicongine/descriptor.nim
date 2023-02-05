@@ -14,10 +14,12 @@ import ./glsl_helpers
 #
 type
   DescriptorType = SomeNumber|TVec|TMat
-  Descriptor*[T:DescriptorType] = object
+  Descriptor*[T: DescriptorType] = object
     value*: T
+  ViewProjectionTransform* = Descriptor[Mat44]
 
-proc createUniformDescriptorLayout*(device: VkDevice, shaderStage: VkShaderStageFlags, binding: uint32): VkDescriptorSetLayout =
+proc createUniformDescriptorLayout*(device: VkDevice,
+    shaderStage: VkShaderStageFlags, binding: uint32): VkDescriptorSetLayout =
   var
     layoutbinding = VkDescriptorSetLayoutBinding(
       binding: binding,
@@ -33,7 +35,8 @@ proc createUniformDescriptorLayout*(device: VkDevice, shaderStage: VkShaderStage
     )
   checkVkResult device.vkCreateDescriptorSetLayout(addr(layoutInfo), nil, addr(result))
 
-proc createUniformBuffers*[nBuffers: static int, Uniforms](device: VkDevice, physicalDevice: VkPhysicalDevice): array[nBuffers, Buffer] =
+proc createUniformBuffers*[nBuffers: static int, Uniforms](device: VkDevice,
+    physicalDevice: VkPhysicalDevice): array[nBuffers, Buffer] =
   let size = sizeof(Uniforms)
   for i in 0 ..< nBuffers:
     var buffer = InitBuffer(
@@ -47,7 +50,8 @@ proc createUniformBuffers*[nBuffers: static int, Uniforms](device: VkDevice, phy
 
 template getDescriptorType*(v: Descriptor): auto = get(genericParams(typeof(v)), 0)
 
-func generateGLSLUniformDeclarations*[Uniforms](binding: int = 0): string {.compileTime.} =
+func generateGLSLUniformDeclarations*[Uniforms](
+  binding: int = 0): string {.compileTime.} =
   var stmtList: seq[string]
 
   when not (Uniforms is void):
