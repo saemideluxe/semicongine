@@ -26,13 +26,11 @@ type
 var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
   uniforms: Uniforms
-  t: float32
 
 
-proc globalUpdate(engine: var Engine, dt: float32) =
+proc globalUpdate(engine: var Engine, t, dt: float32) =
   let ratio = float32(engine.vulkan.frameSize.y) / float32(
       engine.vulkan.frameSize.x)
-  t += dt
   uniforms.model.value = translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t,
       Yf32) #  * rotate3d(float32(PI), Yf32)
 

@@ -12,7 +12,7 @@ type
 
 var pipeline: RenderPipeline[VertexDataA, void]
 
-proc globalUpdate(engine: var Engine, dt: float32) =
+proc globalUpdate(engine: var Engine, t, dt: float32) =
   discard
 
 # vertex data (types must match the above VertexAttributes)

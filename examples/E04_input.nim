@@ -110,7 +110,7 @@ for row in keyrows.fields:
   firstRow = false
 
 
-proc globalUpdate(engine: var Engine, dt: float32) =
+proc globalUpdate(engine: var Engine, t, dt: float32) =
   uniforms.projection.value = ortho[float32](
     0'f32, float32(engine.vulkan.frameSize.x),
     0'f32, float32(engine.vulkan.frameSize.y),
