@@ -17,7 +17,7 @@ var
   pipeline: RenderPipeline[VertexDataA, Uniforms]
   uniformdata = Uniforms(t: Descriptor[float32](value: 0'f32))
 
-proc globalUpdate(engine: var Engine, dt: float32) =
+proc globalUpdate(engine: var Engine, t, dt: float32) =
   uniformdata.t.value += dt
   engine.vulkan.device.updateUniformData(pipeline, uniformdata)
 
