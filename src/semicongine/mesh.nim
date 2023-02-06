@@ -1,3 +1,4 @@
+import std/math
 import std/options
 import std/typetraits
 
@@ -122,4 +123,20 @@ func quad*[VertexType, VecType, T](): Mesh[VertexType, uint16] =
         VecType([T(+0.5), T(+0.5), T(0)]),
         VecType([T(-0.5), T(+0.5), T(0)]),
       ]
+      value.useOnDeviceMemory = true
+
+func circle*[VertexType, VecType, T](n = 16): Mesh[VertexType, uint16] =
+  result = new Mesh[VertexType, uint16]
+  result.indexed = true
+  let angleStep = (2'f * PI) / float32(n)
+  var data = @[VecType([T(0), T(0), T(0)])]
+  for i in 1 .. n:
+    data.add VecType([T(cos(float32(i) * angleStep)), T(sin(float32(i) *
+        angleStep)), T(0)])
+    result.indices.add [0'u16, uint16(i), uint16(i mod (n) + 1)]
+
+  result.vertexData = VertexType()
+  for attrname, value in result.vertexData.fieldPairs:
+    when typeof(value) is PositionAttribute:
+      value.data = data
       value.useOnDeviceMemory = true
