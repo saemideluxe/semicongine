@@ -18,8 +18,9 @@ template checkVkResult*(call: untyped) =
     debug "CALLING vulkan: ", callstr
     let value = call
     if value != VK_SUCCESS:
-      error "Vulkan error: ",  astToStr(call),  " returned ", $value
-      raise newException(Exception, "Vulkan error: " & astToStr(call) & " returned " & $value)
+      error "Vulkan error: ", astToStr(call), " returned ", $value
+      raise newException(Exception, "Vulkan error: " & astToStr(call) &
+          " returned " & $value)
 
 # the included code need checkVkResult, therefore having the template above
 when defined(linux):
@@ -32,16 +33,19 @@ const ENABLEVULKANVALIDATIONLAYERS* = not defined(release)
 func addrOrNil[T](obj: var openArray[T]): ptr T =
   if obj.len > 0: addr(obj[0]) else: nil
 
-func VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =
+func VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32,
+    patch: uint32): uint32 {.compileTime.} =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
 
 
-func filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[VkSurfaceFormatKHR] =
+func filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[
+    VkSurfaceFormatKHR] =
   for format in formats:
     if format.format == VK_FORMAT_B8G8R8A8_SRGB and format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR:
       result.add(format)
 
-func getSuitableSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): VkSurfaceFormatKHR =
+func getSuitableSurfaceFormat*(formats: seq[
+    VkSurfaceFormatKHR]): VkSurfaceFormatKHR =
   let usableSurfaceFormats = filterForSurfaceFormat(formats)
   if len(usableSurfaceFormats) == 0:
     raise newException(Exception, "No suitable surface formats found")
@@ -56,9 +60,11 @@ func cleanString*(str: openArray[char]): string =
 
 proc getInstanceExtensions*(): seq[string] =
   var extensionCount: uint32
-  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), nil)
+  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(
+      extensionCount), nil)
   var extensions = newSeq[VkExtensionProperties](extensionCount)
-  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), addrOrNil(extensions))
+  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(
+      extensionCount), addrOrNil(extensions))
 
   for extension in extensions:
     result.add(cleanString(extension.extensionName))
@@ -66,9 +72,11 @@ proc getInstanceExtensions*(): seq[string] =
 
 proc getDeviceExtensions*(device: VkPhysicalDevice): seq[string] =
   var extensionCount: uint32
-  checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(extensionCount), nil)
+  checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(
+      extensionCount), nil)
   var extensions = newSeq[VkExtensionProperties](extensionCount)
-  checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(extensionCount), addrOrNil(extensions))
+  checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(
+      extensionCount), addrOrNil(extensions))
 
   for extension in extensions:
     result.add(cleanString(extension.extensionName))
@@ -95,36 +103,44 @@ proc getQueueFamilies*(device: VkPhysicalDevice): seq[VkQueueFamilyProperties] =
   var n_queuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), nil)
   result = newSeq[VkQueueFamilyProperties](n_queuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), addrOrNil(result))
+  vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies),
+      addrOrNil(result))
 
 
-proc getDeviceSurfaceFormats*(device: VkPhysicalDevice, surface: VkSurfaceKHR): seq[VkSurfaceFormatKHR] =
+proc getDeviceSurfaceFormats*(device: VkPhysicalDevice,
+    surface: VkSurfaceKHR): seq[VkSurfaceFormatKHR] =
   var n_formats: uint32
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), nil)
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(
+      n_formats), nil)
   result = newSeq[VkSurfaceFormatKHR](n_formats)
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), addrOrNil(result))
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(
+      n_formats), addrOrNil(result))
 
 
-proc getDeviceSurfacePresentModes*(device: VkPhysicalDevice, surface: VkSurfaceKHR): seq[VkPresentModeKHR] =
+proc getDeviceSurfacePresentModes*(device: VkPhysicalDevice,
+    surface: VkSurfaceKHR): seq[VkPresentModeKHR] =
   var n_modes: uint32
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), nil)
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(
+      n_modes), nil)
   result = newSeq[VkPresentModeKHR](n_modes)
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(n_modes), addrOrNil(result))
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, addr(
+      n_modes), addrOrNil(result))
 
 
 proc getSwapChainImages*(device: VkDevice, swapChain: VkSwapchainKHR): seq[VkImage] =
   var n_images: uint32
   checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), nil)
   result = newSeq[VkImage](n_images)
-  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addr(result[0]))
+  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addr(
+      result[0]))
 
 
 func getPresentMode*(modes: seq[VkPresentModeKHR]): VkPresentModeKHR =
   let preferredModes = [
-    VK_PRESENT_MODE_MAILBOX_KHR, # triple buffering
+    VK_PRESENT_MODE_MAILBOX_KHR,      # triple buffering
     VK_PRESENT_MODE_FIFO_RELAXED_KHR, # double duffering
-    VK_PRESENT_MODE_FIFO_KHR, # double duffering
-    VK_PRESENT_MODE_IMMEDIATE_KHR, # single buffering
+    VK_PRESENT_MODE_FIFO_KHR,         # double duffering
+    VK_PRESENT_MODE_IMMEDIATE_KHR,    # single buffering
   ]
   for preferredMode in preferredModes:
     for mode in modes:
@@ -139,7 +155,7 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
   var requiredExtensions = @["VK_KHR_surface".cstring] & REQUIRED_PLATFORM_EXTENSIONS
   when ENABLEVULKANVALIDATIONLAYERS:
     requiredExtensions.add("VK_EXT_debug_utils".cstring)
-  
+
   let availableExtensions = getInstanceExtensions()
   for extension in requiredExtensions:
     assert $extension in availableExtensions, $extension
@@ -148,9 +164,10 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
   var usableLayers = newSeq[cstring]()
 
   when ENABLEVULKANVALIDATIONLAYERS:
-    const desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring, "VK_LAYER_MESA_overlay".cstring]
+    const desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring,
+        "VK_LAYER_MESA_overlay".cstring]
   else:
-    const desiredLayers = ["VK_LAYER_MESA_overlay".cstring]
+    const desiredLayers: array[0, string] = []
   for layer in desiredLayers:
     if $layer in availableLayers:
       usableLayers.add(layer)
@@ -170,9 +187,11 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
     sType: VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
     pApplicationInfo: addr(appinfo),
     enabledLayerCount: usableLayers.len.uint32,
-    ppEnabledLayerNames: cast[ptr UncheckedArray[cstring]](addrOrNil(usableLayers)),
+    ppEnabledLayerNames: cast[ptr UncheckedArray[cstring]](addrOrNil(
+        usableLayers)),
     enabledExtensionCount: requiredExtensions.len.uint32,
-    ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(requiredExtensions[0]))
+    ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(
+        requiredExtensions[0]))
   )
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result))
 
@@ -210,7 +229,8 @@ proc getVulcanDevice*(
     enabledExtensionCount: requiredExtensions.len.uint32,
     ppEnabledExtensionNames: cast[ptr UncheckedArray[cstring]](addr(requiredExtensions))
   )
-  checkVkResult vkCreateDevice(physicalDevice, addr(deviceCreateInfo), nil, addr(result[0]))
+  checkVkResult vkCreateDevice(physicalDevice, addr(deviceCreateInfo), nil,
+      addr(result[0]))
   vkGetDeviceQueue(result[0], graphicsQueueFamily, 0'u32, addr(result[1]))
   vkGetDeviceQueue(result[0], presentationQueueFamily, 0'u32, addr(result[2]))
 
@@ -223,5 +243,6 @@ proc debugCallback*(
   echo &"{messageSeverity}: {VkDebugUtilsMessageTypeFlagBitsEXT(messageTypes)}: {pCallbackData.pMessage}"
   return VK_FALSE
 
-proc getSurfaceCapabilities*(device: VkPhysicalDevice, surface: VkSurfaceKHR): VkSurfaceCapabilitiesKHR =
-    checkVkResult device.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(surface, addr(result))
+proc getSurfaceCapabilities*(device: VkPhysicalDevice,
+    surface: VkSurfaceKHR): VkSurfaceCapabilitiesKHR =
+  checkVkResult device.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(surface, addr(result))
