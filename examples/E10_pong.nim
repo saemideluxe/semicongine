@@ -9,18 +9,20 @@ type
     view: ViewProjectionTransform
 
 const
-  barcolor = Vec3([1'f, 0'f, 0'f])
+  barcolor = RGBfromHex("5A3F00").gamma(2.2)
   barSize = 0.1'f
   barWidth = 0.01'f
-  ballcolor = Vec3([0'f, 0'f, 0'f])
+  ballcolor = RGBfromHex("B17F08").gamma(2.2)
   levelRatio = 1
   ballSize = 0.01'f
+  backgroundColor = RGBAfromHex("FAC034").gamma(2.2)
+  ballSpeed = 60'f
 
 var
   uniforms = Uniforms()
   pipeline: RenderPipeline[Vertex, Uniforms]
   level: Thing
-  ballVelocity = Vec2([1'f, 1'f]).normalized * 30'f
+  ballVelocity = Vec2([1'f, 1'f]).normalized * ballSpeed
 
 proc globalUpdate(engine: var Engine; t, dt: float32) =
   var height = float32(engine.vulkan.frameSize.y) / float32(
@@ -44,9 +46,9 @@ proc globalUpdate(engine: var Engine; t, dt: float32) =
 
   # loose
   if ball.transform.col(3).x - ballSize/2 <= 0:
-    ballVelocity = Vec2([1'f, 1'f]).normalized * 30'f
-    ball.transform[0, 3] = 0.5
-    ball.transform[1, 3] = 0.5
+    ballVelocity = Vec2([1'f, 1'f]).normalized * ballSpeed
+    ball.transform[0, 3] = width / 2
+    ball.transform[1, 3] = height / 2
 
   # bounce level
   if ball.transform.col(3).x + ballSize/2 > width: ballVelocity[
@@ -68,7 +70,7 @@ proc globalUpdate(engine: var Engine; t, dt: float32) =
 
 when isMainModule:
   var myengine = igniteEngine("Pong")
-  myengine.fps = 60
+  myengine.maxFPS = 61
   level = newThing("Level")
   var playerbarmesh = quad[Vertex, Vec2, float32]()
   playerbarmesh.vertexData.color.data = @[barcolor, barcolor, barcolor, barcolor]
@@ -99,7 +101,7 @@ when isMainModule:
     vertexShader,
     fragmentShader
   )
-  pipeline.clearColor = Vec4([1.0'f, 1.0'f, 1.0'f, 1.0'f])
+  pipeline.clearColor = backgroundColor
   # show something
   myengine.run(pipeline, globalUpdate)
   pipeline.trash()

@@ -25,7 +25,8 @@ converter toVec3*[T: SomeNumber](orig: TVec4[T]): TVec3[T] =
 # define some often used constants
 func ConstOne2[T: SomeNumber](): auto {.compiletime.} = TVec2[T]([T(1), T(1)])
 func ConstOne3[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(1), T(1)])
-func ConstOne4[T: SomeNumber](): auto {.compiletime.} = TVec4[T]([T(1), T(1), T(1), T(1)])
+func ConstOne4[T: SomeNumber](): auto {.compiletime.} = TVec4[T]([T(1), T(1), T(
+    1), T(1)])
 func ConstX[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(0), T(0)])
 func ConstY[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(1), T(0)])
 func ConstZ[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(0), T(1)])
@@ -39,7 +40,8 @@ func ConstB[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(0), T(1)]
 macro generateAllConsts() =
   result = newStmtList()
   for component in ["X", "Y", "Z", "R", "G", "B", "One2", "One3", "One4"]:
-    for theType in ["int", "int8", "int16", "int32", "int64", "float", "float32", "float64"]:
+    for theType in ["int", "int8", "int16", "int32", "int64", "float",
+        "float32", "float64"]:
       var typename = theType[0 .. 0]
       if theType[^2].isDigit:
         typename = typename & theType[^2]
@@ -80,11 +82,16 @@ func `$`*(v: TVec3[SomeNumber]): string = toString[TVec3[SomeNumber]](v)
 func `$`*(v: TVec4[SomeNumber]): string = toString[TVec4[SomeNumber]](v)
 
 func length*(vec: TVec2[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1])
-func length*(vec: TVec2[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1]))
-func length*(vec: TVec3[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2])
-func length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]))
-func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3])
-func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
+func length*(vec: TVec2[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[
+    1] * vec[1]))
+func length*(vec: TVec3[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[
+    1] + vec[2] * vec[2])
+func length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[
+    1] * vec[1] + vec[2] * vec[2]))
+func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[
+    1] + vec[2] * vec[2] + vec[3] * vec[3])
+func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[
+    1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
 
 func normalized*[T](vec: TVec2[T]): auto =
   let l = vec.length
@@ -103,62 +110,93 @@ func normalized*[T](vec: TVec4[T]): auto =
   when T is SomeFloat:
     TVec4[T]([vec[0] / l, vec[1] / l, vec[2] / l, vec[3] / l])
   else:
-    TVec4[float]([float(vec[0]) / l, float(vec[1]) / l, float(vec[2]) / l, float(vec[3]) / l])
+    TVec4[float]([float(vec[0]) / l, float(vec[1]) / l, float(vec[2]) / l,
+        float(vec[3]) / l])
 
 # scalar operations
 func `+`*(a: TVec2, b: SomeNumber): auto = TVec2([a[0] + b, a[1] + b])
 func `+`*(a: TVec3, b: SomeNumber): auto = TVec3([a[0] + b, a[1] + b, a[2] + b])
-func `+`*(a: TVec4, b: SomeNumber): auto = TVec4([a[0] + b, a[1] + b, a[2] + b, a[3] + b])
+func `+`*(a: TVec4, b: SomeNumber): auto = TVec4([a[0] + b, a[1] + b, a[2] + b,
+    a[3] + b])
 func `-`*(a: TVec2, b: SomeNumber): auto = TVec2([a[0] - b, a[1] - b])
 func `-`*(a: TVec3, b: SomeNumber): auto = TVec3([a[0] - b, a[1] - b, a[2] - b])
-func `-`*(a: TVec4, b: SomeNumber): auto = TVec4([a[0] - b, a[1] - b, a[2] - b, a[3] - b])
+func `-`*(a: TVec4, b: SomeNumber): auto = TVec4([a[0] - b, a[1] - b, a[2] - b,
+    a[3] - b])
 func `*`*(a: TVec2, b: SomeNumber): auto = TVec2([a[0] * b, a[1] * b])
 func `*`*(a: TVec3, b: SomeNumber): auto = TVec3([a[0] * b, a[1] * b, a[2] * b])
-func `*`*(a: TVec4, b: SomeNumber): auto = TVec4([a[0] * b, a[1] * b, a[2] * b, a[3] * b])
-func `/`*[T: SomeInteger](a: TVec2[T], b: SomeInteger): auto = TVec2([a[0] div b, a[1] div b])
+func `*`*(a: TVec4, b: SomeNumber): auto = TVec4([a[0] * b, a[1] * b, a[2] * b,
+    a[3] * b])
+func `/`*[T: SomeInteger](a: TVec2[T], b: SomeInteger): auto = TVec2([a[
+    0] div b, a[1] div b])
 func `/`*[T: SomeFloat](a: TVec2[T], b: SomeFloat): auto = TVec2([a[0] / b, a[1] / b])
-func `/`*[T: SomeInteger](a: TVec3[T], b: SomeInteger): auto = TVec3([a[0] div b, a[1] div b, a[2] div b])
-func `/`*[T: SomeFloat](a: TVec3[T], b: SomeFloat): auto = TVec3([a[0] / b, a[1] / b, a[2] / b])
-func `/`*[T: SomeInteger](a: TVec4[T], b: SomeInteger): auto = TVec4([a[0] div b, a[1] div b, a[2] div b, a[3] div b])
-func `/`*[T: SomeFloat](a: TVec4[T], b: SomeFloat): auto = TVec4([a[0] / b, a[1] / b, a[2] / b, a[3] / b])
+func `/`*[T: SomeInteger](a: TVec3[T], b: SomeInteger): auto = TVec3([a[
+    0] div b, a[1] div b, a[2] div b])
+func `/`*[T: SomeFloat](a: TVec3[T], b: SomeFloat): auto = TVec3([a[0] / b, a[
+    1] / b, a[2] / b])
+func `/`*[T: SomeInteger](a: TVec4[T], b: SomeInteger): auto = TVec4([a[
+    0] div b, a[1] div b, a[2] div b, a[3] div b])
+func `/`*[T: SomeFloat](a: TVec4[T], b: SomeFloat): auto = TVec4([a[0] / b, a[
+    1] / b, a[2] / b, a[3] / b])
 
 func `+`*(a: SomeNumber, b: TVec2): auto = TVec2([a + b[0], a + b[1]])
 func `+`*(a: SomeNumber, b: TVec3): auto = TVec3([a + b[0], a + b[1], a + b[2]])
-func `+`*(a: SomeNumber, b: TVec4): auto = TVec4([a + b[0], a + b[1], a + b[2], a + b[3]])
+func `+`*(a: SomeNumber, b: TVec4): auto = TVec4([a + b[0], a + b[1], a + b[2],
+    a + b[3]])
 func `-`*(a: SomeNumber, b: TVec2): auto = TVec2([a - b[0], a - b[1]])
 func `-`*(a: SomeNumber, b: TVec3): auto = TVec3([a - b[0], a - b[1], a - b[2]])
-func `-`*(a: SomeNumber, b: TVec4): auto = TVec4([a - b[0], a - b[1], a - b[2], a - b[3]])
+func `-`*(a: SomeNumber, b: TVec4): auto = TVec4([a - b[0], a - b[1], a - b[2],
+    a - b[3]])
 func `*`*(a: SomeNumber, b: TVec2): auto = TVec2([a * b[0], a * b[1]])
 func `*`*(a: SomeNumber, b: TVec3): auto = TVec3([a * b[0], a * b[1], a * b[2]])
-func `*`*(a: SomeNumber, b: TVec4): auto = TVec4([a * b[0], a * b[1], a * b[2], a * b[3]])
-func `/`*[T: SomeInteger](a: SomeInteger, b: TVec2[T]): auto = TVec2([a div b[0], a div b[1]])
+func `*`*(a: SomeNumber, b: TVec4): auto = TVec4([a * b[0], a * b[1], a * b[2],
+    a * b[3]])
+func `/`*[T: SomeInteger](a: SomeInteger, b: TVec2[T]): auto = TVec2([a div b[
+    0], a div b[1]])
 func `/`*[T: SomeFloat](a: SomeFloat, b: TVec2[T]): auto = TVec2([a / b[0], a / b[1]])
-func `/`*[T: SomeInteger](a: SomeInteger, b: TVec3[T]): auto = TVec3([a div b[0], a div b[1], a div b[2]])
-func `/`*[T: SomeFloat](a: SomeFloat, b: TVec3[T]): auto = TVec3([a / b[0], a / b[1], a / b[2]])
-func `/`*[T: SomeInteger](a: SomeInteger, b: TVec4[T]): auto = TVec4([a div b[0], a div b[1], a div b[2], a div b[3]])
-func `/`*[T: SomeFloat](a: SomeFloat, b: TVec4[T]): auto = TVec4([a / b[0], a / b[1], a / b[2], a / b[3]])
+func `/`*[T: SomeInteger](a: SomeInteger, b: TVec3[T]): auto = TVec3([a div b[
+    0], a div b[1], a div b[2]])
+func `/`*[T: SomeFloat](a: SomeFloat, b: TVec3[T]): auto = TVec3([a / b[0], a /
+    b[1], a / b[2]])
+func `/`*[T: SomeInteger](a: SomeInteger, b: TVec4[T]): auto = TVec4([a div b[
+    0], a div b[1], a div b[2], a div b[3]])
+func `/`*[T: SomeFloat](a: SomeFloat, b: TVec4[T]): auto = TVec4([a / b[0], a /
+    b[1], a / b[2], a / b[3]])
 
 # compontent-wise operations
 func `+`*(a, b: TVec2): auto = TVec2([a[0] + b[0], a[1] + b[1]])
 func `+`*(a, b: TVec3): auto = TVec3([a[0] + b[0], a[1] + b[1], a[2] + b[2]])
-func `+`*(a, b: TVec4): auto = TVec4([a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]])
+func `+`*(a, b: TVec4): auto = TVec4([a[0] + b[0], a[1] + b[1], a[2] + b[2], a[
+    3] + b[3]])
 func `-`*(a: TVec2): auto = TVec2([-a[0], -a[1]])
 func `-`*(a: TVec3): auto = TVec3([-a[0], -a[1], -a[2]])
 func `-`*(a: TVec4): auto = TVec4([-a[0], -a[1], -a[2], -a[3]])
 func `-`*(a, b: TVec2): auto = TVec2([a[0] - b[0], a[1] - b[1]])
 func `-`*(a, b: TVec3): auto = TVec3([a[0] - b[0], a[1] - b[1], a[2] - b[2]])
-func `-`*(a, b: TVec4): auto = TVec4([a[0] - b[0], a[1] - b[1], a[2] - b[2], a[3] - b[3]])
+func `-`*(a, b: TVec4): auto = TVec4([a[0] - b[0], a[1] - b[1], a[2] - b[2], a[
+    3] - b[3]])
 func `*`*(a, b: TVec2): auto = TVec2([a[0] * b[0], a[1] * b[1]])
 func `*`*(a, b: TVec3): auto = TVec3([a[0] * b[0], a[1] * b[1], a[2] * b[2]])
-func `*`*(a, b: TVec4): auto = TVec4([a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3]])
-func `/`*[T: SomeInteger](a, b: TVec2[T]): auto = TVec2([a[0] div b[0], a[1] div b[1]])
+func `*`*(a, b: TVec4): auto = TVec4([a[0] * b[0], a[1] * b[1], a[2] * b[2], a[
+    3] * b[3]])
+func `/`*[T: SomeInteger](a, b: TVec2[T]): auto = TVec2([a[0] div b[0], a[
+    1] div b[1]])
 func `/`*[T: SomeFloat](a, b: TVec2[T]): auto = TVec2([a[0] / b[0], a[1] / b[1]])
-func `/`*[T: SomeInteger](a, b: TVec3[T]): auto = TVec3([a[0] div b[0], a[1] div b[1], a[2] div b[2]])
-func `/`*[T: SomeFloat](a, b: TVec3[T]): auto = TVec3([a[0] / b[0], a[1] / b[1], a[2] / b[2]])
-func `/`*[T: SomeInteger](a, b: TVec4[T]): auto = TVec4([a[0] div b[0], a[1] div b[1], a[2] div b[2], a[3] div b[3]])
-func `/`*[T: SomeFloat](a, b: TVec4[T]): auto = TVec4([a[0] / b[0], a[1] / b[1], a[2] / b[2], a[3] / b[3]])
+func `/`*[T: SomeInteger](a, b: TVec3[T]): auto = TVec3([a[0] div b[0], a[
+    1] div b[1], a[2] div b[2]])
+func `/`*[T: SomeFloat](a, b: TVec3[T]): auto = TVec3([a[0] / b[0], a[1] / b[1],
+    a[2] / b[2]])
+func `/`*[T: SomeInteger](a, b: TVec4[T]): auto = TVec4([a[0] div b[0], a[
+    1] div b[1], a[2] div b[2], a[3] div b[3]])
+func `/`*[T: SomeFloat](a, b: TVec4[T]): auto = TVec4([a[0] / b[0], a[1] / b[1],
+    a[2] / b[2], a[3] / b[3]])
 
 # special operations
+func pow*(a: TVec2, b: SomeNumber): auto =
+  TVec2([pow(a[0], b), pow(a[1], b)])
+func pow*(a: TVec3, b: SomeNumber): auto =
+  TVec3([pow(a[0], b), pow(a[1], b), pow(a[2], b)])
+func pow*(a: TVec4, b: SomeNumber): auto =
+  TVec4([pow(a[0], b), pow(a[1], b), pow(a[2], b), pow(a[3], b)])
 func dot*(a, b: TVec2): auto = a[0] * b[0] + a[1] * b[1]
 func dot*(a, b: TVec3): auto = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 func dot*(a, b: TVec4): auto = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]
@@ -189,7 +227,8 @@ proc vectorAttributeAccessor(accessor: string): NimNode =
   if accessorvalue.len == 0:
     raise newException(Exception, "empty attribute")
   elif accessorvalue.len == 1:
-    ret = nnkBracketExpr.newTree(ident("value"), newLit(ACCESSOR_INDICES[accessorvalue[0]]))
+    ret = nnkBracketExpr.newTree(ident("value"), newLit(ACCESSOR_INDICES[
+        accessorvalue[0]]))
   if accessorvalue.len > 1:
     var attrs = nnkBracket.newTree()
     for attrname in accessorvalue:
@@ -197,9 +236,10 @@ proc vectorAttributeAccessor(accessor: string): NimNode =
     ret = nnkCall.newTree(ident("TVec" & $accessorvalue.len), attrs)
 
   newProc(
-    name=nnkPostfix.newTree(ident("*"), ident(accessor)),
-    params=[ident("auto"), nnkIdentDefs.newTree(ident("value"), ident("TVec"), newEmptyNode())],
-    body=newStmtList(ret),
+    name = nnkPostfix.newTree(ident("*"), ident(accessor)),
+    params = [ident("auto"), nnkIdentDefs.newTree(ident("value"), ident("TVec"),
+        newEmptyNode())],
+    body = newStmtList(ret),
     procType = nnkFuncDef,
   )
 
@@ -221,12 +261,12 @@ createVectorAttribAccessorFuncs()
 
 # call e.g. Vec2[int]().randomized() to get a random matrix
 template makeRandomInit(mattype: typedesc) =
-    proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
-      for i in 0 ..< result.len:
-        result[i] = rand(low(typeof(m[0])) .. high(typeof(m[0])))
-    proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
-      for i in 0 ..< result.len:
-        result[i] = rand(1.0)
+  proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
+    for i in 0 ..< result.len:
+      result[i] = rand(low(typeof(m[0])) .. high(typeof(m[0])))
+  proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
+    for i in 0 ..< result.len:
+      result[i] = rand(1.0)
 
 makeRandomInit(TVec2)
 makeRandomInit(TVec3)

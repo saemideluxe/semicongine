@@ -95,7 +95,7 @@ type
     window*: NativeWindow
     currentscenedata*: Thing
     input*: Input
-    fps*: uint
+    maxFPS*: uint
 
 
 method update*(thing: Thing, engine: Engine, t, dt: float32) {.base.} = discard
@@ -810,8 +810,8 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int,
 
 
 func frametime(engine: Engine): auto =
-  if engine.fps == 0: 0'f
-  else: 1'f / float32(engine.fps)
+  if engine.maxFPS == 0: 0'f
+  else: 1'f / float32(engine.maxFPS)
 
 proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(
     engine: var Engine, t, dt: float32)) =
@@ -863,11 +863,11 @@ proc run*(engine: var Engine, pipeline: var RenderPipeline, globalUpdate: proc(
       update(thing, engine, now, dt)
 
     # submit frame for drawing
-    if engine.fps == 0 or (now - lastframe >= engine.frametime): # framerate limit
+    if engine.maxFPS == 0 or (now - lastframe >= engine.frametime): # framerate limit
       engine.window.drawFrame(engine.vulkan, currentFrame, resized, pipeline)
       lastframe = now
+      currentFrame = (currentFrame + 1) mod MAX_FRAMES_IN_FLIGHT
     resized = false
-    currentFrame = (currentFrame + 1) mod MAX_FRAMES_IN_FLIGHT
 
   checkVkResult vkDeviceWaitIdle(engine.vulkan.device.device)
 
