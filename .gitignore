@@ -1,3 +1,10 @@
+# # Ignore all
+*
+# Unignore all with extensions
+!*.*
+# Unignore all dirs
+!*/
+
 # nim directories
 nimcache/
 nimblecache/
@@ -16,3 +23,7 @@ testresults.html
 examples/glslangValidator
 examples/glslangValidator.exe
 notes
+
+# from API generator
+src/vulkan_api/output/
+vk.xml
