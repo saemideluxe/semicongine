@@ -141,5 +141,13 @@ task run_all, "Run all binaries":
   for file in listFiles("build/release/windows"):
     exec &"wine {file}"
 
+task get_vulkan_wrapper, "Download vulkan wrapper":
+  exec &"curl https://raw.githubusercontent.com/nimgl/nimgl/master/src/nimgl/vulkan.nim > src/semicongine/vulkan/c_api.nim"
+
+const api_generator_name = "vulkan_api_generator"
+
+task generate_vulkan_api, "Generate Vulkan API":
+  selfExec &"c -d:ssl --run src/vulkan_api/{api_generator_name}.nim"
+
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
   compilerFlags()
