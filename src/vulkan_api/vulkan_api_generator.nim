@@ -37,27 +37,30 @@ const
     "VK_DEFINE_NON_DISPATCHABLE_HANDLE": "VkNonDispatchableHandle",
   }.toTable
   PLATFORM_HEADER_MAP = {
-    "X11/Xlib.h": "xlib",
-    "X11/extensions/Xrandr.h": "xlib_xrandr",
-    "wayland-client.h": "wayland",
-    "windows.h": "win32",
-    "xcb/xcb.h": "xcb",
-    "directfb.h": "directfb",
-    "zircon/types.h": "fuchsia",
-    "ggp_c/vulkan_types.h": "ggp",
-    "screen/screen.h": "screen",
-    "nvscisync.h": "nvidia",
-    "nvscibuf.h": "nvidia",
-    "vk_video/vulkan_video_codec_h264std.h": "vk_video",
-    "vk_video/vulkan_video_codec_h264std_decode.h": "vk_video",
-    "vk_video/vulkan_video_codec_h264std_encode.h": "vk_video",
-    "vk_video/vulkan_video_codec_h265std.h": "vk_video",
-    "vk_video/vulkan_video_codec_h265std_decode.h": "vk_video",
-    "vk_video/vulkan_video_codec_h265std_encode.h": "vk_video",
+    "X11/Xlib.h": @["xlib", "xlib_xrandr"],
+    "X11/extensions/Xrandr.h": @["xlib_xrandr"],
+    "wayland-client.h": @["wayland"],
+    "windows.h": @["win32"],
+    "xcb/xcb.h": @["xcb"],
+    "directfb.h": @["directfb"],
+    "zircon/types.h": @["fuchsia"],
+    "ggp_c/vulkan_types.h": @["ggp"],
+    "screen/screen.h": @["screen"],
+    "nvscisync.h": @["sci"],
+    "nvscibuf.h": @["sci"],
+    "vk_video/vulkan_video_codec_h264std.h": @["provisional"],
+    "vk_video/vulkan_video_codec_h264std_decode.h": @["provisional"],
+    "vk_video/vulkan_video_codec_h264std_encode.h": @["provisional"],
+    "vk_video/vulkan_video_codec_h265std.h": @["provisional"],
+    "vk_video/vulkan_video_codec_h265std_decode.h": @["provisional"],
+    "vk_video/vulkan_video_codec_h265std_encode.h": @["provisional"],
   }.toTable
   MAP_KEYWORD = {
     "object": "theobject",
     "type": "thetype",
+  }.toTable
+  SPECIAL_DEPENDENCIES = {
+    "VK_NV_ray_tracing": "VK_KHR_ray_tracing_pipeline",
   }.toTable
 
 # helpers
@@ -159,9 +162,10 @@ func serializeEnum(node: XmlNode, root: XmlNode): seq[string] =
   # generate bitsets (normal enums in the C API, but bitfield-enums in Nim)
   elif node.attr("type") == "bitmask":
     for value in node.findAll("enum"):
-      if value.hasAttr("alias") or not value.hasAttr("bitpos"):
-        continue
-      values[smartParseInt(value.attr("bitpos"))] = value.attr("name")
+      if value.hasAttr("bitpos"):
+        values[smartParseInt(value.attr("bitpos"))] = value.attr("name")
+      elif node.attr("name") == "VkVideoEncodeRateControlModeFlagBitsKHR": # special exception, for some reason this has values instead of bitpos
+        values[smartParseInt(value.attr("value"))] = value.attr("name")
     if values.len > 0:
       if node.hasAttr("bitwidth"):
         result.add "  " & name & "* {.size: " & $(smartParseInt(node.attr("bitwidth")) div 8) & ".} = enum"
@@ -193,8 +197,8 @@ func serializeStruct(node: XmlNode, root: XmlNode): seq[string] =
   let name = node.attr("name")
   var union = ""
   if node.attr("category") == "union":
-    union = "{.union.}"
-  result.add &"  {name}* {union} = object"
+    union = "{.union.} "
+  result.add &"  {name}* {union}= object"
   for member in node.findAll("member"):
     if not member.hasAttr("api") or member.attr("api") == "vulkan":
       let fieldname = member.child("name")[0].text.strip(chars={'_'})
@@ -219,9 +223,9 @@ func serializeFunctiontypes(api: XmlNode): seq[string] =
         paramname = mapName(paramname)
         params.add &"{paramname}: {mapType(paramtype)}"
       let paramsstr = params.join(", ")
-      result.add(&"  {name} = proc({paramsstr}): {returntype} {{.cdecl.}}")
+      result.add(&"  {name}* = proc({paramsstr}): {returntype} {{.cdecl.}}")
 
-func serializeType(node: XmlNode): Table[string, seq[string]] =
+func serializeType(node: XmlNode, headerTypes: Table[string, string]): Table[string, seq[string]] =
   if node.attrsLen == 0:
     return
   if node.attr("requires") == "vk_platform" or node.attr("category") == "include":
@@ -230,12 +234,12 @@ func serializeType(node: XmlNode): Table[string, seq[string]] =
   result["enums"] = @[]
 
   # include-defined types (in platform headers)
-  if node.hasAttr("requires") and node.hasAttr("name") and node.attr("category") != "define":
-    let platform = "platform/" & PLATFORM_HEADER_MAP[node.attr("requires")]
-    if not result.hasKey(platform):
-      result[platform] = @[]
-    result[platform].add "type " & node.attr(
-        "name") & " {.header: \"" & node.attr("requires") & "\".} = object"
+  if node.attr("name") in headerTypes:
+    for platform in PLATFORM_HEADER_MAP[node.attr("requires")]:
+      let platformfile = "platform/" & platform
+      if not result.hasKey(platformfile):
+        result[platformfile] = @[]
+      result[platformfile].add "  " & node.attr("name").strip(chars={'_'}) & " {.header: \"" & node.attr("requires") & "\".} = object"
   # generic base types
   elif node.attr("category") == "basetype":
     let typechild = node.child("type")
@@ -274,6 +278,23 @@ func serializeType(node: XmlNode): Table[string, seq[string]] =
   else:
     discard
 
+func serializeCommand(node: XmlNode): (string, string) =
+  let
+    proto = node.child("proto")
+    resulttype = mapType(proto.child("type")[0].text)
+    name = proto.child("name")[0].text
+  var params: seq[string]
+  for param in node:
+    if param.tag == "param" and param.attr("api") in ["", "vulkan"]:
+      let fieldname = param.child("name")[0].text.strip(chars={'_'})
+      var fieldtype = param.child("type")[0].text.strip(chars={'_'})
+      if param[param.len - 2].kind == xnText and param[param.len - 2].text.strip() == "*":
+        fieldtype = &"ptr {mapType(fieldtype)}"
+      fieldtype = mapType(fieldtype)
+      params.add &"{mapName(fieldname)}: {fieldtype}"
+  let allparams = params.join(", ")
+  return (name, &"proc({allparams}): {resulttype} {{.stdcall.}}")
+
 
 proc update(a: var Table[string, seq[string]], b: Table[string, seq[string]]) =
   for k, v in b.pairs:
@@ -305,14 +326,27 @@ proc main() =
         platformTypes[command.attr("name")] = extension.attr("platform")
     elif extension.attr("name").startsWith("VK_KHR_video"):
       for thetype in extension.findAll("type"):
-        platformTypes[thetype.attr("name")] = "vk_video"
+        platformTypes[thetype.attr("name")] = "provisional"
       for command in extension.findAll("command"):
-        platformTypes[command.attr("name")] = "vk_video"
+        platformTypes[command.attr("name")] = "provisional"
 
   var outputFiles = {
-    "basetypes": @["type", "  VkHandle* = distinct pointer", "  VkNonDispatchableHandle* = distinct pointer"],
-    "structs": @["import ./enums", "import ./basetypes", "type"],
-    "enums": @["import ./basetypes", "type"],
+    "basetypes": @[
+      "import std/dynlib",
+      "type",
+      "  VkHandle* = distinct pointer",
+      "  VkNonDispatchableHandle* = distinct pointer",
+      "when defined(linux):",
+      "  let vulkanLib* = loadLib(\"libvulkan.so.1\")",
+      "when defined(windows):",
+      "  let vulkanLib* = loadLib(\"vulkan-1.dll\")",
+      "if vulkanLib == nil:",
+      "  raise newException(Exception, \"Unable to load vulkan library\")",
+      "type",
+    ],
+    "structs": @["type"],
+    "enums": @["type"],
+    "commands": @[],
   }.toTable
 
   # enums
@@ -332,15 +366,141 @@ proc main() =
         outfile = "platform/" & platformTypes[thetype.attr("name")]
       if not (outfile in outputFiles):
         outputFiles[outfile] = @[]
-      outputFiles[outfile].add "type"
       outputFiles[outfile].add serializeStruct(thetype, api)
 
   # types
+  var headerTypes: Table[string, string]
+  for types in api.findAll("types"):
+    for thetype in types.findAll("type"):
+      if thetype.attrsLen == 2 and thetype.hasAttr("requires") and thetype.hasAttr("name") and thetype.attr("requires") != "vk_platform":
+        let name = thetype.attr("name")
+        let incld = thetype.attr("requires")
+        headerTypes[name] = &"{name} {{.header: \"{incld}\".}} = object"
+
   for typesgroup in api.findAll("types"):
     for thetype in typesgroup.findAll("type"):
-      outputFiles.update serializeType(thetype)
+      outputFiles.update serializeType(thetype, headerTypes)
+
+  # commands aka functions
+  var varDecls: Table[string, string]
+  var procLoads: Table[string, string] # procloads need to be packed into feature/extension loader procs
+  for commands in api.findAll("commands"):
+    for command in commands.findAll("command"):
+      if command.attr("api") != "vulkansc":
+        if command.hasAttr("alias"):
+          let name = command.attr("name")
+          let alias = command.attr("alias")
+          let thetype = varDecls[alias].split(":", 1)[1].strip()
+          varDecls[name] = &"  {name}*: {thetype}"
+          procLoads[name] = &"  {name} = {alias}"
+        else:
+          let (name, thetype) = serializeCommand(command)
+          varDecls[name] = &"  {name}*: {thetype}"
+          procLoads[name] = &"  {name} = cast[{thetype}](checkedSymAddr(vulkanLib, \"{name}\"))"
+  var declared: seq[string]
+  var featureloads: seq[string]
+  for feature in api.findAll("feature"):
+    if feature.attr("api") in ["vulkan", "vulkan,vulkansc"]:
+      let name = feature.attr("name")
+      outputFiles["commands"].add &"# feature {name}"
+      outputFiles["commands"].add "var"
+      for command in feature.findAll("command"):
+        if not (command.attr("name") in declared):
+          outputFiles["commands"].add varDecls[command.attr("name")]
+          declared.add command.attr("name")
+      featureloads.add &"load{name}"
+      outputFiles["commands"].add &"proc load{name}*() ="
+      for command in feature.findAll("command"):
+        outputFiles["commands"].add procLoads[command.attr("name")]
+    outputFiles["commands"].add ""
+  outputFiles["commands"].add ["proc loadAll*() ="]
+  for l in featureloads:
+    outputFiles["commands"].add [&"  {l}()"]
+  outputFiles["commands"].add ""
+
+  # for promoted extensions, dependants need to call the load-function of the promoted feature/extension
+  # use table to store promotions
+  var promotions: Table[string, string]
+  for extensions in api.findAll("extensions"):
+    for extension in extensions.findAll("extension"):
+      if extension.hasAttr("promotedto"):
+        promotions[extension.attr("name")] = extension.attr("promotedto")
+
+  var extensionDependencies: Table[string, (seq[string], XmlNode)]
+  var features: seq[string]
+  for feature in api.findAll("feature"):
+    features.add feature.attr("name")
+  for extensions in api.findAll("extensions"):
+    for extension in extensions.findAll("extension"):
+      let name = extension.attr("name")
+      extensionDependencies[name] = (@[], extension)
+      if extension.hasAttr("depends"):
+        extensionDependencies[name] = (extension.attr("depends").split("+"), extension)
+        if extension.attr("depends").startsWith("("): # no need for full tree parser, only single place where we can use a feature
+          let dependencies = extension.attr("depends").rsplit({')'}, 1)[1][1 .. ^1].split("+")
+          extensionDependencies[name] = (dependencies, extension)
+      if name in SPECIAL_DEPENDENCIES:
+        extensionDependencies[name][0].add SPECIAL_DEPENDENCIES[name]
+
+  var dependencyOrderedExtensions: OrderedTable[string, XmlNode]
+  while extensionDependencies.len > 0:
+    var delkeys: seq[string]
+    for extensionName, (dependencies, extension) in extensionDependencies.pairs:
+      var missingExtension = false
+      for dep in dependencies:
+        let realdep = promotions.getOrDefault(dep, dep)
+        if not (realdep in dependencyOrderedExtensions) and not (realdep in features):
+          missingExtension = true
+          break
+      if not missingExtension:
+        dependencyOrderedExtensions[extensionName] = extension
+        delkeys.add extensionName
+    for key in delkeys:
+      extensionDependencies.del key
+
+  for extension in dependencyOrderedExtensions.values:
+    if extension.hasAttr("promotedto"): # will be loaded in promoted place
+      continue
+    if extension.attr("supported") in ["", "vulkan", "vulkan,vulkansc"]:
+      var file = "commands"
+      if extension.attr("platform") != "":
+        file = "platform/" & extension.attr("platform")
+      elif extension.attr("name").startsWith("VK_KHR_video"): # hack since we do not include video headers by default
+        file = "platform/provisional"
+      let name = extension.attr("name")
+      if extension.findAll("command").len > 0:
+        outputFiles[file].add &"# extension {name}"
+        outputFiles[file].add "var"
+        for command in extension.findAll("command"):
+          if not (command.attr("name") in declared):
+            outputFiles[file].add varDecls[command.attr("name")]
+            declared.add command.attr("name")
+      outputFiles[file].add &"proc load{name}*() ="
+      var addedFunctionBody = false
+      if extension.hasAttr("depends"):
+        for dependency in extension.attr("depends").split("+"):
+          # need to check since some extensions have no commands and therefore no load-function
+          outputFiles[file].add &"  load{promotions.getOrDefault(dependency, dependency)}()"
+          addedFunctionBody = true
+      for command in extension.findAll("command"):
+        outputFiles[file].add procLoads[command.attr("name")]
+        addedFunctionBody = true
+      if not addedFunctionBody:
+        outputFiles[file].add "  discard"
+      outputFiles[file].add ""
+
+  var mainout: seq[string]
+  for section in ["basetypes", "enums", "structs", "commands"]:
+    mainout.add outputFiles[section]
+  writeFile outdir / &"types.nim", mainout.join("\n")
+
   for filename, filecontent in outputFiles.pairs:
-    writeFile outdir / &"{filename}.nim", filecontent.join("\n")
+    if filename.startsWith("platform/"):
+      writeFile outdir / &"{filename}.nim", (@[
+      "import std/dynlib",
+      "import ../types",
+      "type"
+      ] & filecontent).join("\n")
 
 when isMainModule:
   main()
