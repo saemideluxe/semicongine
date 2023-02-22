@@ -59,6 +59,15 @@ const
   SPECIAL_DEPENDENCIES = {
     "VK_NV_ray_tracing": "VK_KHR_ray_tracing_pipeline",
   }.toTable
+  # will be directly loaded at startup
+  IGNORED_COMMANDS = @["vkGetInstanceProcAddr"]
+  # can be loaded without a vulkan instance
+  GLOBAL_COMMANDS = @[
+    "vkEnumerateInstanceVersion",
+    "vkEnumerateInstanceExtensionProperties",
+    "vkEnumerateInstanceLayerProperties",
+    "vkCreateInstance",
+  ]
 
 # helpers
 func mapType(typename: string): auto =
@@ -207,9 +216,22 @@ func serializeStruct(node: XmlNode): seq[string] =
     if not member.hasAttr("api") or member.attr("api") == "vulkan":
       let fieldname = member.child("name")[0].text.strip(chars={'_'})
       var fieldtype = member.child("type")[0].text.strip(chars={'_'})
-      if member[member.len - 2].kind == xnText and member[member.len - 2].text.strip() == "*":
-        fieldtype = &"ptr {mapType(fieldtype)}"
+      # detect pointers
+      for child in member:
+        if child.kind == xnText and child.text.strip() == "*":
+          fieldtype = &"ptr {mapType(fieldtype)}"
+        elif child.kind == xnText and child.text.strip() == "* const*":
+          fieldtype = "cstringArray"
       fieldtype = mapType(fieldtype)
+      # detect arrays
+      for child in member:
+        if child.kind == xnText and child.text.endsWith("]"):
+          var thelen = ""
+          if "[" in child.text:
+            thelen = child.text.strip(chars={'[', ']'}).replace("][", "*")
+          else:
+            thelen = member.child("enum")[0].text
+          fieldtype = &"array[{thelen}, {fieldtype}]"
       result.add &"    {mapName(fieldname)}*: {fieldtype}"
 
 func serializeFunctiontypes(api: XmlNode): seq[string] =
@@ -229,6 +251,23 @@ func serializeFunctiontypes(api: XmlNode): seq[string] =
       let paramsstr = params.join(", ")
       result.add(&"  {name}* = proc({paramsstr}): {returntype} {{.cdecl.}}")
 
+func serializeConsts(api: XmlNode): seq[string] =
+  result = @["const"]
+  for enums in api.findAll("enums"):
+    if enums.attr("name") == "API Constants":
+      for theenum in enums.findAll("enum"):
+        if theenum.hasAttr("alias"):
+          result.add &"  {theenum.attr(\"name\")}* = {theenum.attr(\"alias\")}"
+        else:
+          var value = theenum.attr("value").strip(chars={'(', ')'})
+          if value.endsWith("U"):
+            value = value[0..^2] & "'u32"
+          elif value.endsWith("ULL"):
+            value = value[0..^4] & "'u64"
+          if value[0] == '~':
+            value = "not " & value[1..^1]
+          result.add &"  {theenum.attr(\"name\")}*: {mapType(theenum.attr(\"type\"))} = {value}"
+
 func serializeType(node: XmlNode, headerTypes: Table[string, string]): Table[string, seq[string]] =
   if node.attrsLen == 0:
     return
@@ -243,7 +282,7 @@ func serializeType(node: XmlNode, headerTypes: Table[string, string]): Table[str
       let platformfile = "platform/" & platform
       if not result.hasKey(platformfile):
         result[platformfile] = @[]
-      result[platformfile].add "  " & node.attr("name").strip(chars={'_'}) & " {.header: \"" & node.attr("requires") & "\".} = object"
+      result[platformfile].add "  " & node.attr("name").strip(chars={'_'}) & " *{.header: \"" & node.attr("requires") & "\".} = object"
   # generic base types
   elif node.attr("category") == "basetype":
     let typechild = node.child("type")
@@ -338,9 +377,10 @@ proc main() =
   var outputFiles = {
     "basetypes": @[
       "import std/dynlib",
+      "import std/tables",
       "type",
-      "  VkHandle* = distinct pointer",
-      "  VkNonDispatchableHandle* = distinct pointer",
+      "  VkHandle* = distinct uint",
+      "  VkNonDispatchableHandle* = distinct uint",
       "when defined(linux):",
       "  let vulkanLib* = loadLib(\"libvulkan.so.1\")",
       "when defined(windows):",
@@ -364,18 +404,21 @@ proc main() =
       error "Vulkan error: ", astToStr(call), " returned ", $value
       raise newException(Exception, "Vulkan error: " & astToStr(call) &
           " returned " & $value)""",
-      "type",
     ],
     "structs": @["type"],
     "enums": @["type"],
     "commands": @[],
   }.toTable
+  outputFiles["basetypes"].add serializeConsts(api)
+  outputFiles["basetypes"].add "type"
 
   # enums
   for thetype in api.findAll("type"):
     if thetype.attr("category") == "bitmask" and not thetype.hasAttr("alias") and (not thetype.hasAttr("api") or thetype.attr("api") == "vulkan"):
       let name = thetype.child("name")[0].text
       outputFiles["enums"].add &"  {name}* = distinct VkFlags"
+  outputFiles["enums"].add "let vkGetInstanceProcAddr = cast[proc(instance: VkInstance, name: cstring): pointer {.stdcall.}](checkedSymAddr(vulkanLib, \"vkGetInstanceProcAddr\"))"
+  outputFiles["enums"].add "type"
   for theenum in api.findAll("enums"):
     outputFiles["enums"].add serializeEnum(theenum, api)
 
@@ -408,7 +451,7 @@ proc main() =
   var procLoads: Table[string, string] # procloads need to be packed into feature/extension loader procs
   for commands in api.findAll("commands"):
     for command in commands.findAll("command"):
-      if command.attr("api") != "vulkansc":
+      if command.attr("api") != "vulkansc" and not (command.attr("name") in IGNORED_COMMANDS):
         if command.hasAttr("alias"):
           let name = command.attr("name")
           let alias = command.attr("alias")
@@ -418,7 +461,7 @@ proc main() =
         else:
           let (name, thetype) = serializeCommand(command)
           varDecls[name] = &"  {name}*: {thetype}"
-          procLoads[name] = &"  {name} = cast[{thetype}](checkedSymAddr(vulkanLib, \"{name}\"))"
+          procLoads[name] = &"  {name} = cast[{thetype}](vkGetInstanceProcAddr(instance, \"{name}\"))"
   var declared: seq[string]
   var featureloads: seq[string]
   for feature in api.findAll("feature"):
@@ -427,17 +470,18 @@ proc main() =
       outputFiles["commands"].add &"# feature {name}"
       outputFiles["commands"].add "var"
       for command in feature.findAll("command"):
-        if not (command.attr("name") in declared):
+        if not (command.attr("name") in declared) and not (command.attr("name") in IGNORED_COMMANDS):
           outputFiles["commands"].add varDecls[command.attr("name")]
           declared.add command.attr("name")
       featureloads.add &"load{name}"
-      outputFiles["commands"].add &"proc load{name}*() ="
+      outputFiles["commands"].add &"proc load{name}*(instance: VkInstance) ="
       for command in feature.findAll("command"):
-        outputFiles["commands"].add procLoads[command.attr("name")]
+        if not (command.attr("name") in IGNORED_COMMANDS & GLOBAL_COMMANDS):
+          outputFiles["commands"].add procLoads[command.attr("name")]
     outputFiles["commands"].add ""
-  outputFiles["commands"].add ["proc initVulkan*() ="]
+  outputFiles["commands"].add ["proc loadVulkan*(instance: VkInstance) ="]
   for l in featureloads:
-    outputFiles["commands"].add [&"  {l}()"]
+    outputFiles["commands"].add [&"  {l}(instance)"]
   outputFiles["commands"].add ""
 
   # for promoted extensions, dependants need to call the load-function of the promoted feature/extension
@@ -464,6 +508,7 @@ proc main() =
       if name in SPECIAL_DEPENDENCIES:
         extensionDependencies[name][0].add SPECIAL_DEPENDENCIES[name]
 
+  # order dependencies to generate them in correct order
   var dependencyOrderedExtensions: OrderedTable[string, XmlNode]
   while extensionDependencies.len > 0:
     var delkeys: seq[string]
@@ -480,29 +525,34 @@ proc main() =
     for key in delkeys:
       extensionDependencies.del key
 
+  var extensionLoaderMap: Table[string, Table[string, string]]
   for extension in dependencyOrderedExtensions.values:
     if extension.hasAttr("promotedto"): # will be loaded in promoted place
       continue
     if extension.attr("supported") in ["", "vulkan", "vulkan,vulkansc"]:
       var file = "commands"
-      if extension.attr("platform") != "":
-        file = "platform/" & extension.attr("platform")
-      elif extension.attr("name").startsWith("VK_KHR_video"): # hack since we do not include video headers by default
-        file = "platform/provisional"
+      var platform = extension.attr("platform")
+      if extension.attr("name").startsWith("VK_KHR_video"):
+        platform = "provisional"
+      if platform != "":
+        file = "platform/" & platform
       let name = extension.attr("name")
       if extension.findAll("command").len > 0:
         outputFiles[file].add &"# extension {name}"
         outputFiles[file].add "var"
         for command in extension.findAll("command"):
-          if not (command.attr("name") in declared):
+          if not (command.attr("name") in declared) and not (command.attr("name") in IGNORED_COMMANDS):
             outputFiles[file].add varDecls[command.attr("name")]
             declared.add command.attr("name")
-      outputFiles[file].add &"proc load{name}*() ="
+      outputFiles[file].add &"proc load{name}*(instance: VkInstance) ="
+      if not (platform in extensionLoaderMap):
+        extensionLoaderMap[platform] = Table[string, string]()
+      extensionLoaderMap[platform][name] = &"load{name}"
       var addedFunctionBody = false
       if extension.hasAttr("depends"):
         for dependency in extension.attr("depends").split("+"):
           # need to check since some extensions have no commands and therefore no load-function
-          outputFiles[file].add &"  load{promotions.getOrDefault(dependency, dependency)}()"
+          outputFiles[file].add &"  load{promotions.getOrDefault(dependency, dependency)}(instance)"
           addedFunctionBody = true
       for command in extension.findAll("command"):
         outputFiles[file].add procLoads[command.attr("name")]
@@ -514,10 +564,30 @@ proc main() =
   var mainout: seq[string]
   for section in ["basetypes", "enums", "structs", "commands"]:
     mainout.add outputFiles[section]
+  mainout.add "var EXTENSION_LOADERS = {"
+  for extension, loader in extensionLoaderMap[""].pairs:
+    mainout.add &"  \"{extension}\": {loader},"
+  mainout.add "}.toTable"
   for platform in api.findAll("platform"):
     mainout.add &"when defined({platform.attr(\"protect\")}):"
     mainout.add &"  include platform/{platform.attr(\"name\")}"
+    if platform.attr("name") in extensionLoaderMap:
+      for extension, loader in extensionLoaderMap[platform.attr("name")].pairs:
+        mainout.add &"  EXTENSION_LOADERS[\"{extension}\"] = {loader}"
+
+  mainout.add ""
+  mainout.add "proc loadExtension*(instance: VkInstance, extension: string) = EXTENSION_LOADERS[extension](instance)"
+  mainout.add ""
+  mainout.add "# load global functions immediately"
+  mainout.add "block globalFunctions:"
+  mainout.add "  let instance = VkInstance(0)"
+  for l in GLOBAL_COMMANDS:
+    mainout.add procLoads[l]
   writeFile outdir / &"api.nim", mainout.join("\n")
+
+  mainout.add ""
+  mainout.add "converter VkBool2NimBool*(a: VkBool32): bool = a > 0"
+  mainout.add "converter NimBool2VkBool*(a: bool): VkBool32 = VkBool32(a)"
 
   for filename, filecontent in outputFiles.pairs:
     if filename.startsWith("platform/"):
