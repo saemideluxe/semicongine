@@ -26,4 +26,3 @@ notes
 
 # from API generator
 src/vulkan_api/output/
-vk.xml

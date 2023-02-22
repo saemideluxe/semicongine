@@ -148,6 +148,9 @@ const api_generator_name = "vulkan_api_generator"
 
 task generate_vulkan_api, "Generate Vulkan API":
   selfExec &"c -d:ssl --run src/vulkan_api/{api_generator_name}.nim"
+  mkDir "src/semicongine/vulkan/"
+  cpFile "src/vulkan_api/output/api.nim", "src/semicongine/vulkan/api.nim"
+  cpDir "src/vulkan_api/output/platform", "src/semicongine/vulkan/platform"
 
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
   compilerFlags()
