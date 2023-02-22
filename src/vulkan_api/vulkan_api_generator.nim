@@ -10,9 +10,6 @@ import httpClient
 import std/xmlparser
 import std/xmltree
 
-type
-  FileContent = seq[string]
-
 const
   TYPEMAP = {
     "void": "void",
@@ -311,12 +308,13 @@ proc update(a: var Table[string, seq[string]], b: Table[string, seq[string]]) =
 
 
 proc main() =
-  if not os.fileExists("vk.xml"):
+  let file = getTempDir() / "vk.xml"
+  if not os.fileExists(file):
     let client = newHttpClient()
     let glUrl = "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Docs/main/xml/vk.xml"
-    client.downloadFile(glUrl, "vk.xml")
+    client.downloadFile(glUrl, file)
 
-  let api = loadXml("vk.xml")
+  let api = loadXml(file)
 
   const outdir = "src/vulkan_api/output"
   removeDir outdir
@@ -352,6 +350,20 @@ proc main() =
       "func VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =",
       "  (variant shl 29) or (major shl 22) or (minor shl 12) or patch",
       "",
+      """template checkVkResult*(call: untyped) =
+  when defined(release):
+    discard call
+  else:
+    # yes, a bit cheap, but this is only for nice debug output
+    var callstr = astToStr(call).replace("\n", "")
+    while callstr.find("  ") >= 0:
+      callstr = callstr.replace("  ", " ")
+    debug "CALLING vulkan: ", callstr
+    let value = call
+    if value != VK_SUCCESS:
+      error "Vulkan error: ", astToStr(call), " returned ", $value
+      raise newException(Exception, "Vulkan error: " & astToStr(call) &
+          " returned " & $value)""",
       "type",
     ],
     "structs": @["type"],
@@ -505,7 +517,7 @@ proc main() =
   for platform in api.findAll("platform"):
     mainout.add &"when defined({platform.attr(\"protect\")}):"
     mainout.add &"  include platform/{platform.attr(\"name\")}"
-  writeFile outdir / &"types.nim", mainout.join("\n")
+  writeFile outdir / &"api.nim", mainout.join("\n")
 
   for filename, filecontent in outputFiles.pairs:
     if filename.startsWith("platform/"):
