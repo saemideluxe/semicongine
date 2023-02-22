@@ -17,7 +17,7 @@ var deleteMessage*: Atom
 
 type
   NativeWindow* = object
-    display*: PDisplay
+    display*: ptr Display
     window*: Window
     emptyCursor: Cursor
 

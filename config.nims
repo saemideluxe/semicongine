@@ -13,6 +13,11 @@ proc compilerFlags() =
   switch("mm", "orc")
   switch("experimental", "strictEffects")
   switch("threads", "on")
+  if defined(linux):
+    switch("define", "VK_USE_PLATFORM_XLIB_KHR")
+  if defined(windows):
+    switch("define", "VK_USE_PLATFORM_WIN32_KHR")
+
 
 proc compilerFlagsDebug() =
   switch("debugger", "native")

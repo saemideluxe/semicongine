@@ -7,21 +7,6 @@ import std/macros
 import ./vulkan
 import ./window
 
-template checkVkResult*(call: untyped) =
-  when defined(release):
-    discard call
-  else:
-    # yes, a bit cheap, but this is only for nice debug output
-    var callstr = astToStr(call).replace("\n", "")
-    while callstr.find("  ") >= 0:
-      callstr = callstr.replace("  ", " ")
-    debug "CALLING vulkan: ", callstr
-    let value = call
-    if value != VK_SUCCESS:
-      error "Vulkan error: ", astToStr(call), " returned ", $value
-      raise newException(Exception, "Vulkan error: " & astToStr(call) &
-          " returned " & $value)
-
 # the included code need checkVkResult, therefore having the template above
 when defined(linux):
   include ./platform/linux/vulkan
@@ -194,10 +179,11 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
         requiredExtensions[0]))
   )
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result))
+  for extension in requiredExtensions:
+    result.loadExtension($extension)
 
-  loadVK_KHR_surface()
-  load_platform_extensions()
-  loadVK_KHR_swapchain()
+  # loadVK_KHR_surface(result)
+  # loadVK_KHR_swapchain(result)
   when ENABLEVULKANVALIDATIONLAYERS:
     loadVK_EXT_debug_utils(result)
 
@@ -239,9 +225,9 @@ proc debugCallback*(
   messageTypes: VkDebugUtilsMessageTypeFlagsEXT,
   pCallbackData: VkDebugUtilsMessengerCallbackDataEXT,
   userData: pointer
-): VkBool32 {.cdecl.} =
+): bool {.cdecl.} =
   echo &"{messageSeverity}: {VkDebugUtilsMessageTypeFlagBitsEXT(messageTypes)}: {pCallbackData.pMessage}"
-  return VK_FALSE
+  return false
 
 proc getSurfaceCapabilities*(device: VkPhysicalDevice,
     surface: VkSurfaceKHR): VkSurfaceCapabilitiesKHR =

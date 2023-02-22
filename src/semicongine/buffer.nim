@@ -36,13 +36,13 @@ proc trash*(buffer: var Buffer) =
     vkFreeMemory(buffer.device, buffer.memory, nil)
     buffer.memory = VkDeviceMemory(0)
 
-proc findMemoryType(buffer: Buffer, physicalDevice: VkPhysicalDevice,
-    properties: MemoryProperties): uint32 =
+proc findMemoryType*(memoryRequirements: VkMemoryRequirements,
+    physicalDevice: VkPhysicalDevice, properties: MemoryProperties): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(physicalDevice, addr(physicalProperties))
 
   for i in 0'u32 ..< physicalProperties.memoryTypeCount:
-    if bool(buffer.memoryRequirements.memoryTypeBits and (1'u32 shl i)):
+    if bool(memoryRequirements.memoryTypeBits and (1'u32 shl i)):
       if (uint32(physicalProperties.memoryTypes[i].propertyFlags) and cast[
           uint32](properties)) == cast[uint32](properties):
         return i
@@ -73,7 +73,7 @@ proc InitBuffer*(
   var allocInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     allocationSize: result.memoryRequirements.size,
-    memoryTypeIndex: result.findMemoryType(physicalDevice, properties)
+    memoryTypeIndex: result.memoryRequirements.findMemoryType(physicalDevice, properties)
   )
   if result.size > 0:
     checkVkResult result.device.vkAllocateMemory(addr(allocInfo), nil, addr(result.memory))
