@@ -79,14 +79,18 @@ func tableSorted(table: Table[int, string]): seq[(int, string)] =
   result.sort((a, b) => cmp(a[0], b[0]))
 
 # serializers
-func serializeEnum(node: XmlNode, root: XmlNode): seq[string] =
+func serializeEnum(node: XmlNode, api: XmlNode): seq[string] =
   let name = node.attr("name")
   if name == "":
     return result
 
+  var reservedNames: seq[string]
+  for t in api.findAll("type"):
+    reservedNames.add t.attr("name").replace("_", "").toLower()
+
   # find additional enum defintion in feature definitions
   var values: Table[int, string]
-  for feature in root.findAll("feature"):
+  for feature in api.findAll("feature"):
     for require in feature.findAll("require"):
       for theenum in require.findAll("enum"):
         if theenum.attr("extends") == name:
@@ -111,7 +115,7 @@ func serializeEnum(node: XmlNode, root: XmlNode): seq[string] =
           else:
             raise newException(Exception, &"Unknown extension value: {feature}\nvalue:{theenum}")
   # find additional enum defintion in extension definitions
-  for extension in root.findAll("extension"):
+  for extension in api.findAll("extension"):
     let extensionNumber = parseInt(extension.attr("number"))
     let enumBase = 1000000000 + (extensionNumber - 1) * 1000
     for require in extension.findAll("require"):
@@ -156,7 +160,10 @@ func serializeEnum(node: XmlNode, root: XmlNode): seq[string] =
     if values.len > 0:
       result.add "  " & name & "* {.size: sizeof(cint).} = enum"
       for (value, name) in tableSorted(values):
-        let enumEntry = &"    {name} = {value}"
+        var thename = name
+        if name.replace("_", "").toLower() in reservedNames:
+          thename = thename & "_ENUM"
+        let enumEntry = &"    {thename} = {value}"
         result.add enumEntry
 
   # generate bitsets (normal enums in the C API, but bitfield-enums in Nim)
@@ -193,7 +200,7 @@ func serializeEnum(node: XmlNode, root: XmlNode): seq[string] =
     result = {cApiName}(uint(result) or uint(flag))"""
         result.add "type"
 
-func serializeStruct(node: XmlNode, root: XmlNode): seq[string] =
+func serializeStruct(node: XmlNode): seq[string] =
   let name = node.attr("name")
   var union = ""
   if node.attr("category") == "union":
@@ -342,6 +349,9 @@ proc main() =
       "  let vulkanLib* = loadLib(\"vulkan-1.dll\")",
       "if vulkanLib == nil:",
       "  raise newException(Exception, \"Unable to load vulkan library\")",
+      "func VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =",
+      "  (variant shl 29) or (major shl 22) or (minor shl 12) or patch",
+      "",
       "type",
     ],
     "structs": @["type"],
@@ -366,7 +376,7 @@ proc main() =
         outfile = "platform/" & platformTypes[thetype.attr("name")]
       if not (outfile in outputFiles):
         outputFiles[outfile] = @[]
-      outputFiles[outfile].add serializeStruct(thetype, api)
+      outputFiles[outfile].add serializeStruct(thetype)
 
   # types
   var headerTypes: Table[string, string]
@@ -413,7 +423,7 @@ proc main() =
       for command in feature.findAll("command"):
         outputFiles["commands"].add procLoads[command.attr("name")]
     outputFiles["commands"].add ""
-  outputFiles["commands"].add ["proc loadAll*() ="]
+  outputFiles["commands"].add ["proc initVulkan*() ="]
   for l in featureloads:
     outputFiles["commands"].add [&"  {l}()"]
   outputFiles["commands"].add ""
@@ -492,13 +502,14 @@ proc main() =
   var mainout: seq[string]
   for section in ["basetypes", "enums", "structs", "commands"]:
     mainout.add outputFiles[section]
+  for platform in api.findAll("platform"):
+    mainout.add &"when defined({platform.attr(\"protect\")}):"
+    mainout.add &"  include platform/{platform.attr(\"name\")}"
   writeFile outdir / &"types.nim", mainout.join("\n")
 
   for filename, filecontent in outputFiles.pairs:
     if filename.startsWith("platform/"):
       writeFile outdir / &"{filename}.nim", (@[
-      "import std/dynlib",
-      "import ../types",
       "type"
       ] & filecontent).join("\n")
 
