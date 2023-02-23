@@ -38,9 +38,8 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT: "tese"
   of VK_SHADER_STAGE_GEOMETRY_BIT: "geom"
   of VK_SHADER_STAGE_FRAGMENT_BIT: "frag"
-  of VK_SHADER_STAGE_ALL_GRAPHICS: ""
   of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
-  of VK_SHADER_STAGE_ALL: ""
+  else: ""
 
 proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
     shaderSource: static string, entrypoint: string): seq[

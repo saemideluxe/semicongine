@@ -529,13 +529,13 @@ proc igniteEngine*(windowTitle: string): Engine =
   if mousepos.isSome():
     result.input.mousePos = mousePos.get()
 
-  # setup vulkan functions
-  vkLoad1_0()
-  vkLoad1_1()
-  vkLoad1_2()
 
   # create vulkan instance
   result.vulkan.instance = createVulkanInstance(VULKAN_VERSION)
+
+  # setup vulkan functions
+  loadVulkan(result.vulkan.instance)
+
   when DEBUG_LOG:
     result.vulkan.debugMessenger = result.vulkan.instance.setupDebugLog()
   result.vulkan.surface = result.vulkan.instance.createVulkanSurface(result.window)
@@ -602,7 +602,7 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](
 
   var
     poolSize = VkDescriptorPoolSize(
-      `type`: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
       descriptorCount: uint32(MAX_FRAMES_IN_FLIGHT),
     )
     poolInfo = VkDescriptorPoolCreateInfo(

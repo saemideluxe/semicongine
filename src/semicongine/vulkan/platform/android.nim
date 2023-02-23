@@ -69,14 +69,14 @@ type
 # extension VK_ANDROID_external_memory_android_hardware_buffer
 var
   vkGetAndroidHardwareBufferPropertiesANDROID*: proc(device: VkDevice, buffer: ptr AHardwareBuffer, pProperties: ptr VkAndroidHardwareBufferPropertiesANDROID): VkResult {.stdcall.}
-  vkGetMemoryAndroidHardwareBufferANDROID*: proc(device: VkDevice, pInfo: ptr VkMemoryGetAndroidHardwareBufferInfoANDROID, pBuffer: AHardwareBuffer): VkResult {.stdcall.}
+  vkGetMemoryAndroidHardwareBufferANDROID*: proc(device: VkDevice, pInfo: ptr VkMemoryGetAndroidHardwareBufferInfoANDROID, pBuffer: ptr ptr AHardwareBuffer): VkResult {.stdcall.}
 proc loadVK_ANDROID_external_memory_android_hardware_buffer*(instance: VkInstance) =
   loadVK_VERSION_1_1(instance)
   loadVK_VERSION_1_1(instance)
   loadVK_EXT_queue_family_foreign(instance)
   loadVK_VERSION_1_1(instance)
   vkGetAndroidHardwareBufferPropertiesANDROID = cast[proc(device: VkDevice, buffer: ptr AHardwareBuffer, pProperties: ptr VkAndroidHardwareBufferPropertiesANDROID): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkGetAndroidHardwareBufferPropertiesANDROID"))
-  vkGetMemoryAndroidHardwareBufferANDROID = cast[proc(device: VkDevice, pInfo: ptr VkMemoryGetAndroidHardwareBufferInfoANDROID, pBuffer: AHardwareBuffer): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkGetMemoryAndroidHardwareBufferANDROID"))
+  vkGetMemoryAndroidHardwareBufferANDROID = cast[proc(device: VkDevice, pInfo: ptr VkMemoryGetAndroidHardwareBufferInfoANDROID, pBuffer: ptr ptr AHardwareBuffer): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkGetMemoryAndroidHardwareBufferANDROID"))
 
 # extension VK_KHR_android_surface
 var
