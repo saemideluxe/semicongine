@@ -18,11 +18,6 @@ const ENABLEVULKANVALIDATIONLAYERS* = not defined(release)
 func addrOrNil[T](obj: var openArray[T]): ptr T =
   if obj.len > 0: addr(obj[0]) else: nil
 
-func VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32,
-    patch: uint32): uint32 {.compileTime.} =
-  (variant shl 29) or (major shl 22) or (minor shl 12) or patch
-
-
 func filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[
     VkSurfaceFormatKHR] =
   for format in formats:
@@ -223,9 +218,9 @@ proc getVulcanDevice*(
 proc debugCallback*(
   messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
   messageTypes: VkDebugUtilsMessageTypeFlagsEXT,
-  pCallbackData: VkDebugUtilsMessengerCallbackDataEXT,
+  pCallbackData: ptr VkDebugUtilsMessengerCallbackDataEXT,
   userData: pointer
-): bool {.cdecl.} =
+): VkBool32 {.cdecl.} =
   echo &"{messageSeverity}: {VkDebugUtilsMessageTypeFlagBitsEXT(messageTypes)}: {pCallbackData.pMessage}"
   return false
 
