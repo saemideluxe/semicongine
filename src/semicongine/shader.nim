@@ -62,7 +62,7 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
     let shaderbinary = staticRead shaderfile.replace("\\", "/")
   else:
     let shaderbinary = staticRead shaderfile
-  when defined(linux) or defined(mingw):
+  when defined(linux):
     discard staticExecChecked(command = fmt"rm {shaderfile}")
   elif defined(windows):
     discard staticExecChecked(command = fmt"del {shaderfile}")
