@@ -144,8 +144,7 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
   var usableLayers = newSeq[cstring]()
 
   when ENABLEVULKANVALIDATIONLAYERS:
-    const desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring,
-        "VK_LAYER_MESA_overlay".cstring]
+    const desiredLayers = ["VK_LAYER_KHRONOS_validation".cstring, "VK_LAYER_MESA_overlay".cstring]
   else:
     const desiredLayers: array[0, string] = []
   for layer in desiredLayers:
@@ -155,7 +154,7 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
   echo "Available validation layers: ", availableLayers
   echo "Using validation layers: ", usableLayers
   echo "Available extensions: ", availableExtensions
-  echo "Using extensions: ", requiredExtensions
+  echo "Using instance extensions: ", requiredExtensions
 
   var appinfo = VkApplicationInfo(
     sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -174,13 +173,9 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
         requiredExtensions[0]))
   )
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result))
-  for extension in requiredExtensions:
+  let other_extensions = @["VK_KHR_swapchain".cstring]
+  for extension in requiredExtensions & other_extensions:
     result.loadExtension($extension)
-
-  # loadVK_KHR_surface(result)
-  # loadVK_KHR_swapchain(result)
-  when ENABLEVULKANVALIDATIONLAYERS:
-    loadVK_EXT_debug_utils(result)
 
 
 proc getVulcanDevice*(

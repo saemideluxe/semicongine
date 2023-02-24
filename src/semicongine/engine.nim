@@ -643,8 +643,7 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](
           dstArrayElement: 0,
           descriptorType: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
           descriptorCount: 1,
-          pBufferInfo: cast[ptr ptr VkDescriptorBufferInfo](addr(bufferInfos[i][
-              0])),
+          pBufferInfo: addr(bufferInfos[i][0]),
         )
       vkUpdateDescriptorSets(result.device, 1, addr(descriptorWrite), 0, nil)
 
