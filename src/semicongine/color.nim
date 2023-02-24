@@ -12,9 +12,9 @@ func RGBfromHex*(value: string): Vec3 =
     hex = hex[0] & hex[0] & hex[1] & hex[1] & hex[2] & hex[2]
   var r, g, b: uint8
   assert hex.len == 6
-  assert parseHex(hex[0 .. 1], r) == 2
-  assert parseHex(hex[2 .. 3], g) == 2
-  assert parseHex(hex[4 .. 5], b) == 2
+  discard parseHex(hex[0 .. 1], r) == 2
+  discard parseHex(hex[2 .. 3], g) == 2
+  discard parseHex(hex[4 .. 5], b) == 2
   return Vec3([float32(r), float32(g), float32(b)]) / 255'f
 
 func RGBAfromHex*(value: string): Vec4 =
@@ -32,10 +32,10 @@ func RGBAfromHex*(value: string): Vec4 =
     hex = hex & "ff"
   assert hex.len == 8
   var r, g, b, a: uint8
-  assert parseHex(hex[0 .. 1], r) == 2
-  assert parseHex(hex[2 .. 3], g) == 2
-  assert parseHex(hex[4 .. 5], b) == 2
-  assert parseHex(hex[6 .. 7], a) == 2
+  discard parseHex(hex[0 .. 1], r)
+  discard parseHex(hex[2 .. 3], g)
+  discard parseHex(hex[4 .. 5], b)
+  discard parseHex(hex[6 .. 7], a)
   return Vec4([float32(r), float32(g), float32(b), float32(a)]) / 255'f
 
 func gamma*[T: Vec3|Vec4](color: T, gamma: float32): auto =

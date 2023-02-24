@@ -18,6 +18,8 @@ const
   backgroundColor = RGBAfromHex("FAC034").gamma(2.2)
   ballSpeed = 60'f
 
+echo RGBAfromHex("FAC034")
+echo RGBAfromHex("FAC034").gamma(2.2)
 var
   uniforms = Uniforms()
   pipeline: RenderPipeline[Vertex, Uniforms]
