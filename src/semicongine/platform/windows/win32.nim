@@ -15,7 +15,7 @@ var currentEvents: seq[Event]
 
 template checkWin32Result*(call: untyped) =
   let value = call
-  if value != 0:
+  if value == 0:
     raise newException(Exception, "Win32 error: " & astToStr(call) & " returned " & $value)
 
 
@@ -77,7 +77,7 @@ proc createWindow*(title: string): NativeWindow =
       DWORD(0),
       windowClassName,
       windowName,
-      DWORD(WS_POPUP or WS_THICKFRAME or WS_SYSMENU or WS_MAXIMIZEBOX or WS_MINIMIZEBOX),
+      DWORD(WS_OVERLAPPEDWINDOW),
       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
       HMENU(0),
       HINSTANCE(0),

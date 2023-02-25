@@ -27,7 +27,7 @@ proc staticExecChecked(command: string, input = ""): string {.compileTime.} =
       command = command,
       input = input)
   if exitcode != 0:
-    raise newException(Exception, output)
+    raise newException(Exception, &"Running '{command}' produced exit code: {exitcode}" & output)
   return output
 
 
@@ -65,7 +65,7 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
   when defined(linux):
     discard staticExecChecked(command = fmt"rm {shaderfile}")
   elif defined(windows):
-    discard staticExecChecked(command = fmt"del {shaderfile}")
+    discard staticExecChecked(command = fmt"cmd.exe /c del {shaderfile}")
   else:
     raise newException(Exception, "Unsupported operating system")
 
