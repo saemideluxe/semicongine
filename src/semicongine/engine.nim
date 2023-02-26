@@ -111,21 +111,17 @@ method update*[T, U](mesh: Mesh[T, U], engine: Engine, t, dt: float32) =
 proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[
     PhysicalDevice] =
   for vulkanPhysicalDevice in getVulkanPhysicalDevices(instance):
-    var device = PhysicalDevice(device: vulkanPhysicalDevice,
-        extensions: getDeviceExtensions(vulkanPhysicalDevice))
+    var device = PhysicalDevice(device: vulkanPhysicalDevice, extensions: getDeviceExtensions(vulkanPhysicalDevice))
     vkGetPhysicalDeviceProperties(vulkanPhysicalDevice, addr(device.properties))
     vkGetPhysicalDeviceFeatures(vulkanPhysicalDevice, addr(device.features))
     device.formats = vulkanPhysicalDevice.getDeviceSurfaceFormats(surface)
     device.presentModes = vulkanPhysicalDevice.getDeviceSurfacePresentModes(surface)
 
     debug(&"Physical device nr {int(vulkanPhysicalDevice)} {cleanString(device.properties.deviceName)}")
-    for i, queueFamilyProperty in enumerate(getQueueFamilies(
-        vulkanPhysicalDevice)):
+    for i, queueFamilyProperty in enumerate(getQueueFamilies(vulkanPhysicalDevice)):
       var hasSurfaceSupport: VkBool32 = VK_FALSE
-      checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkanPhysicalDevice,
-          uint32(i), surface, addr(hasSurfaceSupport))
-      device.queueFamilies.add(QueueFamily(properties: queueFamilyProperty,
-          hasSurfaceSupport: bool(hasSurfaceSupport)))
+      checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkanPhysicalDevice, uint32(i), surface, addr(hasSurfaceSupport))
+      device.queueFamilies.add(QueueFamily(properties: queueFamilyProperty, hasSurfaceSupport: bool(hasSurfaceSupport)))
       debug(&"  Queue family {i} {queueFamilyProperty}")
 
     result.add(device)
@@ -182,11 +178,9 @@ when DEBUG_LOG:
       pfnUserCallback: debugCallback,
       pUserData: nil,
     )
-    checkVkResult instance.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil,
-        addr(result))
+    checkVkResult instance.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result))
 
-proc setupVulkanDeviceAndQueues(instance: VkInstance,
-    surface: VkSurfaceKHR): Device =
+proc setupVulkanDeviceAndQueues(instance: VkInstance, surface: VkSurfaceKHR): Device =
   let usableDevices = instance.getAllPhysicalDevices(surface).filterForDevice()
   if len(usableDevices) == 0:
     raise newException(Exception, "No suitable graphics device found")
@@ -539,8 +533,7 @@ proc igniteEngine*(windowTitle: string): Engine =
   when DEBUG_LOG:
     result.vulkan.debugMessenger = result.vulkan.instance.setupDebugLog()
   result.vulkan.surface = result.vulkan.instance.createVulkanSurface(result.window)
-  result.vulkan.device = result.vulkan.instance.setupVulkanDeviceAndQueues(
-      result.vulkan.surface)
+  result.vulkan.device = result.vulkan.instance.setupVulkanDeviceAndQueues(result.vulkan.surface)
 
   # get basic frame information
   result.vulkan.surfaceFormat = result.vulkan.device.physicalDevice.formats.getSuitableSurfaceFormat()
@@ -906,8 +899,7 @@ proc trash*(engine: var Engine) =
   engine.vulkan.instance.vkDestroySurfaceKHR(engine.vulkan.surface, nil)
   engine.vulkan.device.device.vkDestroyDevice(nil)
   when DEBUG_LOG:
-    engine.vulkan.instance.vkDestroyDebugUtilsMessengerEXT(
-        engine.vulkan.debugMessenger, nil)
+    engine.vulkan.instance.vkDestroyDebugUtilsMessengerEXT(engine.vulkan.debugMessenger, nil)
   engine.window.trash()
   engine.vulkan.instance.vkDestroyInstance(
       nil) # needs to happen after window is trashed as the driver might have a hook registered for the window destruction

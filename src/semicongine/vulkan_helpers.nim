@@ -40,11 +40,9 @@ func cleanString*(str: openArray[char]): string =
 
 proc getInstanceExtensions*(): seq[string] =
   var extensionCount: uint32
-  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(
-      extensionCount), nil)
+  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr( extensionCount), nil)
   var extensions = newSeq[VkExtensionProperties](extensionCount)
-  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(
-      extensionCount), addrOrNil(extensions))
+  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr( extensionCount), addrOrNil(extensions))
 
   for extension in extensions:
     result.add(cleanString(extension.extensionName))
@@ -176,7 +174,6 @@ proc createVulkanInstance*(vulkanVersion: uint32): VkInstance =
   let other_extensions = @["VK_KHR_swapchain".cstring]
   for extension in requiredExtensions & other_extensions:
     result.loadExtension($extension)
-
 
 proc getVulcanDevice*(
   physicalDevice: var VkPhysicalDevice,
