@@ -58,7 +58,7 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
       input = shaderSource
   )
 
-  when defined(mingw) and not defined(windows): # required for crosscompilation, path separators get messed up
+  when defined(mingw) and defined(linux): # required for crosscompilation, path separators get messed up
     let shaderbinary = staticRead shaderfile.replace("\\", "/")
   else:
     let shaderbinary = staticRead shaderfile
