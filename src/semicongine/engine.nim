@@ -111,7 +111,7 @@ method update*[T, U](mesh: Mesh[T, U], engine: Engine, t, dt: float32) =
 proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[
     PhysicalDevice] =
   for vulkanPhysicalDevice in getVulkanPhysicalDevices(instance):
-    var device = PhysicalDevice(device: vulkanPhysicalDevice, extensions: getDeviceExtensions(vulkanPhysicalDevice))
+    var device = PhysicalDevice(device: vulkanPhysicalDevice, extensions: vulkan.getDeviceExtensions(vulkanPhysicalDevice))
     vkGetPhysicalDeviceProperties(vulkanPhysicalDevice, addr(device.properties))
     vkGetPhysicalDeviceFeatures(vulkanPhysicalDevice, addr(device.features))
     device.formats = vulkanPhysicalDevice.getDeviceSurfaceFormats(surface)
@@ -886,20 +886,17 @@ proc trash*(engine: var Engine) =
       engine.vulkan.framebuffers)
 
   for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
-    engine.vulkan.device.device.vkDestroySemaphore(
-        engine.vulkan.imageAvailableSemaphores[i], nil)
-    engine.vulkan.device.device.vkDestroySemaphore(
-        engine.vulkan.renderFinishedSemaphores[i], nil)
+    engine.vulkan.device.device.vkDestroySemaphore(engine.vulkan.imageAvailableSemaphores[i], nil)
+    engine.vulkan.device.device.vkDestroySemaphore(engine.vulkan.renderFinishedSemaphores[i], nil)
     engine.vulkan.device.device.vkDestroyFence(engine.vulkan.inFlightFences[i], nil)
 
   engine.vulkan.device.device.vkDestroyRenderPass(engine.vulkan.renderPass, nil)
-  engine.vulkan.device.device.vkDestroyCommandPool(
-      engine.vulkan.device.commandPool, nil)
+  engine.vulkan.device.device.vkDestroyCommandPool(engine.vulkan.device.commandPool, nil)
 
   engine.vulkan.instance.vkDestroySurfaceKHR(engine.vulkan.surface, nil)
   engine.vulkan.device.device.vkDestroyDevice(nil)
   when DEBUG_LOG:
     engine.vulkan.instance.vkDestroyDebugUtilsMessengerEXT(engine.vulkan.debugMessenger, nil)
   engine.window.trash()
-  engine.vulkan.instance.vkDestroyInstance(
-      nil) # needs to happen after window is trashed as the driver might have a hook registered for the window destruction
+  # needs to happen after window is trashed as the driver might have a hook registered for the window destruction
+  engine.vulkan.instance.vkDestroyInstance(nil)

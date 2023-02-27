@@ -81,8 +81,7 @@ proc getQueueFamilies*(device: VkPhysicalDevice): seq[VkQueueFamilyProperties] =
   var n_queuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), nil)
   result = newSeq[VkQueueFamilyProperties](n_queuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies),
-      addrOrNil(result))
+  vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), addrOrNil(result))
 
 
 proc getDeviceSurfaceFormats*(device: VkPhysicalDevice,

@@ -127,7 +127,8 @@ func findType(declNode: XmlNode): string =
     result = &"array[{arraylen}, {result}]"
 
 # serializers
-func serializeEnum(node: XmlNode, api: XmlNode): seq[string] =
+# return values and whether this is a bitfield
+func serializeEnum(node: XmlNode, api: XmlNode): (seq[string], string) =
   let name = node.attr("name")
   if name == "":
     return result
@@ -206,13 +207,13 @@ func serializeEnum(node: XmlNode, api: XmlNode): seq[string] =
       else:
         values[smartParseInt(value.attr("value"))] = value.attr("name")
     if values.len > 0:
-      result.add "  " & name & "* {.size: sizeof(cint).} = enum"
+      result[0].add "  " & name & "* {.size: sizeof(cint).} = enum"
       for (value, name) in tableSorted(values):
         var thename = name
         if name.replace("_", "").toLower() in reservedNames:
           thename = thename & "_ENUM"
         let enumEntry = &"    {thename} = {value}"
-        result.add enumEntry
+        result[0].add enumEntry
 
   # generate bitsets (normal enums in the C API, but bitfield-enums in Nim)
   elif node.attr("type") == "bitmask":
@@ -226,41 +227,42 @@ func serializeEnum(node: XmlNode, api: XmlNode): seq[string] =
         predefined_enum_sets.add &"  {value.attr(\"name\")}* = {value.attr(\"value\")}"
 
     if values.len > 0:
+      let cApiName = name.replace("FlagBits", "Flags")
+      result[1] = cApiName
       if node.hasAttr("bitwidth"):
-        result.add "  " & name & "* {.size: 8.} = enum"
+        result[0].add "  " & name & "* {.size: 8.} = enum"
       else:
-        result.add "  " & name & "* {.size: sizeof(cint).} = enum"
+        result[0].add "  " & name & "* {.size: sizeof(cint).} = enum"
       for (bitpos, enumvalue) in tableSorted(values):
         var value = "00000000000000000000000000000000"# makes the bit mask nicely visible
         if node.hasAttr("bitwidth"): # assumes this is always 64
           value = value & value
         value[^(bitpos + 1)] = '1'
         let enumEntry = &"    {enumvalue} = 0b{value}"
-        if not (enumEntry in result): # the specs define duplicate entries for backwards compat
-          result.add enumEntry
-      let cApiName = name.replace("FlagBits", "Flags")
+        if not (enumEntry in result[0]): # the specs define duplicate entries for backwards compat
+          result[0].add enumEntry
       if node.hasAttr("bitwidth"): # assuming this attribute is always 64
         if values.len > 0:
-          result.add &"""converter BitsetToNumber*(flags: openArray[{name}]): {cApiName} =
+          result[0].add &"""func toBits*(flags: openArray[{name}]): {cApiName} =
     for flag in flags:
-      result = {cApiName}(int64(result) or int64(flag))"""
-          result.add &"""converter NumberToBitset*(number: {cApiName}): seq[{name}] =
-        for value in {name}.items:
-          if (value.ord and int64(number)) > 0:
-            result.add value"""
+      result = {cApiName}(uint64(result) or uint64(flag))"""
+          result[0].add &"""func toEnums*(number: {cApiName}): seq[{name}] =
+    for value in {name}.items:
+      if (cast[uint64](value) and uint64(number)) > 0:
+        result.add value"""
       else:
         if values.len > 0:
-          result.add &"""func toBits*(flags: openArray[{name}]): {cApiName} =
+          result[0].add &"""func toBits*(flags: openArray[{name}]): {cApiName} =
     for flag in flags:
       result = {cApiName}(uint(result) or uint(flag))"""
-          result.add &"""func toEnums*(number: {cApiName}): seq[{name}] =
+          result[0].add &"""func toEnums*(number: {cApiName}): seq[{name}] =
     for value in {name}.items:
       if (value.ord and cint(number)) > 0:
         result.add value"""
       if predefined_enum_sets.len > 0:
-        result.add "const"
-        result.add predefined_enum_sets
-      result.add "type"
+        result[0].add "const"
+        result[0].add predefined_enum_sets
+      result[0].add "type"
 
 
 func serializeStruct(node: XmlNode): seq[string] =
@@ -416,6 +418,7 @@ proc main() =
       "import std/tables",
       "import std/strutils",
       "import std/logging",
+      "import std/typetraits",
       "import std/macros",
       "import std/private/digitsutils",
       "from typetraits import HoleyEnum",
@@ -465,10 +468,24 @@ iterator items[T: HoleyEnum](E: typedesc[T]): T =
     if thetype.attr("category") == "bitmask" and not thetype.hasAttr("alias") and (not thetype.hasAttr("api") or thetype.attr("api") == "vulkan"):
       let name = thetype.child("name")[0].text
       outputFiles["enums"].add &"  {name}* = distinct VkFlags"
+
+  var bitfields: Table[string, string]
   outputFiles["enums"].add "let vkGetInstanceProcAddr = cast[proc(instance: VkInstance, name: cstring): pointer {.stdcall.}](checkedSymAddr(vulkanLib, \"vkGetInstanceProcAddr\"))"
   outputFiles["enums"].add "type"
   for theenum in api.findAll("enums"):
-    outputFiles["enums"].add serializeEnum(theenum, api)
+    let (enums, bitFieldName) = serializeEnum(theenum, api)
+    outputFiles["enums"].add enums
+    if bitFieldName != "":
+      bitfields[theenum.attr("name")] = bitFieldName
+
+  # bitmask-to-string functions
+  for thetype in api.findAll("type"):
+    if thetype.attr("name") in bitfields:
+      let name = bitfields[thetype.attr("name")]
+      let stringfunc = &"proc `$`*(bitset: {name}): string = $toEnums(bitset)"
+      if not (stringfunc in outputFiles["enums"]):
+        outputFiles["enums"].add stringfunc
+  outputFiles["enums"].add "type"
 
   # structs and function types need to be in same "type" block to avoid forward-declarations
   outputFiles["structs"].add serializeFunctiontypes(api)
@@ -493,6 +510,15 @@ iterator items[T: HoleyEnum](E: typedesc[T]): T =
   for typesgroup in api.findAll("types"):
     for thetype in typesgroup.findAll("type"):
       outputFiles.update serializeType(thetype, headerTypes)
+
+  for typesgroup in api.findAll("types"):
+    for node in typesgroup.findAll("type"):
+      if node.attr("category") == "handle":
+        if not node.hasAttr("alias"):
+          let name = node.child("name")[0].text
+          outputFiles["basetypes"].add &"proc `$`*(handle: {name}): string = \"{name}(\" & $(uint(handle)) & \")\""
+          outputFiles["basetypes"].add &"proc valid*(handle: {name}): bool = uint(handle) != 0"
+          outputFiles["basetypes"].add &"proc reset*(handle: var {name}) = handle = {name}(0)"
 
   # commands aka functions
   var varDecls: Table[string, string]

@@ -2,6 +2,7 @@ import std/dynlib
 import std/tables
 import std/strutils
 import std/logging
+import std/typetraits
 import std/macros
 import std/private/digitsutils
 from typetraits import HoleyEnum
@@ -135,6 +136,150 @@ type
   VkVideoSessionParametersKHR* = distinct VkNonDispatchableHandle
   VkSemaphoreSciSyncPoolNV* = distinct VkNonDispatchableHandle
   VkRemoteAddressNV* = pointer
+proc `$`*(handle: VkInstance): string = "VkInstance(" & $(uint(handle)) & ")"
+proc valid*(handle: VkInstance): bool = uint(handle) != 0
+proc reset*(handle: var VkInstance) = handle = VkInstance(0)
+proc `$`*(handle: VkPhysicalDevice): string = "VkPhysicalDevice(" & $(uint(handle)) & ")"
+proc valid*(handle: VkPhysicalDevice): bool = uint(handle) != 0
+proc reset*(handle: var VkPhysicalDevice) = handle = VkPhysicalDevice(0)
+proc `$`*(handle: VkDevice): string = "VkDevice(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDevice): bool = uint(handle) != 0
+proc reset*(handle: var VkDevice) = handle = VkDevice(0)
+proc `$`*(handle: VkQueue): string = "VkQueue(" & $(uint(handle)) & ")"
+proc valid*(handle: VkQueue): bool = uint(handle) != 0
+proc reset*(handle: var VkQueue) = handle = VkQueue(0)
+proc `$`*(handle: VkCommandBuffer): string = "VkCommandBuffer(" & $(uint(handle)) & ")"
+proc valid*(handle: VkCommandBuffer): bool = uint(handle) != 0
+proc reset*(handle: var VkCommandBuffer) = handle = VkCommandBuffer(0)
+proc `$`*(handle: VkDeviceMemory): string = "VkDeviceMemory(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDeviceMemory): bool = uint(handle) != 0
+proc reset*(handle: var VkDeviceMemory) = handle = VkDeviceMemory(0)
+proc `$`*(handle: VkCommandPool): string = "VkCommandPool(" & $(uint(handle)) & ")"
+proc valid*(handle: VkCommandPool): bool = uint(handle) != 0
+proc reset*(handle: var VkCommandPool) = handle = VkCommandPool(0)
+proc `$`*(handle: VkBuffer): string = "VkBuffer(" & $(uint(handle)) & ")"
+proc valid*(handle: VkBuffer): bool = uint(handle) != 0
+proc reset*(handle: var VkBuffer) = handle = VkBuffer(0)
+proc `$`*(handle: VkBufferView): string = "VkBufferView(" & $(uint(handle)) & ")"
+proc valid*(handle: VkBufferView): bool = uint(handle) != 0
+proc reset*(handle: var VkBufferView) = handle = VkBufferView(0)
+proc `$`*(handle: VkImage): string = "VkImage(" & $(uint(handle)) & ")"
+proc valid*(handle: VkImage): bool = uint(handle) != 0
+proc reset*(handle: var VkImage) = handle = VkImage(0)
+proc `$`*(handle: VkImageView): string = "VkImageView(" & $(uint(handle)) & ")"
+proc valid*(handle: VkImageView): bool = uint(handle) != 0
+proc reset*(handle: var VkImageView) = handle = VkImageView(0)
+proc `$`*(handle: VkShaderModule): string = "VkShaderModule(" & $(uint(handle)) & ")"
+proc valid*(handle: VkShaderModule): bool = uint(handle) != 0
+proc reset*(handle: var VkShaderModule) = handle = VkShaderModule(0)
+proc `$`*(handle: VkPipeline): string = "VkPipeline(" & $(uint(handle)) & ")"
+proc valid*(handle: VkPipeline): bool = uint(handle) != 0
+proc reset*(handle: var VkPipeline) = handle = VkPipeline(0)
+proc `$`*(handle: VkPipelineLayout): string = "VkPipelineLayout(" & $(uint(handle)) & ")"
+proc valid*(handle: VkPipelineLayout): bool = uint(handle) != 0
+proc reset*(handle: var VkPipelineLayout) = handle = VkPipelineLayout(0)
+proc `$`*(handle: VkSampler): string = "VkSampler(" & $(uint(handle)) & ")"
+proc valid*(handle: VkSampler): bool = uint(handle) != 0
+proc reset*(handle: var VkSampler) = handle = VkSampler(0)
+proc `$`*(handle: VkDescriptorSet): string = "VkDescriptorSet(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDescriptorSet): bool = uint(handle) != 0
+proc reset*(handle: var VkDescriptorSet) = handle = VkDescriptorSet(0)
+proc `$`*(handle: VkDescriptorSetLayout): string = "VkDescriptorSetLayout(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDescriptorSetLayout): bool = uint(handle) != 0
+proc reset*(handle: var VkDescriptorSetLayout) = handle = VkDescriptorSetLayout(0)
+proc `$`*(handle: VkDescriptorPool): string = "VkDescriptorPool(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDescriptorPool): bool = uint(handle) != 0
+proc reset*(handle: var VkDescriptorPool) = handle = VkDescriptorPool(0)
+proc `$`*(handle: VkFence): string = "VkFence(" & $(uint(handle)) & ")"
+proc valid*(handle: VkFence): bool = uint(handle) != 0
+proc reset*(handle: var VkFence) = handle = VkFence(0)
+proc `$`*(handle: VkSemaphore): string = "VkSemaphore(" & $(uint(handle)) & ")"
+proc valid*(handle: VkSemaphore): bool = uint(handle) != 0
+proc reset*(handle: var VkSemaphore) = handle = VkSemaphore(0)
+proc `$`*(handle: VkEvent): string = "VkEvent(" & $(uint(handle)) & ")"
+proc valid*(handle: VkEvent): bool = uint(handle) != 0
+proc reset*(handle: var VkEvent) = handle = VkEvent(0)
+proc `$`*(handle: VkQueryPool): string = "VkQueryPool(" & $(uint(handle)) & ")"
+proc valid*(handle: VkQueryPool): bool = uint(handle) != 0
+proc reset*(handle: var VkQueryPool) = handle = VkQueryPool(0)
+proc `$`*(handle: VkFramebuffer): string = "VkFramebuffer(" & $(uint(handle)) & ")"
+proc valid*(handle: VkFramebuffer): bool = uint(handle) != 0
+proc reset*(handle: var VkFramebuffer) = handle = VkFramebuffer(0)
+proc `$`*(handle: VkRenderPass): string = "VkRenderPass(" & $(uint(handle)) & ")"
+proc valid*(handle: VkRenderPass): bool = uint(handle) != 0
+proc reset*(handle: var VkRenderPass) = handle = VkRenderPass(0)
+proc `$`*(handle: VkPipelineCache): string = "VkPipelineCache(" & $(uint(handle)) & ")"
+proc valid*(handle: VkPipelineCache): bool = uint(handle) != 0
+proc reset*(handle: var VkPipelineCache) = handle = VkPipelineCache(0)
+proc `$`*(handle: VkIndirectCommandsLayoutNV): string = "VkIndirectCommandsLayoutNV(" & $(uint(handle)) & ")"
+proc valid*(handle: VkIndirectCommandsLayoutNV): bool = uint(handle) != 0
+proc reset*(handle: var VkIndirectCommandsLayoutNV) = handle = VkIndirectCommandsLayoutNV(0)
+proc `$`*(handle: VkDescriptorUpdateTemplate): string = "VkDescriptorUpdateTemplate(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDescriptorUpdateTemplate): bool = uint(handle) != 0
+proc reset*(handle: var VkDescriptorUpdateTemplate) = handle = VkDescriptorUpdateTemplate(0)
+proc `$`*(handle: VkSamplerYcbcrConversion): string = "VkSamplerYcbcrConversion(" & $(uint(handle)) & ")"
+proc valid*(handle: VkSamplerYcbcrConversion): bool = uint(handle) != 0
+proc reset*(handle: var VkSamplerYcbcrConversion) = handle = VkSamplerYcbcrConversion(0)
+proc `$`*(handle: VkValidationCacheEXT): string = "VkValidationCacheEXT(" & $(uint(handle)) & ")"
+proc valid*(handle: VkValidationCacheEXT): bool = uint(handle) != 0
+proc reset*(handle: var VkValidationCacheEXT) = handle = VkValidationCacheEXT(0)
+proc `$`*(handle: VkAccelerationStructureKHR): string = "VkAccelerationStructureKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkAccelerationStructureKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkAccelerationStructureKHR) = handle = VkAccelerationStructureKHR(0)
+proc `$`*(handle: VkAccelerationStructureNV): string = "VkAccelerationStructureNV(" & $(uint(handle)) & ")"
+proc valid*(handle: VkAccelerationStructureNV): bool = uint(handle) != 0
+proc reset*(handle: var VkAccelerationStructureNV) = handle = VkAccelerationStructureNV(0)
+proc `$`*(handle: VkPerformanceConfigurationINTEL): string = "VkPerformanceConfigurationINTEL(" & $(uint(handle)) & ")"
+proc valid*(handle: VkPerformanceConfigurationINTEL): bool = uint(handle) != 0
+proc reset*(handle: var VkPerformanceConfigurationINTEL) = handle = VkPerformanceConfigurationINTEL(0)
+proc `$`*(handle: VkBufferCollectionFUCHSIA): string = "VkBufferCollectionFUCHSIA(" & $(uint(handle)) & ")"
+proc valid*(handle: VkBufferCollectionFUCHSIA): bool = uint(handle) != 0
+proc reset*(handle: var VkBufferCollectionFUCHSIA) = handle = VkBufferCollectionFUCHSIA(0)
+proc `$`*(handle: VkDeferredOperationKHR): string = "VkDeferredOperationKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDeferredOperationKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkDeferredOperationKHR) = handle = VkDeferredOperationKHR(0)
+proc `$`*(handle: VkPrivateDataSlot): string = "VkPrivateDataSlot(" & $(uint(handle)) & ")"
+proc valid*(handle: VkPrivateDataSlot): bool = uint(handle) != 0
+proc reset*(handle: var VkPrivateDataSlot) = handle = VkPrivateDataSlot(0)
+proc `$`*(handle: VkCuModuleNVX): string = "VkCuModuleNVX(" & $(uint(handle)) & ")"
+proc valid*(handle: VkCuModuleNVX): bool = uint(handle) != 0
+proc reset*(handle: var VkCuModuleNVX) = handle = VkCuModuleNVX(0)
+proc `$`*(handle: VkCuFunctionNVX): string = "VkCuFunctionNVX(" & $(uint(handle)) & ")"
+proc valid*(handle: VkCuFunctionNVX): bool = uint(handle) != 0
+proc reset*(handle: var VkCuFunctionNVX) = handle = VkCuFunctionNVX(0)
+proc `$`*(handle: VkOpticalFlowSessionNV): string = "VkOpticalFlowSessionNV(" & $(uint(handle)) & ")"
+proc valid*(handle: VkOpticalFlowSessionNV): bool = uint(handle) != 0
+proc reset*(handle: var VkOpticalFlowSessionNV) = handle = VkOpticalFlowSessionNV(0)
+proc `$`*(handle: VkMicromapEXT): string = "VkMicromapEXT(" & $(uint(handle)) & ")"
+proc valid*(handle: VkMicromapEXT): bool = uint(handle) != 0
+proc reset*(handle: var VkMicromapEXT) = handle = VkMicromapEXT(0)
+proc `$`*(handle: VkDisplayKHR): string = "VkDisplayKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDisplayKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkDisplayKHR) = handle = VkDisplayKHR(0)
+proc `$`*(handle: VkDisplayModeKHR): string = "VkDisplayModeKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDisplayModeKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkDisplayModeKHR) = handle = VkDisplayModeKHR(0)
+proc `$`*(handle: VkSurfaceKHR): string = "VkSurfaceKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkSurfaceKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkSurfaceKHR) = handle = VkSurfaceKHR(0)
+proc `$`*(handle: VkSwapchainKHR): string = "VkSwapchainKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkSwapchainKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkSwapchainKHR) = handle = VkSwapchainKHR(0)
+proc `$`*(handle: VkDebugReportCallbackEXT): string = "VkDebugReportCallbackEXT(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDebugReportCallbackEXT): bool = uint(handle) != 0
+proc reset*(handle: var VkDebugReportCallbackEXT) = handle = VkDebugReportCallbackEXT(0)
+proc `$`*(handle: VkDebugUtilsMessengerEXT): string = "VkDebugUtilsMessengerEXT(" & $(uint(handle)) & ")"
+proc valid*(handle: VkDebugUtilsMessengerEXT): bool = uint(handle) != 0
+proc reset*(handle: var VkDebugUtilsMessengerEXT) = handle = VkDebugUtilsMessengerEXT(0)
+proc `$`*(handle: VkVideoSessionKHR): string = "VkVideoSessionKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkVideoSessionKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkVideoSessionKHR) = handle = VkVideoSessionKHR(0)
+proc `$`*(handle: VkVideoSessionParametersKHR): string = "VkVideoSessionParametersKHR(" & $(uint(handle)) & ")"
+proc valid*(handle: VkVideoSessionParametersKHR): bool = uint(handle) != 0
+proc reset*(handle: var VkVideoSessionParametersKHR) = handle = VkVideoSessionParametersKHR(0)
+proc `$`*(handle: VkSemaphoreSciSyncPoolNV): string = "VkSemaphoreSciSyncPoolNV(" & $(uint(handle)) & ")"
+proc valid*(handle: VkSemaphoreSciSyncPoolNV): bool = uint(handle) != 0
+proc reset*(handle: var VkSemaphoreSciSyncPoolNV) = handle = VkSemaphoreSciSyncPoolNV(0)
 type
   VkFramebufferCreateFlags* = distinct VkFlags
   VkQueryPoolCreateFlags* = distinct VkFlags
@@ -3314,13 +3459,13 @@ type
     VK_PERFORMANCE_COUNTER_SCOPE_COMMAND_KHR = 2
   VkMemoryDecompressionMethodFlagBitsNV* {.size: 8.} = enum
     VK_MEMORY_DECOMPRESSION_METHOD_GDEFLATE_1_0_BIT_NV = 0b0000000000000000000000000000000000000000000000000000000000000001
-converter BitsetToNumber*(flags: openArray[VkMemoryDecompressionMethodFlagBitsNV]): VkMemoryDecompressionMethodFlagsNV =
+func toBits*(flags: openArray[VkMemoryDecompressionMethodFlagBitsNV]): VkMemoryDecompressionMethodFlagsNV =
     for flag in flags:
-      result = VkMemoryDecompressionMethodFlagsNV(int64(result) or int64(flag))
-converter NumberToBitset*(number: VkMemoryDecompressionMethodFlagsNV): seq[VkMemoryDecompressionMethodFlagBitsNV] =
-        for value in VkMemoryDecompressionMethodFlagBitsNV.items:
-          if (value.ord and int64(number)) > 0:
-            result.add value
+      result = VkMemoryDecompressionMethodFlagsNV(uint64(result) or uint64(flag))
+func toEnums*(number: VkMemoryDecompressionMethodFlagsNV): seq[VkMemoryDecompressionMethodFlagBitsNV] =
+    for value in VkMemoryDecompressionMethodFlagBitsNV.items:
+      if (cast[uint64](value) and uint64(number)) > 0:
+        result.add value
 type
   VkPerformanceCounterUnitKHR* {.size: sizeof(cint).} = enum
     VK_PERFORMANCE_COUNTER_UNIT_GENERIC_KHR = 0
@@ -3496,13 +3641,13 @@ type
     VK_ACCESS_2_MICROMAP_READ_BIT_EXT = 0b0000000000000000000100000000000000000000000000000000000000000000
     VK_ACCESS_2_MICROMAP_WRITE_BIT_EXT = 0b0000000000000000001000000000000000000000000000000000000000000000
     VK_ACCESS_2_RESERVED_46_BIT_EXT = 0b0000000000000000010000000000000000000000000000000000000000000000
-converter BitsetToNumber*(flags: openArray[VkAccessFlagBits2]): VkAccessFlags2 =
+func toBits*(flags: openArray[VkAccessFlagBits2]): VkAccessFlags2 =
     for flag in flags:
-      result = VkAccessFlags2(int64(result) or int64(flag))
-converter NumberToBitset*(number: VkAccessFlags2): seq[VkAccessFlagBits2] =
-        for value in VkAccessFlagBits2.items:
-          if (value.ord and int64(number)) > 0:
-            result.add value
+      result = VkAccessFlags2(uint64(result) or uint64(flag))
+func toEnums*(number: VkAccessFlags2): seq[VkAccessFlagBits2] =
+    for value in VkAccessFlagBits2.items:
+      if (cast[uint64](value) and uint64(number)) > 0:
+        result.add value
 const
   VK_ACCESS_2_NONE* = 0
 type
@@ -3548,13 +3693,13 @@ type
     VK_PIPELINE_STAGE_2_SUBPASS_SHADING_BIT_HUAWEI = 0b0000000000000000000000001000000000000000000000000000000000000000
     VK_PIPELINE_STAGE_2_INVOCATION_MASK_BIT_HUAWEI = 0b0000000000000000000000010000000000000000000000000000000000000000
     VK_PIPELINE_STAGE_2_CLUSTER_CULLING_SHADER_BIT_HUAWEI = 0b0000000000000000000000100000000000000000000000000000000000000000
-converter BitsetToNumber*(flags: openArray[VkPipelineStageFlagBits2]): VkPipelineStageFlags2 =
+func toBits*(flags: openArray[VkPipelineStageFlagBits2]): VkPipelineStageFlags2 =
     for flag in flags:
-      result = VkPipelineStageFlags2(int64(result) or int64(flag))
-converter NumberToBitset*(number: VkPipelineStageFlags2): seq[VkPipelineStageFlagBits2] =
-        for value in VkPipelineStageFlagBits2.items:
-          if (value.ord and int64(number)) > 0:
-            result.add value
+      result = VkPipelineStageFlags2(uint64(result) or uint64(flag))
+func toEnums*(number: VkPipelineStageFlags2): seq[VkPipelineStageFlagBits2] =
+    for value in VkPipelineStageFlagBits2.items:
+      if (cast[uint64](value) and uint64(number)) > 0:
+        result.add value
 const
   VK_PIPELINE_STAGE_2_NONE* = 0
 type
@@ -3974,13 +4119,13 @@ type
     VK_FORMAT_FEATURE_2_OPTICAL_FLOW_COST_BIT_NV = 0b0000000000000000000001000000000000000000000000000000000000000000
     VK_FORMAT_FEATURE_2_RESERVED_44_BIT_EXT = 0b0000000000000000000100000000000000000000000000000000000000000000
     VK_FORMAT_FEATURE_2_RESERVED_45_BIT_EXT = 0b0000000000000000001000000000000000000000000000000000000000000000
-converter BitsetToNumber*(flags: openArray[VkFormatFeatureFlagBits2]): VkFormatFeatureFlags2 =
+func toBits*(flags: openArray[VkFormatFeatureFlagBits2]): VkFormatFeatureFlags2 =
     for flag in flags:
-      result = VkFormatFeatureFlags2(int64(result) or int64(flag))
-converter NumberToBitset*(number: VkFormatFeatureFlags2): seq[VkFormatFeatureFlagBits2] =
-        for value in VkFormatFeatureFlagBits2.items:
-          if (value.ord and int64(number)) > 0:
-            result.add value
+      result = VkFormatFeatureFlags2(uint64(result) or uint64(flag))
+func toEnums*(number: VkFormatFeatureFlags2): seq[VkFormatFeatureFlagBits2] =
+    for value in VkFormatFeatureFlagBits2.items:
+      if (cast[uint64](value) and uint64(number)) > 0:
+        result.add value
 type
   VkRenderingFlagBits* {.size: sizeof(cint).} = enum
     VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT = 0b00000000000000000000000000000001
@@ -4286,6 +4431,130 @@ type
     VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_FAULT_EXT = 6
   VkDeviceFaultVendorBinaryHeaderVersionEXT* {.size: sizeof(cint).} = enum
     VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_EXT_ENUM = 1
+proc `$`*(bitset: VkFramebufferCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkRenderPassCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkSamplerCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineCacheCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineShaderStageCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkDescriptorSetLayoutCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkInstanceCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkDeviceQueueCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkBufferCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkBufferUsageFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkColorComponentFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkCommandPoolCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkCommandPoolResetFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkCommandBufferResetFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkCommandBufferUsageFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkCullModeFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkFenceCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkFormatFeatureFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkImageAspectFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkImageCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkImageUsageFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkImageViewCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkMemoryHeapFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkAccessFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkMemoryPropertyFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkQueryControlFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkQueryPipelineStatisticFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkQueryResultFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkQueueFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkShaderStageFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkSparseMemoryBindFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkStencilFaceFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineStageFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkSparseImageFormatFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkSampleCountFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkAttachmentDescriptionFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkDescriptorPoolCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkDependencyFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkEventCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineLayoutCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkIndirectCommandsLayoutUsageFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkIndirectStateFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkPrivateDataSlotCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkSubpassDescriptionFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkResolveModeFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkDescriptorBindingFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkConditionalRenderingFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkGeometryFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkGeometryInstanceFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkBuildAccelerationStructureFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkAccelerationStructureCreateFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkDeviceDiagnosticsConfigFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineCreationFeedbackFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPerformanceCounterDescriptionFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkSemaphoreWaitFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkToolPurposeFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkAccessFlags2): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineStageFlags2): string = $toEnums(bitset)
+proc `$`*(bitset: VkImageConstraintsInfoFlagsFUCHSIA): string = $toEnums(bitset)
+proc `$`*(bitset: VkFormatFeatureFlags2): string = $toEnums(bitset)
+proc `$`*(bitset: VkRenderingFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineDepthStencilStateCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkPipelineColorBlendStateCreateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkImageCompressionFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkImageCompressionFixedRateFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkExportMetalObjectTypeFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkDeviceAddressBindingFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkBuildMicromapFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkMicromapCreateFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkMemoryDecompressionMethodFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkCompositeAlphaFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkDisplayPlaneAlphaFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkSurfaceTransformFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkDebugReportFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalMemoryHandleTypeFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalMemoryFeatureFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalMemoryHandleTypeFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalMemoryFeatureFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalSemaphoreHandleTypeFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalSemaphoreFeatureFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkSemaphoreImportFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalFenceHandleTypeFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkExternalFenceFeatureFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkFenceImportFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkSurfaceCounterFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkPeerMemoryFeatureFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkMemoryAllocateFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkDeviceGroupPresentModeFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkSwapchainCreateFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkSubgroupFeatureFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkDebugUtilsMessageSeverityFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkDebugUtilsMessageTypeFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkSwapchainImageUsageFlagsANDROID): string = $toEnums(bitset)
+proc `$`*(bitset: VkSubmitFlags): string = $toEnums(bitset)
+proc `$`*(bitset: VkGraphicsPipelineLibraryFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkOpticalFlowGridSizeFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkOpticalFlowUsageFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkOpticalFlowSessionCreateFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkOpticalFlowExecuteFlagsNV): string = $toEnums(bitset)
+proc `$`*(bitset: VkPresentScalingFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkPresentGravityFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoCodecOperationFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoChromaSubsamplingFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoComponentBitDepthFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoCapabilityFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoSessionCreateFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoCodingControlFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoDecodeUsageFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoDecodeCapabilityFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoDecodeH264PictureLayoutFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeUsageFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeContentFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeCapabilityFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeRateControlModeFlagsKHR): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH264CapabilityFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH264InputModeFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH264OutputModeFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH265CapabilityFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH265InputModeFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH265OutputModeFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH265CtbSizeFlagsEXT): string = $toEnums(bitset)
+proc `$`*(bitset: VkVideoEncodeH265TransformBlockSizeFlagsEXT): string = $toEnums(bitset)
+type
   VkGeometryFlagsNV* = VkGeometryFlagsKHR
   VkGeometryInstanceFlagsNV* = VkGeometryInstanceFlagsKHR
   VkBuildAccelerationStructureFlagsNV* = VkBuildAccelerationStructureFlagsKHR
