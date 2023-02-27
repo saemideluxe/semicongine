@@ -3,48 +3,60 @@ import ./utils
 import ./instance
 
 type
-  PhysicalDevice = object
+  PhysicalDevice* = object
     vk: VkPhysicalDevice
-  Device = object
+  Device* = object
     physicalDevice: PhysicalDevice
     vk: VkDevice
-  QueueFamily = object
-    vk: VkQueueFamilyProperties
+  QueueFamily* = object
+    properties: VkQueueFamilyProperties
     index: uint32
-  Queue = object
+  Queue* = object
     vk: VkQueue
 
-proc getDeviceExtensions*(device: VkPhysicalDevice): seq[string] =
-  var extensionCount: uint32
-  checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(extensionCount), nil)
-  if extensionCount > 0:
-    var extensions = newSeq[VkExtensionProperties](extensionCount)
-    checkVkResult vkEnumerateDeviceExtensionProperties(device, nil, addr(extensionCount), addr extensions[0])
-    for extension in extensions:
-      result.add(cleanString(extension.extensionName))
-
-proc getVulkanPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
+proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
+  assert instance.vk.valid
   var nDevices: uint32
   checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), nil)
   var devices = newSeq[VkPhysicalDevice](nDevices)
-  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), addr devices[0])
+  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), devices.toCPointer)
   for i in 0 ..< nDevices:
     result.add PhysicalDevice(vk: devices[i])
 
+proc getExtensions*(device: PhysicalDevice): seq[string] =
+  assert device.vk.valid
+  var extensionCount: uint32
+  checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), nil)
+  if extensionCount > 0:
+    var extensions = newSeq[VkExtensionProperties](extensionCount)
+    checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), extensions.toCPointer)
+    for extension in extensions:
+      result.add(cleanString(extension.extensionName))
+
 proc getQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
+  assert device.vk.valid
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies , addr queuFamilies[0])
+  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies , queuFamilies.toCPointer)
   for i in 0 ..< nQueuefamilies:
-    result.add QueueFamily(vk: queuFamilies[i], index: i)
+    result.add QueueFamily(properties: queuFamilies[i], index: i)
 
-proc createDevice(
+func canGraphics*(family: QueueFamily): bool =
+  VK_QUEUE_GRAPHICS_BIT in family.properties.queueFlags.toEnums
+func canTransfer*(family: QueueFamily): bool =
+  VK_QUEUE_TRANSFER_BIT in family.properties.queueFlags.toEnums
+func canCompute*(family: QueueFamily): bool =
+  VK_QUEUE_COMPUTE_BIT in family.properties.queueFlags.toEnums
+
+proc createDevice*(
   physicalDevice: PhysicalDevice,
   enabledLayers: openArray[string],
   enabledExtensions: openArray[string],
   queueFamilies: openArray[QueueFamily],
 ): Device =
+  assert physicalDevice.vk.valid
+  assert queueFamilies.len > 0
   result.physicalDevice = physicalDevice
   var
     enabledLayersC = allocCStringArray(enabledLayers)
@@ -62,7 +74,7 @@ proc createDevice(
   var createInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     queueCreateInfoCount: uint32(deviceQueues.len),
-    pQueueCreateInfos: addr deviceQueues[0],
+    pQueueCreateInfos: deviceQueues.toCPointer,
     enabledLayerCount: uint32(enabledLayers.len),
     ppEnabledLayerNames: enabledLayersC,
     enabledExtensionCount: uint32(enabledExtensions.len),
@@ -78,3 +90,8 @@ proc createDevice(
   )
   deallocCStringArray(enabledLayersC)
   deallocCStringArray(enabledExtensionsC)
+
+proc destroy*(device: var Device) =
+  assert device.vk.valid
+  device.vk.vkDestroyDevice(nil)
+  device.vk.reset()

@@ -6,10 +6,10 @@ import ./utils
 type
   Instance* = object
     vk*: VkInstance
-  Debugger = object
-    instance: VkInstance
+  Debugger* = object
+    instance: Instance
     messenger: VkDebugUtilsMessengerEXT
-  DebugCallback = proc (
+  DebugCallback* = proc (
     messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
     messageTypes: VkDebugUtilsMessageTypeFlagsEXT,
     pCallbackData: ptr VkDebugUtilsMessengerCallbackDataEXT,
@@ -18,10 +18,10 @@ type
 
 proc getInstanceExtensions*(): seq[string] =
   var extensionCount: uint32
-  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr( extensionCount), nil)
+  checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), nil)
   if extensionCount > 0:
     var extensions = newSeq[VkExtensionProperties](extensionCount)
-    checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr( extensionCount), addr extensions[0])
+    checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), extensions.toCPointer)
     for extension in extensions:
       result.add(cleanString(extension.extensionName))
 
@@ -30,14 +30,14 @@ proc getLayers*(): seq[string] =
   checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), nil)
   if n_layers > 0:
     var layers = newSeq[VkLayerProperties](n_layers)
-    checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), addr layers[0])
+    checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), layers.toCPointer)
     for layer in layers:
       result.add(cleanString(layer.layerName))
 
 proc createInstance*(
   vulkanVersion: uint32,
-  instanceExtensions: seq[string],
-  layers: seq[string],
+  instanceExtensions: openArray[string],
+  layers: openArray[string],
   name = "defaultVulkanInstance",
   engine = "defaultEngine",
 ): Instance =
@@ -61,14 +61,17 @@ proc createInstance*(
       ppEnabledExtensionNames: instanceExtensionsC
     )
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result.vk))
+  result.vk.loadVulkan()
   deallocCStringArray(layersC)
   deallocCStringArray(instanceExtensionsC)
   for extension in instanceExtensions:
     result.vk.loadExtension($extension)
 
-proc destroy(instance: Instance) =
+proc destroy*(instance: var Instance) =
+  assert instance.vk.valid
   # needs to happen after window is trashed as the driver might have a hook registered for the window destruction
   instance.vk.vkDestroyInstance(nil)
+  instance.vk.reset()
 
 proc defaultDebugCallback(
   messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
@@ -79,12 +82,13 @@ proc defaultDebugCallback(
   echo &"{messageSeverity}: {toEnums messageTypes}: {pCallbackData.pMessage}"
   return false
 
-proc createDebugMessenger(
-  instance: VkInstance,
+proc createDebugMessenger*(
+  instance: Instance,
   severityLevels: openArray[VkDebugUtilsMessageSeverityFlagBitsEXT] = @[],
   types: openArray[VkDebugUtilsMessageTypeFlagBitsEXT] = @[],
   callback: DebugCallback=defaultDebugCallback
 ): Debugger =
+  assert instance.vk.valid
   result.instance = instance
   var severityLevelBits = high(VkDebugUtilsMessageSeverityFlagsEXT)
   var typeBits = high(VkDebugUtilsMessageTypeFlagsEXT)
@@ -99,7 +103,10 @@ proc createDebugMessenger(
     pfnUserCallback: callback,
     pUserData: nil,
   )
-  checkVkResult instance.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result.messenger))
+  checkVkResult instance.vk.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result.messenger))
 
-proc destroy(debugger: Debugger) =
-  debugger.instance.vkDestroyDebugUtilsMessengerEXT(debugger.messenger, nil)
+proc destroy*(debugger: var Debugger) =
+  assert debugger.messenger.valid
+  assert debugger.instance.vk.valid
+  debugger.instance.vk.vkDestroyDebugUtilsMessengerEXT(debugger.messenger, nil)
+  debugger.messenger.reset()
