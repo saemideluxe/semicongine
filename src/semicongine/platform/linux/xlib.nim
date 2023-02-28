@@ -17,8 +17,8 @@ var deleteMessage*: Atom
 
 type
   NativeWindow* = object
-    display*: ptr Display
-    window*: Window
+    display*: ptr xlib.Display
+    window*: x.Window
     emptyCursor: Cursor
 
 template checkXlibResult*(call: untyped) =
@@ -126,8 +126,8 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
 
 proc getMousePosition*(window: NativeWindow): Option[Vec2] =
   var
-    root: Window
-    win: Window
+    root: x.Window
+    win: x.Window
     rootX: cint
     rootY: cint
     winX: cint

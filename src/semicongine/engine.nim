@@ -10,7 +10,7 @@ import std/logging
 import ./math/vector
 import ./vulkan
 import ./vulkan_helpers
-import ./window
+import ./platform/window
 import ./events
 import ./shader
 import ./vertex
@@ -128,16 +128,14 @@ proc getAllPhysicalDevices(instance: VkInstance, surface: VkSurfaceKHR): seq[
 
 proc filterForDevice(devices: seq[PhysicalDevice]): seq[(PhysicalDevice, uint32, uint32)] =
   for device in devices:
-    if not (device.formats.len > 0 and device.presentModes.len > 0 and
-        "VK_KHR_swapchain" in device.extensions):
+    if not (device.formats.len > 0 and device.presentModes.len > 0 and "VK_KHR_swapchain" in device.extensions):
       continue
     var graphicsQueueFamily = high(uint32)
     var presentationQueueFamily = high(uint32)
     for i, queueFamily in enumerate(device.queueFamilies):
       if queueFamily.hasSurfaceSupport:
         presentationQueueFamily = uint32(i)
-      if bool(uint32(queueFamily.properties.queueFlags) and ord(
-          VK_QUEUE_GRAPHICS_BIT)):
+      if bool(uint32(queueFamily.properties.queueFlags) and ord(VK_QUEUE_GRAPHICS_BIT)):
         graphicsQueueFamily = uint32(i)
     if graphicsQueueFamily != high(uint32) and presentationQueueFamily != high(uint32):
       result.add((device, graphicsQueueFamily, presentationQueueFamily))
@@ -197,9 +195,7 @@ proc setupVulkanDeviceAndQueues(instance: VkInstance, surface: VkSurfaceKHR): De
     result.presentationQueueFamily,
   )
 
-proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice,
-    surface: VkSurfaceKHR, dimension: TVec2[uint32],
-    surfaceFormat: VkSurfaceFormatKHR): Swapchain =
+proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice, surface: VkSurfaceKHR, dimension: TVec2[uint32], surfaceFormat: VkSurfaceFormatKHR): Swapchain =
 
   let capabilities = physicalDevice.device.getSurfaceCapabilities(surface)
   var selectedPresentationMode = getPresentMode(physicalDevice.presentModes)
@@ -537,8 +533,7 @@ proc igniteEngine*(windowTitle: string): Engine =
 
   # get basic frame information
   result.vulkan.surfaceFormat = result.vulkan.device.physicalDevice.formats.getSuitableSurfaceFormat()
-  result.vulkan.frameSize = result.window.getFrameDimension(
-      result.vulkan.device.physicalDevice.device, result.vulkan.surface)
+  result.vulkan.frameSize = result.window.getFrameDimension(result.vulkan.device.physicalDevice.device, result.vulkan.surface)
 
   # setup swapchain and render pipeline
   result.vulkan.swapchain = result.vulkan.device.device.setupSwapChain(

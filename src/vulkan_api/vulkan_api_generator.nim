@@ -250,6 +250,7 @@ func serializeEnum(node: XmlNode, api: XmlNode): (seq[string], string) =
     for value in {name}.items:
       if (cast[uint64](value) and uint64(number)) > 0:
         result.add value"""
+          result[0].add &"proc `==`*(a, b: {cApiName}): bool = uint64(a) == uint64(b)"
       else:
         if values.len > 0:
           result[0].add &"""func toBits*(flags: openArray[{name}]): {cApiName} =
@@ -259,6 +260,7 @@ func serializeEnum(node: XmlNode, api: XmlNode): (seq[string], string) =
     for value in {name}.items:
       if (value.ord and cint(number)) > 0:
         result.add value"""
+          result[0].add &"proc `==`*(a, b: {cApiName}): bool = cint(a) == cint(b)"
       if predefined_enum_sets.len > 0:
         result[0].add "const"
         result[0].add predefined_enum_sets
@@ -421,7 +423,6 @@ proc main() =
       "import std/typetraits",
       "import std/macros",
       "import std/private/digitsutils",
-      "from typetraits import HoleyEnum",
       "type",
       "  VkHandle* = distinct uint",
       "  VkNonDispatchableHandle* = distinct uint",
@@ -519,6 +520,8 @@ iterator items[T: HoleyEnum](E: typedesc[T]): T =
           outputFiles["basetypes"].add &"proc `$`*(handle: {name}): string = \"{name}(\" & $(uint(handle)) & \")\""
           outputFiles["basetypes"].add &"proc valid*(handle: {name}): bool = uint(handle) != 0"
           outputFiles["basetypes"].add &"proc reset*(handle: var {name}) = handle = {name}(0)"
+          outputFiles["basetypes"].add &"proc `==`*(a, b: {name}): bool = uint(a) == uint(b)"
+          
 
   # commands aka functions
   var varDecls: Table[string, string]
