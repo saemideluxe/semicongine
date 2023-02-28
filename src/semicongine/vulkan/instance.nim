@@ -3,12 +3,17 @@ import std/strformat
 import ./api
 import ./utils
 
+when defined(linux):
+  include ../platform/linux/vulkanExtensions
+elif defined(windows):
+  include ../platform/windows/vulkanExtensions
+
 type
   Instance* = object
     vk*: VkInstance
   Debugger* = object
-    instance: Instance
-    messenger: VkDebugUtilsMessengerEXT
+    instance*: Instance
+    messenger*: VkDebugUtilsMessengerEXT
   DebugCallback* = proc (
     messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
     messageTypes: VkDebugUtilsMessageTypeFlagsEXT,
@@ -36,16 +41,18 @@ proc getLayers*(): seq[string] =
 
 proc createInstance*(
   vulkanVersion: uint32,
-  instanceExtensions: openArray[string],
-  layers: openArray[string],
+  instanceExtensions: seq[string],
+  layers: seq[string],
   name = "defaultVulkanInstance",
   engine = "defaultEngine",
 ): Instance =
+
+  let requiredExtensions = @REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface"] & instanceExtensions
   for i in layers: assert i in getLayers()
-  for i in instanceExtensions: assert i in getInstanceExtensions()
+  for i in requiredExtensions: assert i in getInstanceExtensions()
   var
     layersC = allocCStringArray(layers)
-    instanceExtensionsC = allocCStringArray(instanceExtensions)
+    instanceExtensionsC = allocCStringArray(requiredExtensions)
     appinfo = VkApplicationInfo(
       sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
       pApplicationName: name,
@@ -57,14 +64,14 @@ proc createInstance*(
       pApplicationInfo: addr(appinfo),
       enabledLayerCount: layers.len.uint32,
       ppEnabledLayerNames: layersC,
-      enabledExtensionCount: instanceExtensions.len.uint32,
+      enabledExtensionCount: requiredExtensions.len.uint32,
       ppEnabledExtensionNames: instanceExtensionsC
     )
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result.vk))
   result.vk.loadVulkan()
   deallocCStringArray(layersC)
   deallocCStringArray(instanceExtensionsC)
-  for extension in instanceExtensions:
+  for extension in requiredExtensions:
     result.vk.loadExtension($extension)
 
 proc destroy*(instance: var Instance) =

@@ -2,20 +2,20 @@ import ./api
 
 type
   MemoryHeap = object
-    size: uint64
-    flags: seq[VkMemoryHeapFlagBits]
-    index: uint32
+    size*: uint64
+    flags*: seq[VkMemoryHeapFlagBits]
+    index*: uint32
   MemoryType = object
-    heap: MemoryHeap
-    flags: seq[VkMemoryPropertyFlagBits]
-    index: uint32
+    heap*: MemoryHeap
+    flags*: seq[VkMemoryPropertyFlagBits]
+    index*: uint32
   PhyscialDeviceMemoryProperties = object
-    heaps: seq[MemoryHeap]
-    types: seq[MemoryType]
+    heaps*: seq[MemoryHeap]
+    types*: seq[MemoryType]
   DeviceMemory = object
-    device: VkDevice
-    size: uint64
-    vk: VkDeviceMemory
+    device*: VkDevice
+    size*: uint64
+    vk*: VkDeviceMemory
 
 proc getPhysicalDeviceMemoryProperties(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemoryProperties =
   var physicalProperties: VkPhysicalDeviceMemoryProperties

@@ -1,7 +1,9 @@
-# included in vulkan_helpers
-const REQUIRED_PLATFORM_EXTENSIONS* = @["VK_KHR_win32_surface".cstring]
+import ../../vulkan/api
+import ../../vulkan/instance
+import ../../platform/window
 
-proc createVulkanSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
+proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
+  assert instance.vk.valid
   var surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
     hinstance: cast[HINSTANCE](window.hinstance),

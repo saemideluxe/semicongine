@@ -18,14 +18,12 @@ const ENABLEVULKANVALIDATIONLAYERS* = not defined(release)
 func addrOrNil[T](obj: var openArray[T]): ptr T =
   if obj.len > 0: addr(obj[0]) else: nil
 
-func filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[
-    VkSurfaceFormatKHR] =
+func filterForSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): seq[VkSurfaceFormatKHR] =
   for format in formats:
     if format.format == VK_FORMAT_B8G8R8A8_SRGB and format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR:
       result.add(format)
 
-func getSuitableSurfaceFormat*(formats: seq[
-    VkSurfaceFormatKHR]): VkSurfaceFormatKHR =
+func getSuitableSurfaceFormat*(formats: seq[VkSurfaceFormatKHR]): VkSurfaceFormatKHR =
   let usableSurfaceFormats = filterForSurfaceFormat(formats)
   if len(usableSurfaceFormats) == 0:
     raise newException(Exception, "No suitable surface formats found")
@@ -84,14 +82,11 @@ proc getQueueFamilies*(device: VkPhysicalDevice): seq[VkQueueFamilyProperties] =
   vkGetPhysicalDeviceQueueFamilyProperties(device, addr(n_queuefamilies), addrOrNil(result))
 
 
-proc getDeviceSurfaceFormats*(device: VkPhysicalDevice,
-    surface: VkSurfaceKHR): seq[VkSurfaceFormatKHR] =
+proc getDeviceSurfaceFormats*(device: VkPhysicalDevice, surface: VkSurfaceKHR): seq[VkSurfaceFormatKHR] =
   var n_formats: uint32
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(
-      n_formats), nil)
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), nil)
   result = newSeq[VkSurfaceFormatKHR](n_formats)
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(
-      n_formats), addrOrNil(result))
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, addr(n_formats), addrOrNil(result))
 
 
 proc getDeviceSurfacePresentModes*(device: VkPhysicalDevice,

@@ -5,7 +5,6 @@ import std/logging
 import std/typetraits
 import std/macros
 import std/private/digitsutils
-from typetraits import HoleyEnum
 type
   VkHandle* = distinct uint
   VkNonDispatchableHandle* = distinct uint
@@ -139,147 +138,195 @@ type
 proc `$`*(handle: VkInstance): string = "VkInstance(" & $(uint(handle)) & ")"
 proc valid*(handle: VkInstance): bool = uint(handle) != 0
 proc reset*(handle: var VkInstance) = handle = VkInstance(0)
+proc `==`*(a, b: VkInstance): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPhysicalDevice): string = "VkPhysicalDevice(" & $(uint(handle)) & ")"
 proc valid*(handle: VkPhysicalDevice): bool = uint(handle) != 0
 proc reset*(handle: var VkPhysicalDevice) = handle = VkPhysicalDevice(0)
+proc `==`*(a, b: VkPhysicalDevice): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDevice): string = "VkDevice(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDevice): bool = uint(handle) != 0
 proc reset*(handle: var VkDevice) = handle = VkDevice(0)
+proc `==`*(a, b: VkDevice): bool = uint(a) == uint(b)
 proc `$`*(handle: VkQueue): string = "VkQueue(" & $(uint(handle)) & ")"
 proc valid*(handle: VkQueue): bool = uint(handle) != 0
 proc reset*(handle: var VkQueue) = handle = VkQueue(0)
+proc `==`*(a, b: VkQueue): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCommandBuffer): string = "VkCommandBuffer(" & $(uint(handle)) & ")"
 proc valid*(handle: VkCommandBuffer): bool = uint(handle) != 0
 proc reset*(handle: var VkCommandBuffer) = handle = VkCommandBuffer(0)
+proc `==`*(a, b: VkCommandBuffer): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDeviceMemory): string = "VkDeviceMemory(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDeviceMemory): bool = uint(handle) != 0
 proc reset*(handle: var VkDeviceMemory) = handle = VkDeviceMemory(0)
+proc `==`*(a, b: VkDeviceMemory): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCommandPool): string = "VkCommandPool(" & $(uint(handle)) & ")"
 proc valid*(handle: VkCommandPool): bool = uint(handle) != 0
 proc reset*(handle: var VkCommandPool) = handle = VkCommandPool(0)
+proc `==`*(a, b: VkCommandPool): bool = uint(a) == uint(b)
 proc `$`*(handle: VkBuffer): string = "VkBuffer(" & $(uint(handle)) & ")"
 proc valid*(handle: VkBuffer): bool = uint(handle) != 0
 proc reset*(handle: var VkBuffer) = handle = VkBuffer(0)
+proc `==`*(a, b: VkBuffer): bool = uint(a) == uint(b)
 proc `$`*(handle: VkBufferView): string = "VkBufferView(" & $(uint(handle)) & ")"
 proc valid*(handle: VkBufferView): bool = uint(handle) != 0
 proc reset*(handle: var VkBufferView) = handle = VkBufferView(0)
+proc `==`*(a, b: VkBufferView): bool = uint(a) == uint(b)
 proc `$`*(handle: VkImage): string = "VkImage(" & $(uint(handle)) & ")"
 proc valid*(handle: VkImage): bool = uint(handle) != 0
 proc reset*(handle: var VkImage) = handle = VkImage(0)
+proc `==`*(a, b: VkImage): bool = uint(a) == uint(b)
 proc `$`*(handle: VkImageView): string = "VkImageView(" & $(uint(handle)) & ")"
 proc valid*(handle: VkImageView): bool = uint(handle) != 0
 proc reset*(handle: var VkImageView) = handle = VkImageView(0)
+proc `==`*(a, b: VkImageView): bool = uint(a) == uint(b)
 proc `$`*(handle: VkShaderModule): string = "VkShaderModule(" & $(uint(handle)) & ")"
 proc valid*(handle: VkShaderModule): bool = uint(handle) != 0
 proc reset*(handle: var VkShaderModule) = handle = VkShaderModule(0)
+proc `==`*(a, b: VkShaderModule): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPipeline): string = "VkPipeline(" & $(uint(handle)) & ")"
 proc valid*(handle: VkPipeline): bool = uint(handle) != 0
 proc reset*(handle: var VkPipeline) = handle = VkPipeline(0)
+proc `==`*(a, b: VkPipeline): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPipelineLayout): string = "VkPipelineLayout(" & $(uint(handle)) & ")"
 proc valid*(handle: VkPipelineLayout): bool = uint(handle) != 0
 proc reset*(handle: var VkPipelineLayout) = handle = VkPipelineLayout(0)
+proc `==`*(a, b: VkPipelineLayout): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSampler): string = "VkSampler(" & $(uint(handle)) & ")"
 proc valid*(handle: VkSampler): bool = uint(handle) != 0
 proc reset*(handle: var VkSampler) = handle = VkSampler(0)
+proc `==`*(a, b: VkSampler): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorSet): string = "VkDescriptorSet(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDescriptorSet): bool = uint(handle) != 0
 proc reset*(handle: var VkDescriptorSet) = handle = VkDescriptorSet(0)
+proc `==`*(a, b: VkDescriptorSet): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorSetLayout): string = "VkDescriptorSetLayout(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDescriptorSetLayout): bool = uint(handle) != 0
 proc reset*(handle: var VkDescriptorSetLayout) = handle = VkDescriptorSetLayout(0)
+proc `==`*(a, b: VkDescriptorSetLayout): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorPool): string = "VkDescriptorPool(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDescriptorPool): bool = uint(handle) != 0
 proc reset*(handle: var VkDescriptorPool) = handle = VkDescriptorPool(0)
+proc `==`*(a, b: VkDescriptorPool): bool = uint(a) == uint(b)
 proc `$`*(handle: VkFence): string = "VkFence(" & $(uint(handle)) & ")"
 proc valid*(handle: VkFence): bool = uint(handle) != 0
 proc reset*(handle: var VkFence) = handle = VkFence(0)
+proc `==`*(a, b: VkFence): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSemaphore): string = "VkSemaphore(" & $(uint(handle)) & ")"
 proc valid*(handle: VkSemaphore): bool = uint(handle) != 0
 proc reset*(handle: var VkSemaphore) = handle = VkSemaphore(0)
+proc `==`*(a, b: VkSemaphore): bool = uint(a) == uint(b)
 proc `$`*(handle: VkEvent): string = "VkEvent(" & $(uint(handle)) & ")"
 proc valid*(handle: VkEvent): bool = uint(handle) != 0
 proc reset*(handle: var VkEvent) = handle = VkEvent(0)
+proc `==`*(a, b: VkEvent): bool = uint(a) == uint(b)
 proc `$`*(handle: VkQueryPool): string = "VkQueryPool(" & $(uint(handle)) & ")"
 proc valid*(handle: VkQueryPool): bool = uint(handle) != 0
 proc reset*(handle: var VkQueryPool) = handle = VkQueryPool(0)
+proc `==`*(a, b: VkQueryPool): bool = uint(a) == uint(b)
 proc `$`*(handle: VkFramebuffer): string = "VkFramebuffer(" & $(uint(handle)) & ")"
 proc valid*(handle: VkFramebuffer): bool = uint(handle) != 0
 proc reset*(handle: var VkFramebuffer) = handle = VkFramebuffer(0)
+proc `==`*(a, b: VkFramebuffer): bool = uint(a) == uint(b)
 proc `$`*(handle: VkRenderPass): string = "VkRenderPass(" & $(uint(handle)) & ")"
 proc valid*(handle: VkRenderPass): bool = uint(handle) != 0
 proc reset*(handle: var VkRenderPass) = handle = VkRenderPass(0)
+proc `==`*(a, b: VkRenderPass): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPipelineCache): string = "VkPipelineCache(" & $(uint(handle)) & ")"
 proc valid*(handle: VkPipelineCache): bool = uint(handle) != 0
 proc reset*(handle: var VkPipelineCache) = handle = VkPipelineCache(0)
+proc `==`*(a, b: VkPipelineCache): bool = uint(a) == uint(b)
 proc `$`*(handle: VkIndirectCommandsLayoutNV): string = "VkIndirectCommandsLayoutNV(" & $(uint(handle)) & ")"
 proc valid*(handle: VkIndirectCommandsLayoutNV): bool = uint(handle) != 0
 proc reset*(handle: var VkIndirectCommandsLayoutNV) = handle = VkIndirectCommandsLayoutNV(0)
+proc `==`*(a, b: VkIndirectCommandsLayoutNV): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorUpdateTemplate): string = "VkDescriptorUpdateTemplate(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDescriptorUpdateTemplate): bool = uint(handle) != 0
 proc reset*(handle: var VkDescriptorUpdateTemplate) = handle = VkDescriptorUpdateTemplate(0)
+proc `==`*(a, b: VkDescriptorUpdateTemplate): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSamplerYcbcrConversion): string = "VkSamplerYcbcrConversion(" & $(uint(handle)) & ")"
 proc valid*(handle: VkSamplerYcbcrConversion): bool = uint(handle) != 0
 proc reset*(handle: var VkSamplerYcbcrConversion) = handle = VkSamplerYcbcrConversion(0)
+proc `==`*(a, b: VkSamplerYcbcrConversion): bool = uint(a) == uint(b)
 proc `$`*(handle: VkValidationCacheEXT): string = "VkValidationCacheEXT(" & $(uint(handle)) & ")"
 proc valid*(handle: VkValidationCacheEXT): bool = uint(handle) != 0
 proc reset*(handle: var VkValidationCacheEXT) = handle = VkValidationCacheEXT(0)
+proc `==`*(a, b: VkValidationCacheEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkAccelerationStructureKHR): string = "VkAccelerationStructureKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkAccelerationStructureKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkAccelerationStructureKHR) = handle = VkAccelerationStructureKHR(0)
+proc `==`*(a, b: VkAccelerationStructureKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkAccelerationStructureNV): string = "VkAccelerationStructureNV(" & $(uint(handle)) & ")"
 proc valid*(handle: VkAccelerationStructureNV): bool = uint(handle) != 0
 proc reset*(handle: var VkAccelerationStructureNV) = handle = VkAccelerationStructureNV(0)
+proc `==`*(a, b: VkAccelerationStructureNV): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPerformanceConfigurationINTEL): string = "VkPerformanceConfigurationINTEL(" & $(uint(handle)) & ")"
 proc valid*(handle: VkPerformanceConfigurationINTEL): bool = uint(handle) != 0
 proc reset*(handle: var VkPerformanceConfigurationINTEL) = handle = VkPerformanceConfigurationINTEL(0)
+proc `==`*(a, b: VkPerformanceConfigurationINTEL): bool = uint(a) == uint(b)
 proc `$`*(handle: VkBufferCollectionFUCHSIA): string = "VkBufferCollectionFUCHSIA(" & $(uint(handle)) & ")"
 proc valid*(handle: VkBufferCollectionFUCHSIA): bool = uint(handle) != 0
 proc reset*(handle: var VkBufferCollectionFUCHSIA) = handle = VkBufferCollectionFUCHSIA(0)
+proc `==`*(a, b: VkBufferCollectionFUCHSIA): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDeferredOperationKHR): string = "VkDeferredOperationKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDeferredOperationKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkDeferredOperationKHR) = handle = VkDeferredOperationKHR(0)
+proc `==`*(a, b: VkDeferredOperationKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPrivateDataSlot): string = "VkPrivateDataSlot(" & $(uint(handle)) & ")"
 proc valid*(handle: VkPrivateDataSlot): bool = uint(handle) != 0
 proc reset*(handle: var VkPrivateDataSlot) = handle = VkPrivateDataSlot(0)
+proc `==`*(a, b: VkPrivateDataSlot): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCuModuleNVX): string = "VkCuModuleNVX(" & $(uint(handle)) & ")"
 proc valid*(handle: VkCuModuleNVX): bool = uint(handle) != 0
 proc reset*(handle: var VkCuModuleNVX) = handle = VkCuModuleNVX(0)
+proc `==`*(a, b: VkCuModuleNVX): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCuFunctionNVX): string = "VkCuFunctionNVX(" & $(uint(handle)) & ")"
 proc valid*(handle: VkCuFunctionNVX): bool = uint(handle) != 0
 proc reset*(handle: var VkCuFunctionNVX) = handle = VkCuFunctionNVX(0)
+proc `==`*(a, b: VkCuFunctionNVX): bool = uint(a) == uint(b)
 proc `$`*(handle: VkOpticalFlowSessionNV): string = "VkOpticalFlowSessionNV(" & $(uint(handle)) & ")"
 proc valid*(handle: VkOpticalFlowSessionNV): bool = uint(handle) != 0
 proc reset*(handle: var VkOpticalFlowSessionNV) = handle = VkOpticalFlowSessionNV(0)
+proc `==`*(a, b: VkOpticalFlowSessionNV): bool = uint(a) == uint(b)
 proc `$`*(handle: VkMicromapEXT): string = "VkMicromapEXT(" & $(uint(handle)) & ")"
 proc valid*(handle: VkMicromapEXT): bool = uint(handle) != 0
 proc reset*(handle: var VkMicromapEXT) = handle = VkMicromapEXT(0)
+proc `==`*(a, b: VkMicromapEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDisplayKHR): string = "VkDisplayKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDisplayKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkDisplayKHR) = handle = VkDisplayKHR(0)
+proc `==`*(a, b: VkDisplayKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDisplayModeKHR): string = "VkDisplayModeKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDisplayModeKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkDisplayModeKHR) = handle = VkDisplayModeKHR(0)
+proc `==`*(a, b: VkDisplayModeKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSurfaceKHR): string = "VkSurfaceKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkSurfaceKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkSurfaceKHR) = handle = VkSurfaceKHR(0)
+proc `==`*(a, b: VkSurfaceKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSwapchainKHR): string = "VkSwapchainKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkSwapchainKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkSwapchainKHR) = handle = VkSwapchainKHR(0)
+proc `==`*(a, b: VkSwapchainKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDebugReportCallbackEXT): string = "VkDebugReportCallbackEXT(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDebugReportCallbackEXT): bool = uint(handle) != 0
 proc reset*(handle: var VkDebugReportCallbackEXT) = handle = VkDebugReportCallbackEXT(0)
+proc `==`*(a, b: VkDebugReportCallbackEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDebugUtilsMessengerEXT): string = "VkDebugUtilsMessengerEXT(" & $(uint(handle)) & ")"
 proc valid*(handle: VkDebugUtilsMessengerEXT): bool = uint(handle) != 0
 proc reset*(handle: var VkDebugUtilsMessengerEXT) = handle = VkDebugUtilsMessengerEXT(0)
+proc `==`*(a, b: VkDebugUtilsMessengerEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkVideoSessionKHR): string = "VkVideoSessionKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkVideoSessionKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkVideoSessionKHR) = handle = VkVideoSessionKHR(0)
+proc `==`*(a, b: VkVideoSessionKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkVideoSessionParametersKHR): string = "VkVideoSessionParametersKHR(" & $(uint(handle)) & ")"
 proc valid*(handle: VkVideoSessionParametersKHR): bool = uint(handle) != 0
 proc reset*(handle: var VkVideoSessionParametersKHR) = handle = VkVideoSessionParametersKHR(0)
+proc `==`*(a, b: VkVideoSessionParametersKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSemaphoreSciSyncPoolNV): string = "VkSemaphoreSciSyncPoolNV(" & $(uint(handle)) & ")"
 proc valid*(handle: VkSemaphoreSciSyncPoolNV): bool = uint(handle) != 0
 proc reset*(handle: var VkSemaphoreSciSyncPoolNV) = handle = VkSemaphoreSciSyncPoolNV(0)
+proc `==`*(a, b: VkSemaphoreSciSyncPoolNV): bool = uint(a) == uint(b)
 type
   VkFramebufferCreateFlags* = distinct VkFlags
   VkQueryPoolCreateFlags* = distinct VkFlags
@@ -593,6 +640,7 @@ func toEnums*(number: VkPipelineCacheCreateFlags): seq[VkPipelineCacheCreateFlag
     for value in VkPipelineCacheCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineCacheCreateFlags): bool = cint(a) == cint(b)
 type
   VkPrimitiveTopology* {.size: sizeof(cint).} = enum
     VK_PRIMITIVE_TOPOLOGY_POINT_LIST = 0
@@ -2028,6 +2076,7 @@ func toEnums*(number: VkQueueFlags): seq[VkQueueFlagBits] =
     for value in VkQueueFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkQueueFlags): bool = cint(a) == cint(b)
 type
   VkCullModeFlagBits* {.size: sizeof(cint).} = enum
     VK_CULL_MODE_FRONT_BIT = 0b00000000000000000000000000000001
@@ -2039,6 +2088,7 @@ func toEnums*(number: VkCullModeFlags): seq[VkCullModeFlagBits] =
     for value in VkCullModeFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkCullModeFlags): bool = cint(a) == cint(b)
 const
   VK_CULL_MODE_NONE* = 0
   VK_CULL_MODE_FRONT_AND_BACK* = 0x00000003
@@ -2053,6 +2103,7 @@ func toEnums*(number: VkRenderPassCreateFlags): seq[VkRenderPassCreateFlagBits] 
     for value in VkRenderPassCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkRenderPassCreateFlags): bool = cint(a) == cint(b)
 type
   VkDeviceQueueCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT = 0b00000000000000000000000000000001
@@ -2064,6 +2115,7 @@ func toEnums*(number: VkDeviceQueueCreateFlags): seq[VkDeviceQueueCreateFlagBits
     for value in VkDeviceQueueCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDeviceQueueCreateFlags): bool = cint(a) == cint(b)
 type
   VkMemoryPropertyFlagBits* {.size: sizeof(cint).} = enum
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT = 0b00000000000000000000000000000001
@@ -2082,6 +2134,7 @@ func toEnums*(number: VkMemoryPropertyFlags): seq[VkMemoryPropertyFlagBits] =
     for value in VkMemoryPropertyFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkMemoryPropertyFlags): bool = cint(a) == cint(b)
 type
   VkMemoryHeapFlagBits* {.size: sizeof(cint).} = enum
     VK_MEMORY_HEAP_DEVICE_LOCAL_BIT = 0b00000000000000000000000000000001
@@ -2094,6 +2147,7 @@ func toEnums*(number: VkMemoryHeapFlags): seq[VkMemoryHeapFlagBits] =
     for value in VkMemoryHeapFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkMemoryHeapFlags): bool = cint(a) == cint(b)
 type
   VkAccessFlagBits* {.size: sizeof(cint).} = enum
     VK_ACCESS_INDIRECT_COMMAND_READ_BIT = 0b00000000000000000000000000000001
@@ -2131,6 +2185,7 @@ func toEnums*(number: VkAccessFlags): seq[VkAccessFlagBits] =
     for value in VkAccessFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkAccessFlags): bool = cint(a) == cint(b)
 type
   VkBufferUsageFlagBits* {.size: sizeof(cint).} = enum
     VK_BUFFER_USAGE_TRANSFER_SRC_BIT = 0b00000000000000000000000000000001
@@ -2167,6 +2222,7 @@ func toEnums*(number: VkBufferUsageFlags): seq[VkBufferUsageFlagBits] =
     for value in VkBufferUsageFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkBufferUsageFlags): bool = cint(a) == cint(b)
 type
   VkBufferCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_BUFFER_CREATE_SPARSE_BINDING_BIT = 0b00000000000000000000000000000001
@@ -2182,6 +2238,7 @@ func toEnums*(number: VkBufferCreateFlags): seq[VkBufferCreateFlagBits] =
     for value in VkBufferCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkBufferCreateFlags): bool = cint(a) == cint(b)
 type
   VkShaderStageFlagBits* {.size: sizeof(cint).} = enum
     VK_SHADER_STAGE_VERTEX_BIT = 0b00000000000000000000000000000001
@@ -2210,6 +2267,7 @@ func toEnums*(number: VkShaderStageFlags): seq[VkShaderStageFlagBits] =
     for value in VkShaderStageFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkShaderStageFlags): bool = cint(a) == cint(b)
 const
   VK_SHADER_STAGE_ALL_GRAPHICS* = 0x0000001F
   VK_SHADER_STAGE_ALL* = 0x7FFFFFFF
@@ -2245,6 +2303,7 @@ func toEnums*(number: VkImageUsageFlags): seq[VkImageUsageFlagBits] =
     for value in VkImageUsageFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkImageUsageFlags): bool = cint(a) == cint(b)
 type
   VkImageCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_IMAGE_CREATE_SPARSE_BINDING_BIT = 0b00000000000000000000000000000001
@@ -2274,6 +2333,7 @@ func toEnums*(number: VkImageCreateFlags): seq[VkImageCreateFlagBits] =
     for value in VkImageCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkImageCreateFlags): bool = cint(a) == cint(b)
 type
   VkImageViewCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_IMAGE_VIEW_CREATE_FRAGMENT_DENSITY_MAP_DYNAMIC_BIT_EXT = 0b00000000000000000000000000000001
@@ -2286,6 +2346,7 @@ func toEnums*(number: VkImageViewCreateFlags): seq[VkImageViewCreateFlagBits] =
     for value in VkImageViewCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkImageViewCreateFlags): bool = cint(a) == cint(b)
 type
   VkSamplerCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_SAMPLER_CREATE_SUBSAMPLED_BIT_EXT = 0b00000000000000000000000000000001
@@ -2300,6 +2361,7 @@ func toEnums*(number: VkSamplerCreateFlags): seq[VkSamplerCreateFlagBits] =
     for value in VkSamplerCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSamplerCreateFlags): bool = cint(a) == cint(b)
 type
   VkPipelineCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT = 0b00000000000000000000000000000001
@@ -2340,6 +2402,7 @@ func toEnums*(number: VkPipelineCreateFlags): seq[VkPipelineCreateFlagBits] =
     for value in VkPipelineCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineCreateFlags): bool = cint(a) == cint(b)
 type
   VkPipelineShaderStageCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT = 0b00000000000000000000000000000001
@@ -2352,6 +2415,7 @@ func toEnums*(number: VkPipelineShaderStageCreateFlags): seq[VkPipelineShaderSta
     for value in VkPipelineShaderStageCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineShaderStageCreateFlags): bool = cint(a) == cint(b)
 type
   VkColorComponentFlagBits* {.size: sizeof(cint).} = enum
     VK_COLOR_COMPONENT_R_BIT = 0b00000000000000000000000000000001
@@ -2365,6 +2429,7 @@ func toEnums*(number: VkColorComponentFlags): seq[VkColorComponentFlagBits] =
     for value in VkColorComponentFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkColorComponentFlags): bool = cint(a) == cint(b)
 type
   VkFenceCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_FENCE_CREATE_SIGNALED_BIT = 0b00000000000000000000000000000001
@@ -2375,6 +2440,7 @@ func toEnums*(number: VkFenceCreateFlags): seq[VkFenceCreateFlagBits] =
     for value in VkFenceCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkFenceCreateFlags): bool = cint(a) == cint(b)
 type
   VkFormatFeatureFlagBits* {.size: sizeof(cint).} = enum
     VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT = 0b00000000000000000000000000000001
@@ -2415,6 +2481,7 @@ func toEnums*(number: VkFormatFeatureFlags): seq[VkFormatFeatureFlagBits] =
     for value in VkFormatFeatureFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkFormatFeatureFlags): bool = cint(a) == cint(b)
 type
   VkQueryControlFlagBits* {.size: sizeof(cint).} = enum
     VK_QUERY_CONTROL_PRECISE_BIT = 0b00000000000000000000000000000001
@@ -2425,6 +2492,7 @@ func toEnums*(number: VkQueryControlFlags): seq[VkQueryControlFlagBits] =
     for value in VkQueryControlFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkQueryControlFlags): bool = cint(a) == cint(b)
 type
   VkQueryResultFlagBits* {.size: sizeof(cint).} = enum
     VK_QUERY_RESULT_64_BIT = 0b00000000000000000000000000000001
@@ -2439,6 +2507,7 @@ func toEnums*(number: VkQueryResultFlags): seq[VkQueryResultFlagBits] =
     for value in VkQueryResultFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkQueryResultFlags): bool = cint(a) == cint(b)
 type
   VkCommandBufferUsageFlagBits* {.size: sizeof(cint).} = enum
     VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT = 0b00000000000000000000000000000001
@@ -2451,6 +2520,7 @@ func toEnums*(number: VkCommandBufferUsageFlags): seq[VkCommandBufferUsageFlagBi
     for value in VkCommandBufferUsageFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkCommandBufferUsageFlags): bool = cint(a) == cint(b)
 type
   VkQueryPipelineStatisticFlagBits* {.size: sizeof(cint).} = enum
     VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT = 0b00000000000000000000000000000001
@@ -2474,6 +2544,7 @@ func toEnums*(number: VkQueryPipelineStatisticFlags): seq[VkQueryPipelineStatist
     for value in VkQueryPipelineStatisticFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkQueryPipelineStatisticFlags): bool = cint(a) == cint(b)
 type
   VkImageAspectFlagBits* {.size: sizeof(cint).} = enum
     VK_IMAGE_ASPECT_COLOR_BIT = 0b00000000000000000000000000000001
@@ -2494,6 +2565,7 @@ func toEnums*(number: VkImageAspectFlags): seq[VkImageAspectFlagBits] =
     for value in VkImageAspectFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkImageAspectFlags): bool = cint(a) == cint(b)
 type
   VkSparseImageFormatFlagBits* {.size: sizeof(cint).} = enum
     VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT = 0b00000000000000000000000000000001
@@ -2506,6 +2578,7 @@ func toEnums*(number: VkSparseImageFormatFlags): seq[VkSparseImageFormatFlagBits
     for value in VkSparseImageFormatFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSparseImageFormatFlags): bool = cint(a) == cint(b)
 type
   VkSparseMemoryBindFlagBits* {.size: sizeof(cint).} = enum
     VK_SPARSE_MEMORY_BIND_METADATA_BIT = 0b00000000000000000000000000000001
@@ -2516,6 +2589,7 @@ func toEnums*(number: VkSparseMemoryBindFlags): seq[VkSparseMemoryBindFlagBits] 
     for value in VkSparseMemoryBindFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSparseMemoryBindFlags): bool = cint(a) == cint(b)
 type
   VkPipelineStageFlagBits* {.size: sizeof(cint).} = enum
     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT = 0b00000000000000000000000000000001
@@ -2551,6 +2625,7 @@ func toEnums*(number: VkPipelineStageFlags): seq[VkPipelineStageFlagBits] =
     for value in VkPipelineStageFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineStageFlags): bool = cint(a) == cint(b)
 type
   VkCommandPoolCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_COMMAND_POOL_CREATE_TRANSIENT_BIT = 0b00000000000000000000000000000001
@@ -2563,6 +2638,7 @@ func toEnums*(number: VkCommandPoolCreateFlags): seq[VkCommandPoolCreateFlagBits
     for value in VkCommandPoolCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkCommandPoolCreateFlags): bool = cint(a) == cint(b)
 type
   VkCommandPoolResetFlagBits* {.size: sizeof(cint).} = enum
     VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT = 0b00000000000000000000000000000001
@@ -2574,6 +2650,7 @@ func toEnums*(number: VkCommandPoolResetFlags): seq[VkCommandPoolResetFlagBits] 
     for value in VkCommandPoolResetFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkCommandPoolResetFlags): bool = cint(a) == cint(b)
 type
   VkCommandBufferResetFlagBits* {.size: sizeof(cint).} = enum
     VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT = 0b00000000000000000000000000000001
@@ -2584,6 +2661,7 @@ func toEnums*(number: VkCommandBufferResetFlags): seq[VkCommandBufferResetFlagBi
     for value in VkCommandBufferResetFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkCommandBufferResetFlags): bool = cint(a) == cint(b)
 type
   VkSampleCountFlagBits* {.size: sizeof(cint).} = enum
     VK_SAMPLE_COUNT_1_BIT = 0b00000000000000000000000000000001
@@ -2600,6 +2678,7 @@ func toEnums*(number: VkSampleCountFlags): seq[VkSampleCountFlagBits] =
     for value in VkSampleCountFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSampleCountFlags): bool = cint(a) == cint(b)
 type
   VkAttachmentDescriptionFlagBits* {.size: sizeof(cint).} = enum
     VK_ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT = 0b00000000000000000000000000000001
@@ -2610,6 +2689,7 @@ func toEnums*(number: VkAttachmentDescriptionFlags): seq[VkAttachmentDescription
     for value in VkAttachmentDescriptionFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkAttachmentDescriptionFlags): bool = cint(a) == cint(b)
 type
   VkStencilFaceFlagBits* {.size: sizeof(cint).} = enum
     VK_STENCIL_FACE_FRONT_BIT = 0b00000000000000000000000000000001
@@ -2621,6 +2701,7 @@ func toEnums*(number: VkStencilFaceFlags): seq[VkStencilFaceFlagBits] =
     for value in VkStencilFaceFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkStencilFaceFlags): bool = cint(a) == cint(b)
 const
   VK_STENCIL_FACE_FRONT_AND_BACK* = 0x00000003
 type
@@ -2635,6 +2716,7 @@ func toEnums*(number: VkDescriptorPoolCreateFlags): seq[VkDescriptorPoolCreateFl
     for value in VkDescriptorPoolCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDescriptorPoolCreateFlags): bool = cint(a) == cint(b)
 type
   VkDependencyFlagBits* {.size: sizeof(cint).} = enum
     VK_DEPENDENCY_BY_REGION_BIT = 0b00000000000000000000000000000001
@@ -2648,6 +2730,7 @@ func toEnums*(number: VkDependencyFlags): seq[VkDependencyFlagBits] =
     for value in VkDependencyFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDependencyFlags): bool = cint(a) == cint(b)
 type
   VkSemaphoreType* {.size: sizeof(cint).} = enum
     VK_SEMAPHORE_TYPE_BINARY = 0
@@ -2661,6 +2744,7 @@ func toEnums*(number: VkSemaphoreWaitFlags): seq[VkSemaphoreWaitFlagBits] =
     for value in VkSemaphoreWaitFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSemaphoreWaitFlags): bool = cint(a) == cint(b)
 type
   VkPresentModeKHR* {.size: sizeof(cint).} = enum
     VK_PRESENT_MODE_IMMEDIATE_KHR = 0
@@ -2698,6 +2782,7 @@ func toEnums*(number: VkDisplayPlaneAlphaFlagsKHR): seq[VkDisplayPlaneAlphaFlagB
     for value in VkDisplayPlaneAlphaFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDisplayPlaneAlphaFlagsKHR): bool = cint(a) == cint(b)
 type
   VkCompositeAlphaFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR = 0b00000000000000000000000000000001
@@ -2711,6 +2796,7 @@ func toEnums*(number: VkCompositeAlphaFlagsKHR): seq[VkCompositeAlphaFlagBitsKHR
     for value in VkCompositeAlphaFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkCompositeAlphaFlagsKHR): bool = cint(a) == cint(b)
 type
   VkSurfaceTransformFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR = 0b00000000000000000000000000000001
@@ -2729,6 +2815,7 @@ func toEnums*(number: VkSurfaceTransformFlagsKHR): seq[VkSurfaceTransformFlagBit
     for value in VkSurfaceTransformFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSurfaceTransformFlagsKHR): bool = cint(a) == cint(b)
 type
   VkSwapchainImageUsageFlagBitsANDROID* {.size: sizeof(cint).} = enum
     VK_SWAPCHAIN_IMAGE_USAGE_SHARED_BIT_ANDROID = 0b00000000000000000000000000000001
@@ -2739,6 +2826,7 @@ func toEnums*(number: VkSwapchainImageUsageFlagsANDROID): seq[VkSwapchainImageUs
     for value in VkSwapchainImageUsageFlagBitsANDROID.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSwapchainImageUsageFlagsANDROID): bool = cint(a) == cint(b)
 type
   VkTimeDomainEXT* {.size: sizeof(cint).} = enum
     VK_TIME_DOMAIN_DEVICE_EXT = 0
@@ -2758,6 +2846,7 @@ func toEnums*(number: VkDebugReportFlagsEXT): seq[VkDebugReportFlagBitsEXT] =
     for value in VkDebugReportFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDebugReportFlagsEXT): bool = cint(a) == cint(b)
 type
   VkDebugReportObjectTypeEXT* {.size: sizeof(cint).} = enum
     VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT = 0
@@ -2820,6 +2909,7 @@ func toEnums*(number: VkExternalMemoryHandleTypeFlagsNV): seq[VkExternalMemoryHa
     for value in VkExternalMemoryHandleTypeFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalMemoryHandleTypeFlagsNV): bool = cint(a) == cint(b)
 type
   VkExternalMemoryFeatureFlagBitsNV* {.size: sizeof(cint).} = enum
     VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT_NV = 0b00000000000000000000000000000001
@@ -2832,6 +2922,7 @@ func toEnums*(number: VkExternalMemoryFeatureFlagsNV): seq[VkExternalMemoryFeatu
     for value in VkExternalMemoryFeatureFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalMemoryFeatureFlagsNV): bool = cint(a) == cint(b)
 type
   VkValidationCheckEXT* {.size: sizeof(cint).} = enum
     VK_VALIDATION_CHECK_ALL_EXT = 0
@@ -2868,6 +2959,7 @@ func toEnums*(number: VkSubgroupFeatureFlags): seq[VkSubgroupFeatureFlagBits] =
     for value in VkSubgroupFeatureFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSubgroupFeatureFlags): bool = cint(a) == cint(b)
 type
   VkIndirectCommandsLayoutUsageFlagBitsNV* {.size: sizeof(cint).} = enum
     VK_INDIRECT_COMMANDS_LAYOUT_USAGE_EXPLICIT_PREPROCESS_BIT_NV = 0b00000000000000000000000000000001
@@ -2880,6 +2972,7 @@ func toEnums*(number: VkIndirectCommandsLayoutUsageFlagsNV): seq[VkIndirectComma
     for value in VkIndirectCommandsLayoutUsageFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkIndirectCommandsLayoutUsageFlagsNV): bool = cint(a) == cint(b)
 type
   VkIndirectStateFlagBitsNV* {.size: sizeof(cint).} = enum
     VK_INDIRECT_STATE_FLAG_FRONTFACE_BIT_NV = 0b00000000000000000000000000000001
@@ -2890,6 +2983,7 @@ func toEnums*(number: VkIndirectStateFlagsNV): seq[VkIndirectStateFlagBitsNV] =
     for value in VkIndirectStateFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkIndirectStateFlagsNV): bool = cint(a) == cint(b)
 type
   VkIndirectCommandsTokenTypeNV* {.size: sizeof(cint).} = enum
     VK_INDIRECT_COMMANDS_TOKEN_TYPE_SHADER_GROUP_NV = 0
@@ -2910,6 +3004,7 @@ func toEnums*(number: VkPrivateDataSlotCreateFlags): seq[VkPrivateDataSlotCreate
     for value in VkPrivateDataSlotCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPrivateDataSlotCreateFlags): bool = cint(a) == cint(b)
 type
   VkDescriptorSetLayoutCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR = 0b00000000000000000000000000000001
@@ -2925,6 +3020,7 @@ func toEnums*(number: VkDescriptorSetLayoutCreateFlags): seq[VkDescriptorSetLayo
     for value in VkDescriptorSetLayoutCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDescriptorSetLayoutCreateFlags): bool = cint(a) == cint(b)
 type
   VkExternalMemoryHandleTypeFlagBits* {.size: sizeof(cint).} = enum
     VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT = 0b00000000000000000000000000000001
@@ -2948,6 +3044,7 @@ func toEnums*(number: VkExternalMemoryHandleTypeFlags): seq[VkExternalMemoryHand
     for value in VkExternalMemoryHandleTypeFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalMemoryHandleTypeFlags): bool = cint(a) == cint(b)
 type
   VkExternalMemoryFeatureFlagBits* {.size: sizeof(cint).} = enum
     VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT = 0b00000000000000000000000000000001
@@ -2960,6 +3057,7 @@ func toEnums*(number: VkExternalMemoryFeatureFlags): seq[VkExternalMemoryFeature
     for value in VkExternalMemoryFeatureFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalMemoryFeatureFlags): bool = cint(a) == cint(b)
 type
   VkExternalSemaphoreHandleTypeFlagBits* {.size: sizeof(cint).} = enum
     VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT = 0b00000000000000000000000000000001
@@ -2976,6 +3074,7 @@ func toEnums*(number: VkExternalSemaphoreHandleTypeFlags): seq[VkExternalSemapho
     for value in VkExternalSemaphoreHandleTypeFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalSemaphoreHandleTypeFlags): bool = cint(a) == cint(b)
 type
   VkExternalSemaphoreFeatureFlagBits* {.size: sizeof(cint).} = enum
     VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT = 0b00000000000000000000000000000001
@@ -2987,6 +3086,7 @@ func toEnums*(number: VkExternalSemaphoreFeatureFlags): seq[VkExternalSemaphoreF
     for value in VkExternalSemaphoreFeatureFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalSemaphoreFeatureFlags): bool = cint(a) == cint(b)
 type
   VkSemaphoreImportFlagBits* {.size: sizeof(cint).} = enum
     VK_SEMAPHORE_IMPORT_TEMPORARY_BIT = 0b00000000000000000000000000000001
@@ -2997,6 +3097,7 @@ func toEnums*(number: VkSemaphoreImportFlags): seq[VkSemaphoreImportFlagBits] =
     for value in VkSemaphoreImportFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSemaphoreImportFlags): bool = cint(a) == cint(b)
 type
   VkExternalFenceHandleTypeFlagBits* {.size: sizeof(cint).} = enum
     VK_EXTERNAL_FENCE_HANDLE_TYPE_OPAQUE_FD_BIT = 0b00000000000000000000000000000001
@@ -3012,6 +3113,7 @@ func toEnums*(number: VkExternalFenceHandleTypeFlags): seq[VkExternalFenceHandle
     for value in VkExternalFenceHandleTypeFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalFenceHandleTypeFlags): bool = cint(a) == cint(b)
 type
   VkExternalFenceFeatureFlagBits* {.size: sizeof(cint).} = enum
     VK_EXTERNAL_FENCE_FEATURE_EXPORTABLE_BIT = 0b00000000000000000000000000000001
@@ -3023,6 +3125,7 @@ func toEnums*(number: VkExternalFenceFeatureFlags): seq[VkExternalFenceFeatureFl
     for value in VkExternalFenceFeatureFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExternalFenceFeatureFlags): bool = cint(a) == cint(b)
 type
   VkFenceImportFlagBits* {.size: sizeof(cint).} = enum
     VK_FENCE_IMPORT_TEMPORARY_BIT = 0b00000000000000000000000000000001
@@ -3033,6 +3136,7 @@ func toEnums*(number: VkFenceImportFlags): seq[VkFenceImportFlagBits] =
     for value in VkFenceImportFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkFenceImportFlags): bool = cint(a) == cint(b)
 type
   VkSurfaceCounterFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_SURFACE_COUNTER_VBLANK_BIT_EXT = 0b00000000000000000000000000000001
@@ -3043,6 +3147,7 @@ func toEnums*(number: VkSurfaceCounterFlagsEXT): seq[VkSurfaceCounterFlagBitsEXT
     for value in VkSurfaceCounterFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSurfaceCounterFlagsEXT): bool = cint(a) == cint(b)
 type
   VkDisplayPowerStateEXT* {.size: sizeof(cint).} = enum
     VK_DISPLAY_POWER_STATE_OFF_EXT = 0
@@ -3064,6 +3169,7 @@ func toEnums*(number: VkPeerMemoryFeatureFlags): seq[VkPeerMemoryFeatureFlagBits
     for value in VkPeerMemoryFeatureFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPeerMemoryFeatureFlags): bool = cint(a) == cint(b)
 type
   VkMemoryAllocateFlagBits* {.size: sizeof(cint).} = enum
     VK_MEMORY_ALLOCATE_DEVICE_MASK_BIT = 0b00000000000000000000000000000001
@@ -3076,6 +3182,7 @@ func toEnums*(number: VkMemoryAllocateFlags): seq[VkMemoryAllocateFlagBits] =
     for value in VkMemoryAllocateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkMemoryAllocateFlags): bool = cint(a) == cint(b)
 type
   VkDeviceGroupPresentModeFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR = 0b00000000000000000000000000000001
@@ -3089,6 +3196,7 @@ func toEnums*(number: VkDeviceGroupPresentModeFlagsKHR): seq[VkDeviceGroupPresen
     for value in VkDeviceGroupPresentModeFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDeviceGroupPresentModeFlagsKHR): bool = cint(a) == cint(b)
 type
   VkSwapchainCreateFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_SWAPCHAIN_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR = 0b00000000000000000000000000000001
@@ -3103,6 +3211,7 @@ func toEnums*(number: VkSwapchainCreateFlagsKHR): seq[VkSwapchainCreateFlagBitsK
     for value in VkSwapchainCreateFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSwapchainCreateFlagsKHR): bool = cint(a) == cint(b)
 type
   VkViewportCoordinateSwizzleNV* {.size: sizeof(cint).} = enum
     VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_X_NV = 0
@@ -3132,6 +3241,7 @@ func toEnums*(number: VkSubpassDescriptionFlags): seq[VkSubpassDescriptionFlagBi
     for value in VkSubpassDescriptionFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSubpassDescriptionFlags): bool = cint(a) == cint(b)
 type
   VkPointClippingBehavior* {.size: sizeof(cint).} = enum
     VK_POINT_CLIPPING_BEHAVIOR_ALL_CLIP_PLANES = 0
@@ -3190,6 +3300,7 @@ func toEnums*(number: VkDebugUtilsMessageSeverityFlagsEXT): seq[VkDebugUtilsMess
     for value in VkDebugUtilsMessageSeverityFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDebugUtilsMessageSeverityFlagsEXT): bool = cint(a) == cint(b)
 type
   VkDebugUtilsMessageTypeFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT = 0b00000000000000000000000000000001
@@ -3203,6 +3314,7 @@ func toEnums*(number: VkDebugUtilsMessageTypeFlagsEXT): seq[VkDebugUtilsMessageT
     for value in VkDebugUtilsMessageTypeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDebugUtilsMessageTypeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkConservativeRasterizationModeEXT* {.size: sizeof(cint).} = enum
     VK_CONSERVATIVE_RASTERIZATION_MODE_DISABLED_EXT = 0
@@ -3221,6 +3333,7 @@ func toEnums*(number: VkDescriptorBindingFlags): seq[VkDescriptorBindingFlagBits
     for value in VkDescriptorBindingFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDescriptorBindingFlags): bool = cint(a) == cint(b)
 type
   VkVendorId* {.size: sizeof(cint).} = enum
     VK_VENDOR_ID_VIV = 65537
@@ -3264,6 +3377,7 @@ func toEnums*(number: VkConditionalRenderingFlagsEXT): seq[VkConditionalRenderin
     for value in VkConditionalRenderingFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkConditionalRenderingFlagsEXT): bool = cint(a) == cint(b)
 type
   VkResolveModeFlagBits* {.size: sizeof(cint).} = enum
     VK_RESOLVE_MODE_SAMPLE_ZERO_BIT = 0b00000000000000000000000000000001
@@ -3277,6 +3391,7 @@ func toEnums*(number: VkResolveModeFlags): seq[VkResolveModeFlagBits] =
     for value in VkResolveModeFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkResolveModeFlags): bool = cint(a) == cint(b)
 const
   VK_RESOLVE_MODE_NONE* = 0
 type
@@ -3312,6 +3427,7 @@ func toEnums*(number: VkGeometryInstanceFlagsKHR): seq[VkGeometryInstanceFlagBit
     for value in VkGeometryInstanceFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkGeometryInstanceFlagsKHR): bool = cint(a) == cint(b)
 type
   VkGeometryFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_GEOMETRY_OPAQUE_BIT_KHR = 0b00000000000000000000000000000001
@@ -3323,6 +3439,7 @@ func toEnums*(number: VkGeometryFlagsKHR): seq[VkGeometryFlagBitsKHR] =
     for value in VkGeometryFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkGeometryFlagsKHR): bool = cint(a) == cint(b)
 type
   VkBuildAccelerationStructureFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR = 0b00000000000000000000000000000001
@@ -3343,6 +3460,7 @@ func toEnums*(number: VkBuildAccelerationStructureFlagsKHR): seq[VkBuildAccelera
     for value in VkBuildAccelerationStructureFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkBuildAccelerationStructureFlagsKHR): bool = cint(a) == cint(b)
 type
   VkAccelerationStructureCreateFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_ACCELERATION_STRUCTURE_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT_KHR = 0b00000000000000000000000000000001
@@ -3355,6 +3473,7 @@ func toEnums*(number: VkAccelerationStructureCreateFlagsKHR): seq[VkAcceleration
     for value in VkAccelerationStructureCreateFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkAccelerationStructureCreateFlagsKHR): bool = cint(a) == cint(b)
 type
   VkCopyAccelerationStructureModeKHR* {.size: sizeof(cint).} = enum
     VK_COPY_ACCELERATION_STRUCTURE_MODE_CLONE_KHR = 0
@@ -3405,6 +3524,7 @@ func toEnums*(number: VkFramebufferCreateFlags): seq[VkFramebufferCreateFlagBits
     for value in VkFramebufferCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkFramebufferCreateFlags): bool = cint(a) == cint(b)
 type
   VkScopeNV* {.size: sizeof(cint).} = enum
     VK_SCOPE_DEVICE_NV = 1
@@ -3435,6 +3555,7 @@ func toEnums*(number: VkDeviceDiagnosticsConfigFlagsNV): seq[VkDeviceDiagnostics
     for value in VkDeviceDiagnosticsConfigFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDeviceDiagnosticsConfigFlagsNV): bool = cint(a) == cint(b)
 type
   VkPipelineCreationFeedbackFlagBits* {.size: sizeof(cint).} = enum
     VK_PIPELINE_CREATION_FEEDBACK_VALID_BIT = 0b00000000000000000000000000000001
@@ -3447,6 +3568,7 @@ func toEnums*(number: VkPipelineCreationFeedbackFlags): seq[VkPipelineCreationFe
     for value in VkPipelineCreationFeedbackFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineCreationFeedbackFlags): bool = cint(a) == cint(b)
 type
   VkFullScreenExclusiveEXT* {.size: sizeof(cint).} = enum
     VK_FULL_SCREEN_EXCLUSIVE_DEFAULT_EXT = 0
@@ -3466,6 +3588,7 @@ func toEnums*(number: VkMemoryDecompressionMethodFlagsNV): seq[VkMemoryDecompres
     for value in VkMemoryDecompressionMethodFlagBitsNV.items:
       if (cast[uint64](value) and uint64(number)) > 0:
         result.add value
+proc `==`*(a, b: VkMemoryDecompressionMethodFlagsNV): bool = uint64(a) == uint64(b)
 type
   VkPerformanceCounterUnitKHR* {.size: sizeof(cint).} = enum
     VK_PERFORMANCE_COUNTER_UNIT_GENERIC_KHR = 0
@@ -3496,6 +3619,7 @@ func toEnums*(number: VkPerformanceCounterDescriptionFlagsKHR): seq[VkPerformanc
     for value in VkPerformanceCounterDescriptionFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPerformanceCounterDescriptionFlagsKHR): bool = cint(a) == cint(b)
 type
   VkPerformanceConfigurationTypeINTEL* {.size: sizeof(cint).} = enum
     VK_PERFORMANCE_CONFIGURATION_TYPE_COMMAND_QUEUE_METRICS_DISCOVERY_ACTIVATED_INTEL = 0
@@ -3557,6 +3681,7 @@ func toEnums*(number: VkToolPurposeFlags): seq[VkToolPurposeFlagBits] =
     for value in VkToolPurposeFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkToolPurposeFlags): bool = cint(a) == cint(b)
 type
   VkPipelineMatchControl* {.size: sizeof(cint).} = enum
     VK_PIPELINE_MATCH_CONTROL_APPLICATION_UUID_EXACT_MATCH = 0
@@ -3648,6 +3773,7 @@ func toEnums*(number: VkAccessFlags2): seq[VkAccessFlagBits2] =
     for value in VkAccessFlagBits2.items:
       if (cast[uint64](value) and uint64(number)) > 0:
         result.add value
+proc `==`*(a, b: VkAccessFlags2): bool = uint64(a) == uint64(b)
 const
   VK_ACCESS_2_NONE* = 0
 type
@@ -3700,6 +3826,7 @@ func toEnums*(number: VkPipelineStageFlags2): seq[VkPipelineStageFlagBits2] =
     for value in VkPipelineStageFlagBits2.items:
       if (cast[uint64](value) and uint64(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineStageFlags2): bool = uint64(a) == uint64(b)
 const
   VK_PIPELINE_STAGE_2_NONE* = 0
 type
@@ -3712,6 +3839,7 @@ func toEnums*(number: VkSubmitFlags): seq[VkSubmitFlagBits] =
     for value in VkSubmitFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkSubmitFlags): bool = cint(a) == cint(b)
 type
   VkEventCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_EVENT_CREATE_DEVICE_ONLY_BIT = 0b00000000000000000000000000000001
@@ -3722,6 +3850,7 @@ func toEnums*(number: VkEventCreateFlags): seq[VkEventCreateFlagBits] =
     for value in VkEventCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkEventCreateFlags): bool = cint(a) == cint(b)
 type
   VkPipelineLayoutCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_PIPELINE_LAYOUT_CREATE_RESERVED_0_BIT_AMD = 0b00000000000000000000000000000001
@@ -3733,6 +3862,7 @@ func toEnums*(number: VkPipelineLayoutCreateFlags): seq[VkPipelineLayoutCreateFl
     for value in VkPipelineLayoutCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineLayoutCreateFlags): bool = cint(a) == cint(b)
 type
   VkSciSyncClientTypeNV* {.size: sizeof(cint).} = enum
     VK_SCI_SYNC_CLIENT_TYPE_SIGNALER_NV = 0
@@ -3759,6 +3889,7 @@ func toEnums*(number: VkPipelineColorBlendStateCreateFlags): seq[VkPipelineColor
     for value in VkPipelineColorBlendStateCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineColorBlendStateCreateFlags): bool = cint(a) == cint(b)
 type
   VkPipelineDepthStencilStateCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_PIPELINE_DEPTH_STENCIL_STATE_CREATE_RASTERIZATION_ORDER_ATTACHMENT_DEPTH_ACCESS_BIT_EXT = 0b00000000000000000000000000000001
@@ -3770,6 +3901,7 @@ func toEnums*(number: VkPipelineDepthStencilStateCreateFlags): seq[VkPipelineDep
     for value in VkPipelineDepthStencilStateCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPipelineDepthStencilStateCreateFlags): bool = cint(a) == cint(b)
 type
   VkGraphicsPipelineLibraryFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT = 0b00000000000000000000000000000001
@@ -3783,6 +3915,7 @@ func toEnums*(number: VkGraphicsPipelineLibraryFlagsEXT): seq[VkGraphicsPipeline
     for value in VkGraphicsPipelineLibraryFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkGraphicsPipelineLibraryFlagsEXT): bool = cint(a) == cint(b)
 type
   VkDeviceAddressBindingFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_DEVICE_ADDRESS_BINDING_INTERNAL_OBJECT_BIT_EXT = 0b00000000000000000000000000000001
@@ -3793,6 +3926,7 @@ func toEnums*(number: VkDeviceAddressBindingFlagsEXT): seq[VkDeviceAddressBindin
     for value in VkDeviceAddressBindingFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkDeviceAddressBindingFlagsEXT): bool = cint(a) == cint(b)
 type
   VkDeviceAddressBindingTypeEXT* {.size: sizeof(cint).} = enum
     VK_DEVICE_ADDRESS_BINDING_TYPE_BIND_EXT = 0
@@ -3808,6 +3942,7 @@ func toEnums*(number: VkPresentScalingFlagsEXT): seq[VkPresentScalingFlagBitsEXT
     for value in VkPresentScalingFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPresentScalingFlagsEXT): bool = cint(a) == cint(b)
 type
   VkPresentGravityFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_PRESENT_GRAVITY_MIN_BIT_EXT = 0b00000000000000000000000000000001
@@ -3820,6 +3955,7 @@ func toEnums*(number: VkPresentGravityFlagsEXT): seq[VkPresentGravityFlagBitsEXT
     for value in VkPresentGravityFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkPresentGravityFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoCodecOperationFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR = 0b00000000000000000000000000000001
@@ -3833,6 +3969,7 @@ func toEnums*(number: VkVideoCodecOperationFlagsKHR): seq[VkVideoCodecOperationF
     for value in VkVideoCodecOperationFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoCodecOperationFlagsKHR): bool = cint(a) == cint(b)
 const
   VK_VIDEO_CODEC_OPERATION_NONE_KHR* = 0
 type
@@ -3848,6 +3985,7 @@ func toEnums*(number: VkVideoChromaSubsamplingFlagsKHR): seq[VkVideoChromaSubsam
     for value in VkVideoChromaSubsamplingFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoChromaSubsamplingFlagsKHR): bool = cint(a) == cint(b)
 const
   VK_VIDEO_CHROMA_SUBSAMPLING_INVALID_KHR* = 0
 type
@@ -3862,6 +4000,7 @@ func toEnums*(number: VkVideoComponentBitDepthFlagsKHR): seq[VkVideoComponentBit
     for value in VkVideoComponentBitDepthFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoComponentBitDepthFlagsKHR): bool = cint(a) == cint(b)
 const
   VK_VIDEO_COMPONENT_BIT_DEPTH_INVALID_KHR* = 0
 type
@@ -3875,6 +4014,7 @@ func toEnums*(number: VkVideoCapabilityFlagsKHR): seq[VkVideoCapabilityFlagBitsK
     for value in VkVideoCapabilityFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoCapabilityFlagsKHR): bool = cint(a) == cint(b)
 type
   VkVideoSessionCreateFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_VIDEO_SESSION_CREATE_PROTECTED_CONTENT_BIT_KHR = 0b00000000000000000000000000000001
@@ -3885,6 +4025,7 @@ func toEnums*(number: VkVideoSessionCreateFlagsKHR): seq[VkVideoSessionCreateFla
     for value in VkVideoSessionCreateFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoSessionCreateFlagsKHR): bool = cint(a) == cint(b)
 type
   VkVideoDecodeH264PictureLayoutFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_VIDEO_DECODE_H264_PICTURE_LAYOUT_INTERLACED_INTERLEAVED_LINES_BIT_KHR = 0b00000000000000000000000000000001
@@ -3896,6 +4037,7 @@ func toEnums*(number: VkVideoDecodeH264PictureLayoutFlagsKHR): seq[VkVideoDecode
     for value in VkVideoDecodeH264PictureLayoutFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoDecodeH264PictureLayoutFlagsKHR): bool = cint(a) == cint(b)
 const
   VK_VIDEO_DECODE_H264_PICTURE_LAYOUT_PROGRESSIVE_KHR* = 0
 type
@@ -3910,6 +4052,7 @@ func toEnums*(number: VkVideoCodingControlFlagsKHR): seq[VkVideoCodingControlFla
     for value in VkVideoCodingControlFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoCodingControlFlagsKHR): bool = cint(a) == cint(b)
 type
   VkQueryResultStatusKHR* {.size: sizeof(cint).} = enum
     VK_QUERY_RESULT_STATUS_ERROR_KHR = -1
@@ -3926,6 +4069,7 @@ func toEnums*(number: VkVideoDecodeUsageFlagsKHR): seq[VkVideoDecodeUsageFlagBit
     for value in VkVideoDecodeUsageFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoDecodeUsageFlagsKHR): bool = cint(a) == cint(b)
 const
   VK_VIDEO_DECODE_USAGE_DEFAULT_KHR* = 0
 type
@@ -3939,6 +4083,7 @@ func toEnums*(number: VkVideoDecodeCapabilityFlagsKHR): seq[VkVideoDecodeCapabil
     for value in VkVideoDecodeCapabilityFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoDecodeCapabilityFlagsKHR): bool = cint(a) == cint(b)
 type
   VkVideoEncodeUsageFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_USAGE_TRANSCODING_BIT_KHR = 0b00000000000000000000000000000001
@@ -3952,6 +4097,7 @@ func toEnums*(number: VkVideoEncodeUsageFlagsKHR): seq[VkVideoEncodeUsageFlagBit
     for value in VkVideoEncodeUsageFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeUsageFlagsKHR): bool = cint(a) == cint(b)
 const
   VK_VIDEO_ENCODE_USAGE_DEFAULT_KHR* = 0
 type
@@ -3966,6 +4112,7 @@ func toEnums*(number: VkVideoEncodeContentFlagsKHR): seq[VkVideoEncodeContentFla
     for value in VkVideoEncodeContentFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeContentFlagsKHR): bool = cint(a) == cint(b)
 const
   VK_VIDEO_ENCODE_CONTENT_DEFAULT_KHR* = 0
 type
@@ -3984,6 +4131,7 @@ func toEnums*(number: VkVideoEncodeCapabilityFlagsKHR): seq[VkVideoEncodeCapabil
     for value in VkVideoEncodeCapabilityFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeCapabilityFlagsKHR): bool = cint(a) == cint(b)
 type
   VkVideoEncodeRateControlModeFlagBitsKHR* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_RATE_CONTROL_MODE_NONE_BIT_KHR = 0b00000000000000000000000000000001
@@ -3996,6 +4144,7 @@ func toEnums*(number: VkVideoEncodeRateControlModeFlagsKHR): seq[VkVideoEncodeRa
     for value in VkVideoEncodeRateControlModeFlagBitsKHR.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeRateControlModeFlagsKHR): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH264CapabilityFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H264_CAPABILITY_DIRECT_8X8_INFERENCE_ENABLED_BIT_EXT = 0b00000000000000000000000000000001
@@ -4030,6 +4179,7 @@ func toEnums*(number: VkVideoEncodeH264CapabilityFlagsEXT): seq[VkVideoEncodeH26
     for value in VkVideoEncodeH264CapabilityFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH264CapabilityFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH264InputModeFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H264_INPUT_MODE_FRAME_BIT_EXT = 0b00000000000000000000000000000001
@@ -4042,6 +4192,7 @@ func toEnums*(number: VkVideoEncodeH264InputModeFlagsEXT): seq[VkVideoEncodeH264
     for value in VkVideoEncodeH264InputModeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH264InputModeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH264OutputModeFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H264_OUTPUT_MODE_FRAME_BIT_EXT = 0b00000000000000000000000000000001
@@ -4054,6 +4205,7 @@ func toEnums*(number: VkVideoEncodeH264OutputModeFlagsEXT): seq[VkVideoEncodeH26
     for value in VkVideoEncodeH264OutputModeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH264OutputModeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH264RateControlStructureEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H264_RATE_CONTROL_STRUCTURE_UNKNOWN_EXT = 0
@@ -4072,6 +4224,7 @@ func toEnums*(number: VkImageConstraintsInfoFlagsFUCHSIA): seq[VkImageConstraint
     for value in VkImageConstraintsInfoFlagBitsFUCHSIA.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkImageConstraintsInfoFlagsFUCHSIA): bool = cint(a) == cint(b)
 type
   VkFormatFeatureFlagBits2* {.size: 8.} = enum
     VK_FORMAT_FEATURE_2_SAMPLED_IMAGE_BIT = 0b0000000000000000000000000000000000000000000000000000000000000001
@@ -4126,6 +4279,7 @@ func toEnums*(number: VkFormatFeatureFlags2): seq[VkFormatFeatureFlagBits2] =
     for value in VkFormatFeatureFlagBits2.items:
       if (cast[uint64](value) and uint64(number)) > 0:
         result.add value
+proc `==`*(a, b: VkFormatFeatureFlags2): bool = uint64(a) == uint64(b)
 type
   VkRenderingFlagBits* {.size: sizeof(cint).} = enum
     VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT = 0b00000000000000000000000000000001
@@ -4139,6 +4293,7 @@ func toEnums*(number: VkRenderingFlags): seq[VkRenderingFlagBits] =
     for value in VkRenderingFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkRenderingFlags): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH265CapabilityFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H265_CAPABILITY_SEPARATE_COLOUR_PLANE_BIT_EXT = 0b00000000000000000000000000000001
@@ -4174,6 +4329,7 @@ func toEnums*(number: VkVideoEncodeH265CapabilityFlagsEXT): seq[VkVideoEncodeH26
     for value in VkVideoEncodeH265CapabilityFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH265CapabilityFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH265InputModeFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H265_INPUT_MODE_FRAME_BIT_EXT = 0b00000000000000000000000000000001
@@ -4186,6 +4342,7 @@ func toEnums*(number: VkVideoEncodeH265InputModeFlagsEXT): seq[VkVideoEncodeH265
     for value in VkVideoEncodeH265InputModeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH265InputModeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH265OutputModeFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H265_OUTPUT_MODE_FRAME_BIT_EXT = 0b00000000000000000000000000000001
@@ -4198,6 +4355,7 @@ func toEnums*(number: VkVideoEncodeH265OutputModeFlagsEXT): seq[VkVideoEncodeH26
     for value in VkVideoEncodeH265OutputModeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH265OutputModeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH265RateControlStructureEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H265_RATE_CONTROL_STRUCTURE_UNKNOWN_EXT = 0
@@ -4214,6 +4372,7 @@ func toEnums*(number: VkVideoEncodeH265CtbSizeFlagsEXT): seq[VkVideoEncodeH265Ct
     for value in VkVideoEncodeH265CtbSizeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH265CtbSizeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkVideoEncodeH265TransformBlockSizeFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_VIDEO_ENCODE_H265_TRANSFORM_BLOCK_SIZE_4_BIT_EXT = 0b00000000000000000000000000000001
@@ -4227,6 +4386,7 @@ func toEnums*(number: VkVideoEncodeH265TransformBlockSizeFlagsEXT): seq[VkVideoE
     for value in VkVideoEncodeH265TransformBlockSizeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkVideoEncodeH265TransformBlockSizeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkExportMetalObjectTypeFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_EXPORT_METAL_OBJECT_TYPE_METAL_DEVICE_BIT_EXT = 0b00000000000000000000000000000001
@@ -4242,6 +4402,7 @@ func toEnums*(number: VkExportMetalObjectTypeFlagsEXT): seq[VkExportMetalObjectT
     for value in VkExportMetalObjectTypeFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkExportMetalObjectTypeFlagsEXT): bool = cint(a) == cint(b)
 type
   VkInstanceCreateFlagBits* {.size: sizeof(cint).} = enum
     VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR = 0b00000000000000000000000000000001
@@ -4252,6 +4413,7 @@ func toEnums*(number: VkInstanceCreateFlags): seq[VkInstanceCreateFlagBits] =
     for value in VkInstanceCreateFlagBits.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkInstanceCreateFlags): bool = cint(a) == cint(b)
 type
   VkImageCompressionFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_IMAGE_COMPRESSION_FIXED_RATE_DEFAULT_EXT = 0b00000000000000000000000000000001
@@ -4264,6 +4426,7 @@ func toEnums*(number: VkImageCompressionFlagsEXT): seq[VkImageCompressionFlagBit
     for value in VkImageCompressionFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkImageCompressionFlagsEXT): bool = cint(a) == cint(b)
 const
   VK_IMAGE_COMPRESSION_DEFAULT_EXT* = 0
 type
@@ -4299,6 +4462,7 @@ func toEnums*(number: VkImageCompressionFixedRateFlagsEXT): seq[VkImageCompressi
     for value in VkImageCompressionFixedRateFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkImageCompressionFixedRateFlagsEXT): bool = cint(a) == cint(b)
 const
   VK_IMAGE_COMPRESSION_FIXED_RATE_NONE_EXT* = 0
 type
@@ -4324,6 +4488,7 @@ func toEnums*(number: VkOpticalFlowGridSizeFlagsNV): seq[VkOpticalFlowGridSizeFl
     for value in VkOpticalFlowGridSizeFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkOpticalFlowGridSizeFlagsNV): bool = cint(a) == cint(b)
 const
   VK_OPTICAL_FLOW_GRID_SIZE_UNKNOWN_NV* = 0
 type
@@ -4340,6 +4505,7 @@ func toEnums*(number: VkOpticalFlowUsageFlagsNV): seq[VkOpticalFlowUsageFlagBits
     for value in VkOpticalFlowUsageFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkOpticalFlowUsageFlagsNV): bool = cint(a) == cint(b)
 const
   VK_OPTICAL_FLOW_USAGE_UNKNOWN_NV* = 0
 type
@@ -4371,6 +4537,7 @@ func toEnums*(number: VkOpticalFlowSessionCreateFlagsNV): seq[VkOpticalFlowSessi
     for value in VkOpticalFlowSessionCreateFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkOpticalFlowSessionCreateFlagsNV): bool = cint(a) == cint(b)
 type
   VkOpticalFlowExecuteFlagBitsNV* {.size: sizeof(cint).} = enum
     VK_OPTICAL_FLOW_EXECUTE_DISABLE_TEMPORAL_HINTS_BIT_NV = 0b00000000000000000000000000000001
@@ -4381,6 +4548,7 @@ func toEnums*(number: VkOpticalFlowExecuteFlagsNV): seq[VkOpticalFlowExecuteFlag
     for value in VkOpticalFlowExecuteFlagBitsNV.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkOpticalFlowExecuteFlagsNV): bool = cint(a) == cint(b)
 type
   VkMicromapTypeEXT* {.size: sizeof(cint).} = enum
     VK_MICROMAP_TYPE_OPACITY_MICROMAP_EXT = 0
@@ -4395,6 +4563,7 @@ func toEnums*(number: VkBuildMicromapFlagsEXT): seq[VkBuildMicromapFlagBitsEXT] 
     for value in VkBuildMicromapFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkBuildMicromapFlagsEXT): bool = cint(a) == cint(b)
 type
   VkMicromapCreateFlagBitsEXT* {.size: sizeof(cint).} = enum
     VK_MICROMAP_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT_EXT = 0b00000000000000000000000000000001
@@ -4405,6 +4574,7 @@ func toEnums*(number: VkMicromapCreateFlagsEXT): seq[VkMicromapCreateFlagBitsEXT
     for value in VkMicromapCreateFlagBitsEXT.items:
       if (value.ord and cint(number)) > 0:
         result.add value
+proc `==`*(a, b: VkMicromapCreateFlagsEXT): bool = cint(a) == cint(b)
 type
   VkCopyMicromapModeEXT* {.size: sizeof(cint).} = enum
     VK_COPY_MICROMAP_MODE_CLONE_EXT = 0
