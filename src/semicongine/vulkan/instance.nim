@@ -3,10 +3,7 @@ import std/strformat
 import ./api
 import ./utils
 
-when defined(linux):
-  include ../platform/linux/vulkanExtensions
-elif defined(windows):
-  include ../platform/windows/vulkanExtensions
+import ../platform/vulkanExtensions
 
 type
   Instance* = object
@@ -47,9 +44,11 @@ proc createInstance*(
   engine = "defaultEngine",
 ): Instance =
 
-  let requiredExtensions = @REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface"] & instanceExtensions
-  for i in layers: assert i in getLayers()
-  for i in requiredExtensions: assert i in getInstanceExtensions()
+  let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface"] & instanceExtensions
+  for i in layers:
+    assert i in getLayers(), $i
+  for i in requiredExtensions:
+    assert i in getInstanceExtensions(), $i
   var
     layersC = allocCStringArray(layers)
     instanceExtensionsC = allocCStringArray(requiredExtensions)

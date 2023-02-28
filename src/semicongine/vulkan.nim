@@ -15,5 +15,3 @@ export buffer
 
 import ./vulkan/memory
 export memory
-
-

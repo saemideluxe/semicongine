@@ -4,32 +4,24 @@ Semicongine
 Hi there
 
 This is a very simplistic little game engine, mainly trying to wrap around vulkan and the operating system's windowing, input and audio system.
-This is using the last programming language you will ever need, [Nim](https://nim-lang.org/)
+I am using the last programming language you will ever need, [Nim](https://nim-lang.org/)
 
 Building
 --------
 
+Requires Nim to be installed and ```glslangValidator``` to be downloaded to the
+directory of the main compilation file (e.g. into ```examples/``` in order to
+compile the examples). It can be downloaded at
+https://github.com/KhronosGroup/glslang/releases/.
+
 Run ```nim help``` to see a list of available build commands.
-
-It is required to download the glslangValidator binary into the ```examples/``` directory in order to be able to build.
-There is a nim command for this that works on linux.
-
-Compilation on Windows
-----------------------
-
-Requires a Windows SDK to be installed (e.g. via Visual Studio Build Tools).
-Also, using Nim on Windows with mingw seems to be way faster than with vcc/lc.
-For compilation with vcc/ls, install additionaly (with Visual Studio Build Tools):
-- Windows Universal C Runtime (some important files)
-- Windows CRT SDK (some important header files)
-- Some version of MSVC (the compiler)
-
-glslangValidator cannot yet be downloaded automatically on windows, check config.nim for instructions.
 
 Roadmap
 -------
 
-Still tons to do, but it feels like the worst things (except audio maybe?) are over the hill.
+Still tons to do. Making render pipeline and scenegraph somewhat compatible
+seems like it will require quite a bit more of work. Also, audio might require
+quite a bit of work, no experience there.
 
 Rendering:
 
@@ -41,7 +33,7 @@ Rendering:
 - [ ] Depth buffering
 - [ ] Mipmaps 
 - [ ] Multisampling 
-- [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per mesh)
+- [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [ ] Fullscreen mode + switch between modes
 - [x] Fixed framerate
 - [ ] Allow multipel Uniform blocks
@@ -52,7 +44,7 @@ Build-system:
 Asset handling:
 - [ ] Mesh files (Wavefront OBJ, MTL) (use something from sketchfab for testing, https://sketchfab.com/)
 - [ ] Image files (BMP RGB + BMP Graysscale for transparency)
-- [ ] Audio files (WAV)
+- [ ] Audio files (AU)
 
 Quality improvments:
 
@@ -65,8 +57,7 @@ Other:
   - [x] Win32
 - [ ] Config files ala \*.ini files (use std/parsecfg)
 - [ ] Input-mapping configuration
-- [ ] Audio (Alsa, Windows Waveform API?)
-- [ ] Game controller input handling
+- [ ] Audio playing (Alsa, Windows Waveform API?)
 
 Advanced features:
 - [ ] Text rendering
@@ -74,3 +65,4 @@ Advanced features:
 - [ ] Sprite system
 - [ ] Particle system
 - [ ] Query and display rendering information from Vulkan
+- [ ] Game controller input handling
