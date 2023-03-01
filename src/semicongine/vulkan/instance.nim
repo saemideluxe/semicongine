@@ -1,13 +1,19 @@
 import std/strformat
+import std/enumutils
+import std/sequtils
 
 import ./api
 import ./utils
 
 import ../platform/vulkanExtensions
+import ../platform/window
+import ../platform/surface
 
 type
   Instance* = object
     vk*: VkInstance
+    window*: NativeWindow
+    surface*: VkSurfaceKHR
   Debugger* = object
     instance*: Instance
     messenger*: VkDebugUtilsMessengerEXT
@@ -37,6 +43,7 @@ proc getLayers*(): seq[string] =
       result.add(cleanString(layer.layerName))
 
 proc createInstance*(
+  window: NativeWindow,
   vulkanVersion: uint32,
   instanceExtensions: seq[string],
   layers: seq[string],
@@ -72,10 +79,14 @@ proc createInstance*(
   deallocCStringArray(instanceExtensionsC)
   for extension in requiredExtensions:
     result.vk.loadExtension($extension)
+  result.surface = result.vk.createNativeSurface(window)
 
 proc destroy*(instance: var Instance) =
   assert instance.vk.valid
+  assert instance.surface.valid
   # needs to happen after window is trashed as the driver might have a hook registered for the window destruction
+  instance.vk.vkDestroySurfaceKHR(instance.surface, nil)
+  instance.surface.reset
   instance.vk.vkDestroyInstance(nil)
   instance.vk.reset()
 
@@ -96,8 +107,8 @@ proc createDebugMessenger*(
 ): Debugger =
   assert instance.vk.valid
   result.instance = instance
-  var severityLevelBits = high(VkDebugUtilsMessageSeverityFlagsEXT)
-  var typeBits = high(VkDebugUtilsMessageTypeFlagsEXT)
+  var severityLevelBits = VkDebugUtilsMessageSeverityFlagBitsEXT.items.toSeq.toBits
+  var typeBits = VkDebugUtilsMessageTypeFlagBitsEXT.items.toSeq.toBits
   if severityLevels.len > 0:
     severityLevelBits = toBits severityLevels
   if types.len > 0:

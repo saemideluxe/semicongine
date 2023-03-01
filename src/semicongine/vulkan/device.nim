@@ -5,118 +5,36 @@ import std/tables
 import ./api
 import ./utils
 import ./instance
-import ./surface
+import ./physicaldevice
 
 type
-  PhysicalDevice* = object
-    vk*: VkPhysicalDevice
   Device* = object
     physicalDevice*: PhysicalDevice
     vk*: VkDevice
     queues*: Table[QueueFamily, Queue]
-  QueueFamily* = object
-    properties*: VkQueueFamilyProperties
-    index*: uint32
-    flags*: seq[VkQueueFlagBits]
-    presentation: bool
-    # presentation is related to a specific surface, saving it here if provided during querying
-    surface: Option[Surface]
   Queue* = object
     vk*: VkQueue
-
-proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
-  assert instance.vk.valid
-  var nDevices: uint32
-  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), nil)
-  var devices = newSeq[VkPhysicalDevice](nDevices)
-  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), devices.toCPointer)
-  for i in 0 ..< nDevices:
-    result.add PhysicalDevice(vk: devices[i])
-
-proc getExtensions*(device: PhysicalDevice): seq[string] =
-  assert device.vk.valid
-  var extensionCount: uint32
-  checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), nil)
-  if extensionCount > 0:
-    var extensions = newSeq[VkExtensionProperties](extensionCount)
-    checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), extensions.toCPointer)
-    for extension in extensions:
-      result.add(cleanString(extension.extensionName))
-
-proc getSurfaceFormats*(device: PhysicalDevice, surface: Surface): seq[VkSurfaceFormatKHR] =
-  assert device.vk.valid
-  assert surface.vk.valid
-  var n_formats: uint32
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, surface.vk, addr(n_formats), nil)
-  result = newSeq[VkSurfaceFormatKHR](n_formats)
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, surface.vk, addr(n_formats), result.toCPointer)
-
-proc getSurfacePresentModes*(device: PhysicalDevice, surface: Surface): seq[VkPresentModeKHR] =
-  assert device.vk.valid
-  assert surface.vk.valid
-  var n_modes: uint32
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, surface.vk, addr(n_modes), nil)
-  result = newSeq[VkPresentModeKHR](n_modes)
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, surface.vk, addr(n_modes), result.toCPointer)
-
-proc getQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
-  assert device.vk.valid
-  var nQueuefamilies: uint32
-  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
-  var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies , queuFamilies.toCPointer)
-  for i in 0 ..< nQueuefamilies:
-    result.add QueueFamily(
-      properties: queuFamilies[i],
-      index: i,
-      flags: queuFamilies[i].queueFlags.toEnums,
-      presentation: VkBool32(false),
-    )
-
-proc getQueueFamilies*(device: PhysicalDevice, surface: Surface): seq[QueueFamily] =
-  assert device.vk.valid
-  assert surface.vk.valid
-  var nQueuefamilies: uint32
-  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
-  var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies , queuFamilies.toCPointer)
-  for i in 0 ..< nQueuefamilies:
-    var presentation = VkBool32(false)
-    checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(device.vk, i, surface.vk, addr presentation)
-    result.add QueueFamily(
-      properties: queuFamilies[i],
-      index: i,
-      flags: queuFamilies[i].queueFlags.toEnums,
-      surface: if presentation: some(surface) else: none(Surface),
-      presentation: presentation,
-    )
-
-proc filterForGraphicsPresentationQueues*(families: seq[QueueFamily]): seq[QueueFamily] =
-  var hasGraphics = false
-  var hasPresentation = false
-  var queues: Table[uint32, QueueFamily]
-  for family in families:
-    if VK_QUEUE_GRAPHICS_BIT in family.flags:
-      queues[family.index] = family
-      hasGraphics = true
-    if family.presentation:
-      queues[family.index] = family
-      hasPresentation = true
-    if hasGraphics and hasPresentation:
-      return queues.values.toSeq
+    presentation: bool
+    graphics: bool
 
 proc createDevice*(
+  instance: Instance,
   physicalDevice: PhysicalDevice,
-  enabledLayers: openArray[string],
-  enabledExtensions: openArray[string],
-  queueFamilies: openArray[QueueFamily],
+  enabledLayers: seq[string],
+  enabledExtensions: seq[string],
+  queueFamilies: seq[QueueFamily],
 ): Device =
+  assert instance.vk.valid
   assert physicalDevice.vk.valid
   assert queueFamilies.len > 0
+
   result.physicalDevice = physicalDevice
+  var allExtensions = enabledExtensions & @["VK_KHR_swapchain"]
+  for extension in allExtensions:
+    instance.vk.loadExtension(extension)
   var
     enabledLayersC = allocCStringArray(enabledLayers)
-    enabledExtensionsC = allocCStringArray(enabledExtensions)
+    enabledExtensionsC = allocCStringArray(allExtensions)
     priority = 1'f32
   var deviceQueues: Table[QueueFamily, VkDeviceQueueCreateInfo]
   for family in queueFamilies:
@@ -134,7 +52,7 @@ proc createDevice*(
     pQueueCreateInfos: queueList.toCPointer,
     enabledLayerCount: uint32(enabledLayers.len),
     ppEnabledLayerNames: enabledLayersC,
-    enabledExtensionCount: uint32(enabledExtensions.len),
+    enabledExtensionCount: uint32(allExtensions.len),
     ppEnabledExtensionNames: enabledExtensionsC,
     pEnabledFeatures: nil,
   )
@@ -147,19 +65,21 @@ proc createDevice*(
   )
   deallocCStringArray(enabledLayersC)
   deallocCStringArray(enabledExtensionsC)
-  for queueFamily in deviceQueues.keys:
+  for family in deviceQueues.keys:
     var queue: VkQueue
-    vkGetDeviceQueue(result.vk, queueFamily.index, 0, addr queue)
-    result.queues[queueFamily] = Queue(vk: queue)
+    vkGetDeviceQueue(result.vk, family.index, 0, addr queue)
+    result.queues[family] = Queue(vk: queue, presentation: family.hasPresentation(physicalDevice.surface), graphics: family.hasGraphics())
 
 func firstGraphicsQueue*(device: Device): Option[Queue] =
+  assert device.vk.valid
   for family, queue in device.queues:
-    if VK_QUEUE_GRAPHICS_BIT in family.flags:
+    if queue.graphics:
       return some(queue)
 
-func firstPresentationQueue*(device: Device): Option[Queue] =
+proc firstPresentationQueue*(device: Device): Option[Queue] =
+  assert device.vk.valid
   for family, queue in device.queues:
-    if family.presentation:
+    if queue.presentation:
       return some(queue)
 
 proc destroy*(device: var Device) =

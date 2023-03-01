@@ -4,11 +4,14 @@ export api
 import ./vulkan/instance
 export instance
 
-import ./vulkan/surface
-export surface
+import ./vulkan/physicaldevice
+export physicaldevice
 
 import ./vulkan/device
 export device
+
+import ./vulkan/swapchain
+export swapchain
 
 import ./vulkan/buffer
 export buffer
