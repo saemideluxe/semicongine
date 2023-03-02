@@ -27,7 +27,8 @@ proc createBuffer(device: Device, size: uint64, flags: openArray[VkBufferCreateF
     pBuffer=addr result.vk
   )
 
-proc destroy(buffer: Buffer) =
+proc destroy(buffer: var Buffer) =
   assert buffer.device.vk.valid
   assert buffer.vk.valid
   buffer.device.vk.vkDestroyBuffer(buffer.vk, nil)
+  buffer.vk.reset()

@@ -1,13 +1,16 @@
-import std/options
-
 import ./api
+import ./utils
 import ./device
 import ./physicaldevice
+import ./image
 
 type
   Swapchain = object
     vk*: VkSwapchainKHR
     device*: Device
+    images*: seq[Image]
+    imageviews*: seq[ImageView]
+    format: VkFormat
 
 
 proc createSwapchain*(device: Device, surfaceFormat: VkSurfaceFormatKHR, nBuffers=3'u32, presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR): (Swapchain, VkResult) =
@@ -41,11 +44,31 @@ proc createSwapchain*(device: Device, surfaceFormat: VkSurfaceFormatKHR, nBuffer
     clipped: true,
   )
   var
-    swapchain = Swapchain(device: device)
+    swapchain = Swapchain(device: device, format: surfaceFormat.format)
     createResult = device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk))
+
+  if createResult == VK_SUCCESS:
+    var nImages: uint32
+    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), nil)
+    var images = newSeq[VkImage](nImages)
+    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), images.toCPointer)
+    for vkimage in images:
+      let image = Image(vk: vkimage, format: surfaceFormat.format, device: device)
+      swapChain.images.add image
+      swapChain.imageviews.add image.createImageView()
 
   return (swapchain, createResult)
 
+proc getImages*(device: VkDevice, swapChain: VkSwapchainKHR): seq[VkImage] =
+  var n_images: uint32
+  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), nil)
+  result = newSeq[VkImage](n_images)
+  checkVkResult vkGetSwapchainImagesKHR(device, swapChain, addr(n_images), addr(
+      result[0]))
+
 proc destroy*(swapchain: var Swapchain) =
   assert swapchain.vk.valid
+  for imageview in swapchain.imageviews.mitems:
+    imageview.destroy()
   swapchain.device.vk.vkDestroySwapchainKHR(swapchain.vk, nil)
+  swapchain.vk.reset()

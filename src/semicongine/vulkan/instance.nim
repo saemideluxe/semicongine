@@ -1,5 +1,4 @@
 import std/strformat
-import std/enumutils
 import std/sequtils
 
 import ./api
@@ -86,7 +85,7 @@ proc destroy*(instance: var Instance) =
   assert instance.surface.valid
   # needs to happen after window is trashed as the driver might have a hook registered for the window destruction
   instance.vk.vkDestroySurfaceKHR(instance.surface, nil)
-  instance.surface.reset
+  instance.surface.reset()
   instance.vk.vkDestroyInstance(nil)
   instance.vk.reset()
 
