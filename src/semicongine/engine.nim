@@ -252,8 +252,7 @@ proc setupSwapChain(device: VkDevice, physicalDevice: PhysicalDevice, surface: V
         layerCount: 1,
       ),
     )
-    checkVkResult device.vkCreateImageView(addr(imageViewCreateInfo), nil, addr(
-        result.imageviews[i]))
+    checkVkResult device.vkCreateImageView(addr(imageViewCreateInfo), nil, addr(result.imageviews[i]))
 
 proc setupRenderPass(device: VkDevice, format: VkFormat): VkRenderPass =
   var

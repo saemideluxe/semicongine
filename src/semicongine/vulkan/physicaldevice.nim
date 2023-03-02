@@ -1,5 +1,4 @@
-import std/enumerate
-import std/options
+from std/enumerate import enumerate
 import std/tables
 import std/sequtils
 

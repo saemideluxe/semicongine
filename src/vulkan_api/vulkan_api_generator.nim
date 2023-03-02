@@ -454,7 +454,7 @@ proc main() =
 macro enumFullRange(a: typed): untyped =
   newNimNode(nnkBracket).add(a.getType[1][1..^1])
 
-iterator items[T: HoleyEnum](E: typedesc[T]): T =
+iterator items*[T: HoleyEnum](E: typedesc[T]): T =
   for a in enumFullRange(E): yield a""",
     ],
     "structs": @["type"],

@@ -35,7 +35,7 @@ template checkVkResult*(call: untyped) =
 macro enumFullRange(a: typed): untyped =
   newNimNode(nnkBracket).add(a.getType[1][1..^1])
 
-iterator items[T: HoleyEnum](E: typedesc[T]): T =
+iterator items*[T: HoleyEnum](E: typedesc[T]): T =
   for a in enumFullRange(E): yield a
 const
   VK_MAX_PHYSICAL_DEVICE_NAME_SIZE*: uint32 = 256
