@@ -278,11 +278,9 @@ proc setupRenderPass(device: VkDevice, format: VkFormat): VkRenderPass =
     dependency = VkSubpassDependency(
       srcSubpass: VK_SUBPASS_EXTERNAL,
       dstSubpass: 0,
-      srcStageMask: VkPipelineStageFlags(
-          VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT),
+      srcStageMask: VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT),
       srcAccessMask: VkAccessFlags(0),
-      dstStageMask: VkPipelineStageFlags(
-          VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT),
+      dstStageMask: VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT),
       dstAccessMask: VkAccessFlags(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT),
     )
     renderPassCreateInfo = VkRenderPassCreateInfo(

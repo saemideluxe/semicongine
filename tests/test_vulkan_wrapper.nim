@@ -2,6 +2,7 @@ import std/options
 
 import semicongine/vulkan
 import semicongine/platform/window
+import semicongine/math
 
 
 when isMainModule:
@@ -53,15 +54,26 @@ when isMainModule:
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
-  echo "Created device ", device.physicalDevice.name
+  # setup render pipeline
   var (swapchain, res) = device.createSwapchain(device.physicalDevice.getSurfaceFormats().filterSurfaceFormat())
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
+  var renderpass = device.simpleForwardRenderPass(swapchain.format)
+  var framebuffers: seq[Framebuffer]
+  for imageview in swapchain.imageviews:
+    framebuffers.add device.createFramebuffer(renderpass, [imageview], swapchain.dimension)
+
+  # todo: could be create inside "device", but it would be nice to have nim v2 with support for circular dependencies first
+  var commandPool = device.createCommandPool(family=device.firstGraphicsQueue().get().family, nBuffers=1)
 
   echo "All successfull"
   echo "Start cleanup"
 
+  commandPool.destroy()
   # cleanup
+  for fb in framebuffers.mitems:
+    fb.destroy()
+  renderpass.destroy()
   swapchain.destroy()
   device.destroy()
 

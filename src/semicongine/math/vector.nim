@@ -5,8 +5,7 @@ import std/macros
 import std/typetraits
 import std/tables
 
-export math
-
+import ../vulkan/api
 
 type
   TVec2*[T: SomeNumber] = array[2, T]
@@ -271,3 +270,6 @@ template makeRandomInit(mattype: typedesc) =
 makeRandomInit(TVec2)
 makeRandomInit(TVec3)
 makeRandomInit(TVec4)
+
+converter Vec2VkExtent*(vec: TVec2[uint32]): VkExtent2D = VkExtent2D(width: vec[0], height: vec[1])
+converter Vec3VkExtent*(vec: TVec2[uint32]): VkExtent3D = VkExtent3D(width: vec[0], height: vec[1], depth: vec[2])
