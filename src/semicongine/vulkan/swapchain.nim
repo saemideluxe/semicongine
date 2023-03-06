@@ -3,17 +3,23 @@ import ./utils
 import ./device
 import ./physicaldevice
 import ./image
+import ../math
 
 type
   Swapchain = object
     vk*: VkSwapchainKHR
     device*: Device
-    images*: seq[Image]
     imageviews*: seq[ImageView]
-    format: VkFormat
+    format*: VkFormat
+    dimension*: TVec2[uint32]
 
 
-proc createSwapchain*(device: Device, surfaceFormat: VkSurfaceFormatKHR, nBuffers=3'u32, presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR): (Swapchain, VkResult) =
+proc createSwapchain*(
+  device: Device,
+  surfaceFormat: VkSurfaceFormatKHR,
+  nBuffers=3'u32,
+  presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR
+): (Swapchain, VkResult) =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
   var capabilities = device.physicalDevice.getSurfaceCapabilities()
@@ -44,7 +50,10 @@ proc createSwapchain*(device: Device, surfaceFormat: VkSurfaceFormatKHR, nBuffer
     clipped: true,
   )
   var
-    swapchain = Swapchain(device: device, format: surfaceFormat.format)
+    swapchain = Swapchain(
+      device: device,
+      format: surfaceFormat.format,
+      dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]))
     createResult = device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk))
 
   if createResult == VK_SUCCESS:
@@ -54,7 +63,6 @@ proc createSwapchain*(device: Device, surfaceFormat: VkSurfaceFormatKHR, nBuffer
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), images.toCPointer)
     for vkimage in images:
       let image = Image(vk: vkimage, format: surfaceFormat.format, device: device)
-      swapChain.images.add image
       swapChain.imageviews.add image.createImageView()
 
   return (swapchain, createResult)

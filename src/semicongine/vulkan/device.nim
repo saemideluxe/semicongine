@@ -14,6 +14,7 @@ type
     queues*: Table[QueueFamily, Queue]
   Queue* = object
     vk*: VkQueue
+    family*: QueueFamily
     presentation: bool
     graphics: bool
 
@@ -68,7 +69,7 @@ proc createDevice*(
   for family in deviceQueues.keys:
     var queue: VkQueue
     vkGetDeviceQueue(result.vk, family.index, 0, addr queue)
-    result.queues[family] = Queue(vk: queue, presentation: family.hasPresentation(physicalDevice.surface), graphics: family.hasGraphics())
+    result.queues[family] = Queue(vk: queue, family: family, presentation: family.hasPresentation(physicalDevice.surface), graphics: family.hasGraphics())
 
 func firstGraphicsQueue*(device: Device): Option[Queue] =
   assert device.vk.valid

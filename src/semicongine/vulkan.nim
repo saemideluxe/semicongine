@@ -13,6 +13,18 @@ export device
 import ./vulkan/swapchain
 export swapchain
 
+import ./vulkan/renderpass
+export renderpass
+
+import ./vulkan/framebuffer
+export framebuffer
+
+import ./vulkan/commandbuffer
+export commandbuffer
+
+import ./vulkan/syncing
+export syncing
+
 import ./vulkan/buffer
 export buffer
 
