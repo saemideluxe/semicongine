@@ -41,9 +41,7 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
   else: ""
 
-proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
-    shaderSource: static string, entrypoint: string): seq[
-    uint32] {.compileTime.} =
+proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: static string, entrypoint: string): seq[uint32] {.compileTime.} =
   when defined(nimcheck): # will not run if nimcheck is running
     return result
   const
@@ -79,9 +77,7 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits,
     )
     i += 4
 
-proc initShaderProgram*[VertexType, Uniforms](device: VkDevice,
-    programType: static VkShaderStageFlagBits, shader: static string,
-    entryPoint: static string = "main"): ShaderProgram[VertexType, Uniforms] =
+proc initShaderProgram*[VertexType, Uniforms](device: VkDevice, programType: static VkShaderStageFlagBits, shader: static string, entryPoint: static string = "main"): ShaderProgram[VertexType, Uniforms] =
   result.entryPoint = entryPoint
   result.programType = programType
 

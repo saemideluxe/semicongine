@@ -15,7 +15,7 @@ type
     preserves: seq[uint32]
   RenderPass* = object
     vk*: VkRenderPass
-    device: Device
+    device*: Device
 
 proc createRenderPass*(
   device: Device,

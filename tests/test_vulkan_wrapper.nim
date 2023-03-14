@@ -4,6 +4,10 @@ import semicongine/vulkan
 import semicongine/platform/window
 import semicongine/math
 
+type
+  Vertex = object
+    pos: Vec3
+
 
 when isMainModule:
   # print basic driver infos
@@ -64,13 +68,27 @@ when isMainModule:
     framebuffers.add device.createFramebuffer(renderpass, [imageview], swapchain.dimension)
 
   # todo: could be create inside "device", but it would be nice to have nim v2 with support for circular dependencies first
-  var commandPool = device.createCommandPool(family=device.firstGraphicsQueue().get().family, nBuffers=1)
+  var
+    commandPool = device.createCommandPool(family=device.firstGraphicsQueue().get().family, nBuffers=1)
+    imageAvailable = device.createSemaphore()
+    renderFinished = device.createSemaphore()
+    inflight = device.createFence()
+
+  var vertexshader = device.createVertexShader("#version 450\nvoid main() {}", Vertex())
+  var fragmentshader = device.createFragmentShader("#version 450\nvoid main() {}")
+  var pipeline = renderpass.createPipeline(vertexshader, fragmentshader)
 
   echo "All successfull"
   echo "Start cleanup"
 
-  commandPool.destroy()
   # cleanup
+  pipeline.destroy()
+  vertexshader.destroy()
+  fragmentshader.destroy()
+  inflight.destroy()
+  imageAvailable.destroy()
+  renderFinished.destroy()
+  commandPool.destroy()
   for fb in framebuffers.mitems:
     fb.destroy()
   renderpass.destroy()

@@ -142,8 +142,7 @@ func generateGLSLVertexDeclarations*[T](): string =
   return stmtList.join("\n")
 
 
-func generateInputVertexBinding*[T](bindingoffset: int = 0,
-    locationoffset: int = 0): seq[VkVertexInputBindingDescription] =
+func generateInputVertexBinding*[T](bindingoffset: int = 0, locationoffset: int = 0): seq[VkVertexInputBindingDescription] =
   # packed attribute data, not interleaved (aks "struct of arrays")
   var binding = bindingoffset
   for name, value in T().fieldPairs:
@@ -163,8 +162,7 @@ func generateInputVertexBinding*[T](bindingoffset: int = 0,
     binding += 1
 
 
-func generateInputAttributeBinding*[T](bindingoffset: int = 0,
-    locationoffset: int = 0): seq[VkVertexInputAttributeDescription] =
+func generateInputAttributeBinding*[T](bindingoffset: int = 0, locationoffset: int = 0): seq[VkVertexInputAttributeDescription] =
   # TODO:
   var location = 0
   var binding = bindingoffset
@@ -175,12 +173,9 @@ func generateInputAttributeBinding*[T](bindingoffset: int = 0,
           VkVertexInputAttributeDescription(
             binding: uint32(binding),
             location: uint32(location),
-            format: getVkFormat[compositeAttributeType(getAttributeType(
-                value))](),
-            offset: uint32(i * sizeof(compositeAttributeType(getAttributeType(
-                value)))),
+            format: getVkFormat[compositeAttributeType(getAttributeType(value))](),
+            offset: uint32(i * sizeof(compositeAttributeType(getAttributeType(value)))),
           )
         )
-        location += nLocationSlots[compositeAttributeType(getAttributeType(
-            value))]()
+        location += nLocationSlots[compositeAttributeType(getAttributeType(value))]()
       binding += 1
