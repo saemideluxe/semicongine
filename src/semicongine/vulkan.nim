@@ -25,6 +25,15 @@ export commandbuffer
 import ./vulkan/syncing
 export syncing
 
+import ./vulkan/shader
+export shader
+
+import ./vulkan/vertex
+export vertex
+
+import ./vulkan/pipeline
+export pipeline
+
 import ./vulkan/buffer
 export buffer
 

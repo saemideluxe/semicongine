@@ -294,15 +294,11 @@ proc setupRenderPass(device: VkDevice, format: VkFormat): VkRenderPass =
     )
   checkVkResult device.vkCreateRenderPass(addr(renderPassCreateInfo), nil, addr(result))
 
-proc initRenderPipeline[VertexType, Uniforms](device: VkDevice,
-    frameSize: TVec2[uint32], renderPass: VkRenderPass, vertexShader,
-    fragmentShader: static string): RenderPipeline[VertexType, Uniforms] =
+proc initRenderPipeline[VertexType, Uniforms](device: VkDevice, frameSize: TVec2[uint32], renderPass: VkRenderPass, vertexShader, fragmentShader: static string): RenderPipeline[VertexType, Uniforms] =
   # load shaders
   result.device = device
-  result.shaders.add(initShaderProgram[VertexType, Uniforms](device,
-      VK_SHADER_STAGE_VERTEX_BIT, vertexShader))
-  result.shaders.add(initShaderProgram[VertexType, Uniforms](device,
-      VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader))
+  result.shaders.add(initShaderProgram[VertexType, Uniforms](device, VK_SHADER_STAGE_VERTEX_BIT, vertexShader))
+  result.shaders.add(initShaderProgram[VertexType, Uniforms](device, VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader))
 
   var
     # define which parts can be dynamic (pipeline is fixed after setup)
@@ -395,8 +391,7 @@ proc initRenderPipeline[VertexType, Uniforms](device: VkDevice,
       pushConstantRangeCount: 0,
       pPushConstantRanges: nil,
     )
-  checkVkResult vkCreatePipelineLayout(device, addr(pipelineLayoutInfo), nil,
-      addr(result.layout))
+  checkVkResult vkCreatePipelineLayout(device, addr(pipelineLayoutInfo), nil, addr(result.layout))
 
   var stages: seq[VkPipelineShaderStageCreateInfo]
   for shader in result.shaders:
@@ -559,9 +554,7 @@ proc igniteEngine*(windowTitle: string): Engine =
   ) = result.vulkan.device.device.setupSyncPrimitives()
 
 
-proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](
-  engine: var Engine, scenedata: Thing, vertexShader,
-    fragmentShader: static string): RenderPipeline[VertexType, UniformType] =
+proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: var Engine, scenedata: Thing, vertexShader, fragmentShader: static string): RenderPipeline[VertexType, UniformType] =
   engine.currentscenedata = scenedata
   result = initRenderPipeline[VertexType, UniformType](
     engine.vulkan.device.device,
@@ -670,8 +663,7 @@ proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer,
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
       pipeline.layout, 0, 1, addr(pipeline.descriptors[currentFrame]), 0, nil)
 
-  for (vertexBufferSet, indexed, indexBuffer, count, indexType) in
-    pipeline.vertexBuffers:
+  for (vertexBufferSet, indexed, indexBuffer, count, indexType) in pipeline.vertexBuffers:
     var
       vertexBuffers: seq[VkBuffer]
       offsets: seq[VkDeviceSize]
@@ -679,9 +671,7 @@ proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer,
       vertexBuffers.add buffer.vkBuffer
       offsets.add VkDeviceSize(0)
 
-    vkCmdBindVertexBuffers(commandBuffer, firstBinding = 0'u32,
-        bindingCount = uint32(vertexBuffers.len), pBuffers = addr(vertexBuffers[
-            0]), pOffsets = addr(offsets[0]))
+    vkCmdBindVertexBuffers(commandBuffer, firstBinding = 0'u32, bindingCount = uint32(vertexBuffers.len), pBuffers = addr(vertexBuffers[ 0]), pOffsets = addr(offsets[0]))
     if indexed:
       vkCmdBindIndexBuffer(commandBuffer, indexBuffer.vkBuffer, VkDeviceSize(0), indexType)
       vkCmdDrawIndexed(commandBuffer, count, 1, 0, 0, 0)
@@ -731,10 +721,8 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline,
     vkCmdEndRenderPass(commandBuffer)
   checkVkResult vkEndCommandBuffer(commandBuffer)
 
-proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int,
-    resized: bool, pipeline: var RenderPipeline) =
-  checkVkResult vkWaitForFences(vulkan.device.device, 1, addr(
-      vulkan.inFlightFences[currentFrame]), VK_TRUE, high(uint64))
+proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resized: bool, pipeline: var RenderPipeline) =
+  checkVkResult vkWaitForFences(vulkan.device.device, 1, addr(vulkan.inFlightFences[currentFrame]), VK_TRUE, high(uint64))
   var bufferImageIndex: uint32
   let nextImageResult = vkAcquireNextImageKHR(
     vulkan.device.device,
@@ -751,8 +739,7 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int,
   elif not (nextImageResult in [VK_SUCCESS, VK_SUBOPTIMAL_KHR]):
     raise newException(Exception, "Vulkan error: vkAcquireNextImageKHR returned " &
         $nextImageResult)
-  checkVkResult vkResetFences(vulkan.device.device, 1, addr(
-      vulkan.inFlightFences[currentFrame]))
+  checkVkResult vkResetFences(vulkan.device.device, 1, addr(vulkan.inFlightFences[currentFrame]))
 
   checkVkResult vkResetCommandBuffer(vulkan.device.commandBuffers[currentFrame],
       VkCommandBufferResetFlags(0))
@@ -772,8 +759,7 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int,
       signalSemaphoreCount: 1,
       pSignalSemaphores: addr(signalSemaphores[0]),
     )
-  checkVkResult vkQueueSubmit(vulkan.device.graphicsQueue, 1, addr(submitInfo),
-      vulkan.inFlightFences[currentFrame])
+  checkVkResult vkQueueSubmit(vulkan.device.graphicsQueue, 1, addr(submitInfo), vulkan.inFlightFences[currentFrame])
 
   var presentInfo = VkPresentInfoKHR(
     sType: VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
