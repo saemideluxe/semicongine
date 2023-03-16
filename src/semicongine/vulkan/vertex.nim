@@ -80,14 +80,15 @@ func getVkFormat[T](value: T): VkFormat =
   elif T is TVec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
   else: {.error: "Unsupported vertex attribute type".}
 
-proc getVertexBindings*(shader: VertexShader): VkPipelineVertexInputStateCreateInfo =
+proc getVertexInputInfo*(
+  shader: Shader,
+  bindings: var seq[VkVertexInputBindingDescription],
+  attributes: var seq[VkVertexInputAttributeDescription],
+): VkPipelineVertexInputStateCreateInfo =
   var location = 0'u32
   var binding = 0'u32
-  var offset = 0'u32
-  var bindings: seq[VkVertexInputBindingDescription]
-  var attributes: seq[VkVertexInputAttributeDescription]
 
-  for name, value in shader.vertexType.fieldPairs:
+  for name, value in shader.inputs.fieldPairs:
     bindings.add VkVertexInputBindingDescription(
       binding: binding,
       stride: uint32(sizeof(value)),
