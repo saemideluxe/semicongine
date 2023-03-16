@@ -36,7 +36,6 @@ Rendering:
 - [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [ ] Fullscreen mode + switch between modes
 - [x] Fixed framerate
-- [ ] Allow multipel Uniform blocks
 
 Build-system:
 - [x] move all of Makefile to config.nims
@@ -58,8 +57,10 @@ Other:
 - [ ] Config files ala \*.ini files (use std/parsecfg)
 - [ ] Input-mapping configuration
 - [ ] Audio playing (Alsa, Windows Waveform API?)
+- [ ] Telemetry
 
 Advanced features:
+- [ ] Allow multipel Uniform blocks?
 - [ ] Text rendering
 - [ ] Animation system
 - [ ] Sprite system
