@@ -1,19 +1,87 @@
+import std/macros
 import std/os
+import std/enumerate
+import std/logging
 import std/hashes
 import std/strformat
+import std/strutils
 import std/compilesettings
 
 import ./api
 import ./device
 
+let logger = newConsoleLogger()
+addHandler(logger)
+
 type
-  VertexShader*[VertexType] = object
+  Shader*[InputAttributes, Uniforms] = object
     device: Device
-    vertexType*: VertexType
-    module*: VkShaderModule
-  FragmentShader* = object
-    device: Device
-    module*: VkShaderModule
+    vk*: VkShaderModule
+    entrypoint*: string
+    inputs*: InputAttributes
+    uniforms*: Uniforms
+    binary*: seq[uint32]
+
+# produce ast for: static shader string, inputs, uniforms, entrypoint
+
+dumpAstGen:
+  block:
+    const test = 1
+
+macro shader*(inputattributes: typed, uniforms: typed, device: Device, body: untyped): untyped =
+  var shadertype: NimNode
+  var entrypoint: NimNode
+  var version: NimNode
+  var code: NimNode
+  for node in body:
+    if node.kind == nnkCall and node[0].kind == nnkIdent and node[0].strVal == "shadertype":
+      expectKind(node[1], nnkStmtList)
+      expectKind(node[1][0], nnkIdent)
+      shadertype = node[1][0]
+    if node.kind == nnkCall and node[0].kind == nnkIdent and node[0].strVal == "entrypoint":
+      expectKind(node[1], nnkStmtList)
+      expectKind(node[1][0], nnkStrLit)
+      entrypoint = node[1][0]
+    if node.kind == nnkCall and node[0].kind == nnkIdent and node[0].strVal == "version":
+      expectKind(node[1], nnkStmtList)
+      expectKind(node[1][0], nnkIntLit)
+      version = node[1][0]
+    if node.kind == nnkCall and node[0].kind == nnkIdent and node[0].strVal == "code":
+      expectKind(node[1], nnkStmtList)
+      expectKind(node[1][0], {nnkStrLit, nnkTripleStrLit})
+      code = node[1][0]
+  var shadercode: seq[string]
+  shadercode.add &"#version {version.intVal}"
+  shadercode.add &"""void {entrypoint.strVal}(){{
+{code}
+}}"""
+  
+  return nnkBlockStmt.newTree(
+    newEmptyNode(),
+    nnkStmtList.newTree(
+        nnkConstSection.newTree(
+          nnkConstDef.newTree(
+            newIdentNode("shaderbinary"),
+            newEmptyNode(),
+            newCall("compileGLSLToSPIRV", shadertype, newStrLitNode(shadercode.join("\n")), entrypoint)
+          )
+        ),
+        nnkObjConstr.newTree(
+          nnkBracketExpr.newTree(
+            newIdentNode("Shader"),
+            inputattributes,
+            uniforms,
+          ),
+          nnkExprColonExpr.newTree(newIdentNode("device"), device),
+          nnkExprColonExpr.newTree(newIdentNode("entrypoint"), entrypoint),
+          nnkExprColonExpr.newTree(newIdentNode("binary"), newIdentNode("shaderbinary")),
+
+          # vk*: VkShaderModule
+          # inputs*: InputAttributes
+          # uniforms*: Uniforms
+        )
+      )
+    )
 
 proc staticExecChecked(command: string, input = ""): string {.compileTime.} =
   let (output, exitcode) = gorgeEx(
@@ -33,7 +101,7 @@ func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
   of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
   else: ""
 
-proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: static string, entrypoint: string): seq[uint32] {.compileTime.} =
+proc compileGLSLToSPIRV*(stage: static VkShaderStageFlagBits, shaderSource: static string, entrypoint: static string): seq[uint32] {.compileTime.} =
   when defined(nimcheck): # will not run if nimcheck is running
     return result
   const
@@ -42,6 +110,10 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
     # cross compilation for windows workaround, sorry computer
     shaderfile = getTempDir() / &"shader_{shaderHash}.{stagename}"
     projectPath = querySetting(projectPath)
+
+  echo "shader of type ", stage
+  for i, line in enumerate(shaderSource.splitlines()):
+    echo "  ", i + 1, " ", line
 
   discard staticExecChecked(
       command = &"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}",
@@ -52,12 +124,6 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
     let shaderbinary = staticRead shaderfile.replace("\\", "/")
   else:
     let shaderbinary = staticRead shaderfile
-  when defined(linux):
-    discard staticExecChecked(command = fmt"rm {shaderfile}")
-  elif defined(windows):
-    discard staticExecChecked(command = fmt"cmd.exe /c del {shaderfile}")
-  else:
-    raise newException(Exception, "Unsupported operating system")
 
   var i = 0
   while i < shaderbinary.len:
@@ -69,46 +135,24 @@ proc compileGLSLToSPIRV(stage: static VkShaderStageFlagBits, shaderSource: stati
     )
     i += 4
 
-proc createVertexShader*[VertexType](device: Device, shader: static string, vertexType: VertexType, entryPoint: static string = "main"): VertexShader[VertexType] =
-  assert device.vk.valid
-
-  const constcode = compileGLSLToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, shader, entryPoint)
-  var code = constcode
+proc loadShaderCode*(device: Device, binary: var seq[uint32]): VkShaderModule =
   var createInfo = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-    codeSize: uint(code.len * sizeof(uint32)),
-    pCode: if code.len > 0: addr(code[0]) else: nil,
+    codeSize: uint(binary.len * sizeof(uint32)),
+    pCode: if binary.len > 0: addr(binary[0]) else: nil,
   )
-  checkVkResult vkCreateShaderModule(device.vk, addr(createInfo), nil, addr(result.module))
+  checkVkResult vkCreateShaderModule(device.vk, addr(createInfo), nil, addr(result))
 
-proc createFragmentShader*(device: Device, shader: static string, entryPoint: static string = "main"): FragmentShader =
-  assert device.vk.valid
-
-  const constcode = compileGLSLToSPIRV(VK_SHADER_STAGE_FRAGMENT_BIT, shader, entryPoint)
-  var code = constcode
-  var createInfo = VkShaderModuleCreateInfo(
-    sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-    codeSize: uint(code.len * sizeof(uint32)),
-    pCode: if code.len > 0: addr(code[0]) else: nil,
-  )
-  checkVkResult vkCreateShaderModule(device.vk, addr(createInfo), nil, addr(result.module))
-
-proc getPipelineInfo*(shader: VertexShader|FragmentShader, entryPoint = "main"): VkPipelineShaderStageCreateInfo =
+proc getPipelineInfo*(shader: Shader): VkPipelineShaderStageCreateInfo =
   VkPipelineShaderStageCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
     stage: VK_SHADER_STAGE_VERTEX_BIT,
-    module: shader.module,
-    pName: cstring(entryPoint),
+    module: shader.vk,
+    pName: cstring(shader.entrypoint),
   )
 
-proc destroy*(shader: var VertexShader) =
+proc destroy*(shader: var Shader) =
   assert shader.device.vk.valid
-  assert shader.module.valid
-  shader.device.vk.vkDestroyShaderModule(shader.module, nil)
-  shader.module.reset
-
-proc destroy*(shader: var FragmentShader) =
-  assert shader.device.vk.valid
-  assert shader.module.valid
-  shader.device.vk.vkDestroyShaderModule(shader.module, nil)
-  shader.module.reset
+  assert shader.vk.valid
+  shader.device.vk.vkDestroyShaderModule(shader.vk, nil)
+  shader.vk.reset

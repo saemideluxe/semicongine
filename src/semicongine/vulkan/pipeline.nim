@@ -9,9 +9,11 @@ type
   Pipeline = object
     device: Device
     vk*: VkPipeline
+    layout: VkPipelineLayout
+    descriptorLayout: VkDescriptorSetLayout
 
 
-proc createPipeline*(renderPass: RenderPass, vertexShader: VertexShader, fragmentShader: FragmentShader): Pipeline =
+proc createPipeline*(renderPass: RenderPass, vertexShader: Shader, fragmentShader: Shader): Pipeline =
   assert renderPass.vk.valid
   assert renderPass.device.vk.valid
   result.device = renderPass.device
@@ -33,33 +35,32 @@ proc createPipeline*(renderPass: RenderPass, vertexShader: VertexShader, fragmen
     bindingCount: uint32(descriptorLayoutBinding.len),
     pBindings: descriptorLayoutBinding.toCPointer
   )
-  var descriptorLayout: VkDescriptorSetLayout
   checkVkResult vkCreateDescriptorSetLayout(
     renderPass.device.vk,
     addr(layoutCreateInfo),
     nil,
-    addr(descriptorLayout),
+    addr(result.descriptorLayout),
   )
-  var pushConstant = VkPushConstantRange(
-    stageFlags: toBits shaderStage,
-    offset: 0,
-    size: 0,
-  )
-
-  var descriptorSets: seq[VkDescriptorSetLayout] = @[descriptorLayout]
-  var pushConstants: seq[VkPushConstantRange] = @[pushConstant]
+  # var pushConstant = VkPushConstantRange(
+    # stageFlags: toBits shaderStage,
+    # offset: 0,
+    # size: 0,
+  # )
+  var descriptorSets: seq[VkDescriptorSetLayout] = @[result.descriptorLayout]
+  # var pushConstants: seq[VkPushConstantRange] = @[pushConstant]
   var pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
       setLayoutCount: uint32(descriptorSets.len),
       pSetLayouts: descriptorSets.toCPointer,
-      pushConstantRangeCount: uint32(pushConstants.len),
-      pPushConstantRanges: pushConstants.toCPointer,
+      # pushConstantRangeCount: uint32(pushConstants.len),
+      # pPushConstantRanges: pushConstants.toCPointer,
     )
-  var pipelineLayout: VkPipelineLayout
-  checkVkResult vkCreatePipelineLayout(renderPass.device.vk, addr(pipelineLayoutInfo), nil, addr(pipelineLayout))
+  checkVkResult vkCreatePipelineLayout(renderPass.device.vk, addr(pipelineLayoutInfo), nil, addr(result.layout))
 
   var
-    vertexInputInfo = vertexShader.getVertexBindings()
+    bindings: seq[VkVertexInputBindingDescription]
+    attributes: seq[VkVertexInputAttributeDescription]
+    vertexInputInfo = vertexShader.getVertexInputInfo(bindings, attributes)
     inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
       topology: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -116,25 +117,25 @@ proc createPipeline*(renderPass: RenderPass, vertexShader: VertexShader, fragmen
       dynamicStateCount: uint32(dynamicStates.len),
       pDynamicStates: dynamicStates.toCPointer,
     )
-  var stages = @[vertexShader.getPipelineInfo(), fragmentShader.getPipelineInfo()]
-  var createInfo = VkGraphicsPipelineCreateInfo(
-    sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-    stageCount: uint32(stages.len),
-    pStages: stages.toCPointer,
-    pVertexInputState: addr(vertexInputInfo),
-    pInputAssemblyState: addr(inputAssembly),
-    pViewportState: addr(viewportState),
-    pRasterizationState: addr(rasterizer),
-    pMultisampleState: addr(multisampling),
-    pDepthStencilState: nil,
-    pColorBlendState: addr(colorBlending),
-    pDynamicState: addr(dynamicState),
-    layout: pipelineLayout,
-    renderPass: renderPass.vk,
-    subpass: 0,
-    basePipelineHandle: VkPipeline(0),
-    basePipelineIndex: -1,
-  )
+    stages = @[vertexShader.getPipelineInfo(), fragmentShader.getPipelineInfo()]
+    createInfo = VkGraphicsPipelineCreateInfo(
+      sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+      stageCount: uint32(stages.len),
+      pStages: stages.toCPointer,
+      pVertexInputState: addr(vertexInputInfo),
+      pInputAssemblyState: addr(inputAssembly),
+      pViewportState: addr(viewportState),
+      pRasterizationState: addr(rasterizer),
+      pMultisampleState: addr(multisampling),
+      pDepthStencilState: nil,
+      pColorBlendState: addr(colorBlending),
+      pDynamicState: addr(dynamicState),
+      layout: result.layout,
+      renderPass: renderPass.vk,
+      subpass: 0,
+      basePipelineHandle: VkPipeline(0),
+      basePipelineIndex: -1,
+    )
   checkVkResult vkCreateGraphicsPipelines(
     renderpass.device.vk,
     VkPipelineCache(0),
@@ -147,6 +148,12 @@ proc createPipeline*(renderPass: RenderPass, vertexShader: VertexShader, fragmen
 proc destroy*(pipeline: var Pipeline) =
   assert pipeline.device.vk.valid
   assert pipeline.vk.valid
+  assert pipeline.layout.valid
+  assert pipeline.descriptorLayout.valid
 
+  pipeline.device.vk.vkDestroyDescriptorSetLayout(pipeline.descriptorLayout, nil)
+  pipeline.device.vk.vkDestroyPipelineLayout(pipeline.layout, nil)
   pipeline.device.vk.vkDestroyPipeline(pipeline.vk, nil)
+  pipeline.descriptorLayout.reset()
+  pipeline.layout.reset()
   pipeline.vk.reset()
