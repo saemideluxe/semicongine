@@ -10,7 +10,7 @@ type
     vk*: VkFramebuffer
     device*: Device
 
-proc createFramebuffer*(device: Device, renderpass: RenderPass, attachments: openArray[ImageView], dimension: TVec2[uint32]): Framebuffer =
+proc createFramebuffer*(device: Device, renderPass: RenderPass, attachments: openArray[ImageView], dimension: TVec2[uint32]): Framebuffer =
   assert device.vk.valid
   assert renderpass.vk.valid
   var theattachments: seq[VkImageView]
