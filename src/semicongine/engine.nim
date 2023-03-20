@@ -572,8 +572,7 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: v
 
   # uniform buffers
   when not (UniformType is void):
-    result.uniformBuffers = createUniformBuffers[MAX_FRAMES_IN_FLIGHT,
-        UniformType](
+    result.uniformBuffers = createUniformBuffers[MAX_FRAMES_IN_FLIGHT, UniformType](
       result.device,
       engine.vulkan.device.physicalDevice.device
     )
@@ -589,8 +588,7 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: v
       pPoolSizes: addr(poolSize),
       maxSets: uint32(MAX_FRAMES_IN_FLIGHT),
     )
-  checkVkResult vkCreateDescriptorPool(result.device, addr(poolInfo), nil, addr(
-      result.descriptorPool))
+  checkVkResult vkCreateDescriptorPool(result.device, addr(poolInfo), nil, addr(result.descriptorPool))
 
   var layouts: array[MAX_FRAMES_IN_FLIGHT, VkDescriptorSetLayout]
   for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
@@ -602,12 +600,10 @@ proc setupPipeline*[VertexType; UniformType; IndexType: uint16|uint32](engine: v
     pSetLayouts: addr(layouts[0]),
   )
 
-  checkVkResult vkAllocateDescriptorSets(result.device, addr(allocInfo), addr(
-      result.descriptors[0]))
+  checkVkResult vkAllocateDescriptorSets(result.device, addr(allocInfo), addr(result.descriptors[0]))
 
   when not (UniformType is void):
-    var bufferInfos: array[MAX_FRAMES_IN_FLIGHT, array[1,
-        VkDescriptorBufferInfo]] # because we use only one Uniform atm
+    var bufferInfos: array[MAX_FRAMES_IN_FLIGHT, array[1, VkDescriptorBufferInfo]] # because we use only one Uniform atm
     for i in 0 ..< MAX_FRAMES_IN_FLIGHT:
       bufferInfos[i][0] = VkDescriptorBufferInfo(
         buffer: result.uniformBuffers[i].vkBuffer,
