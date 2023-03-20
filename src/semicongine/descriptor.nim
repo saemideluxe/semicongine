@@ -50,8 +50,7 @@ proc createUniformBuffers*[nBuffers: static int, Uniforms](device: VkDevice,
 
 template getDescriptorType*(v: Descriptor): auto = get(genericParams(typeof(v)), 0)
 
-func generateGLSLUniformDeclarations*[Uniforms](
-  binding: int = 0): string {.compileTime.} =
+func generateGLSLUniformDeclarations*[Uniforms](binding: int = 0): string {.compileTime.} =
   var stmtList: seq[string]
 
   when not (Uniforms is void):

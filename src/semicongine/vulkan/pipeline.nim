@@ -13,7 +13,7 @@ type
     descriptorLayout: VkDescriptorSetLayout
 
 
-proc createPipeline*(renderPass: RenderPass, vertexShader: Shader, fragmentShader: Shader): Pipeline =
+proc createPipeline*[VertexShader: Shader, FragmentShader: Shader](renderPass: RenderPass, vertexShader: VertexShader, fragmentShader: FragmentShader): Pipeline =
   assert renderPass.vk.valid
   assert renderPass.device.vk.valid
   result.device = renderPass.device

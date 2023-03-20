@@ -7,8 +7,12 @@ import semicongine/math
 type
   Vertex = object
     pos: Vec3
+  FragmentInput = object
+    fragpos: Vec3
   Uniforms = object
     time: float32
+  Pixel = object
+    color: Vec4
 
 
 when isMainModule:
@@ -76,20 +80,12 @@ when isMainModule:
     renderFinished = device.createSemaphore()
     inflight = device.createFence()
 
-  var vertexshader = shader(Vertex, Uniforms, device):
-    shadertype: VK_SHADER_STAGE_VERTEX_BIT
-    entrypoint: "main"
-    version: 450
-    code: """"""
-  var fragmentshader = shader(Vertex, Uniforms, device):
-    shadertype: VK_SHADER_STAGE_FRAGMENT_BIT
-    entrypoint: "main"
-    version: 450
-    code: ""
+  const vertexBinary = shaderCode[Vertex, Uniforms, FragmentInput](shadertype=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
+  const fragmentBinary = shaderCode[FragmentInput, void, Pixel](shadertype=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
+  var vertexshader = createShader[Vertex, Uniforms, FragmentInput](device, "main", vertexBinary)
+  var fragmentshader = createShader[FragmentInput, void, Pixel](device, "main", fragmentBinary)
 
-  #var vertexshader = loadShaderCode[Vertex, Uniforms](device, vertexshadercode)
-  #var fragmentshader = loadShaderCode[Vertex, Uniforms](device, fragmentshadercode)
-  #var pipeline = renderpass.createPipeline(vertexshaderhandle, fragmentshaderhandle)
+  var pipeline = renderpass.createPipeline(vertexshader, fragmentshader)
 
   echo "All successfull"
   echo "Start cleanup"
@@ -98,6 +94,8 @@ when isMainModule:
   #pipeline.destroy()
   #vertexshader.destroy()
   #fragmentshader.destroy()
+  vertexshader.destroy()
+  fragmentshader.destroy()
   inflight.destroy()
   imageAvailable.destroy()
   renderFinished.destroy()
