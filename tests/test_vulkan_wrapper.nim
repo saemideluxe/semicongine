@@ -14,25 +14,7 @@ type
   Pixel = object
     color: Vec4
 
-
-when isMainModule:
-  # print basic driver infos
-  echo "Layers"
-  for layer in getLayers():
-    echo "  " & layer
-  echo "Instance extensions"
-  for extension in getInstanceExtensions():
-    echo "  " & extension
-
-  # create instance
-  var thewindow = createWindow("Test")
-  var instance = thewindow.createInstance(
-    vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
-    instanceExtensions= @["VK_EXT_debug_utils"],
-    layers= @["VK_LAYER_KHRONOS_validation"]
-  )
-  var debugger = instance.createDebugMessenger()
-
+proc diagnostics(instance: Instance) =
   # diagnostic output
   echo "Devices"
   for device in instance.getPhysicalDevices():
@@ -54,6 +36,24 @@ when isMainModule:
     echo "  Surface formats"
     for format in device.getSurfaceFormats():
       echo "    " & $format
+
+when isMainModule:
+  # print basic driver infos
+  echo "Layers"
+  for layer in getLayers():
+    echo "  " & layer
+  echo "Instance extensions"
+  for extension in getInstanceExtensions():
+    echo "  " & extension
+
+  # create instance
+  var thewindow = createWindow("Test")
+  var instance = thewindow.createInstance(
+    vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
+    instanceExtensions= @["VK_EXT_debug_utils"],
+    layers= @["VK_LAYER_KHRONOS_validation"]
+  )
+  var debugger = instance.createDebugMessenger()
 
   # create devices
   let selectedPhysicalDevice = instance.getPhysicalDevices().filterBestGraphics()
@@ -80,10 +80,10 @@ when isMainModule:
     renderFinished = device.createSemaphore()
     inflight = device.createFence()
 
-  const vertexBinary = shaderCode[Vertex, Uniforms, FragmentInput](shadertype=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
-  const fragmentBinary = shaderCode[FragmentInput, void, Pixel](shadertype=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
-  var vertexshader = createShader[Vertex, Uniforms, FragmentInput](device, "main", vertexBinary)
-  var fragmentshader = createShader[FragmentInput, void, Pixel](device, "main", fragmentBinary)
+  const vertexBinary = shaderCode[Vertex, Uniforms, FragmentInput](stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
+  const fragmentBinary = shaderCode[FragmentInput, void, Pixel](stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
+  var vertexshader = createShader[Vertex, Uniforms, FragmentInput](device, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
+  var fragmentshader = createShader[FragmentInput, void, Pixel](device, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
 
   var pipeline = renderpass.createPipeline(vertexshader, fragmentshader)
 
@@ -91,11 +91,9 @@ when isMainModule:
   echo "Start cleanup"
 
   # cleanup
-  #pipeline.destroy()
-  #vertexshader.destroy()
-  #fragmentshader.destroy()
   vertexshader.destroy()
   fragmentshader.destroy()
+  pipeline.destroy()
   inflight.destroy()
   imageAvailable.destroy()
   renderFinished.destroy()

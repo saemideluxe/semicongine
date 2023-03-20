@@ -20,6 +20,7 @@ addHandler(logger)
 type
   Shader*[Inputs, Uniforms, Outputs] = object
     device: Device
+    stage*: VkShaderStageFlagBits
     vk*: VkShaderModule
     entrypoint*: string
 
@@ -46,12 +47,13 @@ proc compileGLSLToSPIRV*(stage: VkShaderStageFlagBits, shaderSource: string, ent
     shaderfile = getTempDir() / &"shader_{shaderHash}.{stagename}"
     projectPath = querySetting(projectPath)
 
-  echo "shader of type ", stage
+  echo "shader of type ", stage, ", entrypoint ", entrypoint
   for i, line in enumerate(shaderSource.splitlines()):
     echo "  ", i + 1, " ", line
+  let command = &"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}"
 
   discard staticExecChecked(
-      command = &"{projectPath}/glslangValidator --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}",
+      command = command,
       input = shaderSource
   )
 
@@ -71,7 +73,7 @@ proc compileGLSLToSPIRV*(stage: VkShaderStageFlagBits, shaderSource: string, ent
     i += 4
 
 
-proc shaderCode*[Inputs, Uniforms, Outputs](shadertype: VkShaderStageFlagBits, version: int, entrypoint: string, body: seq[string]): seq[uint32] {.compileTime.} =
+proc shaderCode*[Inputs, Uniforms, Outputs](stage: VkShaderStageFlagBits, version: int, entrypoint: string, body: seq[string]): seq[uint32] {.compileTime.} =
   var code = @[&"#version {version}", ""] &
     glslInput[Inputs]() & @[""] &
     glslUniforms[Uniforms]() & @[""] &
@@ -79,19 +81,20 @@ proc shaderCode*[Inputs, Uniforms, Outputs](shadertype: VkShaderStageFlagBits, v
     @[&"void {entrypoint}(){{"] &
     body &
     @[&"}}"]
-  compileGLSLToSPIRV(shadertype, code.join("\n"), entrypoint)
+  compileGLSLToSPIRV(stage, code.join("\n"), entrypoint)
 
 
-proc shaderCode*[Inputs, Uniforms, Outputs](shadertype: VkShaderStageFlagBits, version: int, entrypoint: string, body: string): seq[uint32] {.compileTime.} =
-  return shaderCode[Inputs, Uniforms, Outputs](shadertype, version, entrypoint, @[body])
+proc shaderCode*[Inputs, Uniforms, Outputs](stage: VkShaderStageFlagBits, version: int, entrypoint: string, body: string): seq[uint32] {.compileTime.} =
+  return shaderCode[Inputs, Uniforms, Outputs](stage, version, entrypoint, @[body])
 
 
-proc createShader*[Inputs, Uniforms, Outputs](device: Device, entrypoint: string, binary: seq[uint32]): Shader[Inputs, Uniforms, Outputs] =
+proc createShader*[Inputs, Uniforms, Outputs](device: Device, stage: VkShaderStageFlagBits, entrypoint: string, binary: seq[uint32]): Shader[Inputs, Uniforms, Outputs] =
   assert device.vk.valid
   assert len(binary) > 0
 
   result.device = device
   result.entrypoint = entrypoint
+  result.stage = stage
   var bin = binary
   var createInfo = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -103,7 +106,7 @@ proc createShader*[Inputs, Uniforms, Outputs](device: Device, entrypoint: string
 proc getPipelineInfo*(shader: Shader): VkPipelineShaderStageCreateInfo =
   VkPipelineShaderStageCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-    stage: VK_SHADER_STAGE_VERTEX_BIT,
+    stage: shader.stage,
     module: shader.vk,
     pName: cstring(shader.entrypoint),
   )

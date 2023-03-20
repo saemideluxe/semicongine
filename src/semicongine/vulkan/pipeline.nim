@@ -16,6 +16,8 @@ type
 proc createPipeline*[VertexShader: Shader, FragmentShader: Shader](renderPass: RenderPass, vertexShader: VertexShader, fragmentShader: FragmentShader): Pipeline =
   assert renderPass.vk.valid
   assert renderPass.device.vk.valid
+  assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
+  assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
   result.device = renderPass.device
 
   var descriptorType: VkDescriptorType
