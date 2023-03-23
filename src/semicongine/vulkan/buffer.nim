@@ -2,10 +2,10 @@ import ./api
 import ./device
 
 type
-  Buffer = object
-    device: Device
-    vk: VkBuffer
-    size: uint64
+  Buffer* = object
+    device*: Device
+    vk*: VkBuffer
+    size*: uint64
 
 # currently no support for extended structure and concurrent/shared use
 # (shardingMode = VK_SHARING_MODE_CONCURRENT not supported)

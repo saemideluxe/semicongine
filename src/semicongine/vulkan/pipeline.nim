@@ -1,16 +1,16 @@
 import ./api
 import ./utils
 import ./renderpass
-import ./vertex
 import ./device
 import ./shader
+import ./descriptor
 
 type
-  Pipeline = object
+  Pipeline* = object
     device: Device
     vk*: VkPipeline
     layout: VkPipelineLayout
-    descriptorLayout: VkDescriptorSetLayout
+    descriptorSetLayout*: DescriptorSetLayout
 
 
 proc createPipeline*[VertexShader: Shader, FragmentShader: Shader](renderPass: RenderPass, vertexShader: VertexShader, fragmentShader: FragmentShader): Pipeline =
@@ -18,42 +18,46 @@ proc createPipeline*[VertexShader: Shader, FragmentShader: Shader](renderPass: R
   assert renderPass.device.vk.valid
   assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
   assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
-  result.device = renderPass.device
 
-  var descriptorType: VkDescriptorType
-  var bindingNumber = 0'u32
-  var arrayLen = 1
-  var shaderStage: seq[VkShaderStageFlagBits]
-  var layoutbinding = VkDescriptorSetLayoutBinding(
-    binding: bindingNumber,
-    descriptorType: descriptorType,
-    descriptorCount: uint32(arrayLen),
-    stageFlags: toBits shaderStage,
-    pImmutableSamplers: nil,
-  )
-  var descriptorLayoutBinding: seq[VkDescriptorSetLayoutBinding] = @[layoutbinding]
-  var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
-    sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-    bindingCount: uint32(descriptorLayoutBinding.len),
-    pBindings: descriptorLayoutBinding.toCPointer
-  )
-  checkVkResult vkCreateDescriptorSetLayout(
-    renderPass.device.vk,
-    addr(layoutCreateInfo),
-    nil,
-    addr(result.descriptorLayout),
-  )
+  result.device = renderPass.device
+  
+  var descriptors = @[Descriptor(
+    thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    count: 1,
+    stages: @[VK_SHADER_STAGE_VERTEX_BIT],
+    itemsize: uint32(sizeof(shaderUniforms(vertexShader)))
+  )]
+  when shaderUniforms(vertexShader) is shaderUniforms(fragmentShader):
+    descriptors[0].stages.add VK_SHADER_STAGE_FRAGMENT_BIT
+  else:
+    descriptors.add Descriptor(
+      thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      count: 1,
+      stages: @[VK_SHADER_STAGE_FRAGMENT_BIT],
+      itemsize: uint32(sizeof(shaderUniforms(fragmentShader)))
+    )
+  result.descriptorSetLayout = renderPass.device.createDescriptorSetLayout(descriptors)
+
+  #[
+  Descriptor
+    thetype: VkDescriptorType
+    count: uint32
+    stages: seq[VkShaderStageFlagBits]
+    itemsize: uint32
+  ]#
+
+  # TODO: Push constants
   # var pushConstant = VkPushConstantRange(
     # stageFlags: toBits shaderStage,
     # offset: 0,
     # size: 0,
   # )
-  var descriptorSets: seq[VkDescriptorSetLayout] = @[result.descriptorLayout]
+  var descriptorSetLayouts: seq[VkDescriptorSetLayout] = @[result.descriptorSetLayout.vk]
   # var pushConstants: seq[VkPushConstantRange] = @[pushConstant]
   var pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-      setLayoutCount: uint32(descriptorSets.len),
-      pSetLayouts: descriptorSets.toCPointer,
+      setLayoutCount: uint32(descriptorSetLayouts.len),
+      pSetLayouts: descriptorSetLayouts.toCPointer,
       # pushConstantRangeCount: uint32(pushConstants.len),
       # pPushConstantRanges: pushConstants.toCPointer,
     )
@@ -151,11 +155,11 @@ proc destroy*(pipeline: var Pipeline) =
   assert pipeline.device.vk.valid
   assert pipeline.vk.valid
   assert pipeline.layout.valid
-  assert pipeline.descriptorLayout.valid
+  assert pipeline.descriptorSetLayout.vk.valid
 
-  pipeline.device.vk.vkDestroyDescriptorSetLayout(pipeline.descriptorLayout, nil)
+  pipeline.descriptorSetLayout.destroy()
   pipeline.device.vk.vkDestroyPipelineLayout(pipeline.layout, nil)
   pipeline.device.vk.vkDestroyPipeline(pipeline.vk, nil)
-  pipeline.descriptorLayout.reset()
+  pipeline.descriptorSetLayout.reset()
   pipeline.layout.reset()
   pipeline.vk.reset()

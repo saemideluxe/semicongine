@@ -1,14 +1,15 @@
 import ./api
 import ./device
-import ./renderpass
 import ./utils
 import ./image
+import ./renderpass
+
 import ../math
 
 type
   Framebuffer* = object
-    vk*: VkFramebuffer
     device*: Device
+    vk*: VkFramebuffer
 
 proc createFramebuffer*(device: Device, renderPass: RenderPass, attachments: openArray[ImageView], dimension: TVec2[uint32]): Framebuffer =
   assert device.vk.valid
