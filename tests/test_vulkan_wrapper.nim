@@ -65,13 +65,14 @@ when isMainModule:
   )
 
   # setup render pipeline
-  var (swapchain, res) = device.createSwapchain(device.physicalDevice.getSurfaceFormats().filterSurfaceFormat())
+  var surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
+  var renderpass = device.simpleForwardRenderPass(surfaceFormat.format)
+  var (swapchain, res) = device.createSwapchain(renderpass, surfaceFormat)
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
-  var renderpass = device.simpleForwardRenderPass(swapchain.format)
-  var framebuffers: seq[Framebuffer]
-  for imageview in swapchain.imageviews:
-    framebuffers.add device.createFramebuffer(renderpass, [imageview], swapchain.dimension)
+  # var framebuffers: seq[Framebuffer]
+  # for imageview in swapchain.imageviews:
+    # framebuffers.add device.createFramebuffer(renderpass, [imageview], swapchain.dimension)
 
   # todo: could be create inside "device", but it would be nice to have nim v2 with support for circular dependencies first
   var
@@ -86,11 +87,15 @@ when isMainModule:
   var fragmentshader = createShader[FragmentInput, void, Pixel](device, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
 
   var pipeline = renderpass.createPipeline(vertexshader, fragmentshader)
+  var descriptorPool = device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
+  var descriptorSet = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, 1)
 
   echo "All successfull"
   echo "Start cleanup"
 
   # cleanup
+  checkVkResult device.vk.vkDeviceWaitIdle()
+  descriptorPool.destroy()
   vertexshader.destroy()
   fragmentshader.destroy()
   pipeline.destroy()
@@ -98,8 +103,6 @@ when isMainModule:
   imageAvailable.destroy()
   renderFinished.destroy()
   commandPool.destroy()
-  for fb in framebuffers.mitems:
-    fb.destroy()
   renderpass.destroy()
   swapchain.destroy()
   device.destroy()

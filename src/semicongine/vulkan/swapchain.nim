@@ -3,28 +3,42 @@ import ./utils
 import ./device
 import ./physicaldevice
 import ./image
+import ./renderpass
+import ./framebuffer
+import ./syncing
+
 import ../math
 
 type
   Swapchain = object
-    vk*: VkSwapchainKHR
     device*: Device
-    imageviews*: seq[ImageView]
+    vk*: VkSwapchainKHR
     format*: VkFormat
     dimension*: TVec2[uint32]
+    nImages*: uint32
+    imageviews*: seq[ImageView]
+    framebuffers*: seq[Framebuffer]
+    nInFlight*: uint32
+    inFlightFences: seq[Fence]
+    imageAvailableSemaphores*: seq[Semaphore]
+    renderFinishedSemaphores*: seq[Semaphore]
 
 
 proc createSwapchain*(
   device: Device,
+  renderPass: RenderPass,
   surfaceFormat: VkSurfaceFormatKHR,
-  nBuffers=3'u32,
+  desiredNumberOfImages=3'u32,
+  framesInFlight=2'u32,
   presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR
 ): (Swapchain, VkResult) =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
+  assert renderPass.vk.valid
+
   var capabilities = device.physicalDevice.getSurfaceCapabilities()
 
-  var imageCount = nBuffers
+  var imageCount = desiredNumberOfImages
   # following is according to vulkan specs
   if presentationMode in [VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR, VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR]:
     imageCount = 1
@@ -53,17 +67,26 @@ proc createSwapchain*(
     swapchain = Swapchain(
       device: device,
       format: surfaceFormat.format,
-      dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]))
+      nInFlight: framesInFlight,
+      dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height])
+    )
     createResult = device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk))
 
   if createResult == VK_SUCCESS:
     var nImages: uint32
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), nil)
+    swapchain.nImages = nImages
     var images = newSeq[VkImage](nImages)
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), images.toCPointer)
     for vkimage in images:
       let image = Image(vk: vkimage, format: surfaceFormat.format, device: device)
-      swapChain.imageviews.add image.createImageView()
+      let imageview = image.createImageView()
+      swapChain.imageviews.add imageview
+      swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass, [imageview], swapchain.dimension)
+    for i in 0 ..< swapchain.nInFlight:
+      swapchain.inFlightFences.add device.createFence()
+      swapchain.imageAvailableSemaphores.add device.createSemaphore()
+      swapchain.renderFinishedSemaphores.add device.createSemaphore()
 
   return (swapchain, createResult)
 
@@ -77,6 +100,17 @@ proc getImages*(device: VkDevice, swapChain: VkSwapchainKHR): seq[VkImage] =
 proc destroy*(swapchain: var Swapchain) =
   assert swapchain.vk.valid
   for imageview in swapchain.imageviews.mitems:
+    assert imageview.vk.valid
     imageview.destroy()
+  for framebuffer in swapchain.framebuffers.mitems:
+    assert framebuffer.vk.valid
+    framebuffer.destroy()
+  for i in 0 ..< swapchain.nInFlight:
+    assert swapchain.inFlightFences[i].vk.valid
+    assert swapchain.imageAvailableSemaphores[i].vk.valid
+    assert swapchain.renderFinishedSemaphores[i].vk.valid
+    swapchain.inFlightFences[i].destroy()
+    swapchain.imageAvailableSemaphores[i].destroy()
+    swapchain.renderFinishedSemaphores[i].destroy()
   swapchain.device.vk.vkDestroySwapchainKHR(swapchain.vk, nil)
   swapchain.vk.reset()

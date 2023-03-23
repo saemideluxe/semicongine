@@ -31,6 +31,9 @@ export shader
 import ./vulkan/vertex
 export vertex
 
+import ./vulkan/descriptor
+export descriptor
+
 import ./vulkan/pipeline
 export pipeline
 

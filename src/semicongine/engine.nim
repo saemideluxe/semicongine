@@ -656,8 +656,7 @@ proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer,
   vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
       pipeline.pipeline)
 
-  vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-      pipeline.layout, 0, 1, addr(pipeline.descriptors[currentFrame]), 0, nil)
+  vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout, 0, 1, addr(pipeline.descriptors[currentFrame]), 0, nil)
 
   for (vertexBufferSet, indexed, indexBuffer, count, indexType) in pipeline.vertexBuffers:
     var
@@ -718,7 +717,9 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline,
   checkVkResult vkEndCommandBuffer(commandBuffer)
 
 proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resized: bool, pipeline: var RenderPipeline) =
+
   checkVkResult vkWaitForFences(vulkan.device.device, 1, addr(vulkan.inFlightFences[currentFrame]), VK_TRUE, high(uint64))
+
   var bufferImageIndex: uint32
   let nextImageResult = vkAcquireNextImageKHR(
     vulkan.device.device,
@@ -729,18 +730,19 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resi
     addr(bufferImageIndex)
   )
   if nextImageResult == VK_ERROR_OUT_OF_DATE_KHR:
-    vulkan.frameSize = window.getFrameDimension(
-        vulkan.device.physicalDevice.device, vulkan.surface)
+    vulkan.frameSize = window.getFrameDimension(vulkan.device.physicalDevice.device, vulkan.surface)
     (vulkan.swapchain, vulkan.framebuffers) = vulkan.recreateSwapchain()
   elif not (nextImageResult in [VK_SUCCESS, VK_SUBOPTIMAL_KHR]):
-    raise newException(Exception, "Vulkan error: vkAcquireNextImageKHR returned " &
-        $nextImageResult)
+    raise newException(Exception, "Vulkan error: vkAcquireNextImageKHR returned " & $nextImageResult)
   checkVkResult vkResetFences(vulkan.device.device, 1, addr(vulkan.inFlightFences[currentFrame]))
 
-  checkVkResult vkResetCommandBuffer(vulkan.device.commandBuffers[currentFrame],
-      VkCommandBufferResetFlags(0))
-  vulkan.renderPass.recordCommandBuffer(pipeline, vulkan.device.commandBuffers[
-      currentFrame], vulkan.framebuffers[bufferImageIndex], vulkan.frameSize, currentFrame)
+  checkVkResult vkResetCommandBuffer(vulkan.device.commandBuffers[currentFrame], VkCommandBufferResetFlags(0))
+  vulkan.renderPass.recordCommandBuffer(
+    pipeline,
+    vulkan.device.commandBuffers[currentFrame],
+    vulkan.framebuffers[bufferImageIndex], vulkan.frameSize,
+    currentFrame
+  )
   var
     waitSemaphores = [vulkan.imageAvailableSemaphores[currentFrame]]
     waitStages = [VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)]
@@ -767,11 +769,8 @@ proc drawFrame(window: NativeWindow, vulkan: var Vulkan, currentFrame: int, resi
     pResults: nil,
   )
   let presentResult = vkQueuePresentKHR(vulkan.device.presentationQueue, addr(presentInfo))
-
-  if presentResult == VK_ERROR_OUT_OF_DATE_KHR or presentResult ==
-      VK_SUBOPTIMAL_KHR or resized:
-    vulkan.frameSize = window.getFrameDimension(
-        vulkan.device.physicalDevice.device, vulkan.surface)
+  if presentResult == VK_ERROR_OUT_OF_DATE_KHR or presentResult == VK_SUBOPTIMAL_KHR or resized:
+    vulkan.frameSize = window.getFrameDimension(vulkan.device.physicalDevice.device, vulkan.surface)
     (vulkan.swapchain, vulkan.framebuffers) = vulkan.recreateSwapchain()
 
 

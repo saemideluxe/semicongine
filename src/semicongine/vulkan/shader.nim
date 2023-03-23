@@ -1,3 +1,4 @@
+import std/typetraits
 import std/macros
 import std/os
 import std/enumerate
@@ -23,6 +24,10 @@ type
     stage*: VkShaderStageFlagBits
     vk*: VkShaderModule
     entrypoint*: string
+
+template shaderInput*[Inputs, Uniforms, Outputs](shader: Shader[Inputs, Uniforms, Outputs]): typedesc = Inputs
+template shaderOutputs*[Inputs, Uniforms, Outputs](shader: Shader[Inputs, Uniforms, Outputs]): typedesc = Outputs
+template shaderUniforms*[Inputs, Uniforms, Outputs](shader: Shader[Inputs, Uniforms, Outputs]): typedesc = Uniforms
 
 
 proc compileGLSLToSPIRV*(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =

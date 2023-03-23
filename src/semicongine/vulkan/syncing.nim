@@ -2,10 +2,10 @@ import ./api
 import ./device
 
 type
-  Semaphore = object
+  Semaphore* = object
     vk*: VkSemaphore
     device: Device
-  Fence = object
+  Fence* = object
     vk*: VkFence
     device: Device
 
