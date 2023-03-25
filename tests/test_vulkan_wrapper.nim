@@ -67,30 +67,22 @@ when isMainModule:
   # setup render pipeline
   var surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
   var renderpass = device.simpleForwardRenderPass(surfaceFormat.format)
-  var (swapchain, res) = device.createSwapchain(renderpass, surfaceFormat)
+  var (swapchain, res) = device.createSwapchain(renderpass, surfaceFormat, device.firstGraphicsQueue().get().family)
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
-  # var framebuffers: seq[Framebuffer]
-  # for imageview in swapchain.imageviews:
-    # framebuffers.add device.createFramebuffer(renderpass, [imageview], swapchain.dimension)
 
   # todo: could be create inside "device", but it would be nice to have nim v2 with support for circular dependencies first
-  var
-    commandPool = device.createCommandPool(family=device.firstGraphicsQueue().get().family, nBuffers=1)
-    imageAvailable = device.createSemaphore()
-    renderFinished = device.createSemaphore()
-    inflight = device.createFence()
-
   const vertexBinary = shaderCode[Vertex, Uniforms, FragmentInput](stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
   const fragmentBinary = shaderCode[FragmentInput, void, Pixel](stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
-  var vertexshader = createShader[Vertex, Uniforms, FragmentInput](device, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
-  var fragmentshader = createShader[FragmentInput, void, Pixel](device, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
-
-  var pipeline = renderpass.createPipeline(vertexshader, fragmentshader)
-  var descriptorPool = device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
-  var descriptorSet = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, 1)
+  var
+    vertexshader = createShader[Vertex, Uniforms, FragmentInput](device, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
+    fragmentshader = createShader[FragmentInput, void, Pixel](device, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
+    pipeline = renderpass.createPipeline(vertexshader, fragmentshader)
+    descriptorPool = device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
+    descriptorSet = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, 1)
 
   echo "All successfull"
+  echo swapchain.drawNextFrame(pipeline)
   echo "Start cleanup"
 
   # cleanup
@@ -99,10 +91,6 @@ when isMainModule:
   vertexshader.destroy()
   fragmentshader.destroy()
   pipeline.destroy()
-  inflight.destroy()
-  imageAvailable.destroy()
-  renderFinished.destroy()
-  commandPool.destroy()
   renderpass.destroy()
   swapchain.destroy()
   device.destroy()
