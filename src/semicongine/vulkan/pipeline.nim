@@ -38,14 +38,6 @@ proc createPipeline*[VertexShader: Shader, FragmentShader: Shader](renderPass: R
     )
   result.descriptorSetLayout = renderPass.device.createDescriptorSetLayout(descriptors)
 
-  #[
-  Descriptor
-    thetype: VkDescriptorType
-    count: uint32
-    stages: seq[VkShaderStageFlagBits]
-    itemsize: uint32
-  ]#
-
   # TODO: Push constants
   # var pushConstant = VkPushConstantRange(
     # stageFlags: toBits shaderStage,

@@ -3,9 +3,11 @@ import std/options
 import ./api
 import ./utils
 import ./device
+import ../math
 
 type
   Subpass* = object
+    clearColor*: Vec4
     flags: VkSubpassDescriptionFlags
     pipelineBindPoint: VkPipelineBindPoint
     inputs: seq[VkAttachmentReference]
@@ -16,6 +18,7 @@ type
   RenderPass* = object
     vk*: VkRenderPass
     device*: Device
+    subpasses*: seq[Subpass]
 
 proc createRenderPass*(
   device: Device,
@@ -50,6 +53,7 @@ proc createRenderPass*(
       pDependencies: dependencies.toCPointer,
     )
   result.device = device
+  result.subpasses = subpasses
   checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
 
 proc createRenderAttachment(
@@ -75,7 +79,7 @@ proc createRenderAttachment(
     finalLayout: finalLayout,
   )
 
-proc simpleForwardRenderPass*(device: Device, format: VkFormat): RenderPass =
+proc simpleForwardRenderPass*(device: Device, format: VkFormat, clearColor=Vec4([0.5'f32, 0.5'f32, 0.5'f32, 1'f32])): RenderPass =
   assert device.vk.valid
   var
     attachments = @[createRenderAttachment(
@@ -91,7 +95,8 @@ proc simpleForwardRenderPass*(device: Device, format: VkFormat): RenderPass =
     subpasses = @[
       Subpass(
         pipelineBindPoint: VK_PIPELINE_BIND_POINT_GRAPHICS,
-        outputs: @[VkAttachmentReference(attachment: 0, layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)]
+        outputs: @[VkAttachmentReference(attachment: 0, layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)],
+        clearColor: clearColor
       )
     ]
     dependencies = @[
@@ -104,7 +109,7 @@ proc simpleForwardRenderPass*(device: Device, format: VkFormat): RenderPass =
         dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
       )
     ]
-  device.createRenderPass(attachments = attachments, subpasses = subpasses, dependencies = dependencies)
+  device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
 
 proc destroy*(renderpass: var RenderPass) =
   assert renderpass.device.vk.valid

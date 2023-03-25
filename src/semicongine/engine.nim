@@ -651,11 +651,8 @@ proc updateUniformData*[VertexType, Uniforms](device: Device,
     device.updateBufferData(buffer, data)
 
 
-proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer,
-    pipeline: var RenderPipeline[VertexType, Uniforms], currentFrame: int) =
-  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-      pipeline.pipeline)
-
+proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer, pipeline: var RenderPipeline[VertexType, Uniforms], currentFrame: int) =
+  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout, 0, 1, addr(pipeline.descriptors[currentFrame]), 0, nil)
 
   for (vertexBufferSet, indexed, indexBuffer, count, indexType) in pipeline.vertexBuffers:
@@ -671,8 +668,7 @@ proc runPipeline[VertexType; Uniforms](commandBuffer: VkCommandBuffer,
       vkCmdBindIndexBuffer(commandBuffer, indexBuffer.vkBuffer, VkDeviceSize(0), indexType)
       vkCmdDrawIndexed(commandBuffer, count, 1, 0, 0, 0)
     else:
-      vkCmdDraw(commandBuffer, vertexCount = count, instanceCount = 1,
-          firstVertex = 0, firstInstance = 0)
+      vkCmdDraw(commandBuffer, vertexCount = count, instanceCount = 1, firstVertex = 0, firstInstance = 0)
 
 proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline,
     commandBuffer: VkCommandBuffer, framebuffer: VkFramebuffer,
@@ -682,8 +678,7 @@ proc recordCommandBuffer(renderPass: VkRenderPass, pipeline: var RenderPipeline,
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
       pInheritanceInfo: nil,
     )
-    clearColor = VkClearValue(color: VkClearColorValue(
-        float32: pipeline.clearColor))
+    clearColor = VkClearValue(color: VkClearColorValue(float32: pipeline.clearColor))
     renderPassInfo = VkRenderPassBeginInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
       renderPass: renderPass,

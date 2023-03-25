@@ -15,6 +15,9 @@ type
   Vec2* = TVec2[float32]
   Vec3* = TVec3[float32]
   Vec4* = TVec4[float32]
+  Vec2I* = TVec2[uint32]
+  Vec3I* = TVec3[uint32]
+  Vec4I* = TVec4[uint32]
 
 converter toVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
   TVec2[T]([orig[0], orig[1]])
