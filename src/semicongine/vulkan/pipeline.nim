@@ -103,11 +103,9 @@ proc createPipeline*[VertexShader: Shader, FragmentShader: Shader](renderPass: R
     )
     colorBlending = VkPipelineColorBlendStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-      logicOpEnable: VK_TRUE,
-      logicOp: VK_LOGIC_OP_COPY,
+      logicOpEnable: false,
       attachmentCount: 1,
       pAttachments: addr(colorBlendAttachment),
-      blendConstants: [0.0'f, 0.0'f, 0.0'f, 0.0'f],
     )
     dynamicStates = @[VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR]
     dynamicState = VkPipelineDynamicStateCreateInfo(
@@ -135,7 +133,7 @@ proc createPipeline*[VertexShader: Shader, FragmentShader: Shader](renderPass: R
       basePipelineIndex: -1,
     )
   checkVkResult vkCreateGraphicsPipelines(
-    renderpass.device.vk,
+    renderPass.device.vk,
     VkPipelineCache(0),
     1,
     addr(createInfo),

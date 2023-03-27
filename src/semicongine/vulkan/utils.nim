@@ -1,5 +1,4 @@
 import std/strutils
-import std/os
 import std/strformat
 
 func cleanString*(str: openArray[char]): string =
