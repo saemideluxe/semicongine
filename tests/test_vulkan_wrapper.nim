@@ -64,14 +64,13 @@ when isMainModule:
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
-  # setup render pipeline
   var surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
   var renderpass = device.simpleForwardRenderPass(surfaceFormat.format)
+  echo renderpass
   var (swapchain, res) = device.createSwapchain(renderpass, surfaceFormat, device.firstGraphicsQueue().get().family)
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
-  # todo: could be create inside "device", but it would be nice to have nim v2 with support for circular dependencies first
   const vertexBinary = shaderCode[Vertex, Uniforms, FragmentInput](stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
   const fragmentBinary = shaderCode[FragmentInput, void, Pixel](stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
   var
@@ -82,7 +81,7 @@ when isMainModule:
     descriptorSet = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, 1)
 
   echo "All successfull"
-  echo swapchain.drawNextFrame(pipeline)
+  discard swapchain.drawNextFrame(pipeline)
   echo "Start cleanup"
 
   # cleanup

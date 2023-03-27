@@ -127,8 +127,9 @@ proc drawNextFrame*(swapchain: var Swapchain, pipeline: Pipeline): bool =
   renderCommands(
     swapchain.commandBufferPool.buffers[swapchain.currentInFlight],
     swapchain.renderpass,
-    swapchain.framebuffers[swapChain.currentInFlight]
+    swapchain.framebuffers[currentFramebufferIndex]
   ):
+    swapchain.commandBufferPool.buffers[swapchain.currentInFlight].vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
     echo "TODO: Draw calls here"
 
   var

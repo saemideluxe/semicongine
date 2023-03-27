@@ -22,14 +22,17 @@ type
 
 proc createRenderPass*(
   device: Device,
-  attachments: var seq[VkAttachmentDescription],
-  subpasses: var seq[Subpass],
-  dependencies: var seq[VkSubpassDependency]
+  attachments: seq[VkAttachmentDescription],
+  subpasses: seq[Subpass],
+  dependencies: seq[VkSubpassDependency]
 ): RenderPass =
   assert device.vk.valid
+  var pAttachments = attachments
+  var pSubpasses = subpasses
+  var pDependencies = dependencies
 
-  var subpassesList = newSeq[VkSubpassDescription](subpasses.len)
-  for subpass in subpasses.mitems:
+  var subpassesList: seq[VkSubpassDescription]
+  for subpass in pSubpasses.mitems:
     subpassesList.add VkSubpassDescription(
       flags: subpass.flags,
       pipelineBindPoint: subpass.pipelineBindPoint,
@@ -45,52 +48,29 @@ proc createRenderPass*(
 
   var createInfo = VkRenderPassCreateInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-      attachmentCount: uint32(attachments.len),
-      pAttachments: attachments.toCPointer,
+      attachmentCount: uint32(pAttachments.len),
+      pAttachments: pAttachments.toCPointer,
       subpassCount: uint32(subpassesList.len),
       pSubpasses: subpassesList.toCPointer,
-      dependencyCount: uint32(dependencies.len),
-      pDependencies: dependencies.toCPointer,
+      dependencyCount: uint32(pDependencies.len),
+      pDependencies: pDependencies.toCPointer,
     )
   result.device = device
-  result.subpasses = subpasses
+  result.subpasses = pSubpasses
   checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
-
-proc createRenderAttachment(
-  format: VkFormat,
-  flags = VkAttachmentDescriptionFlags(0),
-  samples = VK_SAMPLE_COUNT_1_BIT,
-  loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-  storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-  stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-  stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-  initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-  finalLayout = VK_IMAGE_LAYOUT_GENERAL,
-): auto =
-  VkAttachmentDescription(
-    format: format,
-    flags: flags,
-    samples: samples,
-    loadOp: loadOp,
-    storeOp: storeOp,
-    stencilLoadOp: stencilLoadOp,
-    stencilStoreOp: stencilStoreOp,
-    initialLayout: initialLayout,
-    finalLayout: finalLayout,
-  )
 
 proc simpleForwardRenderPass*(device: Device, format: VkFormat, clearColor=Vec4([0.5'f32, 0.5'f32, 0.5'f32, 1'f32])): RenderPass =
   assert device.vk.valid
   var
-    attachments = @[createRenderAttachment(
-      format = format,
-      samples = VK_SAMPLE_COUNT_1_BIT,
-      loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-      storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-      stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-      stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-      initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-      finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    attachments = @[VkAttachmentDescription(
+        format: format,
+        samples: VK_SAMPLE_COUNT_1_BIT,
+        loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
+        storeOp: VK_ATTACHMENT_STORE_OP_STORE,
+        stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+        finalLayout: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
     )]
     subpasses = @[
       Subpass(
@@ -99,17 +79,8 @@ proc simpleForwardRenderPass*(device: Device, format: VkFormat, clearColor=Vec4(
         clearColor: clearColor
       )
     ]
-    dependencies = @[
-      VkSubpassDependency(
-        srcSubpass: VK_SUBPASS_EXTERNAL,
-        dstSubpass: 0,
-        srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
-        srcAccessMask: VkAccessFlags(0),
-        dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
-        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
-      )
-    ]
-  device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
+    dependencies: seq[VkSubpassDependency]
+  result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
 
 proc destroy*(renderpass: var RenderPass) =
   assert renderpass.device.vk.valid

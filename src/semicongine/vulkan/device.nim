@@ -18,6 +18,9 @@ type
     presentation: bool
     graphics: bool
 
+proc `$`*(device: Device): string =
+  "vk: " & $device.vk & "physicalDevice: " & $device.physicalDevice
+
 proc createDevice*(
   instance: Instance,
   physicalDevice: PhysicalDevice,
