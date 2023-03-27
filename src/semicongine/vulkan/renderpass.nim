@@ -3,6 +3,9 @@ import std/options
 import ./api
 import ./utils
 import ./device
+import ./pipeline
+import ./shader
+import ./descriptor
 import ../math
 
 type
@@ -18,13 +21,16 @@ type
   RenderPass* = object
     vk*: VkRenderPass
     device*: Device
+    inFlightFrames*: int
     subpasses*: seq[Subpass]
+    pipelines*: seq[Pipeline]
 
 proc createRenderPass*(
   device: Device,
   attachments: seq[VkAttachmentDescription],
   subpasses: seq[Subpass],
-  dependencies: seq[VkSubpassDependency]
+  dependencies: seq[VkSubpassDependency],
+  inFlightFrames: int,
 ): RenderPass =
   assert device.vk.valid
   var pAttachments = attachments
@@ -56,10 +62,143 @@ proc createRenderPass*(
       pDependencies: pDependencies.toCPointer,
     )
   result.device = device
+  result.inFlightFrames = inFlightFrames
   result.subpasses = pSubpasses
+  result.pipelines = newSeq[Pipeline](pSubpasses.len)
   checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
 
-proc simpleForwardRenderPass*(device: Device, format: VkFormat, clearColor=Vec4([0.5'f32, 0.5'f32, 0.5'f32, 1'f32])): RenderPass =
+proc attachPipeline[VertexShader: Shader, FragmentShader: Shader](renderPass: var RenderPass, vertexShader: VertexShader, fragmentShader: FragmentShader, subpass = 0'u32) =
+  assert renderPass.vk.valid
+  assert renderPass.device.vk.valid
+  assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
+  assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
+
+  var pipeline = Pipeline(device: renderPass.device)
+  
+  var descriptors = @[Descriptor(
+    thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    count: 1,
+    stages: @[VK_SHADER_STAGE_VERTEX_BIT],
+    itemsize: uint32(sizeof(shaderUniforms(vertexShader)))
+  )]
+  when shaderUniforms(vertexShader) is shaderUniforms(fragmentShader):
+    descriptors[0].stages.add VK_SHADER_STAGE_FRAGMENT_BIT
+  else:
+    descriptors.add Descriptor(
+      thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      count: 1,
+      stages: @[VK_SHADER_STAGE_FRAGMENT_BIT],
+      itemsize: uint32(sizeof(shaderUniforms(fragmentShader)))
+    )
+  pipeline.descriptorSetLayout = renderPass.device.createDescriptorSetLayout(descriptors)
+
+  # TODO: Push constants
+  # var pushConstant = VkPushConstantRange(
+    # stageFlags: toBits shaderStage,
+    # offset: 0,
+    # size: 0,
+  # )
+  var descriptorSetLayouts: seq[VkDescriptorSetLayout] = @[pipeline.descriptorSetLayout.vk]
+  # var pushConstants: seq[VkPushConstantRange] = @[pushConstant]
+  var pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+      setLayoutCount: uint32(descriptorSetLayouts.len),
+      pSetLayouts: descriptorSetLayouts.toCPointer,
+      # pushConstantRangeCount: uint32(pushConstants.len),
+      # pPushConstantRanges: pushConstants.toCPointer,
+    )
+  checkVkResult vkCreatePipelineLayout(renderPass.device.vk, addr(pipelineLayoutInfo), nil, addr(pipeline.layout))
+
+  var
+    bindings: seq[VkVertexInputBindingDescription]
+    attributes: seq[VkVertexInputAttributeDescription]
+    vertexInputInfo = vertexShader.getVertexInputInfo(bindings, attributes)
+    inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+      topology: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+      primitiveRestartEnable: VK_FALSE,
+    )
+    viewportState = VkPipelineViewportStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+      viewportCount: 1,
+      scissorCount: 1,
+    )
+    rasterizer = VkPipelineRasterizationStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+      depthClampEnable: VK_FALSE,
+      rasterizerDiscardEnable: VK_FALSE,
+      polygonMode: VK_POLYGON_MODE_FILL,
+      lineWidth: 1.0,
+      cullMode: toBits [VK_CULL_MODE_BACK_BIT],
+      frontFace: VK_FRONT_FACE_CLOCKWISE,
+      depthBiasEnable: VK_FALSE,
+      depthBiasConstantFactor: 0.0,
+      depthBiasClamp: 0.0,
+      depthBiasSlopeFactor: 0.0,
+    )
+    multisampling = VkPipelineMultisampleStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+      sampleShadingEnable: VK_FALSE,
+      rasterizationSamples: VK_SAMPLE_COUNT_1_BIT,
+      minSampleShading: 1.0,
+      pSampleMask: nil,
+      alphaToCoverageEnable: VK_FALSE,
+      alphaToOneEnable: VK_FALSE,
+    )
+    colorBlendAttachment = VkPipelineColorBlendAttachmentState(
+      colorWriteMask: toBits [VK_COLOR_COMPONENT_R_BIT, VK_COLOR_COMPONENT_G_BIT, VK_COLOR_COMPONENT_B_BIT, VK_COLOR_COMPONENT_A_BIT],
+      blendEnable: VK_TRUE,
+      srcColorBlendFactor: VK_BLEND_FACTOR_SRC_ALPHA,
+      dstColorBlendFactor: VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+      colorBlendOp: VK_BLEND_OP_ADD,
+      srcAlphaBlendFactor: VK_BLEND_FACTOR_ONE,
+      dstAlphaBlendFactor: VK_BLEND_FACTOR_ZERO,
+      alphaBlendOp: VK_BLEND_OP_ADD,
+    )
+    colorBlending = VkPipelineColorBlendStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+      logicOpEnable: false,
+      attachmentCount: 1,
+      pAttachments: addr(colorBlendAttachment),
+    )
+    dynamicStates = @[VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR]
+    dynamicState = VkPipelineDynamicStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+      dynamicStateCount: uint32(dynamicStates.len),
+      pDynamicStates: dynamicStates.toCPointer,
+    )
+    stages = @[vertexShader.getPipelineInfo(), fragmentShader.getPipelineInfo()]
+    createInfo = VkGraphicsPipelineCreateInfo(
+      sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+      stageCount: uint32(stages.len),
+      pStages: stages.toCPointer,
+      pVertexInputState: addr(vertexInputInfo),
+      pInputAssemblyState: addr(inputAssembly),
+      pViewportState: addr(viewportState),
+      pRasterizationState: addr(rasterizer),
+      pMultisampleState: addr(multisampling),
+      pDepthStencilState: nil,
+      pColorBlendState: addr(colorBlending),
+      pDynamicState: addr(dynamicState),
+      layout: pipeline.layout,
+      renderPass: renderPass.vk,
+      subpass: subpass,
+      basePipelineHandle: VkPipeline(0),
+      basePipelineIndex: -1,
+    )
+  checkVkResult vkCreateGraphicsPipelines(
+    renderPass.device.vk,
+    VkPipelineCache(0),
+    1,
+    addr(createInfo),
+    nil,
+    addr(pipeline.vk)
+  )
+  pipeline.descriptorPool = pipeline.device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
+  pipeline.descriptorSets = pipeline.descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, renderPass.inFlightFrames)
+  renderPass.pipelines[subpass] = pipeline
+
+proc simpleForwardRenderPass*[VertexShader: Shader, FragmentShader: Shader](device: Device, format: VkFormat, vertexShader: VertexShader, fragmentShader: FragmentShader, inFlightFrames: int, clearColor=Vec4([0.5'f32, 0.5'f32, 0.5'f32, 1'f32])): RenderPass =
   assert device.vk.valid
   var
     attachments = @[VkAttachmentDescription(
@@ -80,10 +219,14 @@ proc simpleForwardRenderPass*(device: Device, format: VkFormat, clearColor=Vec4(
       )
     ]
     dependencies: seq[VkSubpassDependency]
-  result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
+  result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies, inFlightFrames=inFlightFrames)
+  result.attachPipeline(vertexShader, fragmentShader, 0)
 
 proc destroy*(renderpass: var RenderPass) =
   assert renderpass.device.vk.valid
   assert renderpass.vk.valid
   renderpass.device.vk.vkDestroyRenderPass(renderpass.vk, nil)
   renderpass.vk.reset
+  for pipeline in renderpass.pipelines.mitems:
+    pipeline.destroy()
+  renderpass.pipelines = @[]

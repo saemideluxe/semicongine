@@ -14,7 +14,7 @@ type
     buffers*: seq[VkCommandBuffer]
     device: Device
 
-proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: uint32): CommandBufferPool =
+proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int): CommandBufferPool =
   assert device.vk.valid
   var createInfo = VkCommandPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -29,7 +29,7 @@ proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: uin
     sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
     commandPool: result.vk,
     level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-    commandBufferCount: nBuffers,
+    commandBufferCount: uint32(nBuffers),
   )
   result.buffers = newSeq[VkCommandBuffer](nBuffers)
   checkVkResult device.vk.vkAllocateCommandBuffers(addr(allocInfo), result.buffers.toCPointer)

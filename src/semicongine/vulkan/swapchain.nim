@@ -23,8 +23,8 @@ type
     nImages*: uint32
     imageviews*: seq[ImageView]
     framebuffers*: seq[Framebuffer]
-    nInFlight*: uint32
-    currentInFlight*: uint32
+    currentInFlight*: int
+    framesRendered*: int
     queueFinishedFence: seq[Fence]
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
@@ -37,13 +37,12 @@ proc createSwapchain*(
   surfaceFormat: VkSurfaceFormatKHR,
   queueFamily: QueueFamily,
   desiredNumberOfImages=3'u32,
-  framesInFlight=2'u32,
   presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR
 ): (Swapchain, VkResult) =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
   assert renderPass.vk.valid
-  assert framesInFlight > 0
+  assert renderPass.inFlightFrames > 0
 
   var capabilities = device.physicalDevice.getSurfaceCapabilities()
 
@@ -76,7 +75,6 @@ proc createSwapchain*(
     swapchain = Swapchain(
       device: device,
       format: surfaceFormat.format,
-      nInFlight: framesInFlight,
       dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]),
       renderPass: renderPass,
     )
@@ -93,21 +91,21 @@ proc createSwapchain*(
       let imageview = image.createImageView()
       swapChain.imageviews.add imageview
       swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass, [imageview], swapchain.dimension)
-    for i in 0 ..< swapchain.nInFlight:
+    for i in 0 ..< swapchain.renderPass.inFlightFrames:
       swapchain.queueFinishedFence.add device.createFence()
       swapchain.imageAvailableSemaphore.add device.createSemaphore()
       swapchain.renderFinishedSemaphore.add device.createSemaphore()
-    swapchain.commandBufferPool = device.createCommandBufferPool(queueFamily, swapchain.nInFlight)
+    swapchain.commandBufferPool = device.createCommandBufferPool(queueFamily, swapchain.renderPass.inFlightFrames)
 
   return (swapchain, createResult)
 
-proc drawNextFrame*(swapchain: var Swapchain, pipeline: Pipeline): bool =
+proc drawNextFrame*(swapchain: var Swapchain): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
   assert swapchain.device.firstGraphicsQueue().isSome
   assert swapchain.device.firstPresentationQueue().isSome
 
-  swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.nInFlight
+  swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.renderPass.inFlightFrames
   swapchain.queueFinishedFence[swapchain.currentInFlight].wait()
 
   var currentFramebufferIndex: uint32
@@ -124,13 +122,22 @@ proc drawNextFrame*(swapchain: var Swapchain, pipeline: Pipeline): bool =
 
   swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
 
+  var commandBuffer = swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
+
   renderCommands(
-    swapchain.commandBufferPool.buffers[swapchain.currentInFlight],
+    commandBuffer,
     swapchain.renderpass,
     swapchain.framebuffers[currentFramebufferIndex]
   ):
-    swapchain.commandBufferPool.buffers[swapchain.currentInFlight].vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
-    echo "TODO: Draw calls here"
+    for i in 0 ..< swapchain.renderpass.subpasses.len:
+      var pipeline = swapchain.renderpass.pipelines[i]
+      commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
+      commandBuffer.vkCmdBindDescriptorSets(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout, 0, 1, addr(pipeline.descriptorSets[swapchain.currentInFlight].vk), 0, nil)
+      pipeline.run(commandBuffer)
+
+      swapchain.renderpass.pipelines[i].run(commandBuffer)
+      if i < swapchain.renderpass.subpasses.len - 1:
+        commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
 
   var
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
@@ -141,7 +148,7 @@ proc drawNextFrame*(swapchain: var Swapchain, pipeline: Pipeline): bool =
       pWaitSemaphores: addr(waitSemaphores[0]),
       pWaitDstStageMask: addr(waitStages[0]),
       commandBufferCount: 1,
-      pCommandBuffers: addr(swapchain.commandBufferPool.buffers[swapchain.currentInFlight]),
+      pCommandBuffers: addr(commandBuffer),
       signalSemaphoreCount: 1,
       pSignalSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk),
     )
@@ -165,6 +172,8 @@ proc drawNextFrame*(swapchain: var Swapchain, pipeline: Pipeline): bool =
   if not (presentResult in [VK_SUCCESS, VK_SUBOPTIMAL_KHR]):
     return false
 
+  inc swapchain.framesRendered
+
   return true
 
 
@@ -179,7 +188,7 @@ proc destroy*(swapchain: var Swapchain) =
     assert framebuffer.vk.valid
     framebuffer.destroy()
   swapchain.commandBufferPool.destroy()
-  for i in 0 ..< swapchain.nInFlight:
+  for i in 0 ..< swapchain.renderPass.inFlightFrames:
     assert swapchain.queueFinishedFence[i].vk.valid
     assert swapchain.imageAvailableSemaphore[i].vk.valid
     assert swapchain.renderFinishedSemaphore[i].vk.valid
