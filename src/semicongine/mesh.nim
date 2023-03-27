@@ -5,7 +5,6 @@ import std/typetraits
 import ./vulkan
 import ./thing
 import ./buffer
-import ./vertex
 import ./math/vector
 
 type
@@ -23,10 +22,9 @@ func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[Mesh[
   var indexoffset = U(0)
   for mesh in meshes:
     for srcname, srcvalue in mesh.vertexData.fieldPairs:
-      when typeof(srcvalue) is VertexAttribute:
-        for dstname, dstvalue in result.vertexData.fieldPairs:
-          when srcname == dstname:
-            dstvalue.data.add srcvalue.data
+      for dstname, dstvalue in result.vertexData.fieldPairs:
+        when srcname == dstname:
+          dstvalue.data.add srcvalue.data
       var indexdata: seq[array[3, U]]
       for i in mesh.indices:
         indexdata.add [i[0] + indexoffset, i[1] + indexoffset, i[2] + indexoffset]
@@ -47,24 +45,23 @@ proc createVertexBuffers*[M: Mesh](
 ): (seq[Buffer], uint32) =
   result[1] = mesh.vertexData.VertexCount
   for name, value in mesh.vertexData.fieldPairs:
-    when typeof(value) is VertexAttribute:
-      assert value.data.len > 0
-      var flags = if value.useOnDeviceMemory: {TransferSrc} else: {VertexBuffer}
-      var stagingBuffer = device.InitBuffer(physicalDevice, value.datasize,
-          flags, {HostVisible, HostCoherent})
-      copyMem(stagingBuffer.data, addr(value.data[0]), value.datasize)
+    assert value.data.len > 0
+    var flags = if value.useOnDeviceMemory: {TransferSrc} else: {VertexBuffer}
+    var stagingBuffer = device.InitBuffer(physicalDevice, value.datasize,
+        flags, {HostVisible, HostCoherent})
+    copyMem(stagingBuffer.data, addr(value.data[0]), value.datasize)
 
-      if value.useOnDeviceMemory:
-        var finalBuffer = device.InitBuffer(physicalDevice, value.datasize, {
-            TransferDst, VertexBuffer}, {DeviceLocal})
-        transferBuffer(commandPool, queue, stagingBuffer, finalBuffer,
-            value.datasize)
-        stagingBuffer.trash()
-        result[0].add(finalBuffer)
-        value.buffer = finalBuffer
-      else:
-        result[0].add(stagingBuffer)
-        value.buffer = stagingBuffer
+    if value.useOnDeviceMemory:
+      var finalBuffer = device.InitBuffer(physicalDevice, value.datasize, {
+          TransferDst, VertexBuffer}, {DeviceLocal})
+      transferBuffer(commandPool, queue, stagingBuffer, finalBuffer,
+          value.datasize)
+      stagingBuffer.trash()
+      result[0].add(finalBuffer)
+      value.buffer = finalBuffer
+    else:
+      result[0].add(stagingBuffer)
+      value.buffer = stagingBuffer
 
 proc createIndexBuffer*(
   mesh: Mesh,

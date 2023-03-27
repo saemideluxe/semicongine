@@ -25,7 +25,7 @@ template checkVkResult*(call: untyped) =
     var callstr = astToStr(call).replace("\n", "")
     while callstr.find("  ") >= 0:
       callstr = callstr.replace("  ", " ")
-    debug "CALLING vulkan: ", callstr
+    debug "Calling vulkan: ", callstr
     let value = call
     if value != VK_SUCCESS:
       error "Vulkan error: ", astToStr(call), " returned ", $value

@@ -43,6 +43,7 @@ func newThing*(name: string = ""): Thing =
   result.transform = Unit44
   if result.name == "":
     result.name = &"Thing[{$(cast[ByteAddress](result))}]"
+
 func newThing*(name: string, firstChild: Thing, children: varargs[
     Thing]): Thing =
   result = new Thing
@@ -53,6 +54,7 @@ func newThing*(name: string, firstChild: Thing, children: varargs[
   result.transform = Unit44
   if result.name == "":
     result.name = &"Thing[{$(cast[ByteAddress](result))}]"
+
 proc newThing*(name: string, firstPart: Part, parts: varargs[Part]): Thing =
   result = new Thing
   result.name = name

@@ -64,32 +64,28 @@ when isMainModule:
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
-  var surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
-  var renderpass = device.simpleForwardRenderPass(surfaceFormat.format)
-  echo renderpass
-  var (swapchain, res) = device.createSwapchain(renderpass, surfaceFormat, device.firstGraphicsQueue().get().family)
-  if res != VK_SUCCESS:
-    raise newException(Exception, "Unable to create swapchain")
-
   const vertexBinary = shaderCode[Vertex, Uniforms, FragmentInput](stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
   const fragmentBinary = shaderCode[FragmentInput, void, Pixel](stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
   var
     vertexshader = createShader[Vertex, Uniforms, FragmentInput](device, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
     fragmentshader = createShader[FragmentInput, void, Pixel](device, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
-    pipeline = renderpass.createPipeline(vertexshader, fragmentshader)
-    descriptorPool = device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
-    descriptorSet = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, 1)
+    surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
+    renderpass = device.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
+  var (swapchain, res) = device.createSwapchain(renderpass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
+  if res != VK_SUCCESS:
+    raise newException(Exception, "Unable to create swapchain")
 
   echo "All successfull"
-  discard swapchain.drawNextFrame(pipeline)
+  for i in 0 ..< 2:
+    discard swapchain.drawNextFrame()
+  echo "Rendered ", swapchain.framesRendered, " frames"
   echo "Start cleanup"
+
 
   # cleanup
   checkVkResult device.vk.vkDeviceWaitIdle()
-  descriptorPool.destroy()
   vertexshader.destroy()
   fragmentshader.destroy()
-  pipeline.destroy()
   renderpass.destroy()
   swapchain.destroy()
   device.destroy()

@@ -83,7 +83,7 @@ proc destroy*(pool: var DescriptorPool) =
   pool.device.vk.vkDestroyDescriptorPool(pool.vk, nil)
   pool.vk.reset
 
-proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, nframes: uint32): seq[DescriptorSet] =
+proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, nframes: int): seq[DescriptorSet] =
   assert pool.device.vk.valid
   assert pool.vk.valid
   assert layout.device.vk.valid
