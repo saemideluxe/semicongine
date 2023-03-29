@@ -18,12 +18,12 @@ type
     resolvers: seq[VkAttachmentReference]
     depthStencil: Option[VkAttachmentReference]
     preserves: seq[uint32]
+    pipelines*: seq[Pipeline]
   RenderPass* = object
     vk*: VkRenderPass
     device*: Device
     inFlightFrames*: int
     subpasses*: seq[Subpass]
-    pipelines*: seq[Pipeline]
 
 proc createRenderPass*(
   device: Device,
@@ -64,7 +64,6 @@ proc createRenderPass*(
   result.device = device
   result.inFlightFrames = inFlightFrames
   result.subpasses = pSubpasses
-  result.pipelines = newSeq[Pipeline](pSubpasses.len)
   checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
 
 proc attachPipeline[VertexShader: Shader, FragmentShader: Shader](renderPass: var RenderPass, vertexShader: VertexShader, fragmentShader: FragmentShader, subpass = 0'u32) =
@@ -196,7 +195,7 @@ proc attachPipeline[VertexShader: Shader, FragmentShader: Shader](renderPass: va
   )
   pipeline.descriptorPool = pipeline.device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
   pipeline.descriptorSets = pipeline.descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, renderPass.inFlightFrames)
-  renderPass.pipelines[subpass] = pipeline
+  renderPass.subpasses[subpass].pipelines.add pipeline
 
 proc simpleForwardRenderPass*[VertexShader: Shader, FragmentShader: Shader](device: Device, format: VkFormat, vertexShader: VertexShader, fragmentShader: FragmentShader, inFlightFrames: int, clearColor=Vec4([0.5'f32, 0.5'f32, 0.5'f32, 1'f32])): RenderPass =
   assert device.vk.valid
@@ -235,6 +234,7 @@ proc destroy*(renderpass: var RenderPass) =
   assert renderpass.vk.valid
   renderpass.device.vk.vkDestroyRenderPass(renderpass.vk, nil)
   renderpass.vk.reset
-  for pipeline in renderpass.pipelines.mitems:
-    pipeline.destroy()
-  renderpass.pipelines = @[]
+  for subpass in renderpass.subpasses.mitems:
+    for pipeline in subpass.pipelines.mitems:
+      pipeline.destroy()
+  renderpass.subpasses = @[]
