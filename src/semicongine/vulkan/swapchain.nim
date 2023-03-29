@@ -11,6 +11,7 @@ import ./commandbuffer
 import ./pipeline
 import ./syncing
 
+import ../scene
 import ../math
 
 type
@@ -99,7 +100,7 @@ proc createSwapchain*(
 
   return (swapchain, createResult)
 
-proc drawNextFrame*(swapchain: var Swapchain): bool =
+proc drawNextFrame*(swapchain: var Swapchain, scene: Scene): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
   assert swapchain.device.firstGraphicsQueue().isSome
@@ -131,11 +132,7 @@ proc drawNextFrame*(swapchain: var Swapchain): bool =
   ):
     for i in 0 ..< swapchain.renderpass.subpasses.len:
       var pipeline = swapchain.renderpass.pipelines[i]
-      commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
-      commandBuffer.vkCmdBindDescriptorSets(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.layout, 0, 1, addr(pipeline.descriptorSets[swapchain.currentInFlight].vk), 0, nil)
-      pipeline.run(commandBuffer)
-
-      swapchain.renderpass.pipelines[i].run(commandBuffer)
+      pipeline.run(commandBuffer, swapchain.currentInFlight, scene)
       if i < swapchain.renderpass.subpasses.len - 1:
         commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
 

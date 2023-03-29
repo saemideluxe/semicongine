@@ -1,5 +1,7 @@
 import std/strformat
+import std/tables
 import std/sequtils
+import std/logging
 
 import ./api
 import ./utils
@@ -89,13 +91,21 @@ proc destroy*(instance: var Instance) =
   instance.vk.vkDestroyInstance(nil)
   instance.vk.reset()
 
+const LEVEL_MAPPING = {
+    VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: lvlDebug,
+    VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: lvlInfo,
+    VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: lvlWarn,
+    VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: lvlError,
+}.toTable
+
 proc defaultDebugCallback(
   messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
   messageTypes: VkDebugUtilsMessageTypeFlagsEXT,
   pCallbackData: ptr VkDebugUtilsMessengerCallbackDataEXT,
   userData: pointer
 ): VkBool32 {.cdecl.} =
-  echo &"{messageSeverity}: {toEnums messageTypes}: {pCallbackData.pMessage}"
+
+  log LEVEL_MAPPING[messageSeverity], &"{toEnums messageTypes}: {pCallbackData.pMessage}"
   return false
 
 proc createDebugMessenger*(
