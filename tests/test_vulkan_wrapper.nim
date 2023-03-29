@@ -3,6 +3,8 @@ import std/options
 import semicongine/vulkan
 import semicongine/platform/window
 import semicongine/math
+import semicongine/entity
+import semicongine/scene
 
 type
   Vertex = object
@@ -75,9 +77,11 @@ when isMainModule:
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
+  var thescene = Scene(root: newEntity("scene"))
+
   echo "All successfull"
   for i in 0 ..< 2:
-    discard swapchain.drawNextFrame()
+    discard swapchain.drawNextFrame(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
   echo "Start cleanup"
 

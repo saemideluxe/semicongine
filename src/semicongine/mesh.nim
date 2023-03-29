@@ -8,7 +8,6 @@ import ./buffer
 import ./math/vector
 
 type
-  # TODO: make single mesh type, with case-of attribute for indices
   Mesh*[T: object, U: uint16|uint32] = ref object of Part
     vertexData*: T
     case indexed*: bool

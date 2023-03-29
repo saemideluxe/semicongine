@@ -218,7 +218,15 @@ proc simpleForwardRenderPass*[VertexShader: Shader, FragmentShader: Shader](devi
         clearColor: clearColor
       )
     ]
-    dependencies: seq[VkSubpassDependency]
+    # dependencies seems to be optional, TODO: benchmark difference
+    dependencies = @[VkSubpassDependency(
+      srcSubpass: VK_SUBPASS_EXTERNAL,
+      dstSubpass: 0,
+      srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+      srcAccessMask: VkAccessFlags(0),
+      dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+      dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+    )]
   result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies, inFlightFrames=inFlightFrames)
   result.attachPipeline(vertexShader, fragmentShader, 0)
 
