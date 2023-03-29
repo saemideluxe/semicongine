@@ -131,8 +131,8 @@ proc drawNextFrame*(swapchain: var Swapchain, scene: Scene): bool =
     swapchain.framebuffers[currentFramebufferIndex]
   ):
     for i in 0 ..< swapchain.renderpass.subpasses.len:
-      var pipeline = swapchain.renderpass.pipelines[i]
-      pipeline.run(commandBuffer, swapchain.currentInFlight, scene)
+      for pipeline in swapchain.renderpass.subpasses[i].pipelines:
+        pipeline.run(commandBuffer, swapchain.currentInFlight, scene)
       if i < swapchain.renderpass.subpasses.len - 1:
         commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
 
