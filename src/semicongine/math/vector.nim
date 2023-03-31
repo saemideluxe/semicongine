@@ -36,6 +36,13 @@ func ConstR[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(0), T(0)]
 func ConstG[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(1), T(0)])
 func ConstB[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(0), T(1)])
 
+func newVec2*(x=0'f32, y=0'f32): auto =
+  Vec2([x, y])
+func newVec3*(x=0'f32, y=0'f32, z=0'f32): auto =
+  Vec3([x, y, z])
+func newVec4*(x=0'f32, y=0'f32, z=0'f32, a=0'f32): auto =
+  Vec4([x, y, z, a])
+
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
 # Also for Y, Z, R, G, B and One
 # not sure if this is necessary or even a good idea...

@@ -1,5 +1,4 @@
 import std/typetraits
-import std/macros
 import std/os
 import std/enumerate
 import std/logging
@@ -8,10 +7,8 @@ import std/strformat
 import std/strutils
 import std/compilesettings
 
-import ../math
 import ./api
 import ./device
-import ./vertex
 import ./utils
 
 import ../gpu_data

@@ -74,7 +74,7 @@ proc attachPipeline(renderPass: var RenderPass, vertexShader: Shader, fragmentSh
   assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
   assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
 
-  var pipeline = Pipeline(device: renderPass.device)
+  var pipeline = Pipeline(device: renderPass.device, shaders: @[vertexShader, fragmentShader])
   
   var descriptors = @[Descriptor(
     thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,

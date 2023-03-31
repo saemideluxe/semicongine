@@ -99,37 +99,41 @@ proc getQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
       flags: queuFamilies[i].queueFlags.toEnums,
     )
 
-proc hasGraphics*(family: QueueFamily): bool =
+proc canDoGraphics*(family: QueueFamily): bool =
   VK_QUEUE_GRAPHICS_BIT in family.flags
-proc hasPresentation*(family: QueueFamily, surface: VkSurfaceKHR): bool =
+
+proc canDoPresentation*(family: QueueFamily, surface: VkSurfaceKHR): bool =
   assert surface.valid
   var presentation = VkBool32(false)
   checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(family.device.vk, family.index, surface, addr presentation)
   return presentation
 
+proc canDoTransfer*(family: QueueFamily): bool =
+  VK_QUEUE_TRANSFER_BIT in family.flags
+
 proc filterForGraphicsPresentationQueues*(device: PhysicalDevice): seq[QueueFamily] =
-  var hasGraphics = false
-  var hasPresentation = false
+  var canDoGraphics = false
+  var canDoPresentation = false
   var queues: Table[uint32, QueueFamily]
   for family in device.getQueueFamilies():
-    if family.hasGraphics:
+    if family.canDoGraphics:
       queues[family.index] = family
-      hasGraphics = true
-    if family.hasPresentation(device.surface):
+      canDoGraphics = true
+    if family.canDoPresentation(device.surface):
       queues[family.index] = family
-      hasPresentation = true
-    if hasGraphics and hasPresentation:
+      canDoPresentation = true
+    if canDoGraphics and canDoPresentation:
       return queues.values.toSeq
 
 proc filterGraphics(families: seq[QueueFamily]): seq[QueueFamily] =
   for family in families:
-    if family.hasGraphics:
+    if family.canDoGraphics:
       result.add family
 
 proc filterPresentation(families: seq[QueueFamily], surface: VkSurfaceKHR): seq[QueueFamily] =
   assert surface.valid
   for family in families:
-    if family.hasPresentation(surface):
+    if family.canDoPresentation(surface):
       result.add family
 
 proc rateGraphics*(device: PhysicalDevice): float =

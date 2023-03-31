@@ -1,4 +1,3 @@
-import std/os
 import std/options
 
 import semicongine/vulkan
@@ -7,16 +6,7 @@ import semicongine/math
 import semicongine/entity
 import semicongine/scene
 import semicongine/gpu_data
-
-type
-  Vertex = object
-    pos: Vec3
-  FragmentInput = object
-    fragpos: Vec3
-  Uniforms = object
-    time: float32
-  Pixel = object
-    color: Vec4
+import semicongine/mesh
 
 proc diagnostics(instance: Instance) =
   # diagnostic output
@@ -83,11 +73,11 @@ when isMainModule:
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
-  var thescene = Scene(root: newEntity("scene"))
+  var thescene = Scene(name: "main", root: newEntity("triangle", newMesh([newVec3(-1, -1), newVec3(0, 1), newVec3(1, -1)])))
   thescene.setupDrawables(renderPass)
 
   echo "Setup successfull, start rendering"
-  for i in 0 ..< 10:
+  for i in 0 ..< 1:
     discard swapchain.drawScene(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
   echo "Start cleanup"

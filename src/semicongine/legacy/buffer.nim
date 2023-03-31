@@ -54,8 +54,7 @@ proc InitBuffer*(
   bufferTypes: set[BufferType],
   properties: MemoryProperties,
 ): Buffer =
-  result = Buffer(device: device, size: size, bufferTypes: bufferTypes,
-      memoryProperties: properties)
+  result = Buffer(device: device, size: size, bufferTypes: bufferTypes, memoryProperties: properties)
   var usageFlags = 0
   for usage in bufferTypes:
     usageFlags = ord(usageFlags) or ord(usage)
@@ -65,10 +64,8 @@ proc InitBuffer*(
     usage: VkBufferUsageFlags(usageFlags),
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
   )
-  checkVkResult vkCreateBuffer(result.device, addr(bufferInfo), nil, addr(
-      result.vkBuffer))
-  vkGetBufferMemoryRequirements(result.device, result.vkBuffer, addr(
-      result.memoryRequirements))
+  checkVkResult vkCreateBuffer(result.device, addr(bufferInfo), nil, addr(result.vkBuffer))
+  vkGetBufferMemoryRequirements(result.device, result.vkBuffer, addr(result.memoryRequirements))
 
   var allocInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -77,8 +74,7 @@ proc InitBuffer*(
   )
   if result.size > 0:
     checkVkResult result.device.vkAllocateMemory(addr(allocInfo), nil, addr(result.memory))
-  checkVkResult result.device.vkBindBufferMemory(result.vkBuffer, result.memory,
-      VkDeviceSize(0))
+  checkVkResult result.device.vkBindBufferMemory(result.vkBuffer, result.memory, VkDeviceSize(0))
   checkVkResult vkMapMemory(
     result.device,
     result.memory,
@@ -89,8 +85,7 @@ proc InitBuffer*(
   )
 
 
-proc transferBuffer*(commandPool: VkCommandPool, queue: VkQueue, src,
-    dst: Buffer, size: uint64) =
+proc transferBuffer*(commandPool: VkCommandPool, queue: VkQueue, src, dst: Buffer, size: uint64) =
   assert uint64(src.device) == uint64(dst.device)
   assert TransferSrc in src.bufferTypes
   assert TransferDst in dst.bufferTypes
