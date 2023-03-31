@@ -6,13 +6,15 @@ import ./device
 import ./pipeline
 import ./shader
 import ./descriptor
+import ../gpu_data
+
 import ../math
 
 type
   Subpass* = object
     clearColor*: Vec4
+    pipelineBindPoint*: VkPipelineBindPoint
     flags: VkSubpassDescriptionFlags
-    pipelineBindPoint: VkPipelineBindPoint
     inputs: seq[VkAttachmentReference]
     outputs: seq[VkAttachmentReference]
     resolvers: seq[VkAttachmentReference]
@@ -66,7 +68,7 @@ proc createRenderPass*(
   result.subpasses = pSubpasses
   checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
 
-proc attachPipeline[VertexShader: Shader, FragmentShader: Shader](renderPass: var RenderPass, vertexShader: VertexShader, fragmentShader: FragmentShader, subpass = 0'u32) =
+proc attachPipeline(renderPass: var RenderPass, vertexShader: Shader, fragmentShader: Shader, subpass = 0'u32) =
   assert renderPass.vk.valid
   assert renderPass.device.vk.valid
   assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
@@ -78,16 +80,16 @@ proc attachPipeline[VertexShader: Shader, FragmentShader: Shader](renderPass: va
     thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
     count: 1,
     stages: @[VK_SHADER_STAGE_VERTEX_BIT],
-    itemsize: uint32(sizeof(shaderUniforms(vertexShader)))
+    itemsize: vertexShader.uniforms.size(),
   )]
-  when shaderUniforms(vertexShader) is shaderUniforms(fragmentShader):
+  if vertexShader.uniforms == fragmentShader.uniforms:
     descriptors[0].stages.add VK_SHADER_STAGE_FRAGMENT_BIT
   else:
     descriptors.add Descriptor(
       thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
       count: 1,
       stages: @[VK_SHADER_STAGE_FRAGMENT_BIT],
-      itemsize: uint32(sizeof(shaderUniforms(fragmentShader)))
+      itemsize: fragmentShader.uniforms.size(),
     )
   pipeline.descriptorSetLayout = renderPass.device.createDescriptorSetLayout(descriptors)
 
@@ -197,7 +199,7 @@ proc attachPipeline[VertexShader: Shader, FragmentShader: Shader](renderPass: va
   pipeline.descriptorSets = pipeline.descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, renderPass.inFlightFrames)
   renderPass.subpasses[subpass].pipelines.add pipeline
 
-proc simpleForwardRenderPass*[VertexShader: Shader, FragmentShader: Shader](device: Device, format: VkFormat, vertexShader: VertexShader, fragmentShader: FragmentShader, inFlightFrames: int, clearColor=Vec4([0.5'f32, 0.5'f32, 0.5'f32, 1'f32])): RenderPass =
+proc simpleForwardRenderPass*(device: Device, format: VkFormat, vertexShader: Shader, fragmentShader: Shader, inFlightFrames: int, clearColor=Vec4([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): RenderPass =
   assert device.vk.valid
   var
     attachments = @[VkAttachmentDescription(
@@ -229,12 +231,12 @@ proc simpleForwardRenderPass*[VertexShader: Shader, FragmentShader: Shader](devi
   result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies, inFlightFrames=inFlightFrames)
   result.attachPipeline(vertexShader, fragmentShader, 0)
 
-proc destroy*(renderpass: var RenderPass) =
-  assert renderpass.device.vk.valid
-  assert renderpass.vk.valid
-  renderpass.device.vk.vkDestroyRenderPass(renderpass.vk, nil)
-  renderpass.vk.reset
-  for subpass in renderpass.subpasses.mitems:
+proc destroy*(renderPass: var RenderPass) =
+  assert renderPass.device.vk.valid
+  assert renderPass.vk.valid
+  renderPass.device.vk.vkDestroyRenderPass(renderPass.vk, nil)
+  renderPass.vk.reset
+  for subpass in renderPass.subpasses.mitems:
     for pipeline in subpass.pipelines.mitems:
       pipeline.destroy()
-  renderpass.subpasses = @[]
+  renderPass.subpasses = @[]

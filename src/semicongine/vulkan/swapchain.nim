@@ -100,7 +100,37 @@ proc createSwapchain*(
 
   return (swapchain, createResult)
 
-proc drawNextFrame*(swapchain: var Swapchain, scene: Scene): bool =
+proc draw*(commandBuffer: VkCommandBuffer, drawables: seq[Drawable], scene: Scene) =
+  for drawable in drawables:
+    var buffers: seq[VkBuffer]
+    var offsets: seq[VkDeviceSize]
+    for (buffer, offset) in drawable.buffers:
+      buffers.add buffer.vk
+      offsets.add VkDeviceSize(offset)
+    commandBuffer.vkCmdBindVertexBuffers(
+      firstBinding=0'u32,
+      bindingCount=uint32(buffers.len),
+      pBuffers=buffers.toCPointer(),
+      pOffsets=offsets.toCPointer()
+    )
+    if drawable.indexed:
+      commandBuffer.vkCmdBindIndexBuffer(drawable.indexBuffer.vk, VkDeviceSize(0), drawable.indexType)
+      commandBuffer.vkCmdDrawIndexed(
+        indexCount=drawable.elementCount,
+        instanceCount=drawable.instanceCount,
+        firstIndex=0,
+        vertexOffset=0,
+        firstInstance=0
+      )
+    else:
+      commandBuffer.vkCmdDraw(
+        vertexCount=drawable.elementCount,
+        instanceCount=drawable.instanceCount,
+        firstVertex=0,
+        firstInstance=0
+      )
+
+proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
   assert swapchain.device.firstGraphicsQueue().isSome
@@ -131,8 +161,10 @@ proc drawNextFrame*(swapchain: var Swapchain, scene: Scene): bool =
     swapchain.framebuffers[currentFramebufferIndex]
   ):
     for i in 0 ..< swapchain.renderpass.subpasses.len:
-      for pipeline in swapchain.renderpass.subpasses[i].pipelines:
-        pipeline.run(commandBuffer, swapchain.currentInFlight, scene)
+      for pipeline in swapchain.renderpass.subpasses[i].pipelines.mitems:
+        commandBuffer.vkCmdBindPipeline(swapchain.renderpass.subpasses[i].pipelineBindPoint, pipeline.vk)
+        commandBuffer.vkCmdBindDescriptorSets(swapchain.renderpass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(pipeline.descriptorSets[swapchain.currentInFlight].vk), 0, nil)
+        commandBuffer.draw(scene.getDrawables(pipeline), scene)
       if i < swapchain.renderpass.subpasses.len - 1:
         commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
 
@@ -194,3 +226,4 @@ proc destroy*(swapchain: var Swapchain) =
     swapchain.renderFinishedSemaphore[i].destroy()
   swapchain.device.vk.vkDestroySwapchainKHR(swapchain.vk, nil)
   swapchain.vk.reset()
+

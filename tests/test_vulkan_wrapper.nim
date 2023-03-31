@@ -1,3 +1,4 @@
+import std/os
 import std/options
 
 import semicongine/vulkan
@@ -5,6 +6,7 @@ import semicongine/platform/window
 import semicongine/math
 import semicongine/entity
 import semicongine/scene
+import semicongine/gpu_data
 
 type
   Vertex = object
@@ -66,22 +68,27 @@ when isMainModule:
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
-  const vertexBinary = shaderCode[Vertex, Uniforms, FragmentInput](stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
-  const fragmentBinary = shaderCode[FragmentInput, void, Pixel](stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
+  const inputs = AttributeGroup(attributes: @[attr(name="pos", thetype=Float32, components=3)])
+  const uniforms = AttributeGroup()
+  const outputs = AttributeGroup(attributes: @[attr(name="fragpos", thetype=Float32, components=3)])
+  const fragOutput = AttributeGroup(attributes: @[attr(name="color", thetype=Float32, components=4)])
+  const vertexBinary = shaderCode(inputs=inputs, uniforms=uniforms, outputs=outputs, stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
+  const fragmentBinary = shaderCode(inputs=outputs, uniforms=uniforms, outputs=fragOutput, stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
   var
-    vertexshader = createShader[Vertex, Uniforms, FragmentInput](device, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
-    fragmentshader = createShader[FragmentInput, void, Pixel](device, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
+    vertexshader = device.createShader(inputs, uniforms, outputs, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
+    fragmentshader = device.createShader(inputs, uniforms, outputs, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
     surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
-    renderpass = device.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
-  var (swapchain, res) = device.createSwapchain(renderpass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
+    renderPass = device.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
+  var (swapchain, res) = device.createSwapchain(renderPass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
   var thescene = Scene(root: newEntity("scene"))
+  thescene.setupDrawables(renderPass)
 
-  echo "All successfull"
-  for i in 0 ..< 2:
-    discard swapchain.drawNextFrame(thescene)
+  echo "Setup successfull, start rendering"
+  for i in 0 ..< 10:
+    discard swapchain.drawScene(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
   echo "Start cleanup"
 
@@ -90,7 +97,7 @@ when isMainModule:
   checkVkResult device.vk.vkDeviceWaitIdle()
   vertexshader.destroy()
   fragmentshader.destroy()
-  renderpass.destroy()
+  renderPass.destroy()
   swapchain.destroy()
   device.destroy()
 

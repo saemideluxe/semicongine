@@ -14,7 +14,7 @@ type
   DescriptorSetLayout* = object # "type description of a DescriptorSet
     device: Device
     vk*: VkDescriptorSetLayout
-    descriptors: seq[Descriptor]
+    descriptors*: seq[Descriptor]
   DescriptorSet* = object # "instance" of a DescriptorSetLayout
     vk*: VkDescriptorSet
     layout: DescriptorSetLayout

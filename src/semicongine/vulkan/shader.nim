@@ -12,22 +12,22 @@ import ../math
 import ./api
 import ./device
 import ./vertex
-import ./glsl
 import ./utils
+
+import ../gpu_data
 
 let logger = newConsoleLogger()
 addHandler(logger)
 
 type
-  Shader*[Inputs, Uniforms, Outputs] = object
+  Shader* = object
     device: Device
     stage*: VkShaderStageFlagBits
     vk*: VkShaderModule
     entrypoint*: string
-
-template shaderInput*[Inputs, Uniforms, Outputs](shader: Shader[Inputs, Uniforms, Outputs]): typedesc = Inputs
-template shaderOutputs*[Inputs, Uniforms, Outputs](shader: Shader[Inputs, Uniforms, Outputs]): typedesc = Outputs
-template shaderUniforms*[Inputs, Uniforms, Outputs](shader: Shader[Inputs, Uniforms, Outputs]): typedesc = Uniforms
+    inputs*: AttributeGroup
+    uniforms*: AttributeGroup
+    outputs*: AttributeGroup
 
 
 proc compileGLSLToSPIRV*(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
@@ -78,26 +78,53 @@ proc compileGLSLToSPIRV*(stage: VkShaderStageFlagBits, shaderSource: string, ent
     i += 4
 
 
-proc shaderCode*[Inputs, Uniforms, Outputs](stage: VkShaderStageFlagBits, version: int, entrypoint: string, body: seq[string]): seq[uint32] {.compileTime.} =
+proc shaderCode*(
+  inputs: AttributeGroup,
+  uniforms: AttributeGroup,
+  outputs: AttributeGroup,
+  stage: VkShaderStageFlagBits,
+  version: int,
+  entrypoint: string,
+  body: seq[string]
+): seq[uint32] {.compileTime.} =
   var code = @[&"#version {version}", ""] &
-    glslInput[Inputs]() & @[""] &
-    glslUniforms[Uniforms]() & @[""] &
-    glslOutput[Outputs]() & @[""] &
+    inputs.glslInput() & @[""] &
+    uniforms.glslUniforms() & @[""] &
+    outputs.glslOutput() & @[""] &
     @[&"void {entrypoint}(){{"] &
     body &
     @[&"}}"]
   compileGLSLToSPIRV(stage, code.join("\n"), entrypoint)
 
 
-proc shaderCode*[Inputs, Uniforms, Outputs](stage: VkShaderStageFlagBits, version: int, entrypoint: string, body: string): seq[uint32] {.compileTime.} =
-  return shaderCode[Inputs, Uniforms, Outputs](stage, version, entrypoint, @[body])
+proc shaderCode*(
+  inputs: AttributeGroup,
+  uniforms: AttributeGroup,
+  outputs: AttributeGroup,
+  stage: VkShaderStageFlagBits,
+  version: int,
+  entrypoint: string,
+  body: string
+): seq[uint32] {.compileTime.} =
+  return shaderCode(inputs, uniforms, outputs, stage, version, entrypoint, @[body])
 
 
-proc createShader*[Inputs, Uniforms, Outputs](device: Device, stage: VkShaderStageFlagBits, entrypoint: string, binary: seq[uint32]): Shader[Inputs, Uniforms, Outputs] =
+proc createShader*(
+  device: Device,
+  inputs: AttributeGroup,
+  uniforms: AttributeGroup,
+  outputs: AttributeGroup,
+  stage: VkShaderStageFlagBits,
+  entrypoint: string,
+  binary: seq[uint32]
+): Shader =
   assert device.vk.valid
   assert len(binary) > 0
 
   result.device = device
+  result.inputs = inputs
+  result.uniforms = uniforms
+  result.outputs = outputs
   result.entrypoint = entrypoint
   result.stage = stage
   var bin = binary
@@ -107,6 +134,41 @@ proc createShader*[Inputs, Uniforms, Outputs](device: Device, stage: VkShaderSta
     pCode: addr(bin[0]),
   )
   checkVkResult vkCreateShaderModule(device.vk, addr(createInfo), nil, addr(result.vk))
+
+proc getVertexInputInfo*(
+  shader: Shader,
+  bindings: var seq[VkVertexInputBindingDescription],
+  attributes: var seq[VkVertexInputAttributeDescription],
+  baseBinding=0'u32
+): VkPipelineVertexInputStateCreateInfo =
+  var location = 0'u32
+  var binding = baseBinding
+
+  for attribute in shader.inputs.attributes:
+    bindings.add VkVertexInputBindingDescription(
+      binding: binding,
+      stride: attribute.size,
+      inputRate: if attribute.perInstance: VK_VERTEX_INPUT_RATE_INSTANCE else: VK_VERTEX_INPUT_RATE_VERTEX,
+    )
+    # allows to submit larger data structures like Mat44, for most other types will be 1
+    for i in 0 ..< attribute.rows:
+      attributes.add VkVertexInputAttributeDescription(
+        binding: binding,
+        location: location,
+        format: getVkFormat(attribute),
+        offset: i * attribute.size(perRow=true),
+      )
+      location += attribute.nLocationSlots
+    inc binding
+
+  return VkPipelineVertexInputStateCreateInfo(
+    sType: VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+    vertexBindingDescriptionCount: uint32(bindings.len),
+    pVertexBindingDescriptions: bindings.toCPointer,
+    vertexAttributeDescriptionCount: uint32(attributes.len),
+    pVertexAttributeDescriptions: attributes.toCPointer,
+  )
+
 
 proc getPipelineInfo*(shader: Shader): VkPipelineShaderStageCreateInfo =
   VkPipelineShaderStageCreateInfo(
@@ -121,81 +183,3 @@ proc destroy*(shader: var Shader) =
   assert shader.vk.valid
   shader.device.vk.vkDestroyShaderModule(shader.vk, nil)
   shader.vk.reset
-
-
-func getVkFormat[T](value: T): VkFormat =
-  when T is uint8: VK_FORMAT_R8_UINT
-  elif T is int8: VK_FORMAT_R8_SINT
-  elif T is uint16: VK_FORMAT_R16_UINT
-  elif T is int16: VK_FORMAT_R16_SINT
-  elif T is uint32: VK_FORMAT_R32_UINT
-  elif T is int32: VK_FORMAT_R32_SINT
-  elif T is uint64: VK_FORMAT_R64_UINT
-  elif T is int64: VK_FORMAT_R64_SINT
-  elif T is float32: VK_FORMAT_R32_SFLOAT
-  elif T is float64: VK_FORMAT_R64_SFLOAT
-  elif T is TVec2[uint8]: VK_FORMAT_R8G8_UINT
-  elif T is TVec2[int8]: VK_FORMAT_R8G8_SINT
-  elif T is TVec2[uint16]: VK_FORMAT_R16G16_UINT
-  elif T is TVec2[int16]: VK_FORMAT_R16G16_SINT
-  elif T is TVec2[uint32]: VK_FORMAT_R32G32_UINT
-  elif T is TVec2[int32]: VK_FORMAT_R32G32_SINT
-  elif T is TVec2[uint64]: VK_FORMAT_R64G64_UINT
-  elif T is TVec2[int64]: VK_FORMAT_R64G64_SINT
-  elif T is TVec2[float32]: VK_FORMAT_R32G32_SFLOAT
-  elif T is TVec2[float64]: VK_FORMAT_R64G64_SFLOAT
-  elif T is TVec3[uint8]: VK_FORMAT_R8G8B8_UINT
-  elif T is TVec3[int8]: VK_FORMAT_R8G8B8_SINT
-  elif T is TVec3[uint16]: VK_FORMAT_R16G16B16_UINT
-  elif T is TVec3[int16]: VK_FORMAT_R16G16B16_SINT
-  elif T is TVec3[uint32]: VK_FORMAT_R32G32B32_UINT
-  elif T is TVec3[int32]: VK_FORMAT_R32G32B32_SINT
-  elif T is TVec3[uint64]: VK_FORMAT_R64G64B64_UINT
-  elif T is TVec3[int64]: VK_FORMAT_R64G64B64_SINT
-  elif T is TVec3[float32]: VK_FORMAT_R32G32B32_SFLOAT
-  elif T is TVec3[float64]: VK_FORMAT_R64G64B64_SFLOAT
-  elif T is TVec4[uint8]: VK_FORMAT_R8G8B8A8_UINT
-  elif T is TVec4[int8]: VK_FORMAT_R8G8B8A8_SINT
-  elif T is TVec4[uint16]: VK_FORMAT_R16G16B16A16_UINT
-  elif T is TVec4[int16]: VK_FORMAT_R16G16B16A16_SINT
-  elif T is TVec4[uint32]: VK_FORMAT_R32G32B32A32_UINT
-  elif T is TVec4[int32]: VK_FORMAT_R32G32B32A32_SINT
-  elif T is TVec4[uint64]: VK_FORMAT_R64G64B64A64_UINT
-  elif T is TVec4[int64]: VK_FORMAT_R64G64B64A64_SINT
-  elif T is TVec4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
-  elif T is TVec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
-  else: {.error: "Unsupported vertex attribute type".}
-
-
-proc getVertexInputInfo*[Input, Uniforms, Output](
-  shader: Shader[Input, Uniforms, Output],
-  bindings: var seq[VkVertexInputBindingDescription],
-  attributes: var seq[VkVertexInputAttributeDescription],
-): VkPipelineVertexInputStateCreateInfo =
-  var location = 0'u32
-  var binding = 0'u32
-
-  for name, value in default(Input).fieldPairs:
-    bindings.add VkVertexInputBindingDescription(
-      binding: binding,
-      stride: uint32(sizeof(value)),
-      inputRate: if value.hasCustomPragma(PerInstance): VK_VERTEX_INPUT_RATE_INSTANCE else: VK_VERTEX_INPUT_RATE_VERTEX,
-    )
-    # allows to submit larger data structures like Mat44, for most other types will be 1
-    for i in 0 ..< compositeAttributesNumber(value):
-      attributes.add VkVertexInputAttributeDescription(
-        binding: binding,
-        location: location,
-        format: getVkFormat(compositeAttribute(value)),
-        offset: uint32(i * sizeof(compositeAttribute(value))),
-      )
-      location += nLocationSlots(compositeAttribute(value))
-    inc binding
-
-  return VkPipelineVertexInputStateCreateInfo(
-    sType: VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-    vertexBindingDescriptionCount: uint32(bindings.len),
-    pVertexBindingDescriptions: bindings.toCPointer,
-    vertexAttributeDescriptionCount: uint32(attributes.len),
-    pVertexAttributeDescriptions: attributes.toCPointer,
-  )
