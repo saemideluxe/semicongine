@@ -15,12 +15,9 @@ type
     components*: seq[Component]
 
 
-func `$`*(entity: Entity): string = entity.name
+method `$`*(entity: Entity): string {.base.} = entity.name
 method `$`*(part: Component): string {.base.} =
-  if part.entity != nil:
-    &"{part.entity} -> Component"
-  else:
-    &"Standalone Component"
+  "Unknown Component"
 
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
@@ -44,8 +41,7 @@ func newEntity*(name: string = ""): Entity =
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
 
-func newEntity*(name: string, firstChild: Entity, children: varargs[
-    Entity]): Entity =
+func newEntity*(name: string, firstChild: Entity, children: varargs[Entity]): Entity =
   result = new Entity
   result.add firstChild
   for child in children:

@@ -1,20 +1,50 @@
-import std/math
-import std/options
-import std/typetraits
+import std/enumerate
+import std/strformat
+import std/sequtils
 
-import ./vulkan
-import ./thing
-import ./buffer
-import ./math/vector
+import ./entity
+import ./math
 
 type
-  Mesh*[T: object, U: uint16|uint32] = ref object of Part
-    vertexData*: T
-    case indexed*: bool
-    of true:
-      indices*: seq[array[3, U]]
-    of false:
+  MeshIndexType* = enum
+    None
+    Small # up to 2^16 vertices
+    Big # up to 2^32 vertices
+  Mesh* = ref object of Component
+    vertices: seq[Vec3]
+    case indexType*: MeshIndexType
+    of None:
       discard
+    of Small:
+      smallIndices*: seq[array[3, uint16]]
+    of Big:
+      bigIndices*: seq[array[3, uint32]]
+
+method `$`*(mesh: Mesh): string =
+  &"Mesh ({mesh.vertices.len})"
+
+func newMesh*(vertices: openArray[Vec3]): auto =
+  Mesh(vertices: vertices.toSeq, indexType: None)
+
+func newMesh*(vertices: openArray[Vec3], indices: openArray[array[3, uint32|int32]]): auto =
+  if uint16(vertices.len) < high(uint16):
+    var smallIndices = newSeq[array[3, uint16]](indices.len)
+    for i, tri in enumerate(indices):
+      smallIndices[i] = [uint16(tri[0]), uint16(tri[1]), uint16(tri[3])]
+    Mesh(vertices: vertices.toSeq, indexType: Small, smallIndices: smallIndices)
+  else:
+    var bigIndices = newSeq[array[3, uint32]](indices.len)
+    for i, tri in enumerate(indices):
+      bigIndices[i] = [uint32(tri[0]), uint32(tri[1]), uint32(tri[3])]
+    Mesh(vertices: vertices.toSeq, indexType: Big, bigIndices: bigIndices)
+
+func newMesh*(vertices: openArray[Vec3], indices: openArray[array[3, uint16|int16]]): auto =
+  var smallIndices = newSeq[array[3, uint16]](indices.len)
+  for i, tri in enumerate(indices):
+    smallIndices[i] = [uint16(tri[0]), uint16(tri[1]), uint16(tri[3])]
+  Mesh(vertices: vertices.toSeq, indexType: Small, smallIndices: smallIndices)
+
+#[
 
 func createUberMesh*[T: object, U: uint16|uint32](meshes: openArray[Mesh[
     T, U]]): Mesh[T, U] =
@@ -136,3 +166,4 @@ func circle*[VertexType, VecType, T](n = 16): Mesh[VertexType, uint16] =
     when typeof(value) is PositionAttribute:
       value.data = data
       value.useOnDeviceMemory = true
+]#

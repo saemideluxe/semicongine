@@ -22,6 +22,7 @@ type
     components*: CountType # how many components the vectors has (1 means scalar)
     rows*: CountType # used to split matrices into rows of vectors
     perInstance*: bool
+    useGPULocalMemory*: bool
   AttributeGroup* = object
     attributes*: seq[Attribute]
 

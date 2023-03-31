@@ -72,7 +72,7 @@ proc createDevice*(
   for family in deviceQueues.keys:
     var queue: VkQueue
     vkGetDeviceQueue(result.vk, family.index, 0, addr queue)
-    result.queues[family] = Queue(vk: queue, family: family, presentation: family.hasPresentation(physicalDevice.surface), graphics: family.hasGraphics())
+    result.queues[family] = Queue(vk: queue, family: family, presentation: family.canDoPresentation(physicalDevice.surface), graphics: family.canDoGraphics())
 
 func firstGraphicsQueue*(device: Device): Option[Queue] =
   assert device.vk.valid
