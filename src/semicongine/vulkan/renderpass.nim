@@ -12,7 +12,7 @@ import ../math
 
 type
   Subpass* = object
-    clearColor*: Vec4
+    clearColor*: Vec4f
     pipelineBindPoint*: VkPipelineBindPoint
     flags: VkSubpassDescriptionFlags
     inputs: seq[VkAttachmentReference]
@@ -199,7 +199,7 @@ proc attachPipeline(renderPass: var RenderPass, vertexShader: Shader, fragmentSh
   pipeline.descriptorSets = pipeline.descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, renderPass.inFlightFrames)
   renderPass.subpasses[subpass].pipelines.add pipeline
 
-proc simpleForwardRenderPass*(device: Device, format: VkFormat, vertexShader: Shader, fragmentShader: Shader, inFlightFrames: int, clearColor=Vec4([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): RenderPass =
+proc simpleForwardRenderPass*(device: Device, format: VkFormat, vertexShader: Shader, fragmentShader: Shader, inFlightFrames: int, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): RenderPass =
   assert device.vk.valid
   var
     attachments = @[VkAttachmentDescription(

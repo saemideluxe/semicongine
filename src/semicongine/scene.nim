@@ -1,15 +1,17 @@
 import std/tables
+import std/strformat
 
 import ./vulkan/api
 import ./vulkan/buffer
 import ./vulkan/pipeline
 import ./vulkan/renderpass
+import ./gpu_data
 import ./entity
 import ./mesh
 
 type
   Drawable* = object
-    buffers*: seq[(Buffer, int)] # buffer + offset from buffer
+    buffers*: seq[(Buffer, uint64)] # buffer + offset from buffer
     elementCount*: uint32 # number of vertices or indices
     instanceCount*: uint32 # number of instance
     case indexed*: bool
@@ -24,23 +26,51 @@ type
     root*: Entity
     drawables: Table[VkPipeline, seq[Drawable]]
 
+func `$`*(drawable: Drawable): string =
+  if drawable.indexed:
+    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffers: {drawable.buffers}, indexType: {drawable.indexType})"
+  else:
+    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffers: {drawable.buffers})"
+
 proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
-  var meshes: seq[Mesh]
-  var smallIMeshes: seq[Mesh]
-  var bigIMeshes: seq[Mesh]
+  assert pipeline.device.vk.valid
+  assert not (pipeline.vk in scene.drawables)
+
+  scene.drawables[pipeline.vk] = @[]
+
+  var
+    nonIMeshes: seq[Mesh]
+    smallIMeshes: seq[Mesh]
+    bigIMeshes: seq[Mesh]
   for mesh in allPartsOfType[Mesh](scene.root):
+    for inputAttr in pipeline.inputs.vertexInputs:
+      assert mesh.hasDataFor(inputAttr), &"{mesh} missing data for {inputAttr}"
     case mesh.indexType:
-      of None: meshes.add mesh
+      of None: nonIMeshes.add mesh
       of Small: smallIMeshes.add mesh
       of Big: bigIMeshes.add mesh
-  echo pipeline.inputs
-
-  # one drawable per mesh list
-    # one buffer per pipeline.input
-      # how to find data for pipeline.inputs attribute-buffer?
-      # position: get from mesh, mark attribute
-      # color/UVs: material component?
-  scene.drawables[pipeline.vk] = @[]
+  
+  if nonIMeshes.len > 0:
+    var
+      bufferSize = 0'u64
+      vertexCount = 0'u32
+    for mesh in nonIMeshes:
+      bufferSize += mesh.size
+      vertexCount += mesh.vertexCount
+    var buffer = pipeline.device.createBuffer(
+        size=bufferSize,
+        usage=[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
+        memoryFlags=[VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT],
+      )
+    var offset = 0'u64
+    var drawable = Drawable(elementCount: vertexCount, indexed: false, instanceCount: 1)
+    for inputAttr in pipeline.inputs.vertexInputs:
+      drawable.buffers.add (buffer, offset)
+      for mesh in nonIMeshes:
+        var (pdata, size) = mesh.getRawData(inputAttr)
+        buffer.setData(pdata, size, offset)
+        offset += size
+    scene.drawables[pipeline.vk].add drawable
 
 #[
 proc createVertexBuffers*[M: Mesh](
@@ -76,3 +106,12 @@ proc setupDrawables*(scene: var Scene, renderPass: var RenderPass) =
 
 proc getDrawables*(scene: Scene, pipeline: Pipeline): seq[Drawable] =
   scene.drawables.getOrDefault(pipeline.vk, @[])
+
+proc destroy*(scene: var Scene) =
+  for drawables in scene.drawables.mvalues:
+    for drawable in drawables.mitems:
+      for (buffer, offset) in drawable.buffers.mitems:
+        # if buffer.vk.valid: # required because we allow duplicates in drawable.buffers
+        buffer.destroy()
+      if drawable.indexed:
+        drawable.indexBuffer.destroy()

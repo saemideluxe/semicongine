@@ -58,12 +58,12 @@ when isMainModule:
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
-  const inputs = AttributeGroup(attributes: @[attr(name="pos", thetype=Float32, components=3)])
+  const inputs = AttributeGroup(attributes: @[attr(name="position", thetype=Float32, components=3)])
   const uniforms = AttributeGroup()
   const outputs = AttributeGroup(attributes: @[attr(name="fragpos", thetype=Float32, components=3)])
   const fragOutput = AttributeGroup(attributes: @[attr(name="color", thetype=Float32, components=4)])
-  const vertexBinary = shaderCode(inputs=inputs, uniforms=uniforms, outputs=outputs, stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = pos;")
-  const fragmentBinary = shaderCode(inputs=outputs, uniforms=uniforms, outputs=fragOutput, stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 0);")
+  const vertexBinary = shaderCode(inputs=inputs, uniforms=uniforms, outputs=outputs, stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = position;")
+  const fragmentBinary = shaderCode(inputs=outputs, uniforms=uniforms, outputs=fragOutput, stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 1);")
   var
     vertexshader = device.createShader(inputs, uniforms, outputs, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
     fragmentshader = device.createShader(inputs, uniforms, outputs, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
@@ -73,7 +73,13 @@ when isMainModule:
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
-  var thescene = Scene(name: "main", root: newEntity("triangle", newMesh([newVec3(-1, -1), newVec3(0, 1), newVec3(1, -1)])))
+  var thescene = Scene(
+    name: "main",
+    root: newEntity("root",
+      newEntity("triangle1", newMesh([newVec3f(-0.5, -0.5), newVec3f(0.5, 0.5), newVec3f(0.5, -0.5)])),
+      newEntity("triangle2", newMesh([newVec3f(-0.5, -0.5), newVec3f(0.5, -0.5), newVec3f(0.5, 0.5)])),
+    )
+  )
   thescene.setupDrawables(renderPass)
 
   echo "Setup successfull, start rendering"
@@ -85,6 +91,7 @@ when isMainModule:
 
   # cleanup
   checkVkResult device.vk.vkDeviceWaitIdle()
+  thescene.destroy()
   vertexshader.destroy()
   fragmentshader.destroy()
   renderPass.destroy()

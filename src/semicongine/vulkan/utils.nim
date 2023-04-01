@@ -1,3 +1,4 @@
+import std/typetraits
 import std/strutils
 import std/strformat
 
@@ -18,4 +19,5 @@ proc staticExecChecked*(command: string, input = ""): string {.compileTime.} =
     raise newException(Exception, &"Running '{command}' produced exit code: {exitcode}" & output)
   return output
 
-
+func size*[T: seq](list: T): uint64 =
+  uint64(list.len * sizeof(get(genericParams(typeof(list)), 0)))

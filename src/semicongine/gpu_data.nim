@@ -1,7 +1,9 @@
+import std/typetraits
 import std/strformat
 import std/tables
 
 import ./vulkan/api
+import ./math
 
 type
   CountType = 1'u32 .. 4'u32
@@ -25,6 +27,16 @@ type
     useGPULocalMemory*: bool
   AttributeGroup* = object
     attributes*: seq[Attribute]
+
+func vertexInputs*(group: AttributeGroup): seq[Attribute] =
+  for attr in group.attributes:
+    if attr.perInstance == false:
+      result.add attr
+
+func instanceInputs*(group: AttributeGroup): seq[Attribute] =
+  for attr in group.attributes:
+    if attr.perInstance == false:
+      result.add attr
 
 func attr*(name: string, thetype: DataType, components=CountType(1), rows=CountType(1), perInstance=false): auto =
   Attribute(name: name, thetype: thetype, components: components, rows: rows, perInstance: perInstance)
@@ -51,6 +63,47 @@ func size*(attribute: Attribute, perRow=false): uint32 =
 func size*(thetype: AttributeGroup): uint32 =
   for attribute in thetype.attributes:
     result += attribute.size
+
+func getDataType*[T: SomeNumber](value: T): DataType =
+  when T is float32: Float32
+  elif T is float64: Float64
+  elif T is int8: Int8
+  elif T is int16: Int16
+  elif T is int32: Int32
+  elif T is int64: Int64
+  elif T is uint8: UInt8
+  elif T is uint16: UInt16
+  elif T is uint32: UInt32
+  elif T is uint64: UInt64
+  elif T is int and sizeof(int) == sizeof(int64): Int64
+  elif T is int and sizeof(int) == sizeof(int32): Int32
+  elif T is uint and sizeof(uint) == sizeof(uint64): UInt64
+  elif T is uint and sizeof(uint) == sizeof(uint32): UInt32
+  elif T is float and sizeof(float) == sizeof(float32): Float32
+  elif T is float and sizeof(float) == sizeof(float64): Float64
+  else:
+    static:
+      raise newException(Exception, &"Unsupported data type for GPU data: {name(T)}" )
+
+func asAttribute*[T: SomeNumber|TMat|TVec](value: T, name: string): Attribute =
+  when not (T is SomeNumber):
+    let nonScalarDatatype = getDataType(default(get(genericParams(typeof(value)), 0)))
+
+  when T is SomeNumber: attr(name, getDataType(default(T)))
+  elif T is TMat22: attr(name, nonScalarDatatype, 2, 2)
+  elif T is TMat23: attr(name, nonScalarDatatype, 3, 2)
+  elif T is TMat32: attr(name, nonScalarDatatype, 3, 2)
+  elif T is TMat33: attr(name, nonScalarDatatype, 3, 3)
+  elif T is TMat34: attr(name, nonScalarDatatype, 4, 3)
+  elif T is TMat43: attr(name, nonScalarDatatype, 3, 4)
+  elif T is TMat44: attr(name, nonScalarDatatype, 4, 4)
+  elif T is TVec2: attr(name, nonScalarDatatype, 2)
+  elif T is TVec3: attr(name, nonScalarDatatype, 3)
+  elif T is TVec4: attr(name, nonScalarDatatype, 4)
+  else: {.error "Unsupported attribute type for GPU data".}
+
+func asAttribute*[T: SomeNumber|TMat|TVec](): Attribute =
+  asAttribute(default(T), name(T))
 
 const TYPEMAP = {
   CountType(1): {

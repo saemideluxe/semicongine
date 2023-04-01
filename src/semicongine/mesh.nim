@@ -1,17 +1,34 @@
+import std/typetraits
+import std/tables
 import std/enumerate
 import std/strformat
 import std/sequtils
 
+import ./vulkan/utils
+import ./gpu_data
 import ./entity
 import ./math
 
 type
+  SurfaceDataType = enum
+    Position, Color, Normal, Tangent, BiTangent, TextureCoordinate, Index, BigIndex
   MeshIndexType* = enum
     None
     Small # up to 2^16 vertices
     Big # up to 2^32 vertices
+  MeshData = object
+    case thetype*: SurfaceDataType
+      of Position: position: seq[Vec3f]
+      of Color: color: seq[Vec3f]
+      of Normal: normal: seq[Vec3f]
+      of Tangent: tangent: seq[Vec3f]
+      of BiTangent: bitangent: seq[Vec3f]
+      of TextureCoordinate: texturecoord: seq[Vec2f]
+      of Index: index: seq[uint16]
+      of BigIndex: bigindex: seq[uint32]
   Mesh* = ref object of Component
-    vertices: seq[Vec3]
+    vertexCount*: uint32
+    data: Table[Attribute, MeshData]
     case indexType*: MeshIndexType
     of None:
       discard
@@ -20,29 +37,78 @@ type
     of Big:
       bigIndices*: seq[array[3, uint32]]
 
+
 method `$`*(mesh: Mesh): string =
-  &"Mesh ({mesh.vertices.len})"
+  &"Mesh ({mesh.vertexCount})"
 
-func newMesh*(vertices: openArray[Vec3]): auto =
-  Mesh(vertices: vertices.toSeq, indexType: None)
+func newMesh*(vertices: openArray[Vec3f]): auto =
+  let meshdata = {asAttribute(default(Vec3f), "position"): MeshData(thetype: Position, position: vertices.toSeq)}.toTable
+  Mesh(vertexCount: uint32(vertices.len), data: meshdata, indexType: None)
 
-func newMesh*(vertices: openArray[Vec3], indices: openArray[array[3, uint32|int32]]): auto =
+func newMesh*(vertices: openArray[Vec3f], indices: openArray[array[3, uint32|int32]]): auto =
+  let meshdata = {asAttribute(default(Vec3f), "position"): MeshData(thetype: Position, position: vertices.toSeq)}.toTable
   if uint16(vertices.len) < high(uint16):
     var smallIndices = newSeq[array[3, uint16]](indices.len)
     for i, tri in enumerate(indices):
       smallIndices[i] = [uint16(tri[0]), uint16(tri[1]), uint16(tri[3])]
-    Mesh(vertices: vertices.toSeq, indexType: Small, smallIndices: smallIndices)
+    Mesh(vertexCount: uint32(vertices.len), data: meshdata, indexType: Small, smallIndices: smallIndices)
   else:
     var bigIndices = newSeq[array[3, uint32]](indices.len)
     for i, tri in enumerate(indices):
       bigIndices[i] = [uint32(tri[0]), uint32(tri[1]), uint32(tri[3])]
-    Mesh(vertices: vertices.toSeq, indexType: Big, bigIndices: bigIndices)
+    Mesh(vertexCount: uint32(vertices.len), data: meshdata, indexType: Big, bigIndices: bigIndices)
 
-func newMesh*(vertices: openArray[Vec3], indices: openArray[array[3, uint16|int16]]): auto =
+func newMesh*(vertices: openArray[Vec3f], indices: openArray[array[3, uint16|int16]]): auto =
+  let meshdata = {asAttribute(default(Vec3f), "position"): MeshData(thetype: Position, position: vertices.toSeq)}.toTable
   var smallIndices = newSeq[array[3, uint16]](indices.len)
   for i, tri in enumerate(indices):
     smallIndices[i] = [uint16(tri[0]), uint16(tri[1]), uint16(tri[3])]
-  Mesh(vertices: vertices.toSeq, indexType: Small, smallIndices: smallIndices)
+  Mesh(vertexCount: vertices.len, data: meshdata, indexType: Small, smallIndices: smallIndices)
+
+
+func size*(meshdata: MeshData): uint64 =
+  case meshdata.thetype:
+    of Position: meshdata.position.size
+    of Color: meshdata.color.size
+    of Normal: meshdata.normal.size
+    of Tangent: meshdata.tangent.size
+    of BiTangent: meshdata.bitangent.size
+    of TextureCoordinate: meshdata.texturecoord.size
+    of Index: meshdata.index.size
+    of BigIndex: meshdata.bigindex.size
+
+func size*(mesh: Mesh, attribute: Attribute): uint64 =
+  mesh.data[attribute].size
+
+func size*(mesh: Mesh): uint64 =
+  for d in mesh.data.values:
+    result += d.size
+
+proc rawData[T: seq](value: var T): (pointer, uint64) =
+  (pointer(addr(value)), uint64(sizeof(get(genericParams(typeof(value)), 0)) * value.len))
+
+proc getRawData(data: var MeshData): (pointer, uint64) =
+  case data.thetype:
+    of Position: rawData(data.position)
+    of Color: rawData(data.color)
+    of Normal: rawData(data.normal)
+    of Tangent: rawData(data.tangent)
+    of BiTangent: rawData(data.bitangent)
+    of TextureCoordinate: rawData(data.texturecoord)
+    of Index: rawData(data.index)
+    of BigIndex: rawData(data.bigindex)
+
+proc hasDataFor*(mesh: Mesh, attribute: Attribute): bool =
+  assert attribute.perInstance == false, "Mesh data cannot handle per-instance attributes"
+  attribute in mesh.data
+
+proc getRawData*(mesh: Mesh, attribute: Attribute): (pointer, uint64) =
+  assert attribute.perInstance == false, "Mesh data cannot handle per-instance attributes"
+  mesh.data[attribute].getRawData()
+
+proc getData*(mesh: Mesh, attribute: Attribute): MeshData =
+  assert attribute.perInstance == false, "Mesh data cannot handle per-instance attributes"
+  mesh.data[attribute]
 
 #[
 
@@ -76,8 +142,7 @@ proc createVertexBuffers*[M: Mesh](
   for name, value in mesh.vertexData.fieldPairs:
     assert value.data.len > 0
     var flags = if value.useOnDeviceMemory: {TransferSrc} else: {VertexBuffer}
-    var stagingBuffer = device.InitBuffer(physicalDevice, value.datasize,
-        flags, {HostVisible, HostCoherent})
+    var stagingBuffer = device.InitBuffer(physicalDevice, value.datasize, flags, {HostVisible, HostCoherent})
     copyMem(stagingBuffer.data, addr(value.data[0]), value.datasize)
 
     if value.useOnDeviceMemory:
