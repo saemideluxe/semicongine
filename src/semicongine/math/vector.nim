@@ -12,12 +12,12 @@ type
   TVec3*[T: SomeNumber] = array[3, T]
   TVec4*[T: SomeNumber] = array[4, T]
   TVec* = TVec2|TVec3|TVec4
-  Vec2* = TVec2[float32]
-  Vec3* = TVec3[float32]
-  Vec4* = TVec4[float32]
-  Vec2I* = TVec2[uint32]
-  Vec3I* = TVec3[uint32]
-  Vec4I* = TVec4[uint32]
+  Vec2f* = TVec2[float32]
+  Vec3f* = TVec3[float32]
+  Vec4f* = TVec4[float32]
+  Vec2i* = TVec2[uint32]
+  Vec3i* = TVec3[uint32]
+  Vec4i* = TVec4[uint32]
 
 converter toVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
   TVec2[T]([orig[0], orig[1]])
@@ -36,12 +36,12 @@ func ConstR[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(0), T(0)]
 func ConstG[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(1), T(0)])
 func ConstB[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(0), T(1)])
 
-func newVec2*(x=0'f32, y=0'f32): auto =
-  Vec2([x, y])
-func newVec3*(x=0'f32, y=0'f32, z=0'f32): auto =
-  Vec3([x, y, z])
-func newVec4*(x=0'f32, y=0'f32, z=0'f32, a=0'f32): auto =
-  Vec4([x, y, z, a])
+func newVec2f*(x=0'f32, y=0'f32): auto =
+  Vec2f([x, y])
+func newVec3f*(x=0'f32, y=0'f32, z=0'f32): auto =
+  Vec3f([x, y, z])
+func newVec4f*(x=0'f32, y=0'f32, z=0'f32, a=0'f32): auto =
+  Vec4f([x, y, z, a])
 
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
 # Also for Y, Z, R, G, B and One
@@ -65,12 +65,12 @@ macro generateAllConsts() =
 
 generateAllConsts()
 
-const X* = ConstX[float]()
-const Y* = ConstY[float]()
-const Z* = ConstZ[float]()
-const One2* = ConstOne2[float]()
-const One3* = ConstOne3[float]()
-const One4* = ConstOne4[float]()
+const X* = ConstX[float32]()
+const Y* = ConstY[float32]()
+const Z* = ConstZ[float32]()
+const One2* = ConstOne2[float32]()
+const One3* = ConstOne3[float32]()
+const One4* = ConstOne4[float32]()
 
 func newVec2*[T](x, y: T): auto = TVec2([x, y])
 func newVec3*[T](x, y, z: T): auto = TVec3([x, y, z])

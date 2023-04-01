@@ -124,7 +124,7 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
         result.add events[0]
 
 
-proc getMousePosition*(window: NativeWindow): Option[Vec2] =
+proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
   var
     root: x.Window
     win: x.Window
@@ -144,7 +144,6 @@ proc getMousePosition*(window: NativeWindow): Option[Vec2] =
       addr(winY),
       addr(mask),
     )
-  if onscreen == 0:
-    return none(Vec2)
-  return some(Vec2([float32(winX), float32(winY)]))
+  if onscreen != 0:
+    result = some(Vec2f([float32(winX), float32(winY)]))
 

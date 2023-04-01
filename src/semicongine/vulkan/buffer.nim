@@ -1,3 +1,5 @@
+import std/strformat
+import std/typetraits
 import std/sequtils
 import std/tables
 
@@ -19,6 +21,18 @@ type
         memory*: DeviceMemory
         data*: pointer
 
+func `$`*(buffer: Buffer): string = &"Buffer(size: {buffer.size}, usage: {buffer.usage})"
+
+proc setData*(dst: Buffer, src: pointer, len: uint64, offset=0'u64) =
+  assert offset + len <= dst.size
+  copyMem(cast[pointer](cast[uint64](dst.data) + offset), src, len)
+
+proc setData*[T: seq](dst: Buffer, src: ptr T, offset=0'u64) =
+  dst.setData(src, sizeof(get(genericParams(T), 0)) * src[].len, offset=offset)
+
+proc setData*[T](dst: Buffer, src: ptr T, offset=0'u64) =
+  dst.setData(src, sizeof(T), offset=offset)
+
 proc allocateMemory(buffer: var Buffer, flags: openArray[VkMemoryPropertyFlagBits]) =
   assert buffer.device.vk.valid
   assert buffer.hasMemory == false
@@ -33,9 +47,9 @@ proc allocateMemory(buffer: var Buffer, flags: openArray[VkMemoryPropertyFlagBit
 proc createBuffer*(
   device: Device,
   size: uint64,
-  flags: openArray[VkBufferCreateFlagBits],
   usage: openArray[VkBufferUsageFlagBits],
-  memoryFlags: openArray[VkMemoryPropertyFlagBits],
+  flags: openArray[VkBufferCreateFlagBits] = @[],
+  memoryFlags: openArray[VkMemoryPropertyFlagBits] = @[],
 ): Buffer =
   assert device.vk.valid
   assert size > 0

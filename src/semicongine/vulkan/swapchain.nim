@@ -1,4 +1,5 @@
 import std/options
+import std/logging
 
 import ./api
 import ./utils
@@ -156,6 +157,7 @@ template renderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass,
 
 proc draw*(commandBuffer: VkCommandBuffer, drawables: seq[Drawable], scene: Scene) =
   for drawable in drawables:
+    debug "Draw ", drawable
     var buffers: seq[VkBuffer]
     var offsets: seq[VkDeviceSize]
     for (buffer, offset) in drawable.buffers:
