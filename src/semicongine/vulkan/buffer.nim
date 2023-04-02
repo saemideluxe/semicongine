@@ -118,4 +118,4 @@ proc destroy*(buffer: var Buffer) =
     assert buffer.memory.vk.valid
     buffer.memory.free
   buffer.device.vk.vkDestroyBuffer(buffer.vk, nil)
-  buffer.vk.reset()
+  buffer = default(Buffer)

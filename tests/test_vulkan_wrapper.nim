@@ -45,7 +45,7 @@ when isMainModule:
   var instance = thewindow.createInstance(
     vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
     instanceExtensions= @["VK_EXT_debug_utils"],
-    layers= @["VK_LAYER_KHRONOS_validation"]
+    layers= @["VK_LAYER_KHRONOS_validation", "VK_LAYER_MESA_overlay"]
   )
   var debugger = instance.createDebugMessenger()
 
@@ -58,45 +58,64 @@ when isMainModule:
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
-  const inputs = AttributeGroup(attributes: @[attr(name="position", thetype=Float32, components=3)])
-  const uniforms = AttributeGroup()
-  const outputs = AttributeGroup(attributes: @[attr(name="fragpos", thetype=Float32, components=3)])
-  const fragOutput = AttributeGroup(attributes: @[attr(name="color", thetype=Float32, components=4)])
-  const vertexBinary = shaderCode(inputs=inputs, uniforms=uniforms, outputs=outputs, stage=VK_SHADER_STAGE_VERTEX_BIT, version=450, entrypoint="main", "fragpos = position;")
-  const fragmentBinary = shaderCode(inputs=outputs, uniforms=uniforms, outputs=fragOutput, stage=VK_SHADER_STAGE_FRAGMENT_BIT, version=450, entrypoint="main", "color = vec4(1, 1, 1, 1);")
+  const
+    vertexInput = initAttributeGroup(
+      asAttribute(default(Vec3f), "position"),
+      asAttribute(default(Vec3f), "color"),
+    )
+    vertexOutput = initAttributeGroup(asAttribute(default(Vec3f), "outcolor"))
+    fragOutput = initAttributeGroup(asAttribute(default(Vec4f), "color"))
+    vertexCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_VERTEX_BIT,
+      inputs=vertexInput,
+      outputs=vertexOutput,
+      body="""gl_Position = vec4(position, 1.0); outcolor = color;"""
+    )
+    fragmentCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+      inputs=vertexOutput,
+      outputs=fragOutput,
+      body="color = vec4(outcolor, 1);"
+    )
   var
-    vertexshader = device.createShader(inputs, uniforms, outputs, VK_SHADER_STAGE_VERTEX_BIT, "main", vertexBinary)
-    fragmentshader = device.createShader(inputs, uniforms, outputs, VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragmentBinary)
+    vertexshader = device.createShaderModule(vertexCode)
+    fragmentshader = device.createShaderModule(fragmentCode)
     surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
     renderPass = device.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
-  var (swapchain, res) = device.createSwapchain(renderPass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
+    (swapchain, res) = device.createSwapchain(renderPass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
   var thescene = Scene(
     name: "main",
     root: newEntity("root",
-      newEntity("triangle1", newMesh([newVec3f(-0.5, -0.5), newVec3f(0.5, 0.5), newVec3f(0.5, -0.5)])),
-      newEntity("triangle2", newMesh([newVec3f(-0.5, -0.5), newVec3f(0.5, -0.5), newVec3f(0.5, 0.5)])),
+      newEntity("triangle1", initMesh(
+        positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
+        colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+      )),
     )
   )
   thescene.setupDrawables(renderPass)
 
   echo "Setup successfull, start rendering"
-  for i in 0 ..< 1:
+  for i in 0 ..< 1000:
     discard swapchain.drawScene(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
-  echo "Start cleanup"
-
+  checkVkResult device.vk.vkDeviceWaitIdle()
 
   # cleanup
-  checkVkResult device.vk.vkDeviceWaitIdle()
+  echo "Start cleanup"
+
+  # logical
   thescene.destroy()
+
+  # rendering objects
   vertexshader.destroy()
   fragmentshader.destroy()
   renderPass.destroy()
   swapchain.destroy()
-  device.destroy()
 
+  # global objects
+  device.destroy()
   debugger.destroy()
   instance.destroy()
