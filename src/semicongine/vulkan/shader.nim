@@ -13,22 +13,31 @@ import ./utils
 
 import ../gpu_data
 
+const DEFAULT_SHADER_VERSION = 450
+const DEFAULT_SHADER_ENTRYPOINT = "main"
+
 let logger = newConsoleLogger()
 addHandler(logger)
 
 type
+  ShaderCode = object
+    stage: VkShaderStageFlagBits
+    entrypoint: string
+    binary: seq[uint32]
+    inputs: AttributeGroup
+    uniforms: AttributeGroup
+    outputs: AttributeGroup
   Shader* = object
     device: Device
-    stage*: VkShaderStageFlagBits
     vk*: VkShaderModule
+    stage*: VkShaderStageFlagBits
     entrypoint*: string
     inputs*: AttributeGroup
     uniforms*: AttributeGroup
     outputs*: AttributeGroup
 
 
-proc compileGLSLToSPIRV*(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
-
+proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
   func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
     case stage
     of VK_SHADER_STAGE_VERTEX_BIT: "vert"
@@ -75,56 +84,56 @@ proc compileGLSLToSPIRV*(stage: VkShaderStageFlagBits, shaderSource: string, ent
     i += 4
 
 
-proc shaderCode*(
-  inputs: AttributeGroup,
-  uniforms: AttributeGroup,
-  outputs: AttributeGroup,
+proc compileGlslShader*(
   stage: VkShaderStageFlagBits,
-  version: int,
-  entrypoint: string,
+  inputs=AttributeGroup(),
+  uniforms=AttributeGroup(),
+  outputs=AttributeGroup(),
+  version=DEFAULT_SHADER_VERSION ,
+  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
   body: seq[string]
-): seq[uint32] {.compileTime.} =
+): ShaderCode {.compileTime.} =
   var code = @[&"#version {version}", ""] &
-    inputs.glslInput() & @[""] &
-    uniforms.glslUniforms() & @[""] &
-    outputs.glslOutput() & @[""] &
+    (if inputs.attributes.len > 0: inputs.glslInput() & @[""] else: @[]) &
+    (if uniforms.attributes.len > 0: uniforms.glslUniforms() & @[""] else: @[]) &
+    (if outputs.attributes.len > 0: outputs.glslOutput() & @[""] else: @[]) &
     @[&"void {entrypoint}(){{"] &
     body &
     @[&"}}"]
-  compileGLSLToSPIRV(stage, code.join("\n"), entrypoint)
-
-
-proc shaderCode*(
-  inputs: AttributeGroup,
-  uniforms: AttributeGroup,
-  outputs: AttributeGroup,
-  stage: VkShaderStageFlagBits,
-  version: int,
-  entrypoint: string,
-  body: string
-): seq[uint32] {.compileTime.} =
-  return shaderCode(inputs, uniforms, outputs, stage, version, entrypoint, @[body])
-
-
-proc createShader*(
-  device: Device,
-  inputs: AttributeGroup,
-  uniforms: AttributeGroup,
-  outputs: AttributeGroup,
-  stage: VkShaderStageFlagBits,
-  entrypoint: string,
-  binary: seq[uint32]
-): Shader =
-  assert device.vk.valid
-  assert len(binary) > 0
-
-  result.device = device
   result.inputs = inputs
   result.uniforms = uniforms
   result.outputs = outputs
   result.entrypoint = entrypoint
   result.stage = stage
-  var bin = binary
+  result.binary = compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
+
+
+proc compileGlslShader*(
+  stage: VkShaderStageFlagBits,
+  inputs: AttributeGroup=AttributeGroup(),
+  uniforms: AttributeGroup=AttributeGroup(),
+  outputs: AttributeGroup=AttributeGroup(),
+  version=DEFAULT_SHADER_VERSION ,
+  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
+  body: string
+): ShaderCode {.compileTime.} =
+  return compileGlslShader(stage, inputs, uniforms, outputs, version, entrypoint, @[body])
+
+
+proc createShaderModule*(
+  device: Device,
+  shaderCode: ShaderCode,
+): Shader =
+  assert device.vk.valid
+  assert len(shaderCode.binary) > 0
+
+  result.device = device
+  result.inputs = shaderCode.inputs
+  result.uniforms = shaderCode.uniforms
+  result.outputs = shaderCode.outputs
+  result.entrypoint = shaderCode.entrypoint
+  result.stage = shaderCode.stage
+  var bin = shaderCode.binary
   var createInfo = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     codeSize: uint(bin.len * sizeof(uint32)),

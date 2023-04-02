@@ -11,7 +11,8 @@ import ./mesh
 
 type
   Drawable* = object
-    buffers*: seq[(Buffer, uint64)] # buffer + offset from buffer
+    buffer*: Buffer # buffer
+    offsets*: seq[uint64] # offsets from buffer
     elementCount*: uint32 # number of vertices or indices
     instanceCount*: uint32 # number of instance
     case indexed*: bool
@@ -28,14 +29,20 @@ type
 
 func `$`*(drawable: Drawable): string =
   if drawable.indexed:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffers: {drawable.buffers}, indexType: {drawable.indexType})"
+    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets}, indexType: {drawable.indexType})"
   else:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffers: {drawable.buffers})"
+    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets})"
+
+proc destroy(drawable: var Drawable) =
+  drawable.buffer.destroy()
+  if drawable.indexed:
+    drawable.indexBuffer.destroy()
 
 proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
   assert pipeline.device.vk.valid
-  assert not (pipeline.vk in scene.drawables)
-
+  if pipeline.vk in scene.drawables:
+    for drawable in scene.drawables[pipeline.vk].mitems:
+      drawable.destroy()
   scene.drawables[pipeline.vk] = @[]
 
   var
@@ -63,9 +70,9 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
         memoryFlags=[VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT],
       )
     var offset = 0'u64
-    var drawable = Drawable(elementCount: vertexCount, indexed: false, instanceCount: 1)
+    var drawable = Drawable(elementCount: vertexCount, buffer: buffer, indexed: false, instanceCount: 1)
     for inputAttr in pipeline.inputs.vertexInputs:
-      drawable.buffers.add (buffer, offset)
+      drawable.offsets.add offset
       for mesh in nonIMeshes:
         var (pdata, size) = mesh.getRawData(inputAttr)
         buffer.setData(pdata, size, offset)
@@ -110,8 +117,4 @@ proc getDrawables*(scene: Scene, pipeline: Pipeline): seq[Drawable] =
 proc destroy*(scene: var Scene) =
   for drawables in scene.drawables.mvalues:
     for drawable in drawables.mitems:
-      for (buffer, offset) in drawable.buffers.mitems:
-        # if buffer.vk.valid: # required because we allow duplicates in drawable.buffers
-        buffer.destroy()
-      if drawable.indexed:
-        drawable.indexBuffer.destroy()
+      drawable.destroy()

@@ -160,8 +160,8 @@ proc draw*(commandBuffer: VkCommandBuffer, drawables: seq[Drawable], scene: Scen
     debug "Draw ", drawable
     var buffers: seq[VkBuffer]
     var offsets: seq[VkDeviceSize]
-    for (buffer, offset) in drawable.buffers:
-      buffers.add buffer.vk
+    for offset in drawable.offsets:
+      buffers.add drawable.buffer.vk
       offsets.add VkDeviceSize(offset)
     commandBuffer.vkCmdBindVertexBuffers(
       firstBinding=0'u32,

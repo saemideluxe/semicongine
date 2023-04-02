@@ -1,3 +1,4 @@
+import std/sequtils
 import std/typetraits
 import std/strformat
 import std/tables
@@ -27,6 +28,9 @@ type
     useGPULocalMemory*: bool
   AttributeGroup* = object
     attributes*: seq[Attribute]
+
+func initAttributeGroup*(attrs: varargs[Attribute]): auto =
+  AttributeGroup(attributes: attrs.toSeq)
 
 func vertexInputs*(group: AttributeGroup): seq[Attribute] =
   for attr in group.attributes:

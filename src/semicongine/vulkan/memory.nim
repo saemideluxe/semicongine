@@ -91,4 +91,4 @@ proc free*(memory: var DeviceMemory) =
   assert memory.vk.valid
 
   memory.device.vk.vkFreeMemory(memory.vk, nil)
-  memory.vk.reset
+  memory = default(DeviceMemory)
