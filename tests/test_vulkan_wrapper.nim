@@ -10,6 +10,14 @@ import semicongine/mesh
 
 proc diagnostics(instance: Instance) =
   # diagnostic output
+  # print basic driver infos
+  echo "Layers"
+  for layer in getLayers():
+    echo "  " & layer
+  echo "Instance extensions"
+  for extension in getInstanceExtensions():
+    echo "  " & extension
+
   echo "Devices"
   for device in instance.getPhysicalDevices():
     echo "  " & $device
@@ -32,14 +40,8 @@ proc diagnostics(instance: Instance) =
       echo "    " & $format
 
 when isMainModule:
-  # print basic driver infos
-  echo "Layers"
-  for layer in getLayers():
-    echo "  " & layer
-  echo "Instance extensions"
-  for extension in getInstanceExtensions():
-    echo "  " & extension
 
+  # INIT ENGINE:
   # create instance
   var thewindow = createWindow("Test")
   var instance = thewindow.createInstance(
@@ -48,7 +50,6 @@ when isMainModule:
     layers= @["VK_LAYER_KHRONOS_validation", "VK_LAYER_MESA_overlay"]
   )
   var debugger = instance.createDebugMessenger()
-
   # create devices
   let selectedPhysicalDevice = instance.getPhysicalDevices().filterBestGraphics()
   var device = instance.createDevice(
@@ -58,6 +59,7 @@ when isMainModule:
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
+  # INIT RENDERER:
   const
     vertexInput = initAttributeGroup(
       asAttribute(default(Vec3f), "position"),
@@ -86,6 +88,7 @@ when isMainModule:
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
+  # INIT SCENE
   var thescene = Scene(
     name: "main",
     root: newEntity("root",
@@ -97,6 +100,7 @@ when isMainModule:
   )
   thescene.setupDrawables(renderPass)
 
+  # MAINLOOP
   echo "Setup successfull, start rendering"
   for i in 0 ..< 1000:
     discard swapchain.drawScene(thescene)
@@ -106,16 +110,16 @@ when isMainModule:
   # cleanup
   echo "Start cleanup"
 
-  # logical
+  # destroy scene
   thescene.destroy()
 
-  # rendering objects
+  # destroy renderer
   vertexshader.destroy()
   fragmentshader.destroy()
   renderPass.destroy()
   swapchain.destroy()
 
-  # global objects
+  # destroy engine
   device.destroy()
   debugger.destroy()
   instance.destroy()
