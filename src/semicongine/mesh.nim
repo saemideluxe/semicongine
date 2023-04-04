@@ -41,7 +41,7 @@ type
 method `$`*(mesh: Mesh): string =
   &"Mesh ({mesh.vertexCount})"
 
-func initMesh*(positions: openArray[Vec3f], colors: openArray[Vec3f]=[]): Mesh =
+func newMesh*(positions: openArray[Vec3f], colors: openArray[Vec3f]=[]): Mesh =
   assert colors.len == 0 or colors.len == positions.len
   result = new Mesh
   result.vertexCount = uint32(positions.len)
@@ -51,7 +51,7 @@ func initMesh*(positions: openArray[Vec3f], colors: openArray[Vec3f]=[]): Mesh =
     result.data[asAttribute(default(Vec3f), "color")] = MeshData(thetype: Color, color: colors.toSeq)
 
 
-func initMesh*(positions: openArray[Vec3f], indices: openArray[array[3, uint32|int32]]): auto =
+func newMesh*(positions: openArray[Vec3f], indices: openArray[array[3, uint32|int32]]): auto =
   let meshdata = {asAttribute(default(Vec3f), "position"): MeshData(thetype: Position, position: positions.toSeq)}.toTable
   if uint16(positions.len) < high(uint16):
     var smallIndices = newSeq[array[3, uint16]](indices.len)
@@ -64,7 +64,7 @@ func initMesh*(positions: openArray[Vec3f], indices: openArray[array[3, uint32|i
       bigIndices[i] = [uint32(tri[0]), uint32(tri[1]), uint32(tri[3])]
     Mesh(vertexCount: uint32(positions.len), data: meshdata, indexType: Big, bigIndices: bigIndices)
 
-func initMesh*(positions: openArray[Vec3f], indices: openArray[array[3, uint16|int16]]): auto =
+func newMesh*(positions: openArray[Vec3f], indices: openArray[array[3, uint16|int16]]): auto =
   let meshdata = {asAttribute(default(Vec3f), "position"): MeshData(thetype: Position, position: positions.toSeq)}.toTable
   var smallIndices = newSeq[array[3, uint16]](indices.len)
   for i, tri in enumerate(indices):
