@@ -29,38 +29,30 @@ Rendering:
 - [x] Shaders (allow for predefined and custom shaders)
 - [x] Uniforms
 - [x] Per-instance vertex attributes (required to be able to draw scene graph)
+- [x] Fixed framerate
+- [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [ ] Textures
 - [ ] Depth buffering
 - [ ] Mipmaps 
 - [ ] Multisampling 
-- [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
-- [ ] Fullscreen mode + switch between modes
-- [x] Fixed framerate
-
-Build-system:
-- [x] move all of Makefile to config.nims
 
 Asset handling:
 - [ ] Mesh files (Wavefront OBJ, MTL) (use something from sketchfab for testing, https://sketchfab.com/)
 - [ ] Image files (BMP RGB + BMP Graysscale for transparency)
 - [ ] Audio files (AU)
 
-Quality improvments:
-
-- [x] Better scenegraph API
-- [x] Better rendering pipeline API
-
-Other:
+Other (required for alpha release):
+- [x] Config files ala \*.ini files (use std/parsecfg)
 - [x] Mouse/Keyboard input handling
   - [x] X11
   - [x] Win32
 - [ ] Enable/disable hardware cursor
-- [ ] Config files ala \*.ini files (use std/parsecfg)
+- [ ] Fullscreen mode + switch between modes
 - [ ] Input-mapping configuration
 - [ ] Audio playing (Alsa, Windows Waveform API?)
 - [ ] Telemetry
 
-Advanced features:
+Advanced features (very low priority):
 - [ ] Allow multipel Uniform blocks?
 - [ ] Text rendering
 - [ ] Animation system
@@ -68,3 +60,11 @@ Advanced features:
 - [ ] Particle system
 - [ ] Query and display rendering information from Vulkan
 - [ ] Game controller input handling
+
+Quality improvments:
+
+- [x] Better scenegraph API
+- [x] Better rendering pipeline API
+
+Build-system:
+- [x] move all of Makefile to config.nims
