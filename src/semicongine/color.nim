@@ -2,7 +2,7 @@ import std/parseutils
 
 import ./math/vector
 
-func RGBfromHex*(value: string): Vec3 =
+func RGBfromHex*(value: string): Vec3f =
   assert value != ""
   var hex = value
   if hex[0] == '#':
@@ -15,9 +15,9 @@ func RGBfromHex*(value: string): Vec3 =
   discard parseHex(hex[0 .. 1], r) == 2
   discard parseHex(hex[2 .. 3], g) == 2
   discard parseHex(hex[4 .. 5], b) == 2
-  return Vec3([float32(r), float32(g), float32(b)]) / 255'f
+  return Vec3f([float32(r), float32(g), float32(b)]) / 255'f
 
-func RGBAfromHex*(value: string): Vec4 =
+func RGBAfromHex*(value: string): Vec4f =
   assert value != ""
   var hex = value
   if hex[0] == '#':
@@ -36,7 +36,7 @@ func RGBAfromHex*(value: string): Vec4 =
   discard parseHex(hex[2 .. 3], g)
   discard parseHex(hex[4 .. 5], b)
   discard parseHex(hex[6 .. 7], a)
-  return Vec4([float32(r), float32(g), float32(b), float32(a)]) / 255'f
+  return Vec4f([float32(r), float32(g), float32(b), float32(a)]) / 255'f
 
-func gamma*[T: Vec3|Vec4](color: T, gamma: float32): auto =
+func gamma*[T: Vec3f|Vec4f](color: T, gamma: float32): T =
   return pow(color, gamma)
