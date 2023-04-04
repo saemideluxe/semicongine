@@ -48,12 +48,13 @@ Asset handling:
 Quality improvments:
 
 - [x] Better scenegraph API
-- [ ] Better rendering pipeline API
+- [x] Better rendering pipeline API
 
 Other:
 - [x] Mouse/Keyboard input handling
   - [x] X11
   - [x] Win32
+- [ ] Enable/disable hardware cursor
 - [ ] Config files ala \*.ini files (use std/parsecfg)
 - [ ] Input-mapping configuration
 - [ ] Audio playing (Alsa, Windows Waveform API?)

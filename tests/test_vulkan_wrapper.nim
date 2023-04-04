@@ -1,12 +1,7 @@
+import std/os
 import std/options
 
-import semicongine/vulkan
-import semicongine/platform/window
-import semicongine/math
-import semicongine/entity
-import semicongine/scene
-import semicongine/gpu_data
-import semicongine/mesh
+import semicongine
 
 proc diagnostics(instance: Instance) =
   # diagnostic output
@@ -40,7 +35,6 @@ proc diagnostics(instance: Instance) =
       echo "    " & $format
 
 when isMainModule:
-
   # INIT ENGINE:
   # create instance
   var thewindow = createWindow("Test")
@@ -92,7 +86,7 @@ when isMainModule:
   var thescene = Scene(
     name: "main",
     root: newEntity("root",
-      newEntity("triangle1", initMesh(
+      newEntity("triangle1", newMesh(
         positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
         colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
       )),
