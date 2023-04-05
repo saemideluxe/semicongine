@@ -19,13 +19,15 @@ type
     UInt16
     UInt32
     UInt64
+  MemoryLocation* = enum
+    VRAM, VRAMVisible, RAM # VRAM is fastest, VRAMVisible allows updating memory directly, may be slower
   Attribute* = object
     name*: string
     thetype*: DataType
     components*: CountType # how many components the vectors has (1 means scalar)
     rows*: CountType # used to split matrices into rows of vectors
     perInstance*: bool
-    useGPULocalMemory*: bool
+    memoryLocation*: MemoryLocation
   AttributeGroup* = object
     attributes*: seq[Attribute]
 
@@ -42,8 +44,22 @@ func instanceInputs*(group: AttributeGroup): seq[Attribute] =
     if attr.perInstance == false:
       result.add attr
 
-func attr*(name: string, thetype: DataType, components=CountType(1), rows=CountType(1), perInstance=false): auto =
-  Attribute(name: name, thetype: thetype, components: components, rows: rows, perInstance: perInstance)
+func attr*(
+  name: string,
+  thetype: DataType,
+  components=CountType(1),
+  rows=CountType(1),
+  perInstance=false,
+  memoryLocation=VRAMVisible,
+): auto =
+  Attribute(
+    name: name,
+    thetype: thetype,
+    components: components,
+    rows: rows,
+    perInstance: perInstance,
+    memoryLocation: memoryLocation,
+  )
 
 func size*(thetype: DataType): uint32 =
   case thetype:
@@ -242,3 +258,9 @@ func glslOutput*(group: AttributeGroup): seq[string] =
   for attribute in group.attributes:
     result.add &"layout(location = {i}) out {attribute.glslType} {attribute.name};"
     i += 1
+
+func groupByMemoryLocation*(attributes: openArray[Attribute]): Table[MemoryLocation, seq[Attribute]] =
+  for attr in attributes:
+    if not (attr.memoryLocation in result):
+      result[attr.memoryLocation] = @[]
+    result[attr.memoryLocation].add attr

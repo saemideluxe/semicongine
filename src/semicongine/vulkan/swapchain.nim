@@ -170,7 +170,7 @@ proc draw*(commandBuffer: VkCommandBuffer, drawables: seq[Drawable], scene: Scen
       pOffsets=offsets.toCPointer()
     )
     if drawable.indexed:
-      commandBuffer.vkCmdBindIndexBuffer(drawable.indexBuffer.vk, VkDeviceSize(0), drawable.indexType)
+      commandBuffer.vkCmdBindIndexBuffer(drawable.indexBuffer.vk, VkDeviceSize(drawable.indexOffset), drawable.indexType)
       commandBuffer.vkCmdDrawIndexed(
         indexCount=drawable.elementCount,
         instanceCount=drawable.instanceCount,

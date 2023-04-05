@@ -15,32 +15,31 @@ type
     vk*: VkBuffer
     size*: uint64
     usage*: seq[VkBufferUsageFlagBits]
-    case hasMemory*: bool
+    case memoryAllocated*: bool
       of false: discard
       of true:
         memory*: DeviceMemory
-        data*: pointer
 
-func `$`*(buffer: Buffer): string = &"Buffer(size: {buffer.size}, usage: {buffer.usage})"
+func `$`*(buffer: Buffer): string =
+  &"Buffer(vk: {buffer.vk}, size: {buffer.size}, usage: {buffer.usage})"
 
-proc setData*(dst: Buffer, src: pointer, len: uint64, offset=0'u64) =
-  assert offset + len <= dst.size
-  copyMem(cast[pointer](cast[uint64](dst.data) + offset), src, len)
 
-proc setData*[T: seq](dst: Buffer, src: ptr T, offset=0'u64) =
-  dst.setData(src, sizeof(get(genericParams(T), 0)) * src[].len, offset=offset)
-
-proc setData*[T](dst: Buffer, src: ptr T, offset=0'u64) =
-  dst.setData(src, sizeof(T), offset=offset)
-
-proc allocateMemory(buffer: var Buffer, flags: openArray[VkMemoryPropertyFlagBits]) =
+proc allocateMemory(buffer: var Buffer, useVRAM: bool, mappable: bool, autoFlush: bool) =
   assert buffer.device.vk.valid
-  assert buffer.hasMemory == false
+  assert buffer.memoryAllocated == false
 
-  buffer.hasMemory = true
+  var flags: seq[VkMemoryPropertyFlagBits]
+  if useVRAM:
+    flags.add VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+  if mappable:
+    flags.add VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+  if autoFlush:
+    flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+
+  buffer.memoryAllocated = true
   buffer.memory = buffer.device.allocate(buffer.size, flags)
   checkVkResult buffer.device.vk.vkBindBufferMemory(buffer.vk, buffer.memory.vk, VkDeviceSize(0))
-  buffer.data = buffer.memory.map()
+
 
 # currently no support for extended structure and concurrent/shared use
 # (shardingMode = VK_SHARING_MODE_CONCURRENT not supported)
@@ -48,8 +47,9 @@ proc createBuffer*(
   device: Device,
   size: uint64,
   usage: openArray[VkBufferUsageFlagBits],
-  flags: openArray[VkBufferCreateFlagBits] = @[],
-  memoryFlags: openArray[VkMemoryPropertyFlagBits] = @[],
+  useVRAM: bool,
+  mappable: bool,
+  autoFlush=true,
 ): Buffer =
   assert device.vk.valid
   assert size > 0
@@ -57,9 +57,11 @@ proc createBuffer*(
   result.device = device
   result.size = size
   result.usage = usage.toSeq
+  if not (mappable or VK_BUFFER_USAGE_TRANSFER_DST_BIT in result.usage):
+    result.usage.add VK_BUFFER_USAGE_TRANSFER_DST_BIT
   var createInfo = VkBufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-    flags: toBits(flags),
+    flags: VkBufferCreateFlags(0),
     size: size,
     usage: toBits(usage),
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
@@ -71,7 +73,7 @@ proc createBuffer*(
     pAllocator=nil,
     pBuffer=addr result.vk
   )
-  result.allocateMemory(memoryFlags)
+  result.allocateMemory(useVRAM, mappable, autoFlush)
 
 
 proc copy*(src, dst: Buffer) =
@@ -114,8 +116,27 @@ proc copy*(src, dst: Buffer) =
 proc destroy*(buffer: var Buffer) =
   assert buffer.device.vk.valid
   assert buffer.vk.valid
-  if buffer.hasMemory:
+  if buffer.memoryAllocated:
     assert buffer.memory.vk.valid
     buffer.memory.free
   buffer.device.vk.vkDestroyBuffer(buffer.vk, nil)
-  buffer = default(Buffer)
+  buffer.vk.reset
+
+proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
+  assert bufferOffset + size <= dst.size
+  if dst.memory.canMap:
+    copyMem(cast[pointer](cast[uint64](dst.memory.data) + bufferOffset), src, size)
+    if dst.memory.needsFlushing:
+      dst.memory.flush()
+  else: # use staging buffer, slower but required if memory is not host visible
+    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], useVRAM=false, mappable=true, autoFlush=true)
+    stagingBuffer.setData(src, size, 0)
+    stagingBuffer.copy(dst)
+    stagingBuffer.destroy()
+
+proc setData*[T: seq](dst: Buffer, src: ptr T, offset=0'u64) =
+  dst.setData(src, sizeof(get(genericParams(T), 0)) * src[].len, offset=offset)
+
+proc setData*[T](dst: Buffer, src: ptr T, offset=0'u64) =
+  dst.setData(src, sizeof(T), offset=offset)
+

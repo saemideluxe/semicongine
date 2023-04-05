@@ -49,7 +49,7 @@ when isMainModule:
   var device = instance.createDevice(
     selectedPhysicalDevice,
     @[],
-    @[],
+    @["VK_EXT_index_type_uint8"],
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
@@ -90,13 +90,39 @@ when isMainModule:
         positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
         colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
       )),
+      newEntity("triangle1b", newMesh(
+        positions=[newVec3f(0.0, -0.4), newVec3f(0.4, 0.4), newVec3f(-0.4, 0.5)],
+        colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+      )),
+      newEntity("triangle2a", newMesh(
+        positions=[newVec3f(0.0, 0.5), newVec3f(0.5, -0.5), newVec3f(-0.5, -0.5)],
+        colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+        indices=[[0'u16, 2'u16, 1'u16]]
+      )),
+      newEntity("triangle2b", newMesh(
+        positions=[newVec3f(0.0, 0.4), newVec3f(0.4, -0.4), newVec3f(-0.4, -0.4)],
+        colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+        indices=[[0'u16, 2'u16, 1'u16]]
+      )),
+      newEntity("triangle3a", newMesh(
+        positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
+        colors=[newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0)],
+        indices=[[0'u32, 2'u32, 1'u32]],
+        autoResize=false
+      )),
+      newEntity("triangle3b", newMesh(
+        positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
+        colors=[newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0)],
+        indices=[[0'u32, 2'u32, 1'u32]],
+        autoResize=false
+      )),
     )
   )
   thescene.setupDrawables(renderPass)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
-  for i in 0 ..< 1000:
+  for i in 0 ..< 10000:
     discard swapchain.drawScene(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
   checkVkResult device.vk.vkDeviceWaitIdle()
