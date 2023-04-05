@@ -1,4 +1,5 @@
 import std/strformat
+import std/algorithm
 
 import ./api
 import ./device
@@ -19,6 +20,11 @@ type
     device*: Device
     vk*: VkDeviceMemory
     size*: uint64
+    memoryType*: MemoryType
+    case canMap*: bool
+      of false: discard
+      of true: data*: pointer
+    needsFlushing*: bool
 
 proc getPhysicalDeviceMemoryProperties(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemoryProperties =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
@@ -38,13 +44,14 @@ proc getPhysicalDeviceMemoryProperties(physicalDevice: VkPhysicalDevice): Physci
 
 proc allocate*(device: Device, size: uint64, flags: openArray[VkMemoryPropertyFlagBits]): DeviceMemory =
   assert device.vk.valid
+  assert size > 0
 
   result.device = device
   result.size = size
 
   var
-    memtype: MemoryType
     hasAllFlags: bool
+    matchingTypes: seq[MemoryType]
   for mtype in device.physicalDevice.vk.getPhysicalDeviceMemoryProperties.types:
     hasAllFlags = true
     for flag in flags:
@@ -52,15 +59,19 @@ proc allocate*(device: Device, size: uint64, flags: openArray[VkMemoryPropertyFl
         hasAllFlags = false
         break
     if hasAllFlags:
-      memtype = mtype
-      break
-  if not hasAllFlags:
+      matchingTypes.add mtype
+  if matchingTypes.len == 0:
     raise newException(Exception, &"No memory with support for {flags}")
+  matchingTypes.sort(cmp= proc(a, b: MemoryType): int = cmp(a.heap.size, b.heap.size))
+
+  result.memoryType = matchingTypes[^1]
+  result.canMap = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in result.memoryType.flags
+  result.needsFlushing = not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in result.memoryType.flags)
 
   var allocationInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     allocationSize: size,
-    memoryTypeIndex: memtype.index,
+    memoryTypeIndex: result.memoryType.index,
   )
 
   checkVkResult vkAllocateMemory(
@@ -70,25 +81,62 @@ proc allocate*(device: Device, size: uint64, flags: openArray[VkMemoryPropertyFl
     addr result.vk
   )
 
-proc map*(memory: DeviceMemory, offset=0'u64, size=0'u64): pointer =
+  if result.canMap:
+    checkVkResult result.device.vk.vkMapMemory(
+      memory=result.vk,
+      offset=VkDeviceSize(0),
+      size=VkDeviceSize(result.size),
+      flags=VkMemoryMapFlags(0), # unused up to Vulkan 1.3
+      ppData=addr(result.data)
+    )
+
+proc allocate*(device: Device, size: uint64, useVRAM: bool, mappable: bool, autoFlush: bool): DeviceMemory =
+  var flags: seq[VkMemoryPropertyFlagBits]
+  if useVRAM:
+    flags.add VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+  if mappable:
+    flags.add VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+  if autoFlush:
+    flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+  device.allocate(size=size, flags=flags)
+
+# flush host -> device
+proc flush*(memory: DeviceMemory, offset=0'u64, size=0'u64) =
   assert memory.device.vk.valid
   assert memory.vk.valid
-  
-  var thesize = size
-  if thesize == 0:
-    thesize = memory.size
+  assert memory.needsFlushing
 
-  checkVkResult memory.device.vk.vkMapMemory(
-    memory=memory.vk,
-    offset=VkDeviceSize(offset),
-    size=VkDeviceSize(thesize),
-    flags=VkMemoryMapFlags(0), # unused up to Vulkan 1.3
-    ppData=addr(result)
+  var actualSize = size
+  if actualSize == 0:
+    actualSize = memory.size
+  var flushrange = VkMappedMemoryRange(
+    sType: VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+    memory: memory.vk,
+    offset: VkDeviceSize(offset),
+    size: VkDeviceSize(size)
   )
+  checkVkResult memory.device.vk.vkFlushMappedMemoryRanges(memoryRangeCount=1, pMemoryRanges=addr(flushrange))
+
+# flush device -> host
+proc invalidate*(memory: DeviceMemory, offset=0'u64, size=0'u64) =
+  assert memory.device.vk.valid
+  assert memory.vk.valid
+  assert memory.needsFlushing
+
+  var actualSize = size
+  if actualSize == 0:
+    actualSize = memory.size
+  var flushrange = VkMappedMemoryRange(
+    sType: VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+    memory: memory.vk,
+    offset: VkDeviceSize(offset),
+    size: VkDeviceSize(size)
+  )
+  checkVkResult memory.device.vk.vkInvalidateMappedMemoryRanges(memoryRangeCount=1, pMemoryRanges=addr(flushrange))
 
 proc free*(memory: var DeviceMemory) =
   assert memory.device.vk.valid
   assert memory.vk.valid
 
   memory.device.vk.vkFreeMemory(memory.vk, nil)
-  memory = default(DeviceMemory)
+  memory.vk.reset

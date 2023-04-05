@@ -19,6 +19,7 @@ type
     of true:
       indexBuffer*: Buffer
       indexType*: VkIndexType
+      indexOffset*: uint64
     of false:
       discard
 
@@ -29,92 +30,125 @@ type
 
 func `$`*(drawable: Drawable): string =
   if drawable.indexed:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets}, indexType: {drawable.indexType})"
+    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets}, indexType: {drawable.indexType}, indexOffset: {drawable.indexOffset}, indexBuffer: {drawable.indexBuffer})"
   else:
     &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets})"
 
-proc destroy(drawable: var Drawable) =
-  drawable.buffer.destroy()
-  if drawable.indexed:
-    drawable.indexBuffer.destroy()
+proc getBuffers*(scene: Scene, pipeline: VkPipeline): seq[Buffer] =
+  var counted: seq[VkBuffer]
+  for drawable in scene.drawables[pipeline]:
+    if not (drawable.buffer.vk in counted):
+      result.add(drawable.buffer)
+      counted.add drawable.buffer.vk
+    if drawable.indexed and not (drawable.indexBuffer.vk in counted):
+      result.add(drawable.indexBuffer)
+      counted.add drawable.indexBuffer.vk
+
+proc destroy*(scene: var Scene, pipeline: VkPipeline) =
+  var buffers = scene.getBuffers(pipeline)
+  for buffer in buffers.mitems:
+      buffer.destroy()
+
+proc destroy*(scene: var Scene) =
+  for pipeline in scene.drawables.keys:
+    scene.destroy(pipeline)
 
 proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
   assert pipeline.device.vk.valid
   if pipeline.vk in scene.drawables:
     for drawable in scene.drawables[pipeline.vk].mitems:
-      drawable.destroy()
+      scene.destroy(pipeline.vk)
   scene.drawables[pipeline.vk] = @[]
 
   var
-    nonIMeshes: seq[Mesh]
-    smallIMeshes: seq[Mesh]
-    bigIMeshes: seq[Mesh]
+    nonIndexedMeshes: seq[Mesh]
+    tinyIndexedMeshes: seq[Mesh]
+    smallIndexedMeshes: seq[Mesh]
+    bigIndexedMeshes: seq[Mesh]
+    allIndexedMeshes: seq[Mesh]
   for mesh in allPartsOfType[Mesh](scene.root):
     for inputAttr in pipeline.inputs.vertexInputs:
       assert mesh.hasDataFor(inputAttr), &"{mesh} missing data for {inputAttr}"
     case mesh.indexType:
-      of None: nonIMeshes.add mesh
-      of Small: smallIMeshes.add mesh
-      of Big: bigIMeshes.add mesh
+      of None: nonIndexedMeshes.add mesh
+      of Tiny: tinyIndexedMeshes.add mesh
+      of Small: smallIndexedMeshes.add mesh
+      of Big: bigIndexedMeshes.add mesh
+
+  allIndexedMeshes = bigIndexedMeshes & smallIndexedMeshes & tinyIndexedMeshes # that we don't have to care about index alignment
   
-  if nonIMeshes.len > 0:
+  var
+    indicesBufferSize = 0'u64
+    indexOffset = 0'u64
+  for mesh in allIndexedMeshes:
+    indicesBufferSize += mesh.indexDataSize
+  var indexBuffer: Buffer
+  if indicesBufferSize > 0:
+    indexBuffer = pipeline.device.createBuffer(
+      size=indicesBufferSize,
+      usage=[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
+      useVRAM=true,
+      mappable=false,
+    )
+
+  for location, attributes in pipeline.inputs.vertexInputs.groupByMemoryLocation().pairs:
+    # setup one buffer per attribute location
+    var bufferSize = 0'u64
+    for mesh in nonIndexedMeshes & allIndexedMeshes:
+      bufferSize += mesh.vertexDataSize
+    if bufferSize == 0:
+      continue
     var
-      bufferSize = 0'u64
-      vertexCount = 0'u32
-    for mesh in nonIMeshes:
-      bufferSize += mesh.size
-      vertexCount += mesh.vertexCount
-    var buffer = pipeline.device.createBuffer(
+      bufferOffset = 0'u64
+      buffer = pipeline.device.createBuffer(
         size=bufferSize,
         usage=[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
-        memoryFlags=[VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT],
+        useVRAM=location in [VRAM, VRAMVisible],
+        mappable=location in [VRAMVisible, RAM],
       )
-    var offset = 0'u64
-    var drawable = Drawable(elementCount: vertexCount, buffer: buffer, indexed: false, instanceCount: 1)
-    for inputAttr in pipeline.inputs.vertexInputs:
-      drawable.offsets.add offset
-      for mesh in nonIMeshes:
+
+    # non-indexed mesh drawable
+    if nonIndexedMeshes.len > 0:
+      var vertexCount = 0'u32
+      for mesh in nonIndexedMeshes:
+        vertexCount += mesh.vertexCount
+      # remark: we merge all meshes into a single drawcall... smart?#
+      # I think bad for instancing...
+      var nonIndexedDrawable = Drawable(elementCount: vertexCount, buffer: buffer, indexed: false, instanceCount: 1)
+      for inputAttr in attributes:
+        nonIndexedDrawable.offsets.add bufferOffset
+        for mesh in nonIndexedMeshes:
+          var (pdata, size) = mesh.getRawData(inputAttr)
+          buffer.setData(pdata, size, bufferOffset)
+          bufferOffset += size
+      scene.drawables[pipeline.vk].add nonIndexedDrawable
+
+    # indexed mesh drawable
+    for mesh in allIndexedMeshes:
+      var drawable = Drawable(
+        elementCount: mesh.indicesCount,
+        buffer: buffer,
+        indexed: true,
+        indexBuffer: indexBuffer,
+        indexOffset: indexOffset,
+        indexType: mesh.indexType,
+        instanceCount: 1
+      )
+      var (pdata, size) = mesh.getRawIndexData()
+      indexBuffer.setData(pdata, size, indexOffset)
+      indexOffset += size
+      for inputAttr in attributes:
+        drawable.offsets.add bufferOffset
         var (pdata, size) = mesh.getRawData(inputAttr)
-        buffer.setData(pdata, size, offset)
-        offset += size
-    scene.drawables[pipeline.vk].add drawable
-
-#[
-proc createVertexBuffers*[M: Mesh](
-  mesh: M,
-  device: VkDevice,
-  physicalDevice: VkPhysicalDevice,
-  commandPool: VkCommandPool,
-  queue: VkQueue,
-): (seq[Buffer], uint32) =
-  result[1] = mesh.vertexData.VertexCount
-  for name, value in mesh.vertexData.fieldPairs:
-    assert value.data.len > 0
-    var flags = if value.useOnDeviceMemory: {TransferSrc} else: {VertexBuffer}
-    var stagingBuffer = device.InitBuffer(physicalDevice, value.datasize, flags, {HostVisible, HostCoherent})
-    copyMem(stagingBuffer.data, addr(value.data[0]), value.datasize)
-
-    if value.useOnDeviceMemory:
-      var finalBuffer = device.InitBuffer(physicalDevice, value.datasize, {TransferDst, VertexBuffer}, {DeviceLocal})
-      transferBuffer(commandPool, queue, stagingBuffer, finalBuffer, value.datasize)
-      stagingBuffer.trash()
-      result[0].add(finalBuffer)
-      value.buffer = finalBuffer
-    else:
-      result[0].add(stagingBuffer)
-      value.buffer = stagingBuffer
-]#
+        buffer.setData(pdata, size, bufferOffset)
+        bufferOffset += size
+      scene.drawables[pipeline.vk].add drawable
+  echo scene.getBuffers(pipeline.vk)
 
 proc setupDrawables*(scene: var Scene, renderPass: var RenderPass) =
   for subpass in renderPass.subpasses.mitems:
     for pipeline in subpass.pipelines.mitems:
       scene.setupDrawables(pipeline)
 
-
 proc getDrawables*(scene: Scene, pipeline: Pipeline): seq[Drawable] =
   scene.drawables.getOrDefault(pipeline.vk, @[])
-
-proc destroy*(scene: var Scene) =
-  for drawables in scene.drawables.mvalues:
-    for drawable in drawables.mitems:
-      drawable.destroy()
