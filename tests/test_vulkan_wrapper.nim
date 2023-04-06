@@ -56,11 +56,11 @@ when isMainModule:
   # INIT RENDERER:
   const
     vertexInput = initAttributeGroup(
-      asAttribute(default(Vec3f), "position"),
-      asAttribute(default(Vec3f), "color"),
+      attr[Vec3f]("position"),
+      attr[Vec3f]("color"),
     )
-    vertexOutput = initAttributeGroup(asAttribute(default(Vec3f), "outcolor"))
-    fragOutput = initAttributeGroup(asAttribute(default(Vec4f), "color"))
+    vertexOutput = initAttributeGroup(attr[Vec3f]("outcolor"))
+    fragOutput = initAttributeGroup(attr[Vec4f]("color"))
     vertexCode = compileGlslShader(
       stage=VK_SHADER_STAGE_VERTEX_BIT,
       inputs=vertexInput,

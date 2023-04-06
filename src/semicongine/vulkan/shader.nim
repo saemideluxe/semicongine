@@ -157,14 +157,14 @@ proc getVertexInputInfo*(
       inputRate: if attribute.perInstance: VK_VERTEX_INPUT_RATE_INSTANCE else: VK_VERTEX_INPUT_RATE_VERTEX,
     )
     # allows to submit larger data structures like Mat44, for most other types will be 1
-    for i in 0 ..< attribute.rows:
+    for i in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
       attributes.add VkVertexInputAttributeDescription(
         binding: binding,
         location: location,
-        format: getVkFormat(attribute),
-        offset: i * attribute.size(perRow=true),
+        format: attribute.thetype.getVkFormat,
+        offset: i * attribute.size(perDescriptor=true),
       )
-      location += attribute.nLocationSlots
+      location += attribute.thetype.nLocationSlots
     inc binding
 
   return VkPipelineVertexInputStateCreateInfo(

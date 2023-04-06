@@ -6,12 +6,12 @@ import ./buffer
 import ./utils
 
 type
-  Descriptor* = object # "fields" of a DescriptorSet
+  Descriptor* = object # "fields" of a DescriptorSetLayout
     thetype*: VkDescriptorType
     count*: uint32
     stages*: seq[VkShaderStageFlagBits]
     itemsize*: uint32
-  DescriptorSetLayout* = object # "type description of a DescriptorSet
+  DescriptorSetLayout* = object # "type-description" of a DescriptorSet
     device: Device
     vk*: VkDescriptorSetLayout
     descriptors*: seq[Descriptor]

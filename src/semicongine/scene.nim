@@ -23,6 +23,10 @@ type
     of false:
       discard
 
+  ShaderGlobal* = ref object of Component
+    name*: string
+    value*: DataValue
+
   Scene* = object
     name*: string
     root*: Entity
@@ -75,7 +79,8 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
       of Small: smallIndexedMeshes.add mesh
       of Big: bigIndexedMeshes.add mesh
 
-  allIndexedMeshes = bigIndexedMeshes & smallIndexedMeshes & tinyIndexedMeshes # that we don't have to care about index alignment
+  # ordering meshes this way allows us to ignore value alignment (I think, needs more testing)
+  allIndexedMeshes = bigIndexedMeshes & smallIndexedMeshes & tinyIndexedMeshes
   
   var
     indicesBufferSize = 0'u64
@@ -92,7 +97,7 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
     )
 
   for location, attributes in pipeline.inputs.vertexInputs.groupByMemoryLocation().pairs:
-    # setup one buffer per attribute location
+    # setup one buffer per attribute-location-type
     var bufferSize = 0'u64
     for mesh in nonIndexedMeshes & allIndexedMeshes:
       bufferSize += mesh.vertexDataSize

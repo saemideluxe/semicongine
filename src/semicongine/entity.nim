@@ -9,7 +9,7 @@ type
 
   Entity* = ref object of RootObj
     name*: string
-    transform*: Mat44 # todo: cache transform + only update VBO when transform changed
+    transform*: Mat4 # todo: cache transform + only update VBO when transform changed
     parent*: Entity
     children*: seq[Entity]
     components*: seq[Component]
@@ -37,7 +37,7 @@ proc add*(entity: Entity, components: seq[Component]) =
 func newEntity*(name: string = ""): Entity =
   result = new Entity
   result.name = name
-  result.transform = Unit44
+  result.transform = Unit4
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
 
@@ -47,7 +47,7 @@ func newEntity*(name: string, firstChild: Entity, children: varargs[Entity]): En
   for child in children:
     result.add child
   result.name = name
-  result.transform = Unit44
+  result.transform = Unit4
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
 
@@ -59,10 +59,10 @@ proc newEntity*(name: string, firstPart: Component, components: varargs[Componen
     result.add part
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
-  result.transform = Unit44
+  result.transform = Unit4
 
-func getModelTransform*(entity: Entity): Mat44 =
-  result = Unit44
+func getModelTransform*(entity: Entity): Mat4 =
+  result = Unit4
   var currentEntity = entity
   while currentEntity != nil:
     result = currentEntity.transform * result
