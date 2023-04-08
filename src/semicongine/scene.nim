@@ -38,14 +38,22 @@ func `$`*(drawable: Drawable): string =
   else:
     &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets})"
 
+func `$`*(global: ShaderGlobal): string =
+  &"ShaderGlobal(name: {global.name}, {global.value})"
+
+func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
+  var value = DataValue(thetype: getDataType[T]())
+  value.setValue(data)
+  ShaderGlobal(name: name, value: value)
+
 proc getBuffers*(scene: Scene, pipeline: VkPipeline): seq[Buffer] =
   var counted: seq[VkBuffer]
   for drawable in scene.drawables[pipeline]:
     if not (drawable.buffer.vk in counted):
-      result.add(drawable.buffer)
+      result.add drawable.buffer
       counted.add drawable.buffer.vk
     if drawable.indexed and not (drawable.indexBuffer.vk in counted):
-      result.add(drawable.indexBuffer)
+      result.add drawable.indexBuffer
       counted.add drawable.indexBuffer.vk
 
 proc destroy*(scene: var Scene, pipeline: VkPipeline) =
@@ -70,7 +78,7 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
     smallIndexedMeshes: seq[Mesh]
     bigIndexedMeshes: seq[Mesh]
     allIndexedMeshes: seq[Mesh]
-  for mesh in allPartsOfType[Mesh](scene.root):
+  for mesh in allComponentsOfType[Mesh](scene.root):
     for inputAttr in pipeline.inputs.vertexInputs:
       assert mesh.hasDataFor(inputAttr), &"{mesh} missing data for {inputAttr}"
     case mesh.indexType:
@@ -148,11 +156,10 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
         buffer.setData(pdata, size, bufferOffset)
         bufferOffset += size
       scene.drawables[pipeline.vk].add drawable
-  echo scene.getBuffers(pipeline.vk)
 
-proc setupDrawables*(scene: var Scene, renderPass: var RenderPass) =
-  for subpass in renderPass.subpasses.mitems:
-    for pipeline in subpass.pipelines.mitems:
+proc setupDrawables*(scene: var Scene, renderPass: RenderPass) =
+  for subpass in renderPass.subpasses:
+    for pipeline in subpass.pipelines:
       scene.setupDrawables(pipeline)
 
 proc getDrawables*(scene: Scene, pipeline: Pipeline): seq[Drawable] =

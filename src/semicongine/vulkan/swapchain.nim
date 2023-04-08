@@ -1,3 +1,4 @@
+import std/tables
 import std/options
 import std/logging
 
@@ -6,13 +7,17 @@ import ./utils
 import ./device
 import ./physicaldevice
 import ./image
+import ./buffer
 import ./renderpass
+import ./descriptor
 import ./framebuffer
 import ./commandbuffer
 import ./pipeline
 import ./syncing
 
 import ../scene
+import ../entity
+import ../gpu_data
 import ../math
 
 type
@@ -31,6 +36,7 @@ type
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
     commandBufferPool: CommandBufferPool
+    uniformBuffers: Table[VkPipeline, seq[Buffer]]
 
 
 proc createSwapchain*(
@@ -100,6 +106,47 @@ proc createSwapchain*(
     swapchain.commandBufferPool = device.createCommandBufferPool(queueFamily, swapchain.renderPass.inFlightFrames)
 
   return (swapchain, createResult)
+
+proc setupUniforms(swapChain: var Swapchain, scene: var Scene, pipeline: var Pipeline) =
+  assert pipeline.vk.valid
+  assert not (pipeline.vk in swapChain.uniformBuffers)
+
+  swapChain.uniformBuffers[pipeline.vk] = @[]
+
+  var uniformBufferSize = 0'u64
+  for uniform in pipeline.uniforms:
+    uniformBufferSize += uniform.thetype.size
+
+  for i in 0 ..< swapChain.renderPass.inFlightFrames:
+    var buffer = pipeline.device.createBuffer(
+      size=uniformBufferSize,
+      usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
+      useVRAM=true,
+      mappable=true,
+    )
+    swapChain.uniformBuffers[pipeline.vk].add buffer
+    pipeline.descriptorSets[i].setDescriptorSet(buffer)
+
+proc setupUniforms*(swapChain: var Swapchain, scene: var Scene) =
+  for subpass in swapChain.renderPass.subpasses.mitems:
+    for pipeline in subpass.pipelines.mitems:
+      swapChain.setupUniforms(scene, pipeline)
+
+proc updateUniforms*(swapChain: var Swapchain, scene: Scene, pipeline: Pipeline) =
+  assert pipeline.vk.valid
+  assert swapChain.uniformBuffers[pipeline.vk][swapChain.currentInFlight].vk.valid
+
+  var globalsByName: Table[string, DataValue]
+  for component in allComponentsOfType[ShaderGlobal](scene.root):
+    globalsByName[component.name] = component.value
+
+  var offset = 0'u64
+  for uniform in pipeline.uniforms:
+    assert uniform.thetype == globalsByName[uniform.name].thetype
+    let (pdata, size) = globalsByName[uniform.name].getRawData()
+    swapChain.uniformBuffers[pipeline.vk][swapChain.currentInFlight].setData(pdata, size, offset)
+    offset += size
+
 
 proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
   assert commandBuffer.valid
@@ -220,6 +267,7 @@ proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
       for pipeline in swapchain.renderpass.subpasses[i].pipelines.mitems:
         commandBuffer.vkCmdBindPipeline(swapchain.renderpass.subpasses[i].pipelineBindPoint, pipeline.vk)
         commandBuffer.vkCmdBindDescriptorSets(swapchain.renderpass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(pipeline.descriptorSets[swapchain.currentInFlight].vk), 0, nil)
+        swapchain.updateUniforms(scene, pipeline)
         commandBuffer.draw(scene.getDrawables(pipeline), scene)
       if i < swapchain.renderpass.subpasses.len - 1:
         commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
@@ -280,6 +328,9 @@ proc destroy*(swapchain: var Swapchain) =
     swapchain.queueFinishedFence[i].destroy()
     swapchain.imageAvailableSemaphore[i].destroy()
     swapchain.renderFinishedSemaphore[i].destroy()
+  for buffers in swapchain.uniformBuffers.mvalues:
+    for buffer in buffers.mitems:
+      buffer.destroy()
+
   swapchain.device.vk.vkDestroySwapchainKHR(swapchain.vk, nil)
   swapchain.vk.reset()
-

@@ -62,7 +62,7 @@ proc createWindow*(title: string): NativeWindow =
   return NativeWindow(display: display, window: window,
       emptyCursor: empty_cursor)
 
-proc trash*(window: NativeWindow) =
+proc destroy*(window: NativeWindow) =
   checkXlibResult window.display.XFreeCursor(window.emptyCursor)
   checkXlibResult window.display.XDestroyWindow(window.window)
   discard window.display.XCloseDisplay() # always returns 0

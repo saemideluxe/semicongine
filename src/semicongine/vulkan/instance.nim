@@ -108,6 +108,7 @@ proc defaultDebugCallback(
   log LEVEL_MAPPING[messageSeverity], &"{toEnums messageTypes}: {pCallbackData.pMessage}"
   if messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
     echo getStackTrace()
+    quit()
   return false
 
 proc createDebugMessenger*(

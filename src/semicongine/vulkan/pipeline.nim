@@ -1,3 +1,6 @@
+import std/tables
+import std/sequtils
+
 import ./api
 import ./device
 import ./descriptor
@@ -16,35 +19,41 @@ type
     descriptorPool*: DescriptorPool
     descriptorSets*: seq[DescriptorSet]
 
-func inputs*(pipeline: Pipeline): AttributeGroup =
+func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
   for shader in pipeline.shaders:
     if shader.stage == VK_SHADER_STAGE_VERTEX_BIT:
       return shader.inputs
+
+func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
+  var uniformList: Table[string, ShaderAttribute]
+  for shader in pipeline.shaders:
+    for attribute in shader.uniforms:
+      if attribute.name in uniformList:
+        assert uniformList[attribute.name] == attribute
+      else:
+        uniformList[attribute.name] = attribute
+  result = uniformList.values.toSeq
 
 proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexShader: Shader, fragmentShader: Shader, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid
   assert device.vk.valid
   assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
   assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
+  assert vertexShader.outputs == fragmentShader.inputs
+  assert vertexShader.uniforms == fragmentShader.uniforms
 
   result.device = device
   result.shaders = @[vertexShader, fragmentShader]
   
-  var descriptors = @[Descriptor(
-    thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-    count: 1,
-    stages: @[VK_SHADER_STAGE_VERTEX_BIT],
-    itemsize: vertexShader.uniforms.size(),
-  )]
-  if vertexShader.uniforms == fragmentShader.uniforms:
-    descriptors[0].stages.add VK_SHADER_STAGE_FRAGMENT_BIT
-  else:
-    descriptors.add Descriptor(
+  # TODO: correct descriptors over all shaders
+  var descriptors = @[
+    Descriptor(
       thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
       count: 1,
-      stages: @[VK_SHADER_STAGE_FRAGMENT_BIT],
-      itemsize: fragmentShader.uniforms.size(),
-    )
+      stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
+      itemsize: vertexShader.uniforms.size(),
+    ),
+  ]
   result.descriptorSetLayout = device.createDescriptorSetLayout(descriptors)
 
   # TODO: Push constants
@@ -151,6 +160,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexShader: Sha
   )
   result.descriptorPool = result.device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
   result.descriptorSets = result.descriptorPool.allocateDescriptorSet(result.descriptorSetLayout, inFlightFrames)
+  discard result.uniforms # just for assertion
 
 proc destroy*(pipeline: var Pipeline) =
   assert pipeline.device.vk.valid

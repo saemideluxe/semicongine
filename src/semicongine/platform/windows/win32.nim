@@ -88,7 +88,7 @@ proc createWindow*(title: string): NativeWindow =
   discard ShowWindow(result.hwnd, SW_SHOW)
   discard ShowCursor(false)
 
-proc trash*(window: NativeWindow) =
+proc destroy*(window: NativeWindow) =
   discard
 
 proc size*(window: NativeWindow): (int, int) =
@@ -106,9 +106,9 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     DispatchMessage(addr(msg))
   return currentEvents
 
-proc getMousePosition*(window: NativeWindow): Option[Vec2] =
+proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
   var p: POINT
   let res = GetCursorPos(addr(p))
   if res:
-    return some(Vec2([float32(p.x), float32(p.y)]))
-  return none(Vec2)
+    return some(Vec2f([float32(p.x), float32(p.y)]))
+  return none(Vec2f)
