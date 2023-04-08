@@ -24,17 +24,17 @@ type
     stage: VkShaderStageFlagBits
     entrypoint: string
     binary: seq[uint32]
-    inputs: AttributeGroup
-    uniforms: AttributeGroup
-    outputs: AttributeGroup
+    inputs: seq[ShaderAttribute]
+    uniforms: seq[ShaderAttribute]
+    outputs: seq[ShaderAttribute]
   Shader* = object
     device: Device
     vk*: VkShaderModule
     stage*: VkShaderStageFlagBits
     entrypoint*: string
-    inputs*: AttributeGroup
-    uniforms*: AttributeGroup
-    outputs*: AttributeGroup
+    inputs*: seq[ShaderAttribute]
+    uniforms*: seq[ShaderAttribute]
+    outputs*: seq[ShaderAttribute]
 
 
 proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
@@ -86,17 +86,17 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
 
 proc compileGlslShader*(
   stage: VkShaderStageFlagBits,
-  inputs=AttributeGroup(),
-  uniforms=AttributeGroup(),
-  outputs=AttributeGroup(),
+  inputs: seq[ShaderAttribute]= @[],
+  uniforms: seq[ShaderAttribute]= @[],
+  outputs: seq[ShaderAttribute]= @[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
   body: seq[string]
 ): ShaderCode {.compileTime.} =
   var code = @[&"#version {version}", ""] &
-    (if inputs.attributes.len > 0: inputs.glslInput() & @[""] else: @[]) &
-    (if uniforms.attributes.len > 0: uniforms.glslUniforms() & @[""] else: @[]) &
-    (if outputs.attributes.len > 0: outputs.glslOutput() & @[""] else: @[]) &
+    (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
+    (if uniforms.len > 0: uniforms.glslUniforms() & @[""] else: @[]) &
+    (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
     @[&"void {entrypoint}(){{"] &
     body &
     @[&"}}"]
@@ -110,9 +110,9 @@ proc compileGlslShader*(
 
 proc compileGlslShader*(
   stage: VkShaderStageFlagBits,
-  inputs: AttributeGroup=AttributeGroup(),
-  uniforms: AttributeGroup=AttributeGroup(),
-  outputs: AttributeGroup=AttributeGroup(),
+  inputs: seq[ShaderAttribute]= @[],
+  uniforms: seq[ShaderAttribute]= @[],
+  outputs: seq[ShaderAttribute]= @[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
   body: string
@@ -150,7 +150,7 @@ proc getVertexInputInfo*(
   var location = 0'u32
   var binding = baseBinding
 
-  for attribute in shader.inputs.attributes:
+  for attribute in shader.inputs.vertexInputs:
     bindings.add VkVertexInputBindingDescription(
       binding: binding,
       stride: attribute.size,

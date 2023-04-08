@@ -28,7 +28,7 @@ type
       of TextureCoordinate: texturecoord: seq[Vec2f]
   Mesh* = ref object of Component
     vertexCount*: uint32
-    data: Table[VertexAttribute, MeshData]
+    data: Table[ShaderAttribute, MeshData]
     case indexType*: MeshIndexType
       of None: discard
       of Tiny: tinyIndices*: seq[array[3, uint8]]
@@ -134,7 +134,7 @@ func meshDataSize*(meshdata: MeshData): uint64 =
     of BiTangent: meshdata.bitangent.size
     of TextureCoordinate: meshdata.texturecoord.size
 
-func attributeSize*(mesh: Mesh, attribute: VertexAttribute): uint64 =
+func attributeSize*(mesh: Mesh, attribute: ShaderAttribute): uint64 =
   mesh.data[attribute].meshDataSize
 
 func vertexDataSize*(mesh: Mesh): uint64 =
@@ -167,14 +167,14 @@ proc getRawIndexData*(mesh: Mesh): (pointer, uint64) =
     of Small: rawData(mesh.smallIndices)
     of Big: rawData(mesh.bigIndices)
 
-proc hasDataFor*(mesh: Mesh, attribute: VertexAttribute): bool =
+proc hasDataFor*(mesh: Mesh, attribute: ShaderAttribute): bool =
   assert attribute.perInstance == false, "Mesh data cannot handle per-instance attributes"
   attribute in mesh.data
 
-proc getRawData*(mesh: Mesh, attribute: VertexAttribute): (pointer, uint64) =
+proc getRawData*(mesh: Mesh, attribute: ShaderAttribute): (pointer, uint64) =
   assert attribute.perInstance == false, "Mesh data cannot handle per-instance attributes"
   mesh.data[attribute].getRawData()
 
-proc getData*(mesh: Mesh, attribute: VertexAttribute): MeshData =
+proc getData*(mesh: Mesh, attribute: ShaderAttribute): MeshData =
   assert attribute.perInstance == false, "Mesh data cannot handle per-instance attributes"
   mesh.data[attribute]

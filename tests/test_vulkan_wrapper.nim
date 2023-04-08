@@ -1,4 +1,3 @@
-import std/os
 import std/options
 
 import semicongine
@@ -55,21 +54,25 @@ when isMainModule:
 
   # INIT RENDERER:
   const
-    vertexInput = initAttributeGroup(
+    vertexInput = @[
       attr[Vec3f]("position"),
       attr[Vec3f]("color"),
-    )
-    vertexOutput = initAttributeGroup(attr[Vec3f]("outcolor"))
-    fragOutput = initAttributeGroup(attr[Vec4f]("color"))
+      attr[Mat4]("transform", perInstance=true)
+    ]
+    vertexOutput = @[attr[Vec3f]("outcolor")]
+    uniforms = @[attr[float32]("time")]
+    fragOutput = @[attr[Vec4f]("color")]
     vertexCode = compileGlslShader(
       stage=VK_SHADER_STAGE_VERTEX_BIT,
       inputs=vertexInput,
+      uniforms=uniforms,
       outputs=vertexOutput,
-      body="""gl_Position = vec4(position, 1.0); outcolor = color;"""
+      body="""gl_Position = vec4(position, 1.0); outcolor = color * sin(Uniforms.time) * 0.5 + 0.5;"""
     )
     fragmentCode = compileGlslShader(
       stage=VK_SHADER_STAGE_FRAGMENT_BIT,
       inputs=vertexOutput,
+      uniforms=uniforms,
       outputs=fragOutput,
       body="color = vec4(outcolor, 1);"
     )
@@ -83,9 +86,11 @@ when isMainModule:
     raise newException(Exception, "Unable to create swapchain")
 
   # INIT SCENE
+  var time = initShaderGlobal("time", 0.0'f32)
   var thescene = Scene(
     name: "main",
     root: newEntity("root",
+      newEntity("stuff", time),
       newEntity("triangle1", newMesh(
         positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
         colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
@@ -119,10 +124,13 @@ when isMainModule:
     )
   )
   thescene.setupDrawables(renderPass)
+  swapchain.setupUniforms(thescene)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
-  for i in 0 ..< 10000:
+  for i in 0 ..< 1:
+    setValue[float32](time.value, get[float32](time.value) + 0.0005)
+    echo get[float32](time.value)
     discard swapchain.drawScene(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
   checkVkResult device.vk.vkDeviceWaitIdle()
@@ -143,3 +151,4 @@ when isMainModule:
   device.destroy()
   debugger.destroy()
   instance.destroy()
+  thewindow.destroy()

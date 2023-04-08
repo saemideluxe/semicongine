@@ -16,23 +16,23 @@ type
 
 
 method `$`*(entity: Entity): string {.base.} = entity.name
-method `$`*(part: Component): string {.base.} =
+method `$`*(component: Component): string {.base.} =
   "Unknown Component"
 
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
   entity.children.add child
-proc add*(entity: Entity, part: Component) =
-  part.entity = entity
-  entity.components.add part
+proc add*(entity: Entity, component: Component) =
+  component.entity = entity
+  entity.components.add component
 proc add*(entity: Entity, children: seq[Entity]) =
   for child in children:
     child.parent = entity
     entity.children.add child
 proc add*(entity: Entity, components: seq[Component]) =
-  for part in components:
-    part.entity = entity
-    entity.components.add part
+  for component in components:
+    component.entity = entity
+    entity.components.add component
 
 func newEntity*(name: string = ""): Entity =
   result = new Entity
@@ -51,12 +51,12 @@ func newEntity*(name: string, firstChild: Entity, children: varargs[Entity]): En
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
 
-proc newEntity*(name: string, firstPart: Component, components: varargs[Component]): Entity =
+proc newEntity*(name: string, firstComponent: Component, components: varargs[Component]): Entity =
   result = new Entity
   result.name = name
-  result.add firstPart
-  for part in components:
-    result.add part
+  result.add firstComponent
+  for component in components:
+    result.add component
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
   result.transform = Unit4
@@ -68,13 +68,13 @@ func getModelTransform*(entity: Entity): Mat4 =
     result = currentEntity.transform * result
     currentEntity = currentEntity.parent
 
-iterator allPartsOfType*[T: Component](root: Entity): T =
+iterator allComponentsOfType*[T: Component](root: Entity): T =
   var queue = @[root]
   while queue.len > 0:
     let entity = queue.pop
-    for part in entity.components:
-      if part of T:
-        yield T(part)
+    for component in entity.components:
+      if component of T:
+        yield T(component)
     for i in countdown(entity.children.len - 1, 0):
       queue.add entity.children[i]
 
@@ -87,15 +87,15 @@ func firstWithName*(root: Entity, name: string): Entity =
         return child
       queue.add child
 
-func firstPartWithName*[T: Component](root: Entity, name: string): T =
+func firstComponentWithName*[T: Component](root: Entity, name: string): T =
   var queue = @[root]
   while queue.len > 0:
     let next = queue.pop
     for child in next.children:
       if child.name == name:
-        for part in child.components:
-          if part of T:
-            return T(part)
+        for component in child.components:
+          if component of T:
+            return T(component)
       queue.add child
 
 func allWithName*(root: Entity, name: string): seq[Entity] =
@@ -107,15 +107,15 @@ func allWithName*(root: Entity, name: string): seq[Entity] =
         result.add child
       queue.add child
 
-func allPartsWithName*[T: Component](root: Entity, name: string): seq[T] =
+func allComponentsWithName*[T: Component](root: Entity, name: string): seq[T] =
   var queue = @[root]
   while queue.len > 0:
     let next = queue.pop
     for child in next.children:
       if child.name == name:
-        for part in child.components:
-          if part of T:
-            result.add T(part)
+        for component in child.components:
+          if component of T:
+            result.add T(component)
       queue.add child
 
 iterator allEntities*(root: Entity): Entity =
