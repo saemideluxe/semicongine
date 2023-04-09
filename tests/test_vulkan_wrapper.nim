@@ -57,7 +57,7 @@ when isMainModule:
     vertexInput = @[
       attr[Vec3f]("position"),
       attr[Vec3f]("color"),
-      attr[Mat4]("transform", perInstance=true)
+      attr[Vec3f]("translate", perInstance=true)
     ]
     vertexOutput = @[attr[Vec3f]("outcolor")]
     uniforms = @[attr[float32]("time")]
@@ -87,6 +87,7 @@ when isMainModule:
 
   # INIT SCENE
   var time = initShaderGlobal("time", 0.0'f32)
+  #[
   var thescene = Scene(
     name: "main",
     root: newEntity("root",
@@ -121,6 +122,19 @@ when isMainModule:
         indices=[[0'u32, 2'u32, 1'u32]],
         autoResize=false
       )),
+    )
+  )
+  ]#
+  var mymesh = newMesh(
+    positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
+    colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+  )
+  setInstanceData[Vec3f](mymesh, "translate", @[newVec3f(0.3, 0.3)])
+  var thescene = Scene(
+    name: "main",
+    root: newEntity("root",
+      newEntity("stuff", time),
+      newEntity("triangle", mymesh),
     )
   )
   thescene.setupDrawables(renderPass)
