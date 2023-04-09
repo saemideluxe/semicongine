@@ -46,7 +46,7 @@ func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
   value.setValue(data)
   ShaderGlobal(name: name, value: value)
 
-proc getBuffers*(scene: Scene, pipeline: VkPipeline): seq[Buffer] =
+func getBuffers*(scene: Scene, pipeline: VkPipeline): seq[Buffer] =
   var counted: seq[VkBuffer]
   for drawable in scene.drawables[pipeline]:
     if not (drawable.buffer.vk in counted):
@@ -80,7 +80,7 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
     allIndexedMeshes: seq[Mesh]
   for mesh in allComponentsOfType[Mesh](scene.root):
     for inputAttr in pipeline.inputs.vertexInputs:
-      assert mesh.hasDataFor(inputAttr), &"{mesh} missing data for {inputAttr}"
+      assert mesh.hasVertexDataFor(inputAttr.name), &"{mesh} missing data for {inputAttr}"
     case mesh.indexType:
       of None: nonIndexedMeshes.add mesh
       of Tiny: tinyIndexedMeshes.add mesh
@@ -120,6 +120,7 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
         mappable=location in [VRAMVisible, RAM],
       )
 
+    # TODO: gather instance data/buffers
     # non-indexed mesh drawable
     if nonIndexedMeshes.len > 0:
       var vertexCount = 0'u32
@@ -127,11 +128,16 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
         vertexCount += mesh.vertexCount
       # remark: we merge all meshes into a single drawcall... smart?#
       # I think bad for instancing...
-      var nonIndexedDrawable = Drawable(elementCount: vertexCount, buffer: buffer, indexed: false, instanceCount: 1)
+      var nonIndexedDrawable = Drawable(
+        elementCount: vertexCount,
+        buffer: buffer,
+        indexed: false,
+        instanceCount: 1
+      )
       for inputAttr in attributes:
         nonIndexedDrawable.offsets.add bufferOffset
         for mesh in nonIndexedMeshes:
-          var (pdata, size) = mesh.getRawData(inputAttr)
+          var (pdata, size) = mesh.getRawVertexData(inputAttr.name)
           buffer.setData(pdata, size, bufferOffset)
           bufferOffset += size
       scene.drawables[pipeline.vk].add nonIndexedDrawable
@@ -152,7 +158,7 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
       indexOffset += size
       for inputAttr in attributes:
         drawable.offsets.add bufferOffset
-        var (pdata, size) = mesh.getRawData(inputAttr)
+        var (pdata, size) = mesh.getRawVertexData(inputAttr.name)
         buffer.setData(pdata, size, bufferOffset)
         bufferOffset += size
       scene.drawables[pipeline.vk].add drawable
@@ -162,5 +168,5 @@ proc setupDrawables*(scene: var Scene, renderPass: RenderPass) =
     for pipeline in subpass.pipelines:
       scene.setupDrawables(pipeline)
 
-proc getDrawables*(scene: Scene, pipeline: Pipeline): seq[Drawable] =
+func getDrawables*(scene: Scene, pipeline: Pipeline): seq[Drawable] =
   scene.drawables.getOrDefault(pipeline.vk, @[])
