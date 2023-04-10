@@ -777,14 +777,21 @@ func glslType*(thetype: DataType): string =
     of Mat4F32: "mat4"
     of Mat4F64: "dmat4"
 
+func groupByMemoryLocation*(attributes: openArray[ShaderAttribute]): Table[MemoryLocation, seq[ShaderAttribute]] =
+  for attr in attributes:
+    if not (attr.memoryLocation in result):
+      result[attr.memoryLocation] = @[]
+    result[attr.memoryLocation].add attr
+
 func glslInput*(group: seq[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
   var i = 0'u32
-  for attribute in group:
-    result.add &"layout(location = {i}) in {attribute.thetype.glslType} {attribute.name};"
-    for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
-      i += attribute.thetype.nLocationSlots
+  for attributes in group.groupByMemoryLocation().values:
+    for attribute in attributes:
+      result.add &"layout(location = {i}) in {attribute.thetype.glslType} {attribute.name};"
+      for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
+        i += attribute.thetype.nLocationSlots
 
 func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding=0): seq[string] =
   if group.len == 0:
@@ -802,9 +809,3 @@ func glslOutput*(group: seq[ShaderAttribute]): seq[string] =
   for attribute in group:
     result.add &"layout(location = {i}) out {attribute.thetype.glslType} {attribute.name};"
     i += 1
-
-func groupByMemoryLocation*(attributes: openArray[ShaderAttribute]): Table[MemoryLocation, seq[ShaderAttribute]] =
-  for attr in attributes:
-    if not (attr.memoryLocation in result):
-      result[attr.memoryLocation] = @[]
-    result[attr.memoryLocation].add attr

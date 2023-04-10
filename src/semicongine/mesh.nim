@@ -19,8 +19,7 @@ type
     vertexCount*: uint32
     indicesCount*: uint32
     instanceCount*: uint32
-    vertexdata: Table[string, DataList]
-    instancedata: Table[string, DataList]
+    data: Table[string, DataList]
     case indexType*: MeshIndexType
       of None: discard
       of Tiny: tinyIndices: seq[array[3, uint8]]
@@ -51,11 +50,11 @@ func newMesh*(
   result.vertexCount = uint32(positions.len)
   result.indicesCount = uint32(indices.len * 3)
   result.instanceCount = instances
-  result.vertexdata["position"] = DataList(thetype: Vec3F32)
-  setValues(result.vertexdata["position"], positions.toSeq)
+  result.data["position"] = DataList(thetype: Vec3F32)
+  setValues(result.data["position"], positions.toSeq)
   if colors.len > 0:
-    result.vertexdata["color"] = DataList(thetype: Vec3F32)
-    setValues(result.vertexdata["color"], colors.toSeq)
+    result.data["color"] = DataList(thetype: Vec3F32)
+    setValues(result.data["color"], colors.toSeq)
 
   for i in indices:
     assert uint32(i[0]) < result.vertexCount
@@ -85,9 +84,8 @@ func newMesh*(
 ): auto =
   newMesh(positions, newSeq[array[3, int]](), colors, instances)
 
-func vertexDataSize*(mesh: Mesh): uint32 =
-  for d in mesh.vertexdata.values:
-    result += d.size
+func dataSize*(mesh: Mesh, attribute: string): uint32 =
+  mesh.data[attribute].size
 
 func indexDataSize*(mesh: Mesh): uint32 =
   case mesh.indexType
@@ -95,10 +93,6 @@ func indexDataSize*(mesh: Mesh): uint32 =
     of Tiny: mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0))
     of Small: mesh.smallIndices.len * sizeof(get(genericParams(typeof(mesh.smallIndices)), 0))
     of Big: mesh.bigIndices.len * sizeof(get(genericParams(typeof(mesh.bigIndices)), 0))
-
-func instanceDataSize*(mesh: Mesh): uint32 =
-  for d in mesh.instancedata.values:
-    result += d.size
 
 func rawData[T: seq](value: var T): (pointer, uint32) =
   (pointer(addr(value[0])), uint32(sizeof(get(genericParams(typeof(value)), 0)) * value.len))
@@ -110,20 +104,14 @@ func getRawIndexData*(mesh: Mesh): (pointer, uint32) =
     of Small: rawData(mesh.smallIndices)
     of Big: rawData(mesh.bigIndices)
 
-func hasVertexDataFor*(mesh: Mesh, attribute: string): bool =
-  attribute in mesh.vertexdata
+func hasDataFor*(mesh: Mesh, attribute: string): bool =
+  attribute in mesh.data
 
-func hasInstanceDataFor*(mesh: Mesh, attribute: string): bool =
-  attribute in mesh.instancedata
+func getRawData*(mesh: Mesh, attribute: string): (pointer, uint32) =
+  mesh.data[attribute].getRawData()
 
-func getRawVertexData*(mesh: Mesh, attribute: string): (pointer, uint32) =
-  mesh.vertexdata[attribute].getRawData()
-
-func getRawInstanceData*(mesh: Mesh, attribute: string): (pointer, uint32) =
-  mesh.instancedata[attribute].getRawData()
-
-proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
-  assert not (attribute in mesh.instancedata)
-  mesh.instancedata[attribute] = DataList(thetype: getDataType[T]())
-  setValues(mesh.instancedata[attribute], data)
+  assert not (attribute in mesh.data)
+  mesh.data[attribute] = DataList(thetype: getDataType[T]())
+  setValues(mesh.data[attribute], data)

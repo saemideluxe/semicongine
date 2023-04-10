@@ -203,13 +203,23 @@ template renderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass,
   commandBuffer.endRenderCommands()
 
 proc draw*(commandBuffer: VkCommandBuffer, drawables: seq[Drawable], scene: Scene) =
+
+  debug "Scene buffers:"
+  for (location, buffer) in scene.vertexBuffers.pairs:
+    echo "  ", location, ": ", buffer
+  echo "  Index buffer: ", scene.indexBuffer
+
   for drawable in drawables:
     debug "Draw ", drawable
+
     var buffers: seq[VkBuffer]
     var offsets: seq[VkDeviceSize]
-    for offset in drawable.offsets:
-      buffers.add drawable.buffer.vk
-      offsets.add VkDeviceSize(offset)
+
+    for (location, bufferOffsets) in drawable.bufferOffsets.pairs:
+      for offset in bufferOffsets:
+        buffers.add scene.vertexBuffers[location].vk
+        offsets.add VkDeviceSize(offset)
+
     commandBuffer.vkCmdBindVertexBuffers(
       firstBinding=0'u32,
       bindingCount=uint32(buffers.len),
@@ -217,7 +227,7 @@ proc draw*(commandBuffer: VkCommandBuffer, drawables: seq[Drawable], scene: Scen
       pOffsets=offsets.toCPointer()
     )
     if drawable.indexed:
-      commandBuffer.vkCmdBindIndexBuffer(drawable.indexBuffer.vk, VkDeviceSize(drawable.indexOffset), drawable.indexType)
+      commandBuffer.vkCmdBindIndexBuffer(scene.indexBuffer.vk, VkDeviceSize(drawable.indexBufferOffset), drawable.indexType)
       commandBuffer.vkCmdDrawIndexed(
         indexCount=drawable.elementCount,
         instanceCount=drawable.instanceCount,
