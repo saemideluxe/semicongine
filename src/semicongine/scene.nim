@@ -11,15 +11,13 @@ import ./mesh
 
 type
   Drawable* = object
-    buffer*: Buffer # buffer
-    offsets*: seq[uint64] # offsets from buffer
     elementCount*: uint32 # number of vertices or indices
+    bufferOffsets*: Table[MemoryLocation, seq[uint64]] # list of buffers and list of offset for each attribute in that buffer
     instanceCount*: uint32 # number of instance
     case indexed*: bool
     of true:
-      indexBuffer*: Buffer
       indexType*: VkIndexType
-      indexOffset*: uint64
+      indexBufferOffset*: uint64
     of false:
       discard
 
@@ -31,12 +29,14 @@ type
     name*: string
     root*: Entity
     drawables: Table[VkPipeline, seq[Drawable]]
+    vertexBuffers*: Table[MemoryLocation, Buffer]
+    indexBuffer*: Buffer
 
 func `$`*(drawable: Drawable): string =
   if drawable.indexed:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets}, indexType: {drawable.indexType}, indexOffset: {drawable.indexOffset}, indexBuffer: {drawable.indexBuffer})"
+    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets}, indexType: {drawable.indexType}, indexBufferOffset: {drawable.indexBufferOffset})"
   else:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, buffer: {drawable.buffer}, offsets: {drawable.offsets})"
+    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
 func `$`*(global: ShaderGlobal): string =
   &"ShaderGlobal(name: {global.name}, {global.value})"
@@ -46,20 +46,11 @@ func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
   value.setValue(data)
   ShaderGlobal(name: name, value: value)
 
-func getBuffers*(scene: Scene, pipeline: VkPipeline): seq[Buffer] =
-  var counted: seq[VkBuffer]
-  for drawable in scene.drawables[pipeline]:
-    if not (drawable.buffer.vk in counted):
-      result.add drawable.buffer
-      counted.add drawable.buffer.vk
-    if drawable.indexed and not (drawable.indexBuffer.vk in counted):
-      result.add drawable.indexBuffer
-      counted.add drawable.indexBuffer.vk
-
 proc destroy*(scene: var Scene, pipeline: VkPipeline) =
-  var buffers = scene.getBuffers(pipeline)
-  for buffer in buffers.mitems:
-      buffer.destroy()
+  for buffer in scene.vertexBuffers.mvalues:
+    buffer.destroy()
+  if scene.indexBuffer.vk.valid:
+    scene.indexBuffer.destroy
 
 proc destroy*(scene: var Scene) =
   for pipeline in scene.drawables.keys:
@@ -67,101 +58,89 @@ proc destroy*(scene: var Scene) =
 
 proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
   assert pipeline.device.vk.valid
+
   if pipeline.vk in scene.drawables:
     for drawable in scene.drawables[pipeline.vk].mitems:
       scene.destroy(pipeline.vk)
   scene.drawables[pipeline.vk] = @[]
 
-  var
-    nonIndexedMeshes: seq[Mesh]
-    tinyIndexedMeshes: seq[Mesh]
-    smallIndexedMeshes: seq[Mesh]
-    bigIndexedMeshes: seq[Mesh]
-    allIndexedMeshes: seq[Mesh]
+  var allMeshes: seq[Mesh]
   for mesh in allComponentsOfType[Mesh](scene.root):
-    for inputAttr in pipeline.inputs.vertexInputs:
-      assert mesh.hasVertexDataFor(inputAttr.name), &"{mesh} missing data for {inputAttr}"
-    case mesh.indexType:
-      of None: nonIndexedMeshes.add mesh
-      of Tiny: tinyIndexedMeshes.add mesh
-      of Small: smallIndexedMeshes.add mesh
-      of Big: bigIndexedMeshes.add mesh
-
-  # ordering meshes this way allows us to ignore value alignment (I think, needs more testing)
-  allIndexedMeshes = bigIndexedMeshes & smallIndexedMeshes & tinyIndexedMeshes
+    allMeshes.add mesh
+    for inputAttr in pipeline.inputs:
+      assert mesh.hasDataFor(inputAttr.name), &"{mesh} missing data for {inputAttr}"
   
-  var
-    indicesBufferSize = 0'u64
-    indexOffset = 0'u64
-  for mesh in allIndexedMeshes:
-    indicesBufferSize += mesh.indexDataSize
-  var indexBuffer: Buffer
+  var indicesBufferSize = 0'u64
+  for mesh in allMeshes:
+    if mesh.indexType != None:
+      let indexAlignment = case mesh.indexType
+        of None: 0'u64
+        of Tiny: 1'u64
+        of Small: 2'u64
+        of Big: 4'u64
+      # index value alignment required by Vulkan
+      if indicesBufferSize mod indexAlignment != 0:
+        indicesBufferSize += indexAlignment - (indicesBufferSize mod indexAlignment)
+      indicesBufferSize += mesh.indexDataSize
   if indicesBufferSize > 0:
-    indexBuffer = pipeline.device.createBuffer(
+    scene.indexBuffer = pipeline.device.createBuffer(
       size=indicesBufferSize,
       usage=[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
       useVRAM=true,
       mappable=false,
     )
 
-  for location, attributes in pipeline.inputs.vertexInputs.groupByMemoryLocation().pairs:
+  # one vertex data buffer per memory location
+  var perLocationOffsets: Table[MemoryLocation, uint64]
+  for location, attributes in pipeline.inputs.groupByMemoryLocation().pairs:
     # setup one buffer per attribute-location-type
     var bufferSize = 0'u64
-    for mesh in nonIndexedMeshes & allIndexedMeshes:
-      bufferSize += mesh.vertexDataSize
-    if bufferSize == 0:
-      continue
-    var
-      bufferOffset = 0'u64
-      buffer = pipeline.device.createBuffer(
+    for mesh in allMeshes:
+      for attribute in attributes:
+        bufferSize += mesh.dataSize(attribute.name)
+    if bufferSize > 0:
+      scene.vertexBuffers[location] = pipeline.device.createBuffer(
         size=bufferSize,
         usage=[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
         useVRAM=location in [VRAM, VRAMVisible],
         mappable=location in [VRAMVisible, RAM],
       )
+      perLocationOffsets[location] = 0
 
-    # TODO: gather instance data/buffers
-    # non-indexed mesh drawable
-    if nonIndexedMeshes.len > 0:
-      var vertexCount = 0'u32
-      for mesh in nonIndexedMeshes:
-        vertexCount += mesh.vertexCount
-      # remark: we merge all meshes into a single drawcall... smart?#
-      # I think bad for instancing...
-      var nonIndexedDrawable = Drawable(
-        elementCount: vertexCount,
-        buffer: buffer,
-        indexed: false,
-        instanceCount: 1
-      )
-      for inputAttr in attributes:
-        nonIndexedDrawable.offsets.add bufferOffset
-        for mesh in nonIndexedMeshes:
-          var (pdata, size) = mesh.getRawVertexData(inputAttr.name)
-          buffer.setData(pdata, size, bufferOffset)
-          bufferOffset += size
-      scene.drawables[pipeline.vk].add nonIndexedDrawable
+  var indexBufferOffset = 0'u64
+  for mesh in allMeshes:
+    var offsets: Table[MemoryLocation, seq[uint64]]
+    for location, attributes in pipeline.inputs.groupByMemoryLocation().pairs:
+      for attribute in attributes:
+        if not (location in offsets):
+          offsets[location] = @[]
+        offsets[location].add perLocationOffsets[location]
+        var (pdata, size) = mesh.getRawData(attribute.name)
+        scene.vertexBuffers[location].setData(pdata, size, perLocationOffsets[location])
+        perLocationOffsets[location] += size
 
-    # indexed mesh drawable
-    for mesh in allIndexedMeshes:
-      var drawable = Drawable(
-        elementCount: mesh.indicesCount,
-        buffer: buffer,
-        indexed: true,
-        indexBuffer: indexBuffer,
-        indexOffset: indexOffset,
-        indexType: mesh.indexType,
-        instanceCount: 1
-      )
+    let indexed = mesh.indexType != None
+    var drawable = Drawable(
+      elementCount: if indexed: mesh.indicesCount else: mesh.vertexCount,
+      bufferOffsets: offsets,
+      instanceCount: mesh.instanceCount,
+      indexed: indexed,
+    )
+    if indexed:
+      let indexAlignment = case mesh.indexType
+        of None: 0'u64
+        of Tiny: 1'u64
+        of Small: 2'u64
+        of Big: 4'u64
+      # index value alignment required by Vulkan
+      if indexBufferOffset mod indexAlignment != 0:
+        indexBufferOffset += indexAlignment - (indexBufferOffset mod indexAlignment)
+      drawable.indexBufferOffset = indexBufferOffset
+      drawable.indexType = mesh.indexType
       var (pdata, size) = mesh.getRawIndexData()
-      indexBuffer.setData(pdata, size, indexOffset)
-      indexOffset += size
-      for inputAttr in attributes:
-        drawable.offsets.add bufferOffset
-        var (pdata, size) = mesh.getRawVertexData(inputAttr.name)
-        buffer.setData(pdata, size, bufferOffset)
-        bufferOffset += size
-      scene.drawables[pipeline.vk].add drawable
+      scene.indexBuffer.setData(pdata, size, indexBufferOffset)
+      indexBufferOffset += size
+    scene.drawables[pipeline.vk].add drawable
 
 proc setupDrawables*(scene: var Scene, renderPass: RenderPass) =
   for subpass in renderPass.subpasses:

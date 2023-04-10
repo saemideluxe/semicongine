@@ -20,6 +20,9 @@ type
       of true:
         memory*: DeviceMemory
 
+proc `==`*(a, b: Buffer): bool =
+  a.vk == b.vk
+
 func `$`*(buffer: Buffer): string =
   &"Buffer(vk: {buffer.vk}, size: {buffer.size}, usage: {buffer.usage})"
 

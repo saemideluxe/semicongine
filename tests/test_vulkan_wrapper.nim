@@ -33,65 +33,10 @@ proc diagnostics(instance: Instance) =
     for format in device.getSurfaceFormats():
       echo "    " & $format
 
-when isMainModule:
-  # INIT ENGINE:
-  # create instance
-  var thewindow = createWindow("Test")
-  var instance = thewindow.createInstance(
-    vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
-    instanceExtensions= @["VK_EXT_debug_utils"],
-    layers= @["VK_LAYER_KHRONOS_validation", "VK_LAYER_MESA_overlay"]
-  )
-  var debugger = instance.createDebugMessenger()
-  # create devices
-  let selectedPhysicalDevice = instance.getPhysicalDevices().filterBestGraphics()
-  var device = instance.createDevice(
-    selectedPhysicalDevice,
-    @[],
-    @["VK_EXT_index_type_uint8"],
-    selectedPhysicalDevice.filterForGraphicsPresentationQueues()
-  )
-
-  # INIT RENDERER:
-  const
-    vertexInput = @[
-      attr[Vec3f]("position"),
-      attr[Vec3f]("color"),
-      attr[Vec3f]("translate", perInstance=true)
-    ]
-    vertexOutput = @[attr[Vec3f]("outcolor")]
-    uniforms = @[attr[float32]("time")]
-    fragOutput = @[attr[Vec4f]("color")]
-    vertexCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
-      inputs=vertexInput,
-      uniforms=uniforms,
-      outputs=vertexOutput,
-      body="""gl_Position = vec4(position, 1.0); outcolor = color * sin(Uniforms.time) * 0.5 + 0.5;"""
-    )
-    fragmentCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=vertexOutput,
-      uniforms=uniforms,
-      outputs=fragOutput,
-      body="color = vec4(outcolor, 1);"
-    )
-  var
-    vertexshader = device.createShaderModule(vertexCode)
-    fragmentshader = device.createShaderModule(fragmentCode)
-    surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
-    renderPass = device.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
-    (swapchain, res) = device.createSwapchain(renderPass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
-  if res != VK_SUCCESS:
-    raise newException(Exception, "Unable to create swapchain")
-
-  # INIT SCENE
-  var time = initShaderGlobal("time", 0.0'f32)
-  #[
-  var thescene = Scene(
+proc scene_different_mesh_types(): Scene =
+  result = Scene(
     name: "main",
     root: newEntity("root",
-      newEntity("stuff", time),
       newEntity("triangle1", newMesh(
         positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
         colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
@@ -124,27 +69,98 @@ when isMainModule:
       )),
     )
   )
-  ]#
-  var mymesh = newMesh(
+
+proc scene_simple(): Scene =
+  var mymesh1 = newMesh(
+    positions=[newVec3f(0.0, -0.3), newVec3f(0.3, 0.3), newVec3f(-0.3, 0.3)],
+    colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+  )
+  var mymesh2 = newMesh(
     positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
     colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
   )
-  setInstanceData[Vec3f](mymesh, "translate", @[newVec3f(0.3, 0.3)])
-  var thescene = Scene(
-    name: "main",
-    root: newEntity("root",
-      newEntity("stuff", time),
-      newEntity("triangle", mymesh),
-    )
+  var mymesh3 = newMesh(
+    positions=[newVec3f(0.0, -0.6), newVec3f(0.6, 0.6), newVec3f(-0.6, 0.6)],
+    colors=[newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0)],
+    indices=[[0'u32, 1'u32, 2'u32]],
+    autoResize=false
   )
+  var mymesh4 = newMesh(
+    positions=[newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
+    colors=[newVec3f(0.0, 0.0, 1.0), newVec3f(0.0, 0.0, 1.0), newVec3f(0.0, 0.0, 1.0)],
+    indices=[[0'u16, 1'u16, 2'u16]],
+  )
+  setMeshData[Vec3f](mymesh1, "translate", @[newVec3f(0.3, 0.3)])
+  result = Scene(
+    name: "main",
+    root: newEntity("root", newEntity("triangle", mymesh4, mymesh3, mymesh2, mymesh1),)
+  )
+
+
+when isMainModule:
+  # INIT ENGINE:
+  # create instance
+  var thewindow = createWindow("Test")
+  var instance = thewindow.createInstance(
+    vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
+    instanceExtensions= @["VK_EXT_debug_utils"],
+    layers= @["VK_LAYER_KHRONOS_validation", "VK_LAYER_MESA_overlay"]
+  )
+  var debugger = instance.createDebugMessenger()
+  # create devices
+  let selectedPhysicalDevice = instance.getPhysicalDevices().filterBestGraphics()
+  var device = instance.createDevice(
+    selectedPhysicalDevice,
+    @[],
+    @["VK_EXT_index_type_uint8"],
+    selectedPhysicalDevice.filterForGraphicsPresentationQueues()
+  )
+
+  # INIT RENDERER:
+  const
+    vertexInput = @[
+      attr[Vec3f]("position", memoryLocation=VRAM),
+      attr[Vec3f]("color", memoryLocation=VRAM),
+      # attr[Vec3f]("translate", perInstance=true)
+    ]
+    vertexOutput = @[attr[Vec3f]("outcolor")]
+    uniforms = @[attr[float32]("time")]
+    fragOutput = @[attr[Vec4f]("color")]
+    vertexCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_VERTEX_BIT,
+      inputs=vertexInput,
+      uniforms=uniforms,
+      outputs=vertexOutput,
+      body="""gl_Position = vec4(position, 1.0); outcolor = color * sin(Uniforms.time) * 0.5 + 0.5;"""
+    )
+    fragmentCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+      inputs=vertexOutput,
+      uniforms=uniforms,
+      outputs=fragOutput,
+      body="color = vec4(outcolor, 1);"
+    )
+  var
+    vertexshader = device.createShaderModule(vertexCode)
+    fragmentshader = device.createShaderModule(fragmentCode)
+    surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
+    renderPass = device.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
+    (swapchain, res) = device.createSwapchain(renderPass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
+  if res != VK_SUCCESS:
+    raise newException(Exception, "Unable to create swapchain")
+
+  # INIT SCENE
+  var time = initShaderGlobal("time", 0.0'f32)
+
+  var thescene = scene_simple()
+  thescene.root.components.add time
   thescene.setupDrawables(renderPass)
   swapchain.setupUniforms(thescene)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
-  for i in 0 ..< 1:
+  for i in 0 ..< 10000:
     setValue[float32](time.value, get[float32](time.value) + 0.0005)
-    echo get[float32](time.value)
     discard swapchain.drawScene(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
   checkVkResult device.vk.vkDeviceWaitIdle()
