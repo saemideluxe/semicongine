@@ -150,7 +150,7 @@ proc getVertexInputInfo*(
   var location = 0'u32
   var binding = baseBinding
 
-  for attribute in shader.inputs.vertexInputs:
+  for attribute in shader.inputs:
     bindings.add VkVertexInputBindingDescription(
       binding: binding,
       stride: attribute.size,

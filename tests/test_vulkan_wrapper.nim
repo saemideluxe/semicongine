@@ -89,13 +89,28 @@ proc scene_simple(): Scene =
     positions=[newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
     colors=[newVec3f(0.0, 0.0, 1.0), newVec3f(0.0, 0.0, 1.0), newVec3f(0.0, 0.0, 1.0)],
     indices=[[0'u16, 1'u16, 2'u16]],
+    instanceCount=2
   )
-  setMeshData[Vec3f](mymesh1, "translate", @[newVec3f(0.3, 0.3)])
+  setMeshData[Vec3f](mymesh1, "translate", @[newVec3f(0.3, 0.0)])
+  setMeshData[Vec3f](mymesh2, "translate", @[newVec3f(0.0, 0.3)])
+  setMeshData[Vec3f](mymesh3, "translate", @[newVec3f(-0.3, 0.0)])
+  setMeshData[Vec3f](mymesh4, "translate", @[newVec3f(0.0, -0.3), newVec3f(0.0, 0.5)])
   result = Scene(
     name: "main",
-    root: newEntity("root", newEntity("triangle", mymesh4, mymesh3, mymesh2, mymesh1),)
+    root: newEntity("root", newEntity("triangle", mymesh4, mymesh3, mymesh2, mymesh1))
   )
 
+proc scene_primitives(): Scene =
+  var r = rect(color="ff0000")
+  var t = tri(color="0000ff")
+  var c = circle(color="00ff00")
+  setMeshData[Vec3f](r, "translate", @[newVec3f(0.5, -0.3)])
+  setMeshData[Vec3f](t, "translate", @[newVec3f(0.3,  0.3)])
+  setMeshData[Vec3f](c, "translate", @[newVec3f(-0.3,  0.1)])
+  result = Scene(
+    name: "main",
+    root: newEntity("root", t, r, c)
+  )
 
 when isMainModule:
   # INIT ENGINE:
@@ -121,7 +136,7 @@ when isMainModule:
     vertexInput = @[
       attr[Vec3f]("position", memoryLocation=VRAM),
       attr[Vec3f]("color", memoryLocation=VRAM),
-      # attr[Vec3f]("translate", perInstance=true)
+      attr[Vec3f]("translate", perInstance=true)
     ]
     vertexOutput = @[attr[Vec3f]("outcolor")]
     uniforms = @[attr[float32]("time")]
@@ -131,7 +146,7 @@ when isMainModule:
       inputs=vertexInput,
       uniforms=uniforms,
       outputs=vertexOutput,
-      body="""gl_Position = vec4(position, 1.0); outcolor = color * sin(Uniforms.time) * 0.5 + 0.5;"""
+      body="""gl_Position = vec4(position + translate, 1.0); outcolor = color;"""
     )
     fragmentCode = compileGlslShader(
       stage=VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -152,7 +167,9 @@ when isMainModule:
   # INIT SCENE
   var time = initShaderGlobal("time", 0.0'f32)
 
-  var thescene = scene_simple()
+  # var thescene = scene_simple()
+  # var thescene = scene_different_mesh_types()
+  var thescene = scene_primitives()
   thescene.root.components.add time
   thescene.setupDrawables(renderPass)
   swapchain.setupUniforms(thescene)
