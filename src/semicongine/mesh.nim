@@ -1,3 +1,4 @@
+import std/math as nimmath
 import std/typetraits
 import std/tables
 import std/enumerate
@@ -8,6 +9,7 @@ import ./vulkan/api
 import ./gpu_data
 import ./entity
 import ./math
+import ./color
 
 type
   MeshIndexType* = enum
@@ -41,7 +43,7 @@ func newMesh*(
   positions: openArray[Vec3f],
   indices: openArray[array[3, uint32|int32|uint16|int16|int]],
   colors: openArray[Vec3f]=[],
-  instances=1'u32,
+  instanceCount=1'u32,
   autoResize=true
 ): auto =
   assert colors.len == 0 or colors.len == positions.len
@@ -49,7 +51,7 @@ func newMesh*(
   result = new Mesh
   result.vertexCount = uint32(positions.len)
   result.indicesCount = uint32(indices.len * 3)
-  result.instanceCount = instances
+  result.instanceCount = instanceCount
   result.data["position"] = DataList(thetype: Vec3F32)
   setValues(result.data["position"], positions.toSeq)
   if colors.len > 0:
@@ -80,9 +82,9 @@ func newMesh*(
 func newMesh*(
   positions: openArray[Vec3f],
   colors: openArray[Vec3f]=[],
-  instances=1'u32,
+  instanceCount=1'u32,
 ): auto =
-  newMesh(positions, newSeq[array[3, int]](), colors, instances)
+  newMesh(positions, newSeq[array[3, int]](), colors, instanceCount)
 
 func dataSize*(mesh: Mesh, attribute: string): uint32 =
   mesh.data[attribute].size
@@ -115,3 +117,64 @@ proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, 
   assert not (attribute in mesh.data)
   mesh.data[attribute] = DataList(thetype: getDataType[T]())
   setValues(mesh.data[attribute], data)
+
+
+func rect*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
+  result = new Mesh
+  result.vertexCount = 4
+  result.indicesCount = 6
+  result.instanceCount = 1
+  result.data["position"] = DataList(thetype: Vec3F32)
+  result.data["color"] = DataList(thetype: Vec3F32)
+  result.indexType = Small
+  result.smallIndices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]]
+
+  let
+    half_w = width / 2
+    half_h = height / 2
+    c = RGBfromHex(color)
+    v = [newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
+
+  setValues(result.data["position"], v.toSeq)
+  setValues(result.data["color"], @[c, c, c, c])
+
+func tri*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
+  result = new Mesh
+  result.vertexCount = 3
+  result.instanceCount = 1
+  result.data["position"] = DataList(thetype: Vec3F32)
+  result.data["color"] = DataList(thetype: Vec3F32)
+  let
+    half_w = width / 2
+    half_h = height / 2
+    colorVec = RGBfromHex(color)
+  setValues(result.data["position"], @[
+    newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h),
+  ])
+  setValues(result.data["color"], @[colorVec, colorVec, colorVec])
+
+func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffff"): Mesh =
+  assert nSegments >= 3
+  result = new Mesh
+  result.vertexCount = nSegments + 2
+  result.instanceCount = 1
+  result.indexType = Small
+  result.data["position"] = DataList(thetype: Vec3F32)
+  result.data["color"] = DataList(thetype: Vec3F32)
+  let
+    half_w = width / 2
+    half_h = height / 2
+    c = RGBfromHex(color)
+    step = (2'f32 * PI) / float32(nSegments)
+  var
+    pos = @[newVec3f(0, 0), newVec3f(0, half_h)]
+    col = @[c, c]
+    index: seq[array[3, uint16]] = @[]
+  for i in 0'u16 .. nSegments:
+    pos.add newVec3f(cos(float32(i) * step) * half_w, sin(float32(i) * step) * half_h)
+    col.add c
+    result.smallIndices.add [0'u16, i + 1, i + 2]
+
+  result.indicesCount = uint32(result.smallIndices.len * 3)
+  setValues(result.data["position"], pos)
+  setValues(result.data["color"], col)
