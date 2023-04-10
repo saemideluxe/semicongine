@@ -112,7 +112,7 @@ func hasDataFor*(mesh: Mesh, attribute: string): bool =
 func getRawData*(mesh: Mesh, attribute: string): (pointer, uint32) =
   mesh.data[attribute].getRawData()
 
-proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
   assert not (attribute in mesh.data)
   mesh.data[attribute] = DataList(thetype: getDataType[T]())

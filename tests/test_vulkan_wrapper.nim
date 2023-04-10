@@ -91,10 +91,10 @@ proc scene_simple(): Scene =
     indices=[[0'u16, 1'u16, 2'u16]],
     instanceCount=2
   )
-  setMeshData[Vec3f](mymesh1, "translate", @[newVec3f(0.3, 0.0)])
-  setMeshData[Vec3f](mymesh2, "translate", @[newVec3f(0.0, 0.3)])
-  setMeshData[Vec3f](mymesh3, "translate", @[newVec3f(-0.3, 0.0)])
-  setMeshData[Vec3f](mymesh4, "translate", @[newVec3f(0.0, -0.3), newVec3f(0.0, 0.5)])
+  mymesh1.setInstanceData("translate", @[newVec3f(0.3, 0.0)])
+  mymesh2.setInstanceData("translate", @[newVec3f(0.0, 0.3)])
+  mymesh3.setInstanceData("translate", @[newVec3f(-0.3, 0.0)])
+  mymesh4.setInstanceData("translate", @[newVec3f(0.0, -0.3), newVec3f(0.0, 0.5)])
   result = Scene(
     name: "main",
     root: newEntity("root", newEntity("triangle", mymesh4, mymesh3, mymesh2, mymesh1))
@@ -104,9 +104,9 @@ proc scene_primitives(): Scene =
   var r = rect(color="ff0000")
   var t = tri(color="0000ff")
   var c = circle(color="00ff00")
-  setMeshData[Vec3f](r, "translate", @[newVec3f(0.5, -0.3)])
-  setMeshData[Vec3f](t, "translate", @[newVec3f(0.3,  0.3)])
-  setMeshData[Vec3f](c, "translate", @[newVec3f(-0.3,  0.1)])
+  setInstanceData[Vec3f](r, "translate", @[newVec3f(0.5, -0.3)])
+  setInstanceData[Vec3f](t, "translate", @[newVec3f(0.3,  0.3)])
+  setInstanceData[Vec3f](c, "translate", @[newVec3f(-0.3,  0.1)])
   result = Scene(
     name: "main",
     root: newEntity("root", t, r, c)
