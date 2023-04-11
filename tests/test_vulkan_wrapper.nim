@@ -113,23 +113,7 @@ proc scene_primitives(): Scene =
   )
 
 when isMainModule:
-  # INIT ENGINE:
-  # create instance
-  var thewindow = createWindow("Test")
-  var instance = thewindow.createInstance(
-    vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
-    instanceExtensions= @["VK_EXT_debug_utils"],
-    layers= @["VK_LAYER_KHRONOS_validation", "VK_LAYER_MESA_overlay"]
-  )
-  var debugger = instance.createDebugMessenger()
-  # create devices
-  let selectedPhysicalDevice = instance.getPhysicalDevices().filterBestGraphics()
-  var device = instance.createDevice(
-    selectedPhysicalDevice,
-    @[],
-    @["VK_EXT_index_type_uint8"],
-    selectedPhysicalDevice.filterForGraphicsPresentationQueues()
-  )
+  var engine = initEngine("Test")
 
   # INIT RENDERER:
   const
@@ -146,33 +130,32 @@ when isMainModule:
       inputs=vertexInput,
       uniforms=uniforms,
       outputs=vertexOutput,
-      body="""gl_Position = vec4(position + translate, 1.0); outcolor = color;"""
+      main="""gl_Position = vec4(position + translate, 1.0); outcolor = color;"""
     )
     fragmentCode = compileGlslShader(
       stage=VK_SHADER_STAGE_FRAGMENT_BIT,
       inputs=vertexOutput,
       uniforms=uniforms,
       outputs=fragOutput,
-      body="color = vec4(outcolor, 1);"
+      main="color = vec4(outcolor, 1);"
     )
   var
-    vertexshader = device.createShaderModule(vertexCode)
-    fragmentshader = device.createShaderModule(fragmentCode)
-    surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
-    renderPass = device.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
-    (swapchain, res) = device.createSwapchain(renderPass, surfaceFormat, device.firstGraphicsQueue().get().family, 2)
+    vertexshader = engine.gpuDevice.createShaderModule(vertexCode)
+    fragmentshader = engine.gpuDevice.createShaderModule(fragmentCode)
+    surfaceFormat = engine.gpuDevice.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
+    renderPass = engine.gpuDevice.simpleForwardRenderPass(surfaceFormat.format, vertexshader, fragmentshader, 2)
+    (swapchain, res) = engine.gpuDevice.createSwapchain(renderPass, surfaceFormat, engine.gpuDevice.firstGraphicsQueue().get().family, 2)
   if res != VK_SUCCESS:
     raise newException(Exception, "Unable to create swapchain")
 
   # INIT SCENE
-  var time = initShaderGlobal("time", 0.0'f32)
 
   # var thescene = scene_simple()
   # var thescene = scene_different_mesh_types()
   var thescene = scene_primitives()
+  var time = initShaderGlobal("time", 0.0'f32)
   thescene.root.components.add time
-  thescene.setupDrawables(renderPass)
-  swapchain.setupUniforms(thescene)
+  thescene.setupDrawableBuffers(engine.gpuDevice, vertexInput)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
@@ -180,10 +163,10 @@ when isMainModule:
     setValue[float32](time.value, get[float32](time.value) + 0.0005)
     discard swapchain.drawScene(thescene)
   echo "Rendered ", swapchain.framesRendered, " frames"
-  checkVkResult device.vk.vkDeviceWaitIdle()
 
   # cleanup
   echo "Start cleanup"
+  checkVkResult engine.gpuDevice.vk.vkDeviceWaitIdle()
 
   # destroy scene
   thescene.destroy()
@@ -195,7 +178,4 @@ when isMainModule:
   swapchain.destroy()
 
   # destroy engine
-  device.destroy()
-  debugger.destroy()
-  instance.destroy()
-  thewindow.destroy()
+  engine.destroy()

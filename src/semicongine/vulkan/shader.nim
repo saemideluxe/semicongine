@@ -91,14 +91,14 @@ proc compileGlslShader*(
   outputs: seq[ShaderAttribute]= @[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
-  body: seq[string]
+  main: seq[string]
 ): ShaderCode {.compileTime.} =
   var code = @[&"#version {version}", ""] &
     (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
     (if uniforms.len > 0: uniforms.glslUniforms() & @[""] else: @[]) &
     (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
     @[&"void {entrypoint}(){{"] &
-    body &
+    main &
     @[&"}}"]
   result.inputs = inputs
   result.uniforms = uniforms
@@ -115,9 +115,9 @@ proc compileGlslShader*(
   outputs: seq[ShaderAttribute]= @[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
-  body: string
+  main: string
 ): ShaderCode {.compileTime.} =
-  return compileGlslShader(stage, inputs, uniforms, outputs, version, entrypoint, @[body])
+  return compileGlslShader(stage, inputs, uniforms, outputs, version, entrypoint, @[main])
 
 
 proc createShaderModule*(

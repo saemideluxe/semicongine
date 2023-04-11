@@ -1,5 +1,6 @@
 import semicongine/color
 import semicongine/config
+import semicongine/engine
 import semicongine/entity
 import semicongine/events
 import semicongine/gpu_data
@@ -11,6 +12,7 @@ import semicongine/vulkan
 
 export color
 export config
+export engine
 export entity
 export events
 export gpu_data
