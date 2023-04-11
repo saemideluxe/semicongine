@@ -5,8 +5,10 @@ import ./api
 import ./device
 import ./descriptor
 import ./shader
+import ./buffer
 import ./utils
 
+import ../entity
 import ../gpu_data
 
 type
@@ -18,6 +20,7 @@ type
     descriptorSetLayout*: DescriptorSetLayout
     descriptorPool*: DescriptorPool
     descriptorSets*: seq[DescriptorSet]
+    uniformBuffers: seq[Buffer]
 
 func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
   for shader in pipeline.shaders:
@@ -34,6 +37,23 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
         uniformList[attribute.name] = attribute
   result = uniformList.values.toSeq
 
+proc setupUniforms(pipeline: var Pipeline, inFlightFrames: int) =
+  assert pipeline.vk.valid
+
+  var uniformBufferSize = 0'u64
+  for uniform in pipeline.uniforms:
+    uniformBufferSize += uniform.thetype.size
+
+  for i in 0 ..< inFlightFrames:
+    var buffer = pipeline.device.createBuffer(
+      size=uniformBufferSize,
+      usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
+      useVRAM=true,
+      mappable=true,
+    )
+    pipeline.uniformBuffers.add buffer
+    pipeline.descriptorSets[i].setDescriptorSet(buffer)
+
 proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexShader: Shader, fragmentShader: Shader, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid
   assert device.vk.valid
@@ -45,7 +65,6 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexShader: Sha
   result.device = device
   result.shaders = @[vertexShader, fragmentShader]
   
-  # TODO: correct descriptors over all shaders
   var descriptors = @[
     Descriptor(
       thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -161,12 +180,33 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexShader: Sha
   result.descriptorPool = result.device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
   result.descriptorSets = result.descriptorPool.allocateDescriptorSet(result.descriptorSetLayout, inFlightFrames)
   discard result.uniforms # just for assertion
+  result.setupUniforms(inFlightFrames=inFlightFrames)
+
+proc updateUniforms*(pipeline: Pipeline, rootEntity: Entity, currentInFlight: int) =
+  assert pipeline.vk.valid
+  assert pipeline.uniformBuffers[currentInFlight].vk.valid
+
+  var globalsByName: Table[string, DataValue]
+  for component in allComponentsOfType[ShaderGlobal](rootEntity):
+    globalsByName[component.name] = component.value
+
+  var offset = 0'u64
+  for uniform in pipeline.uniforms:
+    assert uniform.thetype == globalsByName[uniform.name].thetype
+    let (pdata, size) = globalsByName[uniform.name].getRawData()
+    pipeline.uniformBuffers[currentInFlight].setData(pdata, size, offset)
+    offset += size
+
 
 proc destroy*(pipeline: var Pipeline) =
   assert pipeline.device.vk.valid
   assert pipeline.vk.valid
   assert pipeline.layout.valid
   assert pipeline.descriptorSetLayout.vk.valid
+
+  for buffer in pipeline.uniformBuffers.mitems:
+    assert buffer.vk.valid
+    buffer.destroy()
   
   if pipeline.descriptorPool.vk.valid:
     pipeline.descriptorPool.destroy()

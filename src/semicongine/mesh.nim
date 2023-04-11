@@ -169,7 +169,6 @@ func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffff"): Mesh 
   var
     pos = @[newVec3f(0, 0), newVec3f(0, half_h)]
     col = @[c, c]
-    index: seq[array[3, uint16]] = @[]
   for i in 0'u16 .. nSegments:
     pos.add newVec3f(cos(float32(i) * step) * half_w, sin(float32(i) * step) * half_h)
     col.add c

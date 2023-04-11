@@ -3,71 +3,27 @@ import std/strformat
 
 import ./vulkan/api
 import ./vulkan/buffer
-import ./vulkan/pipeline
-import ./vulkan/renderpass
+import ./vulkan/device
+import ./vulkan/drawable
+
 import ./gpu_data
 import ./entity
 import ./mesh
 
 type
-  Drawable* = object
-    elementCount*: uint32 # number of vertices or indices
-    bufferOffsets*: Table[MemoryLocation, seq[uint64]] # list of buffers and list of offset for each attribute in that buffer
-    instanceCount*: uint32 # number of instance
-    case indexed*: bool
-    of true:
-      indexType*: VkIndexType
-      indexBufferOffset*: uint64
-    of false:
-      discard
-
-  ShaderGlobal* = ref object of Component
-    name*: string
-    value*: DataValue
-
   Scene* = object
     name*: string
     root*: Entity
-    drawables: Table[VkPipeline, seq[Drawable]]
+    drawables*: seq[Drawable]
     vertexBuffers*: Table[MemoryLocation, Buffer]
     indexBuffer*: Buffer
 
-func `$`*(drawable: Drawable): string =
-  if drawable.indexed:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets}, indexType: {drawable.indexType}, indexBufferOffset: {drawable.indexBufferOffset})"
-  else:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
-
-func `$`*(global: ShaderGlobal): string =
-  &"ShaderGlobal(name: {global.name}, {global.value})"
-
-func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
-  var value = DataValue(thetype: getDataType[T]())
-  value.setValue(data)
-  ShaderGlobal(name: name, value: value)
-
-proc destroy*(scene: var Scene, pipeline: VkPipeline) =
-  for buffer in scene.vertexBuffers.mvalues:
-    buffer.destroy()
-  if scene.indexBuffer.vk.valid:
-    scene.indexBuffer.destroy
-
-proc destroy*(scene: var Scene) =
-  for pipeline in scene.drawables.keys:
-    scene.destroy(pipeline)
-
-proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
-  assert pipeline.device.vk.valid
-
-  if pipeline.vk in scene.drawables:
-    for drawable in scene.drawables[pipeline.vk].mitems:
-      scene.destroy(pipeline.vk)
-  scene.drawables[pipeline.vk] = @[]
-
+proc setupDrawableBuffers*(scene: var Scene, device: Device, inputs: seq[ShaderAttribute]) =
+  assert scene.drawables.len == 0
   var allMeshes: seq[Mesh]
   for mesh in allComponentsOfType[Mesh](scene.root):
     allMeshes.add mesh
-    for inputAttr in pipeline.inputs:
+    for inputAttr in inputs:
       assert mesh.hasDataFor(inputAttr.name), &"{mesh} missing data for {inputAttr}"
   
   var indicesBufferSize = 0'u64
@@ -83,7 +39,7 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
         indicesBufferSize += indexAlignment - (indicesBufferSize mod indexAlignment)
       indicesBufferSize += mesh.indexDataSize
   if indicesBufferSize > 0:
-    scene.indexBuffer = pipeline.device.createBuffer(
+    scene.indexBuffer = device.createBuffer(
       size=indicesBufferSize,
       usage=[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
       useVRAM=true,
@@ -92,14 +48,14 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
 
   # one vertex data buffer per memory location
   var perLocationOffsets: Table[MemoryLocation, uint64]
-  for location, attributes in pipeline.inputs.groupByMemoryLocation().pairs:
+  for location, attributes in inputs.groupByMemoryLocation().pairs:
     # setup one buffer per attribute-location-type
     var bufferSize = 0'u64
     for mesh in allMeshes:
       for attribute in attributes:
         bufferSize += mesh.dataSize(attribute.name)
     if bufferSize > 0:
-      scene.vertexBuffers[location] = pipeline.device.createBuffer(
+      scene.vertexBuffers[location] = device.createBuffer(
         size=bufferSize,
         usage=[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
         useVRAM=location in [VRAM, VRAMVisible],
@@ -110,7 +66,7 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
   var indexBufferOffset = 0'u64
   for mesh in allMeshes:
     var offsets: Table[MemoryLocation, seq[uint64]]
-    for location, attributes in pipeline.inputs.groupByMemoryLocation().pairs:
+    for location, attributes in inputs.groupByMemoryLocation().pairs:
       for attribute in attributes:
         if not (location in offsets):
           offsets[location] = @[]
@@ -140,12 +96,11 @@ proc setupDrawables(scene: var Scene, pipeline: Pipeline) =
       var (pdata, size) = mesh.getRawIndexData()
       scene.indexBuffer.setData(pdata, size, indexBufferOffset)
       indexBufferOffset += size
-    scene.drawables[pipeline.vk].add drawable
+    scene.drawables.add drawable
 
-proc setupDrawables*(scene: var Scene, renderPass: RenderPass) =
-  for subpass in renderPass.subpasses:
-    for pipeline in subpass.pipelines:
-      scene.setupDrawables(pipeline)
+proc destroy*(scene: var Scene) =
+  for buffer in scene.vertexBuffers.mvalues:
+    buffer.destroy()
+  if scene.indexBuffer.vk.valid:
+    scene.indexBuffer.destroy
 
-func getDrawables*(scene: Scene, pipeline: Pipeline): seq[Drawable] =
-  scene.drawables.getOrDefault(pipeline.vk, @[])

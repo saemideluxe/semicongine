@@ -2,6 +2,7 @@ import std/strformat
 import std/typetraits
 
 import ./math/matrix
+import ./gpu_data
 
 type
   Component* = ref object of RootObj
@@ -13,6 +14,18 @@ type
     parent*: Entity
     children*: seq[Entity]
     components*: seq[Component]
+
+  ShaderGlobal* = ref object of Component
+    name*: string
+    value*: DataValue
+
+func `$`*(global: ShaderGlobal): string =
+  &"ShaderGlobal(name: {global.name}, {global.value})"
+
+func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
+  var value = DataValue(thetype: getDataType[T]())
+  value.setValue(data)
+  ShaderGlobal(name: name, value: value)
 
 
 method `$`*(entity: Entity): string {.base.} = entity.name

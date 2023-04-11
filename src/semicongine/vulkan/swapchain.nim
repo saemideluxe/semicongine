@@ -1,4 +1,3 @@
-import std/tables
 import std/options
 import std/logging
 
@@ -7,21 +6,16 @@ import ./utils
 import ./device
 import ./physicaldevice
 import ./image
-import ./buffer
 import ./renderpass
-import ./descriptor
 import ./framebuffer
 import ./commandbuffer
-import ./pipeline
 import ./syncing
 
 import ../scene
-import ../entity
-import ../gpu_data
 import ../math
 
 type
-  Swapchain = object
+  Swapchain* = object
     device*: Device
     vk*: VkSwapchainKHR
     format*: VkFormat
@@ -36,7 +30,7 @@ type
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
     commandBufferPool: CommandBufferPool
-    uniformBuffers: Table[VkPipeline, seq[Buffer]]
+    inFlightFrames: int
 
 
 proc createSwapchain*(
@@ -45,12 +39,13 @@ proc createSwapchain*(
   surfaceFormat: VkSurfaceFormatKHR,
   queueFamily: QueueFamily,
   desiredNumberOfImages=3'u32,
-  presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR
+  presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR,
+  inFlightFrames=2
 ): (Swapchain, VkResult) =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
   assert renderPass.vk.valid
-  assert renderPass.inFlightFrames > 0
+  assert inFlightFrames > 0
 
   var capabilities = device.physicalDevice.getSurfaceCapabilities()
 
@@ -85,6 +80,7 @@ proc createSwapchain*(
       format: surfaceFormat.format,
       dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]),
       renderPass: renderPass,
+      inFlightFrames: inFlightFrames
     )
     createResult = device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk))
 
@@ -98,150 +94,15 @@ proc createSwapchain*(
       let image = Image(vk: vkimage, format: surfaceFormat.format, device: device)
       let imageview = image.createImageView()
       swapChain.imageviews.add imageview
-      swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass, [imageview], swapchain.dimension)
-    for i in 0 ..< swapchain.renderPass.inFlightFrames:
+      swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass.vk, [imageview], swapchain.dimension)
+    for i in 0 ..< swapchain.inFlightFrames:
       swapchain.queueFinishedFence.add device.createFence()
       swapchain.imageAvailableSemaphore.add device.createSemaphore()
       swapchain.renderFinishedSemaphore.add device.createSemaphore()
-    swapchain.commandBufferPool = device.createCommandBufferPool(queueFamily, swapchain.renderPass.inFlightFrames)
+    swapchain.commandBufferPool = device.createCommandBufferPool(queueFamily, swapchain.inFlightFrames)
 
   return (swapchain, createResult)
 
-proc setupUniforms(swapChain: var Swapchain, scene: var Scene, pipeline: var Pipeline) =
-  assert pipeline.vk.valid
-  assert not (pipeline.vk in swapChain.uniformBuffers)
-
-  swapChain.uniformBuffers[pipeline.vk] = @[]
-
-  var uniformBufferSize = 0'u64
-  for uniform in pipeline.uniforms:
-    uniformBufferSize += uniform.thetype.size
-
-  for i in 0 ..< swapChain.renderPass.inFlightFrames:
-    var buffer = pipeline.device.createBuffer(
-      size=uniformBufferSize,
-      usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
-      useVRAM=true,
-      mappable=true,
-    )
-    swapChain.uniformBuffers[pipeline.vk].add buffer
-    pipeline.descriptorSets[i].setDescriptorSet(buffer)
-
-proc setupUniforms*(swapChain: var Swapchain, scene: var Scene) =
-  for subpass in swapChain.renderPass.subpasses.mitems:
-    for pipeline in subpass.pipelines.mitems:
-      swapChain.setupUniforms(scene, pipeline)
-
-proc updateUniforms*(swapChain: var Swapchain, scene: Scene, pipeline: Pipeline) =
-  assert pipeline.vk.valid
-  assert swapChain.uniformBuffers[pipeline.vk][swapChain.currentInFlight].vk.valid
-
-  var globalsByName: Table[string, DataValue]
-  for component in allComponentsOfType[ShaderGlobal](scene.root):
-    globalsByName[component.name] = component.value
-
-  var offset = 0'u64
-  for uniform in pipeline.uniforms:
-    assert uniform.thetype == globalsByName[uniform.name].thetype
-    let (pdata, size) = globalsByName[uniform.name].getRawData()
-    swapChain.uniformBuffers[pipeline.vk][swapChain.currentInFlight].setData(pdata, size, offset)
-    offset += size
-
-
-proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
-  assert commandBuffer.valid
-  assert renderpass.vk.valid
-  assert framebuffer.vk.valid
-  let
-    w = framebuffer.dimension.x
-    h = framebuffer.dimension.y
-
-  var clearColors: seq[VkClearValue]
-  for subpass in renderpass.subpasses:
-    clearColors.add(VkClearValue(color: VkClearColorValue(float32: subpass.clearColor)))
-  var
-    beginInfo = VkCommandBufferBeginInfo(
-      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-      pInheritanceInfo: nil,
-    )
-    renderPassInfo = VkRenderPassBeginInfo(
-      sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-      renderPass: renderPass.vk,
-      framebuffer: framebuffer.vk,
-      renderArea: VkRect2D(
-        offset: VkOffset2D(x: 0, y: 0),
-        extent: VkExtent2D(width: w, height: h),
-      ),
-      clearValueCount: uint32(clearColors.len),
-      pClearValues: clearColors.toCPointer(),
-    )
-    viewport = VkViewport(
-      x: 0.0,
-      y: 0.0,
-      width: (float)w,
-      height: (float)h,
-      minDepth: 0.0,
-      maxDepth: 1.0,
-    )
-    scissor = VkRect2D(
-      offset: VkOffset2D(x: 0, y: 0),
-      extent: VkExtent2D(width: w, height: h)
-    )
-  checkVkResult commandBuffer.vkResetCommandBuffer(VkCommandBufferResetFlags(0))
-  checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
-  commandBuffer.vkCmdBeginRenderPass(addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
-  commandBuffer.vkCmdSetViewport(firstViewport=0, viewportCount=1, addr(viewport))
-  commandBuffer.vkCmdSetScissor(firstScissor=0, scissorCount=1, addr(scissor))
-
-proc endRenderCommands*(commandBuffer: VkCommandBuffer) =
-  commandBuffer.vkCmdEndRenderPass()
-  checkVkResult commandBuffer.vkEndCommandBuffer()
-
-template renderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer, body: untyped) =
-  commandBuffer.beginRenderCommands(renderpass, framebuffer)
-  body
-  commandBuffer.endRenderCommands()
-
-proc draw*(commandBuffer: VkCommandBuffer, drawables: seq[Drawable], scene: Scene) =
-
-  debug "Scene buffers:"
-  for (location, buffer) in scene.vertexBuffers.pairs:
-    echo "  ", location, ": ", buffer
-  echo "  Index buffer: ", scene.indexBuffer
-
-  for drawable in drawables:
-    debug "Draw ", drawable
-
-    var buffers: seq[VkBuffer]
-    var offsets: seq[VkDeviceSize]
-
-    for (location, bufferOffsets) in drawable.bufferOffsets.pairs:
-      for offset in bufferOffsets:
-        buffers.add scene.vertexBuffers[location].vk
-        offsets.add VkDeviceSize(offset)
-
-    commandBuffer.vkCmdBindVertexBuffers(
-      firstBinding=0'u32,
-      bindingCount=uint32(buffers.len),
-      pBuffers=buffers.toCPointer(),
-      pOffsets=offsets.toCPointer()
-    )
-    if drawable.indexed:
-      commandBuffer.vkCmdBindIndexBuffer(scene.indexBuffer.vk, VkDeviceSize(drawable.indexBufferOffset), drawable.indexType)
-      commandBuffer.vkCmdDrawIndexed(
-        indexCount=drawable.elementCount,
-        instanceCount=drawable.instanceCount,
-        firstIndex=0,
-        vertexOffset=0,
-        firstInstance=0
-      )
-    else:
-      commandBuffer.vkCmdDraw(
-        vertexCount=drawable.elementCount,
-        instanceCount=drawable.instanceCount,
-        firstVertex=0,
-        firstInstance=0
-      )
 
 proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
   assert swapchain.device.vk.valid
@@ -249,7 +110,7 @@ proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
   assert swapchain.device.firstGraphicsQueue().isSome
   assert swapchain.device.firstPresentationQueue().isSome
 
-  swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.renderPass.inFlightFrames
+  swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.inFlightFrames
   swapchain.queueFinishedFence[swapchain.currentInFlight].wait()
 
   var currentFramebufferIndex: uint32
@@ -267,20 +128,7 @@ proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
   swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
 
   var commandBuffer = swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
-
-  renderCommands(
-    commandBuffer,
-    swapchain.renderpass,
-    swapchain.framebuffers[currentFramebufferIndex]
-  ):
-    for i in 0 ..< swapchain.renderpass.subpasses.len:
-      for pipeline in swapchain.renderpass.subpasses[i].pipelines.mitems:
-        commandBuffer.vkCmdBindPipeline(swapchain.renderpass.subpasses[i].pipelineBindPoint, pipeline.vk)
-        commandBuffer.vkCmdBindDescriptorSets(swapchain.renderpass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(pipeline.descriptorSets[swapchain.currentInFlight].vk), 0, nil)
-        swapchain.updateUniforms(scene, pipeline)
-        commandBuffer.draw(scene.getDrawables(pipeline), scene)
-      if i < swapchain.renderpass.subpasses.len - 1:
-        commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
+  commandBuffer.draw(renderPass=swapchain.renderPass, framebuffer=swapchain.framebuffers[currentFramebufferIndex], rootEntity=scene.root, drawables=scene.drawables, vertexBuffers=scene.vertexBuffers, indexBuffer=scene.indexBuffer, currentInFlight=swapchain.currentInFlight)
 
   var
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
@@ -331,16 +179,13 @@ proc destroy*(swapchain: var Swapchain) =
     assert framebuffer.vk.valid
     framebuffer.destroy()
   swapchain.commandBufferPool.destroy()
-  for i in 0 ..< swapchain.renderPass.inFlightFrames:
+  for i in 0 ..< swapchain.inFlightFrames:
     assert swapchain.queueFinishedFence[i].vk.valid
     assert swapchain.imageAvailableSemaphore[i].vk.valid
     assert swapchain.renderFinishedSemaphore[i].vk.valid
     swapchain.queueFinishedFence[i].destroy()
     swapchain.imageAvailableSemaphore[i].destroy()
     swapchain.renderFinishedSemaphore[i].destroy()
-  for buffers in swapchain.uniformBuffers.mvalues:
-    for buffer in buffers.mitems:
-      buffer.destroy()
 
   swapchain.device.vk.vkDestroySwapchainKHR(swapchain.vk, nil)
   swapchain.vk.reset()

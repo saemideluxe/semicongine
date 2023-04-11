@@ -17,7 +17,7 @@ import std/os
 
 # root of where config files will be searched
 # must be relative (to the directory of the binary)
-const DEBUG = not defined(release)
+const DEBUG* = not defined(release)
 const CONFIGROOT {.strdefine.}: string = "."
 assert not isAbsolute(CONFIGROOT)
 

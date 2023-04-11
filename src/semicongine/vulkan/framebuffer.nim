@@ -2,7 +2,6 @@ import ./api
 import ./device
 import ./utils
 import ./image
-import ./renderpass
 
 import ../math
 
@@ -12,9 +11,9 @@ type
     vk*: VkFramebuffer
     dimension*: Vec2I
 
-proc createFramebuffer*(device: Device, renderPass: RenderPass, attachments: openArray[ImageView], dimension: Vec2I): Framebuffer =
+proc createFramebuffer*(device: Device, renderpass: VkRenderPass, attachments: openArray[ImageView], dimension: Vec2I): Framebuffer =
   assert device.vk.valid
-  assert renderpass.vk.valid
+  assert renderpass.valid
 
   result.device = device
   result.dimension = dimension
@@ -25,7 +24,7 @@ proc createFramebuffer*(device: Device, renderPass: RenderPass, attachments: ope
     theattachments.add a.vk
   var framebufferInfo = VkFramebufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-    renderPass: renderPass.vk,
+    renderPass: renderpass,
     attachmentCount: uint32(theattachments.len),
     pAttachments: theattachments.toCPointer,
     width: dimension[0],
