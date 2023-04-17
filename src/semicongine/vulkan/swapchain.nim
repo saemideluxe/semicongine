@@ -122,6 +122,8 @@ proc nextFrame*(swapchain: var Swapchain): VkCommandBuffer =
     VkFence(0),
     addr(swapchain.currentFramebufferIndex)
   )
+  # TODO: resize swapchain on VK_SUBOPTIMAL_KHR
+  echo "HIIIIIIIIIIII next image result", nextImageResult
   if not (nextImageResult in [VK_SUCCESS, VK_TIMEOUT, VK_NOT_READY, VK_SUBOPTIMAL_KHR]):
     return
 
@@ -161,6 +163,8 @@ proc swap*(swapchain: var Swapchain): bool =
     pResults: nil,
   )
   let presentResult = vkQueuePresentKHR(swapchain.device.firstPresentationQueue().get().vk, addr(presentInfo))
+  # TODO: resize swapchain on VK_SUBOPTIMAL_KHR
+  echo "HIIIIIIIIIIII Present Result:", presentResult
   if not (presentResult in [VK_SUCCESS, VK_SUBOPTIMAL_KHR]):
     return false
 

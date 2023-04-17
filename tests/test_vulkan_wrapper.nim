@@ -105,7 +105,7 @@ proc scene_primitives(): Entity =
   setInstanceData[Vec3f](c, "translate", @[newVec3f(-0.3,  0.1)])
   result = newEntity("root", t, r, c)
 
-when isMainModule:
+proc main() =
   var engine = initEngine("Test")
 
   # INIT RENDERER:
@@ -135,27 +135,32 @@ when isMainModule:
   var
     surfaceFormat = engine.gpuDevice.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
     renderPass = engine.gpuDevice.simpleForwardRenderPass(surfaceFormat.format, vertexCode, fragmentCode, 2)
-    renderer = engine.gpuDevice.initRenderer([renderPass])
+  engine.setRenderer([renderPass])
 
-  # INIT SCENE
-
+  # INIT SCENES
   var scenes = [scene_simple(), scene_different_mesh_types(), scene_primitives()]
   var time = initShaderGlobal("time", 0.0'f32)
   for scene in scenes.mitems:
     scene.components.add time
-    renderer.setupDrawableBuffers(scene, vertexInput)
+    engine.addScene(scene, vertexInput)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
   for i in 0 ..< 3:
     for scene in scenes:
       for i in 0 ..< 1000:
+        engine.updateInputs()
         setValue[float32](time.value, get[float32](time.value) + 0.0005)
-        discard renderer.render(scene)
-  echo "Rendered ", renderer.framesRendered, " frames"
+        if not engine.running or engine.keyIsDown(Escape):
+          engine.destroy()
+          return
+        discard engine.renderScene(scene)
+  echo "Rendered ", engine.framesRendered, " frames"
+  echo "Processed ", engine.eventsProcessed, " events"
 
   # cleanup
   echo "Start cleanup"
-  checkVkResult engine.gpuDevice.vk.vkDeviceWaitIdle()
-  renderer.destroy()
   engine.destroy()
+
+when isMainModule:
+  main()

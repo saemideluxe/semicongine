@@ -8,7 +8,6 @@ import ./vulkan/api
 import ./vulkan/buffer
 import ./vulkan/device
 import ./vulkan/drawable
-import ./vulkan/framebuffer
 import ./vulkan/pipeline
 import ./vulkan/physicaldevice
 import ./vulkan/renderpass
@@ -130,6 +129,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[Sha
   renderer.scenedata[tree] = data
 
 proc render*(renderer: var Renderer, entity: Entity): bool =
+  # TODO: check if nextFrame had any problems
   var commandBuffer = renderer.swapchain.nextFrame()
 
   commandBuffer.beginRenderCommands(renderer.swapchain.renderPass, renderer.swapchain.currentFramebuffer())
