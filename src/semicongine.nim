@@ -6,8 +6,8 @@ import semicongine/events
 import semicongine/gpu_data
 import semicongine/math
 import semicongine/mesh
+import semicongine/renderer
 import semicongine/platform/window
-import semicongine/scene
 import semicongine/vulkan
 
 export color
@@ -18,6 +18,6 @@ export events
 export gpu_data
 export math
 export mesh
+export renderer
 export window
-export scene
 export vulkan

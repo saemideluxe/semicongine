@@ -20,7 +20,7 @@ let logger = newConsoleLogger()
 addHandler(logger)
 
 type
-  ShaderCode = object
+  ShaderCode* = object # compiled shader code with some meta data
     stage: VkShaderStageFlagBits
     entrypoint: string
     binary: seq[uint32]

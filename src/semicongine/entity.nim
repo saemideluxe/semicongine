@@ -1,4 +1,5 @@
 import std/strformat
+import std/hashes
 import std/typetraits
 
 import ./math/matrix
@@ -27,6 +28,8 @@ func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
   value.setValue(data)
   ShaderGlobal(name: name, value: value)
 
+func hash*(entity: Entity): Hash =
+  hash(cast[pointer](entity))
 
 method `$`*(entity: Entity): string {.base.} = entity.name
 method `$`*(component: Component): string {.base.} =
@@ -81,11 +84,11 @@ func getModelTransform*(entity: Entity): Mat4 =
     result = currentEntity.transform * result
     currentEntity = currentEntity.parent
 
-iterator allComponentsOfType*[T: Component](root: Entity): T =
+iterator allComponentsOfType*[T: Component](root: Entity): var T =
   var queue = @[root]
   while queue.len > 0:
     let entity = queue.pop
-    for component in entity.components:
+    for component in entity.components.mitems:
       if component of T:
         yield T(component)
     for i in countdown(entity.children.len - 1, 0):
