@@ -30,7 +30,7 @@ Rendering:
 - [x] Uniforms
 - [x] Per-instance vertex attributes (required to be able to draw scene graph)
 - [x] Fixed framerate
-- [~] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
+- [x] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [ ] Textures
 - [ ] Depth buffering
 - [ ] Mipmaps 
