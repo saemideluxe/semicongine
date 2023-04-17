@@ -54,9 +54,13 @@ proc setupUniforms(pipeline: var Pipeline, inFlightFrames: int) =
     pipeline.uniformBuffers.add buffer
     pipeline.descriptorSets[i].setDescriptorSet(buffer)
 
-proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexShader: Shader, fragmentShader: Shader, inFlightFrames: int, subpass = 0'u32): Pipeline =
+proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid
   assert device.vk.valid
+
+  var
+    vertexShader = device.createShaderModule(vertexCode)
+    fragmentShader = device.createShaderModule(fragmentCode)
   assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
   assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
   assert vertexShader.outputs == fragmentShader.inputs
@@ -210,6 +214,9 @@ proc destroy*(pipeline: var Pipeline) =
   
   if pipeline.descriptorPool.vk.valid:
     pipeline.descriptorPool.destroy()
+
+  for shader in pipeline.shaders.mitems:
+    shader.destroy()
   pipeline.descriptorSetLayout.destroy()
   pipeline.device.vk.vkDestroyPipelineLayout(pipeline.layout, nil)
   pipeline.device.vk.vkDestroyPipeline(pipeline.vk, nil)

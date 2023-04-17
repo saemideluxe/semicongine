@@ -1,5 +1,4 @@
 import std/options
-import std/tables
 import std/logging
 
 import ./api
@@ -7,13 +6,9 @@ import ./utils
 import ./device
 import ./pipeline
 import ./shader
-import ./drawable
-import ./buffer
 import ./framebuffer
 
 import ../math
-import ../entity
-import ../gpu_data
 
 type
   Subpass* = object
@@ -70,7 +65,7 @@ proc createRenderPass*(
   result.subpasses = pSubpasses
   checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
 
-proc simpleForwardRenderPass*(device: Device, format: VkFormat, vertexShader: Shader, fragmentShader: Shader, inFlightFrames: int, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): RenderPass =
+proc simpleForwardRenderPass*(device: Device, format: VkFormat, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): RenderPass =
   assert device.vk.valid
   var
     attachments = @[VkAttachmentDescription(
@@ -100,7 +95,7 @@ proc simpleForwardRenderPass*(device: Device, format: VkFormat, vertexShader: Sh
       dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
     )]
   result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
-  result.subpasses[0].pipelines.add device.createPipeline(result.vk, vertexShader, fragmentShader, inFlightFrames, 0)
+  result.subpasses[0].pipelines.add device.createPipeline(result.vk, vertexCode, fragmentCode, inFlightFrames, 0)
 
 proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
   assert commandBuffer.valid
@@ -151,36 +146,6 @@ proc endRenderCommands*(commandBuffer: VkCommandBuffer) =
   commandBuffer.vkCmdEndRenderPass()
   checkVkResult commandBuffer.vkEndCommandBuffer()
 
-proc draw*(
-  commandBuffer: VkCommandBuffer,
-  renderPass: var RenderPass,
-  framebuffer: Framebuffer,
-  rootEntity: Entity,
-  drawables: seq[Drawable],
-  vertexBuffers: Table[MemoryLocation, Buffer],
-  indexBuffer: Buffer,
-  currentInFlight: int
-) =
-  commandBuffer.beginRenderCommands(renderpass, framebuffer)
-  for i in 0 ..< renderpass.subpasses.len:
-    let subpass = renderpass.subpasses[i]
-    for pipeline in subpass.pipelines:
-      var mpipeline = pipeline
-      commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, mpipeline.vk)
-      commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, mpipeline.layout, 0, 1, addr(mpipeline.descriptorSets[currentInFlight].vk), 0, nil)
-      mpipeline.updateUniforms(rootEntity, currentInFlight)
-
-      debug "Scene buffers:"
-      for (location, buffer) in vertexBuffers.pairs:
-        echo "  ", location, ": ", buffer
-      echo "  Index buffer: ", indexBuffer
-
-      for drawable in drawables:
-        commandBuffer.draw(drawable, vertexBuffers=vertexBuffers, indexBuffer=indexBuffer)
-
-    if i < renderpass.subpasses.len - 1:
-      commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
-  commandBuffer.endRenderCommands()
 
 proc destroy*(renderPass: var RenderPass) =
   assert renderPass.device.vk.valid

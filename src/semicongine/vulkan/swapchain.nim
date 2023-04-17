@@ -11,7 +11,6 @@ import ./framebuffer
 import ./commandbuffer
 import ./syncing
 
-import ../scene
 import ../math
 
 type
@@ -25,7 +24,8 @@ type
     imageviews*: seq[ImageView]
     framebuffers*: seq[Framebuffer]
     currentInFlight*: int
-    framesRendered*: int
+    currentFramebufferIndex: uint32
+    framesRendered*: uint64
     queueFinishedFence: seq[Fence]
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
@@ -103,8 +103,10 @@ proc createSwapchain*(
 
   return (swapchain, createResult)
 
+proc currentFramebuffer*(swapchain: Swapchain): Framebuffer =
+  swapchain.framebuffers[swapchain.currentFramebufferIndex]
 
-proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
+proc nextFrame*(swapchain: var Swapchain): VkCommandBuffer =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
   assert swapchain.device.firstGraphicsQueue().isSome
@@ -113,24 +115,23 @@ proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
   swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.inFlightFrames
   swapchain.queueFinishedFence[swapchain.currentInFlight].wait()
 
-  var currentFramebufferIndex: uint32
-
   let nextImageResult = swapchain.device.vk.vkAcquireNextImageKHR(
     swapchain.vk,
     high(uint64),
     swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk,
     VkFence(0),
-    addr(currentFramebufferIndex)
+    addr(swapchain.currentFramebufferIndex)
   )
   if not (nextImageResult in [VK_SUCCESS, VK_TIMEOUT, VK_NOT_READY, VK_SUBOPTIMAL_KHR]):
-    return false
+    return
 
   swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
 
-  var commandBuffer = swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
-  commandBuffer.draw(renderPass=swapchain.renderPass, framebuffer=swapchain.framebuffers[currentFramebufferIndex], rootEntity=scene.root, drawables=scene.drawables, vertexBuffers=scene.vertexBuffers, indexBuffer=scene.indexBuffer, currentInFlight=swapchain.currentInFlight)
+  return swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
 
+proc swap*(swapchain: var Swapchain): bool =
   var
+    commandBuffer = swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
     waitStages = [VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)]
     submitInfo = VkSubmitInfo(
@@ -156,7 +157,7 @@ proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
     pWaitSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk),
     swapchainCount: 1,
     pSwapchains: addr(swapchain.vk),
-    pImageIndices: addr(currentFramebufferIndex),
+    pImageIndices: addr(swapchain.currentFramebufferIndex),
     pResults: nil,
   )
   let presentResult = vkQueuePresentKHR(swapchain.device.firstPresentationQueue().get().vk, addr(presentInfo))
@@ -164,7 +165,6 @@ proc drawScene*(swapchain: var Swapchain, scene: Scene): bool =
     return false
 
   inc swapchain.framesRendered
-
   return true
 
 
