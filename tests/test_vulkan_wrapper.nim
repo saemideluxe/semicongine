@@ -135,7 +135,7 @@ proc main() =
   var
     surfaceFormat = engine.gpuDevice.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
     renderPass = engine.gpuDevice.simpleForwardRenderPass(surfaceFormat.format, vertexCode, fragmentCode, 2)
-  engine.setRenderer([renderPass])
+  engine.setRenderer(renderPass)
 
   # INIT SCENES
   var scenes = [scene_simple(), scene_different_mesh_types(), scene_primitives()]
@@ -154,7 +154,7 @@ proc main() =
         if not engine.running or engine.keyIsDown(Escape):
           engine.destroy()
           return
-        discard engine.renderScene(scene)
+        engine.renderScene(scene)
   echo "Rendered ", engine.framesRendered, " frames"
   echo "Processed ", engine.eventsProcessed, " events"
 
