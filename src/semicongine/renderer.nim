@@ -25,24 +25,23 @@ type
   Renderer* = object
     device: Device
     surfaceFormat: VkSurfaceFormatKHR
-    renderPasses: seq[RenderPass]
+    renderPass: RenderPass
     swapchain: Swapchain
     scenedata: Table[Entity, SceneData]
 
 
-proc initRenderer*(device: Device, renderPasses: openArray[RenderPass]): Renderer =
+proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
   assert device.vk.valid
-  assert renderPasses.len > 0
-  for renderPass in renderPasses:
-    assert renderPass.vk.valid
+  assert renderPass.vk.valid
 
   result.device = device
-  result.renderPasses = renderPasses.toSeq
+  result.renderPass = renderPass
   result.surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
-  let (swapchain, res) = device.createSwapchain(result.renderPasses[^1], result.surfaceFormat, device.firstGraphicsQueue().get().family, 2)
-  if res != VK_SUCCESS:
+  # use last renderpass as output for swapchain
+  let swapchain = device.createSwapchain(result.renderPass.vk, result.surfaceFormat, device.firstGraphicsQueue().get().family)
+  if not swapchain.isSome:
     raise newException(Exception, "Unable to create swapchain")
-  result.swapchain = swapchain
+  result.swapchain = swapchain.get()
 
 proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[ShaderAttribute]) =
   assert not (tree in renderer.scenedata)
@@ -128,14 +127,25 @@ proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[Sha
 
   renderer.scenedata[tree] = data
 
-proc render*(renderer: var Renderer, entity: Entity): bool =
-  # TODO: check if nextFrame had any problems
-  var commandBuffer = renderer.swapchain.nextFrame()
+proc render*(renderer: var Renderer, entity: Entity) =
+  var
+    commandBufferResult = renderer.swapchain.nextFrame()
+    commandBuffer: VkCommandBuffer
 
-  commandBuffer.beginRenderCommands(renderer.swapchain.renderPass, renderer.swapchain.currentFramebuffer())
+  if not commandBufferResult.isSome:
+    let res = renderer.swapchain.recreate()
+    if res.isSome:
+      renderer.swapchain = res.get()
+      commandBufferResult = renderer.swapchain.nextFrame()
+      assert commandBufferResult.isSome
+    else:
+      raise newException(Exception, "Unable to recreate swapchain")
+  commandBuffer = commandBufferResult.get()
 
-  for i in 0 ..< renderer.swapchain.renderPass.subpasses.len:
-    let subpass = renderer.swapchain.renderPass.subpasses[i]
+  commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer())
+
+  for i in 0 ..< renderer.renderPass.subpasses.len:
+    let subpass = renderer.renderPass.subpasses[i]
     for pipeline in subpass.pipelines:
       var mpipeline = pipeline
       commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, mpipeline.vk)
@@ -144,18 +154,24 @@ proc render*(renderer: var Renderer, entity: Entity): bool =
 
       debug "Scene buffers:"
       for (location, buffer) in renderer.scenedata[entity].vertexBuffers.pairs:
-        echo "  ", location, ": ", buffer
-      echo "  Index buffer: ", renderer.scenedata[entity].indexBuffer
+        debug "  ", location, ": ", buffer
+      debug "  Index buffer: ", renderer.scenedata[entity].indexBuffer
 
       for drawable in renderer.scenedata[entity].drawables:
         commandBuffer.draw(drawable, vertexBuffers=renderer.scenedata[entity].vertexBuffers, indexBuffer=renderer.scenedata[entity].indexBuffer)
 
-    if i < renderer.swapchain.renderPass.subpasses.len - 1:
+    if i < renderer.renderPass.subpasses.len - 1:
       commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
 
   commandBuffer.endRenderCommands()
 
-  return renderer.swapchain.swap()
+  if not renderer.swapchain.swap():
+    let res = renderer.swapchain.recreate()
+    if res.isSome:
+      renderer.swapchain = res.get()
+    else:
+      raise newException(Exception, "Unable to recreate swapchain")
+
 
 func framesRendered*(renderer: Renderer): uint64 =
   renderer.swapchain.framesRendered
@@ -166,6 +182,5 @@ proc destroy*(renderer: var Renderer) =
       buffer.destroy()
     if data.indexBuffer.vk.valid:
       data.indexBuffer.destroy()
-  for renderpass in renderer.renderPasses.mitems:
-    renderpass.destroy()
+  renderer.renderPass.destroy()
   renderer.swapchain.destroy()

@@ -1,4 +1,5 @@
 import std/options
+import std/strformat
 import std/logging
 
 import ./api
@@ -17,9 +18,7 @@ type
   Swapchain* = object
     device*: Device
     vk*: VkSwapchainKHR
-    format*: VkFormat
     dimension*: TVec2[uint32]
-    renderPass*: RenderPass
     nImages*: uint32
     imageviews*: seq[ImageView]
     framebuffers*: seq[Framebuffer]
@@ -30,28 +29,36 @@ type
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
     commandBufferPool: CommandBufferPool
+    # required for recreation:
+    renderPass: VkRenderPass
+    surfaceFormat: VkSurfaceFormatKHR
+    queueFamily: QueueFamily
+    imageCount: uint32
+    presentMode: VkPresentModeKHR
     inFlightFrames: int
 
 
 proc createSwapchain*(
   device: Device,
-  renderPass: RenderPass,
+  renderPass: VkRenderPass,
   surfaceFormat: VkSurfaceFormatKHR,
   queueFamily: QueueFamily,
   desiredNumberOfImages=3'u32,
-  presentationMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR,
+  presentMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR,
   inFlightFrames=2
-): (Swapchain, VkResult) =
+): Option[Swapchain] =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
-  assert renderPass.vk.valid
+  assert renderPass.valid
   assert inFlightFrames > 0
 
   var capabilities = device.physicalDevice.getSurfaceCapabilities()
+  if capabilities.currentExtent.width == 0 or capabilities.currentExtent.height == 0:
+    return none(Swapchain)
 
   var imageCount = desiredNumberOfImages
   # following is according to vulkan specs
-  if presentationMode in [VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR, VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR]:
+  if presentMode in [VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR, VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR]:
     imageCount = 1
   else:
     imageCount = max(imageCount, capabilities.minImageCount)
@@ -71,20 +78,20 @@ proc createSwapchain*(
     imageSharingMode: VK_SHARING_MODE_EXCLUSIVE,
     preTransform: capabilities.currentTransform,
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, # only used for blending with other windows, can be opaque
-    presentMode: presentationMode,
+    presentMode: presentMode,
     clipped: true,
   )
   var
     swapchain = Swapchain(
       device: device,
-      format: surfaceFormat.format,
+      surfaceFormat: surfaceFormat,
       dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]),
-      renderPass: renderPass,
-      inFlightFrames: inFlightFrames
+      inFlightFrames: inFlightFrames,
+      queueFamily: queueFamily,
+      renderPass: renderPass
     )
-    createResult = device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk))
 
-  if createResult == VK_SUCCESS:
+  if device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk)) == VK_SUCCESS:
     var nImages: uint32
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), nil)
     swapchain.nImages = nImages
@@ -94,23 +101,25 @@ proc createSwapchain*(
       let image = Image(vk: vkimage, format: surfaceFormat.format, device: device)
       let imageview = image.createImageView()
       swapChain.imageviews.add imageview
-      swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass.vk, [imageview], swapchain.dimension)
+      swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass, [imageview], swapchain.dimension)
     for i in 0 ..< swapchain.inFlightFrames:
       swapchain.queueFinishedFence.add device.createFence()
       swapchain.imageAvailableSemaphore.add device.createSemaphore()
       swapchain.renderFinishedSemaphore.add device.createSemaphore()
     swapchain.commandBufferPool = device.createCommandBufferPool(queueFamily, swapchain.inFlightFrames)
-
-  return (swapchain, createResult)
+    debug &"Created swapchain with: {nImages} framebuffers, {inFlightFrames} in-flight frames, {swapchain.dimension.x}x{swapchain.dimension.y}"
+    result = some(swapchain)
+  else:
+    result = none(Swapchain)
 
 proc currentFramebuffer*(swapchain: Swapchain): Framebuffer =
-  swapchain.framebuffers[swapchain.currentFramebufferIndex]
-
-proc nextFrame*(swapchain: var Swapchain): VkCommandBuffer =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
-  assert swapchain.device.firstGraphicsQueue().isSome
-  assert swapchain.device.firstPresentationQueue().isSome
+  swapchain.framebuffers[swapchain.currentFramebufferIndex]
+
+proc nextFrame*(swapchain: var Swapchain): Option[VkCommandBuffer] =
+  assert swapchain.device.vk.valid
+  assert swapchain.vk.valid
 
   swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.inFlightFrames
   swapchain.queueFinishedFence[swapchain.currentInFlight].wait()
@@ -122,16 +131,19 @@ proc nextFrame*(swapchain: var Swapchain): VkCommandBuffer =
     VkFence(0),
     addr(swapchain.currentFramebufferIndex)
   )
-  # TODO: resize swapchain on VK_SUBOPTIMAL_KHR
-  echo "HIIIIIIIIIIII next image result", nextImageResult
-  if not (nextImageResult in [VK_SUCCESS, VK_TIMEOUT, VK_NOT_READY, VK_SUBOPTIMAL_KHR]):
-    return
 
-  swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
-
-  return swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
+  if nextImageResult == VK_SUCCESS:
+    swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
+    result = some(swapchain.commandBufferPool.buffers[swapchain.currentInFlight])
+  else:
+    result = none(VkCommandBuffer)
 
 proc swap*(swapchain: var Swapchain): bool =
+  assert swapchain.device.vk.valid
+  assert swapchain.vk.valid
+  assert swapchain.device.firstGraphicsQueue().isSome
+  assert swapchain.device.firstPresentationQueue().isSome
+
   var
     commandBuffer = swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
@@ -163,9 +175,7 @@ proc swap*(swapchain: var Swapchain): bool =
     pResults: nil,
   )
   let presentResult = vkQueuePresentKHR(swapchain.device.firstPresentationQueue().get().vk, addr(presentInfo))
-  # TODO: resize swapchain on VK_SUBOPTIMAL_KHR
-  echo "HIIIIIIIIIIII Present Result:", presentResult
-  if not (presentResult in [VK_SUCCESS, VK_SUBOPTIMAL_KHR]):
+  if presentResult != VK_SUCCESS:
     return false
 
   inc swapchain.framesRendered
@@ -193,3 +203,18 @@ proc destroy*(swapchain: var Swapchain) =
 
   swapchain.device.vk.vkDestroySwapchainKHR(swapchain.vk, nil)
   swapchain.vk.reset()
+
+proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
+  assert swapchain.vk.valid
+  assert swapchain.device.vk.valid
+  checkVkResult swapchain.device.vk.vkDeviceWaitIdle()
+  result = createSwapchain(
+    device=swapchain.device,
+    renderPass=swapchain.renderPass,
+    surfaceFormat=swapchain.surfaceFormat,
+    queueFamily=swapchain.queueFamily,
+    desiredNumberOfImages=swapchain.imageCount,
+    presentMode=swapchain.presentMode,
+    inFlightFrames=swapchain.inFlightFrames,
+  )
+  swapchain.destroy()

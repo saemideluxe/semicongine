@@ -81,13 +81,13 @@ proc initEngine*(
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
 
-proc setRenderer*(engine: var Engine, renderPasses: openArray[RenderPass]) =
-  engine.renderer = engine.device.initRenderer(renderPasses)
+proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
+  engine.renderer = engine.device.initRenderer(renderPass)
 
 proc addScene*(engine: var Engine, entity: Entity, vertexInput: seq[ShaderAttribute]) =
   engine.renderer.setupDrawableBuffers(entity, vertexInput)
 
-proc renderScene*(engine: var Engine, entity: Entity): auto =
+proc renderScene*(engine: var Engine, entity: Entity) =
   assert engine.running
   engine.renderer.render(entity)
 
