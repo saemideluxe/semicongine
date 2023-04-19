@@ -7,7 +7,6 @@ import std/tables
 import std/os
 
 
-
 # build configuration
 # =====================
 
@@ -33,6 +32,7 @@ const CONFIGHOTRELOADINTERVAL {.intdefine.}: int = 1000
 when CONFIGHOTRELOAD:
   var configUpdates: Channel[(string, Config)]
   configUpdates.open()
+
 
 # runtime configuration
 # =====================
