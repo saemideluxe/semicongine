@@ -12,6 +12,7 @@ import ./vulkan/pipeline
 import ./vulkan/physicaldevice
 import ./vulkan/renderpass
 import ./vulkan/swapchain
+import ./vulkan/syncing
 
 import ./entity
 import ./mesh
@@ -131,8 +132,10 @@ proc render*(renderer: var Renderer, entity: Entity) =
   var
     commandBufferResult = renderer.swapchain.nextFrame()
     commandBuffer: VkCommandBuffer
+    oldSwapchain: Swapchain
 
   if not commandBufferResult.isSome:
+    oldSwapchain = renderer.swapchain
     let res = renderer.swapchain.recreate()
     if res.isSome:
       renderer.swapchain = res.get()
@@ -166,11 +169,16 @@ proc render*(renderer: var Renderer, entity: Entity) =
   commandBuffer.endRenderCommands()
 
   if not renderer.swapchain.swap():
+    oldSwapchain = renderer.swapchain
     let res = renderer.swapchain.recreate()
     if res.isSome:
       renderer.swapchain = res.get()
     else:
       raise newException(Exception, "Unable to recreate swapchain")
+
+  if oldSwapchain.vk.valid:
+    oldSwapchain.queueFinishedFence[oldSwapchain.currentInFlight].wait()
+    oldSwapchain.destroy()
 
 
 func framesRendered*(renderer: Renderer): uint64 =

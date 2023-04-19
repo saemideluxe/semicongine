@@ -25,7 +25,7 @@ type
     currentInFlight*: int
     currentFramebufferIndex: uint32
     framesRendered*: uint64
-    queueFinishedFence: seq[Fence]
+    queueFinishedFence*: seq[Fence]
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
     commandBufferPool: CommandBufferPool
@@ -45,7 +45,8 @@ proc createSwapchain*(
   queueFamily: QueueFamily,
   desiredNumberOfImages=3'u32,
   presentMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR,
-  inFlightFrames=2
+  inFlightFrames=2,
+  oldSwapchain=VkSwapchainKHR(0)
 ): Option[Swapchain] =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
@@ -80,6 +81,7 @@ proc createSwapchain*(
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, # only used for blending with other windows, can be opaque
     presentMode: presentMode,
     clipped: true,
+    oldSwapchain: oldSwapchain,
   )
   var
     swapchain = Swapchain(
@@ -207,7 +209,6 @@ proc destroy*(swapchain: var Swapchain) =
 proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
   assert swapchain.vk.valid
   assert swapchain.device.vk.valid
-  checkVkResult swapchain.device.vk.vkDeviceWaitIdle()
   result = createSwapchain(
     device=swapchain.device,
     renderPass=swapchain.renderPass,
@@ -216,5 +217,5 @@ proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
     desiredNumberOfImages=swapchain.imageCount,
     presentMode=swapchain.presentMode,
     inFlightFrames=swapchain.inFlightFrames,
+    oldSwapchain=swapchain.vk,
   )
-  swapchain.destroy()
