@@ -7,7 +7,6 @@ import ./utils
 import ./device
 import ./physicaldevice
 import ./image
-import ./renderpass
 import ./framebuffer
 import ./commandbuffer
 import ./syncing

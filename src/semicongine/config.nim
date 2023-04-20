@@ -1,3 +1,4 @@
+import std/logging
 import std/parsecfg
 import std/strutils
 import std/sequtils
@@ -112,3 +113,7 @@ when CONFIGHOTRELOAD == true:
   var thethread: Thread[void]
   createThread(thethread, configFileWatchdog)
 
+if DEBUG:
+  setLogFilter(lvlAll)
+else:
+  setLogFilter(lvlWarn)
