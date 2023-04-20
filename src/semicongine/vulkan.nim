@@ -28,9 +28,6 @@ export syncing
 import ./vulkan/shader
 export shader
 
-import ./vulkan/vertex
-export vertex
-
 import ./vulkan/descriptor
 export descriptor
 

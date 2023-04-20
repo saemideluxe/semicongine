@@ -787,8 +787,7 @@ func glslInput*(group: seq[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
   var i = 0'u32
-  for attributes in group.groupByMemoryLocation().values:
-    for attribute in attributes:
+  for attribute in group:
       result.add &"layout(location = {i}) in {attribute.thetype.glslType} {attribute.name};"
       for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
         i += attribute.thetype.nLocationSlots
