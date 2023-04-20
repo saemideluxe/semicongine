@@ -1,37 +1,22 @@
 import std/times
+import std/sequtils
 import std/strutils
 import std/math
 import std/random
 
 import semicongine
 
-type
-  VertexDataA = object
-    position11: PositionAttribute[Vec2]
-    color22: ColorAttribute[Vec3]
-    index: GenericAttribute[uint32]
-  Uniforms = object
-    t: Descriptor[float32]
-
-var
-  pipeline: RenderPipeline[VertexDataA, Uniforms]
-  uniformdata = Uniforms(t: Descriptor[float32](value: 0'f32))
-
-proc globalUpdate(engine: var Engine, t, dt: float32) =
-  uniformdata.t.value += dt
-  engine.vulkan.device.updateUniformData(pipeline, uniformdata)
 
 when isMainModule:
   randomize()
-  var myengine = igniteEngine("Squares")
   const
     COLUMNS = 10
     ROWS = 10
     WIDTH = 2'f32 / COLUMNS
     HEIGHT = 2'f32 / ROWS
   var
-    vertices: array[COLUMNS * ROWS * 4, Vec2]
-    colors: array[COLUMNS * ROWS * 4, Vec3]
+    vertices: array[COLUMNS * ROWS * 4, Vec3f]
+    colors: array[COLUMNS * ROWS * 4, Vec3f]
     iValues: array[COLUMNS * ROWS * 4, uint32]
     indices: array[COLUMNS * ROWS * 2, array[3, uint16]]
 
@@ -40,13 +25,13 @@ when isMainModule:
       let
         y: float32 = (row * 2 / COLUMNS) - 1
         x: float32 = (col * 2 / ROWS) - 1
-        color = Vec3([(x + 1) / 2, (y + 1) / 2, 0'f32])
+        color = Vec3f([(x + 1) / 2, (y + 1) / 2, 0'f32])
         squareIndex = row * COLUMNS + col
         vertIndex = squareIndex * 4
-      vertices[vertIndex + 0] = Vec2([x, y])
-      vertices[vertIndex + 1] = Vec2([x + WIDTH, y])
-      vertices[vertIndex + 2] = Vec2([x + WIDTH, y + HEIGHT])
-      vertices[vertIndex + 3] = Vec2([x, y + HEIGHT])
+      vertices[vertIndex + 0] = newVec3f(x, y)
+      vertices[vertIndex + 1] = newVec3f(x + WIDTH, y)
+      vertices[vertIndex + 2] = newVec3f(x + WIDTH, y + HEIGHT)
+      vertices[vertIndex + 3] = newVec3f(x, y + HEIGHT)
       colors[vertIndex + 0] = color
       colors[vertIndex + 1] = color
       colors[vertIndex + 2] = color
@@ -55,43 +40,57 @@ when isMainModule:
       iValues[vertIndex + 1] = uint32(squareIndex)
       iValues[vertIndex + 2] = uint32(squareIndex)
       iValues[vertIndex + 3] = uint32(squareIndex)
-      indices[squareIndex * 2 + 0] = [uint16(vertIndex + 0), uint16(vertIndex +
-          1), uint16(vertIndex + 2)]
-      indices[squareIndex * 2 + 1] = [uint16(vertIndex + 2), uint16(vertIndex +
-          3), uint16(vertIndex + 0)]
+      indices[squareIndex * 2 + 0] = [uint16(vertIndex + 0), uint16(vertIndex + 1), uint16(vertIndex + 2)]
+      indices[squareIndex * 2 + 1] = [uint16(vertIndex + 2), uint16(vertIndex + 3), uint16(vertIndex + 0)]
 
 
-  type PIndexedMesh = Mesh[VertexDataA,
-      uint16] # required so we can use ctor with ref/on heap
-  var squaremesh = PIndexedMesh(
-    vertexData: VertexDataA(
-      position11: PositionAttribute[Vec2](data: @vertices),
-      color22: ColorAttribute[Vec3](data: @colors),
-      index: GenericAttribute[uint32](data: @iValues),
-    ),
-    indexed: true,
-    indices: @indices
+  const
+    vertexInput = @[
+      attr[Vec3f]("position", memoryLocation=VRAM),
+      attr[Vec3f]("color", memoryLocation=VRAM), # TODO: VRAMVisible
+      attr[uint32]("index", memoryLocation=VRAM),
+    ]
+    vertexOutput = @[attr[Vec3f]("outcolor")]
+    uniforms = @[attr[float32]("time")]
+    fragOutput = @[attr[Vec4f]("color")]
+    vertexCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_VERTEX_BIT,
+      inputs=vertexInput,
+      uniforms=uniforms,
+      outputs=vertexOutput,
+      main="""
+float pos_weight = index / 100.0; // add some gamma correction?
+float t = sin(Uniforms.time * 0.5) * 0.5 + 0.5;
+float v = min(1, max(0, pow(pos_weight - t, 2)));
+v = pow(1 - v, 3000);
+outcolor = vec3(color.r, color.g, v * 0.5);
+gl_Position = vec4(position, 1.0);
+"""
+    )
+    fragmentCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+      inputs=vertexOutput,
+      uniforms=uniforms,
+      outputs=fragOutput,
+      main="color = vec4(outcolor, 1);"
+    )
+  var squaremesh = newMesh(
+    positions=vertices,
+    indices=indices,
+    colors=colors,
   )
-  var scene = newThing("scene", newThing("squares", squaremesh))
+  setMeshData[uint32](squaremesh, "index", iValues.toSeq)
 
-  const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms](
-    """
-    float pos_weight = index / 100.0; // add some gamma correction?
-    float t = sin(uniforms.t * 0.5) * 0.5 + 0.5;
-    float v = min(1, max(0, pow(pos_weight - t, 2)));
-    v = pow(1 - v, 3000);
-    out_color = vec4(in_color.r, in_color.g, v * 0.5, 1.0);
-    """
-  )
-  const fragmentShader = generateFragmentShaderCode[VertexDataA]()
-  static:
-    echo vertexShader
-  pipeline = setupPipeline[VertexDataA, Uniforms, uint16](
-    myengine,
-    scene,
-    vertexShader,
-    fragmentShader
-  )
-  myengine.run(pipeline, globalUpdate)
-  pipeline.trash()
-  myengine.trash()
+  var myengine = initEngine("Squares")
+  myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
+
+  var scene = newEntity("scene", newEntity("squares", squaremesh))
+  myengine.addScene(scene, vertexInput)
+  var time = initShaderGlobal("time", 0.0'f32)
+  scene.components.add time
+  while myengine.running and not myengine.keyWasPressed(Escape):
+    myengine.updateInputs()
+    setValue[float32](time.value, get[float32](time.value) + 0.0005)
+    myengine.renderScene(scene)
+
+  myengine.destroy()

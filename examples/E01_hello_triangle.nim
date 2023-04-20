@@ -1,6 +1,3 @@
-import std/strutils
-import std/enumerate
-
 import semicongine
 
 
@@ -15,7 +12,10 @@ const
     stage=VK_SHADER_STAGE_VERTEX_BIT,
     inputs=vertexInput,
     outputs=vertexOutput,
-    main="""gl_Position = vec4(position, 1.0); outcolor = color;"""
+    main="""
+    gl_Position = vec4(position, 1.0);
+    outcolor = color;
+    """
   )
   fragmentCode = compileGlslShader(
     stage=VK_SHADER_STAGE_FRAGMENT_BIT,
