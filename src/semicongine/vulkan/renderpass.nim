@@ -71,12 +71,12 @@ proc simpleForwardRenderPass*(
   vertexCode: ShaderCode,
   fragmentCode: ShaderCode,
   inFlightFrames: int = 2,
-  format = VkFormat(0),
+  format = VK_FORMAT_UNDEFINED ,
   clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])
 ): RenderPass =
   assert device.vk.valid
   var theformat = format
-  if theformat == VkFormat(0):
+  if theformat == VK_FORMAT_UNDEFINED:
     theformat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format
   var
     attachments = @[VkAttachmentDescription(

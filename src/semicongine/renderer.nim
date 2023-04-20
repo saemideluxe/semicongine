@@ -1,5 +1,4 @@
 import std/options
-import std/sequtils
 import std/tables
 import std/strformat
 import std/logging
@@ -12,7 +11,6 @@ import ./vulkan/pipeline
 import ./vulkan/physicaldevice
 import ./vulkan/renderpass
 import ./vulkan/swapchain
-import ./vulkan/syncing
 
 import ./entity
 import ./mesh

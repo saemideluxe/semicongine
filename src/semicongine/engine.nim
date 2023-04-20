@@ -40,9 +40,10 @@ proc destroy*(engine: var Engine) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
   engine.renderer.destroy()
   engine.device.destroy()
-  engine.debugger.destroy()
-  engine.instance.destroy()
+  if engine.debugger.messenger.valid:
+    engine.debugger.destroy()
   engine.window.destroy()
+  engine.instance.destroy()
   engine.running = false
 
 
