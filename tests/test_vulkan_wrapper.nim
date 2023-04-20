@@ -132,9 +132,7 @@ proc main() =
       outputs=fragOutput,
       main="color = vec4(outcolor, 1);"
     )
-  var
-    surfaceFormat = engine.gpuDevice.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
-    renderPass = engine.gpuDevice.simpleForwardRenderPass(surfaceFormat.format, vertexCode, fragmentCode, 2)
+  var renderPass = engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
   engine.setRenderer(renderPass)
 
   # INIT SCENES
