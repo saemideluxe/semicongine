@@ -4,6 +4,7 @@ import std/logging
 import ./api
 import ./utils
 import ./device
+import ./physicaldevice
 import ./pipeline
 import ./shader
 import ./framebuffer
@@ -65,11 +66,21 @@ proc createRenderPass*(
   result.subpasses = pSubpasses
   checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
 
-proc simpleForwardRenderPass*(device: Device, format: VkFormat, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): RenderPass =
+proc simpleForwardRenderPass*(
+  device: Device,
+  vertexCode: ShaderCode,
+  fragmentCode: ShaderCode,
+  inFlightFrames: int = 2,
+  format = VkFormat(0),
+  clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])
+): RenderPass =
   assert device.vk.valid
+  var theformat = format
+  if theformat == VkFormat(0):
+    theformat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format
   var
     attachments = @[VkAttachmentDescription(
-        format: format,
+        format: theformat,
         samples: VK_SAMPLE_COUNT_1_BIT,
         loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
         storeOp: VK_ATTACHMENT_STORE_OP_STORE,

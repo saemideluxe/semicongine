@@ -43,6 +43,7 @@ proc destroy*(engine: var Engine) =
   engine.debugger.destroy()
   engine.instance.destroy()
   engine.window.destroy()
+  engine.running = false
 
 
 proc initEngine*(
@@ -88,11 +89,13 @@ proc addScene*(engine: var Engine, entity: Entity, vertexInput: seq[ShaderAttrib
   engine.renderer.setupDrawableBuffers(entity, vertexInput)
 
 proc renderScene*(engine: var Engine, entity: Entity) =
-  assert engine.running
-  engine.renderer.render(entity)
+  if engine.running:
+    engine.renderer.render(entity)
 
 proc updateInputs*(engine: var Engine) =
-  assert engine.running
+  if not engine.running:
+    return
+
   engine.input.keyWasPressed = {}
   engine.input.keyWasReleased = {}
   engine.input.mouseWasPressed = {}

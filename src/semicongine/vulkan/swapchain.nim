@@ -35,7 +35,7 @@ type
     queueFamily: QueueFamily
     imageCount: uint32
     presentMode: VkPresentModeKHR
-    inFlightFrames: int
+    inFlightFrames*: int
 
 
 proc createSwapchain*(

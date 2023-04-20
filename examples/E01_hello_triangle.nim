@@ -1,55 +1,45 @@
-import std/times
 import std/strutils
 import std/enumerate
 
 import semicongine
 
-type
-  # define type of vertex
-  VertexDataA = object
-    position: PositionAttribute[Vec2]
-    color: ColorAttribute[Vec3]
 
-var pipeline: RenderPipeline[VertexDataA, void]
-
-proc globalUpdate(engine: var Engine, t, dt: float32) =
-  discard
-
-# vertex data (types must match the above VertexAttributes)
 const
-  triangle_pos = @[
-    Vec2([0.0'f32, -0.5'f32]),
-    Vec2([0.5'f32, 0.5'f32]),
-    Vec2([-0.5'f32, 0.5'f32]),
+  vertexInput = @[
+    attr[Vec3f]("position", memoryLocation=VRAM),
+    attr[Vec3f]("color", memoryLocation=VRAM),
   ]
-  triangle_color = @[
-    Vec3([1.0'f32, 0.0'f32, 0.0'f32]),
-    Vec3([0.0'f32, 1.0'f32, 0.0'f32]),
-    Vec3([0.0'f32, 0.0'f32, 1.0'f32]),
-  ]
-
-when isMainModule:
-  var myengine = igniteEngine("Hello triangle")
-
-  # build a mesh
-  var trianglemesh = new Mesh[VertexDataA, uint16]
-  trianglemesh.vertexData = VertexDataA(
-    position: PositionAttribute[Vec2](data: triangle_pos),
-    color: ColorAttribute[Vec3](data: triangle_color),
+  vertexOutput = @[attr[Vec3f]("outcolor")]
+  fragOutput = @[attr[Vec4f]("color")]
+  vertexCode = compileGlslShader(
+    stage=VK_SHADER_STAGE_VERTEX_BIT,
+    inputs=vertexInput,
+    outputs=vertexOutput,
+    main="""gl_Position = vec4(position, 1.0); outcolor = color;"""
   )
-  # build a single-object scene graph
-  var triangle = newThing("triangle", trianglemesh)
-
-  # upload data, prepare shaders, etc
-  const vertexShader = generateVertexShaderCode[VertexDataA, void]()
-  const fragmentShader = generateFragmentShaderCode[VertexDataA]()
-  pipeline = setupPipeline[VertexDataA, void, uint16](
-    myengine,
-    triangle,
-    vertexShader,
-    fragmentShader
+  fragmentCode = compileGlslShader(
+    stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+    inputs=vertexOutput,
+    outputs=fragOutput,
+    main="color = vec4(outcolor, 1);"
   )
-  # show something
-  myengine.run(pipeline, globalUpdate)
-  pipeline.trash()
-  myengine.trash()
+
+var
+  triangle = newEntity(
+    "triangle",
+    newMesh(
+      [newVec3f(-0.5, 0.5), newVec3f(0, -0.5), newVec3f(0.5, 0.5)],
+      [X, Y, Z],
+    )
+  )
+  myengine = initEngine("Hello triangle")
+  renderPass = myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
+
+myengine.setRenderer(renderPass)
+myengine.addScene(triangle, vertexInput)
+
+while myengine.running and not myengine.keyWasPressed(Escape):
+  myengine.updateInputs()
+  myengine.renderScene(triangle)
+
+myengine.destroy()
