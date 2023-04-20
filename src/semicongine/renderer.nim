@@ -177,7 +177,7 @@ proc render*(renderer: var Renderer, entity: Entity) =
       raise newException(Exception, "Unable to recreate swapchain")
 
   if oldSwapchain.vk.valid:
-    oldSwapchain.queueFinishedFence[oldSwapchain.currentInFlight].wait()
+    checkVkResult renderer.device.vk.vkDeviceWaitIdle()
     oldSwapchain.destroy()
 
 

@@ -43,6 +43,8 @@ proc setupUniforms(pipeline: var Pipeline, inFlightFrames: int) =
   var uniformBufferSize = 0'u64
   for uniform in pipeline.uniforms:
     uniformBufferSize += uniform.thetype.size
+  if uniformBufferSize == 0:
+    return
 
   for i in 0 ..< inFlightFrames:
     var buffer = pipeline.device.createBuffer(
@@ -187,6 +189,8 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
   result.setupUniforms(inFlightFrames=inFlightFrames)
 
 proc updateUniforms*(pipeline: Pipeline, rootEntity: Entity, currentInFlight: int) =
+  if pipeline.uniformBuffers.len == 0:
+    return
   assert pipeline.vk.valid
   assert pipeline.uniformBuffers[currentInFlight].vk.valid
 
