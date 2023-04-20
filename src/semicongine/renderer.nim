@@ -72,6 +72,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[Sha
       mappable=false,
     )
 
+  # TODO: groupByMemoryLocation does bad stuff when we have mixed types of memory locations for different mesh attributes
+
   # one vertex data buffer per memory location
   var perLocationOffsets: Table[MemoryLocation, uint64]
   for location, attributes in inputs.groupByMemoryLocation().pairs:
