@@ -90,6 +90,7 @@ proc addScene*(engine: var Engine, entity: Entity, vertexInput: seq[ShaderAttrib
   engine.renderer.setupDrawableBuffers(entity, vertexInput)
 
 proc renderScene*(engine: var Engine, entity: Entity) =
+  assert engine.renderer.valid
   if engine.running:
     engine.renderer.render(entity)
 
@@ -144,3 +145,4 @@ func mousePosition*(engine: Engine, key: Key): auto = engine.input.mousePosition
 func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
 func framesRendered*(engine: Engine): auto = engine.renderer.framesRendered
 func gpuDevice*(engine: Engine): Device = engine.device
+func getWindow*(engine: Engine): auto = engine.window
