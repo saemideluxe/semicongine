@@ -112,7 +112,7 @@ proc main() =
   const
     vertexInput = @[
       attr[Vec3f]("position", memoryLocation=VRAM),
-      attr[Vec3f]("color", memoryLocation=VRAM),
+      attr[Vec3f]("color", memoryLocation=RAM),
       attr[Vec3f]("translate", perInstance=true)
     ]
     vertexOutput = @[attr[Vec3f]("outcolor")]
