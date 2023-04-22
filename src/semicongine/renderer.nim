@@ -181,6 +181,9 @@ proc render*(renderer: var Renderer, entity: Entity) =
 func framesRendered*(renderer: Renderer): uint64 =
   renderer.swapchain.framesRendered
 
+func valid*(renderer: Renderer): bool =
+  renderer.device.vk.valid
+
 proc destroy*(renderer: var Renderer) =
   for data in renderer.scenedata.mvalues:
     for buffer in data.vertexBuffers.mvalues:
