@@ -11,7 +11,7 @@ import ../gpu_data
 type
   Drawable* = object
     elementCount*: uint32 # number of vertices or indices
-    bufferOffsets*: Table[MemoryLocation, seq[uint64]] # list of buffers and list of offset for each attribute in that buffer
+    bufferOffsets*: seq[(MemoryLocation, uint64)] # list of buffers and list of offset for each attribute in that buffer
     instanceCount*: uint32 # number of instance
     case indexed*: bool
     of true:
@@ -32,10 +32,9 @@ proc draw*(commandBuffer: VkCommandBuffer, drawable: Drawable, vertexBuffers: Ta
     var buffers: seq[VkBuffer]
     var offsets: seq[VkDeviceSize]
 
-    for (location, bufferOffsets) in drawable.bufferOffsets.pairs:
-      for offset in bufferOffsets:
-        buffers.add vertexBuffers[location].vk
-        offsets.add VkDeviceSize(offset)
+    for (location, offset) in drawable.bufferOffsets:
+      buffers.add vertexBuffers[location].vk
+      offsets.add VkDeviceSize(offset)
 
     commandBuffer.vkCmdBindVertexBuffers(
       firstBinding=0'u32,

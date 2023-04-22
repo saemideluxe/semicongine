@@ -72,16 +72,16 @@ proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[Sha
       mappable=false,
     )
 
-  # TODO: groupByMemoryLocation does bad stuff when we have mixed types of memory locations for different mesh attributes
-
   # one vertex data buffer per memory location
   var perLocationOffsets: Table[MemoryLocation, uint64]
-  for location, attributes in inputs.groupByMemoryLocation().pairs:
+  var perLocationSizes: Table[MemoryLocation, uint64]
+  for attribute in inputs:
     # setup one buffer per attribute-location-type
-    var bufferSize = 0'u64
+    if not (attribute.memoryLocation in perLocationSizes):
+      perLocationSizes[attribute.memoryLocation] = 0'u64
     for mesh in allMeshes:
-      for attribute in attributes:
-        bufferSize += mesh.dataSize(attribute.name)
+      perLocationSizes[attribute.memoryLocation] += mesh.dataSize(attribute.name)
+  for location, bufferSize in perLocationSizes.pairs:
     if bufferSize > 0:
       data.vertexBuffers[location] = renderer.device.createBuffer(
         size=bufferSize,
@@ -93,15 +93,12 @@ proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[Sha
 
   var indexBufferOffset = 0'u64
   for mesh in allMeshes:
-    var offsets: Table[MemoryLocation, seq[uint64]]
-    for location, attributes in inputs.groupByMemoryLocation().pairs:
-      for attribute in attributes:
-        if not (location in offsets):
-          offsets[location] = @[]
-        offsets[location].add perLocationOffsets[location]
-        var (pdata, size) = mesh.getRawData(attribute.name)
-        data.vertexBuffers[location].setData(pdata, size, perLocationOffsets[location])
-        perLocationOffsets[location] += size
+    var offsets: seq[(MemoryLocation, uint64)]
+    for attribute in inputs:
+      offsets.add (attribute.memoryLocation, perLocationOffsets[attribute.memoryLocation])
+      var (pdata, size) = mesh.getRawData(attribute.name)
+      data.vertexBuffers[attribute.memoryLocation].setData(pdata, size, perLocationOffsets[attribute.memoryLocation])
+      perLocationOffsets[attribute.memoryLocation] += size
 
     let indexed = mesh.indexType != None
     var drawable = Drawable(
