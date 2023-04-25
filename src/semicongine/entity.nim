@@ -31,6 +31,9 @@ func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
 func hash*(entity: Entity): Hash =
   hash(cast[pointer](entity))
 
+func hash*(component: Component): Hash =
+  hash(cast[pointer](component))
+
 method `$`*(entity: Entity): string {.base.} = entity.name
 method `$`*(component: Component): string {.base.} =
   "Unknown Component"

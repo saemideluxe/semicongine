@@ -1,3 +1,4 @@
+import std/sequtils
 import ./platform/window
 
 import ./vulkan/api
@@ -9,6 +10,7 @@ import ./vulkan/renderpass
 import ./gpu_data
 import ./entity
 import ./renderer
+import ./mesh
 import ./events
 import ./config
 import ./math
@@ -86,13 +88,15 @@ proc initEngine*(
 proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
   engine.renderer = engine.device.initRenderer(renderPass)
 
-proc addScene*(engine: var Engine, entity: Entity, vertexInput: seq[ShaderAttribute]) =
-  engine.renderer.setupDrawableBuffers(entity, vertexInput)
+proc addScene*(engine: var Engine, scene: Entity, vertexInput: seq[ShaderAttribute], transformAttribute="") =
+  assert transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
+  engine.renderer.setupDrawableBuffers(scene, vertexInput, transformAttribute=transformAttribute)
 
-proc renderScene*(engine: var Engine, entity: Entity) =
+proc renderScene*(engine: var Engine, scene: Entity) =
   assert engine.renderer.valid
   if engine.running:
-    engine.renderer.render(entity)
+    engine.renderer.refreshMeshData(scene)
+    engine.renderer.render(scene)
 
 proc updateInputs*(engine: var Engine) =
   if not engine.running:
@@ -141,7 +145,7 @@ func keyWasReleased*(engine: Engine, key: Key): auto = key in engine.input.keyWa
 func mouseIsDown*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseIsDown
 func mouseWasPressed*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseWasPressed
 func mouseWasReleased*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseWasReleased
-func mousePosition*(engine: Engine, key: Key): auto = engine.input.mousePosition
+func mousePosition*(engine: Engine): auto = engine.input.mousePosition
 func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
 func framesRendered*(engine: Engine): auto = engine.renderer.framesRendered
 func gpuDevice*(engine: Engine): Device = engine.device

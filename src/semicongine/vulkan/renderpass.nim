@@ -70,8 +70,8 @@ proc simpleForwardRenderPass*(
   device: Device,
   vertexCode: ShaderCode,
   fragmentCode: ShaderCode,
-  inFlightFrames: int = 2,
-  format = VK_FORMAT_UNDEFINED ,
+  inFlightFrames=2,
+  format=VK_FORMAT_UNDEFINED ,
   clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])
 ): RenderPass =
   assert device.vk.valid

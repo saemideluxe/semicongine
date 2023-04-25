@@ -15,12 +15,17 @@ import ./vulkan/swapchain
 import ./entity
 import ./mesh
 import ./gpu_data
+import ./math
 
 type
   SceneData = object
-    drawables*: seq[Drawable]
+    drawables*: OrderedTable[Mesh, Drawable]
     vertexBuffers*: Table[MemoryLocation, Buffer]
     indexBuffer*: Buffer
+    attributeLocation*: Table[string, MemoryLocation]
+    attributeBindingNumber*: Table[string, int]
+    transformAttribute: string # name of attribute that is used for per-instance mesh transformation
+    entityTransformationCache: Table[Mesh, Mat4] # remembers last transformation, avoid to send GPU-updates if no changes
   Renderer* = object
     device: Device
     surfaceFormat: VkSurfaceFormatKHR
@@ -42,12 +47,23 @@ proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
     raise newException(Exception, "Unable to create swapchain")
   result.swapchain = swapchain.get()
 
-proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[ShaderAttribute]) =
-  assert not (tree in renderer.scenedata)
+proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[ShaderAttribute], transformAttribute="") =
+  assert not (scene in renderer.scenedata)
   var data = SceneData()
 
+  if transformattribute != "":
+    var hasTransformAttribute = false
+    for input in inputs:
+      if input.name == transformattribute:
+        assert input.perInstance == true, $input
+        assert getDataType[Mat4]() == input.thetype
+        hasTransformAttribute = true
+    assert hasTransformAttribute
+    data.transformAttribute = transformAttribute
+
+
   var allMeshes: seq[Mesh]
-  for mesh in allComponentsOfType[Mesh](tree):
+  for mesh in allComponentsOfType[Mesh](scene):
     allMeshes.add mesh
     for inputAttr in inputs:
       assert mesh.hasDataFor(inputAttr.name), &"{mesh} missing data for {inputAttr}"
@@ -73,9 +89,14 @@ proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[Sha
     )
 
   # one vertex data buffer per memory location
-  var perLocationOffsets: Table[MemoryLocation, uint64]
-  var perLocationSizes: Table[MemoryLocation, uint64]
+  var
+    perLocationOffsets: Table[MemoryLocation, uint64]
+    perLocationSizes: Table[MemoryLocation, uint64]
+    bindingNumber = 0
   for attribute in inputs:
+    data.attributeLocation[attribute.name] = attribute.memoryLocation
+    data.attributeBindingNumber[attribute.name] = bindingNumber
+    inc bindingNumber
     # setup one buffer per attribute-location-type
     if not (attribute.memoryLocation in perLocationSizes):
       perLocationSizes[attribute.memoryLocation] = 0'u64
@@ -121,11 +142,41 @@ proc setupDrawableBuffers*(renderer: var Renderer, tree: Entity, inputs: seq[Sha
       var (pdata, size) = mesh.getRawIndexData()
       data.indexBuffer.setData(pdata, size, indexBufferOffset)
       indexBufferOffset += size
-    data.drawables.add drawable
+    data.drawables[mesh] = drawable
 
-  renderer.scenedata[tree] = data
+  renderer.scenedata[scene] = data
 
-proc render*(renderer: var Renderer, entity: Entity) =
+proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: string) =
+  debug &"Refreshing data on mesh {mesh} for {attribute}"
+  var (pdata, size) = mesh.getRawData(attribute)
+  let memoryLocation = sceneData.attributeLocation[attribute]
+  let bindingNumber = sceneData.attributeBindingNumber[attribute]
+  sceneData.vertexBuffers[memoryLocation].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][1])
+
+
+proc refreshMeshData*(renderer: var Renderer, scene: Entity) =
+  assert scene in renderer.scenedata
+
+  for mesh in allComponentsOfType[Mesh](scene):
+    # if mesh transformation attribute is enabled, update the model matrix
+    if renderer.scenedata[scene].transformAttribute != "":
+      let transform = mesh.entity.getModelTransform()
+      if not (mesh in renderer.scenedata[scene].entityTransformationCache) or renderer.scenedata[scene].entityTransformationCache[mesh] != transform:
+        mesh.updateInstanceData(renderer.scenedata[scene].transformAttribute, @[transform])
+        renderer.scenedata[scene].entityTransformationCache[mesh] = transform
+
+    # update any changed mesh attributes
+    for attribute in mesh.availableAttributes():
+      if mesh.hasDataChanged(attribute):
+        renderer.scenedata[scene].refreshMeshAttributeData(mesh, attribute)
+    var m = mesh
+    m.clearDataChanged()
+
+
+
+proc render*(renderer: var Renderer, scene: Entity) =
+  assert scene in renderer.scenedata
+
   var
     commandBufferResult = renderer.swapchain.nextFrame()
     commandBuffer: VkCommandBuffer
@@ -150,15 +201,15 @@ proc render*(renderer: var Renderer, entity: Entity) =
       var mpipeline = pipeline
       commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, mpipeline.vk)
       commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, mpipeline.layout, 0, 1, addr(mpipeline.descriptorSets[renderer.swapchain.currentInFlight].vk), 0, nil)
-      mpipeline.updateUniforms(entity, renderer.swapchain.currentInFlight)
+      mpipeline.updateUniforms(scene, renderer.swapchain.currentInFlight)
 
       debug "Scene buffers:"
-      for (location, buffer) in renderer.scenedata[entity].vertexBuffers.pairs:
+      for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
         debug "  ", location, ": ", buffer
-      debug "  Index buffer: ", renderer.scenedata[entity].indexBuffer
+      debug "  Index buffer: ", renderer.scenedata[scene].indexBuffer
 
-      for drawable in renderer.scenedata[entity].drawables:
-        commandBuffer.draw(drawable, vertexBuffers=renderer.scenedata[entity].vertexBuffers, indexBuffer=renderer.scenedata[entity].indexBuffer)
+      for drawable in renderer.scenedata[scene].drawables.values:
+        commandBuffer.draw(drawable, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer)
 
     if i < renderer.renderPass.subpasses.len - 1:
       commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
