@@ -24,9 +24,9 @@ type
     stage: VkShaderStageFlagBits
     entrypoint: string
     binary: seq[uint32]
-    inputs: seq[ShaderAttribute]
-    uniforms: seq[ShaderAttribute]
-    outputs: seq[ShaderAttribute]
+    inputs*: seq[ShaderAttribute]
+    uniforms*: seq[ShaderAttribute]
+    outputs*: seq[ShaderAttribute]
   Shader* = object
     device: Device
     vk*: VkShaderModule

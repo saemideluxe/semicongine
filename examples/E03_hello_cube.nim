@@ -87,8 +87,7 @@ when isMainModule:
   myengine.addScene(cube, vertexInput)
 
   var t: float32 = cpuTime()
-  while myengine.running and not myengine.keyWasPressed(Escape):
-    myengine.updateInputs()
+  while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
     setValue[Mat4](model.value, translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t, Yf32))
     setValue[Mat4](
       projection.value,

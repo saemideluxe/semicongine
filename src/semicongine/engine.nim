@@ -16,6 +16,11 @@ import ./config
 import ./math
 
 type
+  EngineState* = enum
+    Starting
+    Running
+    Shutdown
+    Destroyed
   Input = object
     keyIsDown: set[Key]
     keyWasPressed: set[Key]
@@ -27,7 +32,7 @@ type
     eventsProcessed: uint64
     windowWasResized: bool
   Engine* = object
-    running*: bool
+    state*: EngineState
     device: Device
     debugger: Debugger
     instance: Instance
@@ -47,7 +52,7 @@ proc destroy*(engine: var Engine) =
     engine.debugger.destroy()
   engine.window.destroy()
   engine.instance.destroy()
-  engine.running = false
+  engine.state = Destroyed
 
 
 proc initEngine*(
@@ -57,7 +62,7 @@ proc initEngine*(
   resizeHandler: proc(engine: var Engine) = nil,
   eventHandler: proc(engine: var Engine, event: Event) = nil
 ): Engine =
-  result.running = true
+  result.state = Starting
   result.exitHandler = exitHandler
   result.resizeHandler = resizeHandler
   result.eventHandler = eventHandler
@@ -87,27 +92,29 @@ proc initEngine*(
   )
 
 proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
+  assert engine.state != Destroyed
   engine.renderer = engine.device.initRenderer(renderPass)
 
 proc addScene*(engine: var Engine, scene: Entity, vertexInput: seq[ShaderAttribute], transformAttribute="") =
-  assert transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
+  assert engine.state != Destroyed
+  assert transformAttribute == "" or transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
   engine.renderer.setupDrawableBuffers(scene, vertexInput, transformAttribute=transformAttribute)
 
 proc renderScene*(engine: var Engine, scene: Entity) =
+  assert engine.state == Running
   assert engine.renderer.valid
-  if engine.running:
+  if engine.state == Running:
     engine.renderer.refreshMeshData(scene)
     engine.renderer.render(scene)
 
-proc updateInputs*(engine: var Engine) =
-  if not engine.running:
-    return
+proc updateInputs*(engine: var Engine): EngineState =
+  assert engine.state in [Starting, Running]
 
   engine.input.keyWasPressed = {}
   engine.input.keyWasReleased = {}
   engine.input.mouseWasPressed = {}
   engine.input.mouseWasReleased = {}
-  engine.input.windowWasResized = false
+  engine.input.windowWasResized = engine.state == Starting
 
   var killed = false
   for event in engine.window.pendingEvents():
@@ -133,12 +140,15 @@ proc updateInputs*(engine: var Engine) =
         engine.input.mouseIsDown.excl event.button
       of MouseMoved:
         engine.input.mousePosition = newVec2(float32(event.x), float32(event.y))
+  if engine.state == Starting:
+    engine.state = Running
   if killed:
-    engine.running = false
+    engine.state = Shutdown
     if engine.exitHandler != nil:
       engine.exitHandler(engine)
   if engine.input.windowWasResized and engine.resizeHandler != nil:
     engine.resizeHandler(engine)
+  return engine.state
 
 func keyIsDown*(engine: Engine, key: Key): auto = key in engine.input.keyIsDown
 func keyWasPressed*(engine: Engine, key: Key): auto = key in engine.input.keyWasPressed

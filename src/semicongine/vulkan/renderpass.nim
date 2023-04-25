@@ -75,6 +75,7 @@ proc simpleForwardRenderPass*(
   clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])
 ): RenderPass =
   assert device.vk.valid
+  assert fragmentCode.outputs.len == 1
   var theformat = format
   if theformat == VK_FORMAT_UNDEFINED:
     theformat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format
