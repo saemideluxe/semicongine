@@ -113,7 +113,7 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     of MotionNotify:
       let motion = cast[PXMotionEvent](addr(event))
       result.add Event(eventType: MouseMoved, x: motion.x, y: motion.y)
-    of ConfigureNotify:
+    of ConfigureNotify, Expose:
       result.add Event(eventType: ResizedWindow)
     else:
       discard

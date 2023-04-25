@@ -38,8 +38,7 @@ var
 myengine.setRenderer(renderPass)
 myengine.addScene(triangle, vertexInput)
 
-while myengine.running and not myengine.keyWasPressed(Escape):
-  myengine.updateInputs()
+while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
   myengine.renderScene(triangle)
 
 myengine.destroy()

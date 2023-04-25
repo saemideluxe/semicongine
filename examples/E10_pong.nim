@@ -1,13 +1,5 @@
 import semicongine
 
-type
-  Vertex = object
-    position: PositionAttribute[Vec2]
-    color: ColorAttribute[Vec3]
-    transform: ModelTransformAttribute
-  Uniforms = object
-    view: ViewProjectionTransform
-
 const
   barcolor = RGBfromHex("5A3F00").gamma(2.2)
   barSize = 0.1'f
@@ -18,14 +10,11 @@ const
   backgroundColor = RGBAfromHex("FAC034").gamma(2.2)
   ballSpeed = 60'f
 
-echo RGBAfromHex("FAC034")
-echo RGBAfromHex("FAC034").gamma(2.2)
 var
-  uniforms = Uniforms()
-  pipeline: RenderPipeline[Vertex, Uniforms]
-  level: Thing
-  ballVelocity = Vec2([1'f, 1'f]).normalized * ballSpeed
+  level: Entity
+  ballVelocity = newVec2f(1, 1).normalized * ballSpeed
 
+#[
 proc globalUpdate(engine: var Engine; t, dt: float32) =
   var height = float32(engine.vulkan.frameSize.y) / float32(
       engine.vulkan.frameSize.x)
@@ -68,43 +57,30 @@ proc globalUpdate(engine: var Engine; t, dt: float32) =
       ballBottom = ball.transform.col(3).y + ballSize/2
     if ballTop >= barTop and ballBottom <= barBottom:
       ballVelocity[0] = abs(ballVelocity[0])
-
+]#
 
 when isMainModule:
-  var myengine = igniteEngine("Pong")
-  myengine.maxFPS = 61
-  level = newThing("Level")
-  var playerbarmesh = quad[Vertex, Vec2, float32]()
+  var myengine = initEngine("Pong")
+  level = newEntity("Level")
+  var playerbarmesh = rect()
   playerbarmesh.vertexData.color.data = @[barcolor, barcolor, barcolor, barcolor]
-  playerbarmesh.vertexData.transform.data = @[Unit44]
-  var playerbar = newThing("playerbar", playerbarmesh)
-  playerbar.transform = scale3d(barWidth, barSize, 1'f) * translate3d(0.5'f,
-      0'f, 0'f)
-  var player = newThing("player", playerbar)
+  var playerbar = newEntity("playerbar", playerbarmesh)
+  playerbar.transform = scale3d(barWidth, barSize, 1'f) * translate3d(0.5'f, 0'f, 0'f)
+  var player = newEntity("player", playerbar)
   player.transform = translate3d(0'f, 0.3'f, 0'f)
   level.add player
 
-  var ballmesh = circle[Vertex, Vec2, float32]()
-  ballmesh.vertexData.color.data = newSeq[Vec3](
-      ballmesh.vertexData.position.data.len)
+  var ballmesh = circle()
+  ballmesh.vertexData.color.data = newSeq[Vec3](ballmesh.vertexData.position.data.len)
   for i in 0 ..< ballmesh.vertexData.color.data.len:
     ballmesh.vertexData.color.data[i] = ballcolor
   ballmesh.vertexData.transform.data = @[Unit44]
-  var ball = newThing("ball", ballmesh)
+  var ball = newEntity("ball", ballmesh)
   ball.transform = scale3d(ballSize, ballSize, 1'f) * translate3d(10'f, 10'f, 0'f)
   level.add ball
 
-  # upload data, prepare shaders, etc
-  const vertexShader = generateVertexShaderCode[Vertex, Uniforms]()
-  const fragmentShader = generateFragmentShaderCode[Vertex]()
-  pipeline = setupPipeline[Vertex, Uniforms, uint16](
-    myengine,
-    level,
-    vertexShader,
-    fragmentShader
-  )
   pipeline.clearColor = backgroundColor
   # show something
   myengine.run(pipeline, globalUpdate)
-  pipeline.trash()
-  myengine.trash()
+
+  myengine.destroy()

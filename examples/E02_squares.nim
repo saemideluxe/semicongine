@@ -93,8 +93,7 @@ gl_Position = vec4(position, 1.0);
   myengine.addScene(scene, vertexInput)
   var time = initShaderGlobal("time", 0.0'f32)
   scene.components.add time
-  while myengine.running and not myengine.keyWasPressed(Escape):
-    myengine.updateInputs()
+  while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
     setValue[float32](time.value, get[float32](time.value) + 0.0005)
     myengine.renderScene(scene)
 
