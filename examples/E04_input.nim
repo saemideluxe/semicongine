@@ -6,45 +6,29 @@ import std/math
 
 import semicongine
 
-type
-  # define type of vertex
-  VertexDataA = object
-    position: PositionAttribute[Vec3]
-    color: ColorAttribute[Vec4]
-    transform: ModelTransformAttribute
-  Uniforms = object
-    projection: ViewProjectionTransform
-
 const
   arrow = @[
-    Vec3([-1'f32, -1'f32, 0'f32]),
-    Vec3([1'f32, -1'f32, 0'f32]),
-    Vec3([-0.3'f32, -0.3'f32, 0'f32]),
-    Vec3([-0.3'f32, -0.3'f32, 0'f32]),
-    Vec3([-1'f32, 1'f32, 0'f32]),
-    Vec3([-1'f32, -1'f32, 0'f32]),
+    newVec3f(-1, -1),
+    newVec3f(1, -1),
+    newVec3f(-0.3, -0.3),
+    newVec3f(-0.3, -0.3),
+    newVec3f(-1, 1),
+    newVec3f(-1, -1),
   ]
   # keyboard layout, specifying rows with key widths, negative numbers are empty spaces
   keyrows = (
-    [1.0, -0.6, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0,
-        1.0, 1.0, -0.1, 1.0, 1.0, 1.0],
-    [1.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.8, -0.1,
-        1.0, 1.0, 1.0],
-    [1.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.5, 1.0,
-        1.0, 1.0],
+    [1.0, -0.6, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0, 1.0, 1.0, -0.5, 1.0, 1.0, 1.0, 1.0, -0.1, 1.0, 1.0, 1.0],
+    [1.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.8, -0.1, 1.0, 1.0, 1.0],
+    [1.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.5, 1.0, 1.0, 1.0],
     [2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
     [2.6, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.8, -1.3, 1.0],
     [1.5, 1.5, 1.5, 6, 1.5, 1.5, -1.2, 1.5, -0.1, 1.0, 1.0, 1.0],
   )
   keyDimension = 50'f32
   keyGap = 10'f32
-  backgroundColor = Vec4([0.6705882352941176'f32, 0.6078431372549019'f32,
-      0.5882352941176471'f32, 0'f32])
-  baseColor = Vec4([0.9411764705882353'f32, 0.9058823529411765'f32,
-      0.8470588235294118'f32, 0'f32])
-  activeColor = Vec4([0.6509803921568628'f32, 0.22745098039215686'f32,
-      0.3137254901960784'f32, 0'f32])
-
+  backgroundColor = newVec3f(0.6705882352941176, 0.6078431372549019, 0.5882352941176471)
+  baseColor = newVec3f(0.9411764705882353, 0.9058823529411765, 0.8470588235294118'f32)
+  activeColor = newVec3f(0.6509803921568628'f32, 0.22745098039215686, 0.3137254901960784'f32)
   arrow_colors = @[
     baseColor * 0.9'f32,
     baseColor * 0.9'f32,
@@ -73,13 +57,11 @@ const
   ]
 
 var
-  pipeline: RenderPipeline[VertexDataA, Uniforms]
-  uniforms: Uniforms
-  scene: Thing
-  keyvertexpos: seq[Vec3]
-  keyvertexcolor: seq[Vec4]
+  scene: Entity
+  keyvertexpos: seq[Vec3f]
+  keyvertexcolor: seq[Vec3f]
   keymeshindices: seq[array[3, uint16]]
-  rowpos = Vec2([0'f32, 0'f32])
+  rowpos = newVec2f(0, 0)
   i = 0'u16
   firstRow = true
   rowWidth = 0'f32
@@ -88,14 +70,13 @@ for row in keyrows.fields:
     let keySpace = float32(keyDimension * key)
     if key > 0:
       if keyIndices[i div 4] == Enter:
-        keyvertexpos.add Vec3([rowpos[0], rowpos[1] - keyDimension - keyGap, 0'f32])
-        keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1] - keyDimension -
-            keyGap, 0'f32])
+        keyvertexpos.add newVec3f(rowpos[0], rowpos[1] - keyDimension - keyGap)
+        keyvertexpos.add newVec3f(rowpos[0] + keySpace, rowpos[1] - keyDimension - keyGap)
       else:
-        keyvertexpos.add Vec3([rowpos[0], rowpos[1], 0'f32])
-        keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1], 0'f32])
-      keyvertexpos.add Vec3([rowpos[0] + keySpace, rowpos[1] + keyDimension, 0'f32])
-      keyvertexpos.add Vec3([rowpos[0], rowpos[1] + keyDimension, 0'f32])
+        keyvertexpos.add newVec3f(rowpos[0], rowpos[1])
+        keyvertexpos.add newVec3f(rowpos[0] + keySpace, rowpos[1])
+      keyvertexpos.add newVec3f(rowpos[0] + keySpace, rowpos[1] + keyDimension)
+      keyvertexpos.add newVec3f(rowpos[0], rowpos[1] + keyDimension)
       keyvertexcolor.add [baseColor, baseColor, baseColor, baseColor]
       keymeshindices.add [i, i + 1, i + 2]
       keymeshindices.add [i + 2, i + 3, i]
@@ -110,55 +91,10 @@ for row in keyrows.fields:
   firstRow = false
 
 
-proc globalUpdate(engine: var Engine, t, dt: float32) =
-  uniforms.projection.value = ortho[float32](
-    0'f32, float32(engine.vulkan.frameSize.x),
-    0'f32, float32(engine.vulkan.frameSize.y),
-    0'f32, 1'f32,
-  )
-  engine.vulkan.device.updateUniformData(pipeline, uniforms)
-
-  let
-    mousePos = translate3d(engine.input.mousePos.x + 20,
-        engine.input.mousePos.y + 20, 0'f32)
-    winsize = engine.window.size
-    center = translate3d(float32(winsize[0]) / 2'f32, float32(winsize[1]) /
-        2'f32, 0.1'f32)
-  scene.firstWithName("cursor").transform = mousePos
-  scene.firstWithName("keyboard-center").transform = center
-  scene.firstWithName("background").transform = scale3d(float32(winsize[0]),
-      float32(winsize[1]), 0'f32)
-  var mesh = Mesh[VertexDataA, uint16](scene.firstWithName("keyboard").parts[0])
-  var hadUpdate = false
-  for (index, key) in enumerate(keyIndices):
-    if key in engine.input.keysPressed:
-      let baseIndex = index * 4
-      mesh.vertexData.color.data[baseIndex + 0] = activeColor
-      mesh.vertexData.color.data[baseIndex + 1] = activeColor
-      mesh.vertexData.color.data[baseIndex + 2] = activeColor
-      mesh.vertexData.color.data[baseIndex + 3] = activeColor
-      hadUpdate = true
-    if key in engine.input.keysReleased:
-      let baseIndex = index * 4
-      mesh.vertexData.color.data[baseIndex + 0] = baseColor
-      mesh.vertexData.color.data[baseIndex + 1] = baseColor
-      mesh.vertexData.color.data[baseIndex + 2] = baseColor
-      mesh.vertexData.color.data[baseIndex + 3] = baseColor
-      hadUpdate = true
-  if hadUpdate:
-    engine.vulkan.device.updateVertexData(mesh.vertexData.color)
-
 
 when isMainModule:
-  var myengine = igniteEngine("Input")
+  var myengine = initEngine("Input")
 
-  # cursor
-  var cursormesh = new Mesh[VertexDataA, uint16]
-  cursormesh.vertexData = VertexDataA(
-    position: PositionAttribute[Vec3](data: arrow, useOnDeviceMemory: true),
-    color: ColorAttribute[Vec4](data: arrow_colors),
-    transform: ModelTransformAttribute(data: @[Unit44]),
-  )
   # transform the cursor a bit to make it look nice
   let cursorscale = (
     scale2d(20'f32, 20'f32) *
@@ -167,60 +103,112 @@ when isMainModule:
     scale2d(0.5'f32, 1'f32) *
     rotate2d(float32(PI) / 4'f32)
   )
-  for i in 0 ..< cursormesh.vertexData.position.data.len:
-    let pos = Vec3([cursormesh.vertexData.position.data[i][0],
-        cursormesh.vertexData.position.data[i][1], 0'f32])
-    cursormesh.vertexData.position.data[i] = (cursorscale * pos)
+  var positions = arrow
+  for i in 0 ..< positions.len:
+    positions[i] = cursorscale * newVec3f(positions[i].x, positions[i].y)
+  # cursor
+  var cursormesh = newMesh(
+    positions=positions,
+    colors=arrow_colors,
+    instanceCount=1,
+  )
 
   # keyboard
-  var keyboardmesh = new Mesh[VertexDataA, uint16]
-  keyboardmesh.indexed = true
-  keyboardmesh.vertexData = VertexDataA(
-    position: PositionAttribute[Vec3](data: keyvertexpos,
-        useOnDeviceMemory: true),
-    color: ColorAttribute[Vec4](data: keyvertexcolor),
-    transform: ModelTransformAttribute(data: @[Unit44]),
+  var keyboardmesh = newMesh(
+    positions=keyvertexpos,
+    colors=keyvertexcolor,
+    indices=keymeshindices
   )
-  keyboardmesh.indices = keymeshindices
 
   # background
-  var backgroundmesh = new Mesh[VertexDataA, uint16]
-  backgroundmesh.indexed = true
-  backgroundmesh.indices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]]
-  backgroundmesh.vertexData = VertexDataA(
-    position: PositionAttribute[Vec3](data: @[
-      Vec3([0'f32, 0'f32, 0'f32]),
-      Vec3([1'f32, 0'f32, 0'f32]),
-      Vec3([1'f32, 1'f32, 0'f32]),
-      Vec3([0'f32, 1'f32, 0'f32]),
-    ], useOnDeviceMemory: true),
-    color: ColorAttribute[Vec4](data: @[
+  var backgroundmesh = newMesh(
+    positions= @[
+      newVec3f(0'f32, 0'f32),
+      newVec3f(1'f32, 0'f32),
+      newVec3f(1'f32, 1'f32),
+      newVec3f(0'f32, 1'f32),
+    ],
+    colors= @[
       backgroundColor,
       backgroundColor,
       backgroundColor,
       backgroundColor,
-    ]),
-    transform: ModelTransformAttribute(data: @[Unit44]),
+    ],
+    indices= @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
   )
 
-  scene = newThing("scene")
-  scene.add newThing("background", backgroundmesh)
-  let keyboard = newThing("keyboard", keyboardmesh)
-  keyboard.transform = translate3d(-float32(rowWidth) / 2'f32, -float32(
-      tupleLen(keyRows) * (keyDimension + keyGap) - keyGap) / 2'f32, 0'f32)
-  scene.add newThing("keyboard-center", keyboard)
-  scene.add newThing("cursor", cursormesh)
+  backgroundmesh.setInstanceData("transform", @[Unit4f32])
+  keyboardmesh.setInstanceData("transform", @[Unit4f32])
+  cursormesh.setInstanceData("transform", @[Unit4f32])
 
-  # upload data, prepare shaders, etc
-  const vertexShader = generateVertexShaderCode[VertexDataA, Uniforms]()
-  const fragmentShader = generateFragmentShaderCode[VertexDataA]()
-  pipeline = setupPipeline[VertexDataA, Uniforms, uint16](
-    myengine,
-    scene,
-    vertexShader,
-    fragmentShader
+  scene = newEntity("scene")
+  scene.add newEntity("background", backgroundmesh)
+  let keyboard = newEntity("keyboard", keyboardmesh)
+  keyboard.transform = translate3d(
+    -float32(rowWidth) / 2'f32,
+    -float32(tupleLen(keyRows) * (keyDimension + keyGap) - keyGap) / 2'f32,
+    0'f32
   )
-  # show something
-  myengine.run(pipeline, globalUpdate)
-  pipeline.trash()
-  myengine.trash()
+  scene.add newEntity("keyboard-center", keyboard)
+  scene.add newEntity("cursor", cursormesh)
+
+  const
+    vertexInput = @[
+      attr[Vec3f]("position", memoryLocation=VRAM),
+      attr[Vec3f]("color", memoryLocation=VRAMVisible),
+      attr[Mat4]("transform", memoryLocation=VRAMVisible, perInstance=true),
+    ]
+    vertexOutput = @[attr[Vec3f]("outcolor")]
+    uniforms = @[attr[Mat4]("projection")]
+    fragOutput = @[attr[Vec4f]("color")]
+    vertexCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_VERTEX_BIT,
+      inputs=vertexInput,
+      uniforms=uniforms,
+      outputs=vertexOutput,
+      main="""outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);"""
+    )
+    fragmentCode = compileGlslShader(
+      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+      inputs=vertexOutput,
+      uniforms=uniforms,
+      outputs=fragOutput,
+      main="color = vec4(outcolor, 1);"
+    )
+  myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0.5)))
+  myengine.addScene(scene, vertexInput, transformAttribute="transform")
+  var projection = initShaderGlobal("projection", Unit4f32)
+  scene.add projection
+  while myengine.running and not myengine.keyWasPressed(Escape):
+    myengine.updateInputs()
+    setValue[Mat4](projection.value, ortho[float32](
+      0'f32, float32(myengine.getWindow().size[0]),
+      0'f32, float32(myengine.getWindow().size[1]),
+      0'f32, 1'f32,
+    ))
+    let
+      mousePos = translate3d(myengine.mousePosition().x + 20, myengine.mousePosition().y + 20, 0'f32)
+      winsize = myengine.getWindow().size
+      center = translate3d(float32(winsize[0]) / 2'f32, float32(winsize[1]) / 2'f32, 0.1'f32)
+    scene.firstWithName("cursor").transform = mousePos
+    scene.firstWithName("keyboard-center").transform = center
+    scene.firstWithName("background").transform = scale3d(float32(winsize[0]), float32(winsize[1]), 1'f32)
+
+    var mesh = Mesh(scene.firstWithName("keyboard").components[0])
+    for (index, key) in enumerate(keyIndices):
+      if myengine.keyWasPressed(key):
+        let baseIndex = uint32(index * 4)
+        mesh.updateMeshData("color", baseIndex + 0, activeColor)
+        mesh.updateMeshData("color", baseIndex + 1, activeColor)
+        mesh.updateMeshData("color", baseIndex + 2, activeColor)
+        mesh.updateMeshData("color", baseIndex + 3, activeColor)
+      if myengine.keyWasReleased(key):
+        let baseIndex = uint32(index * 4)
+        mesh.updateMeshData("color", baseIndex + 0, baseColor)
+        mesh.updateMeshData("color", baseIndex + 1, baseColor)
+        mesh.updateMeshData("color", baseIndex + 2, baseColor)
+        mesh.updateMeshData("color", baseIndex + 3, baseColor)
+
+    myengine.renderScene(scene)
+
+  myengine.destroy()
