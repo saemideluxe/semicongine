@@ -25,6 +25,7 @@ type
     mouseWasReleased: set[MouseButton]
     mousePosition: Vec2f
     eventsProcessed: uint64
+    windowWasResized: bool
   Engine* = object
     running*: bool
     device: Device
@@ -106,9 +107,9 @@ proc updateInputs*(engine: var Engine) =
   engine.input.keyWasReleased = {}
   engine.input.mouseWasPressed = {}
   engine.input.mouseWasReleased = {}
-  var
-    killed = false
-    resized = false
+  engine.input.windowWasResized = false
+
+  var killed = false
   for event in engine.window.pendingEvents():
     inc engine.input.eventsProcessed
     if engine.eventHandler != nil:
@@ -117,7 +118,7 @@ proc updateInputs*(engine: var Engine) =
       of Quit:
         killed = true
       of ResizedWindow:
-        resized = true
+        engine.input.windowWasResized = true
       of KeyPressed:
         engine.input.keyWasPressed.incl event.key
         engine.input.keyIsDown.incl event.key
@@ -136,7 +137,7 @@ proc updateInputs*(engine: var Engine) =
     engine.running = false
     if engine.exitHandler != nil:
       engine.exitHandler(engine)
-  if resized and engine.resizeHandler != nil:
+  if engine.input.windowWasResized and engine.resizeHandler != nil:
     engine.resizeHandler(engine)
 
 func keyIsDown*(engine: Engine, key: Key): auto = key in engine.input.keyIsDown
@@ -150,3 +151,4 @@ func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
 func framesRendered*(engine: Engine): auto = engine.renderer.framesRendered
 func gpuDevice*(engine: Engine): Device = engine.device
 func getWindow*(engine: Engine): auto = engine.window
+func windowWasResized*(engine: Engine): auto = engine.input.windowWasResized
