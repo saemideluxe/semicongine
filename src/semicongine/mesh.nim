@@ -22,6 +22,7 @@ type
     indicesCount*: uint32
     instanceCount*: uint32
     data: Table[string, DataList]
+    changedAttributes: seq[string]
     case indexType*: MeshIndexType
       of None: discard
       of Tiny: tinyIndices: seq[array[3, uint8]]
@@ -86,6 +87,9 @@ func newMesh*(
 ): auto =
   newMesh(positions, newSeq[array[3, int]](), colors, instanceCount)
 
+func availableAttributes*(mesh: Mesh): seq[string] =
+  mesh.data.keys.toSeq
+
 func dataSize*(mesh: Mesh, attribute: string): uint32 =
   mesh.data[attribute].size
 
@@ -112,6 +116,10 @@ func hasDataFor*(mesh: Mesh, attribute: string): bool =
 func getRawData*(mesh: Mesh, attribute: string): (pointer, uint32) =
   mesh.data[attribute].getRawData()
 
+proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): seq[T] =
+  assert attribute in mesh.data
+  get[T](mesh.data[attribute])
+
 proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert not (attribute in mesh.data)
   mesh.data[attribute] = DataList(thetype: getDataType[T]())
@@ -123,6 +131,22 @@ proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: stri
   mesh.data[attribute] = DataList(thetype: getDataType[T]())
   setValues(mesh.data[attribute], data)
 
+proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, i: uint32, value: T) =
+  assert attribute in mesh.data
+  mesh.changedAttributes.add attribute
+  setValue(mesh.data[attribute], i, value)
+
+proc updateInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+  assert uint32(data.len) == mesh.instanceCount
+  assert attribute in mesh.data
+  mesh.changedAttributes.add attribute
+  setValues(mesh.data[attribute], data)
+
+func hasDataChanged*(mesh: Mesh, attribute: string): bool =
+  attribute in mesh.changedAttributes
+
+proc clearDataChanged*(mesh: var Mesh) =
+  mesh.changedAttributes = @[]
 
 func rect*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
   result = new Mesh
