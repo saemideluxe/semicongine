@@ -1,4 +1,6 @@
 when defined(linux):
-  include ./linux/xlib
+  include ./linux/window
 elif defined(windows):
-  include ./windows/win32
+  include ./windows/window
+
+export window
