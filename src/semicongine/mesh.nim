@@ -120,6 +120,15 @@ proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): seq
   assert attribute in mesh.data
   get[T](mesh.data[attribute])
 
+proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
+  assert not (attribute.name in mesh.data)
+  mesh.data[attribute.name] = DataList(thetype: attribute.thetype)
+  echo "Init ", attribute, " of ", mesh
+  if attribute.perInstance:
+    mesh.data[attribute.name].initData(mesh.instanceCount)
+  else:
+    mesh.data[attribute.name].initData(mesh.vertexCount)
+
 proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert not (attribute in mesh.data)
   mesh.data[attribute] = DataList(thetype: getDataType[T]())
@@ -161,7 +170,7 @@ func rect*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
   let
     half_w = width / 2
     half_h = height / 2
-    c = RGBfromHex(color)
+    c = hexToColor(color)
     v = [newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
 
   setValues(result.data["position"], v.toSeq)
@@ -176,7 +185,7 @@ func tri*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
   let
     half_w = width / 2
     half_h = height / 2
-    colorVec = RGBfromHex(color)
+    colorVec = hexToColor(color)
   setValues(result.data["position"], @[
     newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h),
   ])
@@ -193,7 +202,7 @@ func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffff"): Mesh 
   let
     half_w = width / 2
     half_h = height / 2
-    c = RGBfromHex(color)
+    c = hexToColor(color)
     step = (2'f32 * PI) / float32(nSegments)
   var
     pos = @[newVec3f(0, 0), newVec3f(0, half_h)]

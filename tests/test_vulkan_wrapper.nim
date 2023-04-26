@@ -147,11 +147,10 @@ proc main() =
   for i in 0 ..< 3:
     for scene in scenes:
       for i in 0 ..< 1000:
-        engine.updateInputs()
-        setValue[float32](time.value, get[float32](time.value) + 0.0005)
-        if not engine.running or engine.keyIsDown(Escape):
+        if engine.updateInputs() != Running or engine.keyIsDown(Escape):
           engine.destroy()
           return
+        setValue[float32](time.value, get[float32](time.value) + 0.0005)
         engine.renderScene(scene)
   echo "Rendered ", engine.framesRendered, " frames"
   echo "Processed ", engine.eventsProcessed, " events"

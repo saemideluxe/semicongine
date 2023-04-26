@@ -137,7 +137,7 @@ type
     of Mat34F64: mat34f64: seq[TMat34[float64]]
     of Mat43F32: mat43f32: seq[TMat43[float32]]
     of Mat43F64: mat43f64: seq[TMat43[float64]]
-    of Mat4F32: mat4f32: seq[TMat4[float32]]
+    of Mat4F32: mat4f32*: seq[TMat4[float32]]
     of Mat4F64: mat4f64: seq[TMat4[float64]]
   MemoryLocation* = enum
     VRAM, VRAMVisible, RAM # VRAM is fastest, VRAMVisible allows updating memory directly, may be slower
@@ -481,6 +481,52 @@ func getRawData*(value: var DataList): (pointer, uint32) =
     of Mat4F32: result[0] = addr value.mat4f32[0]
     of Mat4F64: result[0] = addr value.mat4f64[0]
 
+func initData*(value: var DataList, len: uint32) =
+  value.len = len
+  case value.thetype
+    of Float32: value.float32.setLen(len)
+    of Float64: value.float64.setLen(len)
+    of Int8: value.int8.setLen(len)
+    of Int16: value.int16.setLen(len)
+    of Int32: value.int32.setLen(len)
+    of Int64: value.int64.setLen(len)
+    of UInt8: value.uint8.setLen(len)
+    of UInt16: value.uint16.setLen(len)
+    of UInt32: value.uint32.setLen(len)
+    of UInt64: value.uint64.setLen(len)
+    of Vec2I32: value.vec2i32.setLen(len)
+    of Vec2I64: value.vec2i64.setLen(len)
+    of Vec3I32: value.vec3i32.setLen(len)
+    of Vec3I64: value.vec3i64.setLen(len)
+    of Vec4I32: value.vec4i32.setLen(len)
+    of Vec4I64: value.vec4i64.setLen(len)
+    of Vec2U32: value.vec2u32.setLen(len)
+    of Vec2U64: value.vec2u64.setLen(len)
+    of Vec3U32: value.vec3u32.setLen(len)
+    of Vec3U64: value.vec3u64.setLen(len)
+    of Vec4U32: value.vec4u32.setLen(len)
+    of Vec4U64: value.vec4u64.setLen(len)
+    of Vec2F32: value.vec2f32.setLen(len)
+    of Vec2F64: value.vec2f64.setLen(len)
+    of Vec3F32: value.vec3f32.setLen(len)
+    of Vec3F64: value.vec3f64.setLen(len)
+    of Vec4F32: value.vec4f32.setLen(len)
+    of Vec4F64: value.vec4f64.setLen(len)
+    of Mat2F32: value.mat2f32.setLen(len)
+    of Mat2F64: value.mat2f64.setLen(len)
+    of Mat23F32: value.mat23f32.setLen(len)
+    of Mat23F64: value.mat23f64.setLen(len)
+    of Mat32F32: value.mat32f32.setLen(len)
+    of Mat32F64: value.mat32f64.setLen(len)
+    of Mat3F32: value.mat3f32.setLen(len)
+    of Mat3F64: value.mat3f64.setLen(len)
+    of Mat34F32: value.mat34f32.setLen(len)
+    of Mat34F64: value.mat34f64.setLen(len)
+    of Mat43F32: value.mat43f32.setLen(len)
+    of Mat43F64: value.mat43f64.setLen(len)
+    of Mat4F32: value.mat4f32.setLen(len)
+    of Mat4F64: value.mat4f64.setLen(len)
+
 func setValue*[T: GPUType|int|uint|float](value: var DataValue, data: T) =
   when T is float32: value.float32 = data
   elif T is float64: value.float64 = data
@@ -581,6 +627,7 @@ func setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is TMat43[float64]: value.mat43f64 = data
   elif T is TMat4[float32]: value.mat4f32 = data
   elif T is TMat4[float64]: value.mat4f64 = data
+
 func setValue*[T: GPUType|int|uint|float](value: var DataList, i: uint32, data: T) =
   assert i < value.len
   when T is float32: value.float32[i] = data
