@@ -1,8 +1,9 @@
 import std/parseutils
+import std/strformat
 
 import ./math/vector
 
-func RGBfromHex*(value: string): Vec3f =
+func hexToColor*(value: string): Vec3f =
   assert value != ""
   var hex = value
   if hex[0] == '#':
@@ -17,7 +18,13 @@ func RGBfromHex*(value: string): Vec3f =
   discard parseHex(hex[4 .. 5], b) == 2
   return Vec3f([float32(r), float32(g), float32(b)]) / 255'f
 
-func RGBAfromHex*(value: string): Vec4f =
+func colorToHex*(color: Vec3f): string =
+  &"{int(color.r * 255):02X}{int(color.g * 255):02X}{int(color.b * 255):02X}"
+
+func colorToHex*(color: Vec4f): string =
+  &"{int(color.r * 255):02X}{int(color.g * 255):02X}{int(color.b * 255):02X}{int(color.a * 255):02X}"
+
+func hexToColorAlpha*(value: string): Vec4f =
   assert value != ""
   var hex = value
   if hex[0] == '#':

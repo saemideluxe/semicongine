@@ -135,10 +135,6 @@ when isMainModule:
       indices= @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
     )
 
-  backgroundmesh.setInstanceData("transform", @[Unit4f32])
-  keyboardmesh.setInstanceData("transform", @[Unit4f32])
-  cursormesh.setInstanceData("transform", @[Unit4f32])
-
   # define mesh objects
   scene = newEntity("scene")
   scene.add newEntity("background", backgroundmesh)

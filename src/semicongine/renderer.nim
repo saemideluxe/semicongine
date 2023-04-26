@@ -66,7 +66,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
   for mesh in allComponentsOfType[Mesh](scene):
     allMeshes.add mesh
     for inputAttr in inputs:
-      assert mesh.hasDataFor(inputAttr.name), &"{mesh} missing data for {inputAttr}"
+      if not mesh.hasDataFor(inputAttr.name):
+        mesh.initData(inputAttr)
   
   var indicesBufferSize = 0'u64
   for mesh in allMeshes:
