@@ -80,11 +80,6 @@ gl_Position = vec4(position, 1.0);
     colors=colors,
   )
   setMeshData[uint32](squaremesh, "index", iValues.toSeq)
-  var i = 0'u64
-  var (p, l) = squaremesh.getRawData("color")
-  while i < uint64(l):
-    echo (cast[ptr float32]((cast[uint64](p) + i)))[]
-    inc i
 
   var myengine = initEngine("Squares")
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
