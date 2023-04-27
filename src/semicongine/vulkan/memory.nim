@@ -42,6 +42,16 @@ proc getPhysicalDeviceMemoryProperties(physicalDevice: VkPhysicalDevice): Physci
       index: i,
     )
 
+proc hasMemoryWith*(device: Device, requiredFlags: openArray[VkMemoryPropertyFlagBits]): bool =
+  for mtype in device.physicalDevice.vk.getPhysicalDeviceMemoryProperties.types:
+    var hasAllFlags = true
+    for flag in requiredFlags:
+      if not (flag in mtype.flags):
+        hasAllFlags = false
+        break
+    if hasAllFlags:
+      return true
+
 proc allocate*(device: Device, size: uint64, flags: openArray[VkMemoryPropertyFlagBits]): DeviceMemory =
   assert device.vk.valid
   assert size > 0
@@ -90,6 +100,7 @@ proc allocate*(device: Device, size: uint64, flags: openArray[VkMemoryPropertyFl
       ppData=addr(result.data)
     )
 
+#[ 
 proc allocate*(device: Device, size: uint64, useVRAM: bool, mappable: bool, autoFlush: bool): DeviceMemory =
   var flags: seq[VkMemoryPropertyFlagBits]
   if useVRAM:
@@ -99,6 +110,7 @@ proc allocate*(device: Device, size: uint64, useVRAM: bool, mappable: bool, auto
   if autoFlush:
     flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
   device.allocate(size=size, flags=flags)
+]#
 
 # flush host -> device
 proc flush*(memory: DeviceMemory, offset=0'u64, size=0'u64) =

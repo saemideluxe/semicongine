@@ -85,8 +85,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
     data.indexBuffer = renderer.device.createBuffer(
       size=indicesBufferSize,
       usage=[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
-      useVRAM=true,
-      mappable=false,
+      preferVRAM=true,
+      requiresMapping=false,
     )
 
   # one vertex data buffer per memory location
@@ -108,8 +108,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
       data.vertexBuffers[location] = renderer.device.createBuffer(
         size=bufferSize,
         usage=[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
-        useVRAM=location in [VRAM, VRAMVisible],
-        mappable=location in [VRAMVisible, RAM],
+        preferVRAM=location in [VRAM, VRAMVisible],
+        requiresMapping=location in [VRAMVisible, RAM],
       )
       perLocationOffsets[location] = 0
 

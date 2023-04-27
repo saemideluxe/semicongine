@@ -27,16 +27,18 @@ func `$`*(buffer: Buffer): string =
   &"Buffer(vk: {buffer.vk}, size: {buffer.size}, usage: {buffer.usage})"
 
 
-proc allocateMemory(buffer: var Buffer, useVRAM: bool, mappable: bool, autoFlush: bool) =
+proc allocateMemory(buffer: var Buffer, preferVRAM: bool, requiresMapping: bool, autoFlush: bool) =
   assert buffer.device.vk.valid
   assert buffer.memoryAllocated == false
 
   var flags: seq[VkMemoryPropertyFlagBits]
-  if useVRAM:
-    flags.add VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-  if mappable:
+  if requiresMapping:
     flags.add VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-  if autoFlush:
+
+  if preferVRAM and buffer.device.hasMemoryWith(flags & @[VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT]):
+    flags.add VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+
+  if autoFlush and buffer.device.hasMemoryWith(flags & @[VK_MEMORY_PROPERTY_HOST_COHERENT_BIT]):
     flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 
   buffer.memoryAllocated = true
@@ -50,8 +52,8 @@ proc createBuffer*(
   device: Device,
   size: uint64,
   usage: openArray[VkBufferUsageFlagBits],
-  useVRAM: bool,
-  mappable: bool,
+  preferVRAM: bool,
+  requiresMapping: bool,
   autoFlush=true,
 ): Buffer =
   assert device.vk.valid
@@ -60,7 +62,7 @@ proc createBuffer*(
   result.device = device
   result.size = size
   result.usage = usage.toSeq
-  if not (mappable or VK_BUFFER_USAGE_TRANSFER_DST_BIT in result.usage):
+  if not (requiresMapping or VK_BUFFER_USAGE_TRANSFER_DST_BIT in result.usage):
     result.usage.add VK_BUFFER_USAGE_TRANSFER_DST_BIT
   var createInfo = VkBufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -76,7 +78,7 @@ proc createBuffer*(
     pAllocator=nil,
     pBuffer=addr result.vk
   )
-  result.allocateMemory(useVRAM, mappable, autoFlush)
+  result.allocateMemory(preferVRAM, requiresMapping, autoFlush)
 
 
 proc copy*(src, dst: Buffer) =
@@ -132,7 +134,7 @@ proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
     if dst.memory.needsFlushing:
       dst.memory.flush()
   else: # use staging buffer, slower but required if memory is not host visible
-    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], useVRAM=false, mappable=true, autoFlush=true)
+    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], preferVRAM=false, requiresMapping=true, autoFlush=true)
     stagingBuffer.setData(src, size, 0)
     stagingBuffer.copy(dst)
     stagingBuffer.destroy()
