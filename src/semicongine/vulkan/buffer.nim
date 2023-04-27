@@ -2,6 +2,7 @@ import std/strformat
 import std/typetraits
 import std/sequtils
 import std/tables
+import std/logging
 
 import ./api
 import ./device
@@ -42,6 +43,7 @@ proc allocateMemory(buffer: var Buffer, preferVRAM: bool, requiresMapping: bool,
     flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 
   buffer.memoryAllocated = true
+  debug "Allocating memory for buffer: ", buffer.size, " bytes ", flags
   buffer.memory = buffer.device.allocate(buffer.size, flags)
   checkVkResult buffer.device.vk.vkBindBufferMemory(buffer.vk, buffer.memory.vk, VkDeviceSize(0))
 
