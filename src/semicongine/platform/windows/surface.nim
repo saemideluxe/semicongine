@@ -1,9 +1,8 @@
 import ../../vulkan/api
-import ../../vulkan/instance
 import ../../platform/window
 
 proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
-  assert instance.vk.valid
+  assert instance.valid
   var surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
     hinstance: cast[HINSTANCE](window.hinstance),
