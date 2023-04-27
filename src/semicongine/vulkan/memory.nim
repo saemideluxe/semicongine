@@ -100,18 +100,6 @@ proc allocate*(device: Device, size: uint64, flags: openArray[VkMemoryPropertyFl
       ppData=addr(result.data)
     )
 
-#[ 
-proc allocate*(device: Device, size: uint64, useVRAM: bool, mappable: bool, autoFlush: bool): DeviceMemory =
-  var flags: seq[VkMemoryPropertyFlagBits]
-  if useVRAM:
-    flags.add VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-  if mappable:
-    flags.add VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-  if autoFlush:
-    flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-  device.allocate(size=size, flags=flags)
-]#
-
 # flush host -> device
 proc flush*(memory: DeviceMemory, offset=0'u64, size=0'u64) =
   assert memory.device.vk.valid

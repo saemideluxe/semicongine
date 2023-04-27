@@ -39,8 +39,10 @@ proc allocateMemory(buffer: var Buffer, preferVRAM: bool, requiresMapping: bool,
   if preferVRAM and buffer.device.hasMemoryWith(flags & @[VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT]):
     flags.add VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 
-  if autoFlush and buffer.device.hasMemoryWith(flags & @[VK_MEMORY_PROPERTY_HOST_COHERENT_BIT]):
+  if requiresMapping and autoFlush and buffer.device.hasMemoryWith(flags & @[VK_MEMORY_PROPERTY_HOST_COHERENT_BIT]):
     flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+
+  assert buffer.device.hasMemoryWith(flags)
 
   buffer.memoryAllocated = true
   debug "Allocating memory for buffer: ", buffer.size, " bytes ", flags
