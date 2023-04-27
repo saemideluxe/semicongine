@@ -74,7 +74,9 @@ proc initEngine*(
 
   if debug:
     instanceExtensions.add "VK_EXT_debug_utils"
-    enabledLayers.add @["VK_LAYER_KHRONOS_validation", "VK_LAYER_MESA_overlay"]
+    enabledLayers.add "VK_LAYER_KHRONOS_validation"
+    if defined(linux):
+      enabledLayers.add "VK_LAYER_MESA_overlay"
   result.instance = result.window.createInstance(
     vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
     instanceExtensions=instanceExtensions,
