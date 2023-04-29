@@ -51,8 +51,8 @@ when isMainModule:
 
   const
     vertexInput = @[
-      attr[Vec3f]("position", memoryLocation=VRAM),
-      attr[Vec3f]("color", memoryLocation=VRAMVisible),
+      attr[Vec3f]("position"),
+      attr[Vec3f]("color", memoryPerformanceHint=PreferFastWrite),
     ]
     vertexOutput = @[attr[Vec3f]("outcolor")]
     uniforms = @[

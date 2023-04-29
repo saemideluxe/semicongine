@@ -21,7 +21,7 @@ when isMainModule:
   level = newEntity("Level")
   var playerbarmesh = rect(color=barcolor)
   var playerbar = newEntity("playerbar", playerbarmesh)
-  playerbar.transform = scale3d(barWidth, barSize, 1'f) * translate3d(0.5'f, 0'f, 0'f)
+  # playerbar.transform = scale3d(barWidth, barSize, 1'f) * translate3d(0.5'f, 0'f, 0'f)
   var player = newEntity("player", playerbar)
   player.transform = translate3d(0'f, 0.3'f, 0'f)
   level.add player

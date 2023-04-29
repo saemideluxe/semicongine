@@ -3,8 +3,8 @@ import semicongine
 
 const
   vertexInput = @[
-    attr[Vec3f]("position", memoryLocation=VRAM),
-    attr[Vec3f]("color", memoryLocation=VRAM),
+    attr[Vec3f]("position"),
+    attr[Vec3f]("color"),
   ]
   vertexOutput = @[attr[Vec3f]("outcolor")]
   fragOutput = @[attr[Vec4f]("color")]
