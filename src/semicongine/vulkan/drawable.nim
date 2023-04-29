@@ -11,7 +11,7 @@ import ../gpu_data
 type
   Drawable* = object
     elementCount*: uint32 # number of vertices or indices
-    bufferOffsets*: seq[(MemoryPerformanceHint, uint64)] # list of buffers and list of offset for each attribute in that buffer
+    bufferOffsets*: seq[(string, MemoryPerformanceHint, uint64)] # list of buffers and list of offset for each attribute in that buffer
     instanceCount*: uint32 # number of instance
     case indexed*: bool
     of true:
@@ -26,13 +26,13 @@ func `$`*(drawable: Drawable): string =
   else:
     &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
-proc draw*(commandBuffer: VkCommandBuffer, drawable: Drawable, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: BUffer) =
+proc draw*(commandBuffer: VkCommandBuffer, drawable: Drawable, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer) =
     debug "Draw ", drawable
 
     var buffers: seq[VkBuffer]
     var offsets: seq[VkDeviceSize]
 
-    for (performanceHint, offset) in drawable.bufferOffsets:
+    for (name, performanceHint, offset) in drawable.bufferOffsets:
       buffers.add vertexBuffers[performanceHint].vk
       offsets.add VkDeviceSize(offset)
 

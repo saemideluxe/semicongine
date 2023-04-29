@@ -115,9 +115,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
 
   var indexBufferOffset = 0'u64
   for mesh in allMeshes:
-    var offsets: seq[(MemoryPerformanceHint, uint64)]
+    var offsets: seq[(string, MemoryPerformanceHint, uint64)]
     for attribute in inputs:
-      offsets.add (attribute.memoryPerformanceHint, perLocationOffsets[attribute.memoryPerformanceHint])
+      offsets.add (attribute.name, attribute.memoryPerformanceHint, perLocationOffsets[attribute.memoryPerformanceHint])
       var (pdata, size) = mesh.getRawData(attribute.name)
       data.vertexBuffers[attribute.memoryPerformanceHint].setData(pdata, size, perLocationOffsets[attribute.memoryPerformanceHint])
       perLocationOffsets[attribute.memoryPerformanceHint] += size
@@ -152,7 +152,7 @@ proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: s
   var (pdata, size) = mesh.getRawData(attribute)
   let memoryPerformanceHint = sceneData.attributeLocation[attribute]
   let bindingNumber = sceneData.attributeBindingNumber[attribute]
-  sceneData.vertexBuffers[memoryPerformanceHint].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][1])
+  sceneData.vertexBuffers[memoryPerformanceHint].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][2])
 
 
 proc refreshMeshData*(renderer: var Renderer, scene: Entity) =

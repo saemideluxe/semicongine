@@ -92,14 +92,13 @@ proc createBuffer*(
     pBuffer=addr result.vk
   )
   result.allocateMemory(requireMappable=requireMappable, preferVRAM=preferVRAM, preferAutoFlush=preferAutoFlush)
-  echo "New Buffer ", result
 
 
-proc copy*(src, dst: Buffer) =
+proc copy*(src, dst: Buffer, dstOffset=0'u64) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
-  assert src.size < dst.size
+  assert src.size <= dst.size - dstOffset
   assert VK_BUFFER_USAGE_TRANSFER_SRC_BIT in src.usage
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 
@@ -118,9 +117,8 @@ proc copy*(src, dst: Buffer) =
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
       flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
     )
-    copyRegion = VkBufferCopy(size: VkDeviceSize(src.size))
+    copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: dstOffset)
   checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
-  echo "B ", dst
   commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
   checkVkResult commandBuffer.vkEndCommandBuffer()
 
@@ -151,8 +149,7 @@ proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
   else: # use staging buffer, slower but required if memory is not host visible
     var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable=true, preferVRAM=false, preferAutoFlush=true)
     stagingBuffer.setData(src, size, 0)
-    echo "B ", dst
-    stagingBuffer.copy(dst)
+    stagingBuffer.copy(dst, bufferOffset)
     stagingBuffer.destroy()
 
 proc setData*[T: seq](dst: Buffer, src: ptr T, offset=0'u64) =
