@@ -99,7 +99,7 @@ proc copy*(src, dst: Buffer) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
-  assert src.size == dst.size
+  assert src.size < dst.size
   assert VK_BUFFER_USAGE_TRANSFER_SRC_BIT in src.usage
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 

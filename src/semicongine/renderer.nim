@@ -5,7 +5,6 @@ import std/logging
 
 import ./vulkan/api
 import ./vulkan/buffer
-import ./vulkan/memory
 import ./vulkan/device
 import ./vulkan/drawable
 import ./vulkan/pipeline
