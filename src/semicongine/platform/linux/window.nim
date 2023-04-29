@@ -54,13 +54,15 @@ proc createWindow*(title: string): NativeWindow =
   var data = "\0".cstring
   var pixmap = XCreateBitmapFromData(display, window, data, 1, 1)
   var color: XColor
-  var empty_cursor = XCreatePixmapCursor(display, pixmap, pixmap, addr(color),
-      addr(color), 0, 0)
+  var empty_cursor = XCreatePixmapCursor(display, pixmap, pixmap, addr(color), addr(color), 0, 0)
   checkXlibResult XFreePixmap(display, pixmap)
-  checkXlibResult XDefineCursor(display, window, empty_cursor)
+  return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
-  return NativeWindow(display: display, window: window,
-      emptyCursor: empty_cursor)
+proc hideSystemCursor*(window: NativeWindow) =
+  checkXlibResult XDefineCursor(window.display, window.window, window.emptyCursor)
+
+proc showSystemCursor*(window: NativeWindow) =
+  checkXlibResult XUndefineCursor(window.display, window.window)
 
 proc destroy*(window: NativeWindow) =
   checkXlibResult window.display.XFreeCursor(window.emptyCursor)

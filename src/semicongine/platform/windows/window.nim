@@ -86,7 +86,12 @@ proc createWindow*(title: string): NativeWindow =
     )
 
   discard ShowWindow(result.hwnd, SW_SHOW)
+
+proc hideSystemCursor*(window: NativeWindow) =
   discard ShowCursor(false)
+
+proc showSystemCursor*(window: NativeWindow) =
+  discard ShowCursor(true)
 
 proc destroy*(window: NativeWindow) =
   discard
