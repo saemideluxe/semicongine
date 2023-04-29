@@ -81,7 +81,7 @@ proc createBuffer*(
     sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
     flags: VkBufferCreateFlags(0),
     size: size,
-    usage: toBits(usage),
+    usage: toBits(result.usage),
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
   )
 
