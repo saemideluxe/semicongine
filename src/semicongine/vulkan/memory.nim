@@ -1,5 +1,4 @@
 import std/strformat
-import std/algorithm
 
 import ./api
 import ./device
@@ -9,7 +8,7 @@ type
     size*: uint64
     flags*: seq[VkMemoryHeapFlagBits]
     index*: uint32
-  MemoryType = object
+  MemoryType* = object
     heap*: MemoryHeap
     flags*: seq[VkMemoryPropertyFlagBits]
     index*: uint32
@@ -26,7 +25,27 @@ type
       of true: data*: pointer
     needsFlushing*: bool
 
-proc getPhysicalDeviceMemoryProperties(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemoryProperties =
+func `$`*(memoryType: MemoryType): string =
+  &"Memorytype {memoryType.flags} (heap size: {memoryType.heap.size}, heap flags: {memoryType.heap.flags})"
+
+proc selectBestMemoryType*(types: seq[MemoryType], requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool): MemoryType =
+  # todo: we assume there is always at least one memory type that is mappable
+  assert types.len > 0
+  var highestRating = 0'f
+  result = types[0]
+  for t in types:
+    var rating = float(t.heap.size) / 1_000_000'f # select biggest heap if all else equal
+    if requireMappable and VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in t.flags:
+      rating += 1000
+    if preferVRAM and VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT in t.flags:
+      rating += 500
+    if preferAutoFlush and VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in t.flags:
+      rating += 100
+    if rating > highestRating:
+      highestRating = rating
+      result = t
+
+proc getMemoryProperties*(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemoryProperties =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(physicalDevice, addr physicalProperties)
   for i in 0 ..< physicalProperties.memoryHeapCount:
@@ -42,39 +61,13 @@ proc getPhysicalDeviceMemoryProperties(physicalDevice: VkPhysicalDevice): Physci
       index: i,
     )
 
-proc hasMemoryWith*(device: Device, requiredFlags: openArray[VkMemoryPropertyFlagBits]): bool =
-  for mtype in device.physicalDevice.vk.getPhysicalDeviceMemoryProperties.types:
-    var hasAllFlags = true
-    for flag in requiredFlags:
-      if not (flag in mtype.flags):
-        hasAllFlags = false
-        break
-    if hasAllFlags:
-      return true
-
-proc allocate*(device: Device, size: uint64, flags: openArray[VkMemoryPropertyFlagBits]): DeviceMemory =
+proc allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemory =
   assert device.vk.valid
   assert size > 0
 
   result.device = device
   result.size = size
-
-  var
-    hasAllFlags: bool
-    matchingTypes: seq[MemoryType]
-  for mtype in device.physicalDevice.vk.getPhysicalDeviceMemoryProperties.types:
-    hasAllFlags = true
-    for flag in flags:
-      if not (flag in mtype.flags):
-        hasAllFlags = false
-        break
-    if hasAllFlags:
-      matchingTypes.add mtype
-  if matchingTypes.len == 0:
-    raise newException(Exception, &"No memory with support for {flags}")
-  matchingTypes.sort(cmp= proc(a, b: MemoryType): int = cmp(a.heap.size, b.heap.size))
-
-  result.memoryType = matchingTypes[^1]
+  result.memoryType = memoryType
   result.canMap = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in result.memoryType.flags
   result.needsFlushing = not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in result.memoryType.flags)
 

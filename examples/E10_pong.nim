@@ -33,9 +33,9 @@ when isMainModule:
 
   const
     vertexInput = @[
-      attr[Vec3f]("position", memoryLocation=VRAM),
-      attr[Vec3f]("color", memoryLocation=VRAMVisible),
-      attr[Mat4]("transform", memoryLocation=VRAMVisible, perInstance=true),
+      attr[Vec3f]("position"),
+      attr[Vec3f]("color", memoryPerformanceHint=PreferFastWrite),
+      attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
     ]
     vertexOutput = @[attr[Vec3f]("outcolor")]
     uniforms = @[attr[Mat4]("projection")]
