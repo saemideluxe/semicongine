@@ -57,8 +57,7 @@ proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool,
   buffer.memoryAllocated = true
   debug "Allocating memory for buffer: ", buffer.size, " bytes of type ", memoryType
   buffer.memory = buffer.device.allocate(requirements.size, memoryType)
-  if buffer.memory.canMap:
-    checkVkResult buffer.device.vk.vkBindBufferMemory(buffer.vk, buffer.memory.vk, VkDeviceSize(0))
+  checkVkResult buffer.device.vk.vkBindBufferMemory(buffer.vk, buffer.memory.vk, VkDeviceSize(0))
 
 # currently no support for extended structure and concurrent/shared use
 # (shardingMode = VK_SHARING_MODE_CONCURRENT not supported)
