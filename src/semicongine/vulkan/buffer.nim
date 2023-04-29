@@ -20,6 +20,11 @@ type
       of false: discard
       of true:
         memory*: DeviceMemory
+  MemoryRequirements = object
+    size: uint64
+    alignment: uint64
+    memoryTypes: seq[MemoryType]
+
 
 proc `==`*(a, b: Buffer): bool =
   a.vk == b.vk
@@ -27,29 +32,33 @@ proc `==`*(a, b: Buffer): bool =
 func `$`*(buffer: Buffer): string =
   &"Buffer(vk: {buffer.vk}, size: {buffer.size}, usage: {buffer.usage})"
 
+proc requirements(buffer: Buffer): MemoryRequirements =
+  assert buffer.vk.valid
+  assert buffer.device.vk.valid
+  var req: VkMemoryRequirements
+  buffer.device.vk.vkGetBufferMemoryRequirements(buffer.vk, addr req)
+  result.size = req.size
+  result.alignment = req.alignment
+  let memorytypes = buffer.device.physicaldevice.vk.getMemoryProperties().types
+  for i in 0 ..< sizeof(req.memoryTypeBits) * 8:
+    if ((req.memoryTypeBits shr i) and 1) == 1:
+      result.memoryTypes.add memorytypes[i]
 
-proc allocateMemory(buffer: var Buffer, preferVRAM: bool, requiresMapping: bool, autoFlush: bool) =
+proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool) =
   assert buffer.device.vk.valid
   assert buffer.memoryAllocated == false
 
-  var flags: seq[VkMemoryPropertyFlagBits]
-  if requiresMapping:
-    flags.add VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-
-  if preferVRAM and buffer.device.hasMemoryWith(flags & @[VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT]):
-    flags.add VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-
-  if requiresMapping and autoFlush and buffer.device.hasMemoryWith(flags & @[VK_MEMORY_PROPERTY_HOST_COHERENT_BIT]):
-    flags.add VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-
-  assert buffer.device.hasMemoryWith(flags)
-
+  let requirements = buffer.requirements()
+  let memoryType = requirements.memoryTypes.selectBestMemoryType(
+    requireMappable=requireMappable,
+    preferVRAM=preferVRAM,
+    preferAutoFlush=preferAutoFlush
+  )
   buffer.memoryAllocated = true
-  debug "Allocating memory for buffer: ", buffer.size, " bytes ", flags
-  buffer.memory = buffer.device.allocate(buffer.size, flags)
+  debug "Allocating memory for buffer: ", buffer.size, " bytes of type ", memoryType
+  buffer.memory = buffer.device.allocate(requirements.size, memoryType)
   if buffer.memory.canMap:
     checkVkResult buffer.device.vk.vkBindBufferMemory(buffer.vk, buffer.memory.vk, VkDeviceSize(0))
-
 
 # currently no support for extended structure and concurrent/shared use
 # (shardingMode = VK_SHARING_MODE_CONCURRENT not supported)
@@ -57,9 +66,9 @@ proc createBuffer*(
   device: Device,
   size: uint64,
   usage: openArray[VkBufferUsageFlagBits],
+  requireMappable: bool,
   preferVRAM: bool,
-  requiresMapping: bool,
-  autoFlush=true,
+  preferAutoFlush=true,
 ): Buffer =
   assert device.vk.valid
   assert size > 0
@@ -67,7 +76,7 @@ proc createBuffer*(
   result.device = device
   result.size = size
   result.usage = usage.toSeq
-  if not (requiresMapping or VK_BUFFER_USAGE_TRANSFER_DST_BIT in result.usage):
+  if not (requireMappable or VK_BUFFER_USAGE_TRANSFER_DST_BIT in result.usage):
     result.usage.add VK_BUFFER_USAGE_TRANSFER_DST_BIT
   var createInfo = VkBufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -83,7 +92,7 @@ proc createBuffer*(
     pAllocator=nil,
     pBuffer=addr result.vk
   )
-  result.allocateMemory(preferVRAM, requiresMapping, autoFlush)
+  result.allocateMemory(requireMappable=requireMappable, preferVRAM=preferVRAM, preferAutoFlush=preferAutoFlush)
 
 
 proc copy*(src, dst: Buffer) =
@@ -139,7 +148,7 @@ proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
     if dst.memory.needsFlushing:
       dst.memory.flush()
   else: # use staging buffer, slower but required if memory is not host visible
-    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], preferVRAM=false, requiresMapping=true, autoFlush=true)
+    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable=true, preferVRAM=false, preferAutoFlush=true)
     stagingBuffer.setData(src, size, 0)
     stagingBuffer.copy(dst)
     stagingBuffer.destroy()

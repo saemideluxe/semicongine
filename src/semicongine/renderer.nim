@@ -5,6 +5,7 @@ import std/logging
 
 import ./vulkan/api
 import ./vulkan/buffer
+import ./vulkan/memory
 import ./vulkan/device
 import ./vulkan/drawable
 import ./vulkan/pipeline
@@ -20,9 +21,9 @@ import ./math
 type
   SceneData = object
     drawables*: OrderedTable[Mesh, Drawable]
-    vertexBuffers*: Table[MemoryLocation, Buffer]
+    vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
-    attributeLocation*: Table[string, MemoryLocation]
+    attributeLocation*: Table[string, MemoryPerformanceHint]
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
     entityTransformationCache: Table[Mesh, Mat4] # remembers last transformation, avoid to send GPU-updates if no changes
@@ -85,42 +86,42 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
     data.indexBuffer = renderer.device.createBuffer(
       size=indicesBufferSize,
       usage=[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
+      requireMappable=false,
       preferVRAM=true,
-      requiresMapping=false,
     )
 
   # one vertex data buffer per memory location
   var
-    perLocationOffsets: Table[MemoryLocation, uint64]
-    perLocationSizes: Table[MemoryLocation, uint64]
+    perLocationOffsets: Table[MemoryPerformanceHint, uint64]
+    perLocationSizes: Table[MemoryPerformanceHint, uint64]
     bindingNumber = 0
   for attribute in inputs:
-    data.attributeLocation[attribute.name] = attribute.memoryLocation
+    data.attributeLocation[attribute.name] = attribute.memoryPerformanceHint
     data.attributeBindingNumber[attribute.name] = bindingNumber
     inc bindingNumber
     # setup one buffer per attribute-location-type
-    if not (attribute.memoryLocation in perLocationSizes):
-      perLocationSizes[attribute.memoryLocation] = 0'u64
+    if not (attribute.memoryPerformanceHint in perLocationSizes):
+      perLocationSizes[attribute.memoryPerformanceHint] = 0'u64
     for mesh in allMeshes:
-      perLocationSizes[attribute.memoryLocation] += mesh.dataSize(attribute.name)
-  for location, bufferSize in perLocationSizes.pairs:
+      perLocationSizes[attribute.memoryPerformanceHint] += mesh.dataSize(attribute.name)
+  for memoryPerformanceHint, bufferSize in perLocationSizes.pairs:
     if bufferSize > 0:
-      data.vertexBuffers[location] = renderer.device.createBuffer(
+      data.vertexBuffers[memoryPerformanceHint] = renderer.device.createBuffer(
         size=bufferSize,
         usage=[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
-        preferVRAM=location in [VRAM, VRAMVisible],
-        requiresMapping=location in [VRAMVisible, RAM],
+        requireMappable=memoryPerformanceHint==PreferFastWrite,
+        preferVRAM=true,
       )
-      perLocationOffsets[location] = 0
+      perLocationOffsets[memoryPerformanceHint] = 0
 
   var indexBufferOffset = 0'u64
   for mesh in allMeshes:
-    var offsets: seq[(MemoryLocation, uint64)]
+    var offsets: seq[(MemoryPerformanceHint, uint64)]
     for attribute in inputs:
-      offsets.add (attribute.memoryLocation, perLocationOffsets[attribute.memoryLocation])
+      offsets.add (attribute.memoryPerformanceHint, perLocationOffsets[attribute.memoryPerformanceHint])
       var (pdata, size) = mesh.getRawData(attribute.name)
-      data.vertexBuffers[attribute.memoryLocation].setData(pdata, size, perLocationOffsets[attribute.memoryLocation])
-      perLocationOffsets[attribute.memoryLocation] += size
+      data.vertexBuffers[attribute.memoryPerformanceHint].setData(pdata, size, perLocationOffsets[attribute.memoryPerformanceHint])
+      perLocationOffsets[attribute.memoryPerformanceHint] += size
 
     let indexed = mesh.indexType != None
     var drawable = Drawable(
@@ -150,9 +151,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
 proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: string) =
   debug &"Refreshing data on mesh {mesh} for {attribute}"
   var (pdata, size) = mesh.getRawData(attribute)
-  let memoryLocation = sceneData.attributeLocation[attribute]
+  let memoryPerformanceHint = sceneData.attributeLocation[attribute]
   let bindingNumber = sceneData.attributeBindingNumber[attribute]
-  sceneData.vertexBuffers[memoryLocation].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][1])
+  sceneData.vertexBuffers[memoryPerformanceHint].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][1])
 
 
 proc refreshMeshData*(renderer: var Renderer, scene: Entity) =

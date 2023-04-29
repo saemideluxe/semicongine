@@ -139,13 +139,13 @@ type
     of Mat43F64: mat43f64: seq[TMat43[float64]]
     of Mat4F32: mat4f32*: seq[TMat4[float32]]
     of Mat4F64: mat4f64: seq[TMat4[float64]]
-  MemoryLocation* = enum
-    VRAM, VRAMVisible, RAM # VRAM is fastest, VRAMVisible allows updating memory directly, may be slower
+  MemoryPerformanceHint* = enum
+    PreferFastRead, PreferFastWrite
   ShaderAttribute* = object
     name*: string
     thetype*: DataType
     perInstance*: bool
-    memoryLocation*: MemoryLocation
+    memoryPerformanceHint*: MemoryPerformanceHint
 
 func vertexInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
   for attr in attributes:
@@ -280,13 +280,13 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
 func attr*[T: GPUType](
   name: string,
   perInstance=false,
-  memoryLocation=VRAMVisible,
+  memoryPerformanceHint=PreferFastRead,
 ): auto =
   ShaderAttribute(
     name: name,
     thetype: getDataType[T](),
     perInstance: perInstance,
-    memoryLocation: memoryLocation,
+    memoryPerformanceHint: memoryPerformanceHint,
   )
 
 func get*[T: GPUType|int|uint|float](value: DataValue): T =
@@ -823,12 +823,6 @@ func glslType*(thetype: DataType): string =
     of Mat43F64: "dmat43"
     of Mat4F32: "mat4"
     of Mat4F64: "dmat4"
-
-func groupByMemoryLocation*(attributes: openArray[ShaderAttribute]): Table[MemoryLocation, seq[ShaderAttribute]] =
-  for attr in attributes:
-    if not (attr.memoryLocation in result):
-      result[attr.memoryLocation] = @[]
-    result[attr.memoryLocation].add attr
 
 func glslInput*(group: seq[ShaderAttribute]): seq[string] =
   if group.len == 0:

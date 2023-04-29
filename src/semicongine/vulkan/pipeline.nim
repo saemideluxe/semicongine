@@ -50,8 +50,8 @@ proc setupUniforms(pipeline: var Pipeline, inFlightFrames: int) =
     var buffer = pipeline.device.createBuffer(
       size=uniformBufferSize,
       usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
+      requireMappable=true,
       preferVRAM=true,
-      requiresMapping=true,
     )
     pipeline.uniformBuffers.add buffer
     pipeline.descriptorSets[i].setDescriptorSet(buffer)
