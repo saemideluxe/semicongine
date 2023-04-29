@@ -152,6 +152,7 @@ proc updateInputs*(engine: var Engine): EngineState =
     engine.resizeHandler(engine)
   return engine.state
 
+# wrappers for internal things
 func keyIsDown*(engine: Engine, key: Key): auto = key in engine.input.keyIsDown
 func keyWasPressed*(engine: Engine, key: Key): auto = key in engine.input.keyWasPressed
 func keyWasReleased*(engine: Engine, key: Key): auto = key in engine.input.keyWasReleased
@@ -164,3 +165,5 @@ func framesRendered*(engine: Engine): auto = engine.renderer.framesRendered
 func gpuDevice*(engine: Engine): Device = engine.device
 func getWindow*(engine: Engine): auto = engine.window
 func windowWasResized*(engine: Engine): auto = engine.input.windowWasResized
+func showSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
+func hideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()

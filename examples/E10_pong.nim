@@ -66,7 +66,15 @@ when isMainModule:
     height = float32(winsize[1]) / float32(winsize[0])
     width = 1'f
     currentTime = cpuTime()
+    showSystemCursor = true
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
+    if myengine.keyWasPressed(C):
+      if showSystemCursor:
+        myengine.hideSystemCursor()
+      else:
+        myengine.showSystemCursor()
+      showSystemCursor = not showSystemCursor
+
     let dt: float32 = cpuTime() - currentTime
     currentTime = cpuTime()
     if myengine.windowWasResized():
