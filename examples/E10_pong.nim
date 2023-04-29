@@ -67,13 +67,17 @@ when isMainModule:
     width = 1'f
     currentTime = cpuTime()
     showSystemCursor = true
-  while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
+    fullscreen = false
+  while myengine.updateInputs() == Running and not myengine.keyIsDown(Escape):
     if myengine.keyWasPressed(C):
       if showSystemCursor:
         myengine.hideSystemCursor()
       else:
         myengine.showSystemCursor()
       showSystemCursor = not showSystemCursor
+    if myengine.keyWasPressed(F):
+      fullscreen = not fullscreen
+      myengine.fullscreen(fullscreen)
 
     let dt: float32 = cpuTime() - currentTime
     currentTime = cpuTime()
@@ -97,7 +101,8 @@ when isMainModule:
 
     # loose
     if ball.transform.col(3).x - ballSize/2 <= 0:
-      break
+      ball.transform = scale3d(ballSize, ballSize, 1'f) * translate3d(30'f, 30'f, 0'f)
+      ballVelocity = newVec2f(1, 1).normalized * ballSpeed
 
     # bar
     if ball.transform.col(3).x - ballSize/2 <= barWidth:

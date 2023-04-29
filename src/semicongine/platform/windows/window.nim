@@ -87,6 +87,10 @@ proc createWindow*(title: string): NativeWindow =
 
   discard ShowWindow(result.hwnd, SW_SHOW)
 
+proc fullscreen*(window: NativeWindow, enable: bool) =
+  discard
+  # from the oneandonly: https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
+
 proc hideSystemCursor*(window: NativeWindow) =
   discard ShowCursor(false)
 

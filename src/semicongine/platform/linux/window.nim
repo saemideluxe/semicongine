@@ -1,9 +1,13 @@
 import std/options
 import std/tables
+import std/strformat
+import std/logging
+
 import
   x11/xlib,
   x11/xutil,
-  x11/keysym
+  x11/keysym,
+  x11/xatom
 import x11/x
 
 import ../../events
@@ -27,42 +31,113 @@ template checkXlibResult*(call: untyped) =
     raise newException(Exception, "Xlib error: " & astToStr(call) &
         " returned " & $value)
 
+
+proc XErrorLogger(display: PDisplay, event: PXErrorEvent): cint {.cdecl.} =
+  echo &"Xlib: {event[]}"
+
 proc createWindow*(title: string): NativeWindow =
   checkXlibResult XInitThreads()
   let display = XOpenDisplay(nil)
   if display == nil:
     quit "Failed to open display"
+  discard XSetErrorHandler(XErrorLogger)
 
-  let
-    screen = XDefaultScreen(display)
-    rootWindow = XRootWindow(display, screen)
-    foregroundColor = XBlackPixel(display, screen)
-    backgroundColor = XWhitePixel(display, screen)
+  let rootWindow = display.XDefaultRootWindow()
+  var
+    attribs: XWindowAttributes
+    width = cuint(800)
+    height = cuint(600)
+  checkXlibResult display.XGetWindowAttributes(rootWindow, addr(attribs))
 
-  let window = XCreateSimpleWindow(display, rootWindow, -1, -1, 800, 600, 0,
-      foregroundColor, backgroundColor)
-  checkXlibResult XSetStandardProperties(display, window, title, "window", 0,
-      nil, 0, nil)
-  checkXlibResult XSelectInput(display, window, PointerMotionMask or
-      ButtonPressMask or ButtonReleaseMask or KeyPressMask or KeyReleaseMask or ExposureMask)
+  var attrs = XSetWindowAttributes(
+    # override_redirect: 1
+  )
+  let window = XCreateWindow(
+    display,
+    rootWindow,
+    (attribs.width - cint(width)) div 2, (attribs.height - cint(height)) div 2,
+    width, height,
+    0,
+    CopyFromParent,
+    InputOutput,
+    cast[PVisual](CopyFromParent),
+    0, # CWOverrideRedirect,
+    addr attrs,
+    # foregroundColor, backgroundColor
+  )
+  checkXlibResult XSetStandardProperties(display, window, title, "window", 0, nil, 0, nil)
+  checkXlibResult XSelectInput(display, window, PointerMotionMask or ButtonPressMask or ButtonReleaseMask or KeyPressMask or KeyReleaseMask or ExposureMask)
   checkXlibResult XMapWindow(display, window)
 
   deleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", XBool(false))
   checkXlibResult XSetWMProtocols(display, window, addr(deleteMessage), 1)
 
-  # quite a lot of work to hide the cursor...
   var data = "\0".cstring
-  var pixmap = XCreateBitmapFromData(display, window, data, 1, 1)
+  var pixmap = display.XCreateBitmapFromData(window, data, 1, 1)
   var color: XColor
-  var empty_cursor = XCreatePixmapCursor(display, pixmap, pixmap, addr(color), addr(color), 0, 0)
-  checkXlibResult XFreePixmap(display, pixmap)
+  var empty_cursor = display.XCreatePixmapCursor(pixmap, pixmap, addr(color), addr(color), 0, 0)
+  checkXlibResult display.XFreePixmap(pixmap)
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
+
+proc fullscreen*(window: NativeWindow, enable: bool) =
+  var WM_HINTS = XInternAtom(window.display, "_MOTIF_WM_HINTS", 1);
+  var border = culong(if enable: 0 else: 1)
+
+  type
+    MWMHints = object
+      flags: culong
+      functions: culong
+      decorations: culong
+      input_mode: clong
+      status: culong
+
+  var hints = MWMHints(flags: (culong(1) shl 1), functions: 0, decorations: border, input_mode: 0, status: 0)
+
+  checkXlibResult window.display.XChangeProperty(window.window, WM_HINTS, WM_HINTS, 32, PropModeReplace, cast[cstring](addr hints), sizeof(MWMHints) div sizeof(clong))
+
+  var
+    wm_state = window.display.XInternAtom("_NET_WM_STATE", 1)
+    wm_state_operation = window.display.XInternAtom(if enable: "_NET_WM_STATE_ADD" else: "_NET_WM_STATE_REMOVE", 1)
+    wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 1)
+    xev = XEvent(
+      theType: ClientMessage,
+      xany: XAnyEvent(theType: ClientMessage),
+      xclient: XClientMessageEvent(
+        message_type: wm_state,
+        format: 32,
+        window: window.window,
+        data: XClientMessageData(
+          l: [
+            clong(wm_state_operation),
+            clong(wm_fullscreen),
+            0,
+            0,
+            0
+          ]
+        )
+      )
+    )
+
+  discard window.display.XSendEvent(
+    window.display.XRootWindow(window.display.XDefaultScreen()),
+    0,
+    SubstructureRedirectMask or SubstructureNotifyMask,
+    addr xev
+  )
+
+  if enable:
+    var attribs: XWindowAttributes
+    checkXlibResult window.display.XGetWindowAttributes(window.display.XDefaultRootWindow(), addr(attribs))
+    checkXlibResult window.display.XMoveResizeWindow(window.window, 0, 0, cuint(attribs.width), cuint(attribs.height))
+  checkXlibResult window.display.XFlush()
 
 proc hideSystemCursor*(window: NativeWindow) =
   checkXlibResult XDefineCursor(window.display, window.window, window.emptyCursor)
+  checkXlibResult window.display.XFlush()
 
 proc showSystemCursor*(window: NativeWindow) =
   checkXlibResult XUndefineCursor(window.display, window.window)
+  checkXlibResult window.display.XFlush()
 
 proc destroy*(window: NativeWindow) =
   checkXlibResult window.display.XFreeCursor(window.emptyCursor)

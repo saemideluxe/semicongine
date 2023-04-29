@@ -167,3 +167,4 @@ func getWindow*(engine: Engine): auto = engine.window
 func windowWasResized*(engine: Engine): auto = engine.input.windowWasResized
 func showSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
 func hideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
+proc fullscreen*(engine: Engine, enable: bool) = engine.window.fullscreen(enable)
