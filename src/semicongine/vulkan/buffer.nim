@@ -92,6 +92,7 @@ proc createBuffer*(
     pBuffer=addr result.vk
   )
   result.allocateMemory(requireMappable=requireMappable, preferVRAM=preferVRAM, preferAutoFlush=preferAutoFlush)
+  echo "New Buffer ", result
 
 
 proc copy*(src, dst: Buffer) =
@@ -119,6 +120,7 @@ proc copy*(src, dst: Buffer) =
     )
     copyRegion = VkBufferCopy(size: VkDeviceSize(src.size))
   checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
+  echo "B ", dst
   commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
   checkVkResult commandBuffer.vkEndCommandBuffer()
 
@@ -149,6 +151,7 @@ proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
   else: # use staging buffer, slower but required if memory is not host visible
     var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable=true, preferVRAM=false, preferAutoFlush=true)
     stagingBuffer.setData(src, size, 0)
+    echo "B ", dst
     stagingBuffer.copy(dst)
     stagingBuffer.destroy()
 
