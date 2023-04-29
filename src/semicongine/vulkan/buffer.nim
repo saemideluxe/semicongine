@@ -75,7 +75,7 @@ proc createBuffer*(
   result.device = device
   result.size = size
   result.usage = usage.toSeq
-  if (not requireMappable) or (VK_BUFFER_USAGE_TRANSFER_DST_BIT in result.usage):
+  if not requireMappable:
     result.usage.add VK_BUFFER_USAGE_TRANSFER_DST_BIT
   var createInfo = VkBufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
