@@ -5,7 +5,6 @@ import std/logging
 import ./api
 import ./utils
 import ./buffer
-import ./memory
 
 import ../gpu_data
 
