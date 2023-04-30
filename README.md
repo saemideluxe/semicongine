@@ -37,6 +37,7 @@ Rendering:
 - [ ] Multisampling 
 
 Asset handling:
+- [ ] Resource concept: load from directory, zip or in-memory-zip, select "mod" as root
 - [ ] Mesh files (Wavefront OBJ, MTL) (use something from sketchfab for testing, https://sketchfab.com/)
 - [ ] Image files (BMP RGB + BMP Graysscale for transparency)
 - [ ] Audio files (AU)
@@ -46,11 +47,16 @@ Other (required for alpha release):
 - [x] Mouse/Keyboard input handling
   - [x] X11
   - [x] Win32
-- [ ] Enable/disable hardware cursor
+- [x] Enable/disable hardware cursor
 - [ ] Fullscreen mode + switch between modes
+      - [x] Linux (works well enough, I hope)
+      - [ ] Window
 - [ ] Input-mapping configuration
-- [ ] Audio playing (Alsa, Windows Waveform API?)
+- [ ] Audio playing
+      - [ ] Linux (Alsa)
+      - [ ] Windows Waveform API?
 - [ ] Telemetry
+- [ ]  Documentation?
 
 Advanced features (very low priority):
 - [ ] Allow multipel Uniform blocks?
