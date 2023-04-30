@@ -1,3 +1,4 @@
+import semicongine/audio
 import semicongine/color
 import semicongine/config
 import semicongine/engine
@@ -10,6 +11,7 @@ import semicongine/renderer
 import semicongine/platform/window
 import semicongine/vulkan
 
+export audio
 export color
 export config
 export engine

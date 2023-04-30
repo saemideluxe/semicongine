@@ -10,7 +10,6 @@ import ./vulkan/renderpass
 import ./gpu_data
 import ./entity
 import ./renderer
-import ./mesh
 import ./events
 import ./config
 import ./math
