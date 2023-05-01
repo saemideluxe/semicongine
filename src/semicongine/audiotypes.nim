@@ -5,7 +5,7 @@ import std/math
 #
 # ffmpeg -i <infile> -f s16le -ac 2 -ar 48000 -acodec pcm_s16le <outfile>
 
-const SAMPLERATE* = 48000
+const SAMPLERATE* = 44100
 const BUFFERSIZE* = 512
 
 type

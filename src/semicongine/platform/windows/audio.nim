@@ -38,6 +38,9 @@ proc updateSoundBuffer*(soundDevice: NativeSoundDevice, buffer: var SoundData) =
   )
   checkWinMMResult waveOutPrepareHeader(soundDevice.handle, addr data, UINT(sizeof(WAVEHDR)))
   checkWinMMResult waveOutWrite(soundDevice.handle, addr data, UINT(sizeof(WAVEHDR)))
+  while (data.dwFlags and WHDR_DONE) != 1:
+    discard
+  checkWinMMResult waveOutUnprepareHeader(soundDevice.handle, addr data, UINT(sizeof(WAVEHDR)))
 
 proc closeSoundDevice*(soundDevice: NativeSoundDevice) =
   waveOutClose(soundDevice.handle)
