@@ -53,7 +53,7 @@ Other (required for alpha release):
       - [ ] Window
 - [ ] Input-mapping configuration
 - [ ] Audio playing
-      - [ ] Linux (Alsa)
+      - [x] Linux (Alsa)
       - [ ] Windows Waveform API?
 - [ ] Telemetry
 - [ ]  Documentation?

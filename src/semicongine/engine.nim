@@ -13,6 +13,7 @@ import ./renderer
 import ./events
 import ./config
 import ./math
+import ./audio
 
 type
   EngineState* = enum
@@ -91,6 +92,7 @@ proc initEngine*(
     enabledExtensions = @[],
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
+  startMixerThread()
 
 proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
   assert engine.state != Destroyed

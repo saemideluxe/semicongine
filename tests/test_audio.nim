@@ -1,31 +1,29 @@
+import std/os
 import std/sequtils
 import std/times
 
 import semicongine
 
+
 proc test1() =
-  var mixer = initMixer()
-  mixer.addSound("test1", newSound(sineSoundData(1000, 2)))
-  mixer.addSound("test2", newSound(sineSoundData(500, 2)))
+  mixer[].addSound("test1", newSound(sineSoundData(1000, 2)))
+  mixer[].addSound("test2", newSound(sineSoundData(500, 2)))
 
 
-  let s1 = mixer.play("test1", loop=true)
-  let s2 = mixer.play("test2", loop=true)
+  let s1 = mixer[].play("test1", loop=true)
+  let s2 = mixer[].play("test2", loop=true)
 
   let t0 = now()
   while true:
-    mixer.updateSoundBuffer()
     let runtime = (now() - t0).inMilliseconds()
     if runtime > 1500:
-      mixer.setLevel(0.1)
+      mixer[].setLevel(0.1)
     if runtime > 3000:
-      mixer.stop(s2)
+      mixer[].stop(s2)
     if runtime > 6000:
-      mixer.stop("")
+      mixer[].stop("")
     if runtime > 8000:
-      mixer.stop()
       break
-  mixer.destroy()
 
 proc test2() =
   let
@@ -56,19 +54,13 @@ proc test2() =
       f, c, f, f,
     )
 
-  var mixer = initMixer()
-  mixer.addSound("frerejaques", newSound(frerejaquesData))
-  discard mixer.play("frerejaques", loop=true)
+  mixer[].addSound("frerejaques", newSound(frerejaquesData))
+  discard mixer[].play("frerejaques")
 
-  let t0 = now()
-  while true:
-    mixer.updateSoundBuffer()
-    if (now() - t0).inMilliseconds() > 20000:
-      break
-  mixer.destroy()
+  while mixer[].isPlaying():
+    sleep(1)
 
 proc test3() =
-
   var song: SoundData
   var f = open("tests/audiotest.PCM.s16le.48000.2")
   var readLen = 999
@@ -77,18 +69,21 @@ proc test3() =
     readLen = f.readBuffer(addr sample, sizeof(Sample))
     song.add sample
 
-  var mixer = initMixer()
-  mixer.addSound("pianosong", newSound(song))
-  discard mixer.play("pianosong", loop=true)
+  mixer[].addSound("pianosong", newSound(song))
+  mixer[].addSound("ping", newSound(sineSoundData(500, 0.05)))
+  mixer[].addTrack("effects")
+  discard mixer[].play("pianosong")
 
   let t0 = now()
-  while true:
-    mixer.updateSoundBuffer()
-    if (now() - t0).inMilliseconds() > 190_000:
-      break
-  mixer.destroy()
+  while mixer[].isPlaying():
+    discard mixer[].play("ping", track="effects", stopOtherSounds=true, level=0.5)
+    var input = stdin.readLine()
 
 when isMainModule:
+  startMixerThread()
   test1()
+  mixer[].stop()
   test2()
+  mixer[].stop()
   test3()
+  mixer[].stop()
