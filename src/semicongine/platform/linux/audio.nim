@@ -28,6 +28,7 @@ proc snd_pcm_hw_params_set_buffer_size*(pcm: snd_pcm_p, params: snd_pcm_hw_param
 proc snd_pcm_hw_params_set_rate*(pcm: snd_pcm_p, params: snd_pcm_hw_params_p, val: cuint, dir: cint): cint {.alsafunc.}
 proc snd_pcm_hw_params*(pcm: snd_pcm_p, params: snd_pcm_hw_params_p): cint {.alsafunc.}
 proc snd_pcm_writei*(pcm: snd_pcm_p, buffer: pointer, size: snd_pcm_uframes_t): snd_pcm_sframes_t {.alsafunc.}
+proc snd_pcm_recover*(pcm: snd_pcm_p, err: cint, silent: cint): cint {.alsafunc.}
 
 template checkAlsaResult*(call: untyped) =
   let value = call
@@ -57,7 +58,10 @@ proc openSoundDevice*(sampleRate: uint32, bufferSize: uint32): NativeSoundDevice
   snd_pcm_hw_params_free(hw_params)
 
 proc updateSoundBuffer*(soundDevice: NativeSoundDevice, buffer: var SoundData) =
-  discard snd_pcm_writei(soundDevice.handle, addr buffer[0], snd_pcm_uframes_t(len(buffer)))
+  var ret = snd_pcm_writei(soundDevice.handle, addr buffer[0], snd_pcm_uframes_t(buffer.len))
+  if ret < 0:
+    checkAlsaResult snd_pcm_recover(soundDevice.handle, cint(ret), 0)
+    
 
 proc closeSoundDevice*(soundDevice: NativeSoundDevice) =
-  checkAlsaResult snd_pcm_close(soundDevice.handle)
+  discard snd_pcm_close(soundDevice.handle)
