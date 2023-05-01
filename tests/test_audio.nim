@@ -6,8 +6,8 @@ import semicongine
 
 
 proc test1() =
-  mixer[].addSound("test1", newSound(sineSoundData(1000, 2)))
-  mixer[].addSound("test2", newSound(sineSoundData(500, 2)))
+  mixer[].addSound("test1", newSound(sineSoundData(1000, 2, 44100)))
+  mixer[].addSound("test2", newSound(sineSoundData(500, 2, 44100)))
 
 
   let s1 = mixer[].play("test1", loop=true)
@@ -28,19 +28,19 @@ proc test1() =
 proc test2() =
   let
     # notes
-    c = sineSoundData(261.6256, 0.5)
-    d = sineSoundData(293.6648, 0.5)
-    e = sineSoundData(329.6276, 0.5)
-    f = sineSoundData(349.2282, 0.5)
-    g = sineSoundData(391.9954, 0.5)
-    a = sineSoundData(440.0000, 0.5)
-    b = sineSoundData(493.8833, 0.5)
-    bb = sineSoundData(466.1638, 0.5)
-    c2 = sineSoundData(523.2511, 0.5)
-    d2 = sineSoundData(587.3295, 0.5)
-    bbShort = sineSoundData(466.1638, 0.25)
-    c2Short = sineSoundData(523.2511, 0.25)
-    d2Short = sineSoundData(587.3295, 0.25)
+    c = sineSoundData(261.6256, 0.5, 44100)
+    d = sineSoundData(293.6648, 0.5, 44100)
+    e = sineSoundData(329.6276, 0.5, 44100)
+    f = sineSoundData(349.2282, 0.5, 44100)
+    g = sineSoundData(391.9954, 0.5, 44100)
+    a = sineSoundData(440.0000, 0.5, 44100)
+    b = sineSoundData(493.8833, 0.5, 44100)
+    bb = sineSoundData(466.1638, 0.5, 44100)
+    c2 = sineSoundData(523.2511, 0.5, 44100)
+    d2 = sineSoundData(587.3295, 0.5, 44100)
+    bbShort = sineSoundData(466.1638, 0.25, 44100)
+    c2Short = sineSoundData(523.2511, 0.25, 44100)
+    d2Short = sineSoundData(587.3295, 0.25, 44100)
 
     # song
     frerejaquesData = concat(
@@ -70,7 +70,7 @@ proc test3() =
     song.add sample
 
   mixer[].addSound("pianosong", newSound(song))
-  mixer[].addSound("ping", newSound(sineSoundData(500, 0.05)))
+  mixer[].addSound("ping", newSound(sineSoundData(500, 0.05, 44100)))
   mixer[].addTrack("effects")
   discard mixer[].play("pianosong")
 

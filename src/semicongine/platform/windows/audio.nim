@@ -11,8 +11,9 @@ template checkWinMMResult*(call: untyped) =
 type
   NativeSoundDevice* = object
     handle: HWAVEOUT
+    buffer: WAVEHDR
  
-proc openSoundDevice*(sampleRate: uint32, bufferSize: uint32): NativeSoundDevice =
+proc openSoundDevice*(sampleRate: uint32, buffer: ptr SoundData): NativeSoundDevice =
   var format = WAVEFORMATEX(
     wFormatTag: WAVE_FORMAT_PCM,
     nChannels: 2,
@@ -24,11 +25,9 @@ proc openSoundDevice*(sampleRate: uint32, bufferSize: uint32): NativeSoundDevice
   )
 
   checkWinMMResult waveOutOpen(addr result.handle, WAVE_MAPPER, addr format, DWORD_PTR(0), DWORD_PTR(0), CALLBACK_NULL)
-
-proc updateSoundBuffer*(soundDevice: NativeSoundDevice, buffer: var SoundData) =
-  var data = WAVEHDR(
-    lpData: cast[cstring](addr buffer[0]),
-    dwBufferLength: DWORD(buffer.len * sizeof(Sample)),
+  result.buffer = WAVEHDR(
+    lpData: cast[cstring](addr buffer[][0]),
+    dwBufferLength: DWORD(buffer[].len * sizeof(Sample)),
     dwBytesRecorded: 0,
     dwUser: DWORD_PTR(0),
     dwFlags: 0,
@@ -36,11 +35,13 @@ proc updateSoundBuffer*(soundDevice: NativeSoundDevice, buffer: var SoundData) =
     lpNext: nil,
     reserved: DWORD_PTR(0)
   )
-  checkWinMMResult waveOutPrepareHeader(soundDevice.handle, addr data, UINT(sizeof(WAVEHDR)))
-  checkWinMMResult waveOutWrite(soundDevice.handle, addr data, UINT(sizeof(WAVEHDR)))
-  while (data.dwFlags and WHDR_DONE) != 1:
-    discard
-  checkWinMMResult waveOutUnprepareHeader(soundDevice.handle, addr data, UINT(sizeof(WAVEHDR)))
+  checkWinMMResult waveOutPrepareHeader(result.handle, addr result.buffer, UINT(sizeof(WAVEHDR)))
 
-proc closeSoundDevice*(soundDevice: NativeSoundDevice) =
+proc writeSoundData*(soundDevice: var NativeSoundDevice) =
+  checkWinMMResult waveOutWrite(soundDevice.handle, addr soundDevice.buffer, UINT(sizeof(WAVEHDR)))
+  while (soundDevice.buffer.dwFlags and WHDR_DONE) != 1:
+    discard
+
+proc closeSoundDevice*(soundDevice: var NativeSoundDevice) =
+  checkWinMMResult waveOutUnprepareHeader(soundDevice.handle, addr soundDevice.buffer, UINT(sizeof(WAVEHDR)))
   waveOutClose(soundDevice.handle)

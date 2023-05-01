@@ -5,9 +5,6 @@ import std/math
 #
 # ffmpeg -i <infile> -f s16le -ac 2 -ar 48000 -acodec pcm_s16le <outfile>
 
-const SAMPLERATE* = 44100
-const BUFFERSIZE* = 512
-
 type
   Level* = 0'f .. 1'f
   Sample* = (int16, int16)
@@ -19,10 +16,10 @@ proc sinewave(f: float): proc(x: float): float =
     sin(x * 2 * Pi * f)
   result = ret
 
-proc sineSoundData*(f: float, len: float): SoundData =
-  let dt = 1'f / float(SAMPLERATE)
+proc sineSoundData*(f: float, len: float, rate: int): SoundData =
+  let dt = 1'f / float(rate)
   var sine = sinewave(f)
-  for i in 0 ..< int(SAMPLERATE * len):
+  for i in 0 ..< int(float(rate) * len):
     let t = dt * float(i)
     let value = int16(sine(t) * float(high(int16)))
     result.add (value, value)
