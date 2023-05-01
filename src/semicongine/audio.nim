@@ -23,6 +23,7 @@ type
     level: Level
     device: NativeSoundDevice
     lock: Lock
+    buffer: SoundData
 
 proc loadSoundResource(resourcePath: string): Sound =
   assert false, "Not implemented yet"
@@ -31,9 +32,13 @@ proc initMixer*(): Mixer =
   result = Mixer(
     tracks: {"": Track(level: 1'f)}.toTable,
     level: 1'f,
-    device: openSoundDevice(SAMPLERATE, BUFFERSIZE),
   )
   result.lock.initLock()
+
+proc setupDevice(mixer: var Mixer) =
+  # call this inside audio thread
+  mixer.buffer = newSeq[Sample](512)
+  mixer.device = openSoundDevice(44100, addr mixer.buffer)
 
 proc loadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
@@ -128,8 +133,7 @@ func mix(a, b: Sample): Sample =
 
 proc updateSoundBuffer(mixer: var Mixer) =
   # mix
-  var buffer = newSeq[Sample](BUFFERSIZE)
-  for i in 0 ..< buffer.len:
+  for i in 0 ..< mixer.buffer.len:
     var currentSample = (0'i16, 0'i16)
     mixer.lock.withLock():
       for track in mixer.tracks.mvalues:
@@ -149,9 +153,9 @@ proc updateSoundBuffer(mixer: var Mixer) =
               stoppedSounds.add id
         for id in stoppedSounds:
           track.playing.del(id)
-      buffer[i] = currentSample
+      mixer.buffer[i] = currentSample
   # send data to sound device
-  mixer.device.updateSoundBuffer(buffer)
+  mixer.device.writeSoundData()
 
 
 proc destroy*(mixer: var Mixer) =
@@ -164,6 +168,7 @@ var mixer* = createShared(Mixer)
 
 proc audioWorker() {.thread.} =
   onThreadDestruction(proc() = mixer[].lock.withLock(mixer[].destroy()); freeShared(mixer))
+  mixer[].setupDevice()
   while true:
     mixer[].updateSoundBuffer()
 
