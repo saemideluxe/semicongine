@@ -1,7 +1,5 @@
 import std/tables
-import std/math
 import std/locks
-import std/sequtils
 
 import ./audiotypes
 import ./platform/audio
