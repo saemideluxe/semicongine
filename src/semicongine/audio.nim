@@ -183,7 +183,7 @@ var mixer* = createShared(Mixer)
 
 proc audioWorker() {.thread.} =
   when defined(linux):
-    nice(-20)
+    discard nice(-20)
   onThreadDestruction(proc() = mixer[].lock.withLock(mixer[].destroy()); freeShared(mixer))
   mixer[].setupDevice()
   while true:
