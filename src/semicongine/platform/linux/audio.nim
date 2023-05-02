@@ -41,9 +41,9 @@ template checkAlsaResult*(call: untyped) =
 type
   NativeSoundDevice* = object
     handle: snd_pcm_p
-    buffer: ptr SoundData
+    buffers: seq[ptr SoundData]
  
-proc openSoundDevice*(sampleRate: uint32, buffer: ptr SoundData): NativeSoundDevice =
+proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSoundDevice =
   var hw_params: snd_pcm_hw_params_p = nil
   checkAlsaResult snd_pcm_open(addr result.handle, "default", SND_PCM_STREAM_PLAYBACK, SND_PCM_BLOCK)
 
@@ -54,13 +54,13 @@ proc openSoundDevice*(sampleRate: uint32, buffer: ptr SoundData): NativeSoundDev
   checkAlsaResult snd_pcm_hw_params_set_format(result.handle, hw_params, SND_PCM_FORMAT_S16_LE)
   checkAlsaResult snd_pcm_hw_params_set_rate(result.handle, hw_params, sampleRate, 0)
   checkAlsaResult snd_pcm_hw_params_set_channels(result.handle, hw_params, 2)
-  checkAlsaResult snd_pcm_hw_params_set_buffer_size(result.handle, hw_params, snd_pcm_uframes_t(buffer[].len))
+  checkAlsaResult snd_pcm_hw_params_set_buffer_size(result.handle, hw_params, snd_pcm_uframes_t(buffers[0][].len))
   checkAlsaResult snd_pcm_hw_params(result.handle, hw_params)
   snd_pcm_hw_params_free(hw_params)
-  result.buffer = buffer
+  result.buffers = buffers
 
-proc writeSoundData*(soundDevice: NativeSoundDevice) =
-  var ret = snd_pcm_writei(soundDevice.handle, addr soundDevice.buffer[][0], snd_pcm_uframes_t(soundDevice.buffer[].len))
+proc writeSoundData*(soundDevice: NativeSoundDevice, buffer: int) =
+  var ret = snd_pcm_writei(soundDevice.handle, addr soundDevice.buffers[buffer][][0], snd_pcm_uframes_t(soundDevice.buffers[buffer][].len))
   if ret < 0:
     checkAlsaResult snd_pcm_recover(soundDevice.handle, cint(ret), 0)
 
