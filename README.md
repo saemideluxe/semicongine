@@ -35,6 +35,7 @@ Rendering:
 - [ ] Depth buffering
 - [ ] Mipmaps 
 - [ ] Multisampling 
+- [ ] Allow different shaders (ie pipelines) for different meshes
 
 Asset handling:
 - [ ] Resource concept: load from directory, zip or in-memory-zip, select "mod" as root
@@ -51,21 +52,21 @@ Other (required for alpha release):
 - [ ] Fullscreen mode + switch between modes
       - [x] Linux (works well enough, I hope)
       - [ ] Window
-- [ ] Input-mapping configuration
-- [ ] Audio playing
+- [x] Audio playing
       - [x] Linux (Alsa)
-      - [ ] Windows Waveform API?
+      - [x] Windows Waveform API (maybe change to direcsound)
+- [ ] Input-mapping configuration
 - [ ] Telemetry
 - [ ]  Documentation?
 
 Advanced features (very low priority):
-- [ ] Allow multipel Uniform blocks?
 - [ ] Text rendering
 - [ ] Animation system
 - [ ] Sprite system
 - [ ] Particle system
-- [ ] Query and display rendering information from Vulkan
-- [ ] Game controller input handling
+- [ ] Query and display rendering information from Vulkan?
+- [ ] Game controller input handling?
+- [ ] Allow multipel Uniform blocks?
 
 Quality improvments:
 
