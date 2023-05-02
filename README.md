@@ -21,7 +21,7 @@ Roadmap
 
 Still tons to do. Making render pipeline and scenegraph somewhat compatible
 seems like it will require quite a bit more of work. Also, audio might require
-quite a bit of work, no experience there.
+quite a bit of work, no experience there (note: audio was super easy to implement)
 
 Rendering:
 
