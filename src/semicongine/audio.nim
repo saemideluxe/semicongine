@@ -1,10 +1,18 @@
 import std/tables
 import std/locks
 
+when defined(windows): # used for setting audio thread priority on windows
+  import winim
+when defined(linux):
+  import std/posix
+
 import ./audiotypes
 import ./platform/audio
 
 export audiotypes
+
+const NBUFFERS = 4
+const BUFFERSAMPLECOUNT = 2048
 
 type
   Playback = object
@@ -23,7 +31,8 @@ type
     level: Level
     device: NativeSoundDevice
     lock: Lock
-    buffer: SoundData
+    buffers: seq[SoundData]
+    currentBuffer: int
 
 proc loadSoundResource(resourcePath: string): Sound =
   assert false, "Not implemented yet"
@@ -37,8 +46,12 @@ proc initMixer*(): Mixer =
 
 proc setupDevice(mixer: var Mixer) =
   # call this inside audio thread
-  mixer.buffer = newSeq[Sample](512)
-  mixer.device = openSoundDevice(44100, addr mixer.buffer)
+  var bufferaddresses: seq[ptr SoundData]
+  for i in 0 ..< NBUFFERS:
+    mixer.buffers.add newSeq[Sample](BUFFERSAMPLECOUNT)
+  for i in 0 ..< mixer.buffers.len:
+    bufferaddresses.add (addr mixer.buffers[i])
+  mixer.device = openSoundDevice(44100, bufferaddresses)
 
 proc loadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
@@ -133,7 +146,7 @@ func mix(a, b: Sample): Sample =
 
 proc updateSoundBuffer(mixer: var Mixer) =
   # mix
-  for i in 0 ..< mixer.buffer.len:
+  for i in 0 ..< mixer.buffers[mixer.currentBuffer].len:
     var currentSample = (0'i16, 0'i16)
     mixer.lock.withLock():
       for track in mixer.tracks.mvalues:
@@ -153,9 +166,11 @@ proc updateSoundBuffer(mixer: var Mixer) =
               stoppedSounds.add id
         for id in stoppedSounds:
           track.playing.del(id)
-      mixer.buffer[i] = currentSample
+      mixer.buffers[mixer.currentBuffer][i] = currentSample
   # send data to sound device
-  mixer.device.writeSoundData()
+  # mixer.device.writeSoundData((mixer.currentBuffer - 1) %% mixer.buffers.len)
+  mixer.device.writeSoundData(mixer.currentBuffer)
+  mixer.currentBuffer = (mixer.currentBuffer + 1) mod mixer.buffers.len
 
 
 proc destroy*(mixer: var Mixer) =
@@ -167,6 +182,8 @@ proc destroy*(mixer: var Mixer) =
 var mixer* = createShared(Mixer)
 
 proc audioWorker() {.thread.} =
+  when defined(linux):
+    nice(-20)
   onThreadDestruction(proc() = mixer[].lock.withLock(mixer[].destroy()); freeShared(mixer))
   mixer[].setupDevice()
   while true:
@@ -176,3 +193,5 @@ proc startMixerThread*() =
   mixer[] = initMixer()
   var audiothread: Thread[void]
   audiothread.createThread(audioWorker)
+  when defined(window):
+    SetThreadPriority(audiothread.handle(), THREAD_PRIORITY_TIME_CRITICAL)

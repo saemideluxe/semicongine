@@ -85,5 +85,6 @@ when isMainModule:
   mixer[].stop()
   test2()
   mixer[].stop()
-  test3()
-  mixer[].stop()
+  while true:
+    test3()
+    mixer[].stop()
