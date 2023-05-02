@@ -36,12 +36,13 @@ proc openSoundDevice*(sampleRate: uint32, buffer: ptr SoundData): NativeSoundDev
     reserved: DWORD_PTR(0)
   )
   checkWinMMResult waveOutPrepareHeader(result.handle, addr result.buffer, UINT(sizeof(WAVEHDR)))
-
+  
+# add double buffering: https://stackoverflow.com/questions/49605552/double-buffered-waveoutwrite-stuttering-like-hell
 proc writeSoundData*(soundDevice: var NativeSoundDevice) =
   checkWinMMResult waveOutWrite(soundDevice.handle, addr soundDevice.buffer, UINT(sizeof(WAVEHDR)))
   while (soundDevice.buffer.dwFlags and WHDR_DONE) != 1:
     discard
 
 proc closeSoundDevice*(soundDevice: var NativeSoundDevice) =
-  checkWinMMResult waveOutUnprepareHeader(soundDevice.handle, addr soundDevice.buffer, UINT(sizeof(WAVEHDR)))
+  discard waveOutUnprepareHeader(soundDevice.handle, addr soundDevice.buffer, UINT(sizeof(WAVEHDR)))
   waveOutClose(soundDevice.handle)
