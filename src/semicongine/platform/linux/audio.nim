@@ -15,7 +15,7 @@ type
   snd_pcm_hw_params_p* = ptr object
   snd_pcm_uframes_t* = culong
   snd_pcm_sframes_t* = clong
-{.pragma: alsafunc, importc, cdecl, dynlib: "libasound.so" .}
+{.pragma: alsafunc, importc, cdecl, dynlib: "libasound.so.2" .}
 proc snd_pcm_open*(pcm_ref: ptr snd_pcm_p, name: cstring, streamMode: StreamMode, openmode: OpenMode): cint {.alsafunc.}
 proc snd_pcm_close*(pcm: snd_pcm_p): cint {.alsafunc.}
 proc snd_pcm_hw_params_malloc*(hw_params_ptr: ptr snd_pcm_hw_params_p): cint {.alsafunc.}

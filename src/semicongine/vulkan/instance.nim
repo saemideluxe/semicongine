@@ -53,12 +53,14 @@ proc createInstance*(
 ): Instance =
 
   let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface"] & instanceExtensions
-  for i in layers:
-    assert i in getLayers(), $i
   for i in requiredExtensions:
     assert i in getInstanceExtensions(), $i
+  var availableLayers: seq[string]
+  for i in layers:
+    if i in getLayers():
+      availableLayers.add i
   var
-    layersC = allocCStringArray(layers)
+    layersC = allocCStringArray(availableLayers)
     instanceExtensionsC = allocCStringArray(requiredExtensions)
     appinfo = VkApplicationInfo(
       sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -69,7 +71,7 @@ proc createInstance*(
     createinfo = VkInstanceCreateInfo(
       sType: VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
       pApplicationInfo: addr(appinfo),
-      enabledLayerCount: layers.len.uint32,
+      enabledLayerCount: availableLayers.len.uint32,
       ppEnabledLayerNames: layersC,
       enabledExtensionCount: requiredExtensions.len.uint32,
       ppEnabledExtensionNames: instanceExtensionsC
