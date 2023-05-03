@@ -9,6 +9,8 @@ type
   NativeWindow* = object
     hinstance*: HINSTANCE
     hwnd*: HWND
+    g_wpPrev: WINDOWPLACEMENT
+
 
 # sorry, have to use module-global variable to capture windows events
 var currentEvents: seq[Event]
@@ -87,9 +89,19 @@ proc createWindow*(title: string): NativeWindow =
 
   discard ShowWindow(result.hwnd, SW_SHOW)
 
+# inspired by the one and only, Raymond Chen
+# https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
 proc fullscreen*(window: NativeWindow, enable: bool) =
-  discard
-  # from the oneandonly: https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
+  let dwStyle: DWORD = GetWindowLong(window.hwnd, GWL_STYLE)
+  if (dwStyle and WS_OVERLAPPEDWINDOW):
+    var mi: MONITORINFO
+    if GetWindowPlacement(window.hwnd, unsafeAddr window.g_wpPrev) and GetMonitorInfo(MonitorFromWindow(window.hwnd, MONITOR_DEFAULTTOPRIMARY), addr mi):
+      SetWindowLong(window.hwnd, GWL_STYLE, dwStyle and (not WS_OVERLAPPEDWINDOW))
+      SetWindowPos(window.hwnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
+  else:
+    SetWindowLong(window.hwnd, GWL_STYLE, dwStyle or WS_OVERLAPPEDWINDOW)
+    SetWindowPlacement(window.hwnd, unsafeAddr window.g_wpPrev)
+    SetWindowPos(window.hwnd, HWND(0), 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
 
 proc hideSystemCursor*(window: NativeWindow) =
   discard ShowCursor(false)
