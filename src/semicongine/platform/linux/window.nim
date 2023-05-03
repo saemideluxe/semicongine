@@ -1,14 +1,15 @@
 import std/options
 import std/tables
 import std/strformat
-import std/logging
 
 import
   x11/xlib,
   x11/xutil,
   x11/keysym,
-  x11/xatom
+  x11/x11pragma
 import x11/x
+
+echo x11pragma.libX11
 
 import ../../events
 import ../../math/vector
@@ -97,7 +98,8 @@ proc fullscreen*(window: NativeWindow, enable: bool) =
 
   var
     wm_state = window.display.XInternAtom("_NET_WM_STATE", 1)
-    wm_state_operation = window.display.XInternAtom(if enable: "_NET_WM_STATE_ADD" else: "_NET_WM_STATE_REMOVE", 1)
+    op = (if enable: "_NET_WM_STATE_ADD" else: "_NET_WM_STATE_REMOVE")
+    wm_state_operation = window.display.XInternAtom(cstring(op), 1)
     wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 1)
     xev = XEvent(
       theType: ClientMessage,

@@ -183,7 +183,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
     nil,
     addr(result.vk)
   )
-  result.descriptorPool = result.device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1'u32)])
+  result.descriptorPool = result.device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32(inFlightFrames))])
   result.descriptorSets = result.descriptorPool.allocateDescriptorSet(result.descriptorSetLayout, inFlightFrames)
   discard result.uniforms # just for assertion
   result.setupUniforms(inFlightFrames=inFlightFrames)

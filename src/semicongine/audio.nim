@@ -1,7 +1,8 @@
 import std/tables
 import std/locks
+import std/logging except Level
 
-when defined(windows): # used for setting audio thread priority on windows
+when defined(windows): # used for setting audio thread priority
   import winim
 when defined(linux):
   import std/posix
@@ -179,19 +180,21 @@ proc destroy*(mixer: var Mixer) =
 
 # Threaded implementation, usually used for audio
 
-var mixer* = createShared(Mixer)
+var
+  mixer* = createShared(Mixer)
+  audiothread: Thread[void]
 
 proc audioWorker() {.thread.} =
-  when defined(linux):
-    discard nice(-20)
-  onThreadDestruction(proc() = mixer[].lock.withLock(mixer[].destroy()); freeShared(mixer))
   mixer[].setupDevice()
+  onThreadDestruction(proc() = mixer[].lock.withLock(mixer[].destroy()); freeShared(mixer))
   while true:
     mixer[].updateSoundBuffer()
 
 proc startMixerThread*() =
   mixer[] = initMixer()
-  var audiothread: Thread[void]
   audiothread.createThread(audioWorker)
+  debug "Created audio thread"
   when defined(window):
     SetThreadPriority(audiothread.handle(), THREAD_PRIORITY_TIME_CRITICAL)
+  when defined(linux):
+    discard pthread_setschedprio(Pthread(audiothread.handle()), cint(-20))

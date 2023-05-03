@@ -89,6 +89,7 @@ proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
   assert layout.device.vk.valid
   assert layout.vk.valid
 
+
   var layouts: seq[VkDescriptorSetLayout]
   var descriptorSets = newSeq[VkDescriptorSet](nframes)
   for i in 0 ..< nframes:
