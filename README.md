@@ -49,15 +49,18 @@ Other (required for alpha release):
   - [x] X11
   - [x] Win32
 - [x] Enable/disable hardware cursor
-- [ ] Fullscreen mode + switch between modes
-      - [x] Linux (works well enough, I hope)
-      - [ ] Window
+- [x] Fullscreen mode + switch between modes
+      - [x] Linux
+      - [x] Window
 - [x] Audio playing
-      - [x] Linux (Alsa)
-      - [x] Windows Waveform API (maybe change to direcsound)
+      - [x] Linux
+      - [x] Windows Waveform API
+- [ ] Generic configuration concept (engine defaults, per-user, etc)
 - [ ] Input-mapping configuration
 - [ ] Telemetry
-- [ ]  Documentation?
+    - [ ] Add simple event logging service
+    - [ ] Add exception reporting
+- [ ] Documentation?
 
 Advanced features (very low priority):
 - [ ] Text rendering
