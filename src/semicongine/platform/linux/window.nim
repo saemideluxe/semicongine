@@ -78,7 +78,7 @@ proc createWindow*(title: string): NativeWindow =
   checkXlibResult display.XFreePixmap(pixmap)
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
-proc fullscreen*(window: NativeWindow, enable: bool) =
+proc fullscreen*(window: var NativeWindow, enable: bool) =
   var
     wm_state = window.display.XInternAtom("_NET_WM_STATE", 0)
     op = (if enable: "_NET_WM_STATE_ADD" else: "_NET_WM_STATE_REMOVE")

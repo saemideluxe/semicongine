@@ -70,6 +70,7 @@ proc createWindow*(title: string): NativeWindow =
       lpfnWndProc: WindowHandler,
       hInstance: result.hInstance,
       lpszClassName: windowClassName,
+      hcursor: LoadCursor(HINSTANCE(0), IDC_ARROW),
     )
   
   if(RegisterClassEx(addr(windowClass)) == 0):
@@ -87,20 +88,21 @@ proc createWindow*(title: string): NativeWindow =
       nil
     )
 
+  result.g_wpPrev.length = UINT(sizeof(WINDOWPLACEMENT))
   discard ShowWindow(result.hwnd, SW_SHOW)
 
 # inspired by the one and only, Raymond Chen
 # https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
-proc fullscreen*(window: NativeWindow, enable: bool) =
+proc fullscreen*(window: var NativeWindow, enable: bool) =
   let dwStyle: DWORD = GetWindowLong(window.hwnd, GWL_STYLE)
-  if (dwStyle and WS_OVERLAPPEDWINDOW):
-    var mi: MONITORINFO
-    if GetWindowPlacement(window.hwnd, unsafeAddr window.g_wpPrev) and GetMonitorInfo(MonitorFromWindow(window.hwnd, MONITOR_DEFAULTTOPRIMARY), addr mi):
+  if enable:
+    var mi = MONITORINFO(cbSize: DWORD(sizeof(MONITORINFO)))
+    if GetWindowPlacement(window.hwnd, addr window.g_wpPrev) and GetMonitorInfo(MonitorFromWindow(window.hwnd, MONITOR_DEFAULTTOPRIMARY), addr mi):
       SetWindowLong(window.hwnd, GWL_STYLE, dwStyle and (not WS_OVERLAPPEDWINDOW))
       SetWindowPos(window.hwnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
   else:
     SetWindowLong(window.hwnd, GWL_STYLE, dwStyle or WS_OVERLAPPEDWINDOW)
-    SetWindowPlacement(window.hwnd, unsafeAddr window.g_wpPrev)
+    SetWindowPlacement(window.hwnd, addr window.g_wpPrev)
     SetWindowPos(window.hwnd, HWND(0), 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
 
 proc hideSystemCursor*(window: NativeWindow) =
