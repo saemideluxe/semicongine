@@ -9,8 +9,6 @@ import
   x11/x11pragma
 import x11/x
 
-echo x11pragma.libX11
-
 import ../../events
 import ../../math/vector
 
@@ -81,56 +79,34 @@ proc createWindow*(title: string): NativeWindow =
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
 proc fullscreen*(window: NativeWindow, enable: bool) =
-  var WM_HINTS = XInternAtom(window.display, "_MOTIF_WM_HINTS", 1);
-  var border = culong(if enable: 0 else: 1)
-
-  type
-    MWMHints = object
-      flags: culong
-      functions: culong
-      decorations: culong
-      input_mode: clong
-      status: culong
-
-  var hints = MWMHints(flags: (culong(1) shl 1), functions: 0, decorations: border, input_mode: 0, status: 0)
-
-  checkXlibResult window.display.XChangeProperty(window.window, WM_HINTS, WM_HINTS, 32, PropModeReplace, cast[cstring](addr hints), sizeof(MWMHints) div sizeof(clong))
-
   var
-    wm_state = window.display.XInternAtom("_NET_WM_STATE", 1)
+    wm_state = window.display.XInternAtom("_NET_WM_STATE", 0)
     op = (if enable: "_NET_WM_STATE_ADD" else: "_NET_WM_STATE_REMOVE")
-    wm_state_operation = window.display.XInternAtom(cstring(op), 1)
-    wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 1)
-    xev = XEvent(
-      theType: ClientMessage,
-      xany: XAnyEvent(theType: ClientMessage),
-      xclient: XClientMessageEvent(
-        message_type: wm_state,
-        format: 32,
-        window: window.window,
-        data: XClientMessageData(
-          l: [
-            clong(wm_state_operation),
-            clong(wm_fullscreen),
-            0,
-            0,
-            0
-          ]
-        )
-      )
+    wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 0)
+  var
+    xev: XEvent
+  xev.xclient = XClientMessageEvent(
+    message_type: wm_state,
+    format: 32,
+    window: window.window,
+    data: XClientMessageData(
+      l: [
+        int(enable) xor 1,
+        clong(wm_fullscreen),
+        0,
+        0,
+        0
+      ]
     )
+  )
+  xev.theType = ClientMessage
 
-  discard window.display.XSendEvent(
-    window.display.XRootWindow(window.display.XDefaultScreen()),
+  checkXlibResult window.display.XSendEvent(
+    window.display.DefaultRootWindow(),
     0,
     SubstructureRedirectMask or SubstructureNotifyMask,
     addr xev
   )
-
-  if enable:
-    var attribs: XWindowAttributes
-    checkXlibResult window.display.XGetWindowAttributes(window.display.XDefaultRootWindow(), addr(attribs))
-    checkXlibResult window.display.XMoveResizeWindow(window.window, 0, 0, cuint(attribs.width), cuint(attribs.height))
   checkXlibResult window.display.XFlush()
 
 proc hideSystemCursor*(window: NativeWindow) =
