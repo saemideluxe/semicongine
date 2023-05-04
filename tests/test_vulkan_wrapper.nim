@@ -20,9 +20,9 @@ proc diagnostics(instance: Instance) =
     for extension in device.getExtensions():
       echo "    " & $extension
     echo "  Properties"
-    echo "  " & $device.getProperties()
+    echo "  " & $device.properties
     echo "  Features"
-    echo "  " & $device.getFeatures()
+    echo "  " & $device.features
     echo "  Queue families"
     for queueFamily in device.getQueueFamilies():
       echo "    " & $queueFamily
@@ -130,7 +130,7 @@ proc main() =
       inputs=vertexOutput,
       uniforms=uniforms,
       outputs=fragOutput,
-      main="color = vec4(outcolor, 1);"
+      main="color = vec4(outcolor, 0.8);"
     )
   var renderPass = engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
   engine.setRenderer(renderPass)

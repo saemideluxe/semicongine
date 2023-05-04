@@ -43,7 +43,7 @@ proc createSwapchain*(
   surfaceFormat: VkSurfaceFormatKHR,
   queueFamily: QueueFamily,
   desiredNumberOfImages=3'u32,
-  presentMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR,
+  preferedPresentMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR,
   inFlightFrames=2,
   oldSwapchain=VkSwapchainKHR(0)
 ): Option[Swapchain] =
@@ -57,6 +57,22 @@ proc createSwapchain*(
     return none(Swapchain)
 
   var imageCount = desiredNumberOfImages
+
+  const PRESENTMODES_BY_PREFERENCE = [
+    VK_PRESENT_MODE_MAILBOX_KHR,
+    VK_PRESENT_MODE_FIFO_RELAXED_KHR,
+    VK_PRESENT_MODE_FIFO_KHR,
+    VK_PRESENT_MODE_IMMEDIATE_KHR,
+    VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR,
+    VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR,
+  ]
+  var supportedModes = device.physicalDevice.getSurfacePresentModes()
+  var presentMode: VkPresentModeKHR
+  for mode in PRESENTMODES_BY_PREFERENCE:
+    if mode in supportedModes:
+      presentMode = mode
+      break
+
   # following is according to vulkan specs
   if presentMode in [VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR, VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR]:
     imageCount = 1
@@ -214,7 +230,6 @@ proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
     surfaceFormat=swapchain.surfaceFormat,
     queueFamily=swapchain.queueFamily,
     desiredNumberOfImages=swapchain.imageCount,
-    presentMode=swapchain.presentMode,
     inFlightFrames=swapchain.inFlightFrames,
     oldSwapchain=swapchain.vk,
   )

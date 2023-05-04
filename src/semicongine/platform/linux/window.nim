@@ -5,8 +5,7 @@ import std/strformat
 import
   x11/xlib,
   x11/xutil,
-  x11/keysym,
-  x11/x11pragma
+  x11/keysym
 import x11/x
 
 import ../../events
@@ -81,7 +80,6 @@ proc createWindow*(title: string): NativeWindow =
 proc fullscreen*(window: var NativeWindow, enable: bool) =
   var
     wm_state = window.display.XInternAtom("_NET_WM_STATE", 0)
-    op = (if enable: "_NET_WM_STATE_ADD" else: "_NET_WM_STATE_REMOVE")
     wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 0)
   var
     xev: XEvent

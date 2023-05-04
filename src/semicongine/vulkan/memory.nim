@@ -24,6 +24,10 @@ type
       of false: discard
       of true: data*: pointer
     needsFlushing*: bool
+  MemoryRequirements* = object
+    size*: uint64
+    alignment*: uint64
+    memoryTypes*: seq[MemoryType]
 
 func `$`*(memoryType: MemoryType): string =
   &"Memorytype {memoryType.flags} (heap size: {memoryType.heap.size}, heap flags: {memoryType.heap.flags})"
