@@ -1,4 +1,6 @@
 import std/sequtils
+import std/os
+
 import ./platform/window
 
 import ./vulkan/api
@@ -75,6 +77,8 @@ proc initEngine*(
   if debug:
     instanceExtensions.add "VK_EXT_debug_utils"
     enabledLayers.add "VK_LAYER_KHRONOS_validation"
+    putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
+
     if defined(linux):
       enabledLayers.add "VK_LAYER_MESA_overlay"
   result.instance = result.window.createInstance(

@@ -12,15 +12,13 @@ type
     name*: string
     devicetype*: VkPhysicalDeviceType
     surface*: VkSurfaceKHR
+    properties*: VkPhysicalDeviceProperties
+    features*: VkPhysicalDeviceFeatures
   QueueFamily* = object
     device: PhysicalDevice
     properties*: VkQueueFamilyProperties
     index*: uint32
     flags*: seq[VkQueueFlagBits]
-
-proc getProperties*(device: PhysicalDevice): VkPhysicalDeviceProperties =
-  assert device.vk.valid
-  device.vk.vkGetPhysicalDeviceProperties(addr result)
 
 proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
   assert instance.vk.valid
@@ -31,9 +29,10 @@ proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
   checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), devices.toCPointer)
   for i in 0 ..< nDevices:
     var device = PhysicalDevice(vk: devices[i], surface: instance.surface)
-    let props = device.getProperties()
-    device.name = props.deviceName.cleanString()
-    device.devicetype = props.deviceType
+    device.vk.vkGetPhysicalDeviceProperties(addr device.properties)
+    device.vk.vkGetPhysicalDeviceFeatures(addr device.features)
+    device.name = device.properties.deviceName.cleanString()
+    device.devicetype = device.properties.deviceType
     result.add device
 
 proc getExtensions*(device: PhysicalDevice): seq[string] =
@@ -45,10 +44,6 @@ proc getExtensions*(device: PhysicalDevice): seq[string] =
     checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), extensions.toCPointer)
     for extension in extensions:
       result.add(cleanString(extension.extensionName))
-
-proc getFeatures*(device: PhysicalDevice): VkPhysicalDeviceFeatures =
-  assert device.vk.valid
-  device.vk.vkGetPhysicalDeviceFeatures(addr result)
 
 proc getSurfaceCapabilities*(device: PhysicalDevice): VkSurfaceCapabilitiesKHR =
   assert device.vk.valid

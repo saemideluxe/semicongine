@@ -31,6 +31,39 @@ proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int
   checkVkResult device.vk.vkAllocateCommandBuffers(addr(allocInfo), result.buffers.toCPointer)
 
 
+template withSingleUseCommandBuffer*(device: Device, needsTransfer: bool, commandBuffer, body: untyped): untyped =
+  assert device.vk.valid
+
+  var queue: Queue
+  for q in device.queues.values:
+    if q.family.canDoTransfer or not needsTransfer:
+      queue = q
+      break
+  if not queue.vk.valid:
+    raise newException(Exception, "No queue that supports buffer transfer")
+
+  var
+    commandBufferPool = createCommandBufferPool(device, queue.family, 1)
+    commandBuffer = commandBufferPool.buffers[0]
+    beginInfo = VkCommandBufferBeginInfo(
+      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+      flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
+    )
+  checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
+
+  block:
+    body
+
+  checkVkResult commandBuffer.vkEndCommandBuffer()
+  var submitInfo = VkSubmitInfo(
+    sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
+    commandBufferCount: 1,
+    pCommandBuffers: addr(commandBuffer),
+  )
+  checkVkResult queue.vk.vkQueueSubmit(1, addr(submitInfo), VkFence(0))
+  checkVkResult queue.vk.vkQueueWaitIdle()
+  commandBufferPool.destroy()
+
 proc destroy*(commandpool: var CommandBufferPool) =
   assert commandpool.device.vk.valid
   assert commandpool.vk.valid

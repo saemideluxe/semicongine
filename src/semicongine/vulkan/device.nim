@@ -12,6 +12,7 @@ type
     physicalDevice*: PhysicalDevice
     vk*: VkDevice
     queues*: Table[QueueFamily, Queue]
+    enabledFeatures*: VkPhysicalDeviceFeatures
   Queue* = object
     vk*: VkQueue
     family*: QueueFamily
@@ -48,7 +49,6 @@ proc createDevice*(
       queueCount: 1,
       pQueuePriorities: addr(priority),
     )
-
   var queueList = deviceQueues.values.toSeq
   var createInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -58,7 +58,7 @@ proc createDevice*(
     ppEnabledLayerNames: enabledLayersC,
     enabledExtensionCount: uint32(allExtensions.len),
     ppEnabledExtensionNames: enabledExtensionsC,
-    pEnabledFeatures: nil,
+    pEnabledFeatures: addr result.enabledFeatures,
   )
 
   checkVkResult vkCreateDevice(

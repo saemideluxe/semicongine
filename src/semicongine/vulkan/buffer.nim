@@ -20,10 +20,6 @@ type
       of false: discard
       of true:
         memory*: DeviceMemory
-  MemoryRequirements = object
-    size: uint64
-    alignment: uint64
-    memoryTypes: seq[MemoryType]
 
 
 proc `==`*(a, b: Buffer): bool =
@@ -102,42 +98,18 @@ proc copy*(src, dst: Buffer, dstOffset=0'u64) =
   assert VK_BUFFER_USAGE_TRANSFER_SRC_BIT in src.usage
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 
-  var queue: Queue
-  for q in src.device.queues.values:
-    if q.family.canDoTransfer:
-      queue = q
-  if not queue.vk.valid:
-    raise newException(Exception, "No queue that supports buffer transfer")
-
-  var
-    commandBufferPool = src.device.createCommandBufferPool(family=queue.family, nBuffers=1)
-    commandBuffer = commandBufferPool.buffers[0]
-
-    beginInfo = VkCommandBufferBeginInfo(
-      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-      flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
-    )
-    copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: dstOffset)
-  checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
-  commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
-  checkVkResult commandBuffer.vkEndCommandBuffer()
-
-  var submitInfo = VkSubmitInfo(
-    sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
-    commandBufferCount: 1,
-    pCommandBuffers: addr(commandBuffer),
-  )
-  checkVkResult queue.vk.vkQueueSubmit(1, addr(submitInfo), VkFence(0))
-  checkVkResult queue.vk.vkQueueWaitIdle()
-  commandBufferPool.destroy()
+  var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: dstOffset)
+  withSingleUseCommandBuffer(src.device, true, commandBuffer):
+    commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
 
 proc destroy*(buffer: var Buffer) =
   assert buffer.device.vk.valid
   assert buffer.vk.valid
+  buffer.device.vk.vkDestroyBuffer(buffer.vk, nil)
   if buffer.memoryAllocated:
     assert buffer.memory.vk.valid
     buffer.memory.free
-  buffer.device.vk.vkDestroyBuffer(buffer.vk, nil)
+    buffer.memoryAllocated = false
   buffer.vk.reset
 
 proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
