@@ -22,9 +22,15 @@ type
       of false: discard
       of true:
         memory*: DeviceMemory
+  Sampler* = object
+    device*: Device
+    vk*: VkSampler
   ImageView* = object
     vk*: VkImageView
     image*: Image
+  Texture* = object
+    imageView*: ImageView
+    sampler*: Sampler
 
 const DEPTH_FORMAT_MAP = {
   PixelDepth(1): VK_FORMAT_R8_SRGB,
@@ -132,10 +138,15 @@ proc copy*(src: Buffer, dst: Image) =
     )
 
 # currently only usable for texture access from shader
-proc createImage(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): Image =
+proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): Image =
   assert device.vk.valid
+  assert width > 0
+  assert height > 0
+  assert depth != 2
+  assert data != nil
 
   let size = width * height * depth
+  result.device = device
   result.width = width
   result.height = height
   result.depth = depth
@@ -156,6 +167,7 @@ proc createImage(device: Device, width, height: uint32, depth: PixelDepth, data:
     samples: VK_SAMPLE_COUNT_1_BIT,
   )
   checkVkResult device.vk.vkCreateImage(addr imageInfo, nil, addr result.vk)
+  result.allocateMemory(requireMappable=false, preferVRAM=true, preferAutoFlush=false)
   result.transitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
 
   var stagingBuffer = device.createBuffer(size=size, usage=[VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable=true, preferVRAM=false, preferAutoFlush=true)
@@ -174,7 +186,8 @@ proc destroy*(image: var Image) =
     image.memoryAllocated = false
   image.vk.reset
 
-proc createSampler(device: Device): VkSampler =
+proc createSampler*(device: Device): Sampler =
+  assert device.vk.valid
   var samplerInfo = VkSamplerCreateInfo(
     sType: VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
     magFilter: VK_FILTER_LINEAR,
@@ -193,8 +206,14 @@ proc createSampler(device: Device): VkSampler =
     minLod: 0,
     maxLod: 0,
   )
-  checkVkResult device.vk.vkCreateSampler(addr samplerInfo, nil, addr result)
+  result.device = device
+  checkVkResult device.vk.vkCreateSampler(addr samplerInfo, nil, addr result.vk)
 
+proc destroy*(sampler: var Sampler) =
+  assert sampler.device.vk.valid
+  assert sampler.vk.valid
+  sampler.device.vk.vkDestroySampler(sampler.vk, nil)
+  sampler.vk.reset
 
 proc createImageView*(
   image: Image,
@@ -234,3 +253,14 @@ proc destroy*(imageview: var ImageView) =
   assert imageview.vk.valid
   imageview.image.device.vk.vkDestroyImageView(imageview.vk, nil)
   imageview.vk.reset()
+
+proc createTexture*(image: Image): Texture =
+  assert image.vk.valid
+  assert image.device.vk.valid
+
+  result.imageView = image.createImageView()
+  result.sampler = image.device.createSampler()
+
+proc destroy*(texture: var Texture) =
+  texture.imageView.destroy()
+  texture.sampler.destroy()

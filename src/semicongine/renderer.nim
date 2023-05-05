@@ -11,6 +11,8 @@ import ./vulkan/pipeline
 import ./vulkan/physicaldevice
 import ./vulkan/renderpass
 import ./vulkan/swapchain
+import ./vulkan/descriptor
+import ./vulkan/image
 
 import ./entity
 import ./mesh
@@ -22,6 +24,9 @@ type
     drawables*: OrderedTable[Mesh, Drawable]
     vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
+    uniformBuffers*: seq[Buffer] # one per frame-in-flight
+    images*: seq[Image] # used to back texturees
+    textures*: seq[Table[string, Texture]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
@@ -31,7 +36,7 @@ type
     surfaceFormat: VkSurfaceFormatKHR
     renderPass: RenderPass
     swapchain: Swapchain
-    scenedata: Table[Entity, SceneData]
+    scenedata: Table[Scene, SceneData]
 
 
 proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
@@ -47,10 +52,11 @@ proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
     raise newException(Exception, "Unable to create swapchain")
   result.swapchain = swapchain.get()
 
-proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[ShaderAttribute], transformAttribute="") =
+proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], transformAttribute="") =
   assert not (scene in renderer.scenedata)
   var data = SceneData()
 
+  # when mesh transformation are handled through the scenegraph-transformation, set it up here
   if transformattribute != "":
     var hasTransformAttribute = false
     for input in inputs:
@@ -61,14 +67,15 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
     assert hasTransformAttribute
     data.transformAttribute = transformAttribute
 
-
+  # find all meshes, populate missing attribute values for shader
   var allMeshes: seq[Mesh]
-  for mesh in allComponentsOfType[Mesh](scene):
+  for mesh in allComponentsOfType[Mesh](scene.root):
     allMeshes.add mesh
     for inputAttr in inputs:
       if not mesh.hasDataFor(inputAttr.name):
         mesh.initData(inputAttr)
   
+  # create index buffer if necessary
   var indicesBufferSize = 0'u64
   for mesh in allMeshes:
     if mesh.indexType != None:
@@ -89,7 +96,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
       preferVRAM=true,
     )
 
-  # one vertex data buffer per memory location
+  # create vertex buffers and calculcate offsets
+  # trying to use one buffer per memory type
   var
     perLocationOffsets: Table[MemoryPerformanceHint, uint64]
     perLocationSizes: Table[MemoryPerformanceHint, uint64]
@@ -113,6 +121,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
       )
       perLocationOffsets[memoryPerformanceHint] = 0
 
+  # fill vertex buffers
   var indexBufferOffset = 0'u64
   for mesh in allMeshes:
     var offsets: seq[(string, MemoryPerformanceHint, uint64)]
@@ -145,6 +154,28 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Entity, inputs: seq[Sh
       indexBufferOffset += size
     data.drawables[mesh] = drawable
 
+  # setup uniforms and textures
+  for i in 0 ..< renderer.renderPass.subpasses.len:
+    var subpass = renderer.renderPass.subpasses[i]
+    for pipeline in subpass.pipelines.mitems:
+      var uniformBufferSize = 0'u64
+      for uniform in pipeline.uniforms:
+        uniformBufferSize += uniform.thetype.size
+      if uniformBufferSize > 0:
+        for i in 0 ..< renderer.swapchain.inFlightFrames:
+          data.uniformBuffers.add renderer.device.createBuffer(
+            size=uniformBufferSize,
+            usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
+            requireMappable=true,
+            preferVRAM=true,
+          )
+      # textures: seq[Table[string, Texture]]
+      var textures: Table[string, Texture]
+      data.textures.add textures
+      # need a separate descriptor for each frame in flight
+      pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
+      pipeline.descriptorSets[i].writeDescriptorSet()
+
   renderer.scenedata[scene] = data
 
 proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: string) =
@@ -154,11 +185,10 @@ proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: s
   let bindingNumber = sceneData.attributeBindingNumber[attribute]
   sceneData.vertexBuffers[memoryPerformanceHint].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][2])
 
-
-proc refreshMeshData*(renderer: var Renderer, scene: Entity) =
+proc refreshMeshData*(renderer: var Renderer, scene: Scene) =
   assert scene in renderer.scenedata
 
-  for mesh in allComponentsOfType[Mesh](scene):
+  for mesh in allComponentsOfType[Mesh](scene.root):
     # if mesh transformation attribute is enabled, update the model matrix
     if renderer.scenedata[scene].transformAttribute != "":
       let transform = mesh.entity.getModelTransform()
@@ -173,9 +203,24 @@ proc refreshMeshData*(renderer: var Renderer, scene: Entity) =
     var m = mesh
     m.clearDataChanged()
 
+proc updateUniforms(renderer: Renderer, scene: var Scene, currentInFlight: int) =
+  assert scene in renderer.scenedata
+  var data = renderer.scenedata[scene]
+  if data.uniformBuffers.len == 0:
+    return
+  assert data.uniformBuffers[currentInFlight].vk.valid
 
+  for i in 0 ..< renderer.renderPass.subpasses.len:
+    var subpass = renderer.renderPass.subpasses[i]
+    for pipeline in subpass.pipelines.mitems:
+      var offset = 0'u64
+      for uniform in pipeline.uniforms:
+        assert uniform.thetype == scene.shaderGlobals[uniform.name].thetype
+        let (pdata, size) = scene.shaderGlobals[uniform.name].getRawData()
+        data.uniformBuffers[currentInFlight].setData(pdata, size, offset)
+        offset += size
 
-proc render*(renderer: var Renderer, scene: Entity) =
+proc render*(renderer: var Renderer, scene: var Scene) =
   assert scene in renderer.scenedata
 
   var
@@ -196,13 +241,14 @@ proc render*(renderer: var Renderer, scene: Entity) =
 
   commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer())
 
+  renderer.updateUniforms(scene, renderer.swapchain.currentInFlight)
+
   for i in 0 ..< renderer.renderPass.subpasses.len:
     let subpass = renderer.renderPass.subpasses[i]
     for pipeline in subpass.pipelines:
       var mpipeline = pipeline
       commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, mpipeline.vk)
       commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, mpipeline.layout, 0, 1, addr(mpipeline.descriptorSets[renderer.swapchain.currentInFlight].vk), 0, nil)
-      mpipeline.updateUniforms(scene, renderer.swapchain.currentInFlight)
 
       debug "Scene buffers:"
       for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
@@ -229,7 +275,6 @@ proc render*(renderer: var Renderer, scene: Entity) =
     checkVkResult renderer.device.vk.vkDeviceWaitIdle()
     oldSwapchain.destroy()
 
-
 func framesRendered*(renderer: Renderer): uint64 =
   renderer.swapchain.framesRendered
 
@@ -239,8 +284,13 @@ func valid*(renderer: Renderer): bool =
 proc destroy*(renderer: var Renderer) =
   for data in renderer.scenedata.mvalues:
     for buffer in data.vertexBuffers.mvalues:
+      assert buffer.vk.valid
       buffer.destroy()
     if data.indexBuffer.vk.valid:
+      assert data.indexBuffer.vk.valid
       data.indexBuffer.destroy()
+    for buffer in data.uniformBuffers.mitems:
+      assert buffer.vk.valid
+      buffer.destroy()
   renderer.renderPass.destroy()
   renderer.swapchain.destroy()

@@ -26,6 +26,7 @@ type
     binary: seq[uint32]
     inputs*: seq[ShaderAttribute]
     uniforms*: seq[ShaderAttribute]
+    samplers*: seq[ShaderAttribute]
     outputs*: seq[ShaderAttribute]
   Shader* = object
     device: Device
@@ -34,6 +35,7 @@ type
     entrypoint*: string
     inputs*: seq[ShaderAttribute]
     uniforms*: seq[ShaderAttribute]
+    samplers*: seq[ShaderAttribute]
     outputs*: seq[ShaderAttribute]
 
 
@@ -88,6 +90,7 @@ proc compileGlslShader*(
   stage: VkShaderStageFlagBits,
   inputs: seq[ShaderAttribute]= @[],
   uniforms: seq[ShaderAttribute]= @[],
+  samplers: seq[ShaderAttribute]= @[],
   outputs: seq[ShaderAttribute]= @[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
@@ -97,13 +100,15 @@ proc compileGlslShader*(
   var code = @[&"#version {version}", ""] &
   # var code = @[&"#version {version}", "layout(row_major) uniform;", ""] &
     (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
-    (if uniforms.len > 0: uniforms.glslUniforms() & @[""] else: @[]) &
+    (if uniforms.len > 0: uniforms.glslUniforms(binding=0) & @[""] else: @[]) &
+    (if samplers.len > 0: samplers.glslSamplers(basebinding=1) & @[""] else: @[]) &
     (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
     @[&"void {entrypoint}(){{"] &
     main &
     @[&"}}"]
   result.inputs = inputs
   result.uniforms = uniforms
+  result.samplers = samplers
   result.outputs = outputs
   result.entrypoint = entrypoint
   result.stage = stage
@@ -114,12 +119,13 @@ proc compileGlslShader*(
   stage: VkShaderStageFlagBits,
   inputs: seq[ShaderAttribute]= @[],
   uniforms: seq[ShaderAttribute]= @[],
+  samplers: seq[ShaderAttribute]= @[],
   outputs: seq[ShaderAttribute]= @[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
   main: string
 ): ShaderCode {.compileTime.} =
-  return compileGlslShader(stage, inputs, uniforms, outputs, version, entrypoint, @[main])
+  return compileGlslShader(stage, inputs, uniforms, samplers, outputs, version, entrypoint, @[main])
 
 
 proc createShaderModule*(
@@ -132,6 +138,7 @@ proc createShaderModule*(
   result.device = device
   result.inputs = shaderCode.inputs
   result.uniforms = shaderCode.uniforms
+  result.samplers = shaderCode.samplers
   result.outputs = shaderCode.outputs
   result.entrypoint = shaderCode.entrypoint
   result.stage = shaderCode.stage

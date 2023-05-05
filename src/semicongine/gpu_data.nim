@@ -6,7 +6,8 @@ import ./vulkan/api
 import ./math
 
 type
-  GPUType* = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
+  Sampler2DType* = object
+  GPUType* = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64] | Sampler2DType
   DataType* = enum
     Float32
     Float64
@@ -50,6 +51,7 @@ type
     Mat43F64
     Mat4F32
     Mat4F64
+    Sampler2D
   DataValue* = object
     case thetype*: DataType
     of Float32: float32: float32
@@ -94,6 +96,7 @@ type
     of Mat43F64: mat43f64: TMat43[float64]
     of Mat4F32: mat4f32: TMat4[float32]
     of Mat4F64: mat4f64: TMat4[float64]
+    of Sampler2D: discard
   DataList* = object
     len*: uint32
     case thetype*: DataType
@@ -139,6 +142,7 @@ type
     of Mat43F64: mat43f64: seq[TMat43[float64]]
     of Mat4F32: mat4f32*: seq[TMat4[float32]]
     of Mat4F64: mat4f64: seq[TMat4[float64]]
+    of Sampler2D: discard
   MemoryPerformanceHint* = enum
     PreferFastRead, PreferFastWrite
   ShaderAttribute* = object
@@ -156,7 +160,6 @@ func instanceInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
   for attr in attributes:
     if attr.perInstance == false:
       result.add attr
-
 
 func numberOfVertexInputAttributeDescriptors*(thetype: DataType): uint32 =
   case thetype:
@@ -209,6 +212,7 @@ func size*(thetype: DataType): uint32 =
     of Mat43F64: 92
     of Mat4F32: 64
     of Mat4F64: 128
+    of Sampler2D: 0
 
 func size*(attribute: ShaderAttribute, perDescriptor=false): uint32 =
   if perDescriptor: attribute.thetype.size div attribute.thetype.numberOfVertexInputAttributeDescriptors
@@ -273,6 +277,7 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
   elif T is TMat43[float64]: Mat43F64
   elif T is TMat4[float32]: Mat4F32
   elif T is TMat4[float64]: Mat4F64
+  elif T is Sampler2DType: Sampler2D
   else:
     static:
       raise newException(Exception, &"Unsupported data type for GPU data: {name(T)}" )
@@ -338,6 +343,7 @@ func get*[T: GPUType|int|uint|float](value: DataValue): T =
   elif T is TMat43[float64]: value.mat43f64
   elif T is TMat4[float32]: value.mat4f32
   elif T is TMat4[float64]: value.mat4f64
+  else: {.error: "Virtual datatype has no value" .}
 
 func get*[T: GPUType|int|uint|float](value: DataList): seq[T] =
   when T is float32: value.float32
@@ -388,6 +394,7 @@ func get*[T: GPUType|int|uint|float](value: DataList): seq[T] =
   elif T is TMat43[float64]: value.mat43f64
   elif T is TMat4[float32]: value.mat4f32
   elif T is TMat4[float64]: value.mat4f64
+  else: {. error: "Virtual datatype has no values" .}
 
 func getRawData*(value: var DataValue): (pointer, uint32) =
   result[1] = value.thetype.size
@@ -434,6 +441,7 @@ func getRawData*(value: var DataValue): (pointer, uint32) =
     of Mat43F64: result[0] = addr value.mat43f64
     of Mat4F32: result[0] = addr value.mat4f32
     of Mat4F64: result[0] = addr value.mat4f64
+    of Sampler2D: result[0] = nil
 
 func getRawData*(value: var DataList): (pointer, uint32) =
   result[1] = value.thetype.size * value.len
@@ -480,6 +488,7 @@ func getRawData*(value: var DataList): (pointer, uint32) =
     of Mat43F64: result[0] = addr value.mat43f64[0]
     of Mat4F32: result[0] = addr value.mat4f32[0]
     of Mat4F64: result[0] = addr value.mat4f64[0]
+    of Sampler2D: result[0] = nil
 
 func initData*(value: var DataList, len: uint32) =
   value.len = len
@@ -526,6 +535,7 @@ func initData*(value: var DataList, len: uint32) =
     of Mat43F64: value.mat43f64.setLen(len)
     of Mat4F32: value.mat4f32.setLen(len)
     of Mat4F64: value.mat4f64.setLen(len)
+    of Sampler2D: discard
 
 func setValue*[T: GPUType|int|uint|float](value: var DataValue, data: T) =
   when T is float32: value.float32 = data
@@ -576,6 +586,7 @@ func setValue*[T: GPUType|int|uint|float](value: var DataValue, data: T) =
   elif T is TMat43[float64]: value.mat43f64 = data
   elif T is TMat4[float32]: value.mat4f32 = data
   elif T is TMat4[float64]: value.mat4f64 = data
+  else: {.error: "Virtual datatype has no value" .}
 
 func setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   value.len = uint32(data.len)
@@ -627,6 +638,7 @@ func setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is TMat43[float64]: value.mat43f64 = data
   elif T is TMat4[float32]: value.mat4f32 = data
   elif T is TMat4[float64]: value.mat4f64 = data
+  else: {. error: "Virtual datatype has no values" .}
 
 func setValue*[T: GPUType|int|uint|float](value: var DataList, i: uint32, data: T) =
   assert i < value.len
@@ -678,6 +690,7 @@ func setValue*[T: GPUType|int|uint|float](value: var DataList, i: uint32, data: 
   elif T is TMat43[float64]: value.mat43f64[i] = data
   elif T is TMat4[float32]: value.mat4f32[i] = data
   elif T is TMat4[float64]: value.mat4f64[i] = data
+  else: {. error: "Virtual datatype has no values" .}
 
 const TYPEMAP = {
     Float32: VK_FORMAT_R32_SFLOAT,
@@ -780,6 +793,7 @@ func nLocationSlots*(thetype: DataType): uint32 =
     of Mat43F64: 2
     of Mat4F32: 1
     of Mat4F64: 2
+    of Sampler2D: 1
 
 func glslType*(thetype: DataType): string =
   # todo: likely not correct as we would need to enable some 
@@ -823,6 +837,7 @@ func glslType*(thetype: DataType): string =
     of Mat43F64: "dmat43"
     of Mat4F32: "mat4"
     of Mat4F64: "dmat4"
+    of Sampler2D: "sampler2D"
 
 func glslInput*(group: seq[ShaderAttribute]): seq[string] =
   if group.len == 0:
@@ -833,7 +848,7 @@ func glslInput*(group: seq[ShaderAttribute]): seq[string] =
       for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
         i += attribute.thetype.nLocationSlots
 
-func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding=0): seq[string] =
+func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding: int): seq[string] =
   if group.len == 0:
     return @[]
   # currently only a single uniform block supported, therefore binding = 0
@@ -841,6 +856,14 @@ func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding=0)
   for attribute in group:
     result.add(&"    {attribute.thetype.glslType} {attribute.name};")
   result.add(&"}} {blockName};")
+
+func glslSamplers*(group: seq[ShaderAttribute], basebinding: int): seq[string] =
+  if group.len == 0:
+    return @[]
+  var thebinding = basebinding
+  for attribute in group:
+    result.add(&"layout(binding = {thebinding}) uniform {attribute.thetype.glslType} {attribute.name};")
+    inc thebinding
 
 func glslOutput*(group: seq[ShaderAttribute]): seq[string] =
   if group.len == 0:

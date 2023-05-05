@@ -1,29 +1,48 @@
 import std/enumerate
+import std/tables
 
 import ./api
 import ./device
 import ./buffer
 import ./utils
+import ./image
 
 type
+  DescriptorType* = enum
+    Uniform, ImageSampler
   Descriptor* = object # "fields" of a DescriptorSetLayout
-    thetype*: VkDescriptorType
+    name*: string
     count*: uint32
     stages*: seq[VkShaderStageFlagBits]
     itemsize*: uint32
+    case thetype*: DescriptorType
+    of Uniform:
+      buffer*: Buffer
+      offset*: uint64
+      size*: uint64
+    of ImageSampler:
+      imageview*: ImageView
+      sampler*: Sampler
+  DescriptorSet* = object # "instance" of a DescriptorSetLayout
+    vk*: VkDescriptorSet
+    layout*: DescriptorSetLayout
   DescriptorSetLayout* = object # "type-description" of a DescriptorSet
     device: Device
     vk*: VkDescriptorSetLayout
     descriptors*: seq[Descriptor]
-  DescriptorSet* = object # "instance" of a DescriptorSetLayout
-    vk*: VkDescriptorSet
-    layout: DescriptorSetLayout
   DescriptorPool* = object # required for allocation of DescriptorSet
     device: Device
     vk*: VkDescriptorPool
     maxSets*: uint32 # maximum number of allocatable descriptor sets
     counts*: seq[(VkDescriptorType, uint32)] # maximum number for each descriptor type to allocate
 
+const DESCRIPTOR_TYPE_MAP = {
+  Uniform: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+  ImageSampler: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+}.toTable
+
+func vkType(descriptor: Descriptor): VkDescriptorType =
+  DESCRIPTOR_TYPE_MAP[descriptor.thetype]
 
 proc createDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): DescriptorSetLayout =
   assert device.vk.valid
@@ -35,7 +54,7 @@ proc createDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): D
   for i, descriptor in enumerate(descriptors):
     layoutbindings.add VkDescriptorSetLayoutBinding(
       binding: uint32(i),
-      descriptorType: descriptor.thetype,
+      descriptorType: descriptor.vkType,
       descriptorCount: descriptor.count,
       stageFlags: toBits descriptor.stages,
       pImmutableSamplers: nil,
@@ -105,29 +124,52 @@ proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
   for descriptorSet in descriptorSets:
     result.add DescriptorSet(vk: descriptorSet, layout: layout)
 
-proc setDescriptorSet*(descriptorSet: DescriptorSet, buffer: Buffer, bindingBase=0'u32) =
+proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
   # assumes descriptors of the descriptorSet are arranged interleaved in buffer
   assert descriptorSet.layout.device.vk.valid
   assert descriptorSet.layout.vk.valid
   assert descriptorSet.vk.valid
-  assert buffer.device.vk.valid
-  assert buffer.vk.valid
 
   var descriptorSetWrites: seq[VkWriteDescriptorSet]
+  var bufferInfos: seq[VkDescriptorBufferInfo]
+  var imageInfos: seq[VkDescriptorImageInfo]
 
-  var offset = VkDeviceSize(0)
   var i = bindingBase
   for descriptor in descriptorSet.layout.descriptors:
-    let length = VkDeviceSize(descriptor.itemsize * descriptor.count)
-    var bufferInfo = VkDescriptorBufferInfo(buffer: buffer.vk, offset: offset, range: length)
-    descriptorSetWrites.add VkWriteDescriptorSet(
-        sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        dstSet: descriptorSet.vk,
-        dstBinding: i,
-        dstArrayElement: 0,
-        descriptorType: descriptor.thetype,
-        descriptorCount: descriptor.count,
-        pBufferInfo: addr(bufferInfo),
+    if descriptor.thetype == Uniform:
+      assert descriptor.buffer.vk.valid
+      bufferInfos.add VkDescriptorBufferInfo(
+        buffer: descriptor.buffer.vk,
+        offset: descriptor.offset,
+        range: descriptor.size,
       )
-    offset += length
+      descriptorSetWrites.add VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: descriptorSet.vk,
+          dstBinding: i,
+          dstArrayElement: 0,
+          descriptorType: descriptor.vkType,
+          descriptorCount: descriptor.count,
+          pBufferInfo: addr bufferInfos[^1],
+        )
+    #[ 
+    elif descriptor.thetype == ImageSampler:
+      assert descriptor.imageview.vk.valid
+      assert descriptor.sampler.vk.valid
+      imageInfos.add VkDescriptorImageInfo(
+        imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        imageView: descriptor.imageview.vk,
+        sampler: descriptor.sampler.vk,
+      )
+      descriptorSetWrites.add VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: descriptorSet.vk,
+          dstBinding: i,
+          dstArrayElement: 0,
+          descriptorType: descriptor.vkType,
+          descriptorCount: descriptor.count,
+          pImageInfo: addr imageInfos[^1],
+        )
+    ]#
+    inc i
   descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.toCPointer, 0, nil)
