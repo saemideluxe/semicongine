@@ -20,7 +20,7 @@ type
     graphics: bool
 
 proc `$`*(device: Device): string =
-  "vk: " & $device.vk & "physicalDevice: " & $device.physicalDevice
+  "Device: vk=" & $device.vk
 
 proc createDevice*(
   instance: Instance,

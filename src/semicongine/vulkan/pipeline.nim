@@ -7,8 +7,8 @@ import ./descriptor
 import ./shader
 import ./buffer
 import ./utils
+import ./image
 
-import ../entity
 import ../gpu_data
 
 type
@@ -20,7 +20,6 @@ type
     descriptorSetLayout*: DescriptorSetLayout
     descriptorPool*: DescriptorPool
     descriptorSets*: seq[DescriptorSet]
-    uniformBuffers: seq[Buffer]
 
 func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
   for shader in pipeline.shaders:
@@ -37,24 +36,23 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
         uniformList[attribute.name] = attribute
   result = uniformList.values.toSeq
 
-proc setupUniforms(pipeline: var Pipeline, inFlightFrames: int) =
+proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: seq[Table[string, Texture]], inFlightFrames: int) =
   assert pipeline.vk.valid
-
-  var uniformBufferSize = 0'u64
-  for uniform in pipeline.uniforms:
-    uniformBufferSize += uniform.thetype.size
-  if uniformBufferSize == 0:
-    return
+  assert buffers.len == 0 or buffers.len == inFlightFrames
+  # assert textures.len == 0 or textures.len == inFlightFrames
 
   for i in 0 ..< inFlightFrames:
-    var buffer = pipeline.device.createBuffer(
-      size=uniformBufferSize,
-      usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
-      requireMappable=true,
-      preferVRAM=true,
-    )
-    pipeline.uniformBuffers.add buffer
-    pipeline.descriptorSets[i].setDescriptorSet(buffer)
+    var offset = 0'u64
+    for descriptor in pipeline.descriptorSets[i].layout.descriptors.mitems:
+      if descriptor.thetype == Uniform:
+        let size = VkDeviceSize(descriptor.itemsize * descriptor.count)
+        descriptor.buffer = buffers[i]
+        descriptor.offset = offset
+        descriptor.size = size
+        offset += size
+      # elif descriptor.thetype == ImageSampler:
+        # descriptor.imageview = textures[i][descriptor.name].imageView
+        # descriptor.sampler = textures[i][descriptor.name].sampler
 
 proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid
@@ -67,18 +65,28 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
   assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
   assert vertexShader.outputs == fragmentShader.inputs
   assert vertexShader.uniforms == fragmentShader.uniforms
+  assert vertexShader.samplers == fragmentShader.samplers
 
   result.device = device
   result.shaders = @[vertexShader, fragmentShader]
   
   var descriptors = @[
     Descriptor(
-      thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      name: "Uniforms",
+      thetype: Uniform,
       count: 1,
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
       itemsize: vertexShader.uniforms.size(),
     ),
   ]
+  for sampler in vertexShader.samplers:
+    descriptors.add Descriptor(
+      name: sampler.name,
+      thetype: ImageSampler,
+      count: 1,
+      stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
+      itemsize: 0,
+    )
   result.descriptorSetLayout = device.createDescriptorSetLayout(descriptors)
 
   # TODO: Push constants
@@ -183,27 +191,13 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
     nil,
     addr(result.vk)
   )
-  result.descriptorPool = result.device.createDescriptorSetPool(@[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32(inFlightFrames))])
+  var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32(inFlightFrames))]
+  if vertexShader.samplers.len > 0:
+    poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, uint32(inFlightFrames * vertexShader.samplers.len))
+
+  result.descriptorPool = result.device.createDescriptorSetPool(poolsizes)
   result.descriptorSets = result.descriptorPool.allocateDescriptorSet(result.descriptorSetLayout, inFlightFrames)
   discard result.uniforms # just for assertion
-  result.setupUniforms(inFlightFrames=inFlightFrames)
-
-proc updateUniforms*(pipeline: Pipeline, rootEntity: Entity, currentInFlight: int) =
-  if pipeline.uniformBuffers.len == 0:
-    return
-  assert pipeline.vk.valid
-  assert pipeline.uniformBuffers[currentInFlight].vk.valid
-
-  var globalsByName: Table[string, DataValue]
-  for component in allComponentsOfType[ShaderGlobal](rootEntity):
-    globalsByName[component.name] = component.value
-
-  var offset = 0'u64
-  for uniform in pipeline.uniforms:
-    assert uniform.thetype == globalsByName[uniform.name].thetype
-    let (pdata, size) = globalsByName[uniform.name].getRawData()
-    pipeline.uniformBuffers[currentInFlight].setData(pdata, size, offset)
-    offset += size
 
 
 proc destroy*(pipeline: var Pipeline) =
@@ -212,10 +206,6 @@ proc destroy*(pipeline: var Pipeline) =
   assert pipeline.layout.valid
   assert pipeline.descriptorSetLayout.vk.valid
 
-  for buffer in pipeline.uniformBuffers.mitems:
-    assert buffer.vk.valid
-    buffer.destroy()
-  
   if pipeline.descriptorPool.vk.valid:
     pipeline.descriptorPool.destroy()
 

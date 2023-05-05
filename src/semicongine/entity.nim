@@ -1,13 +1,21 @@
 import std/strformat
+import std/tables
 import std/hashes
 import std/typetraits
 
 import ./math/matrix
 import ./gpu_data
+import ./vulkan/image
 
 type
   Component* = ref object of RootObj
     entity*: Entity
+
+  Scene* = object
+    name*: string
+    root*: Entity
+    shaderGlobals*: Table[string, DataValue]
+    texture: Table[string, TextureImage]
 
   Entity* = ref object of RootObj
     name*: string
@@ -16,17 +24,31 @@ type
     children*: seq[Entity]
     components*: seq[Component]
 
-  ShaderGlobal* = ref object of Component
+  TextureImage* = ref object of RootObj
     name*: string
-    value*: DataValue
+    width*: int
+    height*: int
+    imagedata*: seq[array[4, uint8]]
 
-func `$`*(global: ShaderGlobal): string =
-  &"ShaderGlobal(name: {global.name}, {global.value})"
-
-func initShaderGlobal*[T](name: string, data: T): ShaderGlobal =
+func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   var value = DataValue(thetype: getDataType[T]())
   value.setValue(data)
-  ShaderGlobal(name: name, value: value)
+  scene.shaderGlobals[name] = value
+
+func getShaderGlobal*(scene: Scene, name: string): DataValue =
+  return scene.shaderGlobals[name]
+
+func addTexture*[T](scene: var Scene, name: string, texture: Texture) =
+  scene.textures[name] = texture
+
+func newScene*(name: string, root: Entity): Scene =
+  Scene(name: name, root: root)
+
+func hash*(scene: Scene): Hash =
+  hash(scene.name)
+
+func `==`*(a, b: Scene): bool =
+  a.name == b.name
 
 func hash*(entity: Entity): Hash =
   hash(cast[pointer](entity))

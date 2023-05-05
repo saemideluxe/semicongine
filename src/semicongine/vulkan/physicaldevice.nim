@@ -20,6 +20,9 @@ type
     index*: uint32
     flags*: seq[VkQueueFlagBits]
 
+func `$`*(device: PhysicalDevice): string =
+  "Physical device: vk=" & $device.vk & ", name=" & $device.name & ", devicetype=" & $device.devicetype
+
 proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
   assert instance.vk.valid
   assert instance.surface.valid
