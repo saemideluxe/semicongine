@@ -50,9 +50,9 @@ proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: s
         descriptor.offset = offset
         descriptor.size = size
         offset += size
-      # elif descriptor.thetype == ImageSampler:
-        # descriptor.imageview = textures[i][descriptor.name].imageView
-        # descriptor.sampler = textures[i][descriptor.name].sampler
+      elif descriptor.thetype == ImageSampler:
+        descriptor.imageview = textures[i][descriptor.name].imageView
+        descriptor.sampler = textures[i][descriptor.name].sampler
 
 proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid

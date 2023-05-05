@@ -157,8 +157,7 @@ proc main() =
         if engine.updateInputs() != Running or engine.keyIsDown(Escape):
           engine.destroy()
           return
-        var time = scene.getShaderGlobal("time")
-        setValue[float32](time, get[float32](time) + 0.0005)
+        setShaderGlobal(scene, "time", getShaderGlobal[float32](scene, "time") + 0.0005'f)
         engine.renderScene(scene)
   echo "Rendered ", engine.framesRendered, " frames"
   echo "Processed ", engine.eventsProcessed, " events"

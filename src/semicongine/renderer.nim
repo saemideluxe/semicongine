@@ -169,8 +169,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
             requireMappable=true,
             preferVRAM=true,
           )
-      # textures: seq[Table[string, Texture]]
       var textures: Table[string, Texture]
+      # todo: get textures from scene
       data.textures.add textures
       # need a separate descriptor for each frame in flight
       pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)

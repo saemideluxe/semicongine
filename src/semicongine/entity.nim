@@ -35,8 +35,11 @@ func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   value.setValue(data)
   scene.shaderGlobals[name] = value
 
-func getShaderGlobal*(scene: Scene, name: string): DataValue =
-  return scene.shaderGlobals[name]
+func getShaderGlobal*[T](scene: Scene, name: string): T =
+  getValue[T](scene.shaderGlobals[name])
+
+func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
+  setValue[T](scene.shaderGlobals[name], value)
 
 func addTexture*[T](scene: var Scene, name: string, texture: Texture) =
   scene.textures[name] = texture
