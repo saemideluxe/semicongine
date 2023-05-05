@@ -169,9 +169,12 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
             requireMappable=true,
             preferVRAM=true,
           )
-      var textures: Table[string, Texture]
-      # todo: get textures from scene
-      data.textures.add textures
+      for i in 0 ..< renderer.swapchain.inFlightFrames:
+        var textures: Table[string, Texture]
+        # todo: get textures from scene, currently only 32 bit images supported
+        for name, image in scene.textures.pairs:
+          textures[name] = renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0])
+        data.textures.add textures
       # need a separate descriptor for each frame in flight
       pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       pipeline.descriptorSets[i].writeDescriptorSet()

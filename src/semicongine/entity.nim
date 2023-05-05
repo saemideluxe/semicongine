@@ -5,7 +5,6 @@ import std/typetraits
 
 import ./math/matrix
 import ./gpu_data
-import ./vulkan/image
 
 type
   Component* = ref object of RootObj
@@ -15,7 +14,7 @@ type
     name*: string
     root*: Entity
     shaderGlobals*: Table[string, DataValue]
-    texture: Table[string, TextureImage]
+    textures*: Table[string, TextureImage]
 
   Entity* = ref object of RootObj
     name*: string
@@ -26,8 +25,8 @@ type
 
   TextureImage* = ref object of RootObj
     name*: string
-    width*: int
-    height*: int
+    width*: uint32
+    height*: uint32
     imagedata*: seq[array[4, uint8]]
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
@@ -41,7 +40,7 @@ func getShaderGlobal*[T](scene: Scene, name: string): T =
 func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
   setValue[T](scene.shaderGlobals[name], value)
 
-func addTexture*[T](scene: var Scene, name: string, texture: Texture) =
+func addTexture*(scene: var Scene, name: string, texture: TextureImage) =
   scene.textures[name] = texture
 
 func newScene*(name: string, root: Entity): Scene =
