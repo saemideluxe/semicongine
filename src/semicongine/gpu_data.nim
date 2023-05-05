@@ -294,7 +294,7 @@ func attr*[T: GPUType](
     memoryPerformanceHint: memoryPerformanceHint,
   )
 
-func get*[T: GPUType|int|uint|float](value: DataValue): T =
+func getValue*[T: GPUType|int|uint|float](value: DataValue): T =
   when T is float32: value.float32
   elif T is float64: value.float64
   elif T is int8: value.int8
@@ -345,7 +345,7 @@ func get*[T: GPUType|int|uint|float](value: DataValue): T =
   elif T is TMat4[float64]: value.mat4f64
   else: {.error: "Virtual datatype has no value" .}
 
-func get*[T: GPUType|int|uint|float](value: DataList): seq[T] =
+func getValues*[T: GPUType|int|uint|float](value: DataList): seq[T] =
   when T is float32: value.float32
   elif T is float64: value.float64
   elif T is int8: value.int8

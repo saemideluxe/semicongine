@@ -152,7 +152,6 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           descriptorCount: descriptor.count,
           pBufferInfo: addr bufferInfos[^1],
         )
-    #[ 
     elif descriptor.thetype == ImageSampler:
       assert descriptor.imageview.vk.valid
       assert descriptor.sampler.vk.valid
@@ -170,6 +169,5 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           descriptorCount: descriptor.count,
           pImageInfo: addr imageInfos[^1],
         )
-    ]#
     inc i
   descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.toCPointer, 0, nil)
