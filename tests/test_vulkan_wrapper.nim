@@ -117,13 +117,13 @@ proc main() =
     ]
     vertexOutput = @[attr[Vec3f]("outcolor")]
     uniforms = @[attr[float32]("time")]
-    # samplers = @[attr[Sampler2DType]("my_little_texture")]
+    samplers = @[attr[Sampler2DType]("my_little_texture")]
     fragOutput = @[attr[Vec4f]("color")]
     vertexCode = compileGlslShader(
       stage=VK_SHADER_STAGE_VERTEX_BIT,
       inputs=vertexInput,
       uniforms=uniforms,
-      # samplers=samplers,
+      samplers=samplers,
       outputs=vertexOutput,
       main="""gl_Position = vec4(position + translate, 1.0); outcolor = color;"""
     )
@@ -131,10 +131,9 @@ proc main() =
       stage=VK_SHADER_STAGE_FRAGMENT_BIT,
       inputs=vertexOutput,
       uniforms=uniforms,
-      # samplers=samplers,
+      samplers=samplers,
       outputs=fragOutput,
-      # main="color = texture(my_little_texture, outcolor.xy) * 0.5 + vec4(outcolor, 1) * 0.5;"
-      main="color = vec4(outcolor, 1) * 0.5;"
+      main="color = texture(my_little_texture, outcolor.xy) * 0.5 + vec4(outcolor, 1) * 0.5;"
     )
   var renderPass = engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
   engine.setRenderer(renderPass)
@@ -147,6 +146,14 @@ proc main() =
   ]
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
+    let (R, W) = ([0'u8, 0'u8, 0'u8, 0'u8], [0'u8, 0'u8, 0'u8, 0'u8])
+    scene.addTexture("my_little_texture", TextureImage(width: 5, height: 5, imagedata: @[
+      R, R, R, R, R,
+      R, R, R, R, R,
+      R, R, R, R, R,
+      R, R, R, R, R,
+      R, R, R, R, R,
+    ]))
     engine.addScene(scene, vertexInput)
 
   # MAINLOOP

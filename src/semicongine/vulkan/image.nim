@@ -29,6 +29,7 @@ type
     vk*: VkImageView
     image*: Image
   Texture* = object
+    image*: Image
     imageView*: ImageView
     sampler*: Sampler
 
@@ -254,13 +255,14 @@ proc destroy*(imageview: var ImageView) =
   imageview.image.device.vk.vkDestroyImageView(imageview.vk, nil)
   imageview.vk.reset()
 
-proc createTexture*(image: Image): Texture =
-  assert image.vk.valid
-  assert image.device.vk.valid
-
-  result.imageView = image.createImageView()
-  result.sampler = image.device.createSampler()
+proc createTexture*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): Texture =
+  assert device.vk.valid
+  
+  result.image = createImage(device=device, width=width, height=width, depth=depth, data=data)
+  result.imageView = result.image.createImageView()
+  result.sampler = result.image.device.createSampler()
 
 proc destroy*(texture: var Texture) =
+  texture.image.destroy()
   texture.imageView.destroy()
   texture.sampler.destroy()

@@ -39,10 +39,13 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
 proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: seq[Table[string, Texture]], inFlightFrames: int) =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames
-  # assert textures.len == 0 or textures.len == inFlightFrames
+  assert textures.len == 0 or textures.len == inFlightFrames
+  assert pipeline.descriptorSets.len > 0
 
   for i in 0 ..< inFlightFrames:
     var offset = 0'u64
+    # first descriptor is always uniform for globals, match should be better somehow
+    assert pipeline.descriptorSets[i].layout.descriptors[0].thetype == Uniform
     for descriptor in pipeline.descriptorSets[i].layout.descriptors.mitems:
       if descriptor.thetype == Uniform:
         let size = VkDeviceSize(descriptor.itemsize * descriptor.count)
@@ -51,6 +54,8 @@ proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: s
         descriptor.size = size
         offset += size
       elif descriptor.thetype == ImageSampler:
+        if not (descriptor.name in textures[i]):
+          raise newException(Exception, "Missing shader texture in scene: " & descriptor.name)
         descriptor.imageview = textures[i][descriptor.name].imageView
         descriptor.sampler = textures[i][descriptor.name].sampler
 
