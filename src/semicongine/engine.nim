@@ -1,4 +1,6 @@
 import std/sequtils
+import std/strutils
+import std/logging
 import std/os
 
 import ./platform/window
@@ -13,7 +15,7 @@ import ./gpu_data
 import ./entity
 import ./renderer
 import ./events
-import ./config
+import ./buildconfig
 import ./math
 import ./audio
 
@@ -64,6 +66,9 @@ proc initEngine*(
   resizeHandler: proc(engine: var Engine) = nil,
   eventHandler: proc(engine: var Engine, event: Event) = nil
 ): Engine =
+  echo "Set log level to ", ENGINE_LOGLEVEL
+  setLogFilter(ENGINE_LOGLEVEL)
+
   result.state = Starting
   result.exitHandler = exitHandler
   result.resizeHandler = resizeHandler

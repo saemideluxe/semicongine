@@ -140,6 +140,11 @@ proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: stri
   mesh.data[attribute] = DataList(thetype: getDataType[T]())
   setValues(mesh.data[attribute], data)
 
+proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+  assert attribute in mesh.data
+  mesh.changedAttributes.add attribute
+  setValues(mesh.data[attribute], data)
+
 proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, i: uint32, value: T) =
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute

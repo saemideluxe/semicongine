@@ -100,10 +100,15 @@ proc scene_primitives(): Entity =
   var r = rect(color="ff0000")
   var t = tri(color="0000ff")
   var c = circle(color="00ff00")
-  setInstanceData[Vec3f](r, "translate", @[newVec3f(0.5, -0.3)])
-  setInstanceData[Vec3f](t, "translate", @[newVec3f(0.3,  0.3)])
-  setInstanceData[Vec3f](c, "translate", @[newVec3f(-0.3,  0.1)])
+  r.setInstanceData("translate", @[newVec3f(0.5, -0.3)])
+  t.setInstanceData("translate", @[newVec3f(0.3,  0.3)])
+  c.setInstanceData("translate", @[newVec3f(-0.3,  0.1)])
   result = newEntity("root", t, r, c)
+
+proc scene_flag(): Entity =
+  var r = rect(color="ff0000")
+  r.updateMeshData("color", @[newVec3f(0, 0), newVec3f(1, 0), newVec3f(1, 1), newVec3f(0, 1)])
+  result = newEntity("root", r)
 
 proc main() =
   var engine = initEngine("Test")
@@ -142,16 +147,17 @@ proc main() =
   var scenes = [
     newScene("simple", scene_simple()),
     newScene("different mesh types", scene_different_mesh_types()),
-    newScene("primitives", scene_primitives())
+    newScene("primitives", scene_primitives()),
+    newScene("flag", scene_flag()),
   ]
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
-    let (R, W) = ([0'u8, 0'u8, 0'u8, 0'u8], [0'u8, 0'u8, 0'u8, 0'u8])
+    let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
     scene.addTexture("my_little_texture", TextureImage(width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
-      R, R, R, R, R,
-      R, R, R, R, R,
-      R, R, R, R, R,
+      R, R, W, R, R,
+      R, W, W, W, R,
+      R, R, W, R, R,
       R, R, R, R, R,
     ]))
     engine.addScene(scene, vertexInput)

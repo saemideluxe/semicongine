@@ -36,10 +36,9 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
         uniformList[attribute.name] = attribute
   result = uniformList.values.toSeq
 
-proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: seq[Table[string, Texture]], inFlightFrames: int) =
+proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, Texture], inFlightFrames: int) =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames
-  assert textures.len == 0 or textures.len == inFlightFrames
   assert pipeline.descriptorSets.len > 0
 
   for i in 0 ..< inFlightFrames:
@@ -54,10 +53,10 @@ proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: s
         descriptor.size = size
         offset += size
       elif descriptor.thetype == ImageSampler:
-        if not (descriptor.name in textures[i]):
+        if not (descriptor.name in textures):
           raise newException(Exception, "Missing shader texture in scene: " & descriptor.name)
-        descriptor.imageview = textures[i][descriptor.name].imageView
-        descriptor.sampler = textures[i][descriptor.name].sampler
+        descriptor.imageview = textures[descriptor.name].imageView
+        descriptor.sampler = textures[descriptor.name].sampler
 
 proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid

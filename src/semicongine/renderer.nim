@@ -1,6 +1,7 @@
 import std/options
 import std/tables
 import std/strformat
+import std/strutils
 import std/logging
 
 import ./vulkan/api
@@ -18,6 +19,7 @@ import ./entity
 import ./mesh
 import ./gpu_data
 import ./math
+import ./buildconfig
 
 type
   SceneData = object
@@ -26,7 +28,7 @@ type
     indexBuffer*: Buffer
     uniformBuffers*: seq[Buffer] # one per frame-in-flight
     images*: seq[Image] # used to back texturees
-    textures*: seq[Table[string, Texture]] # per frame-in-flight
+    textures*: Table[string, Texture] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
@@ -155,29 +157,26 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     data.drawables[mesh] = drawable
 
   # setup uniforms and textures
-  for i in 0 ..< renderer.renderPass.subpasses.len:
-    var subpass = renderer.renderPass.subpasses[i]
+  for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
+    var subpass = renderer.renderPass.subpasses[subpass_i]
     for pipeline in subpass.pipelines.mitems:
       var uniformBufferSize = 0'u64
       for uniform in pipeline.uniforms:
         uniformBufferSize += uniform.thetype.size
       if uniformBufferSize > 0:
-        for i in 0 ..< renderer.swapchain.inFlightFrames:
+        for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
           data.uniformBuffers.add renderer.device.createBuffer(
             size=uniformBufferSize,
             usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
             requireMappable=true,
             preferVRAM=true,
           )
-      for i in 0 ..< renderer.swapchain.inFlightFrames:
-        var textures: Table[string, Texture]
-        # todo: get textures from scene, currently only 32 bit images supported
-        for name, image in scene.textures.pairs:
-          textures[name] = renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0])
-        data.textures.add textures
-      # need a separate descriptor for each frame in flight
+
+      for name, image in scene.textures.pairs:
+        data.textures[name] = renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0])
       pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
-      pipeline.descriptorSets[i].writeDescriptorSet()
+      for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
+        pipeline.descriptorSets[frame_i].writeDescriptorSet()
 
   renderer.scenedata[scene] = data
 
@@ -251,6 +250,7 @@ proc render*(renderer: var Renderer, scene: var Scene) =
     for pipeline in subpass.pipelines:
       var mpipeline = pipeline
       commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, mpipeline.vk)
+      echo "############## ", mpipeline.descriptorSets[renderer.swapchain.currentInFlight]
       commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, mpipeline.layout, 0, 1, addr(mpipeline.descriptorSets[renderer.swapchain.currentInFlight].vk), 0, nil)
 
       debug "Scene buffers:"
