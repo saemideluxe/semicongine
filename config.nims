@@ -21,13 +21,9 @@ proc compilerFlags() =
 
 proc compilerFlagsDebug() =
   switch("debugger", "native")
-  switch("checks", "on")
-  switch("assertions", "on")
 
 proc compilerFlagsRelease() =
   switch("define", "release")
-  switch("checks", "off")
-  switch("assertions", "off")
   switch("app", "gui")
 
 task single_linux_debug, "build linux debug":
@@ -51,21 +47,12 @@ task single_windows_debug, "build windows debug":
   setCommand "c"
   mkDir(BUILDBASE & "/" & DEBUG & "/" & WINDOWS)
 
-
 task single_windows_release, "build windows release":
   compilerFlags()
   compilerFlagsRelease()
   switch("outdir", BUILDBASE & "/" & RELEASE & "/" & WINDOWS)
   setCommand "c"
   mkDir(BUILDBASE & "/" & RELEASE & "/" & WINDOWS)
-
-task single_crosscompile_windows_debug, "build crosscompile windows debug":
-  switch("define", "mingw")
-  single_windows_debugTask()
-
-task single_crosscompile_windows_release, "build crosscompile windows release":
-  switch("define", "mingw")
-  single_windows_releaseTask()
 
 task build_all_linux_debug, "build all examples with linux/debug":
   for file in listFiles("examples"):
@@ -149,10 +136,8 @@ task run_all, "Run all binaries":
 task get_vulkan_wrapper, "Download vulkan wrapper":
   exec &"curl https://raw.githubusercontent.com/nimgl/nimgl/master/src/nimgl/vulkan.nim > src/semicongine/vulkan/c_api.nim"
 
-const api_generator_name = "vulkan_api_generator"
-
 task generate_vulkan_api, "Generate Vulkan API":
-  selfExec &"c -d:ssl --run src/vulkan_api/{api_generator_name}.nim"
+  selfExec &"c -d:ssl --run src/vulkan_api/vulkan_api_generator.nim"
   mkDir "src/semicongine/vulkan/"
   cpFile "src/vulkan_api/output/api.nim", "src/semicongine/vulkan/api.nim"
   cpDir "src/vulkan_api/output/platform", "src/semicongine/vulkan/platform"
