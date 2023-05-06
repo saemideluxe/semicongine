@@ -295,5 +295,7 @@ proc destroy*(renderer: var Renderer) =
     for buffer in data.uniformBuffers.mitems:
       assert buffer.vk.valid
       buffer.destroy()
+    for texture in data.textures.mvalues:
+      texture.destroy()
   renderer.renderPass.destroy()
   renderer.swapchain.destroy()
