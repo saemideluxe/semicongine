@@ -5,7 +5,7 @@ author        = "Sam <sam@basx.dev"
 description   = "Hobby game engine, for games that run on semiconductor engines"
 license       = "MIT"
 srcDir        = "src"
-
+backend       = "c"
 
 # Dependencies
 
