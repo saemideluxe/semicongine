@@ -10,6 +10,7 @@ import semicongine/gpu_data
 import semicongine/math
 import semicongine/mesh
 import semicongine/renderer
+import semicongine/resources
 import semicongine/settings
 import semicongine/platform/window
 import semicongine/vulkan
@@ -23,6 +24,7 @@ export gpu_data
 export math
 export mesh
 export renderer
+export resources
 export settings
 export window
 export vulkan
