@@ -44,3 +44,6 @@ const CONFIGHOTRELOADINTERVAL* {.intdefine.}: int = 1000
 # log level
 const LOGLEVEL {.strdefine.}: string = (when DEBUG: "lvlAll" else: "lvlWarn")
 const ENGINE_LOGLEVEL* = parseEnum[Level](LOGLEVEL)
+
+const MODROOT* {.strdefine.}: string = "mods"
+const BUNDLETYPE* {.strdefine.}: string = "Dir" # zip, exe
