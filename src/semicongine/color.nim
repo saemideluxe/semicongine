@@ -24,6 +24,11 @@ func colorToHex*(color: Vec3f): string =
 func colorToHex*(color: Vec4f): string =
   &"{int(color.r * 255):02X}{int(color.g * 255):02X}{int(color.b * 255):02X}{int(color.a * 255):02X}"
 
+func asPixel*(color: Vec3f): array[4, uint8] =
+  [uint8(color.r * 255), uint8(color.g * 255), uint8(color.b * 255), 255'u8]
+func asPixel*(color: Vec4f): array[4, uint8] =
+  [uint8(color.r * 255), uint8(color.g * 255), uint8(color.b * 255), uint8(color.a * 255)]
+
 func hexToColorAlpha*(value: string): Vec4f =
   assert value != ""
   var hex = value

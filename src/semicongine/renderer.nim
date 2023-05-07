@@ -173,7 +173,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
           )
 
       for name, image in scene.textures.pairs:
-        data.textures[name] = renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0])
+        data.textures[name] = renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0], image.interpolation)
       pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         pipeline.descriptorSets[frame_i].writeDescriptorSet()

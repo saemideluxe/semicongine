@@ -5,6 +5,7 @@ import std/typetraits
 
 import ./math/matrix
 import ./gpu_data
+import ./vulkan/api
 
 type
   Component* = ref object of RootObj
@@ -28,6 +29,7 @@ type
     width*: uint32
     height*: uint32
     imagedata*: seq[Pixel]
+    interpolation*: VkFilter
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   var value = DataValue(thetype: getDataType[T]())
