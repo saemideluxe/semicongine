@@ -148,6 +148,7 @@ type
   ShaderAttribute* = object
     name*: string
     thetype*: DataType
+    arrayCount*: int
     perInstance*: bool
     memoryPerformanceHint*: MemoryPerformanceHint
 
@@ -216,7 +217,7 @@ func size*(thetype: DataType): uint32 =
 
 func size*(attribute: ShaderAttribute, perDescriptor=false): uint32 =
   if perDescriptor: attribute.thetype.size div attribute.thetype.numberOfVertexInputAttributeDescriptors
-  else:      attribute.thetype.size
+  else: attribute.thetype.size
 
 func size*(thetype: seq[ShaderAttribute]): uint32 =
   for attribute in thetype:
@@ -285,12 +286,14 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
 func attr*[T: GPUType](
   name: string,
   perInstance=false,
+  arrayCount=0,
   memoryPerformanceHint=PreferFastRead,
 ): auto =
   ShaderAttribute(
     name: name,
     thetype: getDataType[T](),
     perInstance: perInstance,
+    arrayCount: arrayCount,
     memoryPerformanceHint: memoryPerformanceHint,
   )
 
@@ -844,9 +847,10 @@ func glslInput*(group: seq[ShaderAttribute]): seq[string] =
     return @[]
   var i = 0'u32
   for attribute in group:
-      result.add &"layout(location = {i}) in {attribute.thetype.glslType} {attribute.name};"
-      for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
-        i += attribute.thetype.nLocationSlots
+    assert attribute.arrayCount == 0, "arrays not yet supported for shader vertex attributes"
+    result.add &"layout(location = {i}) in {attribute.thetype.glslType} {attribute.name};"
+    for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
+      i += attribute.thetype.nLocationSlots
 
 func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding: int): seq[string] =
   if group.len == 0:
@@ -854,6 +858,7 @@ func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding: i
   # currently only a single uniform block supported, therefore binding = 0
   result.add(&"layout(binding = {binding}) uniform T{blockName} {{")
   for attribute in group:
+    assert attribute.arrayCount == 0, "arrays not yet supported for uniforms"
     result.add(&"    {attribute.thetype.glslType} {attribute.name};")
   result.add(&"}} {blockName};")
 
@@ -862,7 +867,10 @@ func glslSamplers*(group: seq[ShaderAttribute], basebinding: int): seq[string] =
     return @[]
   var thebinding = basebinding
   for attribute in group:
-    result.add(&"layout(binding = {thebinding}) uniform {attribute.thetype.glslType} {attribute.name};")
+    var arrayDecl = ""
+    if attribute.arrayCount > 0:
+      arrayDecl = &"[{attribute.arrayCount}]"
+    result.add(&"layout(binding = {thebinding}) uniform {attribute.thetype.glslType} {attribute.name}{arrayDecl};")
     inc thebinding
 
 func glslOutput*(group: seq[ShaderAttribute]): seq[string] =
@@ -870,5 +878,6 @@ func glslOutput*(group: seq[ShaderAttribute]): seq[string] =
     return @[]
   var i = 0'u32
   for attribute in group:
+    assert attribute.arrayCount == 0, "arrays not yet supported for outputs"
     result.add &"layout(location = {i}) out {attribute.thetype.glslType} {attribute.name};"
     i += 1

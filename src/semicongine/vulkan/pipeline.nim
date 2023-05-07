@@ -1,4 +1,5 @@
 import std/tables
+import std/strformat
 import std/sequtils
 
 import ./api
@@ -36,7 +37,7 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
         uniformList[attribute.name] = attribute
   result = uniformList.values.toSeq
 
-proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, Texture], inFlightFrames: int) =
+proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, seq[Texture]], inFlightFrames: int) =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
   assert pipeline.descriptorSets.len > 0
@@ -54,8 +55,11 @@ proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: T
       elif descriptor.thetype == ImageSampler:
         if not (descriptor.name in textures):
           raise newException(Exception, "Missing shader texture in scene: " & descriptor.name)
-        descriptor.imageview = textures[descriptor.name].imageView
-        descriptor.sampler = textures[descriptor.name].sampler
+        if uint32(textures[descriptor.name].len) != descriptor.count:
+          raise newException(Exception, &"Incorrect number of textures in array for {descriptor.name}: has {textures[descriptor.name].len} but needs {descriptor.count}")
+        for t in textures[descriptor.name]:
+          descriptor.imageviews.add t.imageView
+          descriptor.samplers.add t.sampler
 
 proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid
@@ -76,6 +80,8 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
   var descriptors: seq[Descriptor]
 
   if vertexCode.uniforms.len > 0:
+    for uniform in vertexCode.uniforms:
+      assert uniform.arrayCount == 0, "arrays not yet supported for uniforms"
     descriptors.add Descriptor(
       name: "Uniforms",
       thetype: Uniform,
@@ -87,7 +93,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
     descriptors.add Descriptor(
       name: sampler.name,
       thetype: ImageSampler,
-      count: 1,
+      count: (if sampler.arrayCount == 0: 1 else: sampler.arrayCount),
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
       itemsize: 0,
     )

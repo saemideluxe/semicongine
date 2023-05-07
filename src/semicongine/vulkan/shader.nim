@@ -21,9 +21,9 @@ addHandler(logger)
 
 type
   ShaderCode* = object # compiled shader code with some meta data
+    binary: seq[uint32]
     stage: VkShaderStageFlagBits
     entrypoint: string
-    binary: seq[uint32]
     inputs*: seq[ShaderAttribute]
     uniforms*: seq[ShaderAttribute]
     samplers*: seq[ShaderAttribute]

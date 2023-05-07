@@ -15,7 +15,7 @@ type
     name*: string
     root*: Entity
     shaderGlobals*: Table[string, DataValue]
-    textures*: Table[string, TextureImage]
+    textures*: Table[string, seq[TextureImage]]
 
   Entity* = ref object of RootObj
     name*: string
@@ -42,8 +42,11 @@ func getShaderGlobal*[T](scene: Scene, name: string): T =
 func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
   setValue[T](scene.shaderGlobals[name], value)
 
-func addTexture*(scene: var Scene, name: string, texture: TextureImage) =
+func addTextures*(scene: var Scene, name: string, texture: seq[TextureImage]) =
   scene.textures[name] = texture
+
+func addTexture*(scene: var Scene, name: string, texture: TextureImage) =
+  scene.textures[name] = @[texture]
 
 func newScene*(name: string, root: Entity): Scene =
   Scene(name: name, root: root)
