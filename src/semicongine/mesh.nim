@@ -124,7 +124,7 @@ func getRawData*(mesh: Mesh, attribute: string): (pointer, uint32) =
 
 proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): seq[T] =
   assert attribute in mesh.data
-  get[T](mesh.data[attribute])
+  getValues[T](mesh.data[attribute])
 
 proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
   assert not (attribute.name in mesh.data)

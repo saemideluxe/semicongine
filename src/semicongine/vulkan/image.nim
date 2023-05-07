@@ -187,12 +187,12 @@ proc destroy*(image: var Image) =
     image.memoryAllocated = false
   image.vk.reset
 
-proc createSampler*(device: Device): Sampler =
+proc createSampler*(device: Device, interpolation: VkFilter): Sampler =
   assert device.vk.valid
   var samplerInfo = VkSamplerCreateInfo(
     sType: VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-    magFilter: VK_FILTER_LINEAR,
-    minFilter: VK_FILTER_LINEAR,
+    magFilter: interpolation,
+    minFilter: interpolation,
     addressModeU: VK_SAMPLER_ADDRESS_MODE_REPEAT,
     addressModeV: VK_SAMPLER_ADDRESS_MODE_REPEAT,
     addressModeW: VK_SAMPLER_ADDRESS_MODE_REPEAT,
@@ -255,12 +255,12 @@ proc destroy*(imageview: var ImageView) =
   imageview.image.device.vk.vkDestroyImageView(imageview.vk, nil)
   imageview.vk.reset()
 
-proc createTexture*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): Texture =
+proc createTexture*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer, interpolation: VkFilter): Texture =
   assert device.vk.valid
   
-  result.image = createImage(device=device, width=width, height=width, depth=depth, data=data)
+  result.image = createImage(device=device, width=width, height=height, depth=depth, data=data)
   result.imageView = result.image.createImageView()
-  result.sampler = result.image.device.createSampler()
+  result.sampler = result.image.device.createSampler(interpolation)
 
 proc destroy*(texture: var Texture) =
   texture.image.destroy()

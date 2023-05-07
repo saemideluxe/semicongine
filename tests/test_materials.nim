@@ -3,13 +3,15 @@ import semicongine
 proc main() =
   var scene = newScene("main", root=newEntity("rect", rect()))
   let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
-  scene.addTexture("my_texture", TextureImage(width: 5, height: 5, imagedata: @[
-    R, R, R, R, R,
-    R, R, W, R, R,
-    R, W, W, W, R,
-    R, R, W, R, R,
-    R, R, R, R, R,
+  let (RT, WT, PT) = (hexToColorAlpha("A51931").asPixel, hexToColorAlpha("F4F5F8").asPixel, hexToColorAlpha("2D2A4A").asPixel)
+  scene.addTexture("my_texture", TextureImage(width: 13, height: 5, imagedata: @[
+    R, R, R, R, R, W, RT, RT, RT, RT, RT, RT, RT,
+    R, R, W, R, R, W, WT, WT, WT, WT, WT, WT, WT,
+    R, W, W, W, R, W, PT, PT, PT, PT, PT, PT, PT,
+    R, R, W, R, R, W, WT, WT, WT, WT, WT, WT, WT,
+    R, R, R, R, R, W, RT, RT, RT, RT, RT, RT, RT,
   ]))
+  var m: Mesh = Mesh(scene.root.components[0])
 
   var engine = initEngine("Test materials")
   const
@@ -38,7 +40,6 @@ proc main() =
   engine.addScene(scene, vertexInput)
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     engine.renderScene(scene)
-    break
   engine.destroy()
 
 
