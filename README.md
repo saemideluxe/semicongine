@@ -32,6 +32,7 @@ Rendering:
 - [x] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [x] Textures
 - [ ] Multisampling
+- [ ] Materials (vertices with material indices)
 - [ ] Viewport scaling (e.g. framebuffer resolution != window resolution
 - [ ] Allow different shaders (ie pipelines) for different meshes
 
@@ -104,6 +105,23 @@ Currently we have at least the following:
 - Resources/mods: resources.nim (wip)
 
 Got you: Everything is wip, but (wip) here means work has not started yet.
+
+Handling of assets
+------------------
+
+A short description how I want to handle assets.
+
+Support for file formats (super limited, no external dependencies, uses quite a bit of space, hoping for zip):
+
+- Images: BMP
+- Audio: AU
+- Mesh: OBJ + MTL
+
+In-memory layout of assets (everything needs to be converted to those while loading):
+
+- Images: 4 channel with each uint8 = 32 bit RGBA, little endian (R is low bits, A is high bits)
+- Audio: 2 Channel 16 bit signed little endian, 44100Hz
+- Meshes: non-interleaved, lists of values for each vertex, one list per attribute
 
 Configuration
 -------------
