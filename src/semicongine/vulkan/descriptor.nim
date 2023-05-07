@@ -21,8 +21,8 @@ type
       offset*: uint64
       size*: uint64
     of ImageSampler:
-      imageview*: ImageView
-      sampler*: Sampler
+      imageviews*: seq[ImageView]
+      samplers*: seq[Sampler]
   DescriptorSet* = object # "instance" of a DescriptorSetLayout
     vk*: VkDescriptorSet
     layout*: DescriptorSetLayout
@@ -132,7 +132,6 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
 
   var descriptorSetWrites: seq[VkWriteDescriptorSet]
   var bufferInfos: seq[VkDescriptorBufferInfo]
-  var imageInfos: seq[VkDescriptorImageInfo]
 
   var i = bindingBase
   for descriptor in descriptorSet.layout.descriptors:
@@ -153,13 +152,15 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           pBufferInfo: addr bufferInfos[^1],
         )
     elif descriptor.thetype == ImageSampler:
-      assert descriptor.imageview.vk.valid
-      assert descriptor.sampler.vk.valid
-      imageInfos.add VkDescriptorImageInfo(
-        imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        imageView: descriptor.imageview.vk,
-        sampler: descriptor.sampler.vk,
-      )
+      var imgInfo: seq[VkDescriptorImageInfo]
+      for img_i in 0 ..< descriptor.count:
+        assert descriptor.imageviews[img_i].vk.valid
+        assert descriptor.samplers[img_i].vk.valid
+        imgInfo.add VkDescriptorImageInfo(
+          imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+          imageView: descriptor.imageviews[img_i].vk,
+          sampler: descriptor.samplers[img_i].vk,
+        )
       descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
           dstSet: descriptorSet.vk,
@@ -167,7 +168,7 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           dstArrayElement: 0,
           descriptorType: descriptor.vkType,
           descriptorCount: descriptor.count,
-          pImageInfo: addr imageInfos[^1],
+          pImageInfo: addr imgInfo[0],
         )
     inc i
   descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.toCPointer, 0, nil)

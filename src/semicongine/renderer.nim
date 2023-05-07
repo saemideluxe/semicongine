@@ -28,7 +28,7 @@ type
     indexBuffer*: Buffer
     uniformBuffers*: seq[Buffer] # one per frame-in-flight
     images*: seq[Image] # used to back texturees
-    textures*: Table[string, Texture] # per frame-in-flight
+    textures*: Table[string, seq[Texture]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
@@ -172,8 +172,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
             preferVRAM=true,
           )
 
-      for name, image in scene.textures.pairs:
-        data.textures[name] = renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0], image.interpolation)
+      for name, images in scene.textures.pairs:
+        data.textures[name] = @[]
+        for image in images:
+          data.textures[name].add renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0], image.interpolation)
       pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         pipeline.descriptorSets[frame_i].writeDescriptorSet()
@@ -294,7 +296,8 @@ proc destroy*(renderer: var Renderer) =
     for buffer in data.uniformBuffers.mitems:
       assert buffer.vk.valid
       buffer.destroy()
-    for texture in data.textures.mvalues:
-      texture.destroy()
+    for textures in data.textures.mvalues:
+      for texture in textures.mitems:
+        texture.destroy()
   renderer.renderPass.destroy()
   renderer.swapchain.destroy()
