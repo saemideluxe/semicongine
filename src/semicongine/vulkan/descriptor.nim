@@ -170,7 +170,4 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           pImageInfo: addr imageInfos[^1],
         )
     inc i
-  echo "wrote descriptors:"
-  for w in descriptorSetWrites:
-    echo "  ", w
   descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.toCPointer, 0, nil)
