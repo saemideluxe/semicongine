@@ -32,6 +32,7 @@ Rendering:
 - [x] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [x] Textures
 - [ ] Multisampling
+- [ ] Viewport scaling (e.g. framebuffer resolution != window resolution
 - [ ] Allow different shaders (ie pipelines) for different meshes
 
 Required for 3D rendering:
