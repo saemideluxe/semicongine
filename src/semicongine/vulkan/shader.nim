@@ -101,7 +101,7 @@ proc compileGlslShader*(
   # var code = @[&"#version {version}", "layout(row_major) uniform;", ""] &
     (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
     (if uniforms.len > 0: uniforms.glslUniforms(binding=0) & @[""] else: @[]) &
-    (if samplers.len > 0: samplers.glslSamplers(basebinding=1) & @[""] else: @[]) &
+    (if samplers.len > 0: samplers.glslSamplers(basebinding=if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
     (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
     @[&"void {entrypoint}(){{"] &
     main &

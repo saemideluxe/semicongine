@@ -1,4 +1,5 @@
 import std/sequtils
+import std/options
 import std/strutils
 import std/logging
 import std/os
@@ -41,7 +42,7 @@ type
     debugger: Debugger
     instance: Instance
     window: NativeWindow
-    renderer: Renderer
+    renderer: Option[Renderer]
     input: Input
     exitHandler: proc(engine: var Engine)
     resizeHandler: proc(engine: var Engine)
@@ -50,7 +51,8 @@ type
 
 proc destroy*(engine: var Engine) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
-  engine.renderer.destroy()
+  if engine.renderer.isSome:
+    engine.renderer.get.destroy()
   engine.device.destroy()
   if engine.debugger.messenger.valid:
     engine.debugger.destroy()
@@ -105,19 +107,22 @@ proc initEngine*(
 
 proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
   assert engine.state != Destroyed
-  engine.renderer = engine.device.initRenderer(renderPass)
+  if engine.renderer.isSome:
+    engine.renderer.get.destroy()
+  engine.renderer = some(engine.device.initRenderer(renderPass))
 
 proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribute], transformAttribute="") =
   assert engine.state != Destroyed
   assert transformAttribute == "" or transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
-  engine.renderer.setupDrawableBuffers(scene, vertexInput, transformAttribute=transformAttribute)
+  assert engine.renderer.isSome
+  engine.renderer.get.setupDrawableBuffers(scene, vertexInput, transformAttribute=transformAttribute)
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
-  assert engine.renderer.valid
+  assert engine.renderer.isSome
   if engine.state == Running:
-    engine.renderer.refreshMeshData(scene)
-    engine.renderer.render(scene)
+    engine.renderer.get.refreshMeshData(scene)
+    engine.renderer.get.render(scene)
 
 proc updateInputs*(engine: var Engine): EngineState =
   assert engine.state in [Starting, Running]
@@ -171,7 +176,7 @@ func mouseWasPressed*(engine: Engine, button: MouseButton): auto = button in eng
 func mouseWasReleased*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseWasReleased
 func mousePosition*(engine: Engine): auto = engine.input.mousePosition
 func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
-func framesRendered*(engine: Engine): auto = engine.renderer.framesRendered
+func framesRendered*(engine: Engine): uint64 = (if engine.renderer.isSome: engine.renderer.get.framesRendered else: 0)
 func gpuDevice*(engine: Engine): Device = engine.device
 func getWindow*(engine: Engine): auto = engine.window
 func windowWasResized*(engine: Engine): auto = engine.input.windowWasResized

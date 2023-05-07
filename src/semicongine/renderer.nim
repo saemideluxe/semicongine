@@ -250,7 +250,6 @@ proc render*(renderer: var Renderer, scene: var Scene) =
     for pipeline in subpass.pipelines:
       var mpipeline = pipeline
       commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, mpipeline.vk)
-      echo "############## ", mpipeline.descriptorSets[renderer.swapchain.currentInFlight]
       commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, mpipeline.layout, 0, 1, addr(mpipeline.descriptorSets[renderer.swapchain.currentInFlight].vk), 0, nil)
 
       debug "Scene buffers:"

@@ -38,15 +38,14 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
 
 proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, Texture], inFlightFrames: int) =
   assert pipeline.vk.valid
-  assert buffers.len == 0 or buffers.len == inFlightFrames
+  assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
   assert pipeline.descriptorSets.len > 0
 
   for i in 0 ..< inFlightFrames:
     var offset = 0'u64
     # first descriptor is always uniform for globals, match should be better somehow
-    assert pipeline.descriptorSets[i].layout.descriptors[0].thetype == Uniform
     for descriptor in pipeline.descriptorSets[i].layout.descriptors.mitems:
-      if descriptor.thetype == Uniform:
+      if descriptor.thetype == Uniform and buffers.len > 0:
         let size = VkDeviceSize(descriptor.itemsize * descriptor.count)
         descriptor.buffer = buffers[i]
         descriptor.offset = offset
@@ -74,15 +73,16 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
   result.device = device
   result.shaders = @[vertexShader, fragmentShader]
   
-  var descriptors = @[
-    Descriptor(
+  var descriptors: seq[Descriptor]
+
+  if vertexCode.uniforms.len > 0:
+    descriptors.add Descriptor(
       name: "Uniforms",
       thetype: Uniform,
       count: 1,
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
       itemsize: vertexShader.uniforms.size(),
-    ),
-  ]
+    )
   for sampler in vertexShader.samplers:
     descriptors.add Descriptor(
       name: sampler.name,

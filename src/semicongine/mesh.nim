@@ -44,10 +44,12 @@ func newMesh*(
   positions: openArray[Vec3f],
   indices: openArray[array[3, uint32|int32|uint16|int16|int]],
   colors: openArray[Vec3f]=[],
+  uvs: openArray[Vec2f]=[],
   instanceCount=1'u32,
   autoResize=true
 ): auto =
   assert colors.len == 0 or colors.len == positions.len
+  assert uvs.len == 0 or uvs.len == positions.len
 
   result = new Mesh
   result.vertexCount = uint32(positions.len)
@@ -58,6 +60,9 @@ func newMesh*(
   if colors.len > 0:
     result.data["color"] = DataList(thetype: Vec3F32)
     setValues(result.data["color"], colors.toSeq)
+  if uvs.len > 0:
+    result.data["uv"] = DataList(thetype: Vec2F32)
+    setValues(result.data["uv"], colors.toSeq)
 
   for i in indices:
     assert uint32(i[0]) < result.vertexCount
@@ -83,9 +88,10 @@ func newMesh*(
 func newMesh*(
   positions: openArray[Vec3f],
   colors: openArray[Vec3f]=[],
+  uvs: openArray[Vec2f]=[],
   instanceCount=1'u32,
 ): auto =
-  newMesh(positions, newSeq[array[3, int]](), colors, instanceCount)
+  newMesh(positions, newSeq[array[3, int]](), colors, uvs, instanceCount)
 
 func availableAttributes*(mesh: Mesh): seq[string] =
   mesh.data.keys.toSeq
@@ -169,6 +175,7 @@ func rect*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
   result.instanceCount = 1
   result.data["position"] = DataList(thetype: Vec3F32)
   result.data["color"] = DataList(thetype: Vec3F32)
+  result.data["uv"] = DataList(thetype: Vec2F32)
   result.indexType = Small
   result.smallIndices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]]
 
@@ -180,6 +187,7 @@ func rect*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
 
   setValues(result.data["position"], v.toSeq)
   setValues(result.data["color"], @[c, c, c, c])
+  setValues(result.data["uv"], @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
 func tri*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
   result = new Mesh

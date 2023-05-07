@@ -1,5 +1,3 @@
-{. error: "do resources" .}
-
 import std/strutils
 import std/os
 

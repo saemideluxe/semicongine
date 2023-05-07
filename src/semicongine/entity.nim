@@ -23,11 +23,11 @@ type
     children*: seq[Entity]
     components*: seq[Component]
 
+  Pixel* = array[4, uint8]
   TextureImage* = ref object of RootObj
-    name*: string
     width*: uint32
     height*: uint32
-    imagedata*: seq[array[4, uint8]]
+    imagedata*: seq[Pixel]
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   var value = DataValue(thetype: getDataType[T]())
