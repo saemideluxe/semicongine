@@ -2,7 +2,6 @@ import std/options
 import std/logging
 
 import ../core
-import ./utils
 import ./device
 import ./physicaldevice
 import ./pipeline

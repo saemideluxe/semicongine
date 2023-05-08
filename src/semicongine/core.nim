@@ -8,6 +8,7 @@ import ./core/color
 import ./core/gpu_data
 import ./core/matrix
 import ./core/vector
+import ./core/utils
 
 export vulkanapi
 export audiotypes
@@ -16,3 +17,4 @@ export color
 export gpu_data
 export matrix
 export vector
+export utils

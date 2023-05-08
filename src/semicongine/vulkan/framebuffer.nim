@@ -1,6 +1,5 @@
 import ../core
 import ./device
-import ./utils
 import ./image
 
 

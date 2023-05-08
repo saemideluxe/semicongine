@@ -9,7 +9,6 @@ import std/compilesettings
 
 import ../core
 import ./device
-import ./utils
 
 const DEFAULT_SHADER_VERSION = 450
 const DEFAULT_SHADER_ENTRYPOINT = "main"

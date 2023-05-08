@@ -1,7 +1,6 @@
 import ../core
 import ./device
 import ./physicaldevice
-import ./utils
 
 type
   CommandBufferPool* = object

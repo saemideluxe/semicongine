@@ -7,7 +7,6 @@ import ./device
 import ./descriptor
 import ./shader
 import ./buffer
-import ./utils
 import ./image
 
 type

@@ -3,7 +3,6 @@ import std/tables
 import std/sequtils
 
 import ../core
-import ./utils
 import ./instance
 
 type

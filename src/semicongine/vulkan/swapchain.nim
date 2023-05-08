@@ -3,7 +3,6 @@ import std/strformat
 import std/logging
 
 import ../core
-import ./utils
 import ./device
 import ./physicaldevice
 import ./image

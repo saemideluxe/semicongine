@@ -4,7 +4,6 @@ import std/tables
 import ../core
 import ./device
 import ./buffer
-import ./utils
 import ./image
 
 type
