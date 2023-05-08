@@ -1,9 +1,16 @@
+import std/parsecfg
+import std/streams
 import std/compilesettings
 import std/strutils
 import std/logging
 import std/os
 
 const ENGINENAME = "semicongine"
+const ENGINEVERSION* = static:
+  var nimbleFile = newStringStream(staticRead("../../../semicongine.nimble"))
+  var config = loadConfig(nimbleFile)
+  config.getSectionValue("", "version")
+
 
 # checks required build options:
 static:
