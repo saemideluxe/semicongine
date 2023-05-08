@@ -9,7 +9,6 @@
 
 
 import std/times
-import std/strutils
 
 import semicongine
 
