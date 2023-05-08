@@ -3,7 +3,6 @@ import std/strformat
 import std/logging
 
 import ../core
-import ./utils
 import ./buffer
 
 type

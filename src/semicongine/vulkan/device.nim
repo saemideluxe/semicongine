@@ -3,7 +3,6 @@ import std/options
 import std/tables
 
 import ../core
-import ./utils
 import ./instance
 import ./physicaldevice
 

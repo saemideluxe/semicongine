@@ -139,7 +139,8 @@ task get_vulkan_wrapper, "Download vulkan wrapper":
 task generate_vulkan_api, "Generate Vulkan API":
   selfExec &"c -d:ssl --run src/vulkan_api/vulkan_api_generator.nim"
   mkDir "src/semicongine/vulkan/"
-  cpFile "src/vulkan_api/output/api.nim", "src/semicongine/vulkan/api.nim"
+  mkDir "src/semicongine/core/"
+  cpFile "src/vulkan_api/output/api.nim", "src/semicongine/core/api.nim"
   cpDir "src/vulkan_api/output/platform", "src/semicongine/vulkan/platform"
 
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:

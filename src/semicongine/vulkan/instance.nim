@@ -4,7 +4,6 @@ import std/sequtils
 import std/logging
 
 import ../core
-import ./utils
 
 import ../platform/vulkanExtensions
 import ../platform/window
