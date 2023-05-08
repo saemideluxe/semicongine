@@ -7,29 +7,28 @@ let
   barSize = 0.1'f
   barWidth = 0.01'f
   ballcolor = hexToColor("B17F08").gamma(2.2).colorToHex()
-  levelRatio = 1
   ballSize = 0.01'f
   backgroundColor = hexToColorAlpha("FAC034FF").gamma(2.2)
   ballSpeed = 60'f
 
 var
-  level: Entity
+  level: Scene
   ballVelocity = newVec2f(1, 1).normalized * ballSpeed
 
 when isMainModule:
   var myengine = initEngine("Pong")
-  level = newEntity("Level")
+  level = newScene("scene", newEntity("Level"))
   var playerbarmesh = rect(color=barcolor)
   var playerbar = newEntity("playerbar", playerbarmesh)
   playerbar.transform = scale3d(barWidth, barSize, 1'f) * translate3d(0.5'f, 0'f, 0'f)
   var player = newEntity("player", playerbar)
   player.transform = translate3d(0'f, 0.3'f, 0'f)
-  level.add player
+  level.root.add player
 
   var ballmesh = circle(color=ballcolor)
   var ball = newEntity("ball", ballmesh)
   ball.transform = scale3d(ballSize, ballSize, 1'f) * translate3d(10'f, 10'f, 0'f)
-  level.add ball
+  level.root.add ball
 
   const
     vertexInput = @[
@@ -58,8 +57,7 @@ when isMainModule:
   # set up rendering
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=backgroundColor))
   myengine.addScene(level, vertexInput, transformAttribute="transform")
-  var projection = initShaderGlobal("projection", Unit4f32)
-  level.add projection
+  level.addShaderGlobal("projection", Unit4f32)
 
   var
     winsize = myengine.getWindow().size
@@ -85,8 +83,8 @@ when isMainModule:
       winsize = myengine.getWindow().size
       height = float32(winsize[1]) / float32(winsize[0])
       width = 1'f
-      setValue[Mat4](projection.value, ortho[float32](0'f, width, 0'f, height, 0'f, 1'f))
-    var player = level.firstWithName("player")
+      setShaderGlobal(level, "projection", ortho[float32](0'f, width, 0'f, height, 0'f, 1'f))
+    var player = level.root.firstWithName("player")
     if myengine.keyIsDown(Down) and (player.transform.col(3).y + barSize/2) < height:
       player.transform = player.transform * translate3d(0'f, 1'f * dt, 0'f)
     if myengine.keyIsDown(Up) and (player.transform.col(3).y - barSize/2) > 0:

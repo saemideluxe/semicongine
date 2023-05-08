@@ -76,21 +76,16 @@ when isMainModule:
       main="color = vec4(outcolor, 1);"
     )
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  var
-    projection = initShaderGlobal("projection", Unit4f32)
-    view = initShaderGlobal("view", Unit4f32)
-    model = initShaderGlobal("model", Unit4f32)
-    cube = newEntity("cube", newMesh(positions=cube_pos, indices=tris, colors=cube_color))
-  cube.components.add projection
-  cube.components.add view
-  cube.components.add model
+  var cube = newScene("scene", newEntity("cube", newMesh(positions=cube_pos, indices=tris, colors=cube_color)))
+  cube.addShaderGlobal("projection", Unit4f32)
+  cube.addShaderGlobal("view", Unit4f32)
+  cube.addShaderGlobal("model", Unit4f32)
   myengine.addScene(cube, vertexInput)
 
   var t: float32 = cpuTime()
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
-    setValue[Mat4](model.value, translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t, Yf32))
-    setValue[Mat4](
-      projection.value,
+    setShaderGlobal(cube, "model", translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t, Yf32))
+    setShaderGlobal(cube, "projection",
       perspective(
         float32(PI / 4),
         float32(myengine.getWindow().size[0]) / float32(myengine.getWindow().size[0]),

@@ -1,7 +1,5 @@
 import std/enumerate
-import std/strutils
 import std/typetraits
-import std/times
 import std/math
 
 import semicongine
@@ -58,7 +56,7 @@ const
 
 # build keyboard and cursor meshes
 var
-  scene: Entity
+  scene: Scene
   keyvertexpos: seq[Vec3f]
   keyvertexcolor: seq[Vec3f]
   keymeshindices: seq[array[3, uint16]]
@@ -136,16 +134,16 @@ when isMainModule:
     )
 
   # define mesh objects
-  scene = newEntity("scene")
-  scene.add newEntity("background", backgroundmesh)
+  scene = newScene("scene", newEntity("scene"))
+  scene.root.add newEntity("background", backgroundmesh)
   let keyboard = newEntity("keyboard", keyboardmesh)
   keyboard.transform = translate3d(
     -float32(rowWidth) / 2'f32,
     -float32(tupleLen(keyRows) * (keyDimension + keyGap) - keyGap) / 2'f32,
     0'f32
   )
-  scene.add newEntity("keyboard-center", keyboard)
-  scene.add newEntity("cursor", cursormesh)
+  scene.root.add newEntity("keyboard-center", keyboard)
+  scene.root.add newEntity("cursor", cursormesh)
 
   # shaders
   const
@@ -175,27 +173,28 @@ when isMainModule:
   # set up rendering
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0.5)))
   myengine.addScene(scene, vertexInput, transformAttribute="transform")
-  var projection = initShaderGlobal("projection", Unit4f32)
-  scene.add projection
+  scene.addShaderGlobal("projection", Unit4f32)
 
   # mainloop
   while myengine.updateInputs() == Running:
     if myengine.windowWasResized():
-      setValue[Mat4](projection.value, ortho[float32](
-        0'f32, float32(myengine.getWindow().size[0]),
-        0'f32, float32(myengine.getWindow().size[1]),
-        0'f32, 1'f32,
-      ))
+      setShaderGlobal(scene, "projection",
+        ortho[float32](
+          0'f32, float32(myengine.getWindow().size[0]),
+          0'f32, float32(myengine.getWindow().size[1]),
+          0'f32, 1'f32,
+        )
+      )
       let
         winsize = myengine.getWindow().size
         center = translate3d(float32(winsize[0]) / 2'f32, float32(winsize[1]) / 2'f32, 0.1'f32)
-      scene.firstWithName("keyboard-center").transform = center
-      scene.firstWithName("background").transform = scale3d(float32(winsize[0]), float32(winsize[1]), 1'f32)
+      scene.root.firstWithName("keyboard-center").transform = center
+      scene.root.firstWithName("background").transform = scale3d(float32(winsize[0]), float32(winsize[1]), 1'f32)
 
     let mousePos = translate3d(myengine.mousePosition().x + 20, myengine.mousePosition().y + 20, 0'f32)
-    scene.firstWithName("cursor").transform = mousePos
+    scene.root.firstWithName("cursor").transform = mousePos
 
-    var mesh = Mesh(scene.firstWithName("keyboard").components[0])
+    var mesh = Mesh(scene.root.firstWithName("keyboard").components[0])
     for (index, key) in enumerate(keyIndices):
       if myengine.keyWasPressed(key):
         let baseIndex = uint32(index * 4)
