@@ -1,7 +1,4 @@
-import std/times
 import std/sequtils
-import std/strutils
-import std/math
 import std/random
 
 import semicongine
