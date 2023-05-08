@@ -25,13 +25,13 @@ const
   )
 
 var
-  triangle = newEntity(
+  triangle = newScene("scene", newEntity(
     "triangle",
     newMesh(
       [newVec3f(-0.5, 0.5), newVec3f(0, -0.5), newVec3f(0.5, 0.5)],
       [X, Y, Z],
     )
-  )
+  ))
   myengine = initEngine("Hello triangle")
   renderPass = myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
 
