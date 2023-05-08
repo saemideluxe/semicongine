@@ -647,7 +647,7 @@ iterator items*[T: HoleyEnum](E: typedesc[T]): T =
   mainout.add "}.toTable"
   for platform in api.findAll("platform"):
     mainout.add &"when defined({platform.attr(\"protect\")}):"
-    mainout.add &"  include platform/{platform.attr(\"name\")}"
+    mainout.add &"  ../vulkan/include platform/{platform.attr(\"name\")}"
     if platform.attr("name") in extensionLoaderMap:
       for extension, loader in extensionLoaderMap[platform.attr("name")].pairs:
         mainout.add &"  EXTENSION_LOADERS[\"{extension}\"] = {loader}"

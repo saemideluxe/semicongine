@@ -2,7 +2,7 @@ import std/sequtils
 import std/options
 import std/tables
 
-import ./api
+import ../core
 import ./utils
 import ./instance
 import ./physicaldevice

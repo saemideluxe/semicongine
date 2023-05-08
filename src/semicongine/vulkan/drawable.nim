@@ -2,11 +2,9 @@ import std/tables
 import std/strformat
 import std/logging
 
-import ./api
+import ../core
 import ./utils
 import ./buffer
-
-import ../gpu_data
 
 type
   Drawable* = object

@@ -7,7 +7,7 @@ import std/strformat
 import std/tables
 import std/os
 
-import ./buildconfig
+import ./core
 
 when CONFIGHOTRELOAD:
   var configUpdates: Channel[(string, Config)]

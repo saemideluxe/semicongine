@@ -11986,26 +11986,26 @@ var EXTENSION_LOADERS = {
   "VK_QCOM_fragment_density_map_offset": loadVK_QCOM_fragment_density_map_offset,
 }.toTable
 when defined(VK_USE_PLATFORM_XLIB_KHR):
-  include platform/xlib
+  include ../vulkan/platform/xlib
   EXTENSION_LOADERS["VK_KHR_xlib_surface"] = loadVK_KHR_xlib_surface
 when defined(VK_USE_PLATFORM_XLIB_XRANDR_EXT):
-  include platform/xlib_xrandr
+  include ../vulkan/platform/xlib_xrandr
   EXTENSION_LOADERS["VK_EXT_acquire_xlib_display"] = loadVK_EXT_acquire_xlib_display
 when defined(VK_USE_PLATFORM_XCB_KHR):
-  include platform/xcb
+  include ../vulkan/platform/xcb
   EXTENSION_LOADERS["VK_KHR_xcb_surface"] = loadVK_KHR_xcb_surface
 when defined(VK_USE_PLATFORM_WAYLAND_KHR):
-  include platform/wayland
+  include ../vulkan/platform/wayland
   EXTENSION_LOADERS["VK_KHR_wayland_surface"] = loadVK_KHR_wayland_surface
 when defined(VK_USE_PLATFORM_DIRECTFB_EXT):
-  include platform/directfb
+  include ../vulkan/platform/directfb
   EXTENSION_LOADERS["VK_EXT_directfb_surface"] = loadVK_EXT_directfb_surface
 when defined(VK_USE_PLATFORM_ANDROID_KHR):
-  include platform/android
+  include ../vulkan/platform/android
   EXTENSION_LOADERS["VK_KHR_android_surface"] = loadVK_KHR_android_surface
   EXTENSION_LOADERS["VK_ANDROID_external_memory_android_hardware_buffer"] = loadVK_ANDROID_external_memory_android_hardware_buffer
 when defined(VK_USE_PLATFORM_WIN32_KHR):
-  include platform/win32
+  include ../vulkan/platform/win32
   EXTENSION_LOADERS["VK_KHR_external_semaphore_win32"] = loadVK_KHR_external_semaphore_win32
   EXTENSION_LOADERS["VK_EXT_full_screen_exclusive"] = loadVK_EXT_full_screen_exclusive
   EXTENSION_LOADERS["VK_NV_external_memory_win32"] = loadVK_NV_external_memory_win32
@@ -12015,32 +12015,32 @@ when defined(VK_USE_PLATFORM_WIN32_KHR):
   EXTENSION_LOADERS["VK_KHR_external_fence_win32"] = loadVK_KHR_external_fence_win32
   EXTENSION_LOADERS["VK_KHR_win32_keyed_mutex"] = loadVK_KHR_win32_keyed_mutex
 when defined(VK_USE_PLATFORM_VI_NN):
-  include platform/vi
+  include ../vulkan/platform/vi
   EXTENSION_LOADERS["VK_NN_vi_surface"] = loadVK_NN_vi_surface
 when defined(VK_USE_PLATFORM_IOS_MVK):
-  include platform/ios
+  include ../vulkan/platform/ios
   EXTENSION_LOADERS["VK_MVK_ios_surface"] = loadVK_MVK_ios_surface
 when defined(VK_USE_PLATFORM_MACOS_MVK):
-  include platform/macos
+  include ../vulkan/platform/macos
   EXTENSION_LOADERS["VK_MVK_macos_surface"] = loadVK_MVK_macos_surface
 when defined(VK_USE_PLATFORM_METAL_EXT):
-  include platform/metal
+  include ../vulkan/platform/metal
   EXTENSION_LOADERS["VK_EXT_metal_objects"] = loadVK_EXT_metal_objects
   EXTENSION_LOADERS["VK_EXT_metal_surface"] = loadVK_EXT_metal_surface
 when defined(VK_USE_PLATFORM_FUCHSIA):
-  include platform/fuchsia
+  include ../vulkan/platform/fuchsia
   EXTENSION_LOADERS["VK_FUCHSIA_external_semaphore"] = loadVK_FUCHSIA_external_semaphore
   EXTENSION_LOADERS["VK_FUCHSIA_imagepipe_surface"] = loadVK_FUCHSIA_imagepipe_surface
   EXTENSION_LOADERS["VK_FUCHSIA_external_memory"] = loadVK_FUCHSIA_external_memory
   EXTENSION_LOADERS["VK_FUCHSIA_buffer_collection"] = loadVK_FUCHSIA_buffer_collection
 when defined(VK_USE_PLATFORM_GGP):
-  include platform/ggp
+  include ../vulkan/platform/ggp
   EXTENSION_LOADERS["VK_GGP_frame_token"] = loadVK_GGP_frame_token
   EXTENSION_LOADERS["VK_GGP_stream_descriptor_surface"] = loadVK_GGP_stream_descriptor_surface
 when defined(VK_USE_PLATFORM_SCI):
-  include platform/sci
+  include ../vulkan/platform/sci
 when defined(VK_ENABLE_BETA_EXTENSIONS):
-  include platform/provisional
+  include ../vulkan/platform/provisional
   EXTENSION_LOADERS["VK_KHR_video_encode_queue"] = loadVK_KHR_video_encode_queue
   EXTENSION_LOADERS["VK_KHR_video_queue"] = loadVK_KHR_video_queue
   EXTENSION_LOADERS["VK_EXT_video_encode_h264"] = loadVK_EXT_video_encode_h264
@@ -12050,7 +12050,7 @@ when defined(VK_ENABLE_BETA_EXTENSIONS):
   EXTENSION_LOADERS["VK_KHR_portability_subset"] = loadVK_KHR_portability_subset
   EXTENSION_LOADERS["VK_KHR_video_decode_h265"] = loadVK_KHR_video_decode_h265
 when defined(VK_USE_PLATFORM_SCREEN_QNX):
-  include platform/screen
+  include ../vulkan/platform/screen
   EXTENSION_LOADERS["VK_QNX_screen_surface"] = loadVK_QNX_screen_surface
 
 proc loadExtension*(instance: VkInstance, extension: string) = EXTENSION_LOADERS[extension](instance)

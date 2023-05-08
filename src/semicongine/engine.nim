@@ -6,18 +6,15 @@ import std/os
 
 import ./platform/window
 
-import ./vulkan/api
+import ./core
 import ./vulkan/instance
 import ./vulkan/device
 import ./vulkan/physicaldevice
 import ./vulkan/renderpass
 
-import ./gpu_data
 import ./entity
 import ./renderer
 import ./events
-import ./buildconfig
-import ./math
 import ./audio
 
 type

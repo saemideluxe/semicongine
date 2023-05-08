@@ -1,15 +1,13 @@
 import std/options
 import std/logging
 
-import ./api
+import ../core
 import ./utils
 import ./device
 import ./physicaldevice
 import ./pipeline
 import ./shader
 import ./framebuffer
-
-import ../math
 
 type
   Subpass* = object

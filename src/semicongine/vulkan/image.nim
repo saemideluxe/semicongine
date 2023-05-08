@@ -1,7 +1,7 @@
 import std/tables
 import std/logging
 
-import ./api
+import ../core
 import ./device
 import ./physicaldevice
 import ./buffer

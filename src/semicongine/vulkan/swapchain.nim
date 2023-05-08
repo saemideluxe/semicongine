@@ -2,7 +2,7 @@ import std/options
 import std/strformat
 import std/logging
 
-import ./api
+import ../core
 import ./utils
 import ./device
 import ./physicaldevice
@@ -10,8 +10,6 @@ import ./image
 import ./framebuffer
 import ./commandbuffer
 import ./syncing
-
-import ../math
 
 type
   Swapchain* = object

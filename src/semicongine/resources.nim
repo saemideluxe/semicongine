@@ -1,7 +1,7 @@
 import std/strutils
 import std/os
 
-import ./buildconfig
+import ./core
 
 type
   ResourceBundlingType* = enum

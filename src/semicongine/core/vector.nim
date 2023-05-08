@@ -5,7 +5,7 @@ import std/macros
 import std/typetraits
 import std/tables
 
-import ../vulkan/api
+import ./vulkanapi
 
 type
   TVec2*[T: SomeNumber] = array[2, T]

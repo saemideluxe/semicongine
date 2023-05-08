@@ -1,7 +1,7 @@
 import std/enumerate
 import std/tables
 
-import ./api
+import ../core
 import ./device
 import ./buffer
 import ./utils

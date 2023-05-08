@@ -1,4 +1,4 @@
-import ../../vulkan/api
+import ../../core
 import ../../platform/window
 
 proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =

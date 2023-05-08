@@ -8,8 +8,8 @@ import
   x11/keysym
 import x11/x
 
+import ../../core
 import ../../events
-import ../../math/vector
 
 import ./symkey_map
 

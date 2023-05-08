@@ -1,6 +1,6 @@
 import std/strformat
 
-import ./api
+import ../core
 import ./device
 
 type

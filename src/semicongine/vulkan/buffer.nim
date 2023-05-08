@@ -4,7 +4,7 @@ import std/sequtils
 import std/tables
 import std/logging
 
-import ./api
+import ../core
 import ./device
 import ./memory
 import ./physicaldevice

@@ -1,4 +1,4 @@
-import ./api
+import ../core
 import ./device
 
 type
