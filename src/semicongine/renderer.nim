@@ -230,17 +230,15 @@ proc render*(renderer: var Renderer, scene: var Scene) =
   var
     commandBufferResult = renderer.swapchain.nextFrame()
     commandBuffer: VkCommandBuffer
-    oldSwapchain: Swapchain
 
   if not commandBufferResult.isSome:
-    oldSwapchain = renderer.swapchain
     let res = renderer.swapchain.recreate()
     if res.isSome:
+      var oldSwapchain = renderer.swapchain
       renderer.swapchain = res.get()
-      commandBufferResult = renderer.swapchain.nextFrame()
-      assert commandBufferResult.isSome
-    else:
-      raise newException(Exception, "Unable to recreate swapchain")
+      checkVkResult renderer.device.vk.vkDeviceWaitIdle()
+      oldSwapchain.destroy()
+    return
   commandBuffer = commandBufferResult.get()
 
   commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer())
@@ -268,16 +266,12 @@ proc render*(renderer: var Renderer, scene: var Scene) =
   commandBuffer.endRenderCommands()
 
   if not renderer.swapchain.swap():
-    oldSwapchain = renderer.swapchain
     let res = renderer.swapchain.recreate()
     if res.isSome:
+      var oldSwapchain = renderer.swapchain
       renderer.swapchain = res.get()
-    else:
-      raise newException(Exception, "Unable to recreate swapchain")
-
-  if oldSwapchain.vk.valid:
-    checkVkResult renderer.device.vk.vkDeviceWaitIdle()
-    oldSwapchain.destroy()
+      checkVkResult renderer.device.vk.vkDeviceWaitIdle()
+      oldSwapchain.destroy()
 
 func framesRendered*(renderer: Renderer): uint64 =
   renderer.swapchain.framesRendered
