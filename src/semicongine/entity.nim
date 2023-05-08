@@ -3,9 +3,7 @@ import std/tables
 import std/hashes
 import std/typetraits
 
-import ./math/matrix
-import ./gpu_data
-import ./vulkan/api
+import ./core
 
 type
   Component* = ref object of RootObj

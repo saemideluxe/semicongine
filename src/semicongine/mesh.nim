@@ -5,11 +5,8 @@ import std/enumerate
 import std/strformat
 import std/sequtils
 
-import ./vulkan/api
-import ./gpu_data
+import ./core
 import ./entity
-import ./math
-import ./color
 
 type
   MeshIndexType* = enum

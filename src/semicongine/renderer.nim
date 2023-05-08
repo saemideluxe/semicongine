@@ -4,7 +4,7 @@ import std/strformat
 import std/strutils
 import std/logging
 
-import ./vulkan/api
+import ./core
 import ./vulkan/buffer
 import ./vulkan/device
 import ./vulkan/drawable
@@ -17,9 +17,6 @@ import ./vulkan/image
 
 import ./entity
 import ./mesh
-import ./gpu_data
-import ./math
-import ./buildconfig
 
 type
   SceneData = object

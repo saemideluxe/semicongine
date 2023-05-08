@@ -1,4 +1,4 @@
-import ../../audiotypes
+import ../../core
 
 # alsa API
 type 

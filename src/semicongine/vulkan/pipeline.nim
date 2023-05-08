@@ -2,15 +2,13 @@ import std/tables
 import std/strformat
 import std/sequtils
 
-import ./api
+import ../core
 import ./device
 import ./descriptor
 import ./shader
 import ./buffer
 import ./utils
 import ./image
-
-import ../gpu_data
 
 type
   Pipeline* = object

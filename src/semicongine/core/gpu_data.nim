@@ -2,8 +2,9 @@ import std/typetraits
 import std/strformat
 import std/tables
 
-import ./vulkan/api
-import ./math
+import ./vulkanapi
+import ./vector
+import ./matrix
 
 type
   Sampler2DType* = object

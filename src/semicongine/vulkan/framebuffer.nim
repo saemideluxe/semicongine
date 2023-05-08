@@ -1,9 +1,8 @@
-import ./api
+import ../core
 import ./device
 import ./utils
 import ./image
 
-import ../math
 
 type
   Framebuffer* = object

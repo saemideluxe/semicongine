@@ -7,7 +7,7 @@ when defined(windows): # used for setting audio thread priority
 when defined(linux):
   import std/posix
 
-import ./audiotypes
+import ./core
 import ./platform/audio
 
 export audiotypes

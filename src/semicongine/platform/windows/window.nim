@@ -1,9 +1,9 @@
 import std/options
 import winim
 
+import ../../core
 import ./virtualkey_map
 import ../../events
-import ../../math/vector
 
 type
   NativeWindow* = object

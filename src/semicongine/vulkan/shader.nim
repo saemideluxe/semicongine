@@ -7,11 +7,9 @@ import std/strformat
 import std/strutils
 import std/compilesettings
 
-import ./api
+import ../core
 import ./device
 import ./utils
-
-import ../gpu_data
 
 const DEFAULT_SHADER_VERSION = 450
 const DEFAULT_SHADER_ENTRYPOINT = "main"

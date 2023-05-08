@@ -1,7 +1,7 @@
 import std/parseutils
 import std/strformat
 
-import ./math/vector
+import ./vector
 
 func hexToColor*(value: string): Vec3f =
   assert value != ""

@@ -3,7 +3,7 @@ import std/tables
 import std/sequtils
 import std/logging
 
-import ./api
+import ../core
 import ./utils
 
 import ../platform/vulkanExtensions

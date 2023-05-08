@@ -2,7 +2,7 @@ from std/enumerate import enumerate
 import std/tables
 import std/sequtils
 
-import ./api
+import ../core
 import ./utils
 import ./instance
 
