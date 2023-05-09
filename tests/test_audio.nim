@@ -62,7 +62,7 @@ proc test2() =
 
 proc test3() =
   var song: SoundData
-  var f = open("tests/audiotest.PCM.s16le.48000.2")
+  var f = open("./tests/audiotest.PCM.s16le.48000.2")
   var readLen = 999
   while readLen > 0:
     var sample: Sample
@@ -85,6 +85,5 @@ when isMainModule:
   mixer[].stop()
   test2()
   mixer[].stop()
-  while true:
-    test3()
-    mixer[].stop()
+  # test3() # only run this manually, not in automated tests
+  # mixer[].stop()

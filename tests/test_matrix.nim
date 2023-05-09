@@ -1,8 +1,7 @@
 import random
 import math
 
-import semicongine/math/vector
-import semicongine/math/matrix
+import semicongine
 
 
 proc echoInfo(v: TVec) =
@@ -33,52 +32,52 @@ proc randVec4F(): auto = newVec4(rand(10'f) + 0.01, rand(10'f) + 0.01, rand(10'f
 
 
 template withAllIntegerMats(stuff: untyped) =
-  stuff(TMat22[int32])
+  stuff(TMat2[int32])
   stuff(TMat23[int32])
   stuff(TMat32[int32])
-  stuff(TMat33[int32])
+  stuff(TMat3[int32])
   stuff(TMat34[int32])
   stuff(TMat43[int32])
-  stuff(TMat44[int32])
-  stuff(TMat22[int64])
+  stuff(TMat4[int32])
+  stuff(TMat2[int64])
   stuff(TMat23[int64])
   stuff(TMat32[int64])
-  stuff(TMat33[int64])
+  stuff(TMat3[int64])
   stuff(TMat34[int64])
   stuff(TMat43[int64])
-  stuff(TMat44[int64])
+  stuff(TMat4[int64])
 
 template withAllFloatMats(stuff: untyped) =
-  stuff(TMat22[float32])
+  stuff(TMat2[float32])
   stuff(TMat23[float32])
   stuff(TMat32[float32])
-  stuff(TMat33[float32])
+  stuff(TMat3[float32])
   stuff(TMat34[float32])
   stuff(TMat43[float32])
-  stuff(TMat44[float32])
-  stuff(TMat22[float64])
+  stuff(TMat4[float32])
+  stuff(TMat2[float64])
   stuff(TMat23[float64])
   stuff(TMat32[float64])
-  stuff(TMat33[float64])
+  stuff(TMat3[float64])
   stuff(TMat34[float64])
   stuff(TMat43[float64])
-  stuff(TMat44[float64])
+  stuff(TMat4[float64])
 
 template withAllMats(stuff: untyped) =
-  stuff(TMat22[int])
+  stuff(TMat2[int])
   stuff(TMat23[int])
   stuff(TMat32[int])
-  stuff(TMat33[int])
+  stuff(TMat3[int])
   stuff(TMat34[int])
   stuff(TMat43[int])
-  stuff(TMat44[int])
-  stuff(TMat22[float])
+  stuff(TMat4[int])
+  stuff(TMat2[float])
   stuff(TMat23[float])
   stuff(TMat32[float])
-  stuff(TMat33[float])
+  stuff(TMat3[float])
   stuff(TMat34[float])
   stuff(TMat43[float])
-  stuff(TMat44[float])
+  stuff(TMat4[float])
 
 template testTranspose(t: typedesc) =
   echo "testTranspose: ", t
@@ -112,30 +111,30 @@ proc testMatrix() =
   withAllFloatMats(testAssignF)
   withAllMats(testRowCols)
 
-  echo Unit22
-  echo Unit22i
-  echo Unit22i8
-  echo Unit22i16
-  echo Unit22i32
-  echo Unit22i64
+  echo Unit2
+  echo Unit2i
+  echo Unit2i8
+  echo Unit2i16
+  echo Unit2i32
+  echo Unit2i64
 
-  echo Unit33
-  echo Unit33i
-  echo Unit33i8
-  echo Unit33i16
-  echo Unit33i32
-  echo Unit33i64
+  echo Unit3
+  echo Unit3i
+  echo Unit3i8
+  echo Unit3i16
+  echo Unit3i32
+  echo Unit3i64
 
-  echo Unit44
-  echo Unit44i
-  echo Unit44i8
-  echo Unit44i16
-  echo Unit44i32
-  echo Unit44i64
+  echo Unit4
+  echo Unit4i
+  echo Unit4i8
+  echo Unit4i16
+  echo Unit4i32
+  echo Unit4i64
 
-  echo TMat22[float]().randomized() * One2.randomized()
-  echo TMat33[float]().randomized() * One3.randomized()
-  echo TMat44[float]().randomized() * One4.randomized()
+  echo TMat2[float32]().randomized() * One2.randomized()
+  echo TMat3[float32]().randomized() * One3.randomized()
+  echo TMat4[float32]().randomized() * One4.randomized()
 
 randomize()
 testMatrix()
