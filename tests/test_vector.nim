@@ -1,7 +1,7 @@
 import random
 import math
 
-import semicongine/math/vector
+import semicongine
 
 
 proc echoInfo(v: TVec) =
