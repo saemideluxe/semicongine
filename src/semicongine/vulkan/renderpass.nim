@@ -1,5 +1,4 @@
 import std/options
-import std/logging
 
 import ../core
 import ./device

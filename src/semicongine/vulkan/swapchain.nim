@@ -112,7 +112,7 @@ proc createSwapchain*(
     var images = newSeq[VkImage](nImages)
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), images.toCPointer)
     for vkimage in images:
-      let image = Image(vk: vkimage, format: surfaceFormat.format, device: device)
+      let image = GPUImage(vk: vkimage, format: surfaceFormat.format, device: device)
       let imageview = image.createImageView()
       swapChain.imageviews.add imageview
       swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass, [imageview], swapchain.dimension)

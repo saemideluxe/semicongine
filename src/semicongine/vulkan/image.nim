@@ -10,7 +10,7 @@ import ./commandbuffer
 
 type
   PixelDepth = 1'u32 .. 4'u32
-  Image* = object
+  GPUImage* = object
     device*: Device
     vk*: VkImage
     width*: uint32 # pixel
@@ -27,9 +27,9 @@ type
     vk*: VkSampler
   ImageView* = object
     vk*: VkImageView
-    image*: Image
+    image*: GPUImage
   Texture* = object
-    image*: Image
+    image*: GPUImage
     imageView*: ImageView
     sampler*: Sampler
 
@@ -41,7 +41,7 @@ const DEPTH_FORMAT_MAP = {
 }.toTable
 
 
-proc requirements(image: Image): MemoryRequirements =
+proc requirements(image: GPUImage): MemoryRequirements =
   assert image.vk.valid
   assert image.device.vk.valid
   var req: VkMemoryRequirements
@@ -53,7 +53,7 @@ proc requirements(image: Image): MemoryRequirements =
     if ((req.memoryTypeBits shr i) and 1) == 1:
       result.memoryTypes.add memorytypes[i]
 
-proc allocateMemory(image: var Image, requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool) =
+proc allocateMemory(image: var GPUImage, requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool) =
   assert image.device.vk.valid
   assert image.memoryAllocated == false
 
@@ -68,7 +68,7 @@ proc allocateMemory(image: var Image, requireMappable: bool, preferVRAM: bool, p
   image.memory = image.device.allocate(requirements.size, memoryType)
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 
-proc transitionImageLayout*(image: Image, oldLayout, newLayout: VkImageLayout) =
+proc transitionImageLayout*(image: GPUImage, oldLayout, newLayout: VkImageLayout) =
   var barrier = VkImageMemoryBarrier(
     sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
     oldLayout: oldLayout,
@@ -109,7 +109,7 @@ proc transitionImageLayout*(image: Image, oldLayout, newLayout: VkImageLayout) =
       1, addr barrier
     )
 
-proc copy*(src: Buffer, dst: Image) =
+proc copy*(src: Buffer, dst: GPUImage) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -139,7 +139,7 @@ proc copy*(src: Buffer, dst: Image) =
     )
 
 # currently only usable for texture access from shader
-proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): Image =
+proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): GPUImage =
   assert device.vk.valid
   assert width > 0
   assert height > 0
@@ -177,7 +177,7 @@ proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data
   result.transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
   stagingBuffer.destroy()
 
-proc destroy*(image: var Image) =
+proc destroy*(image: var GPUImage) =
   assert image.device.vk.valid
   assert image.vk.valid
   image.device.vk.vkDestroyImage(image.vk, nil)
@@ -217,7 +217,7 @@ proc destroy*(sampler: var Sampler) =
   sampler.vk.reset
 
 proc createImageView*(
-  image: Image,
+  image: GPUImage,
   imageviewtype=VK_IMAGE_VIEW_TYPE_2D,
   baseMipLevel=0'u32,
   levelCount=1'u32,

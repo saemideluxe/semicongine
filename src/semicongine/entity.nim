@@ -13,7 +13,7 @@ type
     name*: string
     root*: Entity
     shaderGlobals*: Table[string, DataValue]
-    textures*: Table[string, seq[TextureImage]]
+    textures*: Table[string, (seq[Image], VkFilter)]
 
   Entity* = ref object of RootObj
     name*: string
@@ -21,13 +21,6 @@ type
     parent*: Entity
     children*: seq[Entity]
     components*: seq[Component]
-
-  Pixel* = array[4, uint8]
-  TextureImage* = ref object of RootObj
-    width*: uint32
-    height*: uint32
-    imagedata*: seq[Pixel]
-    interpolation*: VkFilter
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   var value = DataValue(thetype: getDataType[T]())
@@ -40,11 +33,11 @@ func getShaderGlobal*[T](scene: Scene, name: string): T =
 func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
   setValue[T](scene.shaderGlobals[name], value)
 
-func addTextures*(scene: var Scene, name: string, texture: seq[TextureImage]) =
-  scene.textures[name] = texture
+func addTextures*(scene: var Scene, name: string, texture: seq[Image], interpolation=VK_FILTER_LINEAR) =
+  scene.textures[name] = (texture, interpolation)
 
-func addTexture*(scene: var Scene, name: string, texture: TextureImage) =
-  scene.textures[name] = @[texture]
+func addTexture*(scene: var Scene, name: string, texture: Image, interpolation=VK_FILTER_LINEAR) =
+  scene.textures[name] = (@[texture], interpolation)
 
 func newScene*(name: string, root: Entity): Scene =
   Scene(name: name, root: root)
