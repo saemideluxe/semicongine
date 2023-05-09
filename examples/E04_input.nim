@@ -24,9 +24,9 @@ const
   )
   keyDimension = 50'f32
   keyGap = 10'f32
-  backgroundColor = newVec3f(0.6705882352941176, 0.6078431372549019, 0.5882352941176471)
-  baseColor = newVec3f(0.9411764705882353, 0.9058823529411765, 0.8470588235294118'f32)
-  activeColor = newVec3f(0.6509803921568628'f32, 0.22745098039215686, 0.3137254901960784'f32)
+  backgroundColor = newVec4f(0.6705882352941176, 0.6078431372549019, 0.5882352941176471, 1)
+  baseColor = newVec4f(0.9411764705882353, 0.9058823529411765, 0.8470588235294118, 1)
+  activeColor = newVec4f(0.6509803921568628, 0.22745098039215686, 0.3137254901960784, 1)
   arrow_colors = @[
     baseColor * 0.9'f32,
     baseColor * 0.9'f32,
@@ -58,7 +58,7 @@ const
 var
   scene: Scene
   keyvertexpos: seq[Vec3f]
-  keyvertexcolor: seq[Vec3f]
+  keyvertexcolor: seq[Vec4f]
   keymeshindices: seq[array[3, uint16]]
   rowpos = newVec2f(0, 0)
   i = 0'u16
@@ -149,10 +149,10 @@ when isMainModule:
   const
     vertexInput = @[
       attr[Vec3f]("position"),
-      attr[Vec3f]("color", memoryPerformanceHint=PreferFastWrite),
+      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
       attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
     ]
-    vertexOutput = @[attr[Vec3f]("outcolor")]
+    vertexOutput = @[attr[Vec4f]("outcolor")]
     uniforms = @[attr[Mat4]("projection")]
     fragOutput = @[attr[Vec4f]("color")]
     vertexCode = compileGlslShader(
@@ -167,7 +167,7 @@ when isMainModule:
       inputs=vertexOutput,
       uniforms=uniforms,
       outputs=fragOutput,
-      main="color = vec4(outcolor, 1);"
+      main="color = outcolor;"
     )
 
   # set up rendering

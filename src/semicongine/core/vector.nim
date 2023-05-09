@@ -27,8 +27,7 @@ converter toVec3*[T: SomeNumber](orig: TVec4[T]): TVec3[T] =
 # define some often used constants
 func ConstOne2[T: SomeNumber](): auto {.compiletime.} = TVec2[T]([T(1), T(1)])
 func ConstOne3[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(1), T(1)])
-func ConstOne4[T: SomeNumber](): auto {.compiletime.} = TVec4[T]([T(1), T(1), T(
-    1), T(1)])
+func ConstOne4[T: SomeNumber](): auto {.compiletime.} = TVec4[T]([T(1), T(1), T(1), T(1)])
 func ConstX[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(0), T(0)])
 func ConstY[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(1), T(0)])
 func ConstZ[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(0), T(1)])
@@ -49,8 +48,7 @@ func newVec4f*(x=0'f32, y=0'f32, z=0'f32, a=0'f32): auto =
 macro generateAllConsts() =
   result = newStmtList()
   for component in ["X", "Y", "Z", "R", "G", "B", "One2", "One3", "One4"]:
-    for theType in ["int", "int8", "int16", "int32", "int64", "float",
-        "float32", "float64"]:
+    for theType in ["int", "int8", "int16", "int32", "int64", "float", "float32", "float64"]:
       var typename = theType[0 .. 0]
       if theType[^2].isDigit:
         typename = typename & theType[^2]
