@@ -37,31 +37,31 @@ proc scene_different_mesh_types(): Entity =
   result = newEntity("root",
     newEntity("triangle1", newMesh(
       positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
-      colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+      colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
     )),
     newEntity("triangle1b", newMesh(
       positions=[newVec3f(0.0, -0.4), newVec3f(0.4, 0.4), newVec3f(-0.4, 0.5)],
-      colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+      colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
     )),
     newEntity("triangle2a", newMesh(
       positions=[newVec3f(0.0, 0.5), newVec3f(0.5, -0.5), newVec3f(-0.5, -0.5)],
-      colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+      colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]]
     )),
     newEntity("triangle2b", newMesh(
       positions=[newVec3f(0.0, 0.4), newVec3f(0.4, -0.4), newVec3f(-0.4, -0.4)],
-      colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+      colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]]
     )),
     newEntity("triangle3a", newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
-      colors=[newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0)],
+      colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false
     )),
     newEntity("triangle3b", newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
-      colors=[newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0)],
+      colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false
     )),
@@ -72,21 +72,21 @@ proc scene_different_mesh_types(): Entity =
 proc scene_simple(): Entity =
   var mymesh1 = newMesh(
     positions=[newVec3f(0.0, -0.3), newVec3f(0.3, 0.3), newVec3f(-0.3, 0.3)],
-    colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+    colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
   )
   var mymesh2 = newMesh(
     positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
-    colors=[newVec3f(1.0, 0.0, 0.0), newVec3f(0.0, 1.0, 0.0), newVec3f(0.0, 0.0, 1.0)],
+    colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
   )
   var mymesh3 = newMesh(
     positions=[newVec3f(0.0, -0.6), newVec3f(0.6, 0.6), newVec3f(-0.6, 0.6)],
-    colors=[newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0), newVec3f(1.0, 1.0, 0.0)],
+    colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
     indices=[[0'u32, 1'u32, 2'u32]],
     autoResize=false
   )
   var mymesh4 = newMesh(
     positions=[newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
-    colors=[newVec3f(0.0, 0.0, 1.0), newVec3f(0.0, 0.0, 1.0), newVec3f(0.0, 0.0, 1.0)],
+    colors=[newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
     indices=[[0'u16, 1'u16, 2'u16]],
     instanceCount=2
   )
@@ -107,7 +107,7 @@ proc scene_primitives(): Entity =
 
 proc scene_flag(): Entity =
   var r = rect(color="ff0000")
-  r.updateMeshData("color", @[newVec3f(0, 0), newVec3f(1, 0), newVec3f(1, 1), newVec3f(0, 1)])
+  r.updateMeshData("color", @[newVec4f(0, 0), newVec4f(1, 0), newVec4f(1, 1), newVec4f(0, 1)])
   result = newEntity("root", r)
 
 proc main() =
@@ -117,10 +117,10 @@ proc main() =
   const
     vertexInput = @[
       attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-      attr[Vec3f]("color", memoryPerformanceHint=PreferFastWrite),
+      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
       attr[Vec3f]("translate", perInstance=true)
     ]
-    vertexOutput = @[attr[Vec3f]("outcolor")]
+    vertexOutput = @[attr[Vec4f]("outcolor")]
     uniforms = @[attr[float32]("time")]
     samplers = @[attr[Sampler2DType]("my_little_texture")]
     fragOutput = @[attr[Vec4f]("color")]
@@ -138,7 +138,7 @@ proc main() =
       uniforms=uniforms,
       samplers=samplers,
       outputs=fragOutput,
-      main="color = texture(my_little_texture, outcolor.xy) * 0.5 + vec4(outcolor, 1) * 0.5;"
+      main="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;"
     )
   var renderPass = engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
   engine.setRenderer(renderPass)
@@ -153,13 +153,13 @@ proc main() =
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
     let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
-    scene.addTexture("my_little_texture", TextureImage(width: 5, height: 5, imagedata: @[
+    scene.addTexture("my_little_texture", Image(width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
       R, R, W, R, R,
       R, W, W, W, R,
       R, R, W, R, R,
       R, R, R, R, R,
-    ]))
+    ]), VK_FILTER_NEAREST)
     engine.addScene(scene, vertexInput)
 
   # MAINLOOP

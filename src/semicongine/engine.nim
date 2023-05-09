@@ -82,8 +82,8 @@ proc initEngine*(
     enabledLayers.add "VK_LAYER_KHRONOS_validation"
     putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
 
-    if defined(linux):
-      enabledLayers.add "VK_LAYER_MESA_overlay"
+  if defined(linux):
+    enabledLayers.add "VK_LAYER_MESA_overlay"
   result.instance = result.window.createInstance(
     vulkanVersion=VK_MAKE_API_VERSION(0, 1, 3, 0),
     instanceExtensions=instanceExtensions,
