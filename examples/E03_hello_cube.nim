@@ -30,13 +30,16 @@ const
     TopLeftBack, TopRightBack, TopRightFront, TopLeftFront, # top
     BottomLeftFront, BottomRightFront, BottomRightBack, BottomLeftBack, # bottom
   ]
+  R = newVec4f(1, 0, 0, 1)
+  G = newVec4f(0, 1, 0, 1)
+  B = newVec4f(0, 0, 1, 1)
   cube_color = @[
-    Rf32, Rf32, Rf32, Rf32,
-    Rf32 * 0.5'f32, Rf32 * 0.5'f32, Rf32 * 0.5'f32, Rf32 * 0.5'f32,
-    Gf32, Gf32, Gf32, Gf32,
-    Gf32 * 0.5'f32, Gf32 * 0.5'f32, Gf32 * 0.5'f32, Gf32 * 0.5'f32,
-    Bf32, Bf32, Bf32, Bf32,
-    Bf32 * 0.5'f32, Bf32 * 0.5'f32, Bf32 * 0.5'f32, Bf32 * 0.5'f32,
+    R, R, R, R,
+    R * 0.5'f32, R * 0.5'f32, R * 0.5'f32, R * 0.5'f32,
+    G, G, G, G,
+    G * 0.5'f32, G * 0.5'f32, G * 0.5'f32, G * 0.5'f32,
+    B, B, B, B,
+    B * 0.5'f32, B * 0.5'f32, B * 0.5'f32, B * 0.5'f32,
   ]
 var
   tris: seq[array[3, uint16]]
@@ -51,9 +54,9 @@ when isMainModule:
   const
     vertexInput = @[
       attr[Vec3f]("position"),
-      attr[Vec3f]("color", memoryPerformanceHint=PreferFastWrite),
+      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
     ]
-    vertexOutput = @[attr[Vec3f]("outcolor")]
+    vertexOutput = @[attr[Vec4f]("outcolor")]
     uniforms = @[
       attr[Mat4]("projection"),
       attr[Mat4]("view"),
@@ -72,7 +75,7 @@ when isMainModule:
       inputs=vertexOutput,
       uniforms=uniforms,
       outputs=fragOutput,
-      main="color = vec4(outcolor, 1);"
+      main="color = outcolor;"
     )
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
   var cube = newScene("scene", newEntity("cube", newMesh(positions=cube_pos, indices=tris, colors=cube_color)))

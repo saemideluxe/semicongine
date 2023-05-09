@@ -13,7 +13,7 @@ when isMainModule:
     HEIGHT = 2'f32 / ROWS
   var
     vertices: array[COLUMNS * ROWS * 4, Vec3f]
-    colors: array[COLUMNS * ROWS * 4, Vec3f]
+    colors: array[COLUMNS * ROWS * 4, Vec4f]
     iValues: array[COLUMNS * ROWS * 4, uint32]
     indices: array[COLUMNS * ROWS * 2, array[3, uint16]]
 
@@ -22,7 +22,7 @@ when isMainModule:
       let
         y: float32 = (row * 2 / COLUMNS) - 1
         x: float32 = (col * 2 / ROWS) - 1
-        color = Vec3f([(x + 1) / 2, (y + 1) / 2, 0'f32])
+        color = newVec4f((x + 1) / 2, (y + 1) / 2, 0, 1)
         squareIndex = row * COLUMNS + col
         vertIndex = squareIndex * 4
       vertices[vertIndex + 0] = newVec3f(x, y)
@@ -44,10 +44,10 @@ when isMainModule:
   const
     vertexInput = @[
       attr[Vec3f]("position"),
-      attr[Vec3f]("color", memoryPerformanceHint=PreferFastWrite),
+      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
       attr[uint32]("index"),
     ]
-    vertexOutput = @[attr[Vec3f]("outcolor")]
+    vertexOutput = @[attr[Vec4f]("outcolor")]
     uniforms = @[attr[float32]("time")]
     fragOutput = @[attr[Vec4f]("color")]
     vertexCode = compileGlslShader(
@@ -60,7 +60,7 @@ float pos_weight = index / 100.0; // add some gamma correction?
 float t = sin(Uniforms.time * 0.5) * 0.5 + 0.5;
 float v = min(1, max(0, pow(pos_weight - t, 2)));
 v = pow(1 - v, 3000);
-outcolor = vec3(color.r, color.g, v * 0.5);
+outcolor = vec4(color.r, color.g, v * 0.5, 1);
 gl_Position = vec4(position, 1.0);
 """
     )
@@ -69,7 +69,7 @@ gl_Position = vec4(position, 1.0);
       inputs=vertexOutput,
       uniforms=uniforms,
       outputs=fragOutput,
-      main="color = vec4(outcolor, 1);"
+      main="color = outcolor;"
     )
   var squaremesh = newMesh(
     positions=vertices,

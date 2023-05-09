@@ -73,6 +73,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     for inputAttr in inputs:
       if not mesh.hasDataFor(inputAttr.name):
         mesh.initData(inputAttr)
+      assert mesh.dataType(inputAttr.name) == inputAttr.thetype, &"mesh attribute {inputAttr.name} has type {mesh.dataType(inputAttr.name)} but shader expects {inputAttr.thetype}"
   
   # create index buffer if necessary
   var indicesBufferSize = 0'u64

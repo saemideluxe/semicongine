@@ -1,6 +1,5 @@
 import std/sequtils
 import std/options
-import std/strutils
 import std/logging
 import std/os
 

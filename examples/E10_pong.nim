@@ -3,10 +3,10 @@ import std/times
 import semicongine
 
 let
-  barcolor = hexToColor("5A3F00").gamma(2.2).colorToHex()
+  barcolor = hexToColorAlpha("5A3F00").gamma(2.2).colorToHex()
   barSize = 0.1'f
   barWidth = 0.01'f
-  ballcolor = hexToColor("B17F08").gamma(2.2).colorToHex()
+  ballcolor = hexToColorAlpha("B17F08").gamma(2.2).colorToHex()
   ballSize = 0.01'f
   backgroundColor = hexToColorAlpha("FAC034FF").gamma(2.2)
   ballSpeed = 60'f
@@ -33,10 +33,10 @@ when isMainModule:
   const
     vertexInput = @[
       attr[Vec3f]("position"),
-      attr[Vec3f]("color", memoryPerformanceHint=PreferFastWrite),
+      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
       attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
     ]
-    vertexOutput = @[attr[Vec3f]("outcolor")]
+    vertexOutput = @[attr[Vec4f]("outcolor")]
     uniforms = @[attr[Mat4]("projection")]
     fragOutput = @[attr[Vec4f]("color")]
     vertexCode = compileGlslShader(
@@ -51,7 +51,7 @@ when isMainModule:
       inputs=vertexOutput,
       uniforms=uniforms,
       outputs=fragOutput,
-      main="color = vec4(outcolor, 1);"
+      main="color = outcolor;"
     )
 
   # set up rendering

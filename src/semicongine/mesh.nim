@@ -40,7 +40,7 @@ method `$`*(mesh: Mesh): string =
 func newMesh*(
   positions: openArray[Vec3f],
   indices: openArray[array[3, uint32|int32|uint16|int16|int]],
-  colors: openArray[Vec3f]=[],
+  colors: openArray[Vec4f]=[],
   uvs: openArray[Vec2f]=[],
   instanceCount=1'u32,
   autoResize=true
@@ -55,11 +55,11 @@ func newMesh*(
   result.data["position"] = DataList(thetype: Vec3F32)
   setValues(result.data["position"], positions.toSeq)
   if colors.len > 0:
-    result.data["color"] = DataList(thetype: Vec3F32)
+    result.data["color"] = DataList(thetype: Vec4F32)
     setValues(result.data["color"], colors.toSeq)
   if uvs.len > 0:
     result.data["uv"] = DataList(thetype: Vec2F32)
-    setValues(result.data["uv"], colors.toSeq)
+    setValues(result.data["uv"], uvs.toSeq)
 
   for i in indices:
     assert uint32(i[0]) < result.vertexCount
@@ -84,7 +84,7 @@ func newMesh*(
 
 func newMesh*(
   positions: openArray[Vec3f],
-  colors: openArray[Vec3f]=[],
+  colors: openArray[Vec4f]=[],
   uvs: openArray[Vec2f]=[],
   instanceCount=1'u32,
 ): auto =
@@ -95,6 +95,9 @@ func availableAttributes*(mesh: Mesh): seq[string] =
 
 func dataSize*(mesh: Mesh, attribute: string): uint32 =
   mesh.data[attribute].size
+
+func dataType*(mesh: Mesh, attribute: string): DataType =
+  mesh.data[attribute].theType
 
 func indexDataSize*(mesh: Mesh): uint32 =
   case mesh.indexType
@@ -165,13 +168,13 @@ func hasDataChanged*(mesh: Mesh, attribute: string): bool =
 proc clearDataChanged*(mesh: var Mesh) =
   mesh.changedAttributes = @[]
 
-func rect*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
+func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = new Mesh
   result.vertexCount = 4
   result.indicesCount = 6
   result.instanceCount = 1
   result.data["position"] = DataList(thetype: Vec3F32)
-  result.data["color"] = DataList(thetype: Vec3F32)
+  result.data["color"] = DataList(thetype: Vec4F32)
   result.data["uv"] = DataList(thetype: Vec2F32)
   result.indexType = Small
   result.smallIndices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]]
@@ -179,40 +182,40 @@ func rect*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
   let
     half_w = width / 2
     half_h = height / 2
-    c = hexToColor(color)
+    c = hexToColorAlpha(color)
     v = [newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
 
   setValues(result.data["position"], v.toSeq)
   setValues(result.data["color"], @[c, c, c, c])
   setValues(result.data["uv"], @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
-func tri*(width=1'f32, height=1'f32, color="ffffff"): Mesh =
+func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = new Mesh
   result.vertexCount = 3
   result.instanceCount = 1
   result.data["position"] = DataList(thetype: Vec3F32)
-  result.data["color"] = DataList(thetype: Vec3F32)
+  result.data["color"] = DataList(thetype: Vec4F32)
   let
     half_w = width / 2
     half_h = height / 2
-    colorVec = hexToColor(color)
+    colorVec = hexToColorAlpha(color)
   setValues(result.data["position"], @[
     newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h),
   ])
   setValues(result.data["color"], @[colorVec, colorVec, colorVec])
 
-func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffff"): Mesh =
+func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mesh =
   assert nSegments >= 3
   result = new Mesh
   result.vertexCount = nSegments + 2
   result.instanceCount = 1
   result.indexType = Small
   result.data["position"] = DataList(thetype: Vec3F32)
-  result.data["color"] = DataList(thetype: Vec3F32)
+  result.data["color"] = DataList(thetype: Vec4F32)
   let
     half_w = width / 2
     half_h = height / 2
-    c = hexToColor(color)
+    c = hexToColorAlpha(color)
     step = (2'f32 * PI) / float32(nSegments)
   var
     pos = @[newVec3f(0, 0), newVec3f(0, half_h)]
