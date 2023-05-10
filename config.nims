@@ -52,7 +52,7 @@ task build, "build":
           exec &"zip -r {outputfile} ."
         elif defined(windows):
           # TODO: test this
-          exec &"powershell Compress-Archive {inputfile} {outputfile}"
+          exec &"powershell Compress-Archive * {outputfile}"
         cd(oldcwd)
 
 task build_all_debug, "build all examples for debug":

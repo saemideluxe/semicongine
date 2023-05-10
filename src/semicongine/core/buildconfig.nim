@@ -23,7 +23,7 @@ static:
   if defined(linux):
     assert defined(VK_USE_PLATFORM_XLIB_KHR), ENGINENAME & " requires --d:VK_USE_PLATFORM_XLIB_KHR for linux builds"
   elif defined(windows):
-    assert defined(VK_USE_PLATFORM_XLIB_KHR), ENGINENAME & " requires --d:VK_USE_PLATFORM_WIN32_KHR for windows builds"
+    assert defined(VK_USE_PLATFORM_WIN32_KHR), ENGINENAME & " requires --d:VK_USE_PLATFORM_WIN32_KHR for windows builds"
   else:
     assert false, "trying to build on unsupported platform"
 
