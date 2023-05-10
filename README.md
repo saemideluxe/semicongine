@@ -43,13 +43,14 @@ Required for 3D rendering:
 - [ ] Mipmaps 
 
 Asset handling:
-- [ ] Resource concept (TODO: test on windows)
+- [x] Resource loading
       - [x] Mod/resource-pack concept
       - [x] Load from directory
       - [x] Load from zip
       - [x] Load from exe-embeded
-- [ ] Mesh files (Wavefront OBJ, MTL) (use something from sketchfab for testing, https://sketchfab.com/)
-- [ ] Image files (BMP RGB + BMP Graysscale for transparency)
+- [ ] Mesh files (Wavefront OBJ, MTL)
+- [ ] Material files (Wavefront MTL)
+- [ ] Image files (BMP RGBA)
 - [ ] Audio files (AU)
 
 Other (required for alpha release):
@@ -69,7 +70,6 @@ Other (required for alpha release):
 - [ ] Telemetry
     - [x] Add simple event logging service
     - [ ] Add exception reporting
-- [ ] Documentation?
 
 Advanced features (very low priority):
 - [ ] Text rendering
@@ -79,6 +79,7 @@ Advanced features (very low priority):
 - [ ] Query and display rendering information from Vulkan?
 - [ ] Game controller input handling?
 - [ ] Allow multipel Uniform blocks?
+- [ ] Documentation?
 
 Quality improvments:
 
