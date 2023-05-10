@@ -1,7 +1,7 @@
 import std/options
 import winim
 
-import ../../core
+import ../../core/vector
 import ./virtualkey_map
 import ../../events
 

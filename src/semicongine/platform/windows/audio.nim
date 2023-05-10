@@ -1,7 +1,7 @@
 import winim
 import winim/extra
 
-import ../../core
+import ../../core/audiotypes
 
 template checkWinMMResult*(call: untyped) =
   let value = call
