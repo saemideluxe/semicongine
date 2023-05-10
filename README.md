@@ -3,8 +3,9 @@ Semicongine
 
 Hi there
 
-This is a very simplistic little game engine, mainly trying to wrap around vulkan and the operating system's windowing, input and audio system.
-I am using the last programming language you will ever need, [Nim](https://nim-lang.org/)
+This is a little game engine, mainly trying to wrap around vulkan and the
+operating system's windowing, input and audio system. I am using the last
+programming language you will ever need, [Nim](https://nim-lang.org/)
 
 Building
 --------
@@ -42,7 +43,11 @@ Required for 3D rendering:
 - [ ] Mipmaps 
 
 Asset handling:
-- [ ] Resource concept: load from directory, zip or in-memory-zip, select "mod" as root
+- [ ] Resource concept (TODO: test on windows)
+      - [x] Mod/resource-pack concept
+      - [x] Load from directory
+      - [x] Load from zip
+      - [x] Load from exe-embeded
 - [ ] Mesh files (Wavefront OBJ, MTL) (use something from sketchfab for testing, https://sketchfab.com/)
 - [ ] Image files (BMP RGB + BMP Graysscale for transparency)
 - [ ] Audio files (AU)

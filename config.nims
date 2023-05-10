@@ -8,91 +8,62 @@ const RELEASE = "release"
 const LINUX = "linux"
 const WINDOWS = "windows"
 
-proc compilerFlags() =
+const BUNDLETYPE* {.strdefine.}: string = "dir" # dir, zip, exe
+const RESOURCEROOT* {.strdefine.}: string = "resources"
+
+task build, "build":
   switch("path", "src")
   switch("mm", "orc")
   switch("experimental", "strictEffects")
   switch("threads", "on")
+  var buildType = DEBUG
+  var platformDir = ""
   if defined(linux):
     switch("define", "VK_USE_PLATFORM_XLIB_KHR")
+    platformDir = LINUX
   if defined(windows):
     switch("define", "VK_USE_PLATFORM_WIN32_KHR")
+    platformDir = WINDOWS
+  if defined(release):
+    switch("app", "gui")
+    buildType = RELEASE
+  else:
+    switch("debugger", "native")
 
-
-proc compilerFlagsDebug() =
-  switch("debugger", "native")
-
-proc compilerFlagsRelease() =
-  switch("define", "release")
-  switch("app", "gui")
-
-task single_linux_debug, "build linux debug":
-  compilerFlags()
-  compilerFlagsDebug()
-  switch("outdir", BUILDBASE / DEBUG / LINUX)
+  var outdir = getCurrentDir() / BUILDBASE / buildType / platformDir / projectName()
+  switch("outdir", outdir)
   setCommand "c"
-  mkDir(BUILDBASE / DEBUG / LINUX)
+  rmDir(outdir)
+  mkDir(outdir)
+  let resourcedir = joinPath(projectDir(), RESOURCEROOT)
+  if existsDir(resourcedir):
+    let outdir_resources = joinPath(outdir, RESOURCEROOT)
+    if BUNDLETYPE == "dir":
+      cpDir(resourcedir, outdir_resources)
+    elif BUNDLETYPE == "zip":
+      mkDir(outdir_resources)
+      for resource in listDirs(resourcedir):
+        let
+          oldcwd = getCurrentDir()
+          outputfile = joinPath(outdir_resources, resource.splitPath().tail & ".zip")
+          inputfile = resource.splitPath().tail
+        cd(resource)
+        if defined(linux):
+          exec &"zip -r {outputfile} ."
+        elif defined(windows):
+          # TODO: test this
+          exec &"powershell Compress-Archive {inputfile} {outputfile}"
+        cd(oldcwd)
 
-task single_linux_release, "build linux release":
-  compilerFlags()
-  compilerFlagsRelease()
-  switch("outdir", BUILDBASE / RELEASE / LINUX)
-  setCommand "c"
-  mkDir(BUILDBASE / RELEASE / LINUX)
-
-task single_windows_debug, "build windows debug":
-  compilerFlags()
-  compilerFlagsDebug()
-  switch("outdir", BUILDBASE & "/" & DEBUG & "/" & WINDOWS)
-  setCommand "c"
-  mkDir(BUILDBASE & "/" & DEBUG & "/" & WINDOWS)
-
-task single_windows_release, "build windows release":
-  compilerFlags()
-  compilerFlagsRelease()
-  switch("outdir", BUILDBASE & "/" & RELEASE & "/" & WINDOWS)
-  setCommand "c"
-  mkDir(BUILDBASE & "/" & RELEASE & "/" & WINDOWS)
-
-task build_all_linux_debug, "build all examples with linux/debug":
+task build_all_debug, "build all examples for debug":
   for file in listFiles("examples"):
     if file.endsWith(".nim"):
-      selfExec(&"single_linux_debug {file}")
+      exec(&"nim build {file}")
 
-task build_all_linux_release, "build all examples with linux/release":
+task build_all_release, "build all examples for release":
   for file in listFiles("examples"):
     if file.endsWith(".nim"):
-      selfExec(&"single_linux_release {file}")
-
-task build_all_windows_debug, "build all examples with windows/debug":
-  for file in listFiles("examples"):
-    if file.endsWith(".nim"):
-      exec(&"nim single_windows_debug --define:mingw {file}")
-
-task build_all_windows_release, "build all examples with windows/release":
-  for file in listFiles("examples"):
-    if file.endsWith(".nim"):
-      exec(&"nim single_windows_release --define:mingw {file}")
-
-task build_all_debug, "build all examples with */debug":
-  build_all_linux_debugTask()
-  build_all_windows_debugTask()
-
-task build_all_release, "build all examples with */release":
-  build_all_linux_releaseTask()
-  build_all_windows_releaseTask()
-
-task build_all_linux, "build all examples with linux/*":
-  build_all_linux_debugTask()
-  build_all_linux_releaseTask()
-
-task build_all_windows, "build all examples with windows/*":
-  build_all_windows_debugTask()
-  build_all_windows_releaseTask()
-
-task build_all, "build all examples":
-  build_all_linuxTask()
-  build_all_windowsTask()
+      exec(&"nim build -d:release {file}")
 
 task clean, "remove all build files":
   exec(&"rm -rf {BUILDBASE}")
@@ -116,6 +87,7 @@ task glslangValidator, "Download glslangValidator (required for linux compilatio
   exec &"rm -rf {dirname}"
 
 task glslangValidator_exe, "Download glslangValidator.exe (required for windows compilation)":
+  # TODO: make this work on windows
   let dirname = "/tmp/glslang_download"
   exec &"mkdir -p {dirname}"
   exec &"cd {dirname} && wget https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-windows-x64-Release.zip"
@@ -144,4 +116,10 @@ task generate_vulkan_api, "Generate Vulkan API":
   cpDir "src/vulkan_api/output/platform", "src/semicongine/vulkan/platform"
 
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
-  compilerFlags()
+  --path:src
+  --mm:orc
+  --threads:on
+  if defined(linux):
+    --d:VK_USE_PLATFORM_XLIB_KHR
+  if defined(windows):
+    --d:VK_USE_PLATFORM_WIN32_KHR
