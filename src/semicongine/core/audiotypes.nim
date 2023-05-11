@@ -5,6 +5,8 @@ import std/math
 #
 # ffmpeg -i <infile> -f s16le -ac 2 -ar 48000 -acodec pcm_s16le <outfile>
 
+const AUDIO_SAMPLE_RATE* = 48000
+
 type
   Level* = 0'f .. 1'f
   Sample* = (int16, int16)

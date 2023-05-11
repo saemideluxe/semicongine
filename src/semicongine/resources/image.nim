@@ -36,13 +36,15 @@ type
     gammaGreen: uint32 # not used yet
     gammaBlue: uint32 # not used yet
 
-proc loadBitmap(stream: Stream): Image =
+proc readBMP*(stream: Stream): Image =
   var
     bitmapFileHeader: BitmapFileHeader
     dibHeader: DIBHeader
 
   for name, value in fieldPairs(bitmapFileHeader):
     stream.read(value)
+  if bitmapFileHeader.magicbytes != ['B', 'M']:
+    raise newException(Exception, "Cannot open image, invalid magic bytes (is this really a BMP bitmap?)")
   for name, value in fieldPairs(dibHeader):
 
     when name in ["bitMaskRed", "bitMaskGreen", "bitMaskBlue"]:
@@ -100,6 +102,3 @@ proc loadBitmap(stream: Stream): Image =
     stream.setPosition(stream.getPosition() + padding)
 
   result = newImage(width=uint32(dibHeader.width), height=uint32(abs(dibHeader.height)), imagedata=data)
-
-proc loadBitmap(file: string): Image =
-  loadBitmap(newFileStream(file, fmRead))

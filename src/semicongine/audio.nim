@@ -52,7 +52,7 @@ proc setupDevice(mixer: var Mixer) =
     mixer.buffers.add newSeq[Sample](BUFFERSAMPLECOUNT)
   for i in 0 ..< mixer.buffers.len:
     bufferaddresses.add (addr mixer.buffers[i])
-  mixer.device = openSoundDevice(44100, bufferaddresses)
+  mixer.device = openSoundDevice(AUDIO_SAMPLE_RATE, bufferaddresses)
 
 proc loadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
@@ -169,7 +169,6 @@ proc updateSoundBuffer(mixer: var Mixer) =
           track.playing.del(id)
       mixer.buffers[mixer.currentBuffer][i] = currentSample
   # send data to sound device
-  # mixer.device.writeSoundData((mixer.currentBuffer - 1) %% mixer.buffers.len)
   mixer.device.writeSoundData(mixer.currentBuffer)
   mixer.currentBuffer = (mixer.currentBuffer + 1) mod mixer.buffers.len
 
