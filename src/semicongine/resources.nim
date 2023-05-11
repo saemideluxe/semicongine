@@ -1,10 +1,15 @@
+import std/streams
 import std/strutils
 import std/os
 
 import ./core
+import ./resources/image
+import ./resources/audio
+
+export image
+export audio
 
 type
-  Binary* = seq[uint8]
   ResourceBundlingType = enum
     Dir # Directories
     Zip # Zip files
@@ -22,8 +27,8 @@ when thebundletype == Dir:
   proc modRoot(): string =
     joinPath(resourceRoot(), selectedMod)
 
-  proc loadResource_intern(path: string): Binary =
-    cast[Binary](readFile(joinPath(modRoot(), path)))
+  proc loadResource_intern(path: string): Stream =
+    newFileStream(joinPath(modRoot(), path), fmRead)
 
   proc modList_intern(): seq[string] =
     for kind, file in walkDir(resourceRoot(), relative=true):
@@ -43,9 +48,9 @@ elif thebundletype == Zip:
   proc modRoot(): string =
     joinPath(resourceRoot(), selectedMod)
 
-  proc loadResource_intern(path: string): Binary =
+  proc loadResource_intern(path: string): Stream =
     let reader = openZipArchive(modRoot() & ".zip")
-    result = cast[Binary](reader.extractFile(path))
+    result = newStringStream(reader.extractFile(path))
     reader.close()
 
   proc modList_intern(): seq[string] =
@@ -77,9 +82,9 @@ elif thebundletype == Exe:
           result[modname][resourcefile] = staticRead(joinPath(moddir, resourcefile))
   const bundledResources = loadResources()
 
-  proc loadResource_intern(path: string): Binary =
+  proc loadResource_intern(path: string): Stream =
     # TODO: add Lempel–Ziv–Welch compression or something similar simple
-    cast[seq[uint8]](bundledResources[selectedMod][path])
+    newStringStream(bundledResources[selectedMod][path])
 
   proc modList_intern(): seq[string] =
     result = bundledResources.keys().toSeq()
@@ -88,9 +93,14 @@ elif thebundletype == Exe:
     for i in bundledResources[selectedMod].keys:
       yield i
 
-proc loadResource*(path: string): ref Binary =
-    result = new Binary
-    result[] = loadResource_intern(path)
+proc loadResource*(path: string): Stream =
+    loadResource_intern(path)
+
+proc loadImage*(path: string): Image =
+    loadResource_intern(path).readBMP()
+
+proc loadAudio*(path: string): Sound =
+    loadResource_intern(path).readAU()
 
 proc modList*(): seq[string] =
   modList_intern()
