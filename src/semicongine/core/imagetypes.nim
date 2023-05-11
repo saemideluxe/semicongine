@@ -8,9 +8,10 @@ type
 
 proc newImage*(width, height: uint32, imagedata: seq[Pixel] = @[]): Image =
   assert width > 0 and height > 0
+  result = new Image
+
   result.imagedata = (if imagedata.len == 0: newSeq[Pixel](width * height) else: imagedata)
   assert width * height == uint32(result.imagedata.len)
 
-  result = new Image
   result.width = width
   result.height = height
