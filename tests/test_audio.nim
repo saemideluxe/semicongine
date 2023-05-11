@@ -85,5 +85,3 @@ when isMainModule:
   mixer[].stop()
   test2()
   mixer[].stop()
-  # test3() # only run this manually, not in automated tests
-  # mixer[].stop()
