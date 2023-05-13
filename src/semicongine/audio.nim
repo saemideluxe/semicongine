@@ -135,20 +135,22 @@ proc isPlaying*(mixer: var Mixer): bool =
   return false
 
 func applyLevel(sample: Sample, levelLeft, levelRight: Level): Sample =
- (int16(float(sample[0]) * levelLeft), int16(float(sample[1]) * levelRight))
+ [int16(float(sample[0]) * levelLeft), int16(float(sample[1]) * levelRight)]
 
+func clip(value: int32): int16 =
+  int16(max(min(int32(high(int16)), value), int32(low(int16))))
+
+# used for combining sounds
 func mix(a, b: Sample): Sample =
-  var
-    left = int32(a[0]) + int32(b[0])
-    right = int32(a[1]) + int32(b[1])
-  left = max(min(int32(high(int16)), left), int32(low(int16)))
-  right = max(min(int32(high(int16)), right), int32(low(int16)))
-  (int16(left), int16(right))
+  [
+    clip(int32(a[0]) + int32(b[0])),
+    clip(int32(a[1]) + int32(b[1])),
+  ]
 
 proc updateSoundBuffer(mixer: var Mixer) =
   # mix
   for i in 0 ..< mixer.buffers[mixer.currentBuffer].len:
-    var currentSample = (0'i16, 0'i16)
+    var currentSample = [0'i16, 0'i16]
     mixer.lock.withLock():
       for track in mixer.tracks.mvalues:
         var stoppedSounds: seq[uint64]

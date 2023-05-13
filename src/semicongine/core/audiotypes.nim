@@ -9,7 +9,7 @@ const AUDIO_SAMPLE_RATE* = 48000
 
 type
   Level* = 0'f .. 1'f
-  Sample* = (int16, int16)
+  Sample* = array[2, int16]
   SoundData* = seq[Sample]
   Sound* = ref SoundData
 
@@ -24,7 +24,7 @@ proc sineSoundData*(f: float, len: float, rate: int): SoundData =
   for i in 0 ..< int(float(rate) * len):
     let t = dt * float(i)
     let value = int16(sine(t) * float(high(int16)))
-    result.add (value, value)
+    result.add [value, value]
 
 proc newSound*(data: SoundData): Sound =
   result = new Sound
