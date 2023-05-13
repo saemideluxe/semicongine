@@ -48,10 +48,9 @@ Asset handling:
       - [x] Load from directory
       - [x] Load from zip
       - [x] Load from exe-embeded
-- [ ] Mesh files (Wavefront OBJ, MTL)
-- [ ] Material files (Wavefront MTL)
-- [ ] Image files (BMP RGBA)
-- [ ] Audio files (AU)
+- [ ] Mesh/material files (glTF)
+- [x] Image files (BMP RGBA)
+- [x] Audio files (AU)
 
 Other (required for alpha release):
 - [x] Config files ala \*.ini files (use std/parsecfg)
