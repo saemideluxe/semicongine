@@ -15,8 +15,6 @@ type
     Small # up to 2^16 vertices
     Big # up to 2^32 vertices
   Mesh* = ref object of Component
-    vertexCount*: uint32
-    indicesCount*: uint32
     instanceCount*: uint32
     data: Table[string, DataList]
     changedAttributes: seq[string]
@@ -33,9 +31,30 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
     of Small: VK_INDEX_TYPE_UINT16
     of Big: VK_INDEX_TYPE_UINT32
 
-method `$`*(mesh: Mesh): string =
-  &"Mesh ({mesh.vertexCount})"
+func vertexCount*(mesh: Mesh): uint32 =
+  if mesh.data.len == 0:
+    0'u32
+  else:
+    uint32(mesh.data[mesh.data.keys().toSeq[0]].len)
 
+func indicesCount*(mesh: Mesh): uint32 =
+  case mesh.indexType
+  of None: 0'u32
+  of Tiny: uint32(mesh.tinyIndices.len)
+  of Small: uint32(mesh.smallIndices.len)
+  of Big: uint32(mesh.bigIndices.len)
+
+method `$`*(mesh: Mesh): string =
+  &"Mesh, vertexCount: {mesh.vertexCount}, vertexData: {mesh.data.keys().toSeq()}, indexType: {mesh.indexType}"
+
+func prettyData*(mesh: Mesh): string =
+  for attr, data in mesh.data.pairs:
+    result &= &"{attr}: {data}\n"
+  result &= (case mesh.indexType
+    of None: ""
+    of Tiny: &"indices: {mesh.tinyIndices}"
+    of Small: &"indices: {mesh.smallIndices}"
+    of Big: &"indices: {mesh.bigIndices}")
 
 func newMesh*(
   positions: openArray[Vec3f],
@@ -49,8 +68,6 @@ func newMesh*(
   assert uvs.len == 0 or uvs.len == positions.len
 
   result = new Mesh
-  result.vertexCount = uint32(positions.len)
-  result.indicesCount = uint32(indices.len * 3)
   result.instanceCount = instanceCount
   result.data["position"] = DataList(thetype: Vec3F32)
   setValues(result.data["position"], positions.toSeq)
@@ -129,7 +146,6 @@ proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): seq
 proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
   assert not (attribute.name in mesh.data)
   mesh.data[attribute.name] = DataList(thetype: attribute.thetype)
-  echo "Init ", attribute, " of ", mesh
   if attribute.perInstance:
     mesh.data[attribute.name].initData(mesh.instanceCount)
   else:
@@ -140,11 +156,9 @@ proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, 
   mesh.data[attribute] = DataList(thetype: getDataType[T]())
   setValues(mesh.data[attribute], data)
 
-proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
-  assert uint32(data.len) == mesh.instanceCount
+proc setMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
   assert not (attribute in mesh.data)
-  mesh.data[attribute] = DataList(thetype: getDataType[T]())
-  setValues(mesh.data[attribute], data)
+  mesh.data[attribute] = data
 
 proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert attribute in mesh.data
@@ -156,11 +170,42 @@ proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: strin
   mesh.changedAttributes.add attribute
   setValue(mesh.data[attribute], i, value)
 
+proc appendMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+  assert attribute in mesh.data
+  mesh.changedAttributes.add attribute
+  appendValues(mesh.data[attribute], data)
+
+# currently only used for loading from files, shouls
+proc appendMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
+  assert attribute in mesh.data
+  assert data.thetype == mesh.data[attribute].thetype
+  mesh.changedAttributes.add attribute
+  appendValues(mesh.data[attribute], data)
+
+proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+  assert uint32(data.len) == mesh.instanceCount
+  assert not (attribute in mesh.data)
+  mesh.data[attribute] = DataList(thetype: getDataType[T]())
+  setValues(mesh.data[attribute], data)
+
 proc updateInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute
   setValues(mesh.data[attribute], data)
+
+proc appendInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+  assert uint32(data.len) == mesh.instanceCount
+  assert attribute in mesh.data
+  mesh.changedAttributes.add attribute
+  appendValues(mesh.data[attribute], data)
+
+proc appendIndicesData*(mesh: var Mesh, v1, v2, v3: uint32) =
+  case mesh.indexType
+  of None: raise newException(Exception, "Mesh does not support indexed data")
+  of Tiny: mesh.tinyIndices.add([uint8(v1), uint8(v2), uint8(v3)])
+  of Small: mesh.smallIndices.add([uint16(v1), uint16(v2), uint16(v3)])
+  of Big: mesh.bigIndices.add([v1, v2, v3])
 
 func hasDataChanged*(mesh: Mesh, attribute: string): bool =
   attribute in mesh.changedAttributes
@@ -170,8 +215,6 @@ proc clearDataChanged*(mesh: var Mesh) =
 
 func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = new Mesh
-  result.vertexCount = 4
-  result.indicesCount = 6
   result.instanceCount = 1
   result.data["position"] = DataList(thetype: Vec3F32)
   result.data["color"] = DataList(thetype: Vec4F32)
@@ -191,7 +234,7 @@ func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
 
 func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = new Mesh
-  result.vertexCount = 3
+  # result.vertexCount = 3
   result.instanceCount = 1
   result.data["position"] = DataList(thetype: Vec3F32)
   result.data["color"] = DataList(thetype: Vec4F32)
@@ -207,7 +250,7 @@ func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
 func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mesh =
   assert nSegments >= 3
   result = new Mesh
-  result.vertexCount = nSegments + 2
+  # result.vertexCount = nSegments + 2
   result.instanceCount = 1
   result.indexType = Small
   result.data["position"] = DataList(thetype: Vec3F32)
@@ -225,6 +268,5 @@ func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mes
     col.add c
     result.smallIndices.add [0'u16, i + 1, i + 2]
 
-  result.indicesCount = uint32(result.smallIndices.len * 3)
   setValues(result.data["position"], pos)
   setValues(result.data["color"], col)

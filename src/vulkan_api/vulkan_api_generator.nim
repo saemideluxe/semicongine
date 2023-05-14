@@ -422,7 +422,6 @@ proc main() =
       "import std/logging",
       "import std/typetraits",
       "import std/macros",
-      "import std/private/digitsutils",
       "type",
       "  VkHandle* = distinct uint",
       "  VkNonDispatchableHandle* = distinct uint",
@@ -661,9 +660,9 @@ iterator items*[T: HoleyEnum](E: typedesc[T]): T =
   for l in GLOBAL_COMMANDS:
     mainout.add procLoads[l]
   mainout.add ""
-  mainout.add "converter VkBool2NimBool*(a: VkBool32): bool = a > 0"
+  # produces error if enable both implicit converters
+  # mainout.add "converter VkBool2NimBool*(a: VkBool32): bool = a > 0"
   mainout.add "converter NimBool2VkBool*(a: bool): VkBool32 = VkBool32(a)"
-  mainout.add "proc `$`*(x: uint32): string {.raises: [].} = addInt(result, x)"
 
   writeFile outdir / &"api.nim", mainout.join("\n")
 

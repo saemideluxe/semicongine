@@ -101,13 +101,14 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     perLocationOffsets: Table[MemoryPerformanceHint, uint64]
     perLocationSizes: Table[MemoryPerformanceHint, uint64]
     bindingNumber = 0
+  for hint in MemoryPerformanceHint:
+    perLocationOffsets[hint] = 0
+    perLocationSizes[hint] = 0
   for attribute in inputs:
     data.attributeLocation[attribute.name] = attribute.memoryPerformanceHint
     data.attributeBindingNumber[attribute.name] = bindingNumber
     inc bindingNumber
     # setup one buffer per attribute-location-type
-    if not (attribute.memoryPerformanceHint in perLocationSizes):
-      perLocationSizes[attribute.memoryPerformanceHint] = 0'u64
     for mesh in allMeshes:
       perLocationSizes[attribute.memoryPerformanceHint] += mesh.dataSize(attribute.name)
   for memoryPerformanceHint, bufferSize in perLocationSizes.pairs:
@@ -118,7 +119,6 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         requireMappable=memoryPerformanceHint==PreferFastWrite,
         preferVRAM=true,
       )
-      perLocationOffsets[memoryPerformanceHint] = 0
 
   # fill vertex buffers
   var indexBufferOffset = 0'u64
@@ -127,8 +127,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     for attribute in inputs:
       offsets.add (attribute.name, attribute.memoryPerformanceHint, perLocationOffsets[attribute.memoryPerformanceHint])
       var (pdata, size) = mesh.getRawData(attribute.name)
-      data.vertexBuffers[attribute.memoryPerformanceHint].setData(pdata, size, perLocationOffsets[attribute.memoryPerformanceHint])
-      perLocationOffsets[attribute.memoryPerformanceHint] += size
+      if pdata != nil: # no data
+        data.vertexBuffers[attribute.memoryPerformanceHint].setData(pdata, size, perLocationOffsets[attribute.memoryPerformanceHint])
+        perLocationOffsets[attribute.memoryPerformanceHint] += size
 
     let indexed = mesh.indexType != None
     var drawable = Drawable(
@@ -182,6 +183,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
 
 proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: string) =
   debug &"Refreshing data on mesh {mesh} for {attribute}"
+  # ignore attributes that are not used in this shader
+  if not (attribute in sceneData.attributeLocation):
+    return
   var (pdata, size) = mesh.getRawData(attribute)
   let memoryPerformanceHint = sceneData.attributeLocation[attribute]
   let bindingNumber = sceneData.attributeBindingNumber[attribute]

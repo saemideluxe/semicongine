@@ -103,7 +103,7 @@ proc canDoPresentation*(family: QueueFamily, surface: VkSurfaceKHR): bool =
   assert surface.valid
   var presentation = VkBool32(false)
   checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(family.device.vk, family.index, surface, addr presentation)
-  return presentation
+  return bool(presentation)
 
 proc canDoTransfer*(family: QueueFamily): bool =
   VK_QUEUE_TRANSFER_BIT in family.flags
