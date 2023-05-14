@@ -4,7 +4,6 @@ import std/strutils
 import std/logging
 import std/typetraits
 import std/macros
-import std/private/digitsutils
 type
   VkHandle* = distinct uint
   VkNonDispatchableHandle* = distinct uint
@@ -12063,6 +12062,4 @@ block globalFunctions:
   vkEnumerateInstanceLayerProperties = cast[proc(pPropertyCount: ptr uint32, pProperties: ptr VkLayerProperties): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkEnumerateInstanceLayerProperties"))
   vkCreateInstance = cast[proc(pCreateInfo: ptr VkInstanceCreateInfo, pAllocator: ptr VkAllocationCallbacks, pInstance: ptr VkInstance): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkCreateInstance"))
 
-converter VkBool2NimBool*(a: VkBool32): bool = a > 0
 converter NimBool2VkBool*(a: bool): VkBool32 = VkBool32(a)
-proc `$`*(x: uint32): string {.raises: [].} = addInt(result, x)

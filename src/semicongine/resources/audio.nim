@@ -42,7 +42,6 @@ proc readSample(stream: Stream, encoding: Encoding, channels: int): Sample =
 
 
 # https://en.wikipedia.org/wiki/Au_file_format
-# Returns sound data and samplerate
 proc readAU*(stream: Stream): Sound =
   var header: AuHeader
 
@@ -66,3 +65,6 @@ proc readAU*(stream: Stream): Sound =
   stream.setPosition(int(header.dataOffset))
   while not stream.atEnd():
     result[].add stream.readSample(header.encoding, int(header.channels))
+
+var a = 2'u32
+echo a

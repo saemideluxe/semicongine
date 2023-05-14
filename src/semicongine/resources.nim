@@ -5,9 +5,13 @@ import std/os
 import ./core
 import ./resources/image
 import ./resources/audio
+import ./resources/mesh
+
+from ./entity import Entity, Scene
 
 export image
 export audio
+export mesh
 
 type
   ResourceBundlingType = enum
@@ -101,6 +105,15 @@ proc loadImage*(path: string): Image =
 
 proc loadAudio*(path: string): Sound =
     loadResource_intern(path).readAU()
+
+proc loadMesh*(path: string): Entity =
+    loadResource_intern(path).readglTF()[0].root
+
+proc loadScene*(path: string): Scene =
+    loadResource_intern(path).readglTF()[0]
+
+proc loadScenes*(path: string): seq[Scene] =
+    loadResource_intern(path).readglTF()
 
 proc modList*(): seq[string] =
   modList_intern()

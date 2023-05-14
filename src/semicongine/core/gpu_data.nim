@@ -448,6 +448,8 @@ func getRawData*(value: var DataValue): (pointer, uint32) =
     of Sampler2D: result[0] = nil
 
 func getRawData*(value: var DataList): (pointer, uint32) =
+  if value.len == 0:
+    return (nil, 0'u32)
   result[1] = value.thetype.size * value.len
   case value.thetype
     of Float32: result[0] = addr value.float32[0]
@@ -643,6 +645,106 @@ func setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is TMat4[float32]: value.mat4f32 = data
   elif T is TMat4[float64]: value.mat4f64 = data
   else: {. error: "Virtual datatype has no values" .}
+
+func appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
+  value.len += data.len
+  when T is float32: value.float32.add data
+  elif T is float64: value.float64.add data
+  elif T is int8: value.int8.add data
+  elif T is int16: value.int16.add data
+  elif T is int32: value.int32.add data
+  elif T is int64: value.int64.add data
+  elif T is uint8: value.uint8.add data
+  elif T is uint16: value.uint16.add data
+  elif T is uint32: value.uint32.add data
+  elif T is uint64: value.uint64.add data
+  elif T is int and sizeof(int) == sizeof(int32): value.int32.add data
+  elif T is int and sizeof(int) == sizeof(int64): value.int64.add data
+  elif T is uint and sizeof(uint) == sizeof(uint32): value.uint32.add data
+  elif T is uint and sizeof(uint) == sizeof(uint64): value.uint64.add data
+  elif T is float and sizeof(float) == sizeof(float32): value.float32.add data
+  elif T is float and sizeof(float) == sizeof(float64): value.float64.add data
+  elif T is TVec2[int32]: value.vec2i32.add data
+  elif T is TVec2[int64]: value.vec2i64.add data
+  elif T is TVec3[int32]: value.vec3i32.add data
+  elif T is TVec3[int64]: value.vec3i64.add data
+  elif T is TVec4[int32]: value.vec4i32.add data
+  elif T is TVec4[int64]: value.vec4i64.add data
+  elif T is TVec2[uint32]: value.vec2u32.add data
+  elif T is TVec2[uint64]: value.vec2u64.add data
+  elif T is TVec3[uint32]: value.vec3u32.add data
+  elif T is TVec3[uint64]: value.vec3u64.add data
+  elif T is TVec4[uint32]: value.vec4u32.add data
+  elif T is TVec4[uint64]: value.vec4u64.add data
+  elif T is TVec2[float32]: value.vec2f32.add data
+  elif T is TVec2[float64]: value.vec2f64.add data
+  elif T is TVec3[float32]: value.vec3f32.add data
+  elif T is TVec3[float64]: value.vec3f64.add data
+  elif T is TVec4[float32]: value.vec4f32.add data
+  elif T is TVec4[float64]: value.vec4f64.add data
+  elif T is TMat2[float32]: value.mat2f32.add data
+  elif T is TMat2[float64]: value.mat2f64.add data
+  elif T is TMat23[float32]: value.mat23f32.add data
+  elif T is TMat23[float64]: value.mat23f64.add data
+  elif T is TMat32[float32]: value.mat32f32.add data
+  elif T is TMat32[float64]: value.mat32f64.add data
+  elif T is TMat3[float32]: value.mat3f32.add data
+  elif T is TMat3[float64]: value.mat3f64.add data
+  elif T is TMat34[float32]: value.mat34f32.add data
+  elif T is TMat34[float64]: value.mat34f64.add data
+  elif T is TMat43[float32]: value.mat43f32.add data
+  elif T is TMat43[float64]: value.mat43f64.add data
+  elif T is TMat4[float32]: value.mat4f32.add data
+  elif T is TMat4[float64]: value.mat4f64.add data
+  else: {. error: "Virtual datatype has no values" .}
+
+func appendValues*(value: var DataList, data: DataList) =
+  assert value.thetype == data.thetype
+  value.len += data.len
+  case value.thetype:
+  of Float32: value.float32.add data.float32
+  of Float64: value.float64.add data.float64
+  of Int8: value.int8.add data.int8
+  of Int16: value.int16.add data.int16
+  of Int32: value.int32.add data.int32
+  of Int64: value.int64.add data.int64
+  of UInt8: value.uint8.add data.uint8
+  of UInt16: value.uint16.add data.uint16
+  of UInt32: value.uint32.add data.uint32
+  of UInt64: value.uint64.add data.uint64
+  of Vec2I32: value.vec2i32.add data.vec2i32
+  of Vec2I64: value.vec2i64.add data.vec2i64
+  of Vec3I32: value.vec3i32.add data.vec3i32
+  of Vec3I64: value.vec3i64.add data.vec3i64
+  of Vec4I32: value.vec4i32.add data.vec4i32
+  of Vec4I64: value.vec4i64.add data.vec4i64
+  of Vec2U32: value.vec2u32.add data.vec2u32
+  of Vec2U64: value.vec2u64.add data.vec2u64
+  of Vec3U32: value.vec3u32.add data.vec3u32
+  of Vec3U64: value.vec3u64.add data.vec3u64
+  of Vec4U32: value.vec4u32.add data.vec4u32
+  of Vec4U64: value.vec4u64.add data.vec4u64
+  of Vec2F32: value.vec2f32.add data.vec2f32
+  of Vec2F64: value.vec2f64.add data.vec2f64
+  of Vec3F32: value.vec3f32.add data.vec3f32
+  of Vec3F64: value.vec3f64.add data.vec3f64
+  of Vec4F32: value.vec4f32.add data.vec4f32
+  of Vec4F64: value.vec4f64.add data.vec4f64
+  of Mat2F32: value.mat2f32.add data.mat2f32
+  of Mat2F64: value.mat2f64.add data.mat2f64
+  of Mat23F32: value.mat23f32.add data.mat23f32
+  of Mat23F64: value.mat23f64.add data.mat23f64
+  of Mat32F32: value.mat32f32.add data.mat32f32
+  of Mat32F64: value.mat32f64.add data.mat32f64
+  of Mat3F32: value.mat3f32.add data.mat3f32
+  of Mat3F64: value.mat3f64.add data.mat3f64
+  of Mat34F32: value.mat34f32.add data.mat34f32
+  of Mat34F64: value.mat34f64.add data.mat34f64
+  of Mat43F32: value.mat43f32.add data.mat43f32
+  of Mat43F64: value.mat43f64.add data.mat43f64
+  of Mat4F32: value.mat4f32.add data.mat4f32
+  of Mat4F64: value.mat4f64.add data.mat4f64
+  else: raise newException(Exception, &"Unsupported data type for GPU data:" )
 
 func setValue*[T: GPUType|int|uint|float](value: var DataList, i: uint32, data: T) =
   assert i < value.len
