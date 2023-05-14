@@ -48,9 +48,10 @@ Asset handling:
       - [x] Load from directory
       - [x] Load from zip
       - [x] Load from exe-embeded
-- [ ] Mesh/material files (glTF)
+- [x] Mesh/material files (glTF)
 - [x] Image files (BMP RGBA)
 - [x] Audio files (AU)
+- [ ] API to transform/recalculate mesh data
 
 Other (required for alpha release):
 - [x] Config files ala \*.ini files (use std/parsecfg)
@@ -105,9 +106,9 @@ Currently we have at least the following:
 - Input: events.nim
 - Settings: settings.nim
 - Meshes: mesh.nim
-- Math: math/*
+- Math: math/\*
 - Telemetry: telemetry.nim (wip)
-- Resources/mods: resources.nim (wip)
+- Resources (loading, mods): resources.nim
 
 Got you: Everything is wip, but (wip) here means work has not started yet.
 
@@ -120,7 +121,7 @@ Support for file formats (super limited, no external dependencies, uses quite a 
 
 - Images: BMP
 - Audio: AU
-- Mesh: OBJ + MTL
+- Mesh: glTF (\*.gld)
 
 In-memory layout of assets (everything needs to be converted to those while loading):
 
@@ -131,7 +132,7 @@ In-memory layout of assets (everything needs to be converted to those while load
 Configuration
 -------------
 
-Or: How to organize s**t that is not code
+Or: How to organize s\*\*t that is not code
 
 Not sure why, but this feels super important to get done right. The engine is
 being designed with a library-mindset, not a framework mindset. And with that,
