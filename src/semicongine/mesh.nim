@@ -38,11 +38,13 @@ func vertexCount*(mesh: Mesh): uint32 =
     uint32(mesh.data[mesh.data.keys().toSeq[0]].len)
 
 func indicesCount*(mesh: Mesh): uint32 =
-  case mesh.indexType
-  of None: 0'u32
-  of Tiny: uint32(mesh.tinyIndices.len)
-  of Small: uint32(mesh.smallIndices.len)
-  of Big: uint32(mesh.bigIndices.len)
+  (
+    case mesh.indexType
+    of None: 0'u32
+    of Tiny: uint32(mesh.tinyIndices.len)
+    of Small: uint32(mesh.smallIndices.len)
+    of Big: uint32(mesh.bigIndices.len)
+  ) * 3
 
 method `$`*(mesh: Mesh): string =
   &"Mesh, vertexCount: {mesh.vertexCount}, vertexData: {mesh.data.keys().toSeq()}, indexType: {mesh.indexType}"
@@ -56,6 +58,14 @@ func prettyData*(mesh: Mesh): string =
     of Small: &"indices: {mesh.smallIndices}"
     of Big: &"indices: {mesh.bigIndices}")
 
+proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+  assert not (attribute in mesh.data)
+  mesh.data[attribute] = newDataList(data)
+
+proc setMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
+  assert not (attribute in mesh.data)
+  mesh.data[attribute] = data
+
 func newMesh*(
   positions: openArray[Vec3f],
   indices: openArray[array[3, uint32|int32|uint16|int16|int]],
@@ -67,16 +77,10 @@ func newMesh*(
   assert colors.len == 0 or colors.len == positions.len
   assert uvs.len == 0 or uvs.len == positions.len
 
-  result = new Mesh
-  result.instanceCount = instanceCount
-  result.data["position"] = DataList(thetype: Vec3F32)
-  setValues(result.data["position"], positions.toSeq)
-  if colors.len > 0:
-    result.data["color"] = DataList(thetype: Vec4F32)
-    setValues(result.data["color"], colors.toSeq)
-  if uvs.len > 0:
-    result.data["uv"] = DataList(thetype: Vec2F32)
-    setValues(result.data["uv"], uvs.toSeq)
+  result = Mesh(instanceCount: instanceCount)
+  setMeshData(result, "position", positions.toSeq)
+  if colors.len > 0: setMeshData(result, "color", colors.toSeq)
+  if uvs.len > 0: setMeshData(result, "uv", uvs.toSeq)
 
   for i in indices:
     assert uint32(i[0]) < result.vertexCount
@@ -151,14 +155,6 @@ proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
   else:
     mesh.data[attribute.name].initData(mesh.vertexCount)
 
-proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
-  assert not (attribute in mesh.data)
-  mesh.data[attribute] = newDataList[T](data)
-
-proc setMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
-  assert not (attribute in mesh.data)
-  mesh.data[attribute] = data
-
 proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute
@@ -184,8 +180,7 @@ proc appendMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
 proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
   assert not (attribute in mesh.data)
-  mesh.data[attribute] = DataList(thetype: getDataType[T]())
-  setValues(mesh.data[attribute], data)
+  mesh.data[attribute] = newDataList(data)
 
 proc updateInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
@@ -214,56 +209,38 @@ proc clearDataChanged*(mesh: var Mesh) =
 
 proc transform*[T: GPUType](mesh: var Mesh, attribute: string, transform: Mat4) =
   assert attribute in mesh.data
-  echo "=========", getMeshData[Vec3f](mesh, attribute)[][0 .. 3]
   for v in getValues[T](mesh.data[attribute])[].mitems:
     when T is Vec3f:
       v = (transform * newVec4f(v.x, v.y, v.z)).xyz
     else:
       v = transform * v
-  echo "=========", getMeshData[Vec3f](mesh, attribute)[][0 .. 3]
 
 func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = new Mesh
-  result.instanceCount = 1
-  result.data["position"] = DataList(thetype: Vec3F32)
-  result.data["color"] = DataList(thetype: Vec4F32)
-  result.data["uv"] = DataList(thetype: Vec2F32)
-  result.indexType = Small
-  result.smallIndices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]]
+  result = Mesh(instanceCount: 1, indexType: Small, smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]])
 
   let
     half_w = width / 2
     half_h = height / 2
+    pos = @[newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
     c = hexToColorAlpha(color)
-    v = [newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
 
-  setValues(result.data["position"], v.toSeq)
-  setValues(result.data["color"], @[c, c, c, c])
-  setValues(result.data["uv"], @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
+  setMeshData(result, "position", pos)
+  setMeshData(result, "color", @[c, c, c, c])
+  setMeshData(result, "uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
 func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = new Mesh
-  # result.vertexCount = 3
-  result.instanceCount = 1
-  result.data["position"] = DataList(thetype: Vec3F32)
-  result.data["color"] = DataList(thetype: Vec4F32)
+  result = Mesh(instanceCount: 1)
   let
     half_w = width / 2
     half_h = height / 2
     colorVec = hexToColorAlpha(color)
-  setValues(result.data["position"], @[
-    newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h),
-  ])
-  setValues(result.data["color"], @[colorVec, colorVec, colorVec])
+  setMeshData(result, "position", @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
+  setMeshData(result, "color", @[colorVec, colorVec, colorVec])
 
 func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mesh =
   assert nSegments >= 3
-  result = new Mesh
-  # result.vertexCount = nSegments + 2
-  result.instanceCount = 1
-  result.indexType = Small
-  result.data["position"] = DataList(thetype: Vec3F32)
-  result.data["color"] = DataList(thetype: Vec4F32)
+  result = Mesh(instanceCount: 1, indexType: Small)
+
   let
     half_w = width / 2
     half_h = height / 2
@@ -277,5 +254,5 @@ func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mes
     col.add c
     result.smallIndices.add [0'u16, i + 1, i + 2]
 
-  setValues(result.data["position"], pos)
-  setValues(result.data["color"], col)
+  setMeshData(result, "position", pos)
+  setMeshData(result, "color", col)
