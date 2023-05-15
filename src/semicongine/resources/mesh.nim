@@ -37,7 +37,6 @@ const
 func getGPUType(accessor: JsonNode): DataType =
   # TODO: no full support for all datatypes that glTF may provide
   # semicongine/core/gpu_data should maybe generated with macros to allow for all combinations
-  debugecho accessor.pretty()
   let componentType = ACCESSOR_TYPE_MAP[accessor["componentType"].getInt()]
   let theType = accessor["type"].getStr()
   case theType
@@ -73,7 +72,7 @@ func getGPUType(accessor: JsonNode): DataType =
 
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: var seq[uint8]): DataList =
-  result.thetype = accessor.getGPUType()
+  result = newDataList(thetype=accessor.getGPUType())
   result.initData(uint32(accessor["count"].getInt()))
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
@@ -104,6 +103,8 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
   for attribute, accessor in primitiveNode["attributes"].pairs:
     let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
     mesh.appendMeshData(attribute, data)
+    if attribute == "POSITION":
+      transform[Vec3f](mesh, "POSITION", scale3d(1'f32, -1'f32, 1'f32))
 
   if primitiveNode.hasKey("indices"):
     assert mesh.indexType != None
@@ -111,13 +112,13 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
     var tri: seq[uint32]
     case data.thetype
       of UInt16:
-        for entry in getValues[uint16](data):
+        for entry in getValues[uint16](data)[]:
           tri.add uint32(entry)
           if tri.len == 3:
             mesh.appendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
       of UInt32:
-        for entry in getValues[uint32](data):
+        for entry in getValues[uint32](data)[]:
           tri.add uint32(entry)
           if tri.len == 3:
             mesh.appendIndicesData(tri[0], tri[1], tri[2])
@@ -149,7 +150,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): M
 
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
-    result.setMeshData(attribute, DataList(thetype: root["accessors"][accessor.getInt()].getGPUType()))
+    result.setMeshData(attribute, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
 
   # add all mesh data
   for primitive in meshNode["primitives"]:
@@ -235,3 +236,5 @@ proc readglTF*(stream: Stream): seq[Scene] =
 
   for scene in data.structuredContent["scenes"]:
     result.add data.structuredContent.loadScene(scene, data.binaryBufferData)
+
+  debugecho data.structuredContent.pretty()
