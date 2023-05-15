@@ -117,7 +117,8 @@ proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
   assert engine.renderer.isSome
   if engine.state == Running:
-    engine.renderer.get.refreshMeshData(scene)
+    engine.renderer.get.updateMeshData(scene)
+    engine.renderer.get.updateUniformData(scene)
     engine.renderer.get.render(scene)
 
 proc updateInputs*(engine: var Engine): EngineState =
