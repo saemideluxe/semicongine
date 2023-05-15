@@ -1,37 +1,4 @@
-import std/options
-
 import semicongine
-
-proc diagnostics(instance: Instance) =
-  # diagnostic output
-  # print basic driver infos
-  echo "Layers"
-  for layer in getLayers():
-    echo "  " & layer
-  echo "Instance extensions"
-  for extension in getInstanceExtensions():
-    echo "  " & extension
-
-  echo "Devices"
-  for device in instance.getPhysicalDevices():
-    echo "  " & $device
-    echo "  Rating: " & $device.rateGraphics()
-    echo "  Extensions"
-    for extension in device.getExtensions():
-      echo "    " & $extension
-    echo "  Properties"
-    echo "  " & $device.properties
-    echo "  Features"
-    echo "  " & $device.features
-    echo "  Queue families"
-    for queueFamily in device.getQueueFamilies():
-      echo "    " & $queueFamily
-    echo "  Surface present modes"
-    for mode in device.getSurfacePresentModes():
-      echo "    " & $mode
-    echo "  Surface formats"
-    for format in device.getSurfaceFormats():
-      echo "    " & $format
 
 proc scene_different_mesh_types(): Entity =
   result = newEntity("root",
@@ -100,6 +67,7 @@ proc scene_primitives(): Entity =
   var r = rect(color="ff0000")
   var t = tri(color="0000ff")
   var c = circle(color="00ff00")
+
   r.setInstanceData("translate", @[newVec3f(0.5, -0.3)])
   t.setInstanceData("translate", @[newVec3f(0.3,  0.3)])
   c.setInstanceData("translate", @[newVec3f(-0.3,  0.1)])
