@@ -5,7 +5,6 @@ import std/strutils
 import std/strformat
 import std/streams
 
-# from ../entity import Entity, Scene, Component
 import ../entity
 import ../mesh
 import ../core
