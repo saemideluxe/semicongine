@@ -54,6 +54,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
   assert not (scene in renderer.scenedata)
   var data = SceneData()
 
+
   # when mesh transformation are handled through the scenegraph-transformation, set it up here
   if transformattribute != "":
     var hasTransformAttribute = false
@@ -156,11 +157,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
 
   # setup uniforms and textures
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
-    var subpass = renderer.renderPass.subpasses[subpass_i]
-    for pipeline in subpass.pipelines.mitems:
+    for pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.mitems:
       var uniformBufferSize = 0'u64
       for uniform in pipeline.uniforms:
-        uniformBufferSize += uniform.thetype.size
+        uniformBufferSize += uniform.size
       if uniformBufferSize > 0:
         for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
           data.uniformBuffers.add renderer.device.createBuffer(
@@ -169,7 +169,6 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
             requireMappable=true,
             preferVRAM=true,
           )
-
       for name, images in scene.textures.pairs:
         data.textures[name] = @[]
         let interpolation = images[1]
@@ -191,7 +190,7 @@ proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: s
   let bindingNumber = sceneData.attributeBindingNumber[attribute]
   sceneData.vertexBuffers[memoryPerformanceHint].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][2])
 
-proc refreshMeshData*(renderer: var Renderer, scene: Scene) =
+proc updateMeshData*(renderer: var Renderer, scene: Scene) =
   assert scene in renderer.scenedata
 
   for mesh in allComponentsOfType[Mesh](scene.root):
@@ -209,21 +208,21 @@ proc refreshMeshData*(renderer: var Renderer, scene: Scene) =
     var m = mesh
     m.clearDataChanged()
 
-proc updateUniforms(renderer: Renderer, scene: var Scene, currentInFlight: int) =
+proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
   assert scene in renderer.scenedata
+
   var data = renderer.scenedata[scene]
   if data.uniformBuffers.len == 0:
     return
-  assert data.uniformBuffers[currentInFlight].vk.valid
+  assert data.uniformBuffers[renderer.swapchain.currentInFlight].vk.valid
 
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    var subpass = renderer.renderPass.subpasses[i]
-    for pipeline in subpass.pipelines.mitems:
+    for pipeline in renderer.renderPass.subpasses[i].pipelines.mitems:
       var offset = 0'u64
       for uniform in pipeline.uniforms:
         assert uniform.thetype == scene.shaderGlobals[uniform.name].thetype
         let (pdata, size) = scene.shaderGlobals[uniform.name].getRawData()
-        data.uniformBuffers[currentInFlight].setData(pdata, size, offset)
+        data.uniformBuffers[renderer.swapchain.currentInFlight].setData(pdata, size, offset)
         offset += size
 
 proc render*(renderer: var Renderer, scene: var Scene) =
@@ -241,18 +240,15 @@ proc render*(renderer: var Renderer, scene: var Scene) =
       checkVkResult renderer.device.vk.vkDeviceWaitIdle()
       oldSwapchain.destroy()
     return
-  commandBuffer = commandBufferResult.get()
 
+  commandBuffer = commandBufferResult.get()
   commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer())
 
-  renderer.updateUniforms(scene, renderer.swapchain.currentInFlight)
-
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    let subpass = renderer.renderPass.subpasses[i]
-    for pipeline in subpass.pipelines:
-      var mpipeline = pipeline
-      commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, mpipeline.vk)
-      commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, mpipeline.layout, 0, 1, addr(mpipeline.descriptorSets[renderer.swapchain.currentInFlight].vk), 0, nil)
+    var subpass = renderer.renderPass.subpasses[i]
+    for pipeline in subpass.pipelines.mitems:
+      commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, pipeline.vk)
+      commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, pipeline.layout, 0, 1, addr(pipeline.descriptorSets[renderer.swapchain.currentInFlight].vk), 0, nil)
 
       debug "Scene buffers:"
       for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
