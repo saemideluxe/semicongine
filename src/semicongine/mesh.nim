@@ -139,13 +139,13 @@ func hasDataFor*(mesh: Mesh, attribute: string): bool =
 func getRawData*(mesh: Mesh, attribute: string): (pointer, uint32) =
   mesh.data[attribute].getRawData()
 
-proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): seq[T] =
+proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): ref seq[T] =
   assert attribute in mesh.data
   getValues[T](mesh.data[attribute])
 
 proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
   assert not (attribute.name in mesh.data)
-  mesh.data[attribute.name] = DataList(thetype: attribute.thetype)
+  mesh.data[attribute.name] = newDataList(thetype=attribute.thetype)
   if attribute.perInstance:
     mesh.data[attribute.name].initData(mesh.instanceCount)
   else:
@@ -153,8 +153,7 @@ proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
 
 proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert not (attribute in mesh.data)
-  mesh.data[attribute] = DataList(thetype: getDataType[T]())
-  setValues(mesh.data[attribute], data)
+  mesh.data[attribute] = newDataList[T](data)
 
 proc setMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
   assert not (attribute in mesh.data)
@@ -212,6 +211,16 @@ func hasDataChanged*(mesh: Mesh, attribute: string): bool =
 
 proc clearDataChanged*(mesh: var Mesh) =
   mesh.changedAttributes = @[]
+
+proc transform*[T: GPUType](mesh: var Mesh, attribute: string, transform: Mat4) =
+  assert attribute in mesh.data
+  echo "=========", getMeshData[Vec3f](mesh, attribute)[][0 .. 3]
+  for v in getValues[T](mesh.data[attribute])[].mitems:
+    when T is Vec3f:
+      v = (transform * newVec4f(v.x, v.y, v.z)).xyz
+    else:
+      v = transform * v
+  echo "=========", getMeshData[Vec3f](mesh, attribute)[][0 .. 3]
 
 func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = new Mesh
