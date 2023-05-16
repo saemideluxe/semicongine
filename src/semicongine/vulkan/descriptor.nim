@@ -13,7 +13,6 @@ type
     name*: string
     count*: uint32
     stages*: seq[VkShaderStageFlagBits]
-    itemsize*: uint32
     case thetype*: DescriptorType
     of Uniform:
       buffer*: Buffer

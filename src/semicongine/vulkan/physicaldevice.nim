@@ -12,7 +12,7 @@ type
     devicetype*: VkPhysicalDeviceType
     surface*: VkSurfaceKHR
     properties*: VkPhysicalDeviceProperties
-    features*: VkPhysicalDeviceFeatures
+    features*: VkPhysicalDeviceFeatures2
   QueueFamily* = object
     device: PhysicalDevice
     properties*: VkQueueFamilyProperties
@@ -32,7 +32,8 @@ proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
   for i in 0 ..< nDevices:
     var device = PhysicalDevice(vk: devices[i], surface: instance.surface)
     device.vk.vkGetPhysicalDeviceProperties(addr device.properties)
-    device.vk.vkGetPhysicalDeviceFeatures(addr device.features)
+    device.features.stype = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2
+    device.vk.vkGetPhysicalDeviceFeatures2(addr device.features)
     device.name = device.properties.deviceName.cleanString()
     device.devicetype = device.properties.deviceType
     result.add device

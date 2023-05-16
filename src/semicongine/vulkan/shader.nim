@@ -94,7 +94,7 @@ proc compileGlslShader*(
   main: seq[string]
 ): ShaderCode {.compileTime.} =
 
-  var code = @[&"#version {version}", ""] &
+  var code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
   # var code = @[&"#version {version}", "layout(row_major) uniform;", ""] &
     (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
     (if uniforms.len > 0: uniforms.glslUniforms(binding=0) & @[""] else: @[]) &

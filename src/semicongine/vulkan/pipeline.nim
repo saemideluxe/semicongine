@@ -25,26 +25,26 @@ func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
       return shader.inputs
 
 func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
-  var uniformList: Table[string, ShaderAttribute]
+  var visitedUniforms: Table[string, ShaderAttribute]
   for shader in pipeline.shaders:
     for attribute in shader.uniforms:
-      if attribute.name in uniformList:
-        assert uniformList[attribute.name] == attribute
+      if attribute.name in visitedUniforms:
+        assert visitedUniforms[attribute.name] == attribute
       else:
-        uniformList[attribute.name] = attribute
-  result = uniformList.values.toSeq
+        result.add attribute
+        visitedUniforms[attribute.name] = attribute
 
 proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, seq[Texture]], inFlightFrames: int) =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
   assert pipeline.descriptorSets.len > 0
-
+  
   for i in 0 ..< inFlightFrames:
     var offset = 0'u64
     # first descriptor is always uniform for globals, match should be better somehow
     for descriptor in pipeline.descriptorSets[i].layout.descriptors.mitems:
       if descriptor.thetype == Uniform and buffers.len > 0:
-        let size = VkDeviceSize(descriptor.itemsize * descriptor.count)
+        let size = VkDeviceSize(descriptor.size)
         descriptor.buffer = buffers[i]
         descriptor.offset = offset
         descriptor.size = size
@@ -75,24 +75,20 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
   result.shaders = @[vertexShader, fragmentShader]
   
   var descriptors: seq[Descriptor]
-
   if vertexCode.uniforms.len > 0:
-    for uniform in vertexCode.uniforms:
-      assert uniform.arrayCount == 0, "arrays not yet supported for uniforms"
     descriptors.add Descriptor(
       name: "Uniforms",
       thetype: Uniform,
       count: 1,
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
-      itemsize: vertexShader.uniforms.size(),
+      size: vertexShader.uniforms.size(),
     )
   for sampler in vertexShader.samplers:
     descriptors.add Descriptor(
       name: sampler.name,
       thetype: ImageSampler,
-      count: (if sampler.arrayCount == 0: 1 else: sampler.arrayCount),
+      count: (if sampler.arrayCount == 0: 1'u32 else: sampler.arrayCount),
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
-      itemsize: 0,
     )
   result.descriptorSetLayout = device.createDescriptorSetLayout(descriptors)
 

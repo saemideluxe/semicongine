@@ -12052,7 +12052,9 @@ when defined(VK_USE_PLATFORM_SCREEN_QNX):
   include ../vulkan/platform/screen
   EXTENSION_LOADERS["VK_QNX_screen_surface"] = loadVK_QNX_screen_surface
 
-proc loadExtension*(instance: VkInstance, extension: string) = EXTENSION_LOADERS[extension](instance)
+proc loadExtension*(instance: VkInstance, extension: string) =
+  if extension in EXTENSION_LOADERS:
+    EXTENSION_LOADERS[extension](instance)
 
 # load global functions immediately
 block globalFunctions:
