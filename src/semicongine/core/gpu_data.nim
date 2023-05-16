@@ -1020,7 +1020,7 @@ func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding: i
   if group.len == 0:
     return @[]
   # currently only a single uniform block supported, therefore binding = 0
-  result.add(&"layout(binding = {binding}) uniform T{blockName} {{")
+  result.add(&"layout(std430, binding = {binding}) uniform T{blockName} {{")
   for attribute in group:
     var arrayDecl = ""
     if attribute.arrayCount > 0:
