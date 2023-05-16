@@ -22,8 +22,7 @@ proc main() =
       RT, RT, RT, RT, RT, RT, RT,
     ])
   scene.addTextures("my_texture", @[t1, t2], interpolation=VK_FILTER_NEAREST)
-  scene.addShaderGlobal("time", 0'f32)
-  var m: Mesh = Mesh(scene.root.components[0])
+  scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
   var engine = initEngine("Test materials")
   const
@@ -32,7 +31,7 @@ proc main() =
       attr[Vec2f]("uv", memoryPerformanceHint=PreferFastRead),
     ]
     vertexOutput = @[attr[Vec2f]("uvout")]
-    uniforms = @[attr[float32]("time")]
+    uniforms = @[attr[float32]("test2", arrayCount=2)]
     samplers = @[attr[Sampler2DType]("my_texture", arrayCount=2)]
     fragOutput = @[attr[Vec4f]("color")]
     vertexCode = compileGlslShader(
@@ -41,7 +40,7 @@ proc main() =
       uniforms=uniforms,
       samplers=samplers,
       outputs=vertexOutput,
-      main="""gl_Position = vec4(position, 1.0); uvout = uv;"""
+      main="""gl_Position = vec4(position.x, position.y + sin(Uniforms.test2[1]) / Uniforms.test2[1] * 0.5, position.z, 1.0); uvout = uv;"""
     )
     fragmentCode = compileGlslShader(
       stage=VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -50,7 +49,7 @@ proc main() =
       samplers=samplers,
       outputs=fragOutput,
       main="""
-float d = sin(Uniforms.time * 0.5) * 0.5 + 0.5;
+float d = sin(Uniforms.test2[0]) * 0.5 + 0.5;
 color = texture(my_texture[0], uvout) * (1 - d) + texture(my_texture[1], uvout) * d;
 """
     )
@@ -58,7 +57,8 @@ color = texture(my_texture[0], uvout) * (1 - d) + texture(my_texture[1], uvout) 
   engine.addScene(scene, vertexInput)
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
-    setShaderGlobal(scene, "time", float32(cpuTime() - t))
+    var d = float32(cpuTime() - t)
+    setShaderGlobalArray(scene, "test2", @[d, d * 2])
     engine.renderScene(scene)
   engine.destroy()
 
