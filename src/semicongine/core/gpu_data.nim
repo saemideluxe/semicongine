@@ -1,4 +1,3 @@
-import std/typetraits
 import std/strformat
 import std/tables
 
@@ -708,7 +707,7 @@ func setValue*[T: GPUType|int|uint|float](value: var DataValue, data: T) =
   else: {.error: "Virtual datatype has no value" .}
 
 func appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
-  value.len += data.len
+  value.len += uint32(data.len)
   when T is float32: value.float32[].add data
   elif T is float64: value.float64[].add data
   elif T is int8: value.int8[].add data

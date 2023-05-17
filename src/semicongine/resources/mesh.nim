@@ -1,7 +1,6 @@
 import std/json
 import std/tables
 import std/sequtils
-import std/strutils
 import std/strformat
 import std/streams
 
@@ -95,15 +94,19 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: var seq[uin
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
 proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: var seq[uint8]) =
-  # TODO: material
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
+  var vertexCount = 0'u32
   for attribute, accessor in primitiveNode["attributes"].pairs:
     let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
     mesh.appendMeshData(attribute, data)
+    vertexCount = data.len
     if attribute == "POSITION":
       transform[Vec3f](mesh, "POSITION", scale3d(1'f32, -1'f32, 1'f32))
+
+  let materialId = uint8(primitiveNode["material"].getInt())
+  mesh.appendMeshData("material", newSeqWith[uint8](int(vertexCount), materialId))
 
   if primitiveNode.hasKey("indices"):
     assert mesh.indexType != None
@@ -150,6 +153,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): M
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
     result.setMeshData(attribute, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
+  result.setMeshData("material", newDataList(thetype=getDataType[uint8]()))
 
   # add all mesh data
   for primitive in meshNode["primitives"]:
@@ -206,6 +210,24 @@ proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]):
 
   newScene(scenenode["name"].getStr(), rootEntity)
 
+proc getMaterialsData(root: JsonNode): seq[Vec4f] =
+  for materialNode in root["materials"]:
+    let pbr = materialNode["pbrMetallicRoughness"]
+    var baseColor = newVec4f(0, 0, 0, 1)
+    baseColor[0] = pbr["baseColorFactor"][0].getFloat() * 255
+    baseColor[1] = pbr["baseColorFactor"][1].getFloat() * 255
+    baseColor[2] = pbr["baseColorFactor"][2].getFloat() * 255
+    baseColor[3] = pbr["baseColorFactor"][3].getFloat() * 255
+    result.add baseColor
+    # TODO: pbr["baseColorTexture"]
+    # TODO: pbr["metallicRoughnessTexture"]
+    # TODO: pbr["metallicFactor"]
+    # TODO: pbr["roughnessFactor"]
+    # TODO: materialNode["normalTexture"]
+    # TODO: materialNode["occlusionTexture"]
+    # TODO: materialNode["emissiveTexture"]
+    # TODO: materialNode["emissiveFactor"]
+
 proc readglTF*(stream: Stream): seq[Scene] =
   var
     header: glTFHeader
@@ -234,6 +256,8 @@ proc readglTF*(stream: Stream): seq[Scene] =
   assert 0 <= bufferLenDiff <= 3 # binary buffer may be aligned to 4 bytes
 
   for scene in data.structuredContent["scenes"]:
-    result.add data.structuredContent.loadScene(scene, data.binaryBufferData)
+    var scene = data.structuredContent.loadScene(scene, data.binaryBufferData)
+    echo getMaterialsData(data.structuredContent)
+    scene.addShaderGlobalArray("material_colors", getMaterialsData(data.structuredContent))
+    result.add scene
 
-  debugecho data.structuredContent.pretty()
