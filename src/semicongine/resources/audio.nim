@@ -1,6 +1,5 @@
 import std/streams
 import std/endians
-import std/math
 
 import ../core/audiotypes
 
@@ -22,12 +21,6 @@ type
     encoding: Encoding
     sampleRate: uint32
     channels: uint32
-
-func changeEndian(value: int16): int16 =
-
-  var bytes: array[2, uint8] = cast[array[2, uint8]](value)
-  swap(bytes[0], bytes[1])
-  result = cast[int16](bytes)
 
 proc readSample(stream: Stream, encoding: Encoding, channels: int): Sample =
   result[0] = stream.readint16()
