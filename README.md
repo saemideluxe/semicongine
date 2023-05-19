@@ -32,9 +32,7 @@ Rendering:
 - [x] Fixed framerate
 - [x] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [x] Textures
-- [ ] Multisampling
-- [ ] Materials (vertices with material indices)
-- [ ] Viewport scaling (e.g. framebuffer resolution != window resolution
+- [x] Materials (vertices with material indices)
 - [ ] Allow different shaders (ie pipelines) for different meshes
 
 Required for 3D rendering:
@@ -48,10 +46,10 @@ Asset handling:
       - [x] Load from directory
       - [x] Load from zip
       - [x] Load from exe-embeded
-- [x] Mesh/material files (glTF)
+- [x] Mesh/material files (glTF, but incomplete, not all features supported)
 - [x] Image files (BMP RGBA)
 - [x] Audio files (AU)
-- [ ] API to transform/recalculate mesh data
+- [x] API to transform/recalculate mesh data
 
 Other (required for alpha release):
 - [x] Config files ala \*.ini files (use std/parsecfg)
@@ -71,15 +69,19 @@ Other (required for alpha release):
     - [x] Add simple event logging service
     - [ ] Add exception reporting
 
-Advanced features (very low priority):
+Other important features:
+- [ ] Multisampling
 - [ ] Text rendering
 - [ ] Animation system
 - [ ] Sprite system
 - [ ] Particle system
+
+Other less features:
+- [ ] Viewport scaling (e.g. framebuffer resolution != window resolution)
 - [ ] Query and display rendering information from Vulkan?
-- [ ] Game controller input handling?
-- [ ] Allow multipel Uniform blocks?
-- [ ] Documentation?
+- [ ] Game controller input handling
+- [ ] Allow multipel Uniform blocks
+- [ ] Documentation
 
 Quality improvments:
 
