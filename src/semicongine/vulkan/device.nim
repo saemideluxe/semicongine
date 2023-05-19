@@ -33,7 +33,7 @@ proc createDevice*(
   assert queueFamilies.len > 0
 
   result.physicalDevice = physicalDevice
-  var allExtensions = enabledExtensions & @["VK_KHR_swapchain", "VK_KHR_uniform_buffer_standard_layout"]
+  var allExtensions = enabledExtensions & @["VK_KHR_swapchain"]
   for extension in allExtensions:
     instance.vk.loadExtension(extension)
   var

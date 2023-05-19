@@ -1,4 +1,6 @@
+import std/strutils
 import std/json
+import std/logging
 import std/tables
 import std/sequtils
 import std/strformat
@@ -29,8 +31,6 @@ const
     5125: UInt32,
     5126: Float32,
   }.toTable
-  VERTEX_ATTRIBUTE_DATA = 34962
-  INSTANCE_ATTRIBUTE_DATA = 34963
 
 func getGPUType(accessor: JsonNode): DataType =
   # TODO: no full support for all datatypes that glTF may provide
@@ -85,7 +85,7 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: var seq[uin
   var dstPointer = result.getRawData()[0]
 
   if bufferView.hasKey("byteStride"):
-    raise newException(Exception, "Congratulations, you try to test a feature (loading buffer data with stride attributes) that we have no idea where it is used and how it can be tested (need a coresponding *.glb file). Please open an issue so we can finish the implementation.")
+    warn "Congratulations, you try to test a feature (loading buffer data with stride attributes) that we have no idea where it is used and how it can be tested (need a coresponding *.glb file)."
     # we don't support stride, have to convert stuff here... does this even work?
     for i in 0 ..< int(result.len):
       copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], int(result.thetype.size))
@@ -100,22 +100,23 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
   var vertexCount = 0'u32
   for attribute, accessor in primitiveNode["attributes"].pairs:
     let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
-    mesh.appendMeshData(attribute, data)
+    mesh.appendMeshData(attribute.toLowerAscii, data)
     vertexCount = data.len
-    if attribute == "POSITION":
-      transform[Vec3f](mesh, "POSITION", scale3d(1'f32, -1'f32, 1'f32))
 
-  let materialId = uint8(primitiveNode["material"].getInt())
+  var materialId = 0'u8
+  if primitiveNode.hasKey("material"):
+    materialId = uint8(primitiveNode["material"].getInt())
   mesh.appendMeshData("material", newSeqWith[uint8](int(vertexCount), materialId))
 
   if primitiveNode.hasKey("indices"):
     assert mesh.indexType != None
     let data = root.getAccessorData(root["accessors"][primitiveNode["indices"].getInt()], mainBuffer)
+    let baseIndex = mesh.indicesCount
     var tri: seq[uint32]
     case data.thetype
       of UInt16:
         for entry in getValues[uint16](data)[]:
-          tri.add uint32(entry)
+          tri.add uint32(entry) + baseIndex
           if tri.len == 3:
             mesh.appendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
@@ -152,12 +153,16 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): M
 
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
-    result.setMeshData(attribute, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
+    result.setMeshData(attribute.toLowerAscii, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
+  # if meshNode["primitives"][0].hasKey("material"):
   result.setMeshData("material", newDataList(thetype=getDataType[uint8]()))
 
   # add all mesh data
   for primitive in meshNode["primitives"]:
     result.addPrimitive(root, primitive, mainBuffer)
+
+  # gld uses +y up, but we (vulkan) don't 
+  transform[Vec3f](result, "position", scale3d(1'f32, -1'f32, 1'f32))
 
 proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entity =
   var name = "<Unknown>"
@@ -213,11 +218,12 @@ proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]):
 proc getMaterialsData(root: JsonNode): seq[Vec4f] =
   for materialNode in root["materials"]:
     let pbr = materialNode["pbrMetallicRoughness"]
-    var baseColor = newVec4f(0, 0, 0, 1)
-    baseColor[0] = pbr["baseColorFactor"][0].getFloat() * 255
-    baseColor[1] = pbr["baseColorFactor"][1].getFloat() * 255
-    baseColor[2] = pbr["baseColorFactor"][2].getFloat() * 255
-    baseColor[3] = pbr["baseColorFactor"][3].getFloat() * 255
+    var baseColor = newVec4f(1, 1, 1, 1)
+    if pbr.hasKey("baseColorFactor"):
+      baseColor[0] = pbr["baseColorFactor"][0].getFloat()
+      baseColor[1] = pbr["baseColorFactor"][1].getFloat()
+      baseColor[2] = pbr["baseColorFactor"][2].getFloat()
+      baseColor[3] = pbr["baseColorFactor"][3].getFloat()
     result.add baseColor
     # TODO: pbr["baseColorTexture"]
     # TODO: pbr["metallicRoughnessTexture"]
@@ -255,9 +261,10 @@ proc readglTF*(stream: Stream): seq[Scene] =
   let bufferLenDiff = int(chunkLength) - data.structuredContent["buffers"][0]["byteLength"].getInt()
   assert 0 <= bufferLenDiff <= 3 # binary buffer may be aligned to 4 bytes
 
+  debug data.structuredContent.pretty
+
   for scene in data.structuredContent["scenes"]:
     var scene = data.structuredContent.loadScene(scene, data.binaryBufferData)
-    echo getMaterialsData(data.structuredContent)
     scene.addShaderGlobalArray("material_colors", getMaterialsData(data.structuredContent))
     result.add scene
 
