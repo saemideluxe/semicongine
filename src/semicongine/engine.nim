@@ -30,8 +30,10 @@ type
     mouseWasPressed: set[MouseButton]
     mouseWasReleased: set[MouseButton]
     mousePosition: Vec2f
+    mouseMove: Vec2f
     eventsProcessed: uint64
     windowWasResized: bool
+    mouseWheel: float32
   Engine* = object
     state*: EngineState
     device: Device
@@ -116,10 +118,9 @@ proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribut
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
   assert engine.renderer.isSome
-  if engine.state == Running:
-    engine.renderer.get.updateMeshData(scene)
-    engine.renderer.get.updateUniformData(scene)
-    engine.renderer.get.render(scene)
+  engine.renderer.get.updateMeshData(scene)
+  engine.renderer.get.updateUniformData(scene)
+  engine.renderer.get.render(scene)
 
 proc updateInputs*(engine: var Engine): EngineState =
   assert engine.state in [Starting, Running]
@@ -128,7 +129,13 @@ proc updateInputs*(engine: var Engine): EngineState =
   engine.input.keyWasReleased = {}
   engine.input.mouseWasPressed = {}
   engine.input.mouseWasReleased = {}
-  engine.input.windowWasResized = engine.state == Starting
+  engine.input.mouseWheel = 0
+  engine.input.mouseMove = newVec2f()
+  if engine.state == Starting:
+    engine.input.windowWasResized = true
+    var mpos = engine.window.getMousePosition()
+    if mpos.isSome:
+      engine.input.mousePosition = mpos.get
 
   var killed = false
   for event in engine.window.pendingEvents():
@@ -153,7 +160,11 @@ proc updateInputs*(engine: var Engine): EngineState =
         engine.input.mouseWasReleased.incl event.button
         engine.input.mouseIsDown.excl event.button
       of MouseMoved:
-        engine.input.mousePosition = newVec2(float32(event.x), float32(event.y))
+        let newPos = newVec2(float32(event.x), float32(event.y))
+        engine.input.mouseMove = newPos - engine.input.mousePosition
+        engine.input.mousePosition = newPos
+      of MouseWheel:
+        engine.input.mouseWheel = event.amount
   if engine.state == Starting:
     engine.state = Running
   if killed:
@@ -172,6 +183,8 @@ func mouseIsDown*(engine: Engine, button: MouseButton): auto = button in engine.
 func mouseWasPressed*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseWasPressed
 func mouseWasReleased*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseWasReleased
 func mousePosition*(engine: Engine): auto = engine.input.mousePosition
+func mouseMove*(engine: Engine): auto = engine.input.mouseMove
+func mouseWheel*(engine: Engine): auto = engine.input.mouseWheel
 func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
 func framesRendered*(engine: Engine): uint64 = (if engine.renderer.isSome: engine.renderer.get.framesRendered else: 0)
 func gpuDevice*(engine: Engine): Device = engine.device

@@ -5,8 +5,8 @@ import std/strformat
 import
   x11/xlib,
   x11/xutil,
-  x11/keysym
-import x11/x
+  x11/keysym,
+  x11/x
 
 import ../../core
 import ../../events
@@ -28,7 +28,6 @@ template checkXlibResult*(call: untyped) =
   if value == 0:
     raise newException(Exception, "Xlib error: " & astToStr(call) &
         " returned " & $value)
-
 
 proc XErrorLogger(display: PDisplay, event: PXErrorEvent): cint {.cdecl.} =
   echo &"Xlib: {event[]}"
@@ -157,12 +156,15 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
           key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN))
     of ButtonPress:
       let button = int(cast[PXButtonEvent](addr(event)).button)
-      result.add Event(eventType: MousePressed,
-          button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN))
+      if button == Button4:
+        result.add Event(eventType: MouseWheel, amount: 1'f32)
+      elif button == Button5:
+        result.add Event(eventType: MouseWheel, amount: -1'f32)
+      else:
+        result.add Event(eventType: MousePressed, button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN))
     of ButtonRelease:
       let button = int(cast[PXButtonEvent](addr(event)).button)
-      result.add Event(eventType: MouseReleased,
-          button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN))
+      result.add Event(eventType: MouseReleased, button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN))
     of MotionNotify:
       let motion = cast[PXMotionEvent](addr(event))
       result.add Event(eventType: MouseMoved, x: motion.x, y: motion.y)
