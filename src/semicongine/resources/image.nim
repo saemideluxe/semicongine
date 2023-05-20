@@ -1,6 +1,5 @@
 import std/streams
 import std/bitops
-import std/algorithm
 
 import ../core/imagetypes
 
@@ -102,3 +101,22 @@ proc readBMP*(stream: Stream): Image =
     stream.setPosition(stream.getPosition() + padding)
 
   result = newImage(width=uint32(dibHeader.width), height=uint32(abs(dibHeader.height)), imagedata=data)
+
+{.compile: "thirdparty/LodePNG/lodepng.c".}
+
+proc lodepng_decode32(out_data: ptr cstring, w: ptr cuint, h: ptr cuint, in_data: cstring, insize: csize_t): cuint {.importc.}
+
+proc readPNG*(stream: Stream): Image =
+  let indata = stream.readAll()
+  var w, h: cuint
+  var data: cstring
+
+  if lodepng_decode32(out_data=addr data, w=addr w, h=addr h, in_data=cstring(indata), insize=csize_t(indata.len)) != 0:
+    raise newException(Exception, "An error occured while loading PNG file")
+
+  let imagesize = w * h * 4
+  var imagedata = newSeq[Pixel](w * h)
+  copyMem(addr imagedata[0], data,imagesize)
+  dealloc(data)
+
+  result = newImage(width=w, height=h, imagedata=imagedata)

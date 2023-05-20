@@ -98,22 +98,27 @@ elif thebundletype == Exe:
       yield i
 
 proc loadResource*(path: string): Stream =
-    loadResource_intern(path)
+  loadResource_intern(path)
 
 proc loadImage*(path: string): Image =
+  if path.splitFile().ext.toLowerAscii == ".bmp":
     loadResource_intern(path).readBMP()
+  elif path.splitFile().ext.toLowerAscii == ".png":
+    loadResource_intern(path).readPNG()
+  else:
+    raise newException(Exception, "Unsupported image file type: " & path)
 
 proc loadAudio*(path: string): Sound =
-    loadResource_intern(path).readAU()
+  loadResource_intern(path).readAU()
 
 proc loadMesh*(path: string): Entity =
-    loadResource_intern(path).readglTF()[0].root
+  loadResource_intern(path).readglTF()[0].root
 
 proc loadScene*(path: string): Scene =
-    loadResource_intern(path).readglTF()[0]
+  loadResource_intern(path).readglTF()[0]
 
 proc loadScenes*(path: string): seq[Scene] =
-    loadResource_intern(path).readglTF()
+  loadResource_intern(path).readglTF()
 
 proc modList*(): seq[string] =
   modList_intern()
