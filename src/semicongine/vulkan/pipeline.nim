@@ -16,7 +16,6 @@ type
     shaders*: seq[Shader]
     descriptorSetLayout*: DescriptorSetLayout
     descriptorPool*: DescriptorPool
-    descriptorSets*: seq[DescriptorSet]
 
 func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
   for shader in pipeline.shaders:
@@ -33,15 +32,16 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
         result.add attribute
         visitedUniforms[attribute.name] = attribute
 
-proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, seq[Texture]], inFlightFrames: int) =
+proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, seq[Texture]], inFlightFrames: int): seq[DescriptorSet] =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
-  assert pipeline.descriptorSets.len > 0
+
+  result = pipeline.descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
   
   for i in 0 ..< inFlightFrames:
     var offset = 0'u64
     # first descriptor is always uniform for globals, match should be better somehow
-    for descriptor in pipeline.descriptorSets[i].layout.descriptors.mitems:
+    for descriptor in result[i].layout.descriptors.mitems:
       if descriptor.thetype == Uniform and buffers.len > 0:
         let size = VkDeviceSize(descriptor.size)
         descriptor.buffer = buffers[i]
@@ -198,7 +198,6 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
     poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, uint32(inFlightFrames * vertexShader.samplers.len))
 
   result.descriptorPool = result.device.createDescriptorSetPool(poolsizes)
-  result.descriptorSets = result.descriptorPool.allocateDescriptorSet(result.descriptorSetLayout, inFlightFrames)
   discard result.uniforms # just for assertion
 
 

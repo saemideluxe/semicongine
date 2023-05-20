@@ -29,6 +29,7 @@ type
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
     entityTransformationCache: Table[Mesh, Mat4] # remembers last transformation, avoid to send GPU-updates if no changes
+    descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
   Renderer* = object
     device: Device
     surfaceFormat: VkSurfaceFormatKHR
@@ -180,10 +181,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         let interpolation = images[1]
         for image in images[0]:
           data.textures[name].add renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0], interpolation)
-      # TODO: this only bind shit to the last scene, find per-scene solution
-      pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
+      data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
-        pipeline.descriptorSets[frame_i].writeDescriptorSet()
+        data.descriptorSets[pipeline.vk][frame_i].writeDescriptorSet()
 
   renderer.scenedata[scene] = data
 
@@ -254,7 +254,7 @@ proc render*(renderer: var Renderer, scene: var Scene) =
     var subpass = renderer.renderPass.subpasses[i]
     for pipeline in subpass.pipelines.mitems:
       commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, pipeline.vk)
-      commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, pipeline.layout, 0, 1, addr(pipeline.descriptorSets[renderer.swapchain.currentInFlight].vk), 0, nil)
+      commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
 
       debug "Scene buffers:"
       for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
