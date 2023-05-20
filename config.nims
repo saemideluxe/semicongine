@@ -16,6 +16,7 @@ task build, "build":
   switch("mm", "orc")
   switch("experimental", "strictEffects")
   switch("threads", "on")
+  switch("d", "useLibzipSrc")
   var buildType = DEBUG
   var platformDir = ""
   if defined(linux):
