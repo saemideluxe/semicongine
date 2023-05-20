@@ -4,23 +4,16 @@ import semicongine
 
 proc main() =
   var scene = newScene("main", root=newEntity("rect", rect()))
-  let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
   let (RT, WT, PT) = (hexToColorAlpha("A51931").asPixel, hexToColorAlpha("F4F5F8").asPixel, hexToColorAlpha("2D2A4A").asPixel)
   let
-    t1 = Image(width: 5, height: 5, imagedata: @[
-      R, R, R, R, R,
-      R, R, W, R, R,
-      R, W, W, W, R,
-      R, R, W, R, R,
-      R, R, R, R, R,
-    ])
-    t2 = Image(width: 7, height: 5, imagedata: @[
+    t1 = Image(width: 7, height: 5, imagedata: @[
       RT, RT, RT, RT, RT, RT, RT,
       WT, WT, WT, WT, WT, WT, WT,
       PT, PT, PT, PT, PT, PT, PT,
       WT, WT, WT, WT, WT, WT, WT,
       RT, RT, RT, RT, RT, RT, RT,
     ])
+    t2 = loadImage("flag.png")
   scene.addTextures("my_texture", @[t1, t2], interpolation=VK_FILTER_NEAREST)
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
