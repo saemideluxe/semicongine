@@ -52,8 +52,8 @@ proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
 
 proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], transformAttribute="") =
   assert not (scene in renderer.scenedata)
+  const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
   var data = SceneData()
-
 
   # when mesh transformation are handled through the scenegraph-transformation, set it up here
   if transformattribute != "":
@@ -111,6 +111,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     inc bindingNumber
     # setup one buffer per attribute-location-type
     for mesh in allMeshes:
+      # align size to VERTEX_ATTRIB_ALIGNMENT bytes (the important thing is the correct alignment of the offsets, bu
+      # we need to expand the buffer size as well, therefore considering alignment already here as well
+      if perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
+        perLocationSizes[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
       perLocationSizes[attribute.memoryPerformanceHint] += mesh.dataSize(attribute.name)
   for memoryPerformanceHint, bufferSize in perLocationSizes.pairs:
     if bufferSize > 0:
@@ -131,6 +135,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
       if pdata != nil: # no data
         data.vertexBuffers[attribute.memoryPerformanceHint].setData(pdata, size, perLocationOffsets[attribute.memoryPerformanceHint])
         perLocationOffsets[attribute.memoryPerformanceHint] += size
+        if perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
+          perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
 
     let indexed = mesh.indexType != None
     var drawable = Drawable(
