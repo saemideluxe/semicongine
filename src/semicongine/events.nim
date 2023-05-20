@@ -4,6 +4,7 @@ type
     ResizedWindow
     KeyPressed, KeyReleased
     MousePressed, MouseReleased, MouseMoved,
+    MouseWheel
   Key* {.size: sizeof(cint), pure.} = enum
     UNKNOWN
     Escape, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12
@@ -28,5 +29,7 @@ type
       button*: MouseButton
     of MouseMoved:
       x*, y*: int
+    of MouseWheel:
+      amount*: float32
     else:
       discard

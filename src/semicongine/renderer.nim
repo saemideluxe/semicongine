@@ -180,6 +180,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         let interpolation = images[1]
         for image in images[0]:
           data.textures[name].add renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0], interpolation)
+      # TODO: this only bind shit to the last scene, find per-scene solution
       pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         pipeline.descriptorSets[frame_i].writeDescriptorSet()
@@ -217,10 +218,9 @@ proc updateMeshData*(renderer: var Renderer, scene: Scene) =
 proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
   assert scene in renderer.scenedata
 
-  var data = renderer.scenedata[scene]
-  if data.uniformBuffers.len == 0:
+  if renderer.scenedata[scene].uniformBuffers.len == 0:
     return
-  assert data.uniformBuffers[renderer.swapchain.currentInFlight].vk.valid
+  assert renderer.scenedata[scene].uniformBuffers[renderer.swapchain.currentInFlight].vk.valid
 
   for i in 0 ..< renderer.renderPass.subpasses.len:
     for pipeline in renderer.renderPass.subpasses[i].pipelines.mitems:
@@ -228,7 +228,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
       for uniform in pipeline.uniforms:
         assert uniform.thetype == scene.shaderGlobals[uniform.name].thetype
         let (pdata, size) = scene.shaderGlobals[uniform.name].getRawData()
-        data.uniformBuffers[renderer.swapchain.currentInFlight].setData(pdata, size, offset)
+        renderer.scenedata[scene].uniformBuffers[renderer.swapchain.currentInFlight].setData(pdata, size, offset)
         offset += size
 
 proc render*(renderer: var Renderer, scene: var Scene) =

@@ -121,8 +121,10 @@ proc loadAudio*(path: string): Sound =
 proc loadMesh*(path: string): Entity =
   loadResource_intern(path).readglTF()[0].root
 
-proc loadScene*(path: string): Scene =
-  loadResource_intern(path).readglTF()[0]
+proc loadScene*(path: string, name=""): Scene =
+  result = loadResource_intern(path).readglTF()[0]
+  if name != "":
+    result.name = name
 
 proc loadScenes*(path: string): seq[Scene] =
   loadResource_intern(path).readglTF()
