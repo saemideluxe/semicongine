@@ -40,12 +40,12 @@ when thebundletype == Dir:
         result.add file
 
   iterator walkResources_intern(): string =
-    for i in walkDir(modRoot(), relative=true):
-      yield i.path
+    for file in walkDirRec(modRoot(), relative=true):
+      yield file
 
 elif thebundletype == Zip:
 
-  import zippy/ziparchives
+  import zip/zipfiles
 
   proc resourceRoot(): string =
     joinPath(absolutePath(getAppDir()), RESOURCEROOT)
@@ -53,9 +53,12 @@ elif thebundletype == Zip:
     joinPath(resourceRoot(), selectedMod)
 
   proc loadResource_intern(path: string): Stream =
-    let reader = openZipArchive(modRoot() & ".zip")
-    result = newStringStream(reader.extractFile(path))
-    reader.close()
+    var archive: ZipArchive
+    if not archive.open(modRoot() & ".zip", fmRead):
+      raise newException(Exception, "Unable to open file " & path)
+    # read all here so we can close the stream
+    result = newStringStream(archive.getStream(path).readAll())
+    archive.close()
 
   proc modList_intern(): seq[string] =
     for kind, file in walkDir(resourceRoot(), relative=true):
@@ -63,10 +66,14 @@ elif thebundletype == Zip:
         result.add file[0 ..< ^4]
 
   iterator walkResources_intern(): string =
-    let reader = openZipArchive(modRoot() & ".zip")
-    for i in reader.walkFiles:
-      yield i.splitPath().tail
-    reader.close()
+    var archive: ZipArchive
+    if not archive.open(modRoot() & ".zip", fmRead):
+      raise newException(Exception, "Unable to open file " & modRoot() & ".zip")
+
+    for i in archive.walkFiles:
+      if i[^1] != '/':
+        yield i
+    archive.close()
 
 elif thebundletype == Exe:
 
