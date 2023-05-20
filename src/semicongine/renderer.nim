@@ -251,10 +251,9 @@ proc render*(renderer: var Renderer, scene: var Scene) =
   commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer())
 
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    var subpass = renderer.renderPass.subpasses[i]
-    for pipeline in subpass.pipelines.mitems:
-      commandBuffer.vkCmdBindPipeline(subpass.pipelineBindPoint, pipeline.vk)
-      commandBuffer.vkCmdBindDescriptorSets(subpass.pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
+    for pipeline in renderer.renderPass.subpasses[i].pipelines.mitems:
+      commandBuffer.vkCmdBindPipeline(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.vk)
+      commandBuffer.vkCmdBindDescriptorSets(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
 
       debug "Scene buffers:"
       for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:

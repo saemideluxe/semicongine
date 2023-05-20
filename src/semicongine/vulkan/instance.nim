@@ -58,6 +58,7 @@ proc createInstance*(
   for i in layers:
     if i in getLayers():
       availableLayers.add i
+  debug "Enabled layers: " & $availableLayers
   var
     layersC = allocCStringArray(availableLayers)
     instanceExtensionsC = allocCStringArray(requiredExtensions)
