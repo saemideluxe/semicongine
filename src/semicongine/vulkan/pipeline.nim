@@ -1,6 +1,5 @@
 import std/tables
 import std/strformat
-import std/sequtils
 
 import ../core
 import ./device
