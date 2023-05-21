@@ -6,6 +6,7 @@ proc main() =
   var scene = newScene("main", root=newEntity("rect", rect()))
   let (RT, WT, PT) = (hexToColorAlpha("A51931").asPixel, hexToColorAlpha("F4F5F8").asPixel, hexToColorAlpha("2D2A4A").asPixel)
   let
+    # image from memory
     t1 = Image(width: 7, height: 5, imagedata: @[
       RT, RT, RT, RT, RT, RT, RT,
       WT, WT, WT, WT, WT, WT, WT,
@@ -13,8 +14,12 @@ proc main() =
       WT, WT, WT, WT, WT, WT, WT,
       RT, RT, RT, RT, RT, RT, RT,
     ])
+    # image from file
     t2 = loadImage("flag.png")
-  scene.addTextures("my_texture", @[t1, t2], interpolation=VK_FILTER_NEAREST)
+  var sampler = DefaultSampler()
+  sampler.magnification = VK_FILTER_NEAREST
+  sampler.minification = VK_FILTER_NEAREST
+  scene.addTextures("my_texture", @[Texture(image: t1, sampler: sampler), Texture(image: t2, sampler: sampler)])
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
   var engine = initEngine("Test materials")

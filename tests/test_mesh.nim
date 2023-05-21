@@ -18,13 +18,13 @@ proc main() =
     ]
     vertexOutput = @[attr[Vec4f]("vertexColor")]
     fragOutput = @[attr[Vec4f]("color")]
-    uniforms = @[attr[Mat4]("transform"), attr[Vec4f]("material_colors", arrayCount=16), ]
+    uniforms = @[attr[Mat4]("transform"), attr[Vec4f]("material_color", arrayCount=16), ]
     vertexCode = compileGlslShader(
       stage=VK_SHADER_STAGE_VERTEX_BIT,
       inputs=vertexInput,
       outputs=vertexOutput,
       uniforms=uniforms,
-      main="""gl_Position = vec4(position, 1.0) * Uniforms.transform; vertexColor = Uniforms.material_colors[material];"""
+      main="""gl_Position = vec4(position, 1.0) * Uniforms.transform; vertexColor = Uniforms.material_color[material];"""
     )
     fragmentCode = compileGlslShader(
       stage=VK_SHADER_STAGE_FRAGMENT_BIT,
