@@ -24,7 +24,7 @@ type
     vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
     uniformBuffers*: seq[Buffer] # one per frame-in-flight
-    textures*: Table[string, seq[Texture]] # per frame-in-flight
+    textures*: Table[string, seq[VulkanTexture]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
@@ -176,11 +176,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
             requireMappable=true,
             preferVRAM=true,
           )
-      for name, images in scene.textures.pairs:
+      for name, textures in scene.textures.pairs:
         data.textures[name] = @[]
-        let interpolation = images[1]
-        for image in images[0]:
-          data.textures[name].add renderer.device.createTexture(image.width, image.height, 4, addr image.imagedata[0][0], interpolation)
+        for texture in textures:
+          data.textures[name].add renderer.device.uploadTexture(texture)
       data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         data.descriptorSets[pipeline.vk][frame_i].writeDescriptorSet()

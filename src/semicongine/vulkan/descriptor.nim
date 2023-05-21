@@ -20,7 +20,7 @@ type
       size*: uint64
     of ImageSampler:
       imageviews*: seq[ImageView]
-      samplers*: seq[Sampler]
+      samplers*: seq[VulkanSampler]
   DescriptorSet* = object # "instance" of a DescriptorSetLayout
     vk*: VkDescriptorSet
     layout*: DescriptorSetLayout

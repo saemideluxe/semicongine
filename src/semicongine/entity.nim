@@ -13,7 +13,7 @@ type
     name*: string
     root*: Entity
     shaderGlobals*: Table[string, DataList]
-    textures*: Table[string, (seq[Image], VkFilter)]
+    textures*: Table[string, seq[Texture]]
 
   Entity* = ref object of RootObj
     name*: string
@@ -42,11 +42,11 @@ func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
 func setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
   setValues[T](scene.shaderGlobals[name], value)
 
-func addTextures*(scene: var Scene, name: string, texture: seq[Image], interpolation=VK_FILTER_LINEAR) =
-  scene.textures[name] = (texture, interpolation)
+func addTextures*(scene: var Scene, name: string, textures: seq[Texture], interpolation=VK_FILTER_LINEAR) =
+  scene.textures[name] = textures
 
-func addTexture*(scene: var Scene, name: string, texture: Image, interpolation=VK_FILTER_LINEAR) =
-  scene.textures[name] = (@[texture], interpolation)
+func addTexture*(scene: var Scene, name: string, texture: Texture) =
+  scene.textures[name] = @[texture]
 
 func newScene*(name: string, root: Entity): Scene =
   Scene(name: name, root: root)
