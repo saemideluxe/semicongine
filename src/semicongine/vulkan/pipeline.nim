@@ -32,7 +32,7 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
         result.add attribute
         visitedUniforms[attribute.name] = attribute
 
-proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, seq[Texture]], inFlightFrames: int): seq[DescriptorSet] =
+proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, seq[VulkanTexture]], inFlightFrames: int): seq[DescriptorSet] =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 

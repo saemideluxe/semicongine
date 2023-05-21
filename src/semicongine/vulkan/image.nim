@@ -10,7 +10,7 @@ import ./commandbuffer
 
 type
   PixelDepth = 1'u32 .. 4'u32
-  GPUImage* = object
+  VulkanImage* = object
     device*: Device
     vk*: VkImage
     width*: uint32 # pixel
@@ -22,16 +22,16 @@ type
       of false: discard
       of true:
         memory*: DeviceMemory
-  Sampler* = object
+  VulkanSampler* = object
     device*: Device
     vk*: VkSampler
   ImageView* = object
     vk*: VkImageView
-    image*: GPUImage
-  Texture* = object
-    image*: GPUImage
+    image*: VulkanImage
+  VulkanTexture* = object
+    image*: VulkanImage
     imageView*: ImageView
-    sampler*: Sampler
+    sampler*: VulkanSampler
 
 const DEPTH_FORMAT_MAP = {
   PixelDepth(1): VK_FORMAT_R8_SRGB,
@@ -41,7 +41,7 @@ const DEPTH_FORMAT_MAP = {
 }.toTable
 
 
-proc requirements(image: GPUImage): MemoryRequirements =
+proc requirements(image: VulkanImage): MemoryRequirements =
   assert image.vk.valid
   assert image.device.vk.valid
   var req: VkMemoryRequirements
@@ -53,7 +53,7 @@ proc requirements(image: GPUImage): MemoryRequirements =
     if ((req.memoryTypeBits shr i) and 1) == 1:
       result.memoryTypes.add memorytypes[i]
 
-proc allocateMemory(image: var GPUImage, requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool) =
+proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool) =
   assert image.device.vk.valid
   assert image.memoryAllocated == false
 
@@ -68,7 +68,7 @@ proc allocateMemory(image: var GPUImage, requireMappable: bool, preferVRAM: bool
   image.memory = image.device.allocate(requirements.size, memoryType)
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 
-proc transitionImageLayout*(image: GPUImage, oldLayout, newLayout: VkImageLayout) =
+proc transitionImageLayout*(image: VulkanImage, oldLayout, newLayout: VkImageLayout) =
   var barrier = VkImageMemoryBarrier(
     sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
     oldLayout: oldLayout,
@@ -109,7 +109,7 @@ proc transitionImageLayout*(image: GPUImage, oldLayout, newLayout: VkImageLayout
       1, addr barrier
     )
 
-proc copy*(src: Buffer, dst: GPUImage) =
+proc copy*(src: Buffer, dst: VulkanImage) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -139,7 +139,7 @@ proc copy*(src: Buffer, dst: GPUImage) =
     )
 
 # currently only usable for texture access from shader
-proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): GPUImage =
+proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): VulkanImage =
   assert device.vk.valid
   assert width > 0
   assert height > 0
@@ -177,7 +177,7 @@ proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data
   result.transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
   stagingBuffer.destroy()
 
-proc destroy*(image: var GPUImage) =
+proc destroy*(image: var VulkanImage) =
   assert image.device.vk.valid
   assert image.vk.valid
   image.device.vk.vkDestroyImage(image.vk, nil)
@@ -187,14 +187,14 @@ proc destroy*(image: var GPUImage) =
     image.memoryAllocated = false
   image.vk.reset
 
-proc createSampler*(device: Device, interpolation: VkFilter): Sampler =
+proc createSampler*(device: Device, sampler: Sampler): VulkanSampler =
   assert device.vk.valid
   var samplerInfo = VkSamplerCreateInfo(
     sType: VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-    magFilter: interpolation,
-    minFilter: interpolation,
-    addressModeU: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-    addressModeV: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    magFilter: sampler.magnification,
+    minFilter: sampler.minification,
+    addressModeU: sampler.wrapModeS,
+    addressModeV: sampler.wrapModeT,
     addressModeW: VK_SAMPLER_ADDRESS_MODE_REPEAT,
     anisotropyEnable: device.enabledFeatures.samplerAnisotropy,
     maxAnisotropy: device.physicalDevice.properties.limits.maxSamplerAnisotropy,
@@ -210,14 +210,14 @@ proc createSampler*(device: Device, interpolation: VkFilter): Sampler =
   result.device = device
   checkVkResult device.vk.vkCreateSampler(addr samplerInfo, nil, addr result.vk)
 
-proc destroy*(sampler: var Sampler) =
+proc destroy*(sampler: var VulkanSampler) =
   assert sampler.device.vk.valid
   assert sampler.vk.valid
   sampler.device.vk.vkDestroySampler(sampler.vk, nil)
   sampler.vk.reset
 
 proc createImageView*(
-  image: GPUImage,
+  image: VulkanImage,
   imageviewtype=VK_IMAGE_VIEW_TYPE_2D,
   baseMipLevel=0'u32,
   levelCount=1'u32,
@@ -255,14 +255,13 @@ proc destroy*(imageview: var ImageView) =
   imageview.image.device.vk.vkDestroyImageView(imageview.vk, nil)
   imageview.vk.reset()
 
-proc createTexture*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer, interpolation: VkFilter): Texture =
+proc uploadTexture*(device: Device, texture: Texture): VulkanTexture =
   assert device.vk.valid
-  
-  result.image = createImage(device=device, width=width, height=height, depth=depth, data=data)
+  result.image = createImage(device=device, width=texture.image.width, height=texture.image.height, depth=4, data=addr texture.image.imagedata[0][0])
   result.imageView = result.image.createImageView()
-  result.sampler = result.image.device.createSampler(interpolation)
+  result.sampler = result.image.device.createSampler(texture.sampler)
 
-proc destroy*(texture: var Texture) =
+proc destroy*(texture: var VulkanTexture) =
   texture.image.destroy()
   texture.imageView.destroy()
   texture.sampler.destroy()

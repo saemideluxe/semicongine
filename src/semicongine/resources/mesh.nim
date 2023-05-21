@@ -10,6 +10,8 @@ import ../entity
 import ../mesh
 import ../core
 
+import ./image
+
 
 type
   glTFHeader = object
@@ -19,6 +21,21 @@ type
   glTFData = object
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
+  glTFMaterial = object
+    color: Vec4f
+    colorTexture: Texture
+    colorTextureIndex: uint32
+    metallic: float32
+    roughness: float32
+    metallicRoughnessTexture: Texture
+    metallicRoughnessTextureIndex: uint32
+    normalTexture: Texture
+    normalTextureIndex: uint32
+    occlusionTexture: Texture
+    occlusionTextureIndex: uint32
+    emissiveTexture: Texture
+    emissiveTextureIndex: uint32
+    emissiveFactor: Vec3f
 
 const
   JSON_CHUNK = 0x4E4F534A
@@ -30,6 +47,19 @@ const
     5123: UInt16,
     5125: UInt32,
     5126: Float32,
+  }.toTable
+  SAMPLER_FILTER_MODE_MAP = {
+    9728: VK_FILTER_NEAREST,
+    9729: VK_FILTER_LINEAR,
+    9984: VK_FILTER_NEAREST,
+    9985: VK_FILTER_LINEAR,
+    9986: VK_FILTER_NEAREST,
+    9987: VK_FILTER_LINEAR,
+  }.toTable
+  SAMPLER_WRAP_MODE_MAP = {
+    33071: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+    33648: VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+    10497: VK_SAMPLER_ADDRESS_MODE_REPEAT
   }.toTable
 
 func getGPUType(accessor: JsonNode): DataType =
@@ -68,6 +98,16 @@ func getGPUType(accessor: JsonNode): DataType =
     of Float32: return Vec4F32
     else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
 
+proc getBufferViewData(bufferView: JsonNode, mainBuffer: var seq[uint8], baseBufferOffset=0): seq[uint8] =
+  assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
+
+  result = newSeq[uint8](bufferView["byteLength"].getInt())
+  let bufferOffset = bufferView["byteOffset"].getInt() + baseBufferOffset
+  var dstPointer = addr result[0]
+
+  if bufferView.hasKey("byteStride"):
+    raise newException(Exception, "Unsupported feature: byteStride in buffer view")
+  copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: var seq[uint8]): DataList =
   result = newDataList(thetype=accessor.getGPUType())
@@ -154,7 +194,6 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): M
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
     result.setMeshData(attribute.toLowerAscii, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
-  # if meshNode["primitives"][0].hasKey("material"):
   result.setMeshData("material", newDataList(thetype=getDataType[uint8]()))
 
   # add all mesh data
@@ -215,24 +254,73 @@ proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]):
 
   newScene(scenenode["name"].getStr(), rootEntity)
 
-proc getMaterialsData(root: JsonNode): seq[Vec4f] =
-  for materialNode in root["materials"]:
-    let pbr = materialNode["pbrMetallicRoughness"]
-    var baseColor = newVec4f(1, 1, 1, 1)
-    if pbr.hasKey("baseColorFactor"):
-      baseColor[0] = pbr["baseColorFactor"][0].getFloat()
-      baseColor[1] = pbr["baseColorFactor"][1].getFloat()
-      baseColor[2] = pbr["baseColorFactor"][2].getFloat()
-      baseColor[3] = pbr["baseColorFactor"][3].getFloat()
-    result.add baseColor
-    # TODO: pbr["baseColorTexture"]
-    # TODO: pbr["metallicRoughnessTexture"]
-    # TODO: pbr["metallicFactor"]
-    # TODO: pbr["roughnessFactor"]
-    # TODO: materialNode["normalTexture"]
-    # TODO: materialNode["occlusionTexture"]
-    # TODO: materialNode["emissiveTexture"]
-    # TODO: materialNode["emissiveFactor"]
+proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: var seq[uint8]): Image =
+  if root["images"][imageIndex].hasKey("uri"):
+    raise newException(Exception, "Unsupported feature: Load images from external files")
+
+  let bufferView = root["bufferViews"][root["images"][imageIndex]["bufferView"].getInt()]
+  let imgData = newStringStream(cast[string](getBufferViewData(bufferView, mainBuffer)))
+
+  let imageType = root["images"][imageIndex]["mimeType"].getStr()
+  case imageType
+  of "image/bmp":
+    result = readBMP(imgData)
+  of "image/png":
+    result = readPNG(imgData)
+  else:
+    raise newException(Exception, "Unsupported feature: Load image of type " & imageType)
+
+proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: var seq[uint8]): Texture =
+  result = new Texture
+  let textureNode = root["textures"][textureIndex]
+  result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
+  result.sampler = DefaultSampler()
+
+  if textureNode.hasKey("sampler"):
+    let sampler = root["samplers"][textureNode["sampler"].getInt()]
+    if sampler.hasKey("magFilter"):
+      result.sampler.magnification = SAMPLER_FILTER_MODE_MAP[sampler["magFilter"].getInt()]
+    if sampler.hasKey("minFilter"):
+      result.sampler.minification = SAMPLER_FILTER_MODE_MAP[sampler["minFilter"].getInt()]
+    if sampler.hasKey("wrapS"):
+      result.sampler.wrapModeS = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
+    if sampler.hasKey("wrapT"):
+      result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
+
+proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: var seq[uint8]): glTFMaterial =
+  let defaultMaterial = glTFMaterial(color: newVec4f(1, 1, 1, 1))
+  result = defaultMaterial
+  let pbr = materialNode["pbrMetallicRoughness"]
+  if pbr.hasKey("baseColorFactor"):
+    result.color[0] = pbr["baseColorFactor"][0].getFloat()
+    result.color[1] = pbr["baseColorFactor"][1].getFloat()
+    result.color[2] = pbr["baseColorFactor"][2].getFloat()
+    result.color[3] = pbr["baseColorFactor"][3].getFloat()
+  if pbr.hasKey("baseColorTexture"):
+    result.colorTexture = loadTexture(root, pbr["baseColorTexture"]["index"].getInt(), mainBuffer)
+    result.colorTextureIndex = pbr["baseColorTexture"].getOrDefault("texCoord").getInt(0).uint32
+  if pbr.hasKey("metallicRoughnessTexture"):
+    result.metallicRoughnessTexture = loadTexture(root, pbr["metallicRoughnessTexture"]["index"].getInt(), mainBuffer)
+    result.metallicRoughnessTextureIndex = pbr["metallicRoughnessTexture"].getOrDefault("texCoord").getInt().uint32
+  if pbr.hasKey("metallicFactor"):
+    result.metallic = pbr["metallicFactor"].getFloat()
+  if pbr.hasKey("roughnessFactor"):
+    result.roughness= pbr["roughnessFactor"].getFloat()
+
+  if materialNode.hasKey("normalTexture"):
+    result.normalTexture = loadTexture(root, materialNode["normalTexture"]["index"].getInt(), mainBuffer)
+    result.metallicRoughnessTextureIndex = materialNode["normalTexture"].getOrDefault("texCoord").getInt().uint32
+  if materialNode.hasKey("occlusionTexture"):
+    result.occlusionTexture = loadTexture(root, materialNode["occlusionTexture"]["index"].getInt(), mainBuffer)
+    result.occlusionTextureIndex = materialNode["occlusionTexture"].getOrDefault("texCoord").getInt().uint32
+  if materialNode.hasKey("emissiveTexture"):
+    result.emissiveTexture = loadTexture(root, materialNode["emissiveTexture"]["index"].getInt(), mainBuffer)
+    result.occlusionTextureIndex = materialNode["emissiveTexture"].getOrDefault("texCoord").getInt().uint32
+  if materialNode.hasKey("roughnessFactor"):
+    result.roughness = materialNode["roughnessFactor"].getFloat()
+  if materialNode.hasKey("emissiveFactor"):
+    let em = materialNode["emissiveFactor"]
+    result.emissiveFactor = newVec3f(em[0].getFloat(), em[1].getFloat(), em[2].getFloat())
 
 proc readglTF*(stream: Stream): seq[Scene] =
   var
@@ -265,6 +353,62 @@ proc readglTF*(stream: Stream): seq[Scene] =
 
   for scene in data.structuredContent["scenes"]:
     var scene = data.structuredContent.loadScene(scene, data.binaryBufferData)
-    scene.addShaderGlobalArray("material_colors", getMaterialsData(data.structuredContent))
+    var
+      color: seq[Vec4f]
+      colorTexture: seq[Texture]
+      colorTextureIndex: seq[uint32]
+      metallic: seq[float32]
+      roughness: seq[float32]
+      metallicRoughnessTexture: seq[Texture]
+      metallicRoughnessTextureIndex: seq[uint32]
+      normalTexture: seq[Texture]
+      normalTextureIndex: seq[uint32]
+      occlusionTexture: seq[Texture]
+      occlusionTextureIndex: seq[uint32]
+      emissiveTexture: seq[Texture]
+      emissiveTextureIndex: seq[uint32]
+      emissiveFactor: seq[Vec3f]
+    for materialNode in data.structuredContent["materials"]:
+      let m = loadMaterial(data.structuredContent, materialNode, data.binaryBufferData)
+      color.add m.color
+      if not m.colorTexture.isNil:
+        colorTexture.add m.colorTexture
+        colorTextureIndex.add m.colorTextureIndex
+      metallic.add m.metallic
+      roughness.add m.roughness
+      if not m.metallicRoughnessTexture.isNil:
+        metallicRoughnessTexture.add m.metallicRoughnessTexture
+        metallicRoughnessTextureIndex.add m.metallicRoughnessTextureIndex
+      if not m.normalTexture.isNil:
+        normalTexture.add m.normalTexture
+        normalTextureIndex.add m.normalTextureIndex
+      if not m.occlusionTexture.isNil:
+        occlusionTexture.add m.occlusionTexture
+        occlusionTextureIndex.add m.occlusionTextureIndex
+      if not m.emissiveTexture.isNil:
+        emissiveTexture.add m.emissiveTexture
+        emissiveTextureIndex.add m.emissiveTextureIndex
+      emissiveFactor.add m.emissiveFactor
+
+    # material constants
+    if color.len > 0: scene.addShaderGlobalArray("material_color", color)
+    if colorTextureIndex.len > 0: scene.addShaderGlobalArray("material_color_texture_index", colorTextureIndex)
+    if metallic.len > 0: scene.addShaderGlobalArray("material_metallic", metallic)
+    if roughness.len > 0: scene.addShaderGlobalArray("material_roughness", roughness)
+    if metallicRoughnessTextureIndex.len > 0: scene.addShaderGlobalArray("material_metallic_roughness_texture_index", metallicRoughnessTextureIndex)
+    if normalTextureIndex.len > 0: scene.addShaderGlobalArray("material_normal_texture_index", normalTextureIndex)
+    if occlusionTextureIndex.len > 0: scene.addShaderGlobalArray("material_occlusion_texture_index", occlusionTextureIndex)
+    if emissiveTextureIndex.len > 0: scene.addShaderGlobalArray("material_emissive_texture_index", emissiveTextureIndex)
+    if emissiveFactor.len > 0: scene.addShaderGlobalArray("material_emissive_factor", emissiveFactor)
+
+    # texture
+    #[
+    if colorTexture.len > 0: scene.addShaderGlobalArray("material_color_texture", colorTexture)
+    if metallicRoughnessTexture.len > 0: scene.addShaderGlobalArray("material_metallic_roughness_texture", metallicRoughnessTexture)
+    if normalTexture.len > 0: scene.addShaderGlobalArray("material_normal_texture", normalTexture)
+    if occlusionTexture.len > 0: scene.addShaderGlobalArray("material_occlusion_texture", occlusionTexture)
+    if emissiveTexture.len > 0: scene.addShaderGlobalArray("material_emissive_texture", emissiveTexture)
+    ]#
+
     result.add scene
 
