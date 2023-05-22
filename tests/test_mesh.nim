@@ -45,8 +45,8 @@ proc main() =
     scene.addShaderGlobal("view", Unit4)
     scene.addShaderGlobal("model", Unit4)
   var
-    size = 1'f32
-    elevation = -float32(PI) / 3'f32
+    size = 0.3'f32
+    elevation = 0'f32
     azimut = 0'f32
     currentScene = 0
 
@@ -65,11 +65,11 @@ proc main() =
       currentScene = 5
 
     if engine.keyWasPressed(NumberRowExtra3):
-      size = 1'f32
-      elevation = -float32(PI) / 3'f32
+      size = 0.3'f32
+      elevation = 0'f32
       azimut = 0'f32
-    var ratio = engine.getWindow().size[0] / engine.getWindow().size[1]
 
+    let ratio = engine.getWindow().size[0] / engine.getWindow().size[1]
     size *= 1'f32 + engine.mouseWheel() * 0.05
     azimut += engine.mouseMove().x / 180'f32
     elevation -= engine.mouseMove().y / 180'f32
