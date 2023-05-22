@@ -6,7 +6,7 @@ import std/strformat
 import std/sequtils
 
 import ./core
-import ./entity
+import ./scene
 
 type
   MeshIndexType* = enum
@@ -32,10 +32,9 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
     of Big: VK_INDEX_TYPE_UINT32
 
 func vertexCount*(mesh: Mesh): uint32 =
-  if mesh.data.len == 0:
-    0'u32
-  else:
-    uint32(mesh.data[mesh.data.keys().toSeq[0]].len)
+  result = 0'u32
+  for list in mesh.data.values:
+    result = max(list.len, result)
 
 func indicesCount*(mesh: Mesh): uint32 =
   (

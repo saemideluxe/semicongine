@@ -179,10 +179,10 @@ when isMainModule:
   while myengine.updateInputs() == Running:
     if myengine.windowWasResized():
       setShaderGlobal(scene, "projection",
-        ortho[float32](
-          0'f32, float32(myengine.getWindow().size[0]),
-          0'f32, float32(myengine.getWindow().size[1]),
-          0'f32, 1'f32,
+        ortho(
+          0, float32(myengine.getWindow().size[0]),
+          0, float32(myengine.getWindow().size[1]),
+          0, 1,
         )
       )
       let

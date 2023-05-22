@@ -7,7 +7,7 @@ import ./resources/image
 import ./resources/audio
 import ./resources/mesh
 
-from ./entity import Entity, Scene
+from ./scene import Entity, Scene
 
 export image
 export audio

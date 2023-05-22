@@ -11,7 +11,7 @@ import ./vulkan/device
 import ./vulkan/physicaldevice
 import ./vulkan/renderpass
 
-import ./entity
+import ./scene
 import ./renderer
 import ./events
 import ./audio

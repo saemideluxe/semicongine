@@ -1,4 +1,5 @@
 import std/strformat
+import std/strutils
 import std/tables
 import std/hashes
 import std/typetraits
@@ -21,6 +22,13 @@ type
     parent*: Entity
     children*: seq[Entity]
     components*: seq[Component]
+
+func getModelTransform*(entity: Entity): Mat4 =
+  result = Unit4
+  var currentEntity = entity
+  while currentEntity != nil:
+    result = currentEntity.transform * result
+    currentEntity = currentEntity.parent
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
@@ -67,6 +75,24 @@ method `$`*(entity: Entity): string {.base.} = entity.name
 method `$`*(component: Component): string {.base.} =
   "Unknown Component"
 
+proc prettyRecursive*(entity: Entity): seq[string] =
+  var compList: seq[string]
+  for comp in entity.components:
+    compList.add $comp
+
+  var trans = entity.transform.col(3)
+  var pos = entity.getModelTransform().col(3)
+  result.add "- " & $entity & " [" & $trans.x & ", " & $trans.y & ", " & $trans.z & "] ->  [" & $pos.x & ", " & $pos.y & ", " & $pos.z & "]"
+  if compList.len > 0:
+    result.add "  [" & compList.join(", ") & "]"
+
+  for child in entity.children:
+    for childLine in child.prettyRecursive:
+      result.add "  " & childLine
+
+proc pretty*(entity: Entity): string =
+  entity.prettyRecursive.join("\n")
+
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
   entity.children.add child
@@ -108,13 +134,6 @@ proc newEntity*(name: string, firstComponent: Component, components: varargs[Com
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
   result.transform = Unit4
-
-func getModelTransform*(entity: Entity): Mat4 =
-  result = Unit4
-  var currentEntity = entity
-  while currentEntity != nil:
-    result = currentEntity.transform * result
-    currentEntity = currentEntity.parent
 
 iterator allComponentsOfType*[T: Component](root: Entity): var T =
   var queue = @[root]
