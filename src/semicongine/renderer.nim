@@ -15,7 +15,7 @@ import ./vulkan/swapchain
 import ./vulkan/descriptor
 import ./vulkan/image
 
-import ./entity
+import ./scene
 import ./mesh
 
 type

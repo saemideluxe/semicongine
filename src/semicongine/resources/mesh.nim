@@ -6,7 +6,7 @@ import std/sequtils
 import std/strformat
 import std/streams
 
-import ../entity
+import ../scene
 import ../mesh
 import ../core
 
@@ -201,7 +201,6 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): M
     result.addPrimitive(root, primitive, mainBuffer)
 
   # gld uses +y up, but we (vulkan) don't 
-  transform[Vec3f](result, "position", scale3d(1'f32, -1'f32, 1'f32))
 
 proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entity =
   var name = "<Unknown>"
@@ -250,7 +249,9 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entit
 proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): Scene =
   var rootEntity = newEntity("<root>")
   for nodeId in scenenode["nodes"]:
-    rootEntity.add loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
+    let node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
+    node.transform = node.transform * scale3d(1'f32, -1'f32, 1'f32)
+    rootEntity.add node
 
   newScene(scenenode["name"].getStr(), rootEntity)
 
@@ -402,13 +403,11 @@ proc readglTF*(stream: Stream): seq[Scene] =
     if emissiveFactor.len > 0: scene.addShaderGlobalArray("material_emissive_factor", emissiveFactor)
 
     # texture
-    #[
-    if colorTexture.len > 0: scene.addShaderGlobalArray("material_color_texture", colorTexture)
-    if metallicRoughnessTexture.len > 0: scene.addShaderGlobalArray("material_metallic_roughness_texture", metallicRoughnessTexture)
-    if normalTexture.len > 0: scene.addShaderGlobalArray("material_normal_texture", normalTexture)
-    if occlusionTexture.len > 0: scene.addShaderGlobalArray("material_occlusion_texture", occlusionTexture)
-    if emissiveTexture.len > 0: scene.addShaderGlobalArray("material_emissive_texture", emissiveTexture)
-    ]#
+    if colorTexture.len > 0: scene.addTextures("material_color_texture", colorTexture)
+    if metallicRoughnessTexture.len > 0: scene.addTextures("material_metallic_roughness_texture", metallicRoughnessTexture)
+    if normalTexture.len > 0: scene.addTextures("material_normal_texture", normalTexture)
+    if occlusionTexture.len > 0: scene.addTextures("material_occlusion_texture", occlusionTexture)
+    if emissiveTexture.len > 0: scene.addTextures("material_emissive_texture", emissiveTexture)
 
     result.add scene
 

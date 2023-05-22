@@ -3,7 +3,7 @@ export core
 
 import semicongine/audio
 import semicongine/engine
-import semicongine/entity
+import semicongine/scene
 import semicongine/events
 import semicongine/mesh
 import semicongine/renderer
@@ -14,7 +14,7 @@ import semicongine/vulkan
 
 export audio
 export engine
-export entity
+export scene
 export events
 export mesh
 export renderer
