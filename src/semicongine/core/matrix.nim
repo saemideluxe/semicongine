@@ -378,19 +378,19 @@ makeRandomInit(TMat34)
 makeRandomInit(TMat43)
 makeRandomInit(TMat4)
 
-func perspective*[T: SomeFloat](fovy, aspect, zNear, zFar: T): TMat4[T] =
-  let tanHalfFovy = tan(fovy / T(2))
-  return TMat4[T](data:[
-    T(1) / (aspect * tanHalfFovy), T(0),               T(0),                     T(0),
-    T(0),                          T(1) / tanHalfFovy, T(0),                     T(0),
-    T(0),                          T(0),               T(zFar / (zFar - zNear)), T(-(zFar * zNear) / (zFar - zNear)),
-    T(0),                          T(0),               T(1),                     T(1),
+func perspective*(fovy, aspect, zNear, zFar: float32): Mat4 =
+  let tanHalfFovy = tan(fovy / 2)
+  return Mat4(data:[
+    1 / (aspect * tanHalfFovy), 0,               0,                     0,
+    0,                          1 / tanHalfFovy, 0,                     0,
+    0,                          0,               zFar / (zFar - zNear), -(zFar * zNear) / (zFar - zNear),
+    0,                          0,               1,                     1,
   ])
 
-func ortho*[T: SomeFloat](left, right, top, bottom, zNear, zFar: T): TMat4[T] =
-  TMat4[T](data:[
-    T(2) / (right - left), T(0),                  T(0),                  -(right + left) / (right - left),
-    T(0),                  T(2) / (bottom - top), T(0),                  -(bottom + top) / (bottom - top),
-    T(0),                  T(0),                  T(1) / (zFar - zNear), -zNear / (zFar - zNear),
-    T(0),                  T(0),                  T(1),                   T(1),
+func ortho*(left, right, top, bottom, zNear, zFar: float32): Mat4 =
+  Mat4(data:[
+    2 / (right - left), 0,                  0,                  -(right + left) / (right - left),
+    0,                  2 / (bottom - top), 0,                  -(bottom + top) / (bottom - top),
+    0,                  0,                  1 / (zFar - zNear), -zNear / (zFar - zNear),
+    0,                  0,                  1,                   1,
   ])
