@@ -16,7 +16,6 @@ task build, "build":
   switch("mm", "orc")
   switch("experimental", "strictEffects")
   switch("threads", "on")
-  switch("d", "useLibzipSrc")
   var buildType = DEBUG
   var platformDir = ""
   if defined(linux):
@@ -71,13 +70,13 @@ task clean, "remove all build files":
 
 task publish, "publish all build":
   for file in listDirs("build/debug/linux"):
-    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/linux/")
-  for file in listFiles("build/release/linux"):
-    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/linux/")
-  for file in listFiles("build/debug/windows"):
-    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/windows/")
-  for file in listFiles("build/release/windows"):
-    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/windows/")
+    exec(&"scp -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/linux/")
+  for file in listDirs("build/release/linux"):
+    exec(&"scp -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/linux/")
+  for file in listDirs("build/debug/windows"):
+    exec(&"scp -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/windows/")
+  for file in listDirs("build/release/windows"):
+    exec(&"scp -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/windows/")
 
 task glslangValidator, "Download glslangValidator (required for linux compilation)":
   let dirname = "/tmp/glslang_download"
