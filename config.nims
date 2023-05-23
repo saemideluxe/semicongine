@@ -70,14 +70,14 @@ task clean, "remove all build files":
   exec(&"rm -rf {BUILDBASE}")
 
 task publish, "publish all build":
-  for file in listFiles("build/debug/linux"):
-    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/linux/")
+  for file in listDirs("build/debug/linux"):
+    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/linux/")
   for file in listFiles("build/release/linux"):
-    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/linux/")
+    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/linux/")
   for file in listFiles("build/debug/windows"):
-    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/windows/")
+    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/windows/")
   for file in listFiles("build/release/windows"):
-    exec(&"scp {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/windows/")
+    exec(&"rsync -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/release/windows/")
 
 task glslangValidator, "Download glslangValidator (required for linux compilation)":
   let dirname = "/tmp/glslang_download"
