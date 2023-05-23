@@ -29,6 +29,7 @@ type
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
     entityTransformationCache: Table[Mesh, Mat4] # remembers last transformation, avoid to send GPU-updates if no changes
+    descriptorPool*: DescriptorPool
     descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
   Renderer* = object
     device: Device
@@ -51,7 +52,7 @@ proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
     raise newException(Exception, "Unable to create swapchain")
   result.swapchain = swapchain.get()
 
-proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], transformAttribute="") =
+proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="") =
   assert not (scene in renderer.scenedata)
   const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
   var data = SceneData()
@@ -180,7 +181,17 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         data.textures[name] = @[]
         for texture in textures:
           data.textures[name].add renderer.device.uploadTexture(texture)
-      data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
+          
+      var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32(renderer.swapchain.inFlightFrames))]
+      if samplers.len > 0:
+        var samplercount = 0'u32
+        for sampler in samplers:
+          samplercount += (if sampler.arrayCount == 0: 1'u32 else: sampler.arrayCount)
+        poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, uint32(renderer.swapchain.inFlightFrames) * samplercount)
+    
+      data.descriptorPool = renderer.device.createDescriptorSetPool(poolsizes)
+  
+      data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(data.descriptorPool, data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         data.descriptorSets[pipeline.vk][frame_i].writeDescriptorSet()
 
@@ -295,5 +306,6 @@ proc destroy*(renderer: var Renderer) =
     for textures in data.textures.mvalues:
       for texture in textures.mitems:
         texture.destroy()
+    data.descriptorPool.destroy()
   renderer.renderPass.destroy()
   renderer.swapchain.destroy()
