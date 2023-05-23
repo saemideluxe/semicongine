@@ -83,7 +83,7 @@ when isMainModule:
       winsize = myengine.getWindow().size
       height = float32(winsize[1]) / float32(winsize[0])
       width = 1'f
-      setShaderGlobal(level, "projection", ortho[float32](0'f, width, 0'f, height, 0'f, 1'f))
+      setShaderGlobal(level, "projection", ortho(0, width, 0, height, 0, 1))
     var player = level.root.firstWithName("player")
     if myengine.keyIsDown(Down) and (player.transform.col(3).y + barSize/2) < height:
       player.transform = player.transform * translate3d(0'f, 1'f * dt, 0'f)
