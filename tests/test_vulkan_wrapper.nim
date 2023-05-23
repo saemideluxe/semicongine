@@ -118,16 +118,19 @@ proc main() =
     newScene("primitives", scene_primitives()),
     newScene("flag", scene_flag()),
   ]
+  var sampler = DefaultSampler()
+  sampler.magnification = VK_FILTER_NEAREST
+  sampler.minification = VK_FILTER_NEAREST
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
     let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
-    scene.addTexture("my_little_texture", Image(width: 5, height: 5, imagedata: @[
+    scene.addTexture("my_little_texture", Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
       R, R, W, R, R,
       R, W, W, W, R,
       R, R, W, R, R,
       R, R, R, R, R,
-    ]), VK_FILTER_NEAREST)
+    ]), sampler: sampler))
     engine.addScene(scene, vertexInput)
 
   # MAINLOOP
