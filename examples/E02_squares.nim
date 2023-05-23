@@ -82,7 +82,7 @@ gl_Position = vec4(position, 1.0);
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
 
   var scene = newScene("scene", newEntity("scene", newEntity("squares", squaremesh)))
-  myengine.addScene(scene, vertexInput)
+  myengine.addScene(scene, vertexInput, @[])
   scene.addShaderGlobal("time", 0.0'f32)
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
     setShaderGlobal(scene, "time", getShaderGlobal[float32](scene, "time") + 0.0005'f)

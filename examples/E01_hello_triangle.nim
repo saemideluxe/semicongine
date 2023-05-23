@@ -36,7 +36,7 @@ var
   renderPass = myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
 
 myengine.setRenderer(renderPass)
-myengine.addScene(triangle, vertexInput)
+myengine.addScene(triangle, vertexInput, @[])
 
 while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
   myengine.renderScene(triangle)

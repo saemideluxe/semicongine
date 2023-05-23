@@ -14,8 +14,10 @@ proc main() =
       WT, WT, WT, WT, WT, WT, WT,
       RT, RT, RT, RT, RT, RT, RT,
     ])
+  let
     # image from file
     t2 = loadImage("flag.png")
+
   var sampler = DefaultSampler()
   sampler.magnification = VK_FILTER_NEAREST
   sampler.minification = VK_FILTER_NEAREST
@@ -23,6 +25,7 @@ proc main() =
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
   var engine = initEngine("Test materials")
+
   const
     vertexInput = @[
       attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
@@ -52,7 +55,7 @@ color = texture(my_texture[0], uvout) * (1 - d) + texture(my_texture[1], uvout) 
 """
     )
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  engine.addScene(scene, vertexInput)
+  engine.addScene(scene, vertexInput, samplers)
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     var d = float32(cpuTime() - t)
