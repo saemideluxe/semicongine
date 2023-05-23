@@ -105,6 +105,7 @@ proc readBMP*(stream: Stream): Image =
 {.compile: "thirdparty/LodePNG/lodepng.c".}
 
 proc lodepng_decode32(out_data: ptr cstring, w: ptr cuint, h: ptr cuint, in_data: cstring, insize: csize_t): cuint {.importc.}
+proc free(p: pointer) {.importc.} # for some reason the lodepng pointer can only properly be freed with the native free
 
 proc readPNG*(stream: Stream): Image =
   let indata = stream.readAll()
@@ -117,6 +118,7 @@ proc readPNG*(stream: Stream): Image =
   let imagesize = w * h * 4
   var imagedata = newSeq[Pixel](w * h)
   copyMem(addr imagedata[0], data,imagesize)
-  dealloc(data)
+
+  free(data)
 
   result = newImage(width=w, height=h, imagedata=imagedata)

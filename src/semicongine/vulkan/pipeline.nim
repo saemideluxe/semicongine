@@ -15,7 +15,6 @@ type
     layout*: VkPipelineLayout
     shaders*: seq[Shader]
     descriptorSetLayout*: DescriptorSetLayout
-    descriptorPool*: DescriptorPool
 
 func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
   for shader in pipeline.shaders:
@@ -32,11 +31,11 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
         result.add attribute
         visitedUniforms[attribute.name] = attribute
 
-proc setupDescriptors*(pipeline: var Pipeline, buffers: seq[Buffer], textures: Table[string, seq[VulkanTexture]], inFlightFrames: int): seq[DescriptorSet] =
+proc setupDescriptors*(pipeline: var Pipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: Table[string, seq[VulkanTexture]], inFlightFrames: int): seq[DescriptorSet] =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 
-  result = pipeline.descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
+  result = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
   
   for i in 0 ..< inFlightFrames:
     var offset = 0'u64
@@ -193,11 +192,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
     nil,
     addr(result.vk)
   )
-  var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32(inFlightFrames))]
-  if vertexShader.samplers.len > 0:
-    poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, uint32(inFlightFrames * vertexShader.samplers.len))
 
-  result.descriptorPool = result.device.createDescriptorSetPool(poolsizes)
   discard result.uniforms # just for assertion
 
 
@@ -206,9 +201,6 @@ proc destroy*(pipeline: var Pipeline) =
   assert pipeline.vk.valid
   assert pipeline.layout.valid
   assert pipeline.descriptorSetLayout.vk.valid
-
-  if pipeline.descriptorPool.vk.valid:
-    pipeline.descriptorPool.destroy()
 
   for shader in pipeline.shaders.mitems:
     shader.destroy()
