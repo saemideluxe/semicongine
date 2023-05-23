@@ -131,7 +131,7 @@ proc main() =
       R, R, W, R, R,
       R, R, R, R, R,
     ]), sampler: sampler))
-    engine.addScene(scene, vertexInput)
+    engine.addScene(scene, vertexInput, samplers)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"

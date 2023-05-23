@@ -82,7 +82,7 @@ when isMainModule:
   cube.addShaderGlobal("projection", Unit4f32)
   cube.addShaderGlobal("view", Unit4f32)
   cube.addShaderGlobal("model", Unit4f32)
-  myengine.addScene(cube, vertexInput)
+  myengine.addScene(cube, vertexInput, @[])
 
   var t: float32 = cpuTime()
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):

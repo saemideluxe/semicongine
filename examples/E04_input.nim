@@ -172,7 +172,7 @@ when isMainModule:
 
   # set up rendering
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0.5)))
-  myengine.addScene(scene, vertexInput, transformAttribute="transform")
+  myengine.addScene(scene, vertexInput, @[], transformAttribute="transform")
   scene.addShaderGlobal("projection", Unit4f32)
 
   # mainloop
