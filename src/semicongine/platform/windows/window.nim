@@ -58,7 +58,6 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
     currentEvents.add(Event(eventType: events.MouseMoved, x: GET_X_LPARAM(lParam), y: GET_Y_LPARAM(lParam)))
   of WM_MOUSEWHEEL:
     currentEvents.add(Event(eventType: events.MouseWheel, amount: float32(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA))
-    echo GET_WHEEL_DELTA_WPARAM(wParam)
   else:
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 

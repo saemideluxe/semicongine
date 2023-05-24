@@ -1,6 +1,7 @@
 import std/options
 import std/tables
 import std/strformat
+import std/logging
 
 import
   x11/xlib,
@@ -30,7 +31,7 @@ template checkXlibResult*(call: untyped) =
         " returned " & $value)
 
 proc XErrorLogger(display: PDisplay, event: PXErrorEvent): cint {.cdecl.} =
-  echo &"Xlib: {event[]}"
+  error &"Xlib: {event[]}"
 
 proc createWindow*(title: string): NativeWindow =
   checkXlibResult XInitThreads()
