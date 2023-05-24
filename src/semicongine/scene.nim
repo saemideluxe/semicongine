@@ -154,6 +154,9 @@ func firstWithName*(root: Entity, name: string): Entity =
         return child
       queue.add child
 
+func `[]`*(scene: Scene, name: string): Entity =
+  return scene.root.firstWithName(name)
+
 func firstComponentWithName*[T: Component](root: Entity, name: string): T =
   var queue = @[root]
   while queue.len > 0:

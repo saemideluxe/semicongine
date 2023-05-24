@@ -88,7 +88,7 @@ proc fullscreen*(window: var NativeWindow, enable: bool) =
     window: window.window,
     data: XClientMessageData(
       l: [
-        int(enable) xor 1,
+        int(not enable) xor 1,
         clong(wm_fullscreen),
         0,
         0,

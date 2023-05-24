@@ -10,8 +10,11 @@ import std/os
 import ./core
 
 when CONFIGHOTRELOAD:
-  var configUpdates: Channel[(string, Config)]
+  var
+    configUpdates: Channel[(string, Config)]
+    notifyConfigUpdate: Channel[bool]
   configUpdates.open()
+  notifyConfigUpdate.open()
 
 # runtime configuration
 # =====================
@@ -65,13 +68,19 @@ proc setting*[T: int|float|string](key, section, namespace: string): T =
 
 proc setting*[T: int|float|string](identifier: string): T =
   # identifier can be in the form:
-  # {key}
-  # {section}.{key}
+  # {namespace}.{key}
   # {namespace}.{section}.{key}
   let parts = identifier.rsplit(".")
-  if parts.len == 1: result = setting[T](parts[0], "")
-  elif parts.len == 2: result = setting[T](parts[1], parts[0])
+  if parts.len == 1:
+    raise newException(Exception, &"Setting with name {identifier} has no namespace")
+  if parts.len == 2: result = setting[T](parts[1], "", parts[0])
   else: result = setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]))
+
+proc hadConfigUpdate*(): bool =
+  result = false
+  while notifyConfigUpdate.peek() > 0:
+    result = true
+
 
 allsettings = loadAllConfig()
 
@@ -87,6 +96,7 @@ when CONFIGHOTRELOAD == true:
         let lastMod = namespace.getFile().getLastModificationTime()
         if lastMod != configModTimes[namespace]:
           configUpdates.send((namespace, namespace.getFile().loadConfig()))
+          notifyConfigUpdate.send(true)
       sleep CONFIGHOTRELOADINTERVAL
   var thethread: Thread[void]
   createThread(thethread, configFileWatchdog)
