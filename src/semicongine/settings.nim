@@ -1,4 +1,5 @@
 import std/logging
+import std/streams
 import std/parsecfg
 import std/strutils
 import std/sequtils
@@ -11,7 +12,7 @@ import ./core
 
 when CONFIGHOTRELOAD:
   var
-    configUpdates: Channel[(string, Config)]
+    configUpdates: Channel[(string, string)]
     notifyConfigUpdate: Channel[bool]
   configUpdates.open()
   notifyConfigUpdate.open()
@@ -49,7 +50,7 @@ proc configStr(key, section, namespace: string): string =
   when CONFIGHOTRELOAD:
     while configUpdates.peek() > 0:
       let (updatedNamespace, updatedConfig) = configUpdates.recv()
-      allsettings[updatedNamespace] = updatedConfig
+      allsettings[updatedNamespace] = loadConfig(newStringStream(updatedConfig))
   if not allsettings.hasKey(namespace):
     raise newException(Exception, &"Namespace {namespace} not found, available namespaces are {allsettings.keys().toSeq}")
   allsettings[namespace].getSectionValue(section, key)
@@ -95,7 +96,8 @@ when CONFIGHOTRELOAD == true:
           configModTimes[namespace] = Time()
         let lastMod = namespace.getFile().getLastModificationTime()
         if lastMod != configModTimes[namespace]:
-          configUpdates.send((namespace, namespace.getFile().loadConfig()))
+          let configStr = newFileStream(namespace.getFile()).readAll()
+          configUpdates.send((namespace, configStr))
           notifyConfigUpdate.send(true)
       sleep CONFIGHOTRELOADINTERVAL
   var thethread: Thread[void]
