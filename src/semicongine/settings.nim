@@ -79,8 +79,9 @@ proc setting*[T: int|float|string](identifier: string): T =
 
 proc hadConfigUpdate*(): bool =
   result = false
-  while notifyConfigUpdate.peek() > 0:
-    result = true
+  when CONFIGHOTRELOAD == true:
+    while notifyConfigUpdate.peek() > 0:
+      result = true
 
 
 allsettings = loadAllConfig()
