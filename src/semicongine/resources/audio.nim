@@ -58,6 +58,3 @@ proc readAU*(stream: Stream): Sound =
   stream.setPosition(int(header.dataOffset))
   while not stream.atEnd():
     result[].add stream.readSample(header.encoding, int(header.channels))
-
-var a = 2'u32
-echo a
