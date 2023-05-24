@@ -334,30 +334,30 @@ func rotate2d*[T](angle: T): TMat3[T] = TMat3[T](data: [
   sin(angle), cos(angle), T(0),
   T(0), T(0), T(1),
 ])
-func translate3d*[T](x, y, z: T): TMat4[T] = TMat4[T](data: [
-  T(1), T(0), T(0), x,
-  T(0), T(1), T(0), y,
-  T(0), T(0), T(1), z,
-  T(0), T(0), T(0), T(1),
+func translate3d*(x=0'f32, y=0'f32, z=0'f32): TMat4[float32] = Mat4(data: [
+  1'f32, 0'f32, 0'f32, x,
+  0'f32, 1'f32, 0'f32, y,
+  0'f32, 0'f32, 1'f32, z,
+  0'f32, 0'f32, 0'f32, 1'f32,
 ])
-func scale3d*[T](sx, sy, sz: T): TMat4[T] = TMat4[T](data: [
-  sx, T(0), T(0), T(0),
-  T(0), sy, T(0), T(0),
-  T(0), T(0), sz, T(0),
-  T(0), T(0),  T(0), T(1),
+func scale3d*(x=1'f32, y=1'f32, z=1'f32): Mat4 = Mat4(data: [
+  x,     0'f32, 0'f32, 0'f32,
+  0'f32, y,     0'f32, 0'f32,
+  0'f32, 0'f32, z,     0'f32,
+  0'f32, 0'f32, 0'f32, 1'f32,
 ])
-func rotate3d*[T](angle: T, a: TVec3[T]): TMat4[T] =
+func rotate3d*(angle: float32, a: Vec3f): Mat4 =
   let
     cosa = cos(angle)
     sina = sin(angle)
     x = a[0]
     y = a[1]
     z = a[2]
-  TMat4[T](data: [
-    x * x * (1 - cosa) + cosa,     y * x * (1 - cosa) - z * sina, z * x * (1 - cosa) + y * sina, T(0),
-    x * y * (1 - cosa) + z * sina, y * y * (1 - cosa) + cosa,     z * y * (1 - cosa) - x * sina, T(0),
-    x * z * (1 - cosa) - y * sina, y * z * (1 - cosa) + x * sina, z * z * (1 - cosa) + cosa,     T(0),
-    T(0),                          T(0),                          T(0),                          T(1),
+  Mat4(data: [
+    x * x * (1 - cosa) + cosa,     y * x * (1 - cosa) - z * sina, z * x * (1 - cosa) + y * sina, 0'f32,
+    x * y * (1 - cosa) + z * sina, y * y * (1 - cosa) + cosa,     z * y * (1 - cosa) - x * sina, 0'f32,
+    x * z * (1 - cosa) - y * sina, y * z * (1 - cosa) + x * sina, z * z * (1 - cosa) + cosa,     0'f32,
+    0'f32,                         0'f32,                         0'f32,                         1'f32,
   ])
 
 

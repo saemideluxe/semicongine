@@ -210,7 +210,7 @@ proc transform*[T: GPUType](mesh: var Mesh, attribute: string, transform: Mat4) 
   assert attribute in mesh.data
   for v in getValues[T](mesh.data[attribute])[].mitems:
     when T is Vec3f:
-      v = (transform * newVec4f(v.x, v.y, v.z)).xyz
+      v = (transform * newVec4f(v.x, v.y, v.z, 1'f32)).xyz
     else:
       v = transform * v
 

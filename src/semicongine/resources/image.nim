@@ -1,3 +1,4 @@
+import os
 import std/streams
 import std/bitops
 
@@ -102,7 +103,7 @@ proc readBMP*(stream: Stream): Image =
 
   result = newImage(width=uint32(dibHeader.width), height=uint32(abs(dibHeader.height)), imagedata=data)
 
-{.compile: "thirdparty/LodePNG/lodepng.c".}
+{.compile: currentSourcePath.parentDir() & "/lodepng.c" .}
 
 proc lodepng_decode32(out_data: ptr cstring, w: ptr cuint, h: ptr cuint, in_data: cstring, insize: csize_t): cuint {.importc.}
 proc free(p: pointer) {.importc.} # for some reason the lodepng pointer can only properly be freed with the native free
