@@ -1,5 +1,6 @@
 import std/streams
 import std/strutils
+import std/strformat
 import std/os
 
 import ./core
@@ -32,6 +33,8 @@ when thebundletype == Dir:
     joinPath(resourceRoot(), selectedMod)
 
   proc loadResource_intern(path: string): Stream =
+    if not path.fileExists():
+      raise newException(Exception, &"Resource {path} not found")
     newFileStream(joinPath(modRoot(), path), fmRead)
 
   proc modList_intern(): seq[string] =
@@ -53,6 +56,8 @@ elif thebundletype == Zip:
     joinPath(resourceRoot(), selectedMod)
 
   proc loadResource_intern(path: string): Stream =
+    if not path.fileExists():
+      raise newException(Exception, &"Resource {path} not found")
     let archive = openZipArchive(modRoot() & ".zip")
     # read all here so we can close the stream
     result = newStringStream(archive.extractFile(path))
@@ -89,7 +94,8 @@ elif thebundletype == Exe:
   const bundledResources = loadResources()
 
   proc loadResource_intern(path: string): Stream =
-    # TODO: add Lempel–Ziv–Welch compression or something similar simple
+    if not (path in bundledResources[selectedMod]):
+      raise newException(Exception, &"Resource {path} not found")
     newStringStream(bundledResources[selectedMod][path])
 
   proc modList_intern(): seq[string] =

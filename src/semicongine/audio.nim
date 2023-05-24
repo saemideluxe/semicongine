@@ -9,6 +9,7 @@ when defined(linux):
 
 import ./core
 import ./platform/audio
+import ./resources
 
 export audiotypes
 
@@ -35,9 +36,6 @@ type
     buffers: seq[SoundData]
     currentBuffer: int
 
-proc loadSoundResource(resourcePath: string): Sound =
-  assert false, "Not implemented yet"
-
 proc initMixer*(): Mixer =
   result = Mixer(
     tracks: {"": Track(level: 1'f)}.toTable,
@@ -56,7 +54,7 @@ proc setupDevice(mixer: var Mixer) =
 
 proc loadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
-  mixer.sounds[name] = loadSoundResource(resource)
+  mixer.sounds[name] = loadAudio(resource)
 
 proc addSound*(mixer: var Mixer, name: string, sound: Sound) =
   assert not (name in mixer.sounds)
@@ -66,10 +64,10 @@ proc replaceSound*(mixer: var Mixer, name: string, sound: Sound) =
   assert (name in mixer.sounds)
   mixer.sounds[name] = sound
 
-proc addTrack*(mixer: var Mixer, name: string) =
+proc addTrack*(mixer: var Mixer, name: string, level=1'f) =
   assert not (name in mixer.tracks)
   mixer.lock.withLock():
-    mixer.tracks[name] = Track(level: 1'f)
+    mixer.tracks[name] = Track(level: level)
 
 proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false, loop=false, levelLeft, levelRight: Level): uint64 =
   assert track in mixer.tracks
