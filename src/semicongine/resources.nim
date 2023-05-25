@@ -7,6 +7,7 @@ import ./core
 import ./resources/image
 import ./resources/audio
 import ./resources/mesh
+import ./resources/font
 
 from ./scene import Entity, Scene
 
@@ -118,7 +119,15 @@ proc loadImage*(path: string): Image =
     raise newException(Exception, "Unsupported image file type: " & path)
 
 proc loadAudio*(path: string): Sound =
-  loadResource_intern(path).readAU()
+  if path.splitFile().ext.toLowerAscii == ".au":
+    loadResource_intern(path).readAU()
+  elif path.splitFile().ext.toLowerAscii == ".ogg":
+    loadResource_intern(path).readVorbis()
+  else:
+    raise newException(Exception, "Unsupported audio file type: " & path)
+
+proc loadFont*(path: string): Font =
+  loadResource_intern(path).readTrueType()
 
 proc loadMesh*(path: string): Entity =
   loadResource_intern(path).readglTF()[0].root
