@@ -118,7 +118,7 @@ proc readPNG*(stream: Stream): Image =
 
   let imagesize = w * h * 4
   var imagedata = newSeq[Pixel](w * h)
-  copyMem(addr imagedata[0], data,imagesize)
+  copyMem(addr imagedata[0], data, imagesize)
 
   free(data)
 

@@ -1,4 +1,6 @@
+import std/os
 import std/streams
+import std/strformat
 import std/endians
 
 import ../core/audiotypes
@@ -47,7 +49,7 @@ proc readAU*(stream: Stream): Sound =
 
   assert header.magicNumber == 0x2e736e64
   if header.sampleRate != AUDIO_SAMPLE_RATE:
-    raise newException(Exception, "Only support sample rate of 48000 Hz but got " & $header.sampleRate & " Hz, please resample (e.g. ffmpeg -i {infile} -ar 48000 {outfile})")
+    raise newException(Exception, &"Only support sample rate of {AUDIO_SAMPLE_RATE} Hz but got {header.sampleRate} Hz, please resample (e.g. ffmpeg -i <infile> -ar {AUDIO_SAMPLE_RATE} <outfile>)")
   if not (header.channels in [1'u32, 2'u32]):
     raise newException(Exception, "Only support mono and stereo audio at the moment (1 or 2 channels), but found " & $header.channels)
 
@@ -58,3 +60,29 @@ proc readAU*(stream: Stream): Sound =
   stream.setPosition(int(header.dataOffset))
   while not stream.atEnd():
     result[].add stream.readSample(header.encoding, int(header.channels))
+
+{.compile: currentSourcePath.parentDir() & "/stb_vorbis.c" .}
+
+proc stb_vorbis_decode_memory(mem: pointer, len: cint, channels: ptr cint, sample_rate: ptr cint, output: ptr ptr cshort): cint {.importc.}
+proc free(p: pointer) {.importc.}
+
+proc readVorbis*(stream: Stream): Sound =
+  var
+    data = stream.readAll()
+    channels: cint
+    sampleRate: cint
+    output: ptr cshort
+
+  var nSamples = stb_vorbis_decode_memory(addr data[0], cint(data.len), addr channels, addr sampleRate, addr output)
+
+  if nSamples < 0:
+    raise newException(Exception, &"Unable to read ogg/vorbis sound file, error code: {nSamples}")
+  if sampleRate != AUDIO_SAMPLE_RATE:
+    raise newException(Exception, &"Only support sample rate of {AUDIO_SAMPLE_RATE} Hz but got {sampleRate} Hz, please resample (e.g. ffmpeg -i <infile> -acodec libvorbis -ar {AUDIO_SAMPLE_RATE} <outfile>)")
+  if channels != 2:
+    raise newException(Exception, &"Currently only support 2 channels, but ogg/ vorbis file had {channels}")
+
+  result = new Sound
+  result[].setLen(int(nSamples))
+  copyMem(addr result[][0], output, nSamples * sizeof(Sample))
+  free(output)
