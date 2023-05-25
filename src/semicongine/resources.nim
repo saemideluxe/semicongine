@@ -33,9 +33,10 @@ when thebundletype == Dir:
     joinPath(resourceRoot(), selectedMod)
 
   proc loadResource_intern(path: string): Stream =
-    if not path.fileExists():
+    let realpath = joinPath(modRoot(), path)
+    if not realpath.fileExists():
       raise newException(Exception, &"Resource {path} not found")
-    newFileStream(joinPath(modRoot(), path), fmRead)
+    newFileStream(realpath, fmRead)
 
   proc modList_intern(): seq[string] =
     for kind, file in walkDir(resourceRoot(), relative=true):
