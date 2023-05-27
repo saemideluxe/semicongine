@@ -135,6 +135,15 @@ proc newEntity*(name: string, firstComponent: Component, components: varargs[Com
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
   result.transform = Unit4
 
+iterator allEntitiesOfType*[T: Entity](root: Entity): T =
+  var queue = @[root]
+  while queue.len > 0:
+    let entity = queue.pop
+    if entity of T:
+      yield T(entity)
+    for i in countdown(entity.children.len - 1, 0):
+      queue.add entity.children[i]
+
 iterator allComponentsOfType*[T: Component](root: Entity): var T =
   var queue = @[root]
   while queue.len > 0:

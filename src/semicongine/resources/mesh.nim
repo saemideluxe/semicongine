@@ -1,4 +1,5 @@
 import std/strutils
+import std/options
 import std/json
 import std/logging
 import std/tables
@@ -12,7 +13,6 @@ import ../core
 
 import ./image
 
-
 type
   glTFHeader = object
     magic: uint32
@@ -23,17 +23,17 @@ type
     binaryBufferData: seq[uint8]
   glTFMaterial = object
     color: Vec4f
-    colorTexture: Texture
+    colorTexture: Option[Texture]
     colorTextureIndex: uint32
     metallic: float32
     roughness: float32
-    metallicRoughnessTexture: Texture
+    metallicRoughnessTexture: Option[Texture]
     metallicRoughnessTextureIndex: uint32
-    normalTexture: Texture
+    normalTexture: Option[Texture]
     normalTextureIndex: uint32
-    occlusionTexture: Texture
+    occlusionTexture: Option[Texture]
     occlusionTextureIndex: uint32
-    emissiveTexture: Texture
+    emissiveTexture: Option[Texture]
     emissiveTextureIndex: uint32
     emissiveFactor: Vec3f
 
@@ -272,7 +272,6 @@ proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: var seq[uint8]): Ima
     raise newException(Exception, "Unsupported feature: Load image of type " & imageType)
 
 proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: var seq[uint8]): Texture =
-  result = new Texture
   let textureNode = root["textures"][textureIndex]
   result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
   result.sampler = DefaultSampler()
@@ -298,10 +297,10 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: var seq[ui
     result.color[2] = pbr["baseColorFactor"][2].getFloat()
     result.color[3] = pbr["baseColorFactor"][3].getFloat()
   if pbr.hasKey("baseColorTexture"):
-    result.colorTexture = loadTexture(root, pbr["baseColorTexture"]["index"].getInt(), mainBuffer)
+    result.colorTexture = some(loadTexture(root, pbr["baseColorTexture"]["index"].getInt(), mainBuffer))
     result.colorTextureIndex = pbr["baseColorTexture"].getOrDefault("texCoord").getInt(0).uint32
   if pbr.hasKey("metallicRoughnessTexture"):
-    result.metallicRoughnessTexture = loadTexture(root, pbr["metallicRoughnessTexture"]["index"].getInt(), mainBuffer)
+    result.metallicRoughnessTexture = some(loadTexture(root, pbr["metallicRoughnessTexture"]["index"].getInt(), mainBuffer))
     result.metallicRoughnessTextureIndex = pbr["metallicRoughnessTexture"].getOrDefault("texCoord").getInt().uint32
   if pbr.hasKey("metallicFactor"):
     result.metallic = pbr["metallicFactor"].getFloat()
@@ -309,13 +308,13 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: var seq[ui
     result.roughness= pbr["roughnessFactor"].getFloat()
 
   if materialNode.hasKey("normalTexture"):
-    result.normalTexture = loadTexture(root, materialNode["normalTexture"]["index"].getInt(), mainBuffer)
+    result.normalTexture = some(loadTexture(root, materialNode["normalTexture"]["index"].getInt(), mainBuffer))
     result.metallicRoughnessTextureIndex = materialNode["normalTexture"].getOrDefault("texCoord").getInt().uint32
   if materialNode.hasKey("occlusionTexture"):
-    result.occlusionTexture = loadTexture(root, materialNode["occlusionTexture"]["index"].getInt(), mainBuffer)
+    result.occlusionTexture = some(loadTexture(root, materialNode["occlusionTexture"]["index"].getInt(), mainBuffer))
     result.occlusionTextureIndex = materialNode["occlusionTexture"].getOrDefault("texCoord").getInt().uint32
   if materialNode.hasKey("emissiveTexture"):
-    result.emissiveTexture = loadTexture(root, materialNode["emissiveTexture"]["index"].getInt(), mainBuffer)
+    result.emissiveTexture = some(loadTexture(root, materialNode["emissiveTexture"]["index"].getInt(), mainBuffer))
     result.occlusionTextureIndex = materialNode["emissiveTexture"].getOrDefault("texCoord").getInt().uint32
   if materialNode.hasKey("roughnessFactor"):
     result.roughness = materialNode["roughnessFactor"].getFloat()
@@ -372,22 +371,22 @@ proc readglTF*(stream: Stream): seq[Scene] =
     for materialNode in data.structuredContent["materials"]:
       let m = loadMaterial(data.structuredContent, materialNode, data.binaryBufferData)
       color.add m.color
-      if not m.colorTexture.isNil:
-        colorTexture.add m.colorTexture
+      if not m.colorTexture.isSome:
+        colorTexture.add m.colorTexture.get
         colorTextureIndex.add m.colorTextureIndex
       metallic.add m.metallic
       roughness.add m.roughness
-      if not m.metallicRoughnessTexture.isNil:
-        metallicRoughnessTexture.add m.metallicRoughnessTexture
+      if not m.metallicRoughnessTexture.isSome:
+        metallicRoughnessTexture.add m.metallicRoughnessTexture.get
         metallicRoughnessTextureIndex.add m.metallicRoughnessTextureIndex
-      if not m.normalTexture.isNil:
-        normalTexture.add m.normalTexture
+      if not m.normalTexture.isSome:
+        normalTexture.add m.normalTexture.get
         normalTextureIndex.add m.normalTextureIndex
-      if not m.occlusionTexture.isNil:
-        occlusionTexture.add m.occlusionTexture
+      if not m.occlusionTexture.isSome:
+        occlusionTexture.add m.occlusionTexture.get
         occlusionTextureIndex.add m.occlusionTextureIndex
-      if not m.emissiveTexture.isNil:
-        emissiveTexture.add m.emissiveTexture
+      if not m.emissiveTexture.isSome:
+        emissiveTexture.add m.emissiveTexture.get
         emissiveTextureIndex.add m.emissiveTextureIndex
       emissiveFactor.add m.emissiveFactor
 
