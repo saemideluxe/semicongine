@@ -14,10 +14,9 @@ type
     filter*: VkFilter # TODO: replace with mag/minification
 
   Image* = ref ImageObject
-  TextureObject = object
+  Texture* = object
     image*: Image
     sampler*: Sampler
-  Texture* = ref TextureObject
 
 proc DefaultSampler*(): Sampler =
   Sampler(
@@ -29,7 +28,7 @@ proc DefaultSampler*(): Sampler =
 
 proc newImage*(width, height: uint32, imagedata: seq[Pixel] = @[]): Image =
   assert width > 0 and height > 0
-  assert uint32(imagedata.len) == width * height
+  assert uint32(imagedata.len) == width * height or imagedata.len == 0
 
   result = new Image
   result.imagedata = (if imagedata.len == 0: newSeq[Pixel](width * height) else: imagedata)
@@ -37,3 +36,16 @@ proc newImage*(width, height: uint32, imagedata: seq[Pixel] = @[]): Image =
 
   result.width = width
   result.height = height
+
+proc `[]`*(image: Image, x, y: uint32): Pixel =
+  assert x < image.width
+  assert y < image.height
+
+  image[].imagedata[y * image.width + x]
+
+proc `[]=`*(image: var Image, x, y: uint32, value: Pixel) =
+  assert x < image.width
+  assert y < image.height
+
+  image[].imagedata[y * image.width + x] = value
+

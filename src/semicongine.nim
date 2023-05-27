@@ -9,6 +9,7 @@ import semicongine/mesh
 import semicongine/renderer
 import semicongine/resources
 import semicongine/settings
+import semicongine/text
 import semicongine/platform/window
 import semicongine/vulkan
 
@@ -20,5 +21,6 @@ export mesh
 export renderer
 export resources
 export settings
+export text
 export window
 export vulkan

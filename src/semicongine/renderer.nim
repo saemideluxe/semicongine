@@ -17,6 +17,7 @@ import ./vulkan/image
 
 import ./scene
 import ./mesh
+import ./text
 
 type
   SceneData = object
@@ -163,7 +164,23 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
       indexBufferOffset += size
     data.drawables[mesh] = drawable
 
-  # setup uniforms and textures
+  # extract textures
+  var sampler = DefaultSampler()
+  sampler.magnification = VK_FILTER_NEAREST
+  sampler.minification = VK_FILTER_NEAREST
+  # for mesh in allComponentsOfType[Mesh](scene.root):
+  for textbox in allEntitiesOfType[Textbox](scene.root):
+    if not (textbox.font.name in data.textures):
+      data.textures[textbox.font.name] = @[
+        renderer.device.uploadTexture(Texture(image: textbox.font.fontAtlas, sampler: sampler))
+      ]
+
+  for name, textures in scene.textures.pairs:
+    data.textures[name] = @[]
+    for texture in textures:
+      data.textures[name].add renderer.device.uploadTexture(texture)
+
+  # setup uniforms and samplers
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
     for pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.mitems:
       var uniformBufferSize = 0'u64
@@ -177,10 +194,6 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
             requireMappable=true,
             preferVRAM=true,
           )
-      for name, textures in scene.textures.pairs:
-        data.textures[name] = @[]
-        for texture in textures:
-          data.textures[name].add renderer.device.uploadTexture(texture)
           
       var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32(renderer.swapchain.inFlightFrames))]
       if samplers.len > 0:
