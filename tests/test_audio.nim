@@ -61,27 +61,20 @@ proc test2() =
     sleep(1)
 
 proc test3() =
-  var song: SoundData
-  var f = open("./tests/audiotest.PCM.s16le.48000.2")
-  var readLen = 999
-  while readLen > 0:
-    var sample: Sample
-    readLen = f.readBuffer(addr sample, sizeof(Sample))
-    song.add sample
-
-  mixer[].addSound("pianosong", newSound(song))
+  mixer[].addSound("pianosong", loadAudio("test.ogg"))
   mixer[].addSound("ping", newSound(sineSoundData(500, 0.05, 44100)))
   mixer[].addTrack("effects")
   discard mixer[].play("pianosong")
 
-  let t0 = now()
   while mixer[].isPlaying():
     discard mixer[].play("ping", track="effects", stopOtherSounds=true, level=0.5)
-    var input = stdin.readLine()
+    discard stdin.readLine()
 
 when isMainModule:
   startMixerThread()
   test1()
   mixer[].stop()
   test2()
+  mixer[].stop()
+  test3()
   mixer[].stop()
