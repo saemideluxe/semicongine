@@ -1,4 +1,5 @@
 import std/tables
+import std/sequtils
 import std/strformat
 
 import ../core
@@ -49,7 +50,7 @@ proc setupDescriptors*(pipeline: var Pipeline, descriptorPool: DescriptorPool, b
         offset += size
       elif descriptor.thetype == ImageSampler:
         if not (descriptor.name in textures):
-          raise newException(Exception, "Missing shader texture in scene: " & descriptor.name)
+          raise newException(Exception, &"Missing shader texture in scene: {descriptor.name}, available are {textures.keys.toSeq}")
         if uint32(textures[descriptor.name].len) != descriptor.count:
           raise newException(Exception, &"Incorrect number of textures in array for {descriptor.name}: has {textures[descriptor.name].len} but needs {descriptor.count}")
         for t in textures[descriptor.name]:

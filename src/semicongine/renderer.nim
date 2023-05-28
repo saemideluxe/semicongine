@@ -17,14 +17,13 @@ import ./vulkan/image
 
 import ./scene
 import ./mesh
-import ./text
 
 type
   SceneData = object
     drawables*: OrderedTable[Mesh, Drawable]
     vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
-    uniformBuffers*: seq[Buffer] # one per frame-in-flight
+    uniformBuffers*: Table[VkPipeline, seq[Buffer]] # one per frame-in-flight
     textures*: Table[string, seq[VulkanTexture]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
     attributeBindingNumber*: Table[string, int]
@@ -164,6 +163,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
       indexBufferOffset += size
     data.drawables[mesh] = drawable
 
+  #[
   # extract textures
   var sampler = DefaultSampler()
   sampler.magnification = VK_FILTER_NEAREST
@@ -174,11 +174,13 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
       data.textures[textbox.font.name] = @[
         renderer.device.uploadTexture(Texture(image: textbox.font.fontAtlas, sampler: sampler))
       ]
+  ]#
 
-  for name, textures in scene.textures.pairs:
-    data.textures[name] = @[]
-    for texture in textures:
-      data.textures[name].add renderer.device.uploadTexture(texture)
+  for material in scene.getMaterials():
+    for textureName, texture in material.textures.pairs:
+      if not data.textures.hasKey(textureName):
+        data.textures[textureName] = @[]
+      data.textures[textureName].add renderer.device.uploadTexture(texture)
 
   # setup uniforms and samplers
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
@@ -187,8 +189,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
       for uniform in pipeline.uniforms:
         uniformBufferSize += uniform.size
       if uniformBufferSize > 0:
+        data.uniformBuffers[pipeline.vk] = newSeq[Buffer]()
         for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
-          data.uniformBuffers.add renderer.device.createBuffer(
+          data.uniformBuffers[pipeline.vk].add renderer.device.createBuffer(
             size=uniformBufferSize,
             usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
             requireMappable=true,
@@ -204,7 +207,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     
       data.descriptorPool = renderer.device.createDescriptorSetPool(poolsizes)
   
-      data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(data.descriptorPool, data.uniformBuffers, data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
+      data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(data.descriptorPool, data.uniformBuffers[pipeline.vk], data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         data.descriptorSets[pipeline.vk][frame_i].writeDescriptorSet()
 
@@ -241,18 +244,19 @@ proc updateMeshData*(renderer: var Renderer, scene: Scene) =
 proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
   assert scene in renderer.scenedata
 
-  if renderer.scenedata[scene].uniformBuffers.len == 0:
-    return
-  assert renderer.scenedata[scene].uniformBuffers[renderer.swapchain.currentInFlight].vk.valid
-
   for i in 0 ..< renderer.renderPass.subpasses.len:
     for pipeline in renderer.renderPass.subpasses[i].pipelines.mitems:
-      var offset = 0'u64
-      for uniform in pipeline.uniforms:
-        assert uniform.thetype == scene.shaderGlobals[uniform.name].thetype
-        let (pdata, size) = scene.shaderGlobals[uniform.name].getRawData()
-        renderer.scenedata[scene].uniformBuffers[renderer.swapchain.currentInFlight].setData(pdata, size, offset)
-        offset += size
+      if renderer.scenedata[scene].uniformBuffers[pipeline.vk].len != 0:
+        assert renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].vk.valid
+        var offset = 0'u64
+        for uniform in pipeline.uniforms:
+          if not scene.shaderGlobals.hasKey(uniform.name):
+            raise newException(Exception, &"Uniform '{uniform.name}' not found in scene shaderGlobals")
+          if uniform.thetype != scene.shaderGlobals[uniform.name].thetype:
+            raise newException(Exception, &"Uniform '{uniform.name}' has wrong type {uniform.thetype}, required is {scene.shaderGlobals[uniform.name].thetype}")
+          let (pdata, size) = scene.shaderGlobals[uniform.name].getRawData()
+          renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].setData(pdata, size, offset)
+          offset += size
 
 proc render*(renderer: var Renderer, scene: var Scene) =
   assert scene in renderer.scenedata
@@ -313,9 +317,10 @@ proc destroy*(renderer: var Renderer) =
     if data.indexBuffer.vk.valid:
       assert data.indexBuffer.vk.valid
       data.indexBuffer.destroy()
-    for buffer in data.uniformBuffers.mitems:
-      assert buffer.vk.valid
-      buffer.destroy()
+    for pipelineUniforms in data.uniformBuffers.mvalues:
+      for buffer in pipelineUniforms.mitems:
+        assert buffer.vk.valid
+        buffer.destroy()
     for textures in data.textures.mvalues:
       for texture in textures.mitems:
         texture.destroy()

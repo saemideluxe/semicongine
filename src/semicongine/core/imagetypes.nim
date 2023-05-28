@@ -15,6 +15,7 @@ type
 
   Image* = ref ImageObject
   Texture* = object
+    name*: string
     image*: Image
     sampler*: Sampler
 
