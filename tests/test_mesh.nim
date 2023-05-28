@@ -7,11 +7,11 @@ proc main() =
   myScene.root.transform = translate3d(0.2'f32, 0'f32, 0'f32)
   myScene.root.children[0].transform = translate3d(0'f32, 0.2'f32, 0'f32)
   var scenes = [
-    loadScene("default_cube.glb", "1"),
+    # loadScene("default_cube.glb", "1"),
     # loadScene("default_cube1.glb", "3"),
     # loadScene("default_cube2.glb", "4"),
     # loadScene("flat.glb", "5"),
-    # loadScene("tutorialk-donat.glb", "6"),
+    loadScene("tutorialk-donat.glb", "6"),
     # myScene,
     # loadScene("personv3.glb", "2"),
   ]
@@ -24,15 +24,19 @@ proc main() =
       attr[Vec2f]("texcoord_0", memoryPerformanceHint=PreferFastRead),
       attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
     ]
-    vertexOutput = @[attr[Vec4f]("vertexColor"),  #[ attr[Vec2f]("colorTexCoord")]#]
+    vertexOutput = @[
+      attr[Vec4f]("vertexColor"),
+      attr[Vec2f]("colorTexCoord"),
+      attr[uint8]("materialId", noInterpolation=true)
+    ]
     fragOutput = @[attr[Vec4f]("color")]
     uniforms = @[
       attr[Mat4]("projection"),
       attr[Mat4]("view"),
-      attr[Vec4f]("material_color", arrayCount=16),
+      attr[Vec4f]("baseColorFactor", arrayCount=4),
     ]
     samplers = @[
-      # attr[Sampler2DType]("material_color_texture", arrayCount=1),
+      attr[Sampler2DType]("baseColorTexture", arrayCount=4),
     ]
     vertexCode = compileGlslShader(
       stage=VK_SHADER_STAGE_VERTEX_BIT,
@@ -42,8 +46,9 @@ proc main() =
       samplers=samplers,
       main="""
 gl_Position =  vec4(position, 1.0) * (transform * Uniforms.view * Uniforms.projection);
-vertexColor = Uniforms.material_color[material];
-// colorTexCoord = texcoord_0;
+vertexColor = Uniforms.baseColorFactor[material];
+colorTexCoord = texcoord_0;
+materialId = material;
 """
     )
     fragmentCode = compileGlslShader(
@@ -52,8 +57,10 @@ vertexColor = Uniforms.material_color[material];
       outputs=fragOutput,
       uniforms=uniforms,
       samplers=samplers,
-      # main="""color = texture(material_color_texture[0], colorTexCoord) * vertexColor;"""
-      main="""color = vertexColor;"""
+      main="""
+vec4 col[4] = vec4[4](vec4(1, 0, 0, 1), vec4(0, 1, 0, 1), vec4(0, 0, 1, 1), vec4(1, 1, 1, 1));
+color = texture(baseColorTexture[materialId], colorTexCoord) * vertexColor;
+"""
     )
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0, 1)))
   for scene in scenes.mitems:
