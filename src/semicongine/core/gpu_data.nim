@@ -806,6 +806,54 @@ func appendValues*(value: var DataList, data: DataList) =
   of Mat4F64: value.mat4f64[].add data.mat4f64[]
   else: raise newException(Exception, &"Unsupported data type for GPU data:" )
 
+func appendValue*(value: var DataList, data: DataValue) =
+  assert value.thetype == data.thetype
+  value.len += 1
+  case value.thetype:
+  of Float32: value.float32[].add data.float32
+  of Float64: value.float64[].add data.float64
+  of Int8: value.int8[].add data.int8
+  of Int16: value.int16[].add data.int16
+  of Int32: value.int32[].add data.int32
+  of Int64: value.int64[].add data.int64
+  of UInt8: value.uint8[].add data.uint8
+  of UInt16: value.uint16[].add data.uint16
+  of UInt32: value.uint32[].add data.uint32
+  of UInt64: value.uint64[].add data.uint64
+  of Vec2I32: value.vec2i32[].add data.vec2i32
+  of Vec2I64: value.vec2i64[].add data.vec2i64
+  of Vec3I32: value.vec3i32[].add data.vec3i32
+  of Vec3I64: value.vec3i64[].add data.vec3i64
+  of Vec4I32: value.vec4i32[].add data.vec4i32
+  of Vec4I64: value.vec4i64[].add data.vec4i64
+  of Vec2U32: value.vec2u32[].add data.vec2u32
+  of Vec2U64: value.vec2u64[].add data.vec2u64
+  of Vec3U32: value.vec3u32[].add data.vec3u32
+  of Vec3U64: value.vec3u64[].add data.vec3u64
+  of Vec4U32: value.vec4u32[].add data.vec4u32
+  of Vec4U64: value.vec4u64[].add data.vec4u64
+  of Vec2F32: value.vec2f32[].add data.vec2f32
+  of Vec2F64: value.vec2f64[].add data.vec2f64
+  of Vec3F32: value.vec3f32[].add data.vec3f32
+  of Vec3F64: value.vec3f64[].add data.vec3f64
+  of Vec4F32: value.vec4f32[].add data.vec4f32
+  of Vec4F64: value.vec4f64[].add data.vec4f64
+  of Mat2F32: value.mat2f32[].add data.mat2f32
+  of Mat2F64: value.mat2f64[].add data.mat2f64
+  of Mat23F32: value.mat23f32[].add data.mat23f32
+  of Mat23F64: value.mat23f64[].add data.mat23f64
+  of Mat32F32: value.mat32f32[].add data.mat32f32
+  of Mat32F64: value.mat32f64[].add data.mat32f64
+  of Mat3F32: value.mat3f32[].add data.mat3f32
+  of Mat3F64: value.mat3f64[].add data.mat3f64
+  of Mat34F32: value.mat34f32[].add data.mat34f32
+  of Mat34F64: value.mat34f64[].add data.mat34f64
+  of Mat43F32: value.mat43f32[].add data.mat43f32
+  of Mat43F64: value.mat43f64[].add data.mat43f64
+  of Mat4F32: value.mat4f32[].add data.mat4f32
+  of Mat4F64: value.mat4f64[].add data.mat4f64
+  else: raise newException(Exception, &"Unsupported data type for GPU data:" )
+
 func setValue*[T: GPUType|int|uint|float](value: var DataList, i: uint32, data: T) =
   assert i < value.len
   when T is float32: value.float32[][i] = data

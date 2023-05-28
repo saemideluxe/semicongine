@@ -1,4 +1,6 @@
 import std/strformat
+import std/sequtils
+import std/algorithm
 import std/strutils
 import std/tables
 import std/hashes
@@ -7,14 +9,19 @@ import std/typetraits
 import ./core
 
 type
-  Component* = ref object of RootObj
-    entity*: Entity
-
   Scene* = object
     name*: string
     root*: Entity
     shaderGlobals*: Table[string, DataList]
-    textures*: Table[string, seq[Texture]]
+    materials: seq[Material]
+
+  Material* = object
+    name*: string
+    textures*: Table[string, Texture]
+    data*: Table[string, DataValue]
+
+  Component* = ref object of RootObj
+    entity*: Entity
 
   Entity* = ref object of RootObj
     name*: string
@@ -50,14 +57,25 @@ func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
 func setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
   setValues[T](scene.shaderGlobals[name], value)
 
-func addTextures*(scene: var Scene, name: string, textures: seq[Texture], interpolation=VK_FILTER_LINEAR) =
-  scene.textures[name] = textures
-
-func addTexture*(scene: var Scene, name: string, texture: Texture) =
-  scene.textures[name] = @[texture]
+func appendShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
+  appendValues[T](scene.shaderGlobals[name], value)
 
 func newScene*(name: string, root: Entity): Scene =
   Scene(name: name, root: root)
+
+func getMaterials*(scene: Scene): seq[Material] = scene.materials
+
+func addMaterial*(scene: var Scene, material: Material) =
+  if scene.materials.len > 0:
+    assert material.data.keys.toSeq.sorted() == scene.materials[0].data.keys.toSeq.sorted(), &"{material.data.keys.toSeq.sorted()} == {scene.materials[0].data.keys.toSeq.sorted()}"
+  else:
+    for name, value in material.data.pairs:
+      scene.shaderGlobals[name] = newDataList(thetype=value.thetype)
+
+  for name, value in material.data.pairs:
+    scene.shaderGlobals[name].appendValue(value)
+
+  scene.materials.add material
 
 func hash*(scene: Scene): Hash =
   hash(scene.name)
