@@ -150,6 +150,7 @@ type
     thetype*: DataType
     arrayCount*: uint32
     perInstance*: bool
+    noInterpolation: bool
     memoryPerformanceHint*: MemoryPerformanceHint
 
 func vertexInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
@@ -292,6 +293,7 @@ func attr*[T: GPUType](
   name: string,
   perInstance=false,
   arrayCount=0'u32,
+  noInterpolation=false,
   memoryPerformanceHint=PreferFastRead,
 ): auto =
   ShaderAttribute(
@@ -299,6 +301,7 @@ func attr*[T: GPUType](
     thetype: getDataType[T](),
     perInstance: perInstance,
     arrayCount: arrayCount,
+    noInterpolation: noInterpolation,
     memoryPerformanceHint: memoryPerformanceHint,
   )
 
@@ -1059,7 +1062,8 @@ func glslInput*(group: seq[ShaderAttribute]): seq[string] =
   var i = 0'u32
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for shader vertex attributes"
-    result.add &"layout(location = {i}) in {attribute.thetype.glslType} {attribute.name};"
+    let flat = if attribute.noInterpolation: "flat " else: ""
+    result.add &"layout(location = {i}) {flat}in {attribute.thetype.glslType} {attribute.name};"
     for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
       i += attribute.thetype.nLocationSlots
 
@@ -1092,5 +1096,6 @@ func glslOutput*(group: seq[ShaderAttribute]): seq[string] =
   var i = 0'u32
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for outputs"
-    result.add &"layout(location = {i}) out {attribute.thetype.glslType} {attribute.name};"
+    let flat = if attribute.noInterpolation: "flat " else: ""
+    result.add &"layout(location = {i}) {flat}out {attribute.thetype.glslType} {attribute.name};"
     i += 1
