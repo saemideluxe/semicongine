@@ -12,7 +12,13 @@ import ../core
 
 import ./image
 
-let DEFAULTEXTURE = Texture(image: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: DefaultSampler())
+let DEFAULTSAMPLER = Sampler(
+    magnification: VK_FILTER_NEAREST,
+    minification: VK_FILTER_NEAREST,
+    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+  )
+let DEFAULTEXTURE = Texture(image: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: DEFAULTSAMPLER)
 
 type
   glTFHeader = object
