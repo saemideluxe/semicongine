@@ -91,7 +91,7 @@ proc compileGlslShader*(
   outputs: seq[ShaderAttribute]= @[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
-  main: seq[string]
+  main: string
 ): ShaderCode {.compileTime.} =
 
   var code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
@@ -111,9 +111,7 @@ proc compileGlslShader*(
   result.stage = stage
   result.binary = compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
 
-
-proc compileGlslShader*(
-  stage: VkShaderStageFlagBits,
+proc compileVertextShader*(
   inputs: seq[ShaderAttribute]= @[],
   uniforms: seq[ShaderAttribute]= @[],
   samplers: seq[ShaderAttribute]= @[],
@@ -122,7 +120,67 @@ proc compileGlslShader*(
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
   main: string
 ): ShaderCode {.compileTime.} =
-  return compileGlslShader(stage, inputs, uniforms, samplers, outputs, version, entrypoint, @[main])
+  compileGlslShader(
+    stage=VK_SHADER_STAGE_VERTEX_BIT,
+    inputs=inputs,
+    uniforms=uniforms,
+    samplers=samplers,
+    outputs=outputs,
+    version=version,
+    entrypoint=entrypoint,
+    main=main
+  )
+
+proc compileFragmentShader*(
+  inputs: seq[ShaderAttribute]= @[],
+  uniforms: seq[ShaderAttribute]= @[],
+  samplers: seq[ShaderAttribute]= @[],
+  outputs: seq[ShaderAttribute]= @[],
+  version=DEFAULT_SHADER_VERSION ,
+  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
+  main: string
+): ShaderCode {.compileTime.} =
+  compileGlslShader(
+    stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+    inputs=inputs,
+    uniforms=uniforms,
+    samplers=samplers,
+    outputs=outputs,
+    version=version,
+    entrypoint=entrypoint,
+    main=main
+  )
+
+proc compileVertexFragmentShaderSet*(
+  inputs: seq[ShaderAttribute]= @[],
+  intermediate: seq[ShaderAttribute]= @[],
+  outputs: seq[ShaderAttribute]= @[],
+  uniforms: seq[ShaderAttribute]= @[],
+  samplers: seq[ShaderAttribute]= @[],
+  version=DEFAULT_SHADER_VERSION ,
+  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
+  vertexCode: string,
+  fragmentCode: string,
+): (ShaderCode, ShaderCode) {.compileTime.} =
+
+  result[0] = compileVertextShader(
+    inputs=inputs,
+    outputs=intermediate,
+    uniforms=uniforms,
+    samplers=samplers,
+    version=version,
+    entrypoint=entrypoint,
+    main=vertexCode
+  )
+  result[1] = compileFragmentShader(
+    inputs=intermediate,
+    outputs=outputs,
+    uniforms=uniforms,
+    samplers=samplers,
+    version=version,
+    entrypoint=entrypoint,
+    main=fragmentCode
+  )
 
 
 proc createShaderModule*(

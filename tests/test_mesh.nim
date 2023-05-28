@@ -24,7 +24,7 @@ proc main() =
       attr[Vec2f]("texcoord_0", memoryPerformanceHint=PreferFastRead),
       attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
     ]
-    vertexOutput = @[
+    intermediate = @[
       attr[Vec4f]("vertexColor"),
       attr[Vec2f]("colorTexCoord"),
       attr[uint8]("materialId", noInterpolation=true)
@@ -35,29 +35,20 @@ proc main() =
       attr[Mat4]("view"),
       attr[Vec4f]("baseColorFactor", arrayCount=4),
     ]
-    samplers = @[
-      attr[Sampler2DType]("baseColorTexture", arrayCount=4),
-    ]
-    vertexCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
+    samplers = @[attr[Sampler2DType]("baseColorTexture", arrayCount=4)]
+    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
       inputs=vertexInput,
-      outputs=vertexOutput,
+      intermediate=intermediate,
+      outputs=fragOutput,
       uniforms=uniforms,
       samplers=samplers,
-      main="""
+      vertexCode="""
 gl_Position =  vec4(position, 1.0) * (transform * Uniforms.view * Uniforms.projection);
 vertexColor = Uniforms.baseColorFactor[material];
 colorTexCoord = texcoord_0;
 materialId = material;
-"""
-    )
-    fragmentCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=vertexOutput,
-      outputs=fragOutput,
-      uniforms=uniforms,
-      samplers=samplers,
-      main="""
+""",
+      fragmentCode="""
 vec4 col[4] = vec4[4](vec4(1, 0, 0, 1), vec4(0, 1, 0, 1), vec4(0, 0, 1, 1), vec4(1, 1, 1, 1));
 color = texture(baseColorTexture[materialId], colorTexCoord) * vertexColor;
 """
