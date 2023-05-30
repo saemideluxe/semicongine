@@ -2,7 +2,7 @@ import std/enumerate
 import std/typetraits
 import std/math
 
-import semicongine
+import ../src/semicongine
 
 const
   arrow = @[

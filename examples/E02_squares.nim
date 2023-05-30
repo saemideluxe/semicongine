@@ -1,7 +1,7 @@
 import std/sequtils
 import std/random
 
-import semicongine
+import ../src/semicongine
 
 
 when isMainModule:
