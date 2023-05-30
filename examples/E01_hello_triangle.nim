@@ -1,4 +1,4 @@
-import semicongine
+import ../src/semicongine
 
 
 const

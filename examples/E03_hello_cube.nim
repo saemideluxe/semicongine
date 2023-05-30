@@ -10,7 +10,7 @@
 
 import std/times
 
-import semicongine
+import ../src/semicongine
 
 const
   TopLeftFront = newVec3f(-0.5'f32, -0.5'f32, -0.5'f32)

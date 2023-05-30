@@ -1,6 +1,6 @@
 import std/times
 
-import semicongine
+import ../src/semicongine
 
 let
   barcolor = hexToColorAlpha("5A3F00").gamma(2.2).colorToHex()
