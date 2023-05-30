@@ -71,7 +71,7 @@ Other (required for alpha release):
 
 Other important features:
 - [ ] Multisampling
-- [ ] Text rendering
+- [x] Text rendering
 - [ ] Animation system
 - [ ] Sprite system
 - [ ] Particle system
