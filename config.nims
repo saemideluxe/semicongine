@@ -12,7 +12,8 @@ const BUNDLETYPE* {.strdefine.}: string = "dir" # dir, zip, exe
 const RESOURCEROOT* {.strdefine.}: string = "resources"
 
 task build, "build":
-  switch("path", "src")
+  switch("d", "BUNDLETYPE=" & BUNDLETYPE)
+  switch("d", "RESOURCEROOT=" & RESOURCEROOT)
   switch("mm", "orc")
   switch("experimental", "strictEffects")
   switch("threads", "on")
