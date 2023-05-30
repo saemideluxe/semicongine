@@ -1,4 +1,5 @@
 import std/times
+import std/tables
 
 import semicongine
 
@@ -21,7 +22,8 @@ proc main() =
   var sampler = DefaultSampler()
   sampler.magnification = VK_FILTER_NEAREST
   sampler.minification = VK_FILTER_NEAREST
-  scene.addTextures("my_texture", @[Texture(image: t1, sampler: sampler), Texture(image: t2, sampler: sampler)])
+  scene.addMaterial(Material(name:"my material", textures: {"my_texture": Texture(image: t1, sampler: sampler)}.toTable))
+  scene.addMaterial(Material(name:"my material", textures: {"my_texture": Texture(image: t2, sampler: sampler)}.toTable))
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
   var engine = initEngine("Test materials")
@@ -55,7 +57,7 @@ color = texture(my_texture[0], uvout) * (1 - d) + texture(my_texture[1], uvout) 
 """
     )
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  engine.addScene(scene, vertexInput, samplers)
+  engine.addScene(scene, vertexInput, samplers, transformAttribute="")
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     var d = float32(cpuTime() - t)
