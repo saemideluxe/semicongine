@@ -52,7 +52,7 @@ proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
     raise newException(Exception, "Unable to create swapchain")
   result.swapchain = swapchain.get()
 
-proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="") =
+proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="transform") =
   assert not (scene in renderer.scenedata)
   const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
   var data = SceneData()
@@ -163,19 +163,6 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
       indexBufferOffset += size
     data.drawables[mesh] = drawable
 
-  #[
-  # extract textures
-  var sampler = DefaultSampler()
-  sampler.magnification = VK_FILTER_NEAREST
-  sampler.minification = VK_FILTER_NEAREST
-  # for mesh in allComponentsOfType[Mesh](scene.root):
-  for textbox in allEntitiesOfType[Textbox](scene.root):
-    if not (textbox.font.name in data.textures):
-      data.textures[textbox.font.name] = @[
-        renderer.device.uploadTexture(Texture(image: textbox.font.fontAtlas, sampler: sampler))
-      ]
-  ]#
-
   for material in scene.getMaterials():
     for textureName, texture in material.textures.pairs:
       if not data.textures.hasKey(textureName):
@@ -207,7 +194,12 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     
       data.descriptorPool = renderer.device.createDescriptorSetPool(poolsizes)
   
-      data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(data.descriptorPool, data.uniformBuffers[pipeline.vk], data.textures, inFlightFrames=renderer.swapchain.inFlightFrames)
+      data.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(
+        data.descriptorPool,
+        data.uniformBuffers.getOrDefault(pipeline.vk, @[]),
+        data.textures,
+        inFlightFrames=renderer.swapchain.inFlightFrames
+      )
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         data.descriptorSets[pipeline.vk][frame_i].writeDescriptorSet()
 
@@ -221,6 +213,7 @@ proc refreshMeshAttributeData(sceneData: var SceneData, mesh: Mesh, attribute: s
   var (pdata, size) = mesh.getRawData(attribute)
   let memoryPerformanceHint = sceneData.attributeLocation[attribute]
   let bindingNumber = sceneData.attributeBindingNumber[attribute]
+
   sceneData.vertexBuffers[memoryPerformanceHint].setData(pdata, size, sceneData.drawables[mesh].bufferOffsets[bindingNumber][2])
 
 proc updateMeshData*(renderer: var Renderer, scene: Scene) =
@@ -230,8 +223,11 @@ proc updateMeshData*(renderer: var Renderer, scene: Scene) =
     # if mesh transformation attribute is enabled, update the model matrix
     if renderer.scenedata[scene].transformAttribute != "":
       let transform = mesh.entity.getModelTransform()
-      if not (mesh in renderer.scenedata[scene].entityTransformationCache) or renderer.scenedata[scene].entityTransformationCache[mesh] != transform:
-        mesh.updateInstanceData(renderer.scenedata[scene].transformAttribute, @[transform])
+      if not (mesh in renderer.scenedata[scene].entityTransformationCache) or renderer.scenedata[scene].entityTransformationCache[mesh] != transform or mesh.areInstanceTransformsDirty:
+        var updatedTransform = newSeq[Mat4](int(mesh.instanceCount))
+        for i in 0 ..< mesh.instanceCount:
+          updatedTransform[i] = transform * mesh.getInstanceTransform(i)
+        mesh.updateInstanceData(renderer.scenedata[scene].transformAttribute, updatedTransform)
         renderer.scenedata[scene].entityTransformationCache[mesh] = transform
 
     # update any changed mesh attributes
@@ -246,7 +242,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
 
   for i in 0 ..< renderer.renderPass.subpasses.len:
     for pipeline in renderer.renderPass.subpasses[i].pipelines.mitems:
-      if renderer.scenedata[scene].uniformBuffers[pipeline.vk].len != 0:
+      if renderer.scenedata[scene].uniformBuffers.hasKey(pipeline.vk) and renderer.scenedata[scene].uniformBuffers[pipeline.vk].len != 0:
         assert renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].vk.valid
         var offset = 0'u64
         for uniform in pipeline.uniforms:

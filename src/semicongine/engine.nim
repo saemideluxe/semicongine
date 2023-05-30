@@ -109,7 +109,7 @@ proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
     engine.renderer.get.destroy()
   engine.renderer = some(engine.device.initRenderer(renderPass))
 
-proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="") =
+proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="transform") =
   assert engine.state != Destroyed
   assert transformAttribute == "" or transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
   assert engine.renderer.isSome

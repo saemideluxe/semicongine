@@ -31,6 +31,7 @@ type
     components*: seq[Component]
 
 func getModelTransform*(entity: Entity): Mat4 =
+  assert not entity.isNil
   result = Unit4
   var currentEntity = entity
   while currentEntity != nil:
@@ -156,7 +157,7 @@ proc newEntity*(name: string, firstComponent: Component, components: varargs[Com
 iterator allEntitiesOfType*[T: Entity](root: Entity): T =
   var queue = @[root]
   while queue.len > 0:
-    let entity = queue.pop
+    var entity = queue.pop
     if entity of T:
       yield T(entity)
     for i in countdown(entity.children.len - 1, 0):
