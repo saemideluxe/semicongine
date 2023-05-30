@@ -394,3 +394,14 @@ func ortho*(left, right, top, bottom, zNear, zFar: float32): Mat4 =
     0,                  0,                  1 / (zFar - zNear), -zNear / (zFar - zNear),
     0,                  0,                  1,                   1,
   ])
+
+# create an orthographic perspective that will map from -1 .. 1 on all axis and keep a 1:1 aspect ratio
+# the smaller dimension (width or height) will always be 1 and the larger dimension will be larger, to keep the ratio
+func orthoWindowAspect*(windowAspect: float32): Mat4 =
+  if windowAspect > 1:
+    let space = 2 * (windowAspect - 1) / 2
+    ortho(-1, 1, -1 - space, 1 + space, -1, 1)
+  else:
+    let space = 2 * (1 / windowAspect - 1) / 2
+    ortho(-1 - space, 1 + space, -1, 1, -1, 1)
+

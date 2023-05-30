@@ -16,6 +16,8 @@ type
     Big # up to 2^32 vertices
   Mesh* = ref object of Component
     instanceCount*: uint32
+    instanceTransforms: seq[Mat4] # this should not reside in data["transform"], as we will use data["transform"] to store the final transformation matrix (as derived from the scene-tree)
+    dirtyInstanceTransforms: bool
     data: Table[string, DataList]
     changedAttributes: seq[string]
     case indexType*: MeshIndexType
@@ -65,6 +67,11 @@ proc setMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
   assert not (attribute in mesh.data)
   mesh.data[attribute] = data
 
+proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+  assert uint32(data.len) == mesh.instanceCount
+  assert not (attribute in mesh.data)
+  mesh.data[attribute] = newDataList(data)
+
 func newMesh*(
   positions: openArray[Vec3f],
   indices: openArray[array[3, uint32|int32|uint16|int16|int]],
@@ -76,7 +83,7 @@ func newMesh*(
   assert colors.len == 0 or colors.len == positions.len
   assert uvs.len == 0 or uvs.len == positions.len
 
-  result = Mesh(instanceCount: instanceCount)
+  result = Mesh(instanceCount: instanceCount, instanceTransforms: newSeqWith(int(instanceCount), Unit4F32))
   setMeshData(result, "position", positions.toSeq)
   if colors.len > 0: setMeshData(result, "color", colors.toSeq)
   if uvs.len > 0: setMeshData(result, "uv", uvs.toSeq)
@@ -101,6 +108,7 @@ func newMesh*(
       result.indexType = Big
       for i, tri in enumerate(indices):
         result.bigIndices.add [uint32(tri[0]), uint32(tri[1]), uint32(tri[2])]
+  setInstanceData(result, "transform", newSeqWith(int(instanceCount), Unit4F32))
 
 func newMesh*(
   positions: openArray[Vec3f],
@@ -176,11 +184,6 @@ proc appendMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
   mesh.changedAttributes.add attribute
   appendValues(mesh.data[attribute], data)
 
-proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
-  assert uint32(data.len) == mesh.instanceCount
-  assert not (attribute in mesh.data)
-  mesh.data[attribute] = newDataList(data)
-
 proc updateInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
   assert attribute in mesh.data
@@ -215,7 +218,12 @@ proc transform*[T: GPUType](mesh: var Mesh, attribute: string, transform: Mat4) 
       v = transform * v
 
 func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = Mesh(instanceCount: 1, indexType: Small, smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]])
+  result = Mesh(
+    instanceCount: 1,
+    indexType: Small,
+    smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
+    instanceTransforms: @[Unit4F32]
+  )
 
   let
     half_w = width / 2
@@ -226,19 +234,21 @@ func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   setMeshData(result, "position", pos)
   setMeshData(result, "color", @[c, c, c, c])
   setMeshData(result, "uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
+  setInstanceData(result, "transform", @[Unit4F32])
 
 func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = Mesh(instanceCount: 1)
+  result = Mesh(instanceCount: 1, instanceTransforms: @[Unit4F32])
   let
     half_w = width / 2
     half_h = height / 2
     colorVec = hexToColorAlpha(color)
   setMeshData(result, "position", @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
   setMeshData(result, "color", @[colorVec, colorVec, colorVec])
+  setInstanceData(result, "transform", @[Unit4F32])
 
 func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mesh =
   assert nSegments >= 3
-  result = Mesh(instanceCount: 1, indexType: Small)
+  result = Mesh(instanceCount: 1, indexType: Small, instanceTransforms: @[Unit4F32])
 
   let
     half_w = width / 2
@@ -255,3 +265,24 @@ func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mes
 
   setMeshData(result, "position", pos)
   setMeshData(result, "color", col)
+  setInstanceData(result, "transform", @[Unit4F32])
+
+proc areInstanceTransformsDirty*(mesh: var Mesh): bool =
+  result = mesh.dirtyInstanceTransforms
+  mesh.dirtyInstanceTransforms = false
+
+proc setInstanceTransform*(mesh: var Mesh, i: uint32, mat: Mat4) =
+  assert 0 <= i and i < mesh.instanceCount
+  mesh.instanceTransforms[i] = mat
+  mesh.dirtyInstanceTransforms = true
+
+proc setInstanceTransforms*(mesh: var Mesh, mat: seq[Mat4]) =
+  mesh.instanceTransforms = mat
+  mesh.dirtyInstanceTransforms = true
+
+proc getInstanceTransform*(mesh: Mesh, i: uint32): Mat4 =
+  assert 0 <= i and i < mesh.instanceCount
+  mesh.instanceTransforms[i]
+
+proc getInstanceTransforms*(mesh: Mesh): seq[Mat4] =
+  mesh.instanceTransforms

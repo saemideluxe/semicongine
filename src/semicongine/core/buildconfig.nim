@@ -5,7 +5,7 @@ import std/strutils
 import std/logging
 import std/os
 
-const ENGINENAME = "semicongine"
+const ENGINENAME* = "semicongine"
 const ENGINEVERSION* = static:
   var nimbleFile = newStringStream(staticRead("../../../semicongine.nimble"))
   var config = loadConfig(nimbleFile)
@@ -52,5 +52,10 @@ const CONFIGHOTRELOADINTERVAL* {.intdefine.}: int = 1000
 const LOGLEVEL {.strdefine.}: string = (when DEBUG: "lvlAll" else: "lvlWarn")
 const ENGINE_LOGLEVEL* = parseEnum[Level](LOGLEVEL)
 
-const RESOURCEROOT* {.strdefine.}: string = "resources"
-const BUNDLETYPE* {.strdefine.}: string = "dir" # dir, zip, exe
+# resource bundleing settings, need to be configured per project
+const RESOURCEROOT* {.strdefine.}: string = "" # should be the "mod" directory
+const BUNDLETYPE* {.strdefine.}: string = "" # dir, zip, exe
+
+static:
+  assert RESOURCEROOT != "", ENGINENAME & " requires -d:RESOURCEROOT=resources"
+  assert BUNDLETYPE in ["dir", "zip", "exe"], ENGINENAME & " requires one of -d:BUNDLETYPE=dir -d:BUNDLETYPE=zip -d:BUNDLETYPE=exe"
