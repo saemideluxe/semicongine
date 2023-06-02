@@ -22,7 +22,10 @@ type
 converter toVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
   TVec2[T]([orig[0], orig[1]])
 converter toVec3*[T: SomeNumber](orig: TVec4[T]): TVec3[T] =
-  TVec2[T]([orig[0], orig[1], orig[2]])
+  TVec3[T]([orig[0], orig[1], orig[2]])
+
+func toVec4*[T: SomeNumber](orig: TVec3[T], value: T = default(T)): TVec4[T] =
+  TVec4[T]([orig[0], orig[1], orig[2], value])
 
 # define some often used constants
 func ConstOne2[T: SomeNumber](): auto {.compiletime.} = TVec2[T]([T(1), T(1)])

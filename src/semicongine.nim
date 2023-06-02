@@ -3,6 +3,7 @@ export core
 
 import semicongine/audio
 import semicongine/engine
+import semicongine/collision
 import semicongine/scene
 import semicongine/events
 import semicongine/mesh
@@ -15,6 +16,7 @@ import semicongine/vulkan
 
 export audio
 export engine
+export collision
 export scene
 export events
 export mesh
