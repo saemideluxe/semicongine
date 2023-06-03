@@ -170,3 +170,32 @@ func intersects*[A, B](a: A, b: B): bool =
     if direction == newVec3f(0, 0, 0):
       direction[0] = 0.001
     inc n
+
+func calculateHitbox*(points: seq[Vec3f]): HitBox =
+  var
+    minX = high(float32)
+    maxX = low(float32)
+    minY = high(float32)
+    maxY = low(float32)
+    minZ = high(float32)
+    maxZ = low(float32)
+
+  for p in points:
+    minX = min(minX, p.x)
+    maxX = max(maxX, p.x)
+    minY = min(minY, p.y)
+    maxY = max(maxY, p.y)
+    minZ = min(minZ, p.z)
+    maxZ = max(maxz, p.z)
+
+  let
+    scaleX = (maxX - minX)
+    scaleY = (maxY - minY)
+    scaleZ = (maxZ - minZ)
+
+  HitBox(transform: translate3d(minX, minY, minZ) * scale3d(scaleX, scaleY, scaleZ))
+
+func calculateHitsphere*(points: seq[Vec3f]): HitSphere =
+  result = HitSphere()
+  for p in points:
+    result.radius = max(result.radius, p.length)
