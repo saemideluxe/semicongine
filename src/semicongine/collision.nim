@@ -1,5 +1,3 @@
-import std/random
-
 import ./core
 import ./scene
 
@@ -10,7 +8,6 @@ type
     transform*: Mat4
   HitSphere* = ref object of Component
     radius*: float32
-
 
 func between(value, b1, b2: float32): bool =
   min(b1, b2) <= value and value <= max(b1, b2)
@@ -155,7 +152,7 @@ func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f): bool =
   of 4: simplex.tetrahedron(direction)
   else: raise newException(Exception, "Error in simplex")
 
-func overlaps*[A, B](a: A, b: B): bool =
+func intersects*[A, B](a: A, b: B): bool =
   var
     support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
