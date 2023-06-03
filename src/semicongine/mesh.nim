@@ -213,10 +213,7 @@ proc clearDataChanged*(mesh: var Mesh) =
 proc transform*[T: GPUType](mesh: var Mesh, attribute: string, transform: Mat4) =
   assert attribute in mesh.data
   for v in getValues[T](mesh.data[attribute])[].mitems:
-    when T is Vec3f:
-      v = (transform * v.toVec4(1'f32)).toVec3
-    else:
-      v = transform * v
+    v = transform * v
 
 func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = Mesh(
@@ -281,9 +278,14 @@ proc setInstanceTransforms*(mesh: var Mesh, mat: seq[Mat4]) =
   mesh.instanceTransforms = mat
   mesh.dirtyInstanceTransforms = true
 
-proc getInstanceTransform*(mesh: Mesh, i: uint32): Mat4 =
+func getInstanceTransform*(mesh: Mesh, i: uint32): Mat4 =
   assert 0 <= i and i < mesh.instanceCount
   mesh.instanceTransforms[i]
 
-proc getInstanceTransforms*(mesh: Mesh): seq[Mat4] =
+func getInstanceTransforms*(mesh: Mesh): seq[Mat4] =
   mesh.instanceTransforms
+
+func getCollisionPoints*(mesh: Mesh, positionAttribute="position"): seq[Vec3f] =
+  for p in getMeshData[Vec3f](mesh, positionAttribute)[]:
+    result.add mesh.entity.getModelTransform() * p
+
