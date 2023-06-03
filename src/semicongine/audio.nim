@@ -15,6 +15,7 @@ export audiotypes
 
 const NBUFFERS = 4
 const BUFFERSAMPLECOUNT = 2048
+const SOUND_SCALE = 4 # SOUND_SCALE is logarithm-scale
 
 type
   Playback = object
@@ -52,6 +53,11 @@ proc setupDevice(mixer: var Mixer) =
     bufferaddresses.add (addr mixer.buffers[i])
   mixer.device = openSoundDevice(AUDIO_SAMPLE_RATE, bufferaddresses)
 
+func normalized(level: Level): Level =
+  pow(level, SOUND_SCALE)
+func unnormalized(level: Level): Level =
+  log(level, SOUND_SCALE)
+
 proc loadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
   mixer.sounds[name] = loadAudio(resource)
@@ -64,10 +70,10 @@ proc replaceSound*(mixer: var Mixer, name: string, sound: Sound) =
   assert (name in mixer.sounds)
   mixer.sounds[name] = sound
 
-proc addTrack*(mixer: var Mixer, name: string, level=1'f) =
+proc addTrack*(mixer: var Mixer, name: string, level: Level=1'f) =
   assert not (name in mixer.tracks)
   mixer.lock.withLock():
-    mixer.tracks[name] = Track(level: level)
+    mixer.tracks[name] = Track(level: level.normalized)
 
 proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false, loop=false, levelLeft, levelRight: Level): uint64 =
   assert track in mixer.tracks
@@ -79,39 +85,47 @@ proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false,
       sound: mixer.sounds[soundName],
       position: 0,
       loop: loop,
-      levelLeft: levelLeft,
-      levelRight: levelRight
+      levelLeft: levelLeft.normalized,
+      levelRight: levelRight.normalized
     )
   result = mixer.playbackCounter
   inc mixer.playbackCounter
 
 proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false, loop=false, level: Level=1'f): uint64 =
-  play(mixer=mixer, soundName=soundName, track=track, stopOtherSounds=stopOtherSounds, loop=loop, levelLeft=level, levelRight=level)
+  play(
+    mixer=mixer,
+    soundName=soundName,
+    track=track,
+    stopOtherSounds=stopOtherSounds,
+    loop=loop,
+    levelLeft=level.normalized,
+    levelRight=level.normalized
+  )
 
 proc stop*(mixer: var Mixer) =
   mixer.lock.withLock():
     for track in mixer.tracks.mvalues:
       track.playing.clear()
 
-proc getLevel*(mixer: var Mixer): Level = mixer.level
-proc getLevel*(mixer: var Mixer, track: string): Level = mixer.tracks[track].level
+proc getLevel*(mixer: var Mixer): Level = mixer.level.unnormalized
+proc getLevel*(mixer: var Mixer, track: string): Level = mixer.tracks[track].level.unnormalized
 proc getLevel*(mixer: var Mixer, playbackId : uint64): (Level, Level) =
   for track in mixer.tracks.mvalues:
     if playbackId in track.playing:
-      return (track.playing[playbackId].levelLeft, track.playing[playbackId].levelRight)
+      return (track.playing[playbackId].levelLeft.unnormalized, track.playing[playbackId].levelRight.unnormalized)
 
-proc setLevel*(mixer: var Mixer, level: Level) = mixer.level = level
+proc setLevel*(mixer: var Mixer, level: Level) = mixer.level = level.normalized
 proc setLevel*(mixer: var Mixer, track: string, level: Level) =
   mixer.lock.withLock():
-    mixer.tracks[track].level = level
+    mixer.tracks[track].level = level.normalized
 proc setLevel*(mixer: var Mixer, playbackId: uint64, levelLeft, levelRight: Level) =
   mixer.lock.withLock():
     for track in mixer.tracks.mvalues:
       if playbackId in track.playing:
-        track.playing[playbackId].levelLeft = levelLeft
-        track.playing[playbackId].levelRight = levelRight
+        track.playing[playbackId].levelLeft = levelLeft.normalized
+        track.playing[playbackId].levelRight = levelRight.normalized
 proc setLevel*(mixer: var Mixer, playbackId : uint64, level: Level) =
-  setLevel(mixer, playbackId, level, level)
+  setLevel(mixer, playbackId, level.normalized, level.normalized)
 
 proc stop*(mixer: var Mixer, track: string) =
   assert track in mixer.tracks
@@ -133,7 +147,7 @@ proc isPlaying*(mixer: var Mixer): bool =
   return false
 
 func applyLevel(sample: Sample, levelLeft, levelRight: Level): Sample =
- [int16(float(sample[0]) * levelLeft), int16(float(sample[1]) * levelRight)]
+  [int16(float(sample[0]) * levelLeft), int16(float(sample[1]) * levelRight)]
 
 func clip(value: int32): int16 =
   int16(max(min(int32(high(int16)), value), int32(low(int16))))
