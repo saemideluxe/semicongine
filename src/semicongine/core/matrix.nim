@@ -282,6 +282,8 @@ macro createAllMultiplicationOperators() =
 
 createAllMultiplicationOperators()
 
+func `*`*(mat: Mat4, vec: Vec3f): Vec3f =
+  (mat * vec.toVec4(1)).toVec3
 
 func transposed*[T](m: TMat2[T]): TMat2[T] = TMat2[T](data: [
   m[0, 0], m[1, 0],

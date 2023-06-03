@@ -16,10 +16,10 @@ func contains*(hitbox: HitBox, x: Vec3f): bool =
   # from https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
   let
     t = hitbox.entity.getModelTransform() * hitbox.transform
-    P1 = t * newVec4f(0, 0, 0, 1) # origin
-    P2 = t * Z.toVec4(1'f32)
-    P4 = t * X.toVec4(1'f32)
-    P5 = t * Y.toVec4(1'f32)
+    P1 = t * newVec3f(0, 0, 0) # origin
+    P2 = t * Z
+    P4 = t * X
+    P5 = t * Y
     u = (P1 - P4).cross(P1 - P5)
     v = (P1 - P2).cross(P1 - P5)
     w = (P1 - P2).cross(P1 - P4)
@@ -50,20 +50,20 @@ func findFurthestPoint(points: openArray[Vec3f], direction: Vec3f): Vec3f =
 
 func findFurthestPoint(hitsphere: HitSphere, direction: Vec3f): Vec3f =
   let directionNormalizedToSphere = ((direction / direction.length) * hitsphere.radius)
-  return (hitsphere.entity.getModelTransform() * directionNormalizedToSphere.toVec4(1'f32)).toVec3
+  return hitsphere.entity.getModelTransform() * directionNormalizedToSphere
 
 func findFurthestPoint(hitbox: HitBox, direction: Vec3f): Vec3f =
   let transform = hitbox.entity.getModelTransform() * hitbox.transform
   return findFurthestPoint(
     [
-      (transform * newVec4f(0, 0, 0, 1)).toVec3,
-      (transform * X.toVec4(1'f32)).toVec3,
-      (transform * Y.toVec4(1'f32)).toVec3,
-      (transform * Z.toVec4(1'f32)).toVec3,
-      (transform * (X + Y).toVec4(1'f32)).toVec3,
-      (transform * (X + Z).toVec4(1'f32)).toVec3,
-      (transform * (Y + Z).toVec4(1'f32)).toVec3,
-      (transform * (X + Y + Z).toVec4(1'f32)).toVec3,
+      transform * newVec3f(0, 0, 0),
+      transform * X,
+      transform * Y,
+      transform * Z,
+      transform * (X + Y),
+      transform * (X + Z),
+      transform * (Y + Z),
+      transform * (X + Y + Z),
     ],
     direction
   )
