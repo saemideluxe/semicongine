@@ -13,9 +13,7 @@ import ./core
 when CONFIGHOTRELOAD:
   var
     configUpdates: Channel[(string, string)]
-    notifyConfigUpdate: Channel[bool]
   configUpdates.open()
-  notifyConfigUpdate.open()
 
 # runtime configuration
 # =====================
@@ -46,43 +44,40 @@ proc loadAllConfig(): Table[string, Config] =
 proc reloadSettings*() =
   allsettings = loadAllConfig()
 
-proc configStr(key, section, namespace: string): string =
+proc configStr(key, section, namespace: string, default: string): string =
   when CONFIGHOTRELOAD:
     while configUpdates.peek() > 0:
       let (updatedNamespace, updatedConfig) = configUpdates.recv()
       allsettings[updatedNamespace] = loadConfig(newStringStream(updatedConfig))
   if not allsettings.hasKey(namespace):
-    raise newException(Exception, &"Namespace {namespace} not found, available namespaces are {allsettings.keys().toSeq}")
-  allsettings[namespace].getSectionValue(section, key)
+    return default
+  allsettings[namespace].getSectionValue(section, key, default)
 
-proc setting*[T: int|float|string](key, section, namespace: string): T =
+proc setting*[T: int|float|string](key, section, namespace: string, default: T): T =
   when T is int:
-    let value = configStr(key, section, namespace)
+    let value = configStr(key, section, namespace, $default)
     if parseInt(value, result) == 0:
       raise newException(Exception, &"Unable to parse int from settings {namespace}.{section}.{key}: {value}")
   elif T is float:
-    let value = configStr(key, section, namespace)
+    let value = configStr(key, section, namespace, $default)
     if parseFloat(value, result) == 0:
       raise newException(Exception, &"Unable to parse float from settings {namespace}.{section}.{key}: {value}")
   else:
-    result = configStr(key, section, namespace)
+    result = configStr(key, section, namespace, default)
 
-proc setting*[T: int|float|string](identifier: string): T =
+proc setting*[T: int|float|string](identifier: string, default: T): T =
   # identifier can be in the form:
   # {namespace}.{key}
   # {namespace}.{section}.{key}
   let parts = identifier.rsplit(".")
   if parts.len == 1:
     raise newException(Exception, &"Setting with name {identifier} has no namespace")
-  if parts.len == 2: result = setting[T](parts[1], "", parts[0])
-  else: result = setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]))
+  if parts.len == 2: result = setting[T](parts[1], "", parts[0], default)
+  else: result = setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]), default)
 
 proc hadConfigUpdate*(): bool =
-  result = false
   when CONFIGHOTRELOAD == true:
-    while notifyConfigUpdate.peek() > 0:
-      result = true
-
+    result = configUpdates.peek() > 0
 
 allsettings = loadAllConfig()
 
@@ -96,10 +91,10 @@ when CONFIGHOTRELOAD == true:
         if not (namespace in configModTimes):
           configModTimes[namespace] = Time()
         let lastMod = namespace.getFile().getLastModificationTime()
-        if lastMod != configModTimes[namespace]:
+        if lastMod > configModTimes[namespace]:
+          configModTimes[namespace] = lastMod
           let configStr = newFileStream(namespace.getFile()).readAll()
           configUpdates.send((namespace, configStr))
-          notifyConfigUpdate.send(true)
       sleep CONFIGHOTRELOADINTERVAL
   var thethread: Thread[void]
   createThread(thethread, configFileWatchdog)
