@@ -3,8 +3,8 @@ import std/sequtils
 import ./core
 import ./scene
 
-const MAX_COLLISON_DETECTION_ITERATIONS = 10
-const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 10
+const MAX_COLLISON_DETECTION_ITERATIONS = 20
+const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 20
 
 type
   HitBox* = ref object of Component
@@ -92,7 +92,7 @@ func line(simplex: var seq[Vec3f], direction: var Vec3f): bool =
 
   return false
 
-func triangle(simplex: var seq[Vec3f], direction: var Vec3f): bool =
+func triangle(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional=false): bool =
   let
     a = simplex[0]
     b = simplex[1]
@@ -114,6 +114,8 @@ func triangle(simplex: var seq[Vec3f], direction: var Vec3f): bool =
       simplex = @[a, b]
       return line(simplex, direction)
     else:
+      if twoDimensional:
+        return true
       if (sameDirection(abc, ao)):
         direction = abc
       else:
@@ -182,14 +184,14 @@ func addIfUniqueEdge(edges: var seq[(int, int)], faces: seq[int], a: int, b: int
   else:
     edges.add (faces[a], faces[b])
 
-func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f): bool =
+func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional=false): bool =
   case simplex.len
   of 2: simplex.line(direction)
-  of 3: simplex.triangle(direction)
+  of 3: simplex.triangle(direction, twoDimensional)
   of 4: simplex.tetrahedron(direction)
   else: raise newException(Exception, "Error in simplex")
 
-func collisionPoint*[A, B](simplex: var seq[Vec3f], a: A, b: B): tuple[normal: Vec3f, penetrationDepth: float32] =
+func collisionPoint3D[A, B](simplex: var seq[Vec3f], a: A, b: B): tuple[normal: Vec3f, penetrationDepth: float32] =
   var
     polytope = simplex
     faces = @[
@@ -260,6 +262,46 @@ func collisionPoint*[A, B](simplex: var seq[Vec3f], a: A, b: B): tuple[normal: V
 
   result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
 
+
+func collisionPoint2D*[A, B](polytopeIn: seq[Vec3f], a: A, b: B): tuple[normal: Vec2f, penetrationDepth: float32] =
+  var
+    polytope = polytopeIn
+    minIndex = 0
+    minDistance = high(float32)
+    iterCount = 0
+    minNormal: Vec2f
+
+  while minDistance == high(float32) and iterCount < MAX_COLLISON_POINT_CALCULATION_ITERATIONS:
+    for i in 0 ..< polytope.len:
+      let
+        j = (i + 1) mod polytope.len
+        vertexI = polytope[i]
+        vertexJ = polytope[j]
+        ij = vertexJ - vertexI
+      var
+        normal = newVec2f(ij.y, -ij.x).normalized()
+        distance = normal.dot(vertexI)
+
+      if (distance < 0):
+        distance *= -1'f32
+        normal = normal * -1'f32
+
+      if distance < minDistance:
+        minDistance = distance
+        minNormal = normal
+        minIndex = j
+
+    let
+      support = supportPoint(a, b, minNormal.toVec3)
+      sDistance = minNormal.dot(support)
+
+    if(abs(sDistance - minDistance) > 0.001):
+      minDistance = high(float32)
+      polytope.insert(support, minIndex)
+    inc iterCount
+
+  result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
+
 func intersects*[A, B](a: A, b: B): bool =
   var
     support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0.5786)) # just random initial vector
@@ -292,7 +334,27 @@ func collision*[A, B](a: A, b: B): tuple[hasCollision: bool, normal: Vec3f, pene
         return result
     simplex.insert(support, 0)
     if nextSimplex(simplex, direction):
-      let (normal, depth) = collisionPoint(simplex, a, b)
+      let (normal, depth) = collisionPoint3D(simplex, a, b)
+      return (true, normal, depth)
+    # prevent numeric instability
+    if direction == newVec3f(0, 0, 0):
+      direction[0] = 0.0001
+    inc n
+
+func collision2D*[A, B](a: A, b: B): tuple[hasCollision: bool, normal: Vec2f, penetrationDepth: float32] =
+  var
+    support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0)) # just random initial vector
+    simplex = newSeq[Vec3f]()
+    direction = -support
+    n = 0
+  simplex.insert(support, 0)
+  while n < MAX_COLLISON_DETECTION_ITERATIONS:
+    support = supportPoint(a, b, direction)
+    if support.dot(direction) <= 0:
+        return result
+    simplex.insert(support, 0)
+    if nextSimplex(simplex, direction, twoDimensional=true):
+      let (normal, depth) = collisionPoint2D(simplex, a, b)
       return (true, normal, depth)
     # prevent numeric instability
     if direction == newVec3f(0, 0, 0):
