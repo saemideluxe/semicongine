@@ -1,7 +1,10 @@
+import std/sequtils
+
 import ./core
 import ./scene
 
-const MAX_COLLISON_DETECTION_ITERATIONS = 20
+const MAX_COLLISON_DETECTION_ITERATIONS = 10
+const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 10
 
 type
   HitBox* = ref object of Component
@@ -102,7 +105,7 @@ func triangle(simplex: var seq[Vec3f], direction: var Vec3f): bool =
   if sameDirection(abc.cross(ac), ao):
     if sameDirection(ac, ao):
       simplex = @[a, c]
-      direction = ac.cross(ao).cross(ac);
+      direction = ac.cross(ao).cross(ac)
     else:
       simplex = @[a, b]
       return line(simplex, direction)
@@ -145,12 +148,117 @@ func tetrahedron(simplex: var seq[Vec3f], direction: var Vec3f): bool =
  
   return true
 
+func getFaceNormals(polytope: seq[Vec3f], faces: seq[int]): (seq[Vec4f], int) =
+  var
+    normals: seq[Vec4f]
+    minTriangle = 0
+    minDistance = high(float32)
+
+  for i in countup(0, faces.len - 1, 3):
+    let
+      a = polytope[faces[i + 0]]
+      b = polytope[faces[i + 1]]
+      c = polytope[faces[i + 2]]
+
+    var normal = (b - a).cross(c - a).normalized()
+    var distance = normal.dot(a)
+
+    if distance < 0:
+      normal = normal * -1'f32
+      distance = distance * -1'f32
+
+    normals.add normal.toVec4(distance)
+
+    if distance < minDistance:
+      minTriangle = i div 3
+      minDistance = distance
+
+  return (normals, minTriangle)
+
+func addIfUniqueEdge(edges: var seq[(int, int)], faces: seq[int], a: int, b: int) =
+  let reverse = edges.find((faces[b], faces[a]))
+  if (reverse >= 0):
+    edges.delete(reverse)
+  else:
+    edges.add (faces[a], faces[b])
+
 func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f): bool =
   case simplex.len
   of 2: simplex.line(direction)
   of 3: simplex.triangle(direction)
   of 4: simplex.tetrahedron(direction)
   else: raise newException(Exception, "Error in simplex")
+
+func collisionPoint*[A, B](simplex: var seq[Vec3f], a: A, b: B): tuple[normal: Vec3f, penetrationDepth: float32] =
+  var
+    polytope = simplex
+    faces = @[
+      0, 1, 2,
+      0, 3, 1,
+      0, 2, 3,
+      1, 3, 2
+    ]
+    (normals, minFace) = getFaceNormals(polytope, faces)
+    minNormal: Vec3f
+    minDistance = high(float32)
+    iterCount = 0
+
+  while minDistance == high(float32) and iterCount < MAX_COLLISON_POINT_CALCULATION_ITERATIONS:
+    minNormal = normals[minFace].xyz
+    minDistance = normals[minFace].w
+    var
+      support = supportPoint(a, b, minNormal)
+      sDistance = minNormal.dot(support)
+    
+    if abs(sDistance - minDistance) > 0.001'f32:
+      minDistance = high(float32)
+      var uniqueEdges: seq[(int, int)]
+      var i = 0
+      while i < normals.len:
+        if sameDirection(normals[i], support):
+          var f = i * 3
+
+          addIfUniqueEdge(uniqueEdges, faces, f + 0, f + 1)
+          addIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2)
+          addIfUniqueEdge(uniqueEdges, faces, f + 2, f + 0)
+
+          faces[f + 2] = faces.pop()
+          faces[f + 1] = faces.pop()
+          faces[f + 0] = faces.pop()
+
+          normals[i] = normals.pop()
+
+          dec i
+        inc i
+
+      var newFaces: seq[int]
+      for (edgeIndex1, edgeIndex2) in uniqueEdges:
+        newFaces.add edgeIndex1
+        newFaces.add edgeIndex2
+        newFaces.add polytope.len
+       
+      polytope.add support
+
+      var (newNormals, newMinFace) = getFaceNormals(polytope, newFaces)
+      if newNormals.len == 0:
+        break
+
+      var oldMinDistance = high(float32)
+      for j in 0 ..< normals.len:
+        if normals[j].w < oldMinDistance:
+          oldMinDistance = normals[j].w
+          minFace = j
+
+      if (newNormals[newMinFace].w < oldMinDistance):
+        minFace = newMinFace + normals.len
+
+      for f in newFaces:
+        faces.add f
+      for n in newNormals:
+        normals.add n
+    inc iterCount
+
+  result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
 
 func intersects*[A, B](a: A, b: B): bool =
   var
@@ -168,7 +276,27 @@ func intersects*[A, B](a: A, b: B): bool =
       return true
     # prevent numeric instability
     if direction == newVec3f(0, 0, 0):
-      direction[0] = 0.001
+      direction[0] = 0.0001
+    inc n
+
+func collision*[A, B](a: A, b: B): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
+  var
+    support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0.5786)) # just random initial vector
+    simplex = newSeq[Vec3f]()
+    direction = -support
+    n = 0
+  simplex.insert(support, 0)
+  while n < MAX_COLLISON_DETECTION_ITERATIONS:
+    support = supportPoint(a, b, direction)
+    if support.dot(direction) <= 0:
+        return result
+    simplex.insert(support, 0)
+    if nextSimplex(simplex, direction):
+      let (normal, depth) = collisionPoint(simplex, a, b)
+      return (true, normal, depth)
+    # prevent numeric instability
+    if direction == newVec3f(0, 0, 0):
+      direction[0] = 0.0001
     inc n
 
 func calculateHitbox*(points: seq[Vec3f]): HitBox =
