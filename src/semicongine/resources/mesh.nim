@@ -162,8 +162,7 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
 
 proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): Mesh =
-  result = new Mesh
-  result.instanceCount = 1
+  result = Mesh(instanceCount: 1, instanceTransforms: newSeqWith(1, Unit4F32))
 
   # check if and how we use indexes
   var indexCount = 0
@@ -192,7 +191,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): M
   for primitive in meshNode["primitives"]:
     result.addPrimitive(root, primitive, mainBuffer)
 
-  # gld uses +y up, but we (vulkan) don't 
+  setInstanceData(result, "transform", newSeqWith(int(result.instanceCount), Unit4F32))
 
 proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entity =
   var name = "<Unknown>"
