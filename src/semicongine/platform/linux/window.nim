@@ -7,7 +7,8 @@ import
   x11/xlib,
   x11/xutil,
   x11/keysym,
-  x11/x
+  x11/x,
+  x11/xkblib
 
 import ../../core
 import ../../events
@@ -105,6 +106,7 @@ proc fullscreen*(window: var NativeWindow, enable: bool) =
     SubstructureRedirectMask or SubstructureNotifyMask,
     addr xev
   )
+  discard window.display.XkbSetDetectableAutoRepeat(false, nil)
   checkXlibResult window.display.XFlush()
 
 proc hideSystemCursor*(window: NativeWindow) =
@@ -126,9 +128,7 @@ proc size*(window: NativeWindow): (int, int) =
   return (int(attribs.width), int(attribs.height))
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
-  var
-    event: XEvent
-    serials: Table[culong, Table[int, seq[Event]]]
+  var event: XEvent
   while window.display.XPending() > 0:
     discard window.display.XNextEvent(addr(event))
     case event.theType
@@ -138,23 +138,11 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     of KeyPress:
       let keyevent = cast[PXKeyEvent](addr(event))
       let xkey = int(keyevent.keycode)
-      # ugly, but required to catch auto-repeat keys of X11
-      if not (keyevent.serial in serials):
-        serials[keyevent.serial] = initTable[int, seq[Event]]()
-      if not (xkey in serials[keyevent.serial]):
-        serials[keyevent.serial][xkey] = newSeq[Event]()
-      serials[keyevent.serial][xkey].add(Event(eventType: KeyPressed,
-          key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN)))
+      result.add Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN))
     of KeyRelease:
       let keyevent = cast[PXKeyEvent](addr(event))
       let xkey = int(keyevent.keycode)
-      # ugly, but required to catch auto-repeat keys of X11
-      if not (keyevent.serial in serials):
-        serials[keyevent.serial] = initTable[int, seq[Event]]()
-      if not (xkey in serials[keyevent.serial]):
-        serials[keyevent.serial][xkey] = newSeq[Event]()
-      serials[keyevent.serial][xkey].add Event(eventType: KeyReleased,
-          key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN))
+      result.add Event(eventType: KeyReleased, key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN))
     of ButtonPress:
       let button = int(cast[PXButtonEvent](addr(event)).button)
       if button == Button4:
@@ -173,11 +161,6 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
       result.add Event(eventType: ResizedWindow)
     else:
       discard
-  # little hack to work around X11 auto-repeat keys
-  for (serial, keys) in serials.pairs:
-    for (key, events) in keys.pairs:
-      if events.len == 1:
-        result.add events[0]
 
 
 proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
