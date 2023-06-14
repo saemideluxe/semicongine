@@ -21,7 +21,6 @@ type
     Starting
     Running
     Shutdown
-    Destroyed
   Input = object
     keyIsDown: set[Key]
     keyWasPressed: set[Key]
@@ -56,7 +55,6 @@ proc destroy*(engine: var Engine) =
     engine.debugger.destroy()
   engine.window.destroy()
   engine.instance.destroy()
-  engine.state = Destroyed
 
 
 proc initEngine*(
@@ -104,13 +102,11 @@ proc initEngine*(
   startMixerThread()
 
 proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
-  assert engine.state != Destroyed
   if engine.renderer.isSome:
     engine.renderer.get.destroy()
   engine.renderer = some(engine.device.initRenderer(renderPass))
 
 proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="transform") =
-  assert engine.state != Destroyed
   assert transformAttribute == "" or transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
   assert engine.renderer.isSome
   engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers, transformAttribute=transformAttribute)
@@ -121,6 +117,11 @@ proc renderScene*(engine: var Engine, scene: var Scene) =
   engine.renderer.get.updateMeshData(scene)
   engine.renderer.get.updateUniformData(scene)
   engine.renderer.get.render(scene)
+
+proc updateAnimations*(engine: var Engine, scene: var Scene, dt: float32) =
+  assert engine.state == Running
+  assert engine.renderer.isSome
+  engine.renderer.get.updateAnimations(scene, dt)
 
 proc updateInputs*(engine: var Engine): EngineState =
   assert engine.state in [Starting, Running]

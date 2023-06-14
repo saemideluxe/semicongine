@@ -2,6 +2,7 @@ import semicongine/core
 export core
 
 import semicongine/audio
+import semicongine/animation
 import semicongine/engine
 import semicongine/collision
 import semicongine/scene
@@ -15,6 +16,7 @@ import semicongine/platform/window
 import semicongine/vulkan
 
 export audio
+export animation
 export engine
 export collision
 export scene

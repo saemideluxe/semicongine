@@ -7,6 +7,7 @@ import std/hashes
 import std/typetraits
 
 import ./core
+import ./animation
 
 type
   Scene* = object
@@ -25,18 +26,33 @@ type
 
   Entity* = ref object of RootObj
     name*: string
-    transform*: Mat4 # todo: cache transform + only update VBO when transform changed
+    internal_transform: Mat4 # todo: cache transform + only update VBO when transform changed
     parent*: Entity
     children*: seq[Entity]
     components*: seq[Component]
 
-func getModelTransform*(entity: Entity): Mat4 =
-  assert not entity.isNil
-  result = Unit4
-  var currentEntity = entity
-  while currentEntity != nil:
-    result = currentEntity.transform * result
-    currentEntity = currentEntity.parent
+  EntityAnimation* = ref object of Component
+    player: AnimationPlayer[Mat4]
+
+func newEntityAnimation*(animation: Animation[Mat4]): EntityAnimation =
+  result = EntityAnimation(player: newAnimator(animation))
+  result.player.currentValue = Unit4
+
+func setAnimation*(entityAnimation: EntityAnimation, animation: Animation[Mat4]) =
+  entityAnimation.player.animation = animation
+  entityAnimation.player.resetPlayer()
+
+func start*(animation: var EntityAnimation) =
+  animation.player.start()
+
+func stop*(animation: var EntityAnimation) =
+  animation.player.stop()
+
+func update*(animation: var EntityAnimation, dt: float32) =
+  animation.player.advance(dt)
+
+func getValue*(animation: var EntityAnimation): Mat4 =
+  return animation.player.currentValue
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
@@ -93,24 +109,8 @@ func hash*(component: Component): Hash =
 method `$`*(entity: Entity): string {.base.} = entity.name
 method `$`*(component: Component): string {.base.} =
   "Unknown Component"
-
-proc prettyRecursive*(entity: Entity): seq[string] =
-  var compList: seq[string]
-  for comp in entity.components:
-    compList.add $comp
-
-  var trans = entity.transform.col(3)
-  var pos = entity.getModelTransform().col(3)
-  result.add "- " & $entity & " [" & $trans.x & ", " & $trans.y & ", " & $trans.z & "] ->  [" & $pos.x & ", " & $pos.y & ", " & $pos.z & "]"
-  if compList.len > 0:
-    result.add "  [" & compList.join(", ") & "]"
-
-  for child in entity.children:
-    for childLine in child.prettyRecursive:
-      result.add "  " & childLine
-
-proc pretty*(entity: Entity): string =
-  entity.prettyRecursive.join("\n")
+method `$`*(animation: EntityAnimation): string =
+  &"Entity animation: {animation.player.animation}"
 
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
@@ -130,7 +130,7 @@ proc add*(entity: Entity, components: seq[Component]) =
 func newEntity*(name: string = ""): Entity =
   result = new Entity
   result.name = name
-  result.transform = Unit4
+  result.internal_transform = Unit4
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
 
@@ -140,7 +140,7 @@ func newEntity*(name: string, firstChild: Entity, children: varargs[Entity]): En
   for child in children:
     result.add child
   result.name = name
-  result.transform = Unit4
+  result.internal_transform = Unit4
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
 
@@ -152,7 +152,7 @@ proc newEntity*(name: string, firstComponent: Component, components: varargs[Com
     result.add component
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
-  result.transform = Unit4
+  result.internal_transform = Unit4
 
 iterator allEntitiesOfType*[T: Entity](root: Entity): T =
   var queue = @[root]
@@ -223,3 +223,35 @@ iterator allEntities*(root: Entity): Entity =
     for child in next.children:
       queue.add child
     yield next
+
+func transform*(entity: Entity): Mat4 =
+  result = entity.internal_transform
+  for component in entity.components.mitems:
+    if component of EntityAnimation:
+      result = result * EntityAnimation(component).getValue
+
+func `transform=`*(entity: Entity, value: Mat4) =
+  entity.internal_transform = value
+
+func getModelTransform*(entity: Entity): Mat4 =
+  result = entity.transform
+  if not entity.parent.isNil:
+    result = entity.transform * entity.parent.getModelTransform()
+
+proc prettyRecursive*(entity: Entity): seq[string] =
+  var compList: seq[string]
+  for comp in entity.components:
+    compList.add $comp
+
+  var trans = entity.transform.col(3)
+  var pos = entity.getModelTransform().col(3)
+  result.add "- " & $entity & " [" & $trans.x & ", " & $trans.y & ", " & $trans.z & "] ->  [" & $pos.x & ", " & $pos.y & ", " & $pos.z & "]"
+  if compList.len > 0:
+    result.add "  [" & compList.join(", ") & "]"
+
+  for child in entity.children:
+    for childLine in child.prettyRecursive:
+      result.add "  " & childLine
+
+proc pretty*(entity: Entity): string =
+  entity.prettyRecursive.join("\n")
