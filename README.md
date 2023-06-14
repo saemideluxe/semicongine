@@ -1,5 +1,4 @@
-Semicongine
-===========
+# Semicongine
 
 Hi there
 
@@ -7,18 +6,16 @@ This is a little game engine, mainly trying to wrap around vulkan and the
 operating system's windowing, input and audio system. I am using the last
 programming language you will ever need, [Nim](https://nim-lang.org/)
 
-Building
---------
+## Building
 
-Requires Nim to be installed and ```glslangValidator``` to be downloaded to the
-directory of the main compilation file (e.g. into ```examples/``` in order to
+Requires Nim to be installed and `glslangValidator` to be downloaded to the
+directory of the main compilation file (e.g. into `examples/` in order to
 compile the examples). It can be downloaded at
 https://github.com/KhronosGroup/glslang/releases/.
 
-Run ```nim help``` to see a list of available build commands.
+Run `nim help` to see a list of available build commands.
 
-Roadmap
--------
+## Roadmap
 
 Here a bit to see what has been planed and what is done already. Is being
 updated frequently (marking those checkboxes just feels to good to stop working).
@@ -38,45 +35,41 @@ Rendering:
 Required for 3D rendering:
 
 - [ ] Depth buffering
-- [ ] Mipmaps 
+- [ ] Mipmaps
 
 Asset handling:
-- [x] Resource loading
-      - [x] Mod/resource-pack concept
-      - [x] Load from directory
-      - [x] Load from zip
-      - [x] Load from exe-embeded
+
+- [x] Resource loading - [x] Mod/resource-pack concept - [x] Load from directory - [x] Load from zip - [x] Load from exe-embeded
 - [x] Mesh/material files (glTF, but incomplete, not all features supported)
 - [x] Image files (BMP RGBA)
 - [x] Audio files (AU)
 - [x] API to transform/recalculate mesh data
 
 Other (required for alpha release):
+
 - [x] Config files ala \*.ini files (use std/parsecfg)
 - [x] Mouse/Keyboard input handling
   - [x] X11
   - [x] Win32
 - [x] Enable/disable hardware cursor
-- [x] Fullscreen mode + switch between modes
-      - [x] Linux
-      - [x] Window
-- [x] Audio playing
-      - [x] Linux
-      - [x] Windows Waveform API
+- [x] Fullscreen mode + switch between modes - [x] Linux - [x] Window
+- [x] Audio playing - [x] Linux - [x] Windows Waveform API
 - [ ] Generic configuration concept (engine defaults, per-user, etc)
 - [ ] Input-mapping configuration
 - [ ] Telemetry
-    - [x] Add simple event logging service
-    - [ ] Add exception reporting
+  - [x] Add simple event logging service
+  - [ ] Add exception reporting
 
 Other important features:
+
 - [ ] Multisampling
 - [x] Text rendering
-- [ ] Animation system
+- [x] Animation system
 - [ ] Sprite system
 - [ ] Particle system
 
-Other less features:
+Other less important features:
+
 - [ ] Viewport scaling (e.g. framebuffer resolution != window resolution)
 - [ ] Query and display rendering information from Vulkan?
 - [ ] Game controller input handling
@@ -89,20 +82,18 @@ Quality improvments:
 - [x] Better rendering pipeline API
 
 Build-system:
+
 - [x] move all of Makefile to config.nims
 
-
-Documentation
-=============
+# Documentation
 
 Okay, here is first quick-n-dirty documentation, the only purpose to organize my thoughts a bit.
 
-Engine parts
-------------
+## Engine parts
 
 Currently we have at least the following:
 
-- Rendering: rendering.nim vulkan/*
+- Rendering: rendering.nim vulkan/\*
 - Scene graph: entity.nim
 - Audio: audio.nim audiotypes.nim
 - Input: events.nim
@@ -114,8 +105,7 @@ Currently we have at least the following:
 
 Got you: Everything is wip, but (wip) here means work has not started yet.
 
-Handling of assets
-------------------
+## Handling of assets
 
 A short description how I want to handle assets.
 
@@ -131,8 +121,7 @@ In-memory layout of assets (everything needs to be converted to those while load
 - Audio: 2 Channel 16 bit signed little endian, 44100Hz
 - Meshes: non-interleaved, lists of values for each vertex, one list per attribute
 
-Configuration
--------------
+## Configuration
 
 Or: How to organize s\*\*t that is not code
 
@@ -153,7 +142,6 @@ Okay, let's look at each of those and how I plan to implement them:
 
 **1. Build configuration**
 
-
 **2. Runtime settings**
 
 This is mostly implemented already. I am using the Nim module std/parsecfg.
@@ -165,13 +153,13 @@ settings tree that can be access via a setting-hierarchy like this:
 
     setting("a.b.c.d.e")
 
-```a.b``` refers to the settings directory ```./a/b/``` (from the settings-root)
-```c``` refers to the file ```c.ini``` inside ```./a/b/```
-```d``` refers to the ini-section inside the file ```./a/b/c.ini```
-```e``` refers to the key inside section ```d``` inside the file ```./a/b/c.ini```
+`a.b` refers to the settings directory `./a/b/` (from the settings-root)
+`c` refers to the file `c.ini` inside `./a/b/`
+`d` refers to the ini-section inside the file `./a/b/c.ini`
+`e` refers to the key inside section `d` inside the file `./a/b/c.ini`
 
-```a.b``` are optional, they just allow larger configuration trees.
-```d``` is optional, if it is not give, ```e``` refers to the top-level section
+`a.b` are optional, they just allow larger configuration trees.
+`d` is optional, if it is not give, `e` refers to the top-level section
 of the ini-file.
 
 **3. Mods**
