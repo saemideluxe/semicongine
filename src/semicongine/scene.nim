@@ -54,6 +54,23 @@ func update*(animation: var EntityAnimation, dt: float32) =
 func getValue*(animation: var EntityAnimation): Mat4 =
   return animation.player.currentValue
 
+func transform*(entity: Entity): Mat4 =
+  result = entity.internal_transform
+  for component in entity.components.mitems:
+    if component of EntityAnimation:
+      result = result * EntityAnimation(component).getValue
+
+func originalTransform*(entity: Entity): Mat4 =
+  entity.internal_transform
+
+func `transform=`*(entity: Entity, value: Mat4) =
+  entity.internal_transform = value
+
+func getModelTransform*(entity: Entity): Mat4 =
+  result = entity.transform
+  if not entity.parent.isNil:
+    result = entity.transform * entity.parent.getModelTransform()
+
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
   setValues(scene.shaderGlobals[name], @[data])
@@ -223,20 +240,6 @@ iterator allEntities*(root: Entity): Entity =
     for child in next.children:
       queue.add child
     yield next
-
-func transform*(entity: Entity): Mat4 =
-  result = entity.internal_transform
-  for component in entity.components.mitems:
-    if component of EntityAnimation:
-      result = result * EntityAnimation(component).getValue
-
-func `transform=`*(entity: Entity, value: Mat4) =
-  entity.internal_transform = value
-
-func getModelTransform*(entity: Entity): Mat4 =
-  result = entity.transform
-  if not entity.parent.isNil:
-    result = entity.transform * entity.parent.getModelTransform()
 
 proc prettyRecursive*(entity: Entity): seq[string] =
   var compList: seq[string]
