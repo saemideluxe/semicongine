@@ -201,8 +201,10 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entit
 
   # transformation
   if node.hasKey("matrix"):
-    for i in 0 .. node["matrix"].len:
-      result.transform.data[i] = node["matrix"][i].getFloat()
+    var mat: Mat4
+    for i in 0 ..< node["matrix"].len:
+      mat[i] = node["matrix"][i].getFloat()
+    result.transform = mat
   else:
     var (t, r, s) = (Unit4F32, Unit4F32, Unit4F32)
     if node.hasKey("translation"):
@@ -240,7 +242,7 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entit
 proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): Scene =
   var rootEntity = newEntity("<root>")
   for nodeId in scenenode["nodes"]:
-    let node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
+    var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
     node.transform = node.transform * scale3d(1'f32, -1'f32, 1'f32)
     rootEntity.add node
 

@@ -101,6 +101,14 @@ template columnCount*(m: typedesc): int =
   elif m is TMat34: 4
   elif m is TMat43: 3
   elif m is TMat4: 4
+template matlen*(m: typedesc): int =
+  when m is TMat2: 4
+  elif m is TMat23: 6
+  elif m is TMat32: 6
+  elif m is TMat3: 9
+  elif m is TMat34: 12
+  elif m is TMat43: 12
+  elif m is TMat4: 16
 
 
 func toString[T](value: T): string =
@@ -133,7 +141,9 @@ func `$`*(v: TMat43[SomeNumber]): string = toString[TMat43[SomeNumber]](v)
 func `$`*(v: TMat4[SomeNumber]): string = toString[TMat4[SomeNumber]](v)
 
 func `[]`*[T: TMat](m: T, row, col: int): auto = m.data[col + row * T.columnCount]
-proc `[]=`*[T: TMat, U](m: var T, row, col: int, value: U) = m.data[col + row * T.columnCount] = value
+func `[]=`*[T: TMat, U](m: var T, row, col: int, value: U) = m.data[col + row * T.columnCount] = value
+func `[]`*[T: TMat](m: T, i: int): auto = m.data[i]
+func `[]=`*[T: TMat, U](m: var T, i: int, value: U) = m.data[i] = value
 
 func row*[T: TMat2](m: T, i: 0..1): auto = TVec2([m[i, 0], m[i, 1]])
 func row*[T: TMat32](m: T, i: 0..2): auto = TVec2([m[i, 0], m[i, 1]])
@@ -172,6 +182,27 @@ proc createMatMatMultiplicationOperator(leftType: typedesc, rightType: typedesc,
       newIdentDefs(ident("b"), ident(rightType.name))
     ],
     body=nnkObjConstr.newTree(ident(outType.name), nnkExprColonExpr.newTree(ident("data"), data)),
+    procType=nnkFuncDef,
+  )
+
+proc createMatMatAdditionOperator(theType: typedesc): NimNode =
+  var data = nnkBracket.newTree()
+  for i in 0 ..< matlen(theType):
+    data.add(
+      infix(
+        nnkBracketExpr.newTree(ident("a"), newLit(i)),
+        "+",
+        nnkBracketExpr.newTree(ident("b"), newLit(i)),
+    ))
+
+  return newProc(
+    postfix(nnkAccQuoted.newTree(ident("+")), "*"),
+    params=[
+      ident("auto"),
+      newIdentDefs(ident("a"), ident(theType.name)),
+      newIdentDefs(ident("b"), ident(theType.name))
+    ],
+    body=nnkObjConstr.newTree(ident(theType.name), nnkExprColonExpr.newTree(ident("data"), data)),
     procType=nnkFuncDef,
   )
 
@@ -275,6 +306,14 @@ macro createAllMultiplicationOperators() =
   result.add(createMatMatMultiplicationOperator(TMat43, TMat34, TMat4))
   result.add(createMatMatMultiplicationOperator(TMat4, TMat43, TMat43))
   result.add(createMatMatMultiplicationOperator(TMat4, TMat4, TMat4))
+
+  result.add(createMatMatAdditionOperator(TMat2))
+  result.add(createMatMatAdditionOperator(TMat23))
+  result.add(createMatMatAdditionOperator(TMat32))
+  result.add(createMatMatAdditionOperator(TMat3))
+  result.add(createMatMatAdditionOperator(TMat34))
+  result.add(createMatMatAdditionOperator(TMat43))
+  result.add(createMatMatAdditionOperator(TMat4))
 
   result.add(createVecMatMultiplicationOperator(TMat2, TVec2))
   result.add(createVecMatMultiplicationOperator(TMat3, TVec3))

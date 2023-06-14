@@ -85,7 +85,7 @@ proc newTextbox*(maxLen: uint32, font: Font, text=toRunes("")): Textbox =
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs)
   result.mesh.setInstanceTransforms(@[Unit4F32])
   result.name = $text
-  result.transform = Unit4F32
+  Entity(result).transform = Unit4F32
 
   # wrap the text mesh in a new entity to preserve the font-scaling
   var box = newEntity("box", result.mesh)

@@ -80,9 +80,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
   # create index buffer if necessary
   var indicesBufferSize = 0'u64
   for mesh in allMeshes:
-    if mesh.indexType != None:
+    if mesh.indexType != MeshIndexType.None:
       let indexAlignment = case mesh.indexType
-        of None: 0'u64
+        of MeshIndexType.None: 0'u64
         of Tiny: 1'u64
         of Small: 2'u64
         of Big: 4'u64
@@ -140,7 +140,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         if perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
           perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
 
-    let indexed = mesh.indexType != None
+    let indexed = mesh.indexType != MeshIndexType.None
     var drawable = Drawable(
       elementCount: if indexed: mesh.indicesCount else: mesh.vertexCount,
       bufferOffsets: offsets,
@@ -149,7 +149,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     )
     if indexed:
       let indexAlignment = case mesh.indexType
-        of None: 0'u64
+        of MeshIndexType.None: 0'u64
         of Tiny: 1'u64
         of Small: 2'u64
         of Big: 4'u64
@@ -223,7 +223,7 @@ proc updateMeshData*(renderer: var Renderer, scene: Scene) =
     # if mesh transformation attribute is enabled, update the model matrix
     if renderer.scenedata[scene].transformAttribute != "":
       let transform = mesh.entity.getModelTransform()
-      if not (mesh in renderer.scenedata[scene].entityTransformationCache) or renderer.scenedata[scene].entityTransformationCache[mesh] != transform or mesh.areInstanceTransformsDirty:
+      if not (mesh in renderer.scenedata[scene].entityTransformationCache) or renderer.scenedata[scene].entityTransformationCache[mesh] != transform or mesh.areInstanceTransformsDirty :
         var updatedTransform = newSeq[Mat4](int(mesh.instanceCount))
         for i in 0 ..< mesh.instanceCount:
           updatedTransform[i] = transform * mesh.getInstanceTransform(i)
@@ -236,6 +236,10 @@ proc updateMeshData*(renderer: var Renderer, scene: Scene) =
         renderer.scenedata[scene].refreshMeshAttributeData(mesh, attribute)
     var m = mesh
     m.clearDataChanged()
+
+proc updateAnimations*(renderer: var Renderer, scene: var Scene, dt: float32) =
+  for animation in allComponentsOfType[EntityAnimation](scene.root):
+    animation.update(dt)
 
 proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
   assert scene in renderer.scenedata
