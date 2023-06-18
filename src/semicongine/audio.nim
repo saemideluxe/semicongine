@@ -146,6 +146,10 @@ proc isPlaying*(mixer: var Mixer): bool =
         return true
   return false
 
+proc isPlaying*(mixer: var Mixer, track: string): bool =
+  mixer.lock.withLock():
+    return mixer.tracks.contains(track) and mixer.tracks[track].playing.len > 0
+
 func applyLevel(sample: Sample, levelLeft, levelRight: Level): Sample =
   [int16(float(sample[0]) * levelLeft), int16(float(sample[1]) * levelRight)]
 
