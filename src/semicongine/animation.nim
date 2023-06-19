@@ -36,7 +36,7 @@ type
   AnimationPlayer*[T] = object
     animation*: Animation[T]
     currentTime: float32
-    playing: bool
+    playing*: bool
     currentDirection: int
     currentIteration: int
     currentValue*: T

@@ -117,7 +117,7 @@ func toString[T](value: T): string =
     maxwidth = 0
 
   for n in value.data:
-    let strval = $n
+    let strval = &"{n:.2}"
     strvalues.add(strval)
     if strval.len > maxwidth:
       maxwidth = strval.len

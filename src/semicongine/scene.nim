@@ -51,14 +51,11 @@ func stop*(animation: var EntityAnimation) =
 func update*(animation: var EntityAnimation, dt: float32) =
   animation.player.advance(dt)
 
-func getValue*(animation: var EntityAnimation): Mat4 =
-  return animation.player.currentValue
-
 func transform*(entity: Entity): Mat4 =
   result = entity.internal_transform
   for component in entity.components.mitems:
-    if component of EntityAnimation:
-      result = result * EntityAnimation(component).getValue
+    if component of EntityAnimation and EntityAnimation(component).player.playing:
+      result = result * EntityAnimation(component).player.currentValue
 
 func originalTransform*(entity: Entity): Mat4 =
   entity.internal_transform
