@@ -67,8 +67,9 @@ Other important features:
 - [x] Animation system
 - [ ] Sprite system
 - [ ] Particle system
-- [ ] Sound fading
+- [ ] Sound-animation
 - [ ] Named entity components
+- [ ] Paletton-export-loader
 
 Other less important features:
 
