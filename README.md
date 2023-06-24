@@ -67,6 +67,8 @@ Other important features:
 - [x] Animation system
 - [ ] Sprite system
 - [ ] Particle system
+- [ ] Sound fading
+- [ ] Named entity components
 
 Other less important features:
 
