@@ -3,9 +3,9 @@ import std/math
 # in order to generate sound files that are directly usable with the engine,
 # convert an audio file to a raw PCM signed 16 bit little endian file with 2 channels and 48kHz:
 #
-# ffmpeg -i <infile> -f s16le -ac 2 -ar 48000 -acodec pcm_s16le <outfile>
+# ffmpeg -i <infile> -f s16le -ac 2 -ar 44100 -acodec pcm_s16le <outfile>
 
-const AUDIO_SAMPLE_RATE* = 48000
+const AUDIO_SAMPLE_RATE* = 44100
 
 type
   Level* = 0'f .. 1'f

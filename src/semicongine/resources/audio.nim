@@ -79,10 +79,17 @@ proc readVorbis*(stream: Stream): Sound =
     raise newException(Exception, &"Unable to read ogg/vorbis sound file, error code: {nSamples}")
   if sampleRate != AUDIO_SAMPLE_RATE:
     raise newException(Exception, &"Only support sample rate of {AUDIO_SAMPLE_RATE} Hz but got {sampleRate} Hz, please resample (e.g. ffmpeg -i <infile> -acodec libvorbis -ar {AUDIO_SAMPLE_RATE} <outfile>)")
-  if channels != 2:
-    raise newException(Exception, &"Currently only support 2 channels, but ogg/ vorbis file had {channels}")
 
   result = new Sound
   result[].setLen(int(nSamples))
-  copyMem(addr result[][0], output, nSamples * sizeof(Sample))
-  free(output)
+  if channels == 2:
+    copyMem(addr result[][0], output, nSamples * sizeof(Sample))
+    free(output)
+  elif channels == 1:
+    for i in 0 ..< nSamples:
+      let value = cast[ptr UncheckedArray[int16]](output)[i]
+      result[].add [value, value]
+    free(output)
+  else:
+    free(output)
+    raise newException(Exception, "Only support mono and stereo audio at the moment (1 or 2 channels), but found " & $channels)
