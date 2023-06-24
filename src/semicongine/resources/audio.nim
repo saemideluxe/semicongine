@@ -34,8 +34,6 @@ proc readSample(stream: Stream, encoding: Encoding, channels: int): Sample =
   else:
     result[1] = result[0]
 
-
-
 # https://en.wikipedia.org/wiki/Au_file_format
 proc readAU*(stream: Stream): Sound =
   var header: AuHeader
@@ -81,8 +79,8 @@ proc readVorbis*(stream: Stream): Sound =
     raise newException(Exception, &"Only support sample rate of {AUDIO_SAMPLE_RATE} Hz but got {sampleRate} Hz, please resample (e.g. ffmpeg -i <infile> -acodec libvorbis -ar {AUDIO_SAMPLE_RATE} <outfile>)")
 
   result = new Sound
-  result[].setLen(int(nSamples))
   if channels == 2:
+    result[].setLen(int(nSamples))
     copyMem(addr result[][0], output, nSamples * sizeof(Sample))
     free(output)
   elif channels == 1:
