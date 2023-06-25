@@ -7,7 +7,7 @@ import std/os
 
 const ENGINENAME* = "semicongine"
 const ENGINEVERSION* = static:
-  let nimblePath = currentSourcePath.parentDir().parentDir().parentDir().parentDir().joinPath("semicongine.nimble")
+  let nimblePath = currentSourcePath.parentDir().parentDir().parentDir().joinPath("semicongine.nimble")
   let nimbleFile = newStringStream(staticRead(nimblePath))
   let config = loadConfig(nimbleFile)
   config.getSectionValue("", "version")
