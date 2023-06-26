@@ -81,7 +81,7 @@ gl_Position = vec4(position, 1.0);
   var myengine = initEngine("Squares")
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
 
-  var scene = newScene("scene", newEntity("scene", newEntity("squares", squaremesh)))
+  var scene = newScene("scene", newEntity("scene", [], newEntity("squares", {"mesh": Component(squaremesh)})))
   myengine.addScene(scene, vertexInput, @[], transformAttribute="")
   scene.addShaderGlobal("time", 0.0'f32)
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):

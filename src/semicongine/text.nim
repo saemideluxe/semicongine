@@ -88,7 +88,7 @@ proc newTextbox*(maxLen: uint32, font: Font, text=toRunes("")): Textbox =
   Entity(result).transform = Unit4F32
 
   # wrap the text mesh in a new entity to preserve the font-scaling
-  var box = newEntity("box", result.mesh)
+  var box = newEntity("box", {"mesh": Component(result.mesh)})
   # box.transform = scale3d(font.fontscale * 0.002, font.fontscale * 0.002)
   box.transform = scale3d(1 / font.resolution, 1 / font.resolution)
   result.add box

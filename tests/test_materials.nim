@@ -4,7 +4,7 @@ import std/tables
 import semicongine
 
 proc main() =
-  var scene = newScene("main", root=newEntity("rect", rect()))
+  var scene = newScene("main", root=newEntity("rect", {"mesh": Component(rect())}))
   let (RT, WT, PT) = (hexToColorAlpha("A51931").asPixel, hexToColorAlpha("F4F5F8").asPixel, hexToColorAlpha("2D2A4A").asPixel)
   let
     # image from memory

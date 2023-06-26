@@ -135,15 +135,15 @@ when isMainModule:
 
   # define mesh objects
   scene = newScene("scene", newEntity("scene"))
-  scene.root.add newEntity("background", backgroundmesh)
-  let keyboard = newEntity("keyboard", keyboardmesh)
+  scene.root.add newEntity("background", {"mesh": Component(backgroundmesh)})
+  let keyboard = newEntity("keyboard", {"mesh": Component(keyboardmesh)})
   keyboard.transform = translate3d(
     -float32(rowWidth) / 2'f32,
     -float32(tupleLen(keyRows) * (keyDimension + keyGap) - keyGap) / 2'f32,
     0'f32
   )
-  scene.root.add newEntity("keyboard-center", keyboard)
-  scene.root.add newEntity("cursor", cursormesh)
+  scene.root.add newEntity("keyboard-center", [], keyboard)
+  scene.root.add newEntity("cursor", {"mesh": Component(cursormesh)})
 
   # shaders
   const
@@ -194,7 +194,7 @@ when isMainModule:
     let mousePos = translate3d(myengine.mousePosition().x + 20, myengine.mousePosition().y + 20, 0'f32)
     scene.root.firstWithName("cursor").transform = mousePos
 
-    var mesh = Mesh(scene.root.firstWithName("keyboard").components[0])
+    var mesh = Mesh(scene.root.firstWithName("keyboard")["mesh"])
     for (index, key) in enumerate(keyIndices):
       if myengine.keyWasPressed(key):
         let baseIndex = uint32(index * 4)

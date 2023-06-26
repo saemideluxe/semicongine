@@ -237,7 +237,7 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entit
 
   # mesh
   if node.hasKey("mesh"):
-    result.add loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
+    result[name & "_mesh"] = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
 
 proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): Scene =
   var rootEntity = newEntity("<root>")
