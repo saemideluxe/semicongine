@@ -1,8 +1,8 @@
 import semicongine
 
 proc main() =
-  var ent1 = newEntity("hoho", rect())
-  var ent2 = newEntity("hehe", ent1)
+  var ent1 = newEntity("hoho", {"mesh": Component(rect())})
+  var ent2 = newEntity("hehe", [], ent1)
   var myScene = newScene("hi", ent2)
   myScene.root.transform = translate3d(0.2'f32, 0'f32, 0'f32)
   myScene.root.children[0].transform = translate3d(0'f32, 0.2'f32, 0'f32)

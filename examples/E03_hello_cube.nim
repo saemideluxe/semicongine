@@ -78,7 +78,7 @@ when isMainModule:
       main="color = outcolor;"
     )
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  var cube = newScene("scene", newEntity("cube", newMesh(positions=cube_pos, indices=tris, colors=cube_color)))
+  var cube = newScene("scene", newEntity("cube", {"mesh": Component(newMesh(positions=cube_pos, indices=tris, colors=cube_color))}))
   cube.addShaderGlobal("projection", Unit4f32)
   cube.addShaderGlobal("view", Unit4f32)
   cube.addShaderGlobal("model", Unit4f32)

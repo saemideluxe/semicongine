@@ -19,14 +19,14 @@ when isMainModule:
   var myengine = initEngine("Pong")
   level = newScene("scene", newEntity("Level"))
   var playerbarmesh = rect(color=barcolor)
-  var playerbar = newEntity("playerbar", playerbarmesh)
+  var playerbar = newEntity("playerbar", {"mesh": Component(playerbarmesh)})
   playerbar.transform = scale3d(barWidth, barSize, 1'f) * translate3d(0.5'f, 0'f, 0'f)
-  var player = newEntity("player", playerbar)
+  var player = newEntity("player", [], playerbar)
   player.transform = translate3d(0'f, 0.3'f, 0'f)
   level.root.add player
 
   var ballmesh = circle(color=ballcolor)
-  var ball = newEntity("ball", ballmesh)
+  var ball = newEntity("ball", {"mesh": Component(ballmesh)})
   ball.transform = scale3d(ballSize, ballSize, 1'f) * translate3d(10'f, 10'f, 0'f)
   level.root.add ball
 

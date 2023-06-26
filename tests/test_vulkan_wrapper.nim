@@ -3,37 +3,37 @@ import std/tables
 import semicongine
 
 proc scene_different_mesh_types(): Entity =
-  result = newEntity("root",
-    newEntity("triangle1", newMesh(
+  result = newEntity("root", [],
+    newEntity("triangle1", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-    )),
-    newEntity("triangle1b", newMesh(
+    ))}),
+    newEntity("triangle1b", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, -0.4), newVec3f(0.4, 0.4), newVec3f(-0.4, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-    )),
-    newEntity("triangle2a", newMesh(
+    ))}),
+    newEntity("triangle2a", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, 0.5), newVec3f(0.5, -0.5), newVec3f(-0.5, -0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]]
-    )),
-    newEntity("triangle2b", newMesh(
+    ))}),
+    newEntity("triangle2b", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, 0.4), newVec3f(0.4, -0.4), newVec3f(-0.4, -0.4)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]]
-    )),
-    newEntity("triangle3a", newMesh(
+    ))}),
+    newEntity("triangle3a", {"mesh": Component(newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false
-    )),
-    newEntity("triangle3b", newMesh(
+    ))}),
+    newEntity("triangle3b", {"mesh": Component(newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false
-    )),
+    ))}),
   )
   for mesh in allComponentsOfType[Mesh](result):
     mesh.setInstanceData("translate", @[newVec3f()])
@@ -63,7 +63,7 @@ proc scene_simple(): Entity =
   mymesh2.setInstanceData("translate", @[newVec3f(0.0, 0.3)])
   mymesh3.setInstanceData("translate", @[newVec3f(-0.3, 0.0)])
   mymesh4.setInstanceData("translate", @[newVec3f(0.0, -0.3), newVec3f(0.0, 0.5)])
-  result = newEntity("root", newEntity("triangle", mymesh4, mymesh3, mymesh2, mymesh1))
+  result = newEntity("root", [], newEntity("triangle", {"mesh1": Component(mymesh4), "mesh2": Component(mymesh3), "mesh3": Component(mymesh2), "mesh4": Component(mymesh1)}))
 
 proc scene_primitives(): Entity =
   var r = rect(color="ff0000")
@@ -73,12 +73,12 @@ proc scene_primitives(): Entity =
   r.setInstanceData("translate", @[newVec3f(0.5, -0.3)])
   t.setInstanceData("translate", @[newVec3f(0.3,  0.3)])
   c.setInstanceData("translate", @[newVec3f(-0.3,  0.1)])
-  result = newEntity("root", t, r, c)
+  result = newEntity("root", {"mesh1": Component(t), "mesh1": Component(r), "mesh1": Component(c)})
 
 proc scene_flag(): Entity =
   var r = rect(color="ff0000")
   r.updateMeshData("color", @[newVec4f(0, 0), newVec4f(1, 0), newVec4f(1, 1), newVec4f(0, 1)])
-  result = newEntity("root", r)
+  result = newEntity("root", {"mesh": Component(r)})
 
 proc main() =
   var engine = initEngine("Test")

@@ -29,7 +29,7 @@ type
     internal_transform: Mat4 # todo: cache transform + only update VBO when transform changed
     parent*: Entity
     children*: seq[Entity]
-    components*: seq[Component]
+    components*: Table[string, Component]
 
   EntityAnimation* = ref object of Component
     player: AnimationPlayer[Mat4]
@@ -53,7 +53,7 @@ func update*(animation: var EntityAnimation, dt: float32) =
 
 func transform*(entity: Entity): Mat4 =
   result = entity.internal_transform
-  for component in entity.components.mitems:
+  for component in entity.components.mvalues:
     if component of EntityAnimation and EntityAnimation(component).player.playing:
       result = result * EntityAnimation(component).player.currentValue
 
@@ -129,41 +129,25 @@ method `$`*(animation: EntityAnimation): string =
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
   entity.children.add child
-proc add*(entity: Entity, component: Component) =
+proc `[]=`*(entity: Entity, index: int, child: Entity) =
+  child.parent = entity
+  entity.children[index] = child
+proc `[]`*(entity: Entity, index: int): Entity =
+  entity.children[index]
+
+proc `[]=`*(entity: Entity, name: string, component: Component) =
   component.entity = entity
-  entity.components.add component
-proc add*(entity: Entity, children: seq[Entity]) =
-  for child in children:
-    child.parent = entity
-    entity.children.add child
-proc add*(entity: Entity, components: seq[Component]) =
-  for component in components:
-    component.entity = entity
-    entity.components.add component
+  entity.components[name] = component
+proc `[]`*(entity: Entity, name: string): Component =
+  entity.components[name]
 
-func newEntity*(name: string = ""): Entity =
+func newEntity*(name: string, components: openArray[(string, Component)] = [], children: varargs[Entity]): Entity =
   result = new Entity
-  result.name = name
-  result.internal_transform = Unit4
-  if result.name == "":
-    result.name = &"Entity[{$(cast[ByteAddress](result))}]"
-
-func newEntity*(name: string, firstChild: Entity, children: varargs[Entity]): Entity =
-  result = new Entity
-  result.add firstChild
   for child in children:
     result.add child
   result.name = name
-  result.internal_transform = Unit4
-  if result.name == "":
-    result.name = &"Entity[{$(cast[ByteAddress](result))}]"
-
-proc newEntity*(name: string, firstComponent: Component, components: varargs[Component]): Entity =
-  result = new Entity
-  result.name = name
-  result.add firstComponent
-  for component in components:
-    result.add component
+  for (name, comp) in components:
+    result[name] = comp
   if result.name == "":
     result.name = &"Entity[{$(cast[ByteAddress](result))}]"
   result.internal_transform = Unit4
@@ -181,7 +165,7 @@ iterator allComponentsOfType*[T: Component](root: Entity): var T =
   var queue = @[root]
   while queue.len > 0:
     let entity = queue.pop
-    for component in entity.components.mitems:
+    for component in entity.components.mvalues:
       if component of T:
         yield T(component)
     for i in countdown(entity.children.len - 1, 0):
@@ -240,8 +224,8 @@ iterator allEntities*(root: Entity): Entity =
 
 proc prettyRecursive*(entity: Entity): seq[string] =
   var compList: seq[string]
-  for comp in entity.components:
-    compList.add $comp
+  for (name, comp) in entity.components.pairs:
+    compList.add name & ": " & $comp
 
   var trans = entity.transform.col(3)
   var pos = entity.getModelTransform().col(3)

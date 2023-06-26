@@ -2,7 +2,6 @@ import std/logging
 import std/streams
 import std/parsecfg
 import std/strutils
-import std/sequtils
 import std/parseutils
 import std/strformat
 import std/tables

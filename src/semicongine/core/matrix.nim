@@ -2,6 +2,7 @@ import std/math
 import std/macros
 import std/random
 import std/strutils
+import std/strformat
 import std/typetraits
 
 import ./vector

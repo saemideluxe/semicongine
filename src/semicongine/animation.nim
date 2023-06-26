@@ -4,7 +4,6 @@ import std/sequtils
 import std/strformat
 import std/algorithm
 
-import ./scene
 import ./core/matrix
 
 type
