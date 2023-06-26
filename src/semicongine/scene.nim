@@ -27,9 +27,9 @@ type
   Entity* = ref object of RootObj
     name*: string
     internal_transform: Mat4 # todo: cache transform + only update VBO when transform changed
-    parent*: Entity
-    children*: seq[Entity]
-    components*: Table[string, Component]
+    parent: Entity
+    children: seq[Entity]
+    components: Table[string, Component]
 
   EntityAnimation* = ref object of Component
     player: AnimationPlayer[Mat4]
@@ -50,6 +50,9 @@ func stop*(animation: var EntityAnimation) =
 
 func update*(animation: var EntityAnimation, dt: float32) =
   animation.player.advance(dt)
+
+func parent(entity: Entity): Entity =
+  entity.parent
 
 func transform*(entity: Entity): Mat4 =
   result = entity.internal_transform
@@ -129,7 +132,7 @@ method `$`*(animation: EntityAnimation): string =
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
   entity.children.add child
-proc `[]=`*(entity: Entity, index: int, child: Entity) =
+proc `[]=`*(entity: var Entity, index: int, child: var Entity) =
   child.parent = entity
   entity.children[index] = child
 proc `[]`*(entity: Entity, index: int): Entity =
