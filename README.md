@@ -70,6 +70,7 @@ Other important features:
 - [ ] Sound-animation
 - [ ] Named entity components
 - [ ] Paletton-export-loader
+- [ ] Arrange buffer memory types based on per-mesh-attribute type instead of per-shader-attribute type
 
 Other less important features:
 
