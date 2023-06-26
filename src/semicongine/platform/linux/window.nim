@@ -42,15 +42,14 @@ proc createWindow*(title: string): NativeWindow =
   discard XSetErrorHandler(XErrorLogger)
 
   let rootWindow = display.XDefaultRootWindow()
+  discard display.XkbSetDetectableAutoRepeat(true, nil)
   var
     attribs: XWindowAttributes
     width = cuint(800)
     height = cuint(600)
   checkXlibResult display.XGetWindowAttributes(rootWindow, addr(attribs))
 
-  var attrs = XSetWindowAttributes(
-    # override_redirect: 1
-  )
+  var attrs = XSetWindowAttributes()
   let window = XCreateWindow(
     display,
     rootWindow,
@@ -106,7 +105,6 @@ proc fullscreen*(window: var NativeWindow, enable: bool) =
     SubstructureRedirectMask or SubstructureNotifyMask,
     addr xev
   )
-  discard window.display.XkbSetDetectableAutoRepeat(false, nil)
   checkXlibResult window.display.XFlush()
 
 proc hideSystemCursor*(window: NativeWindow) =
