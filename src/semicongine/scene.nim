@@ -132,17 +132,17 @@ method `$`*(animation: EntityAnimation): string =
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
   entity.children.add child
-proc `[]=`*(entity: var Entity, index: int, child: var Entity) =
+proc `[]=`*[T](entity: var Entity, index: int, child: var T) =
   child.parent = entity
   entity.children[index] = child
 proc `[]`*(entity: Entity, index: int): Entity =
   entity.children[index]
 
-proc `[]=`*(entity: Entity, name: string, component: Component) =
+proc `[]=`*[T](entity: Entity, name: string, component: T) =
   component.entity = entity
   entity.components[name] = component
-proc `[]`*(entity: Entity, name: string): Component =
-  entity.components[name]
+proc `[]`*[T](entity: Entity, name: string, component: T): T =
+  T(entity.components[name])
 
 func newEntity*(name: string, components: openArray[(string, Component)] = [], children: varargs[Entity]): Entity =
   result = new Entity
