@@ -68,7 +68,7 @@ Other important features:
 - [ ] Sprite system
 - [ ] Particle system
 - [ ] Sound-animation
-- [ ] Named entity components
+- [x] Named entity components
 - [ ] Paletton-export-loader
 - [ ] Arrange buffer memory types based on per-mesh-attribute type instead of per-shader-attribute type
 
