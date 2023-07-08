@@ -53,11 +53,6 @@ proc setupDevice(mixer: var Mixer) =
     bufferaddresses.add (addr mixer.buffers[i])
   mixer.device = openSoundDevice(AUDIO_SAMPLE_RATE, bufferaddresses)
 
-func normalized(level: Level): Level =
-  pow(level, SOUND_SCALE)
-func unnormalized(level: Level): Level =
-  log(level, SOUND_SCALE)
-
 proc loadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
   mixer.sounds[name] = loadAudio(resource)
@@ -73,7 +68,7 @@ proc replaceSound*(mixer: var Mixer, name: string, sound: Sound) =
 proc addTrack*(mixer: var Mixer, name: string, level: Level=1'f) =
   assert not (name in mixer.tracks)
   mixer.lock.withLock():
-    mixer.tracks[name] = Track(level: level.normalized)
+    mixer.tracks[name] = Track(level: level)
 
 proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false, loop=false, levelLeft, levelRight: Level): uint64 =
   assert track in mixer.tracks
@@ -85,8 +80,8 @@ proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false,
       sound: mixer.sounds[soundName],
       position: 0,
       loop: loop,
-      levelLeft: levelLeft.normalized,
-      levelRight: levelRight.normalized
+      levelLeft: levelLeft,
+      levelRight: levelRight
     )
   result = mixer.playbackCounter
   inc mixer.playbackCounter
@@ -98,8 +93,8 @@ proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false,
     track=track,
     stopOtherSounds=stopOtherSounds,
     loop=loop,
-    levelLeft=level.normalized,
-    levelRight=level.normalized
+    levelLeft=level,
+    levelRight=level
   )
 
 proc stop*(mixer: var Mixer) =
@@ -107,25 +102,25 @@ proc stop*(mixer: var Mixer) =
     for track in mixer.tracks.mvalues:
       track.playing.clear()
 
-proc getLevel*(mixer: var Mixer): Level = mixer.level.unnormalized
-proc getLevel*(mixer: var Mixer, track: string): Level = mixer.tracks[track].level.unnormalized
+proc getLevel*(mixer: var Mixer): Level = mixer.level
+proc getLevel*(mixer: var Mixer, track: string): Level = mixer.tracks[track].level
 proc getLevel*(mixer: var Mixer, playbackId : uint64): (Level, Level) =
   for track in mixer.tracks.mvalues:
     if playbackId in track.playing:
-      return (track.playing[playbackId].levelLeft.unnormalized, track.playing[playbackId].levelRight.unnormalized)
+      return (track.playing[playbackId].levelLeft, track.playing[playbackId].levelRight)
 
-proc setLevel*(mixer: var Mixer, level: Level) = mixer.level = level.normalized
+proc setLevel*(mixer: var Mixer, level: Level) = mixer.level = level
 proc setLevel*(mixer: var Mixer, track: string, level: Level) =
   mixer.lock.withLock():
-    mixer.tracks[track].level = level.normalized
+    mixer.tracks[track].level = level
 proc setLevel*(mixer: var Mixer, playbackId: uint64, levelLeft, levelRight: Level) =
   mixer.lock.withLock():
     for track in mixer.tracks.mvalues:
       if playbackId in track.playing:
-        track.playing[playbackId].levelLeft = levelLeft.normalized
-        track.playing[playbackId].levelRight = levelRight.normalized
+        track.playing[playbackId].levelLeft = levelLeft
+        track.playing[playbackId].levelRight = levelRight
 proc setLevel*(mixer: var Mixer, playbackId : uint64, level: Level) =
-  setLevel(mixer, playbackId, level.normalized, level.normalized)
+  setLevel(mixer, playbackId, level, level)
 
 proc stop*(mixer: var Mixer, track: string) =
   assert track in mixer.tracks
