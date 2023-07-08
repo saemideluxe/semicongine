@@ -37,7 +37,7 @@ proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSo
   
 proc writeSoundData*(soundDevice: var NativeSoundDevice, buffer: int) =
   while (soundDevice.buffers[buffer].dwFlags and WHDR_DONE) == 0:
-    discard
+    echo "" # ugly solution to prevent code elimination, need to find a nicer solution
   checkWinMMResult waveOutWrite(soundDevice.handle, addr soundDevice.buffers[buffer], UINT(sizeof(WAVEHDR)))
 
 proc closeSoundDevice*(soundDevice: var NativeSoundDevice) =
