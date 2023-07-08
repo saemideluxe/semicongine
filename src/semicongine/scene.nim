@@ -60,6 +60,10 @@ func transform*(entity: Entity): Mat4 =
     if component of EntityAnimation and EntityAnimation(component).player.playing:
       result = result * EntityAnimation(component).player.currentValue
 
+# TODO: position-setter
+func position*(entity: Entity): Vec3f =
+  return entity.transform.col(3)
+
 func originalTransform*(entity: Entity): Mat4 =
   entity.internal_transform
 

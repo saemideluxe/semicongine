@@ -7,9 +7,9 @@ type
   Framebuffer* = object
     device*: Device
     vk*: VkFramebuffer
-    dimension*: Vec2I
+    dimension*: Vec2u
 
-proc createFramebuffer*(device: Device, renderpass: VkRenderPass, attachments: openArray[ImageView], dimension: Vec2I): Framebuffer =
+proc createFramebuffer*(device: Device, renderpass: VkRenderPass, attachments: openArray[ImageView], dimension: Vec2u): Framebuffer =
   assert device.vk.valid
   assert renderpass.valid
 

@@ -3,10 +3,13 @@ import std/strformat
 import std/logging
 
 import ../core
+import ../mesh
+import ../scene
 import ./buffer
 
 type
   Drawable* = object
+    mesh*: Mesh
     elementCount*: uint32 # number of vertices or indices
     bufferOffsets*: seq[(string, MemoryPerformanceHint, uint64)] # list of buffers and list of offset for each attribute in that buffer
     instanceCount*: uint32 # number of instance
@@ -24,6 +27,8 @@ func `$`*(drawable: Drawable): string =
     &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
 proc draw*(commandBuffer: VkCommandBuffer, drawable: Drawable, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer) =
+    if drawable.mesh.entity.transform == Mat4():
+      return
     debug "Draw ", drawable
 
     var buffers: seq[VkBuffer]
