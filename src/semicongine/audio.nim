@@ -77,7 +77,7 @@ proc addTrack*(mixer: var Mixer, name: string, level: Level=1'f) =
 
 proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false, loop=false, levelLeft, levelRight: Level): uint64 =
   assert track in mixer.tracks
-  assert soundName in mixer.sounds
+  assert soundName in mixer.sounds, soundName & " not loaded"
   mixer.lock.withLock():
     if stopOtherSounds:
       mixer.tracks[track].playing.clear()
