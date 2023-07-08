@@ -60,15 +60,15 @@ func prettyData*(mesh: Mesh): string =
     of Small: &"indices: {mesh.smallIndices}"
     of Big: &"indices: {mesh.bigIndices}")
 
-proc setMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc setMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert not (attribute in mesh.data)
   mesh.data[attribute] = newDataList(data)
 
-proc setMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
+proc setMeshData*(mesh: Mesh, attribute: string, data: DataList) =
   assert not (attribute in mesh.data)
   mesh.data[attribute] = data
 
-proc setInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc setInstanceData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
   assert not (attribute in mesh.data)
   mesh.data[attribute] = newDataList(data)
@@ -155,7 +155,7 @@ proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): ref
   assert attribute in mesh.data
   getValues[T](mesh.data[attribute])
 
-proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
+proc initData*(mesh: Mesh, attribute: ShaderAttribute) =
   assert not (attribute.name in mesh.data)
   mesh.data[attribute.name] = newDataList(thetype=attribute.thetype)
   if attribute.perInstance:
@@ -163,41 +163,41 @@ proc initData*(mesh: var Mesh, attribute: ShaderAttribute) =
   else:
     mesh.data[attribute.name].initData(mesh.vertexCount)
 
-proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc updateMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute
   setValues(mesh.data[attribute], data)
 
-proc updateMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, i: uint32, value: T) =
+proc updateMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, i: uint32, value: T) =
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute
   setValue(mesh.data[attribute], i, value)
 
-proc appendMeshData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc appendMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute
   appendValues(mesh.data[attribute], data)
 
 # currently only used for loading from files, shouls
-proc appendMeshData*(mesh: var Mesh, attribute: string, data: DataList) =
+proc appendMeshData*(mesh: Mesh, attribute: string, data: DataList) =
   assert attribute in mesh.data
   assert data.thetype == mesh.data[attribute].thetype
   mesh.changedAttributes.add attribute
   appendValues(mesh.data[attribute], data)
 
-proc updateInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc updateInstanceData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute
   setValues(mesh.data[attribute], data)
 
-proc appendInstanceData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc appendInstanceData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
   assert attribute in mesh.data
   mesh.changedAttributes.add attribute
   appendValues(mesh.data[attribute], data)
 
-proc appendIndicesData*(mesh: var Mesh, v1, v2, v3: uint32) =
+proc appendIndicesData*(mesh: Mesh, v1, v2, v3: uint32) =
   case mesh.indexType
   of None: raise newException(Exception, "Mesh does not support indexed data")
   of Tiny: mesh.tinyIndices.add([uint8(v1), uint8(v2), uint8(v3)])
@@ -207,10 +207,10 @@ proc appendIndicesData*(mesh: var Mesh, v1, v2, v3: uint32) =
 func hasDataChanged*(mesh: Mesh, attribute: string): bool =
   attribute in mesh.changedAttributes
 
-proc clearDataChanged*(mesh: var Mesh) =
+proc clearDataChanged*(mesh: Mesh) =
   mesh.changedAttributes = @[]
 
-proc transform*[T: GPUType](mesh: var Mesh, attribute: string, transform: Mat4) =
+proc transform*[T: GPUType](mesh: Mesh, attribute: string, transform: Mat4) =
   assert attribute in mesh.data
   for v in getValues[T](mesh.data[attribute])[].mitems:
     v = transform * v
@@ -265,16 +265,16 @@ func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mes
   setMeshData(result, "color", col)
   setInstanceData(result, "transform", @[Unit4F32])
 
-proc areInstanceTransformsDirty*(mesh: var Mesh): bool =
+proc areInstanceTransformsDirty*(mesh: Mesh): bool =
   result = mesh.dirtyInstanceTransforms
   mesh.dirtyInstanceTransforms = false
 
-proc setInstanceTransform*(mesh: var Mesh, i: uint32, mat: Mat4) =
+proc setInstanceTransform*(mesh: Mesh, i: uint32, mat: Mat4) =
   assert 0 <= i and i < mesh.instanceCount
   mesh.instanceTransforms[i] = mat
   mesh.dirtyInstanceTransforms = true
 
-proc setInstanceTransforms*(mesh: var Mesh, mat: seq[Mat4]) =
+proc setInstanceTransforms*(mesh: Mesh, mat: seq[Mat4]) =
   mesh.instanceTransforms = mat
   mesh.dirtyInstanceTransforms = true
 
