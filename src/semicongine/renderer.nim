@@ -142,6 +142,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
 
     let indexed = mesh.indexType != MeshIndexType.None
     var drawable = Drawable(
+      mesh: mesh,
       elementCount: if indexed: mesh.indicesCount else: mesh.vertexCount,
       bufferOffsets: offsets,
       instanceCount: mesh.instanceCount,

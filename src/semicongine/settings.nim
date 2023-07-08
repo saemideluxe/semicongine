@@ -43,36 +43,36 @@ proc loadAllConfig(): Table[string, Config] =
 proc reloadSettings*() =
   allsettings = loadAllConfig()
 
-proc configStr(key, section, namespace: string, default: string): string =
+proc configStr(key, section, namespace: string): string =
   when CONFIGHOTRELOAD:
     while configUpdates.peek() > 0:
       let (updatedNamespace, updatedConfig) = configUpdates.recv()
       allsettings[updatedNamespace] = loadConfig(newStringStream(updatedConfig))
   if not allsettings.hasKey(namespace):
-    return default
-  allsettings[namespace].getSectionValue(section, key, default)
+    raise newException(Exception, &"Settings {namespace}.{section}.{key} was not found")
+  allsettings[namespace].getSectionValue(section, key)
 
-proc setting*[T: int|float|string](key, section, namespace: string, default: T): T =
+proc setting*[T: int|float|string](key, section, namespace: string): T =
   when T is int:
-    let value = configStr(key, section, namespace, $default)
+    let value = configStr(key, section, namespace)
     if parseInt(value, result) == 0:
       raise newException(Exception, &"Unable to parse int from settings {namespace}.{section}.{key}: {value}")
   elif T is float:
-    let value = configStr(key, section, namespace, $default)
+    let value = configStr(key, section, namespace)
     if parseFloat(value, result) == 0:
       raise newException(Exception, &"Unable to parse float from settings {namespace}.{section}.{key}: {value}")
   else:
-    result = configStr(key, section, namespace, default)
+    result = configStr(key, section, namespace)
 
-proc setting*[T: int|float|string](identifier: string, default: T): T =
+proc setting*[T: int|float|string](identifier: string): T =
   # identifier can be in the form:
   # {namespace}.{key}
   # {namespace}.{section}.{key}
   let parts = identifier.rsplit(".")
   if parts.len == 1:
     raise newException(Exception, &"Setting with name {identifier} has no namespace")
-  if parts.len == 2: result = setting[T](parts[1], "", parts[0], default)
-  else: result = setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]), default)
+  if parts.len == 2: result = setting[T](parts[1], "", parts[0])
+  else: result = setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]))
 
 proc hadConfigUpdate*(): bool =
   when CONFIGHOTRELOAD == true:

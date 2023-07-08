@@ -15,9 +15,12 @@ type
   Vec2f* = TVec2[float32]
   Vec3f* = TVec3[float32]
   Vec4f* = TVec4[float32]
-  Vec2i* = TVec2[uint32]
-  Vec3i* = TVec3[uint32]
-  Vec4i* = TVec4[uint32]
+  Vec2i* = TVec2[int32]
+  Vec3i* = TVec3[int32]
+  Vec4i* = TVec4[int32]
+  Vec2u* = TVec2[uint32]
+  Vec3u* = TVec3[uint32]
+  Vec4u* = TVec4[uint32]
 
 converter toVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
   TVec2[T]([orig[0], orig[1]])
@@ -46,6 +49,18 @@ func newVec3f*(x=0'f32, y=0'f32, z=0'f32): auto =
   Vec3f([x, y, z])
 func newVec4f*(x=0'f32, y=0'f32, z=0'f32, a=0'f32): auto =
   Vec4f([x, y, z, a])
+func newVec2i*(x=0'i32, y=0'i32): auto =
+  Vec2i([x, y])
+func newVec3i*(x=0'i32, y=0'i32, z=0'i32): auto =
+  Vec3i([x, y, z])
+func newVec4i*(x=0'i32, y=0'i32, z=0'i32, a=0'i32): auto =
+  Vec4i([x, y, z, a])
+func newVec2u*(x=0'u32, y=0'u32): auto =
+  Vec2u([x, y])
+func newVec3u*(x=0'u32, y=0'u32, z=0'u32): auto =
+  Vec3u([x, y, z])
+func newVec4u*(x=0'u32, y=0'u32, z=0'u32, a=0'u32): auto =
+  Vec4u([x, y, z, a])
 
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
 # Also for Y, Z, R, G, B and One
@@ -105,25 +120,18 @@ func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[
 func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[
     1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
 
-func normalized*[T](vec: TVec2[T]): auto =
+func normalized*[T: SomeFloat](vec: TVec2[T]): auto =
   let l = vec.length
-  when T is SomeFloat:
-    TVec2[T]([vec[0] / l, vec[1] / l])
-  else:
-    TVec2[float]([float(vec[0]) / l, float(vec[1]) / l])
-func normalized*[T](vec: TVec3[T]): auto =
+  if l == 0: vec
+  else: TVec2[T]([vec[0] / l, vec[1] / l])
+func normalized*[T: SomeFloat](vec: TVec3[T]): auto =
   let l = vec.length
-  when T is SomeFloat:
-    TVec3[T]([vec[0] / l, vec[1] / l, vec[2] / l])
-  else:
-    TVec3[float]([float(vec[0]) / l, float(vec[1]) / l, float(vec[2]) / l])
-func normalized*[T](vec: TVec4[T]): auto =
+  if l == 0: return vec
+  else: TVec3[T]([vec[0] / l, vec[1] / l, vec[2] / l])
+func normalized*[T: SomeFloat](vec: TVec4[T]): auto =
   let l = vec.length
-  when T is SomeFloat:
-    TVec4[T]([vec[0] / l, vec[1] / l, vec[2] / l, vec[3] / l])
-  else:
-    TVec4[float]([float(vec[0]) / l, float(vec[1]) / l, float(vec[2]) / l,
-        float(vec[3]) / l])
+  if l == 0: return vec
+  else: TVec4[T]([vec[0] / l, vec[1] / l, vec[2] / l, vec[3] / l])
 
 # scalar operations
 func `+`*(a: TVec2, b: SomeNumber): auto = TVec2([a[0] + b, a[1] + b])
@@ -222,7 +230,7 @@ func cross*(a, b: TVec3): auto = TVec3([
 # macro to allow creation of new vectors by specifying vector components as attributes
 # e.g. myVec.xxy will return a new Vec3 that contains the components x, x an y of the original vector
 # (instead of x, y, z for a simple copy)
-proc vectorAttributeAccessor(accessor: string): NimNode =
+proc vectorAttributeAccessor(accessor: string): seq[NimNode] =
   const ACCESSOR_INDICES = {
     'x': 0,
     'y': 1,
@@ -233,26 +241,53 @@ proc vectorAttributeAccessor(accessor: string): NimNode =
     'b': 2,
     'a': 3,
   }.toTable
-  var ret: NimNode
+  var getterCode, setterCode: NimNode
   let accessorvalue = accessor
 
   if accessorvalue.len == 0:
     raise newException(Exception, "empty attribute")
   elif accessorvalue.len == 1:
-    ret = nnkBracketExpr.newTree(ident("value"), newLit(ACCESSOR_INDICES[
-        accessorvalue[0]]))
+    getterCode = nnkBracketExpr.newTree(ident("vec"), newLit(ACCESSOR_INDICES[accessorvalue[0]]))
+    setterCode = nnkStmtList.newTree(
+      nnkAsgn.newTree(
+        nnkBracketExpr.newTree(ident("vec"), newLit(ACCESSOR_INDICES[accessorvalue[0]])), ident("value"))
+    )
   if accessorvalue.len > 1:
     var attrs = nnkBracket.newTree()
     for attrname in accessorvalue:
-      attrs.add(nnkBracketExpr.newTree(ident("value"), newLit(ACCESSOR_INDICES[attrname])))
-    ret = nnkCall.newTree(ident("TVec" & $accessorvalue.len), attrs)
+      attrs.add(nnkBracketExpr.newTree(ident("vec"), newLit(ACCESSOR_INDICES[attrname])))
+    getterCode = nnkCall.newTree(ident("TVec" & $accessorvalue.len), attrs)
+    setterCode = nnkStmtList.newTree()
+    var i = 0
+    for attrname in accessorvalue:
+      setterCode.add nnkAsgn.newTree(
+        nnkBracketExpr.newTree(ident("vec"), newLit(ACCESSOR_INDICES[attrname])),
+        nnkBracketExpr.newTree(ident("value"), newLit(i)),
+      )
+      inc i
 
-  newProc(
+  result.add newProc(
     name = nnkPostfix.newTree(ident("*"), ident(accessor)),
-    params = [ident("auto"), nnkIdentDefs.newTree(ident("value"), ident("TVec"),
-        newEmptyNode())],
-    body = newStmtList(ret),
+    params = [ident("auto"), nnkIdentDefs.newTree(ident("vec"), ident("TVec"), newEmptyNode())],
+    body = newStmtList(getterCode),
     procType = nnkFuncDef,
+  )
+
+  result.add nnkFuncDef.newTree(
+    nnkPostfix.newTree(
+      newIdentNode("*"),
+      nnkAccQuoted.newTree(newIdentNode(accessor), newIdentNode("="))
+    ),
+    newEmptyNode(),
+    nnkGenericParams.newTree(nnkIdentDefs.newTree(newIdentNode("T"), newEmptyNode(), newEmptyNode())),
+    nnkFormalParams.newTree(
+      newEmptyNode(),
+      nnkIdentDefs.newTree( newIdentNode("vec"), nnkVarTy.newTree(newIdentNode("TVec")), newEmptyNode()),
+      nnkIdentDefs.newTree( newIdentNode("value"), newIdentNode("T"), newEmptyNode())
+    ),
+    newEmptyNode(),
+    newEmptyNode(),
+    setterCode
   )
 
 macro createVectorAttribAccessorFuncs() =

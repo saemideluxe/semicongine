@@ -1,13 +1,13 @@
 import random
-import math
 
 import semicongine
 
 
-proc echoInfo(v: TVec) =
+proc echoInfo[T](v: TVec2[T] or TVec3[T] or TVec4[T]) =
   echo v
   echo "  Length: ", v.length
-  echo "  Normlized: ", v.normalized
+  when T is SomeFloat:
+    echo "  Normlized: ", v.normalized
   echo "  negated: ", -v
 
 proc echoAdd[T, U](v1: T, v2: U) =
@@ -143,6 +143,22 @@ proc testVector() =
   echo "V3I.r: ", randVec3I().r
   echo "V3I.g: ", randVec3I().g
   echo "V3F.b: ", randVec3F().b
+
+  # test setters
+  var v1 = randVec2I(); v1.x = 1 ; v1.y = 2 ; v1.r = 3 ; v1.g = 4
+  v1.xy = randVec2I() ; v1.yx = randVec2I() ; v1.rg = randVec2I() ; v1.gr = randVec2I()
+  var v2 = randVec2F(); v2.x = 1.0 ; v2.y = 2.0 ; v2.r = 3.0 ; v2.g = 4.0
+  v2.xy = randVec2F() ; v2.yx = randVec2F() ; v2.rg = randVec2F() ; v2.gr = randVec2F()
+
+  var v3 = randVec3I(); v3.x = 1 ; v3.y = 2 ; v3.z = 3 ; v3.r = 4 ; v3.g = 5 ; v3.b = 6
+  v3.xyz = randVec3I() ; v3.rgb = randVec3I()
+  var v4 = randVec3F(); v4.x = 1.0 ; v4.y = 2.0 ; v4.z = 3.0 ; v4.r = 4.0 ; v4.g = 5.0 ; v4.b = 6.0
+  v4.xyz = randVec3F() ; v4.rgb = randVec3F()
+
+  var v5 = randVec4I(); v5.x = 1 ; v5.y = 2 ; v5.z = 3; v5.w = 4 ; v5.r = 5 ; v5.g = 6 ; v5.b = 7 ; v5.a = 8
+  v5.xyzw = randVec4I() ; v5.rgba = randVec4I()
+  var v6 = randVec4F(); v6.x = 1.0 ; v6.y = 2.0 ; v6.z = 3.0 ; v6.w = 4.0 ; v6.r = 5.0 ; v6.g = 6.0 ; v6.b = 7.0 ; v6.a = 8.0
+  v6.xyzw = randVec4F() ; v6.rgba = randVec4F()
 
   echo "V2I.xx: ", randVec2I().xx
   echo "V2I.yx: ", randVec2I().xy
