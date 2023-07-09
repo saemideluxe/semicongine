@@ -48,6 +48,10 @@ func start*(animation: EntityAnimation) =
 func stop*(animation: EntityAnimation) =
   animation.player.stop()
 
+func reset*(animation: EntityAnimation) =
+  animation.player.stop()
+  animation.player.resetPlayer()
+
 func update*(animation: EntityAnimation, dt: float32) =
   animation.player.advance(dt)
 
