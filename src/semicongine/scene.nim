@@ -52,17 +52,24 @@ func reset*(animation: EntityAnimation) =
   animation.player.stop()
   animation.player.resetPlayer()
 
+func playing*(animation: EntityAnimation): bool =
+  animation.player.playing
+
 func update*(animation: EntityAnimation, dt: float32) =
   animation.player.advance(dt)
 
 func parent(entity: Entity): Entity =
   entity.parent
 
+# TODO: this is wrong: transfrom setter + getter are not "symetric"
 func transform*(entity: Entity): Mat4 =
   result = entity.internal_transform
   for component in entity.components.mvalues:
     if component of EntityAnimation and EntityAnimation(component).player.playing:
       result = result * EntityAnimation(component).player.currentValue
+
+func `transform=`*(entity: Entity, value: Mat4) =
+  entity.internal_transform = value
 
 # TODO: position-setter
 func position*(entity: Entity): Vec3f =
@@ -70,9 +77,6 @@ func position*(entity: Entity): Vec3f =
 
 func originalTransform*(entity: Entity): Mat4 =
   entity.internal_transform
-
-func `transform=`*(entity: Entity, value: Mat4) =
-  entity.internal_transform = value
 
 func getModelTransform*(entity: Entity): Mat4 =
   result = entity.transform
