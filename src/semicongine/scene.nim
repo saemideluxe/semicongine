@@ -42,13 +42,13 @@ func setAnimation*(entityAnimation: EntityAnimation, animation: Animation[Mat4])
   entityAnimation.player.animation = animation
   entityAnimation.player.resetPlayer()
 
-func start*(animation: var EntityAnimation) =
+func start*(animation: EntityAnimation) =
   animation.player.start()
 
-func stop*(animation: var EntityAnimation) =
+func stop*(animation: EntityAnimation) =
   animation.player.stop()
 
-func update*(animation: var EntityAnimation, dt: float32) =
+func update*(animation: EntityAnimation, dt: float32) =
   animation.player.advance(dt)
 
 func parent(entity: Entity): Entity =
@@ -136,7 +136,7 @@ method `$`*(animation: EntityAnimation): string =
 proc add*(entity: Entity, child: Entity) =
   child.parent = entity
   entity.children.add child
-proc `[]=`*[T](entity: var Entity, index: int, child: var T) =
+proc `[]=`*[T](entity: Entity, index: int, child: var T) =
   child.parent = entity
   entity.children[index] = child
 proc `[]`*(entity: Entity, index: int): Entity =
