@@ -4,11 +4,12 @@ import std/tables
 import semicongine
 
 proc main() =
-  var scene = newScene("main", root=newEntity("rect", {"mesh": Component(rect())}))
+  var flag = rect()
+  var scene = newScene("main", root=newEntity("rect", {"mesh": Component(flag)}))
   let (RT, WT, PT) = (hexToColorAlpha("A51931").asPixel, hexToColorAlpha("F4F5F8").asPixel, hexToColorAlpha("2D2A4A").asPixel)
   let
     # image from memory
-    t1 = Image(width: 7, height: 5, imagedata: @[
+    thai = Image(width: 7, height: 5, imagedata: @[
       RT, RT, RT, RT, RT, RT, RT,
       WT, WT, WT, WT, WT, WT, WT,
       PT, PT, PT, PT, PT, PT, PT,
@@ -17,13 +18,19 @@ proc main() =
     ])
   let
     # image from file
-    t2 = loadImage("flag.png")
+    swiss = loadImage("flag.png")
 
   var sampler = DefaultSampler()
   sampler.magnification = VK_FILTER_NEAREST
   sampler.minification = VK_FILTER_NEAREST
-  scene.addMaterial(Material(name:"my material", textures: {"my_texture": Texture(image: t1, sampler: sampler)}.toTable))
-  scene.addMaterial(Material(name:"my material", textures: {"my_texture": Texture(image: t2, sampler: sampler)}.toTable))
+  scene.addMaterial(Material(name:"material1", textures: {
+    "swissflag": Texture(image: swiss, sampler: sampler),
+    "thaiflag": Texture(image: thai, sampler: sampler),
+  }.toTable))
+  scene.addMaterial(Material(name:"material2", textures: {
+    "swissflag": Texture(image: thai, sampler: sampler),
+    "thaiflag": Texture(image: swiss, sampler: sampler),
+  }.toTable))
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
   var engine = initEngine("Test materials")
@@ -35,7 +42,10 @@ proc main() =
     ]
     vertexOutput = @[attr[Vec2f]("uvout")]
     uniforms = @[attr[float32]("test2", arrayCount=2)]
-    samplers = @[attr[Sampler2DType]("my_texture", arrayCount=2)]
+    samplers = @[
+      attr[Sampler2DType]("swissflag", arrayCount=2),
+      attr[Sampler2DType]("thaiflag", arrayCount=2),
+    ]
     fragOutput = @[attr[Vec4f]("color")]
     vertexCode = compileGlslShader(
       stage=VK_SHADER_STAGE_VERTEX_BIT,
@@ -53,11 +63,11 @@ proc main() =
       outputs=fragOutput,
       main="""
 float d = sin(Uniforms.test2[0]) * 0.5 + 0.5;
-color = texture(my_texture[0], uvout) * (1 - d) + texture(my_texture[1], uvout) * d;
+color = texture(swissflag[1], uvout) * (1 - d) + texture(thaiflag[1], uvout) * d;
 """
     )
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  engine.addScene(scene, vertexInput, samplers, transformAttribute="")
+  engine.addScene(scene, vertexInput, samplers, transformAttribute="", materialIndexAttribute="")
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     var d = float32(cpuTime() - t)

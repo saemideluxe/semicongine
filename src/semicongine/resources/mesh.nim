@@ -1,4 +1,5 @@
 import std/strutils
+import std/enumerate
 import std/json
 import std/logging
 import std/tables
@@ -8,6 +9,7 @@ import std/streams
 
 import ../scene
 import ../mesh
+import ../material
 import ../core
 
 import ./image
@@ -161,7 +163,7 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
 
-proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): Mesh =
+proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8], materials: seq[Material]): Mesh =
   result = Mesh(instanceCount: 1, instanceTransforms: newSeqWith(1, Unit4F32))
 
   # check if and how we use indexes
@@ -193,7 +195,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8]): M
 
   setInstanceData(result, "transform", newSeqWith(int(result.instanceCount), Unit4F32))
 
-proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entity =
+proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8], materials: seq[Material]): Entity =
   var name = "<Unknown>"
   if node.hasKey("name"):
     name = node["name"].getStr()
@@ -233,16 +235,16 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entit
   # children
   if node.hasKey("children"):
     for childNode in node["children"]:
-      result.add loadNode(root, root["nodes"][childNode.getInt()], mainBuffer)
+      result.add loadNode(root, root["nodes"][childNode.getInt()], mainBuffer, materials)
 
   # mesh
   if node.hasKey("mesh"):
-    result["mesh"] = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
+    result["mesh"] = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer, materials)
 
-proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): Scene =
+proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8], materials: seq[Material]): Scene =
   var rootEntity = newEntity("<root>")
   for nodeId in scenenode["nodes"]:
-    var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
+    var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer, materials)
     node.transform = node.transform * scale3d(1'f32, -1'f32, 1'f32)
     rootEntity.add node
 
@@ -280,63 +282,63 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: var seq[uint8]):
     if sampler.hasKey("wrapT"):
       result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
 
-proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: var seq[uint8]): Material =
-  result.name = materialNode.getStr("name")
+proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: var seq[uint8], materialIndex: int): Material =
+  result = Material(name: materialNode.getStr("name"), index: materialIndex)
 
   let pbr = materialNode["pbrMetallicRoughness"]
 
   # color
-  result.data["baseColorFactor"] = DataValue(thetype: Vec4F32)
+  result.constants["baseColorFactor"] = DataValue(thetype: Vec4F32)
   if pbr.hasKey("baseColorFactor"):
-    setValue(result.data["baseColorFactor"], newVec4f(
+    setValue(result.constants["baseColorFactor"], newVec4f(
       pbr["baseColorFactor"][0].getFloat(),
       pbr["baseColorFactor"][1].getFloat(),
       pbr["baseColorFactor"][2].getFloat(),
       pbr["baseColorFactor"][3].getFloat(),
     ))
   else:
-    setValue(result.data["baseColorFactor"], newVec4f(1, 1, 1, 1))
+    setValue(result.constants["baseColorFactor"], newVec4f(1, 1, 1, 1))
 
   # pbr material constants
   for factor in ["metallicFactor", "roughnessFactor"]:
-    result.data[factor] = DataValue(thetype: Float32)
+    result.constants[factor] = DataValue(thetype: Float32)
     if pbr.hasKey(factor):
-      setValue(result.data[factor], float32(pbr[factor].getFloat()))
+      setValue(result.constants[factor], float32(pbr[factor].getFloat()))
     else:
-      setValue(result.data[factor], 0.5'f32)
+      setValue(result.constants[factor], 0.5'f32)
 
   # pbr material textures
   for texture in ["baseColorTexture", "metallicRoughnessTexture"]:
     if pbr.hasKey(texture):
       result.textures[texture] = loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)
-      result.data[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.data[texture & "Index"], pbr[texture].getOrDefault("texCoord").getInt(0).uint8)
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], pbr[texture].getOrDefault("texCoord").getInt(0).uint8)
     else:
       result.textures[texture] = DEFAULTEXTURE
-      result.data[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.data[texture & "Index"], 0'u8)
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], 0'u8)
 
   # generic material textures
   for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
     if materialNode.hasKey(texture):
       result.textures[texture] = loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)
-      result.data[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.data[texture & "Index"], materialNode[texture].getOrDefault("texCoord").getInt(0).uint8)
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], materialNode[texture].getOrDefault("texCoord").getInt(0).uint8)
     else:
       result.textures[texture] = DEFAULTEXTURE
-      result.data[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.data[texture & "Index"], 0'u8)
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], 0'u8)
 
   # emissiv color
-  result.data["emissiveFactor"] = DataValue(thetype: Vec3F32)
+  result.constants["emissiveFactor"] = DataValue(thetype: Vec3F32)
   if materialNode.hasKey("emissiveFactor"):
-    setValue(result.data["emissiveFactor"], newVec3f(
+    setValue(result.constants["emissiveFactor"], newVec3f(
       materialNode["emissiveFactor"][0].getFloat(),
       materialNode["emissiveFactor"][1].getFloat(),
       materialNode["emissiveFactor"][2].getFloat(),
     ))
   else:
-    setValue(result.data["emissiveFactor"], newVec3f(1'f32, 1'f32, 1'f32))
+    setValue(result.constants["emissiveFactor"], newVec3f(1'f32, 1'f32, 1'f32))
 
 proc readglTF*(stream: Stream): seq[Scene] =
   var
@@ -368,8 +370,9 @@ proc readglTF*(stream: Stream): seq[Scene] =
   debug data.structuredContent.pretty
 
   for scene in data.structuredContent["scenes"]:
-    var scene = data.structuredContent.loadScene(scene, data.binaryBufferData)
-    for materialNode in data.structuredContent["materials"]:
-      scene.addMaterial loadMaterial(data.structuredContent, materialNode, data.binaryBufferData)
+    var materials: seq[Material]
+    for i, materialNode in enumerate(data.structuredContent["materials"]):
+      materials.add loadMaterial(data.structuredContent, materialNode, data.binaryBufferData, i)
+    var scene = data.structuredContent.loadScene(scene, data.binaryBufferData, materials)
 
     result.add scene

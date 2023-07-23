@@ -106,10 +106,10 @@ proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
     engine.renderer.get.destroy()
   engine.renderer = some(engine.device.initRenderer(renderPass))
 
-proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="transform") =
+proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="transform", materialIndexAttribute="materialIndex") =
   assert transformAttribute == "" or transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
   assert engine.renderer.isSome
-  engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers, transformAttribute=transformAttribute)
+  engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers, transformAttribute=transformAttribute, materialIndexAttribute=materialIndexAttribute)
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running

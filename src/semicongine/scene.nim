@@ -7,6 +7,7 @@ import std/hashes
 import std/typetraits
 
 import ./core
+import ./material
 import ./animation
 
 type
@@ -14,12 +15,14 @@ type
     name*: string
     root*: Entity
     shaderGlobals*: Table[string, DataList]
-    materials: seq[Material]
+    materials: OrderedTable[string, Material]
 
+  #[
   Material* = object
     name*: string
     textures*: Table[string, Texture]
     data*: Table[string, DataValue]
+  ]#
 
   Component* = ref object of RootObj
     entity*: Entity
@@ -109,19 +112,25 @@ func appendShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) 
 func newScene*(name: string, root: Entity): Scene =
   Scene(name: name, root: root)
 
-func getMaterials*(scene: Scene): seq[Material] = scene.materials
-
 func addMaterial*(scene: var Scene, material: Material) =
-  if scene.materials.len > 0:
-    assert material.data.keys.toSeq.sorted() == scene.materials[0].data.keys.toSeq.sorted(), &"{material.data.keys.toSeq.sorted()} == {scene.materials[0].data.keys.toSeq.sorted()}"
-  else:
-    for name, value in material.data.pairs:
-      scene.shaderGlobals[name] = newDataList(thetype=value.thetype)
+  assert not scene.materials.contains(material.name), &"Material with name '{material.name}' already exists in scene"
+  for name, value in material.constants.pairs:
+    scene.shaderGlobals[name] = newDataList(thetype=value.thetype)
 
-  for name, value in material.data.pairs:
+  for name, value in material.constants.pairs:
     scene.shaderGlobals[name].appendValue(value)
 
-  scene.materials.add material
+  scene.materials[material.name] = material
+
+func materialIndex*(scene: Scene, materialName: string): int =
+  for name in scene.materials.keys:
+    if name == materialName:
+      return result
+    inc result 
+  return -1
+
+func materials*(scene: Scene): auto =
+  scene.materials.values.toSeq
 
 func hash*(scene: Scene): Hash =
   hash(scene.name)
