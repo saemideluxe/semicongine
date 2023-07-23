@@ -64,7 +64,7 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
     preferAutoFlush=preferAutoFlush
   )
   image.memoryAllocated = true
-  debug "Allocating memory for image: ", image.width, "x", image.height, "x", image.depth, " bytes of type ", memoryType
+  debug "Allocating memory for image: ", image.width, "x", image.height, "x", image.depth, ", ", requirements.size, " bytes of type ", memoryType
   image.memory = image.device.allocate(requirements.size, memoryType)
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 

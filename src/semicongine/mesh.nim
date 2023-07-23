@@ -8,6 +8,7 @@ import std/sequtils
 import ./core
 import ./scene
 import ./collision
+import ./material
 
 type
   MeshIndexType* = enum
@@ -18,6 +19,7 @@ type
   Mesh* = ref object of Component
     instanceCount*: uint32
     instanceTransforms*: seq[Mat4] # this should not reside in data["transform"], as we will use data["transform"] to store the final transformation matrix (as derived from the scene-tree)
+    materials*: seq[string]
     dirtyInstanceTransforms: bool
     data: Table[string, DataList]
     changedAttributes: seq[string]

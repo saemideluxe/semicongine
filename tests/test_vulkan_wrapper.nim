@@ -126,14 +126,19 @@ proc main() =
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
     let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
-    scene.addMaterial(Material(name: "my_material", textures: {"my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
-      R, R, R, R, R,
-      R, R, W, R, R,
-      R, W, W, W, R,
-      R, R, W, R, R,
-      R, R, R, R, R,
-    ]), sampler: sampler)}.toTable))
-    engine.addScene(scene, vertexInput, samplers, transformAttribute="")
+    scene.addMaterial(Material(
+      name: "my_material",
+      textures: {
+        "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
+        R, R, R, R, R,
+        R, R, W, R, R,
+        R, W, W, W, R,
+        R, R, W, R, R,
+        R, R, R, R, R,
+        ]), sampler: sampler)
+      }.toTable
+    ))
+    engine.addScene(scene, vertexInput, samplers, transformAttribute="", materialIndexAttribute="")
 
   # MAINLOOP
   echo "Setup successfull, start rendering"

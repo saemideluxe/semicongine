@@ -106,7 +106,6 @@ proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
   assert layout.device.vk.valid
   assert layout.vk.valid
 
-
   var layouts: seq[VkDescriptorSetLayout]
   var descriptorSets = newSeq[VkDescriptorSet](nframes)
   for i in 0 ..< nframes:
@@ -132,6 +131,9 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
   var bufferInfos: seq[VkDescriptorBufferInfo]
 
   var i = bindingBase
+  # need to keep this sequence out of the loop, otherwise it will be 
+  # gc-ed before the final update call and pointers are invalid :(
+  var imgInfos: seq[seq[VkDescriptorImageInfo]]
   for descriptor in descriptorSet.layout.descriptors:
     if descriptor.thetype == Uniform:
       assert descriptor.buffer.vk.valid
@@ -149,6 +151,7 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           descriptorCount: descriptor.count,
           pBufferInfo: addr bufferInfos[^1],
         )
+      echo bufferInfos
     elif descriptor.thetype == ImageSampler:
       var imgInfo: seq[VkDescriptorImageInfo]
       for img_i in 0 ..< descriptor.count:
@@ -159,6 +162,7 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           imageView: descriptor.imageviews[img_i].vk,
           sampler: descriptor.samplers[img_i].vk,
         )
+      imgInfos.add imgInfo
       descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
           dstSet: descriptorSet.vk,
@@ -166,7 +170,8 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           dstArrayElement: 0,
           descriptorType: descriptor.vkType,
           descriptorCount: descriptor.count,
-          pImageInfo: addr imgInfo[0],
+          pImageInfo: imgInfos[^1].toCPointer,
         )
     inc i
+  echo descriptorSetWrites
   descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.toCPointer, 0, nil)
