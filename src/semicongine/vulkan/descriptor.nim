@@ -151,7 +151,6 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           descriptorCount: descriptor.count,
           pBufferInfo: addr bufferInfos[^1],
         )
-      echo bufferInfos
     elif descriptor.thetype == ImageSampler:
       var imgInfo: seq[VkDescriptorImageInfo]
       for img_i in 0 ..< descriptor.count:
@@ -173,5 +172,4 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
           pImageInfo: imgInfos[^1].toCPointer,
         )
     inc i
-  echo descriptorSetWrites
   descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.toCPointer, 0, nil)

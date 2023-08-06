@@ -92,6 +92,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         mesh.initData(inputAttr)
       assert mesh.dataType(inputAttr.name) == inputAttr.thetype, &"mesh attribute {inputAttr.name} has type {mesh.dataType(inputAttr.name)} but shader expects {inputAttr.thetype}"
       if scenedata.materialIndexAttribute != "" and inputAttr.name == scenedata.materialIndexAttribute:
+        assert mesh.materials.len > 0, "Missing material specification for mesh. Either set the 'materials' attribute or pass the argument 'materialIndexAttribute=\"\"' when calling 'addScene'"
         assert mesh.materials.len == getMeshData[uint16](mesh, scenedata.materialIndexAttribute)[].len
         for i, material in enumerate(mesh.materials):
           let matIndex = materialIndex(scene, material)
@@ -135,7 +136,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     inc bindingNumber
     # setup one buffer per attribute-location-type
     for mesh in allMeshes:
-      # align size to VERTEX_ATTRIB_ALIGNMENT bytes (the important thing is the correct alignment of the offsets, bu
+      # align size to VERTEX_ATTRIB_ALIGNMENT bytes (the important thing is the correct alignment of the offsets, but
       # we need to expand the buffer size as well, therefore considering alignment already here as well
       if perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
         perLocationSizes[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)

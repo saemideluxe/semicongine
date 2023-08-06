@@ -45,7 +45,7 @@ proc main() =
 
   var engine = initEngine("Test fonts")
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  engine.addScene(scene, vertexInput, samplers)
+  engine.addScene(scene, vertexInput, samplers, materialIndexAttribute="")
   scene.addShaderGlobal("perspective", Unit4F32)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):

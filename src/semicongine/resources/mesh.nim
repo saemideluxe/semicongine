@@ -103,7 +103,7 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: var seq[uint8], baseBuf
     raise newException(Exception, "Unsupported feature: byteStride in buffer view")
   copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
-proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: var seq[uint8]): DataList =
+proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
   result = newDataList(thetype=accessor.getGPUType())
   result.initData(uint32(accessor["count"].getInt()))
 
@@ -127,7 +127,7 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: var seq[uin
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
-proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: var seq[uint8]) =
+proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
@@ -163,7 +163,8 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
 
-proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8], materials: seq[Material]): Mesh =
+# TODO: use one mesh per primitive?? right now we are merging primitives... check addPrimitive below
+proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8], materials: seq[string]): Mesh =
   result = Mesh(instanceCount: 1, instanceTransforms: newSeqWith(1, Unit4F32))
 
   # check if and how we use indexes
@@ -187,7 +188,6 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8], ma
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
     result.setMeshData(attribute.toLowerAscii, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
-  result.setMeshData("material", newDataList(thetype=getDataType[uint8]()))
 
   # add all mesh data
   for primitive in meshNode["primitives"]:
@@ -195,7 +195,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: var seq[uint8], ma
 
   setInstanceData(result, "transform", newSeqWith(int(result.instanceCount), Unit4F32))
 
-proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8], materials: seq[Material]): Entity =
+proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8], materials: seq[string]): Entity =
   var name = "<Unknown>"
   if node.hasKey("name"):
     name = node["name"].getStr()
@@ -241,7 +241,7 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8], materi
   if node.hasKey("mesh"):
     result["mesh"] = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer, materials)
 
-proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8], materials: seq[Material]): Scene =
+proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8], materials: seq[string]): Scene =
   var rootEntity = newEntity("<root>")
   for nodeId in scenenode["nodes"]:
     var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer, materials)
@@ -369,10 +369,12 @@ proc readglTF*(stream: Stream): seq[Scene] =
 
   debug data.structuredContent.pretty
 
-  for scene in data.structuredContent["scenes"]:
-    var materials: seq[Material]
+  for scenedata in data.structuredContent["scenes"]:
+    var materials: seq[string]
+    var scene = data.structuredContent.loadScene(scenedata, data.binaryBufferData, materials)
     for i, materialNode in enumerate(data.structuredContent["materials"]):
-      materials.add loadMaterial(data.structuredContent, materialNode, data.binaryBufferData, i)
-    var scene = data.structuredContent.loadScene(scene, data.binaryBufferData, materials)
+      let material = loadMaterial(data.structuredContent, materialNode, data.binaryBufferData, i)
+      materials.add material.name
+      scene.addMaterial material
 
     result.add scene

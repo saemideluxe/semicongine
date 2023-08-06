@@ -1,6 +1,5 @@
 import std/parsecfg
 import std/streams
-import std/compilesettings
 import std/strutils
 import std/logging
 import std/os
@@ -15,7 +14,6 @@ const ENGINEVERSION* = static:
 
 # checks required build options:
 static:
-  assert querySetting(gc) == "orc", ENGINENAME & " requires --mm=orc"
   assert compileOption("threads"), ENGINENAME & " requires --threads=on"
 
   if defined(release):

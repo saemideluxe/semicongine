@@ -15,7 +15,6 @@ export audiotypes
 
 const NBUFFERS = 4
 const BUFFERSAMPLECOUNT = 2048
-const SOUND_SCALE = 4 # SOUND_SCALE is logarithm-scale
 
 type
   Playback = object

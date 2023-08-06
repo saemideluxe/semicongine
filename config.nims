@@ -37,7 +37,7 @@ task build, "build":
   rmDir(outdir)
   mkDir(outdir)
   let resourcedir = joinPath(projectDir(), RESOURCEROOT)
-  if existsDir(resourcedir):
+  if dirExists(resourcedir):
     let outdir_resources = joinPath(outdir, RESOURCEROOT)
     if BUNDLETYPE == "dir":
       cpDir(resourcedir, outdir_resources)
@@ -65,6 +65,11 @@ task build_all_release, "build all examples for release":
   for file in listFiles("examples"):
     if file.endsWith(".nim"):
       exec(&"nim build -d:release {file}")
+
+task test_all, "Run all test programs":
+  for file in listFiles("tests"):
+    if file.endsWith(".nim"):
+      exec(&"nim build --run {file}")
 
 task clean, "remove all build files":
   exec(&"rm -rf {BUILDBASE}")
