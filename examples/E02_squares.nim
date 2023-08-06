@@ -42,34 +42,28 @@ when isMainModule:
 
 
   const
-    vertexInput = @[
+    inputs = @[
       attr[Vec3f]("position"),
       attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
       attr[uint32]("index"),
     ]
-    vertexOutput = @[attr[Vec4f]("outcolor")]
+    intermediate = @[attr[Vec4f]("outcolor")]
     uniforms = @[attr[float32]("time")]
-    fragOutput = @[attr[Vec4f]("color")]
-    vertexCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
-      inputs=vertexInput,
+    outputs = @[attr[Vec4f]("color")]
+    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
+      inputs=inputs,
+      intermediate=intermediate,
+      outputs=outputs,
       uniforms=uniforms,
-      outputs=vertexOutput,
-      main="""
+      vertexCode="""
 float pos_weight = index / 100.0; // add some gamma correction?
 float t = sin(Uniforms.time * 0.5) * 0.5 + 0.5;
 float v = min(1, max(0, pow(pos_weight - t, 2)));
 v = pow(1 - v, 3000);
 outcolor = vec4(color.r, color.g, v * 0.5, 1);
 gl_Position = vec4(position, 1.0);
-"""
-    )
-    fragmentCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=vertexOutput,
-      uniforms=uniforms,
-      outputs=fragOutput,
-      main="color = outcolor;"
+""",
+      fragmentCode="color = outcolor;",
     )
   var squaremesh = newMesh(
     positions=vertices,
@@ -82,7 +76,7 @@ gl_Position = vec4(position, 1.0);
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
 
   var scene = newScene("scene", newEntity("scene", [], newEntity("squares", {"mesh": Component(squaremesh)})))
-  myengine.addScene(scene, vertexInput, @[], transformAttribute="")
+  myengine.addScene(scene, inputs, @[], transformAttribute="")
   scene.addShaderGlobal("time", 0.0'f32)
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
     setShaderGlobal(scene, "time", getShaderGlobal[float32](scene, "time") + 0.0005'f)

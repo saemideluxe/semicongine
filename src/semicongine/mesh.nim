@@ -8,7 +8,6 @@ import std/sequtils
 import ./core
 import ./scene
 import ./collision
-import ./material
 
 type
   MeshIndexType* = enum
@@ -132,10 +131,10 @@ func dataType*(mesh: Mesh, attribute: string): DataType =
 
 func indexDataSize*(mesh: Mesh): uint32 =
   case mesh.indexType
-    of None: 0
-    of Tiny: mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0))
-    of Small: mesh.smallIndices.len * sizeof(get(genericParams(typeof(mesh.smallIndices)), 0))
-    of Big: mesh.bigIndices.len * sizeof(get(genericParams(typeof(mesh.bigIndices)), 0))
+    of None: 0'u32
+    of Tiny: uint32(mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0)))
+    of Small: uint32(mesh.smallIndices.len * sizeof(get(genericParams(typeof(mesh.smallIndices)), 0)))
+    of Big: uint32(mesh.bigIndices.len * sizeof(get(genericParams(typeof(mesh.bigIndices)), 0)))
 
 func rawData[T: seq](value: var T): (pointer, uint32) =
   (pointer(addr(value[0])), uint32(sizeof(get(genericParams(typeof(value)), 0)) * value.len))

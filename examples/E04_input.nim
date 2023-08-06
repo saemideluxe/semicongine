@@ -147,32 +147,26 @@ when isMainModule:
 
   # shaders
   const
-    vertexInput = @[
+    inputs = @[
       attr[Vec3f]("position"),
       attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
       attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
     ]
-    vertexOutput = @[attr[Vec4f]("outcolor")]
+    intermediate = @[attr[Vec4f]("outcolor")]
     uniforms = @[attr[Mat4]("projection")]
-    fragOutput = @[attr[Vec4f]("color")]
-    vertexCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
-      inputs=vertexInput,
+    outputs = @[attr[Vec4f]("color")]
+    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
+      inputs=inputs,
+      intermediate=intermediate,
+      outputs=outputs,
       uniforms=uniforms,
-      outputs=vertexOutput,
-      main="""outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);"""
-    )
-    fragmentCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=vertexOutput,
-      uniforms=uniforms,
-      outputs=fragOutput,
-      main="color = outcolor;"
+      vertexCode="""outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);""",
+      fragmentCode="color = outcolor;",
     )
 
   # set up rendering
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0.5)))
-  myengine.addScene(scene, vertexInput, @[], transformAttribute="transform")
+  myengine.addScene(scene, inputs, @[], transformAttribute="transform")
   scene.addShaderGlobal("projection", Unit4f32)
 
   # mainloop

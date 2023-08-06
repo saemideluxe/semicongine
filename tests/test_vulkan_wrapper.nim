@@ -90,25 +90,18 @@ proc main() =
       attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
       attr[Vec3f]("translate", perInstance=true)
     ]
-    vertexOutput = @[attr[Vec4f]("outcolor")]
-    uniforms = @[attr[float32]("time")]
-    samplers = @[attr[Sampler2DType]("my_little_texture")]
+    intermediate = @[attr[Vec4f]("outcolor")]
     fragOutput = @[attr[Vec4f]("color")]
-    vertexCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
+    samplers = @[attr[Sampler2DType]("my_little_texture")]
+    uniforms = @[attr[float32]("time")]
+    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
       inputs=vertexInput,
-      uniforms=uniforms,
-      samplers=samplers,
-      outputs=vertexOutput,
-      main="""gl_Position = vec4(position + translate, 1.0); outcolor = color;"""
-    )
-    fragmentCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=vertexOutput,
-      uniforms=uniforms,
-      samplers=samplers,
+      intermediate=intermediate,
       outputs=fragOutput,
-      main="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;"
+      samplers=samplers,
+      uniforms=uniforms,
+      vertexCode="""gl_Position = vec4(position + translate, 1.0); outcolor = color;""",
+      fragmentCode="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
   var renderPass = engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
   engine.setRenderer(renderPass)

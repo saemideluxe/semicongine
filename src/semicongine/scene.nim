@@ -1,6 +1,5 @@
 import std/strformat
 import std/sequtils
-import std/algorithm
 import std/strutils
 import std/tables
 import std/hashes
@@ -16,13 +15,6 @@ type
     root*: Entity
     shaderGlobals*: Table[string, DataList]
     materials: OrderedTable[string, Material]
-
-  #[
-  Material* = object
-    name*: string
-    textures*: Table[string, Texture]
-    data*: Table[string, DataValue]
-  ]#
 
   Component* = ref object of RootObj
     entity*: Entity
@@ -173,7 +165,7 @@ func newEntity*(name: string, components: openArray[(string, Component)] = [], c
   for (name, comp) in components:
     result[name] = comp
   if result.name == "":
-    result.name = &"Entity[{$(cast[ByteAddress](result))}]"
+    result.name = &"Entity[{$(cast[uint](result))}]"
   result.internal_transform = Unit4
 
 iterator allEntitiesOfType*[T: Entity](root: Entity): T =

@@ -5,7 +5,7 @@ proc main() =
   var ent2 = newEntity("hehe", [], ent1)
   var myScene = newScene("hi", ent2)
   myScene.root.transform = translate3d(0.2'f32, 0'f32, 0'f32)
-  myScene.root.children[0].transform = translate3d(0'f32, 0.2'f32, 0'f32)
+  myScene.root[0].transform = translate3d(0'f32, 0.2'f32, 0'f32)
   var scenes = [
     # loadScene("default_cube.glb", "1"),
     # loadScene("default_cube1.glb", "3"),
@@ -55,7 +55,7 @@ color = texture(baseColorTexture[materialId], colorTexCoord) * vertexColor;
     )
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0, 1)))
   for scene in scenes.mitems:
-    engine.addScene(scene, vertexInput, samplers, transformAttribute="transform")
+    engine.addScene(scene, vertexInput, samplers, transformAttribute="transform", materialIndexAttribute="")
     scene.addShaderGlobal("projection", Unit4)
     scene.addShaderGlobal("view", Unit4)
   var

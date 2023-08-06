@@ -5,6 +5,7 @@ import semicongine
 
 proc main() =
   var flag = rect()
+  flag.materials = @["material2"]
   var scene = newScene("main", root=newEntity("rect", {"mesh": Component(flag)}))
   let (RT, WT, PT) = (hexToColorAlpha("A51931").asPixel, hexToColorAlpha("F4F5F8").asPixel, hexToColorAlpha("2D2A4A").asPixel)
   let
@@ -24,12 +25,12 @@ proc main() =
   sampler.magnification = VK_FILTER_NEAREST
   sampler.minification = VK_FILTER_NEAREST
   scene.addMaterial(Material(name:"material1", textures: {
-    "swissflag": Texture(image: swiss, sampler: sampler),
-    "thaiflag": Texture(image: thai, sampler: sampler),
+    "tex1": Texture(image: swiss, sampler: sampler),
+    "tex2": Texture(image: thai, sampler: sampler),
   }.toTable))
   scene.addMaterial(Material(name:"material2", textures: {
-    "swissflag": Texture(image: thai, sampler: sampler),
-    "thaiflag": Texture(image: swiss, sampler: sampler),
+    "tex1": Texture(image: thai, sampler: sampler),
+    "tex2": Texture(image: swiss, sampler: sampler),
   }.toTable))
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
@@ -38,36 +39,33 @@ proc main() =
   const
     vertexInput = @[
       attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
+      attr[uint16]("materialIndex", memoryPerformanceHint=PreferFastRead, perInstance=true),
       attr[Vec2f]("uv", memoryPerformanceHint=PreferFastRead),
     ]
-    vertexOutput = @[attr[Vec2f]("uvout")]
+    vertexOutput = @[attr[Vec2f]("uvout"), attr[uint16]("materialIndexOut", noInterpolation=true)]
     uniforms = @[attr[float32]("test2", arrayCount=2)]
     samplers = @[
-      attr[Sampler2DType]("swissflag", arrayCount=2),
-      attr[Sampler2DType]("thaiflag", arrayCount=2),
+      attr[Sampler2DType]("tex1", arrayCount=2),
+      attr[Sampler2DType]("tex2", arrayCount=2),
     ]
     fragOutput = @[attr[Vec4f]("color")]
-    vertexCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
+    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
       inputs=vertexInput,
-      uniforms=uniforms,
-      samplers=samplers,
-      outputs=vertexOutput,
-      main="""gl_Position = vec4(position.x, position.y + sin(Uniforms.test2[1]) / Uniforms.test2[1] * 0.5, position.z, 1.0); uvout = uv;"""
-    )
-    fragmentCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=vertexOutput,
-      uniforms=uniforms,
-      samplers=samplers,
+      intermediate=vertexOutput,
       outputs=fragOutput,
-      main="""
-float d = sin(Uniforms.test2[0]) * 0.5 + 0.5;
-color = texture(swissflag[1], uvout) * (1 - d) + texture(thaiflag[1], uvout) * d;
-"""
+      samplers=samplers,
+      uniforms=uniforms,
+      vertexCode="""
+      gl_Position = vec4(position.x, position.y + sin(Uniforms.test2[1]) / Uniforms.test2[1] * 0.5, position.z, 1.0);
+      uvout = uv;
+      materialIndexOut = materialIndex;""",
+      fragmentCode="""
+      float d = sin(Uniforms.test2[0]) * 0.5 + 0.5;
+      color = texture(tex1[materialIndexOut], uvout) * (1 - d) + texture(tex2[materialIndexOut], uvout) * d;
+      """,
     )
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  engine.addScene(scene, vertexInput, samplers, transformAttribute="", materialIndexAttribute="")
+  engine.addScene(scene, vertexInput, samplers, transformAttribute="")
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     var d = float32(cpuTime() - t)

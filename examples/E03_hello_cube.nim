@@ -52,37 +52,31 @@ when isMainModule:
   var myengine = initEngine("Hello cube")
 
   const
-    vertexInput = @[
+    inputs = @[
       attr[Vec3f]("position"),
       attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
     ]
-    vertexOutput = @[attr[Vec4f]("outcolor")]
+    intermediate = @[attr[Vec4f]("outcolor")]
     uniforms = @[
       attr[Mat4]("projection"),
       attr[Mat4]("view"),
       attr[Mat4]("model"),
     ]
     fragOutput = @[attr[Vec4f]("color")]
-    vertexCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
-      inputs=vertexInput,
-      uniforms=uniforms,
-      outputs=vertexOutput,
-      main="""outcolor = color; gl_Position = (Uniforms.projection * Uniforms.view * Uniforms.model) * vec4(position, 1);"""
-    )
-    fragmentCode = compileGlslShader(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=vertexOutput,
-      uniforms=uniforms,
+    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
+      inputs=inputs,
+      intermediate=intermediate,
       outputs=fragOutput,
-      main="color = outcolor;"
+      uniforms=uniforms,
+      vertexCode="""outcolor = color; gl_Position = (Uniforms.projection * Uniforms.view * Uniforms.model) * vec4(position, 1);""",
+      fragmentCode="color = outcolor;",
     )
   myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
   var cube = newScene("scene", newEntity("cube", {"mesh": Component(newMesh(positions=cube_pos, indices=tris, colors=cube_color))}))
   cube.addShaderGlobal("projection", Unit4f32)
   cube.addShaderGlobal("view", Unit4f32)
   cube.addShaderGlobal("model", Unit4f32)
-  myengine.addScene(cube, vertexInput, @[], transformAttribute="")
+  myengine.addScene(cube, inputs, @[], transformAttribute="")
 
   var t: float32 = cpuTime()
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):

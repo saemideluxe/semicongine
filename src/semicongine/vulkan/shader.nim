@@ -34,6 +34,15 @@ type
     uniforms*: seq[ShaderAttribute]
     samplers*: seq[ShaderAttribute]
     outputs*: seq[ShaderAttribute]
+  ShaderConfiguration* = object
+    vertexBinary: seq[uint32]
+    fragmentBinary: seq[uint32]
+    entrypoint: string
+    inputs*: seq[ShaderAttribute]
+    intermediates*: seq[ShaderAttribute]
+    outputs*: seq[ShaderAttribute]
+    uniforms*: seq[ShaderAttribute]
+    samplers*: seq[ShaderAttribute]
 
 
 proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
@@ -97,8 +106,7 @@ proc compileGlslShader*(
   main: string
 ): ShaderCode {.compileTime.} =
 
-  var code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
-  # var code = @[&"#version {version}", "layout(row_major) uniform;", ""] &
+  let code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
     (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
     (if uniforms.len > 0: uniforms.glslUniforms(binding=0) & @[""] else: @[]) &
     (if samplers.len > 0: samplers.glslSamplers(basebinding=if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
@@ -114,7 +122,28 @@ proc compileGlslShader*(
   result.stage = stage
   result.binary = compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
 
-proc compileVertextShader*(
+proc compileGlslCode*(
+  stage: VkShaderStageFlagBits,
+  inputs: seq[ShaderAttribute]= @[],
+  uniforms: seq[ShaderAttribute]= @[],
+  samplers: seq[ShaderAttribute]= @[],
+  outputs: seq[ShaderAttribute]= @[],
+  version=DEFAULT_SHADER_VERSION ,
+  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
+  main: string
+): seq[uint32] {.compileTime.} =
+
+  let code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
+    (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
+    (if uniforms.len > 0: uniforms.glslUniforms(binding=0) & @[""] else: @[]) &
+    (if samplers.len > 0: samplers.glslSamplers(basebinding=if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
+    (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
+    @[&"void {entrypoint}(){{"] &
+    main &
+    @[&"}}"]
+  compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
+
+proc compileVertexShader*(
   inputs: seq[ShaderAttribute]= @[],
   uniforms: seq[ShaderAttribute]= @[],
   samplers: seq[ShaderAttribute]= @[],
@@ -166,7 +195,7 @@ proc compileVertexFragmentShaderSet*(
   fragmentCode: string,
 ): (ShaderCode, ShaderCode) {.compileTime.} =
 
-  result[0] = compileVertextShader(
+  result[0] = compileVertexShader(
     inputs=inputs,
     outputs=intermediate,
     uniforms=uniforms,
@@ -183,6 +212,42 @@ proc compileVertexFragmentShaderSet*(
     version=version,
     entrypoint=entrypoint,
     main=fragmentCode
+  )
+
+proc createShaderConfiguration*(
+  inputs: seq[ShaderAttribute]= @[],
+  intermediates: seq[ShaderAttribute]= @[],
+  outputs: seq[ShaderAttribute]= @[],
+  uniforms: seq[ShaderAttribute]= @[],
+  samplers: seq[ShaderAttribute]= @[],
+  version=DEFAULT_SHADER_VERSION ,
+  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
+  vertexCode: string,
+  fragmentCode: string,
+): ShaderConfiguration {.compileTime.} =
+  ShaderConfiguration(
+    vertexBinary: compileGlslCode(
+      stage=VK_SHADER_STAGE_VERTEX_BIT,
+      inputs=inputs,
+      outputs=intermediates,
+      uniforms=uniforms,
+      samplers=samplers,
+      main=vertexCode,
+    ),
+    fragmentBinary: compileGlslCode(
+      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+      inputs=inputs,
+      outputs=intermediates,
+      uniforms=uniforms,
+      samplers=samplers,
+      main=fragmentCode,
+    ),
+    entrypoint: entrypoint,
+    inputs: inputs,
+    intermediates: intermediates,
+    outputs: outputs,
+    uniforms: uniforms,
+    samplers: samplers,
   )
 
 
