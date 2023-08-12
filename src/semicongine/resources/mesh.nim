@@ -153,13 +153,15 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
         for entry in getValues[uint16](data)[]:
           tri.add uint32(entry) + baseIndex
           if tri.len == 3:
-            mesh.appendIndicesData(tri[0], tri[1], tri[2])
+            # FYI gltf uses counter-clockwise indexing
+            mesh.appendIndicesData(tri[0], tri[2], tri[1])
             tri.setLen(0)
       of UInt32:
         for entry in getValues[uint32](data)[]:
           tri.add uint32(entry)
           if tri.len == 3:
-            mesh.appendIndicesData(tri[0], tri[1], tri[2])
+            # FYI gltf uses counter-clockwise indexing
+            mesh.appendIndicesData(tri[0], tri[2], tri[1])
             tri.setLen(0)
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
@@ -247,7 +249,6 @@ proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]):
   var rootEntity = newEntity("<root>")
   for nodeId in scenenode["nodes"]:
     var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
-    node.transform = node.transform * scale3d(1'f32, -1'f32, 1'f32)
     rootEntity.add node
 
   newScene(scenenode["name"].getStr(), rootEntity)
