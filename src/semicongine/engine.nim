@@ -114,6 +114,7 @@ proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribut
   assert engine.renderer.isSome
   engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers, transformAttribute=transformAttribute, materialIndexAttribute=materialIndexAttribute)
 
+#[
 proc addScene*(engine: var Engine, scene: Scene, materialShaders: Table[string, ShaderConfiguration], transformAttribute="transform", materialIndexAttribute="materialIndex") =
   if transformAttribute != "":
     for shader in materialShaders.values:
@@ -123,6 +124,7 @@ proc addScene*(engine: var Engine, scene: Scene, materialShaders: Table[string, 
       assert materialIndexAttribute in map(shader.inputs, proc(a: ShaderAttribute): string = a.name)
   assert engine.renderer.isSome
   engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers, transformAttribute=transformAttribute, materialIndexAttribute=materialIndexAttribute)
+  ]#
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
