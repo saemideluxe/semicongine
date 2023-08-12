@@ -1,3 +1,5 @@
+import std/sequtils
+import std/tables
 import semicongine
 
 proc main() =
@@ -20,14 +22,14 @@ proc main() =
   const
     vertexInput = @[
       attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-      attr[uint8]("material", memoryPerformanceHint=PreferFastRead),
+      attr[uint16]("materialIndex", memoryPerformanceHint=PreferFastRead),
       attr[Vec2f]("texcoord_0", memoryPerformanceHint=PreferFastRead),
       attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
     ]
     intermediate = @[
       attr[Vec4f]("vertexColor"),
       attr[Vec2f]("colorTexCoord"),
-      attr[uint8]("materialId", noInterpolation=true)
+      attr[uint16]("materialIndexOut", noInterpolation=true)
     ]
     fragOutput = @[attr[Vec4f]("color")]
     uniforms = @[
@@ -44,20 +46,22 @@ proc main() =
       samplers=samplers,
       vertexCode="""
 gl_Position =  vec4(position, 1.0) * (transform * Uniforms.view * Uniforms.projection);
-vertexColor = Uniforms.baseColorFactor[material];
+vertexColor = Uniforms.baseColorFactor[materialIndex];
 colorTexCoord = texcoord_0;
-materialId = material;
+materialIndexOut = materialIndex;
 """,
       fragmentCode="""
-vec4 col[4] = vec4[4](vec4(1, 0, 0, 1), vec4(0, 1, 0, 1), vec4(0, 0, 1, 1), vec4(1, 1, 1, 1));
-color = texture(baseColorTexture[materialId], colorTexCoord) * vertexColor;
+// vec4 col[4] = vec4[4](vec4(1, 0, 0, 1), vec4(0, 1, 0, 1), vec4(0, 0, 1, 1), vec4(1, 1, 1, 1));
+color = texture(baseColorTexture[materialIndexOut], colorTexCoord) * vertexColor;
 """
     )
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0, 1)))
   for scene in scenes.mitems:
-    engine.addScene(scene, vertexInput, samplers, transformAttribute="transform", materialIndexAttribute="")
+    engine.addScene(scene, vertexInput, samplers)
     scene.addShaderGlobal("projection", Unit4)
     scene.addShaderGlobal("view", Unit4)
+    let baseColors = scene.materials.map(proc(i: Material): Vec4f = getValue[Vec4f](i[].constants["baseColorFactor"]))
+    scene.addShaderGlobalArray("baseColorFactor", baseColors)
   var
     size = 1'f32
     elevation = 0'f32
