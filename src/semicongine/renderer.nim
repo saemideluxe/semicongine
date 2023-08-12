@@ -95,7 +95,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         assert mesh.materials.len > 0, "Missing material specification for mesh. Either set the 'materials' attribute or pass the argument 'materialIndexAttribute=\"\"' when calling 'addScene'"
         assert mesh.materials.len == getMeshData[uint16](mesh, scenedata.materialIndexAttribute)[].len
         for i, material in enumerate(mesh.materials):
-          let matIndex = materialIndex(scene, material)
+          let matIndex = scene.materialIndex(material)
           if matIndex < 0:
             raise newException(Exception, &"Required material '{material}' not available in scene (available are: {scene.materials.toSeq})")
           updateMeshData[uint16](mesh, scenedata.materialIndexAttribute, uint32(i), uint16(matIndex))

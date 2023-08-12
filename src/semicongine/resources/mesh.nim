@@ -137,10 +137,11 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
     mesh.appendMeshData(attribute.toLowerAscii, data)
     vertexCount = data.len
 
-  var materialId = 0'u8
+  var materialId = 0'u16
   if primitiveNode.hasKey("material"):
-    materialId = uint8(primitiveNode["material"].getInt())
-  mesh.appendMeshData("material", newSeqWith[uint8](int(vertexCount), materialId))
+    materialId = uint16(primitiveNode["material"].getInt())
+  mesh.appendMeshData("materialIndex", newSeqWith[uint8](int(vertexCount), materialId))
+  mesh.materials.add newSeqWith[string](int(vertexCount), root["materials"][int(materialId)]["name"].getStr())
 
   if primitiveNode.hasKey("indices"):
     assert mesh.indexType != None
@@ -164,21 +165,21 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
 
 # TODO: use one mesh per primitive?? right now we are merging primitives... check addPrimitive below
-proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8], materials: seq[string]): Mesh =
-  result = Mesh(instanceCount: 1, instanceTransforms: newSeqWith(1, Unit4F32))
+proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh =
 
   # check if and how we use indexes
   var indexCount = 0
+  var indexType = None
   let indexed = meshNode["primitives"][0].hasKey("indices")
   if indexed:
     for primitive in meshNode["primitives"]:
       indexCount += root["accessors"][primitive["indices"].getInt()]["count"].getInt()
     if indexCount < int(high(uint16)):
-      result.indexType = Small
+      indexType = Small
     else:
-      result.indexType = Big
-  else:
-    result.indexType = None
+      indexType = Big
+
+  result = Mesh(instanceCount: 1, instanceTransforms: newSeqWith(1, Unit4F32), indexType: indexType)
 
   # check we have the same attributes for all primitives
   let attributes = meshNode["primitives"][0]["attributes"].keys.toSeq
@@ -188,6 +189,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8], materi
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
     result.setMeshData(attribute.toLowerAscii, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
+  result.setMeshData("materialIndex", newDataList(theType=UInt16))
 
   # add all mesh data
   for primitive in meshNode["primitives"]:
@@ -195,7 +197,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8], materi
 
   setInstanceData(result, "transform", newSeqWith(int(result.instanceCount), Unit4F32))
 
-proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8], materials: seq[string]): Entity =
+proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entity =
   var name = "<Unknown>"
   if node.hasKey("name"):
     name = node["name"].getStr()
@@ -235,16 +237,16 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8], materi
   # children
   if node.hasKey("children"):
     for childNode in node["children"]:
-      result.add loadNode(root, root["nodes"][childNode.getInt()], mainBuffer, materials)
+      result.add loadNode(root, root["nodes"][childNode.getInt()], mainBuffer)
 
   # mesh
   if node.hasKey("mesh"):
-    result["mesh"] = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer, materials)
+    result["mesh"] = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
 
-proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8], materials: seq[string]): Scene =
+proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): Scene =
   var rootEntity = newEntity("<root>")
   for nodeId in scenenode["nodes"]:
-    var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer, materials)
+    var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
     node.transform = node.transform * scale3d(1'f32, -1'f32, 1'f32)
     rootEntity.add node
 
@@ -283,7 +285,7 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: var seq[uint8]):
       result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
 
 proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: var seq[uint8], materialIndex: int): Material =
-  result = Material(name: materialNode.getStr("name"), index: materialIndex)
+  result = Material(name: materialNode["name"].getStr(), index: materialIndex)
 
   let pbr = materialNode["pbrMetallicRoughness"]
 
@@ -367,14 +369,12 @@ proc readglTF*(stream: Stream): seq[Scene] =
   let bufferLenDiff = int(chunkLength) - data.structuredContent["buffers"][0]["byteLength"].getInt()
   assert 0 <= bufferLenDiff <= 3 # binary buffer may be aligned to 4 bytes
 
-  debug data.structuredContent.pretty
+  debug "Loading mesh: ", data.structuredContent.pretty
 
   for scenedata in data.structuredContent["scenes"]:
-    var materials: seq[string]
-    var scene = data.structuredContent.loadScene(scenedata, data.binaryBufferData, materials)
+    var scene = data.structuredContent.loadScene(scenedata, data.binaryBufferData)
     for i, materialNode in enumerate(data.structuredContent["materials"]):
       let material = loadMaterial(data.structuredContent, materialNode, data.binaryBufferData, i)
-      materials.add material.name
       scene.addMaterial material
 
     result.add scene

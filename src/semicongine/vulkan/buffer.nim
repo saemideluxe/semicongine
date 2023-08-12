@@ -50,9 +50,17 @@ proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool,
     preferVRAM=preferVRAM,
     preferAutoFlush=preferAutoFlush
   )
-  buffer.memoryAllocated = true
+
   debug "Allocating memory for buffer: ", buffer.size, " bytes of type ", memoryType
-  buffer.memory = buffer.device.allocate(requirements.size, memoryType)
+  # need to replace the whole buffer object, due to case statement
+  buffer = Buffer(
+    device: buffer.device,
+    vk: buffer.vk,
+    size: buffer.size,
+    usage: buffer.usage,
+    memoryAllocated: true,
+    memory: buffer.device.allocate(requirements.size, memoryType)
+  )
   checkVkResult buffer.device.vk.vkBindBufferMemory(buffer.vk, buffer.memory.vk, VkDeviceSize(0))
 
 # currently no support for extended structure and concurrent/shared use
@@ -109,7 +117,13 @@ proc destroy*(buffer: var Buffer) =
   if buffer.memoryAllocated:
     assert buffer.memory.vk.valid
     buffer.memory.free
-    buffer.memoryAllocated = false
+    buffer = Buffer(
+      device: buffer.device,
+      vk: buffer.vk,
+      size: buffer.size,
+      usage: buffer.usage,
+      memoryAllocated: false,
+    )
   buffer.vk.reset
 
 proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
@@ -120,7 +134,7 @@ proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
       dst.memory.flush()
   else: # use staging buffer, slower but required if memory is not host visible
     var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable=true, preferVRAM=false, preferAutoFlush=true)
-    stagingBuffer.setData(src, size, 0)
+    setData(stagingBuffer, src, size, 0)
     stagingBuffer.copy(dst, bufferOffset)
     stagingBuffer.destroy()
 

@@ -85,31 +85,36 @@ func newMesh*(
   assert colors.len == 0 or colors.len == positions.len
   assert uvs.len == 0 or uvs.len == positions.len
 
-  result = Mesh(instanceCount: instanceCount, instanceTransforms: newSeqWith(int(instanceCount), Unit4F32))
+  # determine index type (uint8, uint16, uint32)
+  var indexType = None
+  if indices.len > 0:
+    indexType = Big
+    if autoResize and uint32(positions.len) < uint32(high(uint8)) and false: # TODO: check feature support
+      indexType = Tiny
+    elif autoResize and uint32(positions.len) < uint32(high(uint16)):
+      indexType = Small
+
+  result = Mesh(instanceCount: instanceCount, instanceTransforms: newSeqWith(int(instanceCount), Unit4F32), indexType: indexType)
   setMeshData(result, "position", positions.toSeq)
   if colors.len > 0: setMeshData(result, "color", colors.toSeq)
   if uvs.len > 0: setMeshData(result, "uv", uvs.toSeq)
 
+  # assert all indices are valid
   for i in indices:
     assert uint32(i[0]) < result.vertexCount
     assert uint32(i[1]) < result.vertexCount
     assert uint32(i[2]) < result.vertexCount
 
-  if indices.len == 0:
-      result.indexType = None
-  else:
-    if autoResize and uint32(positions.len) < uint32(high(uint8)) and false: # TODO: check feature support
-      result.indexType = Tiny
-      for i, tri in enumerate(indices):
-        result.tinyIndices.add [uint8(tri[0]), uint8(tri[1]), uint8(tri[2])]
-    elif autoResize and uint32(positions.len) < uint32(high(uint16)):
-      result.indexType = Small
-      for i, tri in enumerate(indices):
-        result.smallIndices.add [uint16(tri[0]), uint16(tri[1]), uint16(tri[2])]
-    else:
-      result.indexType = Big
-      for i, tri in enumerate(indices):
-        result.bigIndices.add [uint32(tri[0]), uint32(tri[1]), uint32(tri[2])]
+  # cast index values to appropiate type
+  if result.indexType == Tiny and uint32(positions.len) < uint32(high(uint8)) and false: # TODO: check feature support
+    for i, tri in enumerate(indices):
+      result.tinyIndices.add [uint8(tri[0]), uint8(tri[1]), uint8(tri[2])]
+  elif result.indexType == Small and uint32(positions.len) < uint32(high(uint16)):
+    for i, tri in enumerate(indices):
+      result.smallIndices.add [uint16(tri[0]), uint16(tri[1]), uint16(tri[2])]
+  elif result.indexType == Big:
+    for i, tri in enumerate(indices):
+      result.bigIndices.add [uint32(tri[0]), uint32(tri[1]), uint32(tri[2])]
   setInstanceData(result, "transform", newSeqWith(int(instanceCount), Unit4F32))
 
 func newMesh*(

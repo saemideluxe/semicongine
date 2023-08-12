@@ -63,9 +63,19 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
     preferVRAM=preferVRAM,
     preferAutoFlush=preferAutoFlush
   )
-  image.memoryAllocated = true
+
   debug "Allocating memory for image: ", image.width, "x", image.height, "x", image.depth, ", ", requirements.size, " bytes of type ", memoryType
-  image.memory = image.device.allocate(requirements.size, memoryType)
+  image = VulkanImage(
+    device: image.device,
+    vk: image.vk,
+    width: image.width,
+    height: image.height,
+    depth: image.depth,
+    format: image.format,
+    usage: image.usage,
+    memoryAllocated: true,
+    memory: image.device.allocate(requirements.size, memoryType),
+  )
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 
 proc transitionImageLayout*(image: VulkanImage, oldLayout, newLayout: VkImageLayout) =
@@ -184,7 +194,16 @@ proc destroy*(image: var VulkanImage) =
   if image.memoryAllocated:
     assert image.memory.vk.valid
     image.memory.free
-    image.memoryAllocated = false
+    image = VulkanImage(
+      device: image.device,
+      vk: image.vk,
+      width: image.width,
+      height: image.height,
+      depth: image.depth,
+      format: image.format,
+      usage: image.usage,
+      memoryAllocated: false,
+    )
   image.vk.reset
 
 proc createSampler*(device: Device, sampler: Sampler): VulkanSampler =

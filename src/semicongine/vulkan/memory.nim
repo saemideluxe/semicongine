@@ -68,12 +68,13 @@ proc getMemoryProperties*(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemor
 proc allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemory =
   assert device.vk.valid
   assert size > 0
-
-  result.device = device
-  result.size = size
-  result.memoryType = memoryType
-  result.canMap = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in result.memoryType.flags
-  result.needsFlushing = not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in result.memoryType.flags)
+  result = DeviceMemory(
+    device: device,
+    size: size,
+    memoryType: memoryType,
+    canMap: VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in memoryType.flags,
+    needsFlushing: not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in result.memoryType.flags),
+  )
 
   var allocationInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
