@@ -4,18 +4,24 @@ import semicongine
 proc main() =
   var scene = newScene("main", root=newEntity("rect"))
 
-  var obj1 = newEntity("Obj1", rect(color="f00f"))
-  var obj2 = newEntity("Obj2", rect())
-  var obj3 = newEntity("Obj3", circle(color="0f0f"))
+  var obj1 = newEntity("Obj1", {
+    "mesh": Component(rect(color="f00f")),
+    "hitbox": Component(HitBox(transform: translate3d(-0.5, -0.5, -0.5)))
+  })
+  var obj2 = newEntity("Obj2", {
+    "mesh": Component(rect()),
+    "hitbox": Component(HitBox(transform: translate3d(-0.5, -0.5, -0.5)))
+  })
+  var obj3 = newEntity("Obj3", {
+    "mesh": Component(circle(color="0f0f")),
+    "hitbox": Component(HitSphere(radius: 0.5))
+  })
   
   scene.root.add obj2
   scene.root.add obj1
   scene.root.add obj3
   obj1.transform = scale3d(0.8, 0.8)
   obj3.transform = scale3d(0.1, 0.1)
-  obj1.add HitBox(transform: translate3d(-0.5, -0.5, -0.5))
-  obj2.add HitBox(transform: translate3d(-0.5, -0.5, -0.5))
-  obj3.add HitSphere(radius: 0.5)
 
   const
     vertexInput = @[
@@ -37,7 +43,7 @@ proc main() =
 
   var engine = initEngine("Test collisions")
   engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  engine.addScene(scene, vertexInput, @[])
+  engine.addScene(scene, vertexInput, @[], materialIndexAttribute="")
   scene.addShaderGlobal("perspective", Unit4F32)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
@@ -55,10 +61,7 @@ proc main() =
     if engine.keyIsDown(Key.X): obj2.transform = obj2.transform * rotate3d( 0.001, Z)
     if engine.keyIsDown(Key.C): obj2.transform = obj2.transform * translate3d(0, -0.001, 0)
     if engine.keyIsDown(Key.V): obj2.transform = obj2.transform * translate3d(0,  0.001, 0)
-    var hb1 = HitBox(obj1.components[1])
-    var hb2 = HitBox(obj2.components[1])
-    var hb3 = HitSphere(obj3.components[1])
-    echo overlaps(hb1, hb3)
+    echo intersects(obj1["hitbox", HitBox()], obj3["hitbox", HitSphere()])
     engine.renderScene(scene)
   engine.destroy()
 
