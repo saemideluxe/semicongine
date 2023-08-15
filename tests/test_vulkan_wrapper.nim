@@ -85,25 +85,20 @@ proc main() =
 
   # INIT RENDERER:
   const
-    vertexInput = @[
-      attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
-      attr[Vec3f]("translate", perInstance=true)
-    ]
-    intermediate = @[attr[Vec4f]("outcolor")]
-    fragOutput = @[attr[Vec4f]("color")]
-    samplers = @[attr[Sampler2DType]("my_little_texture")]
-    uniforms = @[attr[float32]("time")]
-    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
-      inputs=vertexInput,
-      intermediate=intermediate,
-      outputs=fragOutput,
-      samplers=samplers,
-      uniforms=uniforms,
+    shaderConfiguration = createShaderConfiguration(
+      inputs=[
+        attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
+        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
+        attr[Vec3f]("translate", perInstance=true)
+      ],
+      intermediates=[attr[Vec4f]("outcolor")],
+      outputs=[attr[Vec4f]("color")],
+      uniforms=[attr[float32]("time")],
+      samplers=[attr[Sampler2DType]("my_little_texture")],
       vertexCode="""gl_Position = vec4(position + translate, 1.0); outcolor = color;""",
       fragmentCode="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
-  var renderPass = engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode)
+  var renderPass = engine.gpuDevice.simpleForwardRenderPass(shaderConfiguration)
   engine.setRenderer(renderPass)
 
   # INIT SCENES

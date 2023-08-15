@@ -64,14 +64,13 @@ proc createRenderPass*(
 
 proc simpleForwardRenderPass*(
   device: Device,
-  vertexCode: ShaderCode,
-  fragmentCode: ShaderCode,
+  shaderConfiguration: ShaderConfiguration,
   inFlightFrames=2,
   format=VK_FORMAT_UNDEFINED ,
   clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])
 ): RenderPass =
   assert device.vk.valid
-  assert fragmentCode.outputs.len == 1
+  assert shaderConfiguration.outputs.len == 1
   var theformat = format
   if theformat == VK_FORMAT_UNDEFINED:
     theformat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format
@@ -103,7 +102,7 @@ proc simpleForwardRenderPass*(
       dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
     )]
   result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
-  result.subpasses[0].pipelines.add device.createPipeline(result.vk, vertexCode, fragmentCode, inFlightFrames, 0)
+  result.subpasses[0].pipelines.add device.createPipeline(result.vk, shaderConfiguration, inFlightFrames, 0)
 
 proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
   assert commandBuffer.valid

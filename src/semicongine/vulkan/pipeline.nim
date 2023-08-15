@@ -14,23 +14,14 @@ type
     device*: Device
     vk*: VkPipeline
     layout*: VkPipelineLayout
-    shaders*: seq[Shader]
+    shaderConfiguration: ShaderConfiguration
+    shaderModules*: (ShaderModule, ShaderModule)
     descriptorSetLayout*: DescriptorSetLayout
 
-func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
-  for shader in pipeline.shaders:
-    if shader.stage == VK_SHADER_STAGE_VERTEX_BIT:
-      return shader.inputs
+func inputs*(pipeline: Pipeline): seq[ShaderAttribute] = pipeline.shaderConfiguration.inputs
 
 func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
-  var visitedUniforms: Table[string, ShaderAttribute]
-  for shader in pipeline.shaders:
-    for attribute in shader.uniforms:
-      if attribute.name in visitedUniforms:
-        assert visitedUniforms[attribute.name] == attribute
-      else:
-        result.add attribute
-        visitedUniforms[attribute.name] = attribute
+  pipeline.shaderConfiguration.uniforms
 
 proc setupDescriptors*(pipeline: var Pipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: Table[string, seq[VulkanTexture]], inFlightFrames: int): seq[DescriptorSet] =
   assert pipeline.vk.valid
@@ -57,32 +48,23 @@ proc setupDescriptors*(pipeline: var Pipeline, descriptorPool: DescriptorPool, b
           descriptor.imageviews.add t.imageView
           descriptor.samplers.add t.sampler
 
-proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: ShaderCode, fragmentCode: ShaderCode, inFlightFrames: int, subpass = 0'u32): Pipeline =
+proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid
   assert device.vk.valid
 
-  var
-    vertexShader = device.createShaderModule(vertexCode)
-    fragmentShader = device.createShaderModule(fragmentCode)
-  assert vertexShader.stage == VK_SHADER_STAGE_VERTEX_BIT
-  assert fragmentShader.stage == VK_SHADER_STAGE_FRAGMENT_BIT
-  assert vertexShader.outputs == fragmentShader.inputs
-  assert vertexShader.uniforms == fragmentShader.uniforms
-  assert vertexShader.samplers == fragmentShader.samplers
-
   result.device = device
-  result.shaders = @[vertexShader, fragmentShader]
+  result.shaderModules = device.createShaderModules(shaderConfiguration)
   
   var descriptors: seq[Descriptor]
-  if vertexCode.uniforms.len > 0:
+  if shaderConfiguration.uniforms.len > 0:
     descriptors.add Descriptor(
       name: "Uniforms",
       thetype: Uniform,
       count: 1,
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
-      size: vertexShader.uniforms.size(),
+      size: shaderConfiguration.uniforms.size(),
     )
-  for sampler in vertexShader.samplers:
+  for sampler in shaderConfiguration.samplers:
     descriptors.add Descriptor(
       name: sampler.name,
       thetype: ImageSampler,
@@ -111,7 +93,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
   var
     bindings: seq[VkVertexInputBindingDescription]
     attributes: seq[VkVertexInputAttributeDescription]
-    vertexInputInfo = vertexShader.getVertexInputInfo(bindings, attributes)
+    vertexInputInfo = shaderConfiguration.getVertexInputInfo(bindings, attributes)
     inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
       topology: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -166,7 +148,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, vertexCode: Shade
       dynamicStateCount: uint32(dynamicStates.len),
       pDynamicStates: dynamicStates.toCPointer,
     )
-    stages = @[vertexShader.getPipelineInfo(), fragmentShader.getPipelineInfo()]
+    stages = @[result.shaderModules[0].getPipelineInfo(), result.shaderModules[1].getPipelineInfo()]
     createInfo = VkGraphicsPipelineCreateInfo(
       sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
       stageCount: uint32(stages.len),
@@ -203,8 +185,8 @@ proc destroy*(pipeline: var Pipeline) =
   assert pipeline.layout.valid
   assert pipeline.descriptorSetLayout.vk.valid
 
-  for shader in pipeline.shaders.mitems:
-    shader.destroy()
+  pipeline.shaderModules[0].destroy()
+  pipeline.shaderModules[1].destroy()
   pipeline.descriptorSetLayout.destroy()
   pipeline.device.vk.vkDestroyPipelineLayout(pipeline.layout, nil)
   pipeline.device.vk.vkDestroyPipeline(pipeline.vk, nil)

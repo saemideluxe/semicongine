@@ -1,5 +1,4 @@
 import std/sequtils
-import std/tables
 import std/options
 import std/logging
 import std/os
@@ -112,19 +111,12 @@ proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribut
   assert transformAttribute == "" or transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
   assert materialIndexAttribute == "" or materialIndexAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
   assert engine.renderer.isSome
-  engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers, transformAttribute=transformAttribute, materialIndexAttribute=materialIndexAttribute)
-
-#[
-proc addScene*(engine: var Engine, scene: Scene, materialShaders: Table[string, ShaderConfiguration], transformAttribute="transform", materialIndexAttribute="materialIndex") =
-  if transformAttribute != "":
-    for shader in materialShaders.values:
-      assert transformAttribute in map(shader.inputs, proc(a: ShaderAttribute): string = a.name)
-  if materialIndexAttribute != "":
-    for shader in materialShaders.values:
-      assert materialIndexAttribute in map(shader.inputs, proc(a: ShaderAttribute): string = a.name)
-  assert engine.renderer.isSome
-  engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers, transformAttribute=transformAttribute, materialIndexAttribute=materialIndexAttribute)
-  ]#
+  # TODO:
+  # rethink when and how we set up those buffers
+  # scene should have no idea about shader inputs and samplers, but we need to use those in the setup
+  # idea: gather material-names -> get materials -> get shaders -> determine vertexInputs and samplers?
+  # also, be aware: need to support multiple pipelines/shaders
+  engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers)
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running

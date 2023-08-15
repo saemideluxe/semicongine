@@ -15,6 +15,8 @@ type
     root*: Entity
     shaderGlobals*: Table[string, DataList]
     materials: OrderedTable[string, Material]
+    transformAttribute*: string = "transform"
+    materialIndexAttribute*: string = "materialIndex"
 
   Component* = ref object of RootObj
     entity*: Entity
