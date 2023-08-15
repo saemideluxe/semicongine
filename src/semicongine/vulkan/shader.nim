@@ -17,23 +17,11 @@ let logger = newConsoleLogger()
 addHandler(logger)
 
 type
-  ShaderCode* = object # compiled shader code with some meta data
-    binary: seq[uint32]
-    stage: VkShaderStageFlagBits
-    entrypoint: string
-    inputs*: seq[ShaderAttribute]
-    uniforms*: seq[ShaderAttribute]
-    samplers*: seq[ShaderAttribute]
-    outputs*: seq[ShaderAttribute]
-  Shader* = object
+  ShaderModule* = object
     device: Device
     vk*: VkShaderModule
     stage*: VkShaderStageFlagBits
-    entrypoint*: string
-    inputs*: seq[ShaderAttribute]
-    uniforms*: seq[ShaderAttribute]
-    samplers*: seq[ShaderAttribute]
-    outputs*: seq[ShaderAttribute]
+    configuration*: ShaderConfiguration
   ShaderConfiguration* = object
     vertexBinary: seq[uint32]
     fragmentBinary: seq[uint32]
@@ -94,40 +82,12 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
     )
     i += 4
 
-
-proc compileGlslShader*(
-  stage: VkShaderStageFlagBits,
-  inputs: seq[ShaderAttribute]= @[],
-  uniforms: seq[ShaderAttribute]= @[],
-  samplers: seq[ShaderAttribute]= @[],
-  outputs: seq[ShaderAttribute]= @[],
-  version=DEFAULT_SHADER_VERSION ,
-  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
-  main: string
-): ShaderCode {.compileTime.} =
-
-  let code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
-    (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
-    (if uniforms.len > 0: uniforms.glslUniforms(binding=0) & @[""] else: @[]) &
-    (if samplers.len > 0: samplers.glslSamplers(basebinding=if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
-    (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
-    @[&"void {entrypoint}(){{"] &
-    main &
-    @[&"}}"]
-  result.inputs = inputs
-  result.uniforms = uniforms
-  result.samplers = samplers
-  result.outputs = outputs
-  result.entrypoint = entrypoint
-  result.stage = stage
-  result.binary = compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
-
 proc compileGlslCode*(
   stage: VkShaderStageFlagBits,
-  inputs: seq[ShaderAttribute]= @[],
-  uniforms: seq[ShaderAttribute]= @[],
-  samplers: seq[ShaderAttribute]= @[],
-  outputs: seq[ShaderAttribute]= @[],
+  inputs: openArray[ShaderAttribute]=[],
+  uniforms: openArray[ShaderAttribute]=[],
+  samplers: openArray[ShaderAttribute]=[],
+  outputs: openArray[ShaderAttribute]=[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
   main: string
@@ -143,83 +103,12 @@ proc compileGlslCode*(
     @[&"}}"]
   compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
 
-proc compileVertexShader*(
-  inputs: seq[ShaderAttribute]= @[],
-  uniforms: seq[ShaderAttribute]= @[],
-  samplers: seq[ShaderAttribute]= @[],
-  outputs: seq[ShaderAttribute]= @[],
-  version=DEFAULT_SHADER_VERSION ,
-  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
-  main: string
-): ShaderCode {.compileTime.} =
-  compileGlslShader(
-    stage=VK_SHADER_STAGE_VERTEX_BIT,
-    inputs=inputs,
-    uniforms=uniforms,
-    samplers=samplers,
-    outputs=outputs,
-    version=version,
-    entrypoint=entrypoint,
-    main=main
-  )
-
-proc compileFragmentShader*(
-  inputs: seq[ShaderAttribute]= @[],
-  uniforms: seq[ShaderAttribute]= @[],
-  samplers: seq[ShaderAttribute]= @[],
-  outputs: seq[ShaderAttribute]= @[],
-  version=DEFAULT_SHADER_VERSION ,
-  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
-  main: string
-): ShaderCode {.compileTime.} =
-  compileGlslShader(
-    stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-    inputs=inputs,
-    uniforms=uniforms,
-    samplers=samplers,
-    outputs=outputs,
-    version=version,
-    entrypoint=entrypoint,
-    main=main
-  )
-
-proc compileVertexFragmentShaderSet*(
-  inputs: seq[ShaderAttribute]= @[],
-  intermediate: seq[ShaderAttribute]= @[],
-  outputs: seq[ShaderAttribute]= @[],
-  uniforms: seq[ShaderAttribute]= @[],
-  samplers: seq[ShaderAttribute]= @[],
-  version=DEFAULT_SHADER_VERSION ,
-  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
-  vertexCode: string,
-  fragmentCode: string,
-): (ShaderCode, ShaderCode) {.compileTime.} =
-
-  result[0] = compileVertexShader(
-    inputs=inputs,
-    outputs=intermediate,
-    uniforms=uniforms,
-    samplers=samplers,
-    version=version,
-    entrypoint=entrypoint,
-    main=vertexCode
-  )
-  result[1] = compileFragmentShader(
-    inputs=intermediate,
-    outputs=outputs,
-    uniforms=uniforms,
-    samplers=samplers,
-    version=version,
-    entrypoint=entrypoint,
-    main=fragmentCode
-  )
-
 proc createShaderConfiguration*(
-  inputs: seq[ShaderAttribute]= @[],
-  intermediates: seq[ShaderAttribute]= @[],
-  outputs: seq[ShaderAttribute]= @[],
-  uniforms: seq[ShaderAttribute]= @[],
-  samplers: seq[ShaderAttribute]= @[],
+  inputs: openArray[ShaderAttribute]=[],
+  intermediates: openArray[ShaderAttribute]=[],
+  outputs: openArray[ShaderAttribute]=[],
+  uniforms: openArray[ShaderAttribute]=[],
+  samplers: openArray[ShaderAttribute]=[],
   version=DEFAULT_SHADER_VERSION ,
   entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
   vertexCode: string,
@@ -236,45 +125,51 @@ proc createShaderConfiguration*(
     ),
     fragmentBinary: compileGlslCode(
       stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=inputs,
-      outputs=intermediates,
+      inputs=intermediates,
+      outputs=outputs,
       uniforms=uniforms,
       samplers=samplers,
       main=fragmentCode,
     ),
     entrypoint: entrypoint,
-    inputs: inputs,
-    intermediates: intermediates,
-    outputs: outputs,
-    uniforms: uniforms,
-    samplers: samplers,
+    inputs: @inputs,
+    intermediates: @intermediates,
+    outputs: @outputs,
+    uniforms: @uniforms,
+    samplers: @samplers,
   )
 
 
-proc createShaderModule*(
+proc createShaderModules*(
   device: Device,
-  shaderCode: ShaderCode,
-): Shader =
+  shaderConfiguration: ShaderConfiguration,
+): (ShaderModule, ShaderModule) =
   assert device.vk.valid
-  assert len(shaderCode.binary) > 0
+  assert len(shaderConfiguration.vertexBinary) > 0
+  assert len(shaderConfiguration.fragmentBinary) > 0
 
-  result.device = device
-  result.inputs = shaderCode.inputs
-  result.uniforms = shaderCode.uniforms
-  result.samplers = shaderCode.samplers
-  result.outputs = shaderCode.outputs
-  result.entrypoint = shaderCode.entrypoint
-  result.stage = shaderCode.stage
-  var bin = shaderCode.binary
-  var createInfo = VkShaderModuleCreateInfo(
+  result[0].device = device
+  result[1].device = device
+  result[0].configuration = shaderConfiguration
+  result[1].configuration = shaderConfiguration
+  result[0].stage = VK_SHADER_STAGE_VERTEX_BIT
+  result[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT
+
+  var createInfoVertex = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-    codeSize: uint(bin.len * sizeof(uint32)),
-    pCode: addr(bin[0]),
+    codeSize: uint(shaderConfiguration.vertexBinary.len * sizeof(uint32)),
+    pCode: addr(shaderConfiguration.vertexBinary[0]),
   )
-  checkVkResult vkCreateShaderModule(device.vk, addr(createInfo), nil, addr(result.vk))
+  checkVkResult vkCreateShaderModule(device.vk, addr(createInfoVertex), nil, addr(result[0].vk))
+  var createInfoFragment = VkShaderModuleCreateInfo(
+    sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+    codeSize: uint(shaderConfiguration.fragmentBinary.len * sizeof(uint32)),
+    pCode: addr(shaderConfiguration.fragmentBinary[0]),
+  )
+  checkVkResult vkCreateShaderModule(device.vk, addr(createInfoFragment), nil, addr(result[1].vk))
 
 proc getVertexInputInfo*(
-  shader: Shader,
+  shaderConfiguration: ShaderConfiguration,
   bindings: var seq[VkVertexInputBindingDescription],
   attributes: var seq[VkVertexInputAttributeDescription],
   baseBinding=0'u32
@@ -282,7 +177,7 @@ proc getVertexInputInfo*(
   var location = 0'u32
   var binding = baseBinding
 
-  for attribute in shader.inputs:
+  for attribute in shaderConfiguration.inputs:
     bindings.add VkVertexInputBindingDescription(
       binding: binding,
       stride: attribute.size,
@@ -308,15 +203,15 @@ proc getVertexInputInfo*(
   )
 
 
-proc getPipelineInfo*(shader: Shader): VkPipelineShaderStageCreateInfo =
+proc getPipelineInfo*(shader: ShaderModule): VkPipelineShaderStageCreateInfo =
   VkPipelineShaderStageCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
     stage: shader.stage,
     module: shader.vk,
-    pName: cstring(shader.entrypoint),
+    pName: cstring(shader.configuration.entrypoint),
   )
 
-proc destroy*(shader: var Shader) =
+proc destroy*(shader: var ShaderModule) =
   assert shader.device.vk.valid
   assert shader.vk.valid
   shader.device.vk.vkDestroyShaderModule(shader.vk, nil)

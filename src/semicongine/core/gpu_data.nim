@@ -1056,7 +1056,7 @@ func glslType*(thetype: DataType): string =
     of Mat4F64: "dmat4"
     of Sampler2D: "sampler2D"
 
-func glslInput*(group: seq[ShaderAttribute]): seq[string] =
+func glslInput*(group: openArray[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
   var i = 0'u32
@@ -1067,7 +1067,7 @@ func glslInput*(group: seq[ShaderAttribute]): seq[string] =
     for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
       i += attribute.thetype.nLocationSlots
 
-func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding: int): seq[string] =
+func glslUniforms*(group: openArray[ShaderAttribute], blockName="Uniforms", binding: int): seq[string] =
   if group.len == 0:
     return @[]
   # currently only a single uniform block supported, therefore binding = 0
@@ -1079,7 +1079,7 @@ func glslUniforms*(group: seq[ShaderAttribute], blockName="Uniforms", binding: i
     result.add(&"    {attribute.thetype.glslType} {attribute.name}{arrayDecl};")
   result.add(&"}} {blockName};")
 
-func glslSamplers*(group: seq[ShaderAttribute], basebinding: int): seq[string] =
+func glslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[string] =
   if group.len == 0:
     return @[]
   var thebinding = basebinding
@@ -1090,7 +1090,7 @@ func glslSamplers*(group: seq[ShaderAttribute], basebinding: int): seq[string] =
     result.add(&"layout(binding = {thebinding}) uniform {attribute.thetype.glslType} {attribute.name}{arrayDecl};")
     inc thebinding
 
-func glslOutput*(group: seq[ShaderAttribute]): seq[string] =
+func glslOutput*(group: openArray[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
   var i = 0'u32

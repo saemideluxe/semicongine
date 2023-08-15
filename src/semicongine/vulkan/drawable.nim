@@ -26,7 +26,7 @@ func `$`*(drawable: Drawable): string =
   else:
     &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
-proc draw*(commandBuffer: VkCommandBuffer, drawable: Drawable, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer) =
+proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer) =
     if drawable.mesh.entity.transform == Mat4():
       return
     debug "Draw ", drawable

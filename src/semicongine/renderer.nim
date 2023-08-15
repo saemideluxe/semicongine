@@ -56,31 +56,31 @@ proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
     raise newException(Exception, "Unable to create swapchain")
   result.swapchain = swapchain.get()
 
-proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="transform", materialIndexAttribute="materialIndex") =
+proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], samplers: seq[ShaderAttribute]) =
   assert not (scene in renderer.scenedata)
   const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
   var scenedata = SceneData()
 
   # if mesh transformation are handled through the scenegraph-transformation, set it up here
-  if transformattribute != "":
+  if scene.transformAttribute != "":
     var hasTransformAttribute = false
     for input in inputs:
-      if input.name == transformattribute:
+      if input.name == scene.transformAttribute:
         assert input.perInstance == true, $input
         assert getDataType[Mat4]() == input.thetype
         hasTransformAttribute = true
     assert hasTransformAttribute
-    scenedata.transformAttribute = transformAttribute
+    scenedata.transformAttribute = scene.transformAttribute
 
   # check if we have support for material indices, if required
-  if materialIndexAttribute != "":
+  if scene.materialIndexAttribute != "":
     var hasMaterialIndexAttribute = false
     for input in inputs:
-      if input.name == materialIndexAttribute:
+      if input.name == scene.materialIndexAttribute:
         assert getDataType[uint16]() == input.thetype
         hasMaterialIndexAttribute = true
     assert hasMaterialIndexAttribute
-    scenedata.materialIndexAttribute = materialIndexAttribute
+    scenedata.materialIndexAttribute = scene.materialIndexAttribute
 
   # find all meshes, populate missing attribute values for shader
   var allMeshes: seq[Mesh]
@@ -312,7 +312,7 @@ proc render*(renderer: var Renderer, scene: var Scene) =
       debug "  Index buffer: ", renderer.scenedata[scene].indexBuffer
 
       for drawable in renderer.scenedata[scene].drawables.values:
-        commandBuffer.draw(drawable, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer)
+        drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer)
 
     if i < renderer.renderPass.subpasses.len - 1:
       commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
