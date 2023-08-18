@@ -18,12 +18,16 @@ type
     shaderModules*: (ShaderModule, ShaderModule)
     descriptorSetLayout*: DescriptorSetLayout
 
-func inputs*(pipeline: Pipeline): seq[ShaderAttribute] = pipeline.shaderConfiguration.inputs
+func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
+  pipeline.shaderConfiguration.inputs
 
 func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.uniforms
 
-proc setupDescriptors*(pipeline: var Pipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: Table[string, seq[VulkanTexture]], inFlightFrames: int): seq[DescriptorSet] =
+func samplers*(pipeline: Pipeline): seq[ShaderAttribute] =
+  pipeline.shaderConfiguration.samplers
+
+proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: Table[string, seq[VulkanTexture]], inFlightFrames: int): seq[DescriptorSet] =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 
@@ -54,17 +58,18 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
 
   result.device = device
   result.shaderModules = device.createShaderModules(shaderConfiguration)
+  result.shaderConfiguration = shaderConfiguration
   
   var descriptors: seq[Descriptor]
-  if shaderConfiguration.uniforms.len > 0:
+  if result.shaderConfiguration.uniforms.len > 0:
     descriptors.add Descriptor(
       name: "Uniforms",
       thetype: Uniform,
       count: 1,
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
-      size: shaderConfiguration.uniforms.size(),
+      size: result.shaderConfiguration.uniforms.size(),
     )
-  for sampler in shaderConfiguration.samplers:
+  for sampler in result.shaderConfiguration.samplers:
     descriptors.add Descriptor(
       name: sampler.name,
       thetype: ImageSampler,
@@ -93,7 +98,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
   var
     bindings: seq[VkVertexInputBindingDescription]
     attributes: seq[VkVertexInputAttributeDescription]
-    vertexInputInfo = shaderConfiguration.getVertexInputInfo(bindings, attributes)
+    vertexInputInfo = result.shaderConfiguration.getVertexInputInfo(bindings, attributes)
     inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
       topology: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,

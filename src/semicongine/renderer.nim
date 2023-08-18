@@ -1,25 +1,23 @@
 import std/options
-import std/sequtils
 import std/enumerate
 import std/tables
 import std/strformat
-import std/strutils
 import std/logging
 
 import ./core
 import ./vulkan/buffer
 import ./vulkan/device
 import ./vulkan/drawable
-import ./vulkan/pipeline
 import ./vulkan/physicaldevice
+import ./vulkan/pipeline
 import ./vulkan/renderpass
 import ./vulkan/swapchain
+import ./vulkan/shader
 import ./vulkan/descriptor
 import ./vulkan/image
 
 import ./scene
 import ./mesh
-import ./material
 
 type
   SceneData = object
@@ -32,6 +30,7 @@ type
     attributeBindingNumber*: Table[string, int]
     transformAttribute: string # name of attribute that is used for per-instance mesh transformation
     materialIndexAttribute: string # name of attribute that is used for material selection
+    materials: seq[Material]
     entityTransformationCache: Table[Mesh, Mat4] # remembers last transformation, avoid to send GPU-updates if no changes
     descriptorPool*: DescriptorPool
     descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
@@ -43,22 +42,36 @@ type
     scenedata: Table[Scene, SceneData]
 
 
-proc initRenderer*(device: Device, renderPass: RenderPass): Renderer =
+proc initRenderer*(device: Device, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): Renderer =
   assert device.vk.valid
-  assert renderPass.vk.valid
-
+  
   result.device = device
-  result.renderPass = renderPass
+  result.renderPass = device.simpleForwardRenderPass(shaders, clearColor=clearColor)
   result.surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
   # use last renderpass as output for swapchain
   let swapchain = device.createSwapchain(result.renderPass.vk, result.surfaceFormat, device.firstGraphicsQueue().get().family)
   if not swapchain.isSome:
     raise newException(Exception, "Unable to create swapchain")
+
   result.swapchain = swapchain.get()
 
-proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[ShaderAttribute], samplers: seq[ShaderAttribute]) =
+func inputs(renderer: Renderer): seq[ShaderAttribute] =
+  for i in 0 ..< renderer.renderPass.subpasses.len:
+    for pipeline in renderer.renderPass.subpasses[i].pipelines.values:
+      result.add pipeline.inputs
+
+func samplers(renderer: Renderer): seq[ShaderAttribute] =
+  for i in 0 ..< renderer.renderPass.subpasses.len:
+    for pipeline in renderer.renderPass.subpasses[i].pipelines.values:
+      result.add pipeline.samplers
+
+proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene) =
   assert not (scene in renderer.scenedata)
   const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
+
+  # TODO: find all inputs and samplers from scene materials
+  let inputs = renderer.inputs
+  var samplers = renderer.samplers
   var scenedata = SceneData()
 
   # if mesh transformation are handled through the scenegraph-transformation, set it up here
@@ -67,7 +80,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     for input in inputs:
       if input.name == scene.transformAttribute:
         assert input.perInstance == true, $input
-        assert getDataType[Mat4]() == input.thetype
+        assert getDataType[Mat4]() == input.thetype, $input
         hasTransformAttribute = true
     assert hasTransformAttribute
     scenedata.transformAttribute = scene.transformAttribute
@@ -82,6 +95,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
     assert hasMaterialIndexAttribute
     scenedata.materialIndexAttribute = scene.materialIndexAttribute
 
+  for mesh in allComponentsOfType[Mesh](scene.root):
+    if mesh.material != nil and not scenedata.materials.contains(mesh.material):
+      scenedata.materials.add mesh.material
+
   # find all meshes, populate missing attribute values for shader
   var allMeshes: seq[Mesh]
   for mesh in allComponentsOfType[Mesh](scene.root):
@@ -92,13 +109,11 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
         mesh.initData(inputAttr)
       assert mesh.dataType(inputAttr.name) == inputAttr.thetype, &"mesh attribute {inputAttr.name} has type {mesh.dataType(inputAttr.name)} but shader expects {inputAttr.thetype}"
       if scenedata.materialIndexAttribute != "" and inputAttr.name == scenedata.materialIndexAttribute:
-        assert mesh.materials.len > 0, "Missing material specification for mesh. Either set the 'materials' attribute or pass the argument 'materialIndexAttribute=\"\"' when calling 'addScene'"
-        assert mesh.materials.len == getMeshData[uint16](mesh, scenedata.materialIndexAttribute)[].len
-        for i, material in enumerate(mesh.materials):
-          let matIndex = scene.materialIndex(material)
-          if matIndex < 0:
-            raise newException(Exception, &"Required material '{material}' not available in scene (available are: {scene.materials.toSeq})")
-          updateMeshData[uint16](mesh, scenedata.materialIndexAttribute, uint32(i), uint16(matIndex))
+        assert mesh.material != nil, "Missing material specification for mesh. Either set the 'materials' attribute or pass the argument 'materialIndexAttribute=\"\"' when calling 'addScene'"
+        let matIndex = scenedata.materials.find(mesh.material)
+        if matIndex < 0:
+          raise newException(Exception, &"Required material '{mesh.material}' not available in scene (available are: {scenedata.materials})")
+        updateMeshData[uint16](mesh, scenedata.materialIndexAttribute, 0, uint16(matIndex))
   
   # create index buffer if necessary
   var indicesBufferSize = 0'u64
@@ -187,7 +202,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
       indexBufferOffset += size
     scenedata.drawables[mesh] = drawable
 
-  for material in scene.materials:
+  # upload textures
+  for material in scenedata.materials:
     for textureName, texture in material.textures.pairs:
       if not scenedata.textures.hasKey(textureName):
         scenedata.textures[textureName] = @[]
@@ -195,7 +211,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: Scene, inputs: seq[Sha
 
   # setup uniforms and samplers
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
-    for pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.mitems:
+    for material, pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.pairs:
       var uniformBufferSize = 0'u64
       for uniform in pipeline.uniforms:
         uniformBufferSize += uniform.size
@@ -269,7 +285,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
   assert scene in renderer.scenedata
 
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    for pipeline in renderer.renderPass.subpasses[i].pipelines.mitems:
+    for material, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
       if renderer.scenedata[scene].uniformBuffers.hasKey(pipeline.vk) and renderer.scenedata[scene].uniformBuffers[pipeline.vk].len != 0:
         assert renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].vk.valid
         var offset = 0'u64
@@ -301,18 +317,19 @@ proc render*(renderer: var Renderer, scene: var Scene) =
   commandBuffer = commandBufferResult.get()
   commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer())
 
+  debug "Scene buffers:"
+  for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
+    debug "  ", location, ": ", buffer
+  debug "  Index buffer: ", renderer.scenedata[scene].indexBuffer
+
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    for pipeline in renderer.renderPass.subpasses[i].pipelines.mitems:
+    for materialType, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
       commandBuffer.vkCmdBindPipeline(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.vk)
       commandBuffer.vkCmdBindDescriptorSets(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
 
-      debug "Scene buffers:"
-      for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
-        debug "  ", location, ": ", buffer
-      debug "  Index buffer: ", renderer.scenedata[scene].indexBuffer
-
       for drawable in renderer.scenedata[scene].drawables.values:
-        drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer)
+        if drawable.mesh.material.materialType == materialType:
+          drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer)
 
     if i < renderer.renderPass.subpasses.len - 1:
       commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)

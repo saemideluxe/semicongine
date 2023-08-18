@@ -2,37 +2,64 @@ import std/tables
 
 import semicongine
 
+
+let sampler = Sampler(
+    magnification: VK_FILTER_NEAREST,
+    minification: VK_FILTER_NEAREST,
+    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+  )
+let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
+let mat = Material(
+    materialType: "my_material",
+    textures: {
+      "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
+      R, R, R, R, R,
+      R, R, W, R, R,
+      R, W, W, W, R,
+      R, R, W, R, R,
+      R, R, R, R, R,
+      ]), sampler: sampler)
+    }.toTable
+  )
+
 proc scene_different_mesh_types(): Entity =
   result = newEntity("root", [],
     newEntity("triangle1", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      material=mat,
     ))}),
     newEntity("triangle1b", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, -0.4), newVec3f(0.4, 0.4), newVec3f(-0.4, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      material=mat,
     ))}),
     newEntity("triangle2a", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, 0.5), newVec3f(0.5, -0.5), newVec3f(-0.5, -0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-      indices=[[0'u16, 2'u16, 1'u16]]
+      indices=[[0'u16, 2'u16, 1'u16]],
+      material=mat,
     ))}),
     newEntity("triangle2b", {"mesh": Component(newMesh(
       positions=[newVec3f(0.0, 0.4), newVec3f(0.4, -0.4), newVec3f(-0.4, -0.4)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-      indices=[[0'u16, 2'u16, 1'u16]]
+      indices=[[0'u16, 2'u16, 1'u16]],
+      material=mat,
     ))}),
     newEntity("triangle3a", {"mesh": Component(newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
-      autoResize=false
+      autoResize=false,
+      material=mat,
     ))}),
     newEntity("triangle3b", {"mesh": Component(newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
-      autoResize=false
+      autoResize=false,
+      material=mat,
     ))}),
   )
   for mesh in allComponentsOfType[Mesh](result):
@@ -42,22 +69,26 @@ proc scene_simple(): Entity =
   var mymesh1 = newMesh(
     positions=[newVec3f(0.0, -0.3), newVec3f(0.3, 0.3), newVec3f(-0.3, 0.3)],
     colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+    material=mat,
   )
   var mymesh2 = newMesh(
     positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
     colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+    material=mat,
   )
   var mymesh3 = newMesh(
     positions=[newVec3f(0.0, -0.6), newVec3f(0.6, 0.6), newVec3f(-0.6, 0.6)],
     colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
     indices=[[0'u32, 1'u32, 2'u32]],
-    autoResize=false
+    autoResize=false,
+    material=mat,
   )
   var mymesh4 = newMesh(
     positions=[newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
     colors=[newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
     indices=[[0'u16, 1'u16, 2'u16]],
-    instanceCount=2
+    instanceCount=2,
+    material=mat,
   )
   mymesh1.setInstanceData("translate", @[newVec3f(0.3, 0.0)])
   mymesh2.setInstanceData("translate", @[newVec3f(0.0, 0.3)])
@@ -69,14 +100,18 @@ proc scene_primitives(): Entity =
   var r = rect(color="ff0000")
   var t = tri(color="0000ff")
   var c = circle(color="00ff00")
+  t.material = mat
+  t.material = mat
+  c.material = mat
 
   r.setInstanceData("translate", @[newVec3f(0.5, -0.3)])
   t.setInstanceData("translate", @[newVec3f(0.3,  0.3)])
   c.setInstanceData("translate", @[newVec3f(-0.3,  0.1)])
-  result = newEntity("root", {"mesh1": Component(t), "mesh1": Component(r), "mesh1": Component(c)})
+  result = newEntity("root", {"mesh1": Component(t), "mesh2": Component(r), "mesh3": Component(c)})
 
 proc scene_flag(): Entity =
   var r = rect(color="ff0000")
+  r.material = mat
   r.updateMeshData("color", @[newVec4f(0, 0), newVec4f(1, 0), newVec4f(1, 1), newVec4f(0, 1)])
   result = newEntity("root", {"mesh": Component(r)})
 
@@ -98,35 +133,19 @@ proc main() =
       vertexCode="""gl_Position = vec4(position + translate, 1.0); outcolor = color;""",
       fragmentCode="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
-  var renderPass = engine.gpuDevice.simpleForwardRenderPass(shaderConfiguration)
-  engine.setRenderer(renderPass)
+  engine.setRenderer({"my_material": shaderConfiguration}.toTable)
 
   # INIT SCENES
   var scenes = [
-    newScene("simple", scene_simple()),
-    newScene("different mesh types", scene_different_mesh_types()),
-    newScene("primitives", scene_primitives()),
-    newScene("flag", scene_flag()),
+    newScene("simple", scene_simple(), transformAttribute="", materialIndexAttribute=""),
+    newScene("different mesh types", scene_different_mesh_types(), transformAttribute="", materialIndexAttribute=""),
+    newScene("primitives", scene_primitives(), transformAttribute="", materialIndexAttribute=""),
+    newScene("flag", scene_flag(), transformAttribute="", materialIndexAttribute=""),
   ]
-  var sampler = DefaultSampler()
-  sampler.magnification = VK_FILTER_NEAREST
-  sampler.minification = VK_FILTER_NEAREST
+
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
-    let (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
-    scene.addMaterial(Material(
-      name: "my_material",
-      textures: {
-        "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
-        R, R, R, R, R,
-        R, R, W, R, R,
-        R, W, W, W, R,
-        R, R, W, R, R,
-        R, R, R, R, R,
-        ]), sampler: sampler)
-      }.toTable
-    ))
-    engine.addScene(scene, vertexInput, samplers, transformAttribute="", materialIndexAttribute="")
+    engine.addScene(scene)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"

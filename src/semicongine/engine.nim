@@ -1,4 +1,4 @@
-import std/sequtils
+import std/tables
 import std/options
 import std/logging
 import std/os
@@ -9,10 +9,10 @@ import ./core
 import ./vulkan/instance
 import ./vulkan/device
 import ./vulkan/physicaldevice
-import ./vulkan/renderpass
 import ./vulkan/shader
 
 import ./scene
+import ./mesh
 import ./renderer
 import ./events
 import ./audio
@@ -102,21 +102,14 @@ proc initEngine*(
   )
   startMixerThread()
 
-proc setRenderer*(engine: var Engine, renderPass: RenderPass) =
-  if engine.renderer.isSome:
-    engine.renderer.get.destroy()
-  engine.renderer = some(engine.device.initRenderer(renderPass))
+proc setRenderer*(engine: var Engine, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
 
-proc addScene*(engine: var Engine, scene: Scene, vertexInput: seq[ShaderAttribute], samplers: seq[ShaderAttribute], transformAttribute="transform", materialIndexAttribute="materialIndex") =
-  assert transformAttribute == "" or transformAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
-  assert materialIndexAttribute == "" or materialIndexAttribute in map(vertexInput, proc(a: ShaderAttribute): string = a.name)
+  assert not engine.renderer.isSome
+  engine.renderer = some(engine.device.initRenderer(shaders=shaders, clearColor=clearColor))
+
+proc addScene*(engine: var Engine, scene: Scene) =
   assert engine.renderer.isSome
-  # TODO:
-  # rethink when and how we set up those buffers
-  # scene should have no idea about shader inputs and samplers, but we need to use those in the setup
-  # idea: gather material-names -> get materials -> get shaders -> determine vertexInputs and samplers?
-  # also, be aware: need to support multiple pipelines/shaders
-  engine.renderer.get.setupDrawableBuffers(scene, vertexInput, samplers)
+  engine.renderer.get.setupDrawableBuffers(scene)
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running

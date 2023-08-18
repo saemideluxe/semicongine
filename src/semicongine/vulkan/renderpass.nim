@@ -1,4 +1,5 @@
 import std/options
+import std/tables
 
 import ../core
 import ./device
@@ -12,12 +13,9 @@ type
     clearColor*: Vec4f
     pipelineBindPoint*: VkPipelineBindPoint
     flags: VkSubpassDescriptionFlags
-    inputs: seq[VkAttachmentReference]
     outputs: seq[VkAttachmentReference]
-    resolvers: seq[VkAttachmentReference]
     depthStencil: Option[VkAttachmentReference]
-    preserves: seq[uint32]
-    pipelines*: seq[Pipeline]
+    pipelines*: Table[string, Pipeline]
   RenderPass* = object
     vk*: VkRenderPass
     device*: Device
@@ -39,14 +37,14 @@ proc createRenderPass*(
     subpassesList.add VkSubpassDescription(
       flags: subpass.flags,
       pipelineBindPoint: subpass.pipelineBindPoint,
-      inputAttachmentCount: uint32(subpass.inputs.len),
-      pInputAttachments: subpass.inputs.toCPointer,
+      inputAttachmentCount: 0,
+      pInputAttachments: nil,
       colorAttachmentCount: uint32(subpass.outputs.len),
       pColorAttachments: subpass.outputs.toCPointer,
-      pResolveAttachments: subpass.resolvers.toCPointer,
+      pResolveAttachments: nil,
       pDepthStencilAttachment: if subpass.depthStencil.isSome: addr(subpass.depthStencil.get) else: nil,
-      preserveAttachmentCount: uint32(subpass.preserves.len),
-      pPreserveAttachments: subpass.preserves.toCPointer,
+      preserveAttachmentCount: 0,
+      pPreserveAttachments: nil,
     )
 
   var createInfo = VkRenderPassCreateInfo(
@@ -64,19 +62,19 @@ proc createRenderPass*(
 
 proc simpleForwardRenderPass*(
   device: Device,
-  shaderConfiguration: ShaderConfiguration,
+  shaders: Table[string, ShaderConfiguration],
   inFlightFrames=2,
-  format=VK_FORMAT_UNDEFINED ,
   clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])
 ): RenderPass =
+  # TODO: check wether materials are compatible with the assigned shaders
+  {.warning: "Need to implement material -> shader compatability" .}
+  
   assert device.vk.valid
-  assert shaderConfiguration.outputs.len == 1
-  var theformat = format
-  if theformat == VK_FORMAT_UNDEFINED:
-    theformat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format
+  for shaderconfig in shaders.values:
+    assert shaderconfig.outputs.len == 1
   var
     attachments = @[VkAttachmentDescription(
-        format: theformat,
+        format: device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format,
         samples: VK_SAMPLE_COUNT_1_BIT,
         loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
         storeOp: VK_ATTACHMENT_STORE_OP_STORE,
@@ -102,7 +100,9 @@ proc simpleForwardRenderPass*(
       dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
     )]
   result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
-  result.subpasses[0].pipelines.add device.createPipeline(result.vk, shaderConfiguration, inFlightFrames, 0)
+  for material, shaderconfig in shaders.pairs:
+    result.subpasses[0].pipelines[material] = device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0)
+
 
 proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
   assert commandBuffer.valid
@@ -159,7 +159,7 @@ proc destroy*(renderPass: var RenderPass) =
   assert renderPass.vk.valid
   renderPass.device.vk.vkDestroyRenderPass(renderPass.vk, nil)
   renderPass.vk.reset
-  for subpass in renderPass.subpasses.mitems:
-    for pipeline in subpass.pipelines.mitems:
+  for i in 0 ..< renderPass.subpasses.len:
+    for pipeline in renderPass.subpasses[i].pipelines.mvalues:
       pipeline.destroy()
   renderPass.subpasses = @[]
