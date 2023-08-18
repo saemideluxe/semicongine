@@ -1,8 +1,10 @@
-import std/math as nimmath
+import std/hashes
+import std/options
 import std/typetraits
 import std/tables
-import std/enumerate
 import std/strformat
+import std/enumerate
+import std/strutils
 import std/sequtils
 
 import ./core
@@ -18,7 +20,7 @@ type
   Mesh* = ref object of Component
     instanceCount*: uint32
     instanceTransforms*: seq[Mat4] # this should not reside in data["transform"], as we will use data["transform"] to store the final transformation matrix (as derived from the scene-tree)
-    materials*: seq[string]
+    material*: Material
     dirtyInstanceTransforms: bool
     data: Table[string, DataList]
     changedAttributes: seq[string]
@@ -27,6 +29,15 @@ type
       of Tiny: tinyIndices: seq[array[3, uint8]]
       of Small: smallIndices: seq[array[3, uint16]]
       of Big: bigIndices: seq[array[3, uint32]]
+  Material* = ref object
+    materialType*: string
+    name*: string
+    index*: uint16
+    constants*: Table[string, DataValue]
+    textures*: Table[string, Texture]
+
+proc hash*(material: Material): Hash =
+  hash(material.name)
 
 converter toVulkan*(indexType: MeshIndexType): VkIndexType =
   case indexType:
@@ -51,6 +62,15 @@ func indicesCount*(mesh: Mesh): uint32 =
 
 method `$`*(mesh: Mesh): string =
   &"Mesh, vertexCount: {mesh.vertexCount}, vertexData: {mesh.data.keys().toSeq()}, indexType: {mesh.indexType}"
+
+proc `$`*(material: Material): string =
+  var constants: seq[string]
+  for key, value in material.constants.pairs:
+    constants.add &"{key}: {value}"
+  var textures: seq[string]
+  for key in material.textures.keys:
+    textures.add &"{key}"
+  return &"""{material.name} ({material.index}) | Values: {constants.join(", ")} | Textures: {textures.join(", ")}"""
 
 func prettyData*(mesh: Mesh): string =
   for attr, data in mesh.data.pairs:
@@ -79,6 +99,7 @@ func newMesh*(
   indices: openArray[array[3, uint32|int32|uint16|int16|int]],
   colors: openArray[Vec4f]=[],
   uvs: openArray[Vec2f]=[],
+  material: Material=nil,
   instanceCount=1'u32,
   autoResize=true
 ): auto =
@@ -94,7 +115,13 @@ func newMesh*(
     elif autoResize and uint32(positions.len) < uint32(high(uint16)):
       indexType = Small
 
-  result = Mesh(instanceCount: instanceCount, instanceTransforms: newSeqWith(int(instanceCount), Unit4F32), indexType: indexType)
+  result = Mesh(
+    instanceCount: instanceCount,
+    instanceTransforms: newSeqWith(int(instanceCount), Unit4F32),
+    indexType: indexType,
+  )
+  result.material = material
+
   setMeshData(result, "position", positions.toSeq)
   if colors.len > 0: setMeshData(result, "color", colors.toSeq)
   if uvs.len > 0: setMeshData(result, "uv", uvs.toSeq)
@@ -122,8 +149,16 @@ func newMesh*(
   colors: openArray[Vec4f]=[],
   uvs: openArray[Vec2f]=[],
   instanceCount=1'u32,
+  material: Material=nil,
 ): auto =
-  newMesh(positions, newSeq[array[3, int]](), colors, uvs, instanceCount)
+  newMesh(
+    positions=positions,
+    indices=newSeq[array[3, int]](),
+    colors=colors,
+    uvs=uvs,
+    material=material,
+    instanceCount=instanceCount,
+  )
 
 func availableAttributes*(mesh: Mesh): seq[string] =
   mesh.data.keys.toSeq

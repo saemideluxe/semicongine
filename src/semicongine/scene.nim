@@ -1,12 +1,10 @@
 import std/strformat
-import std/sequtils
 import std/strutils
 import std/tables
 import std/hashes
 import std/typetraits
 
 import ./core
-import ./material
 import ./animation
 
 type
@@ -14,7 +12,6 @@ type
     name*: string
     root*: Entity
     shaderGlobals*: Table[string, DataList]
-    materials: OrderedTable[string, Material]
     transformAttribute*: string = "transform"
     materialIndexAttribute*: string = "materialIndex"
 
@@ -103,28 +100,8 @@ func setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
 func appendShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
   appendValues[T](scene.shaderGlobals[name], value)
 
-func newScene*(name: string, root: Entity): Scene =
-  Scene(name: name, root: root)
-
-func addMaterial*(scene: var Scene, material: Material) =
-  assert not scene.materials.contains(material.name), &"Material with name '{material.name}' already exists in scene"
-  for name, value in material.constants.pairs:
-    scene.shaderGlobals[name] = newDataList(thetype=value.thetype)
-
-  for name, value in material.constants.pairs:
-    scene.shaderGlobals[name].appendValue(value)
-
-  scene.materials[material.name] = material
-
-func materialIndex*(scene: Scene, materialName: string): int =
-  for name in scene.materials.keys:
-    if name == materialName:
-      return result
-    inc result 
-  return -1
-
-func materials*(scene: Scene): auto =
-  scene.materials.values.toSeq
+func newScene*(name: string, root: Entity, transformAttribute="transform", materialIndexAttribute="materialIndex"): Scene =
+  Scene(name: name, root: root, transformAttribute: transformAttribute, materialIndexAttribute: materialIndexAttribute)
 
 func hash*(scene: Scene): Hash =
   hash(scene.name)

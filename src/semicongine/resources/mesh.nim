@@ -1,5 +1,4 @@
 import std/strutils
-import std/enumerate
 import std/json
 import std/logging
 import std/tables
@@ -9,7 +8,6 @@ import std/streams
 
 import ../scene
 import ../mesh
-import ../material
 import ../core
 
 import ./image
@@ -92,7 +90,7 @@ func getGPUType(accessor: JsonNode): DataType =
     of Float32: return Vec4F32
     else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
 
-proc getBufferViewData(bufferView: JsonNode, mainBuffer: var seq[uint8], baseBufferOffset=0): seq[uint8] =
+proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferOffset=0): seq[uint8] =
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
 
   result = newSeq[uint8](bufferView["byteLength"].getInt())
@@ -127,6 +125,98 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8])
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
+proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: seq[uint8]): Image =
+  if root["images"][imageIndex].hasKey("uri"):
+    raise newException(Exception, "Unsupported feature: Load images from external files")
+
+  let bufferView = root["bufferViews"][root["images"][imageIndex]["bufferView"].getInt()]
+  let imgData = newStringStream(cast[string](getBufferViewData(bufferView, mainBuffer)))
+
+  let imageType = root["images"][imageIndex]["mimeType"].getStr()
+  case imageType
+  of "image/bmp":
+    result = readBMP(imgData)
+  of "image/png":
+    result = readPNG(imgData)
+  else:
+    raise newException(Exception, "Unsupported feature: Load image of type " & imageType)
+
+proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Texture =
+  let textureNode = root["textures"][textureIndex]
+  result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
+  result.sampler = DefaultSampler()
+
+  if textureNode.hasKey("sampler"):
+    let sampler = root["samplers"][textureNode["sampler"].getInt()]
+    if sampler.hasKey("magFilter"):
+      result.sampler.magnification = SAMPLER_FILTER_MODE_MAP[sampler["magFilter"].getInt()]
+    if sampler.hasKey("minFilter"):
+      result.sampler.minification = SAMPLER_FILTER_MODE_MAP[sampler["minFilter"].getInt()]
+    if sampler.hasKey("wrapS"):
+      result.sampler.wrapModeS = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
+    if sampler.hasKey("wrapT"):
+      result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
+
+
+proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8], materialIndex: uint16): Material =
+  result = Material(name: materialNode["name"].getStr(), index: materialIndex)
+
+  let pbr = materialNode["pbrMetallicRoughness"]
+
+  # color
+  result.constants["baseColorFactor"] = DataValue(thetype: Vec4F32)
+  if pbr.hasKey("baseColorFactor"):
+    setValue(result.constants["baseColorFactor"], newVec4f(
+      pbr["baseColorFactor"][0].getFloat(),
+      pbr["baseColorFactor"][1].getFloat(),
+      pbr["baseColorFactor"][2].getFloat(),
+      pbr["baseColorFactor"][3].getFloat(),
+    ))
+  else:
+    setValue(result.constants["baseColorFactor"], newVec4f(1, 1, 1, 1))
+
+  # pbr material constants
+  for factor in ["metallicFactor", "roughnessFactor"]:
+    result.constants[factor] = DataValue(thetype: Float32)
+    if pbr.hasKey(factor):
+      setValue(result.constants[factor], float32(pbr[factor].getFloat()))
+    else:
+      setValue(result.constants[factor], 0.5'f32)
+
+  # pbr material textures
+  for texture in ["baseColorTexture", "metallicRoughnessTexture"]:
+    if pbr.hasKey(texture):
+      result.textures[texture] = loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], pbr[texture].getOrDefault("texCoord").getInt(0).uint8)
+    else:
+      result.textures[texture] = DEFAULTEXTURE
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], 0'u8)
+
+  # generic material textures
+  for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
+    if materialNode.hasKey(texture):
+      result.textures[texture] = loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], materialNode[texture].getOrDefault("texCoord").getInt(0).uint8)
+    else:
+      result.textures[texture] = DEFAULTEXTURE
+      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
+      setValue(result.constants[texture & "Index"], 0'u8)
+
+  # emissiv color
+  result.constants["emissiveFactor"] = DataValue(thetype: Vec3F32)
+  if materialNode.hasKey("emissiveFactor"):
+    setValue(result.constants["emissiveFactor"], newVec3f(
+      materialNode["emissiveFactor"][0].getFloat(),
+      materialNode["emissiveFactor"][1].getFloat(),
+      materialNode["emissiveFactor"][2].getFloat(),
+    ))
+  else:
+    setValue(result.constants["emissiveFactor"], newVec3f(1'f32, 1'f32, 1'f32))
+
+
 proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
@@ -141,7 +231,10 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
   if primitiveNode.hasKey("material"):
     materialId = uint16(primitiveNode["material"].getInt())
   mesh.appendMeshData("materialIndex", newSeqWith[uint8](int(vertexCount), materialId))
-  mesh.materials.add newSeqWith[string](int(vertexCount), root["materials"][int(materialId)]["name"].getStr())
+  let material = loadMaterial(root, root["materials"][int(materialId)], mainBuffer, materialId)
+  # if mesh.material != nil and mesh.material[] != material[]:
+    # raise newException(Exception, &"Only one material per mesh supported at the moment")
+  mesh.material = material
 
   if primitiveNode.hasKey("indices"):
     assert mesh.indexType != None
@@ -253,95 +346,6 @@ proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]):
 
   newScene(scenenode["name"].getStr(), rootEntity)
 
-proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: var seq[uint8]): Image =
-  if root["images"][imageIndex].hasKey("uri"):
-    raise newException(Exception, "Unsupported feature: Load images from external files")
-
-  let bufferView = root["bufferViews"][root["images"][imageIndex]["bufferView"].getInt()]
-  let imgData = newStringStream(cast[string](getBufferViewData(bufferView, mainBuffer)))
-
-  let imageType = root["images"][imageIndex]["mimeType"].getStr()
-  case imageType
-  of "image/bmp":
-    result = readBMP(imgData)
-  of "image/png":
-    result = readPNG(imgData)
-  else:
-    raise newException(Exception, "Unsupported feature: Load image of type " & imageType)
-
-proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: var seq[uint8]): Texture =
-  let textureNode = root["textures"][textureIndex]
-  result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
-  result.sampler = DefaultSampler()
-
-  if textureNode.hasKey("sampler"):
-    let sampler = root["samplers"][textureNode["sampler"].getInt()]
-    if sampler.hasKey("magFilter"):
-      result.sampler.magnification = SAMPLER_FILTER_MODE_MAP[sampler["magFilter"].getInt()]
-    if sampler.hasKey("minFilter"):
-      result.sampler.minification = SAMPLER_FILTER_MODE_MAP[sampler["minFilter"].getInt()]
-    if sampler.hasKey("wrapS"):
-      result.sampler.wrapModeS = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
-    if sampler.hasKey("wrapT"):
-      result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
-
-proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: var seq[uint8], materialIndex: int): Material =
-  result = Material(name: materialNode["name"].getStr(), index: materialIndex)
-
-  let pbr = materialNode["pbrMetallicRoughness"]
-
-  # color
-  result.constants["baseColorFactor"] = DataValue(thetype: Vec4F32)
-  if pbr.hasKey("baseColorFactor"):
-    setValue(result.constants["baseColorFactor"], newVec4f(
-      pbr["baseColorFactor"][0].getFloat(),
-      pbr["baseColorFactor"][1].getFloat(),
-      pbr["baseColorFactor"][2].getFloat(),
-      pbr["baseColorFactor"][3].getFloat(),
-    ))
-  else:
-    setValue(result.constants["baseColorFactor"], newVec4f(1, 1, 1, 1))
-
-  # pbr material constants
-  for factor in ["metallicFactor", "roughnessFactor"]:
-    result.constants[factor] = DataValue(thetype: Float32)
-    if pbr.hasKey(factor):
-      setValue(result.constants[factor], float32(pbr[factor].getFloat()))
-    else:
-      setValue(result.constants[factor], 0.5'f32)
-
-  # pbr material textures
-  for texture in ["baseColorTexture", "metallicRoughnessTexture"]:
-    if pbr.hasKey(texture):
-      result.textures[texture] = loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], pbr[texture].getOrDefault("texCoord").getInt(0).uint8)
-    else:
-      result.textures[texture] = DEFAULTEXTURE
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], 0'u8)
-
-  # generic material textures
-  for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
-    if materialNode.hasKey(texture):
-      result.textures[texture] = loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], materialNode[texture].getOrDefault("texCoord").getInt(0).uint8)
-    else:
-      result.textures[texture] = DEFAULTEXTURE
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], 0'u8)
-
-  # emissiv color
-  result.constants["emissiveFactor"] = DataValue(thetype: Vec3F32)
-  if materialNode.hasKey("emissiveFactor"):
-    setValue(result.constants["emissiveFactor"], newVec3f(
-      materialNode["emissiveFactor"][0].getFloat(),
-      materialNode["emissiveFactor"][1].getFloat(),
-      materialNode["emissiveFactor"][2].getFloat(),
-    ))
-  else:
-    setValue(result.constants["emissiveFactor"], newVec3f(1'f32, 1'f32, 1'f32))
 
 proc readglTF*(stream: Stream): seq[Scene] =
   var
@@ -373,9 +377,4 @@ proc readglTF*(stream: Stream): seq[Scene] =
   debug "Loading mesh: ", data.structuredContent.pretty
 
   for scenedata in data.structuredContent["scenes"]:
-    var scene = data.structuredContent.loadScene(scenedata, data.binaryBufferData)
-    for i, materialNode in enumerate(data.structuredContent["materials"]):
-      let material = loadMaterial(data.structuredContent, materialNode, data.binaryBufferData, i)
-      scene.addMaterial material
-
-    result.add scene
+    result.add data.structuredContent.loadScene(scenedata, data.binaryBufferData)
