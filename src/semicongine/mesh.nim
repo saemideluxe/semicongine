@@ -18,26 +18,28 @@ type
     Small # up to 2^16 vertices
     Big # up to 2^32 vertices
   Mesh* = ref object of Component
+    vertexCount*: uint32
     instanceCount*: uint32
-    instanceTransforms*: seq[Mat4] # this should not reside in data["transform"], as we will use data["transform"] to store the final transformation matrix (as derived from the scene-tree)
+    instanceTransforms*: seq[Mat4] # this should not reside in instanceData["transform"], as we will use instanceData["transform"] to store the final transformation matrix (as derived from the scene-tree)
     material*: Material
-    dirtyInstanceTransforms: bool
-    data: Table[string, DataList]
-    changedAttributes: seq[string]
     case indexType*: MeshIndexType
       of None: discard
       of Tiny: tinyIndices: seq[array[3, uint8]]
       of Small: smallIndices: seq[array[3, uint16]]
       of Big: bigIndices: seq[array[3, uint32]]
+    visible: bool = true
+    dirtyInstanceTransforms: bool
+    vertexData: Table[string, DataList]
+    instanceData: Table[string, DataList]
+    dirtyAttributes: seq[string]
   Material* = ref object
     materialType*: string
     name*: string
-    index*: uint16
     constants*: Table[string, DataValue]
     textures*: Table[string, Texture]
 
 proc hash*(material: Material): Hash =
-  hash(material.name)
+  hash(cast[int64](material))
 
 converter toVulkan*(indexType: MeshIndexType): VkIndexType =
   case indexType:
@@ -45,11 +47,6 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
     of Tiny: VK_INDEX_TYPE_UINT8_EXT
     of Small: VK_INDEX_TYPE_UINT16
     of Big: VK_INDEX_TYPE_UINT32
-
-func vertexCount*(mesh: Mesh): uint32 =
-  result = 0'u32
-  for list in mesh.data.values:
-    result = max(list.len, result)
 
 func indicesCount*(mesh: Mesh): uint32 =
   (
@@ -61,7 +58,7 @@ func indicesCount*(mesh: Mesh): uint32 =
   ) * 3
 
 method `$`*(mesh: Mesh): string =
-  &"Mesh, vertexCount: {mesh.vertexCount}, vertexData: {mesh.data.keys().toSeq()}, indexType: {mesh.indexType}"
+  &"Mesh, vertexCount: {mesh.vertexCount}, vertexData: {mesh.vertexData.keys().toSeq()}, indexType: {mesh.indexType}"
 
 proc `$`*(material: Material): string =
   var constants: seq[string]
@@ -70,10 +67,10 @@ proc `$`*(material: Material): string =
   var textures: seq[string]
   for key in material.textures.keys:
     textures.add &"{key}"
-  return &"""{material.name} ({material.index}) | Values: {constants.join(", ")} | Textures: {textures.join(", ")}"""
+  return &"""{material.name} | Values: {constants.join(", ")} | Textures: {textures.join(", ")}"""
 
 func prettyData*(mesh: Mesh): string =
-  for attr, data in mesh.data.pairs:
+  for attr, data in mesh.vertexData.pairs:
     result &= &"{attr}: {data}\n"
   result &= (case mesh.indexType
     of None: ""
@@ -82,17 +79,17 @@ func prettyData*(mesh: Mesh): string =
     of Big: &"indices: {mesh.bigIndices}")
 
 proc setMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
-  assert not (attribute in mesh.data)
-  mesh.data[attribute] = newDataList(data)
+  assert not (attribute in mesh.vertexData)
+  mesh.vertexData[attribute] = newDataList(data)
 
 proc setMeshData*(mesh: Mesh, attribute: string, data: DataList) =
-  assert not (attribute in mesh.data)
-  mesh.data[attribute] = data
+  assert not (attribute in mesh.vertexData)
+  mesh.vertexData[attribute] = data
 
 proc setInstanceData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
-  assert not (attribute in mesh.data)
-  mesh.data[attribute] = newDataList(data)
+  assert not (attribute in mesh.instanceData)
+  mesh.instanceData[attribute] = newDataList(data)
 
 func newMesh*(
   positions: openArray[Vec3f],
@@ -119,6 +116,7 @@ func newMesh*(
     instanceCount: instanceCount,
     instanceTransforms: newSeqWith(int(instanceCount), Unit4F32),
     indexType: indexType,
+    vertexCount: uint32(positions.len)
   )
   result.material = material
 
@@ -160,16 +158,29 @@ func newMesh*(
     instanceCount=instanceCount,
   )
 
-func availableAttributes*(mesh: Mesh): seq[string] =
-  mesh.data.keys.toSeq
+func vertexAttributes*(mesh: Mesh): seq[string] =
+  mesh.vertexData.keys.toSeq
 
-func dataSize*(mesh: Mesh, attribute: string): uint32 =
-  mesh.data[attribute].size
+func instanceAttributes*(mesh: Mesh): seq[string] =
+  mesh.instanceData.keys.toSeq
 
-func dataType*(mesh: Mesh, attribute: string): DataType =
-  mesh.data[attribute].theType
+func attributeSize*(mesh: Mesh, attribute: string): uint32 =
+  if mesh.vertexData.contains(attribute):
+    mesh.vertexData[attribute].size
+  elif mesh.instanceData.contains(attribute):
+    mesh.instanceData[attribute].size
+  else:
+    0
 
-func indexDataSize*(mesh: Mesh): uint32 =
+func attributeType*(mesh: Mesh, attribute: string): DataType =
+  if mesh.vertexData.contains(attribute):
+    mesh.vertexData[attribute].theType
+  elif mesh.instanceData.contains(attribute):
+    mesh.instanceData[attribute].theType
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+
+func indexSize*(mesh: Mesh): uint32 =
   case mesh.indexType
     of None: 0'u32
     of Tiny: uint32(mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0)))
@@ -186,57 +197,91 @@ func getRawIndexData*(mesh: Mesh): (pointer, uint32) =
     of Small: rawData(mesh.smallIndices)
     of Big: rawData(mesh.bigIndices)
 
-func hasDataFor*(mesh: Mesh, attribute: string): bool =
-  attribute in mesh.data
+func hasAttribute*(mesh: Mesh, attribute: string): bool =
+  mesh.vertexData.contains(attribute) or mesh.instanceData.contains(attribute)
 
 func getRawData*(mesh: Mesh, attribute: string): (pointer, uint32) =
-  mesh.data[attribute].getRawData()
+  if mesh.vertexData.contains(attribute):
+    mesh.vertexData[attribute].getRawData()
+  elif mesh.instanceData.contains(attribute):
+    mesh.instanceData[attribute].getRawData()
+  else:
+    (nil, 0)
 
 proc getMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): ref seq[T] =
-  assert attribute in mesh.data
-  getValues[T](mesh.data[attribute])
-
-proc initData*(mesh: Mesh, attribute: ShaderAttribute) =
-  assert not (attribute.name in mesh.data)
-  mesh.data[attribute.name] = newDataList(thetype=attribute.thetype)
-  if attribute.perInstance:
-    mesh.data[attribute.name].initData(mesh.instanceCount)
+  if mesh.vertexData.contains(attribute):
+    getValues[T](mesh.vertexData[attribute])
+  elif mesh.instanceData.contains(attribute):
+    getValues[T](mesh.instanceData[attribute])
   else:
-    mesh.data[attribute.name].initData(mesh.vertexCount)
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc updateMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
-  assert attribute in mesh.data
-  mesh.changedAttributes.add attribute
-  setValues(mesh.data[attribute], data)
+proc initAttribute*(mesh: Mesh, attribute: ShaderAttribute) =
+  if attribute.perInstance:
+    mesh.instanceData[attribute.name] = newDataList(thetype=attribute.thetype)
+    mesh.instanceData[attribute.name].initData(mesh.instanceCount)
+  else:
+    mesh.vertexData[attribute.name] = newDataList(thetype=attribute.thetype)
+    mesh.vertexData[attribute.name].initData(mesh.vertexCount)
 
-proc updateMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, i: uint32, value: T) =
-  assert attribute in mesh.data
-  mesh.changedAttributes.add attribute
-  setValue(mesh.data[attribute], i, value)
+proc initAttribute*[T](mesh: Mesh, attribute: ShaderAttribute, value: T) =
+  if attribute.perInstance:
+    mesh.instanceData[attribute.name] = newDataList(thetype=attribute.thetype)
+    mesh.instanceData[attribute.name].initData(mesh.instanceCount)
+    mesh.instanceData[attribute.name].setValues(newSeqWith(int(mesh.instanceCount), value))
+  else:
+    mesh.vertexData[attribute.name] = newDataList(thetype=attribute.thetype)
+    mesh.vertexData[attribute.name].initData(mesh.vertexCount)
+    mesh.instanceData[attribute.name].setValues(newSeqWith(int(mesh.vertexCount), value))
 
-proc appendMeshData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
-  assert attribute in mesh.data
-  mesh.changedAttributes.add attribute
-  appendValues(mesh.data[attribute], data)
+proc updateAttributeData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
+  if mesh.vertexData.contains(attribute):
+    setValues(mesh.vertexData[attribute], data)
+  elif mesh.instanceData.contains(attribute):
+    setValues(mesh.instanceData[attribute], data)
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+  mesh.dirtyAttributes.add attribute
 
-# currently only used for loading from files, shouls
-proc appendMeshData*(mesh: Mesh, attribute: string, data: DataList) =
-  assert attribute in mesh.data
-  assert data.thetype == mesh.data[attribute].thetype
-  mesh.changedAttributes.add attribute
-  appendValues(mesh.data[attribute], data)
+proc updateAttributeData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, i: uint32, value: T) =
+  if mesh.vertexData.contains(attribute):
+    setValue(mesh.vertexData[attribute], i, value)
+  elif mesh.instanceData.contains(attribute):
+    setValue(mesh.instanceData[attribute], i, value)
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+  mesh.dirtyAttributes.add attribute
 
 proc updateInstanceData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   assert uint32(data.len) == mesh.instanceCount
-  assert attribute in mesh.data
-  mesh.changedAttributes.add attribute
-  setValues(mesh.data[attribute], data)
+  if mesh.vertexData.contains(attribute):
+    setValues(mesh.vertexData[attribute], data)
+  elif mesh.instanceData.contains(attribute):
+    setValues(mesh.instanceData[attribute], data)
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+  mesh.dirtyAttributes.add attribute
 
-proc appendInstanceData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
-  assert uint32(data.len) == mesh.instanceCount
-  assert attribute in mesh.data
-  mesh.changedAttributes.add attribute
-  appendValues(mesh.data[attribute], data)
+proc appendAttributeData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
+  if mesh.vertexData.contains(attribute):
+    appendValues(mesh.vertexData[attribute], data)
+  elif mesh.instanceData.contains(attribute):
+    appendValues(mesh.instanceData[attribute], data)
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+  mesh.dirtyAttributes.add attribute
+
+# currently only used for loading from files, shouls
+proc appendAttributeData*(mesh: Mesh, attribute: string, data: DataList) =
+  if mesh.vertexData.contains(attribute):
+    assert data.thetype == mesh.vertexData[attribute].thetype
+    appendValues(mesh.vertexData[attribute], data)
+  elif mesh.instanceData.contains(attribute):
+    assert data.thetype == mesh.instanceData[attribute].thetype
+    appendValues(mesh.instanceData[attribute], data)
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+  mesh.dirtyAttributes.add attribute
 
 proc appendIndicesData*(mesh: Mesh, v1, v2, v3: uint32) =
   case mesh.indexType
@@ -246,18 +291,24 @@ proc appendIndicesData*(mesh: Mesh, v1, v2, v3: uint32) =
   of Big: mesh.bigIndices.add([v1, v2, v3])
 
 func hasDataChanged*(mesh: Mesh, attribute: string): bool =
-  attribute in mesh.changedAttributes
+  attribute in mesh.dirtyAttributes
 
 proc clearDataChanged*(mesh: Mesh) =
-  mesh.changedAttributes = @[]
+  mesh.dirtyAttributes = @[]
 
 proc transform*[T: GPUType](mesh: Mesh, attribute: string, transform: Mat4) =
-  assert attribute in mesh.data
-  for v in getValues[T](mesh.data[attribute])[].mitems:
-    v = transform * v
+  if mesh.vertexData.contains(attribute):
+    for v in getValues[T](mesh.vertexData[attribute])[].mitems:
+      v = transform * v
+  elif mesh.instanceData.contains(attribute):
+    for v in getValues[T](mesh.instanceData[attribute])[].mitems:
+      v = transform * v
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
 func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = Mesh(
+    vertexCount: 4,
     instanceCount: 1,
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
@@ -276,7 +327,7 @@ func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   setInstanceData(result, "transform", @[Unit4F32])
 
 func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = Mesh(instanceCount: 1, instanceTransforms: @[Unit4F32])
+  result = Mesh(vertexCount: 3, instanceCount: 1, instanceTransforms: @[Unit4F32])
   let
     half_w = width / 2
     half_h = height / 2
@@ -287,7 +338,7 @@ func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
 
 func circle*(width=1'f32, height=1'f32, nSegments=12'u16, color="ffffffff"): Mesh =
   assert nSegments >= 3
-  result = Mesh(instanceCount: 1, indexType: Small, instanceTransforms: @[Unit4F32])
+  result = Mesh(vertexCount: 3 + nSegments, instanceCount: 1, indexType: Small, instanceTransforms: @[Unit4F32])
 
   let
     half_w = width / 2

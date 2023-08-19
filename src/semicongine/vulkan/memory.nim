@@ -73,7 +73,7 @@ proc allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemo
     size: size,
     memoryType: memoryType,
     canMap: VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in memoryType.flags,
-    needsFlushing: not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in result.memoryType.flags),
+    needsFlushing: not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in memoryType.flags),
   )
 
   var allocationInfo = VkMemoryAllocateInfo(

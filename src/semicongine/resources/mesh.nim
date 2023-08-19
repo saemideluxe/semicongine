@@ -12,14 +12,6 @@ import ../core
 
 import ./image
 
-let DEFAULTSAMPLER = Sampler(
-    magnification: VK_FILTER_NEAREST,
-    minification: VK_FILTER_NEAREST,
-    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-  )
-let DEFAULTEXTURE = Texture(image: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: DEFAULTSAMPLER)
-
 type
   glTFHeader = object
     magic: uint32
@@ -144,7 +136,6 @@ proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: seq[uint8]): Image =
 proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Texture =
   let textureNode = root["textures"][textureIndex]
   result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
-  result.sampler = DefaultSampler()
 
   if textureNode.hasKey("sampler"):
     let sampler = root["samplers"][textureNode["sampler"].getInt()]
@@ -159,7 +150,7 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Tex
 
 
 proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8], materialIndex: uint16): Material =
-  result = Material(name: materialNode["name"].getStr(), index: materialIndex)
+  result = Material(name: materialNode["name"].getStr())
 
   let pbr = materialNode["pbrMetallicRoughness"]
 
@@ -190,7 +181,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]
       result.constants[texture & "Index"] = DataValue(thetype: UInt8)
       setValue(result.constants[texture & "Index"], pbr[texture].getOrDefault("texCoord").getInt(0).uint8)
     else:
-      result.textures[texture] = DEFAULTEXTURE
+      result.textures[texture] = EMPTYTEXTURE
       result.constants[texture & "Index"] = DataValue(thetype: UInt8)
       setValue(result.constants[texture & "Index"], 0'u8)
 
@@ -201,7 +192,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]
       result.constants[texture & "Index"] = DataValue(thetype: UInt8)
       setValue(result.constants[texture & "Index"], materialNode[texture].getOrDefault("texCoord").getInt(0).uint8)
     else:
-      result.textures[texture] = DEFAULTEXTURE
+      result.textures[texture] = EMPTYTEXTURE
       result.constants[texture & "Index"] = DataValue(thetype: UInt8)
       setValue(result.constants[texture & "Index"], 0'u8)
 
@@ -224,13 +215,13 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
   var vertexCount = 0'u32
   for attribute, accessor in primitiveNode["attributes"].pairs:
     let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
-    mesh.appendMeshData(attribute.toLowerAscii, data)
+    mesh.appendAttributeData(attribute.toLowerAscii, data)
     vertexCount = data.len
 
   var materialId = 0'u16
   if primitiveNode.hasKey("material"):
     materialId = uint16(primitiveNode["material"].getInt())
-  mesh.appendMeshData("materialIndex", newSeqWith[uint8](int(vertexCount), materialId))
+  mesh.appendAttributeData("materialIndex", newSeqWith[uint8](int(vertexCount), materialId))
   let material = loadMaterial(root, root["materials"][int(materialId)], mainBuffer, materialId)
   # if mesh.material != nil and mesh.material[] != material[]:
     # raise newException(Exception, &"Only one material per mesh supported at the moment")
