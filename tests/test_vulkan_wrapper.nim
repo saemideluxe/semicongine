@@ -41,7 +41,7 @@ let
     name: "mat3",
     materialType: "my_special_material",
     constants: {
-      "colors": toGPUValue(newVec4f(0.5, 0.5, 0))
+      "color": toGPUValue(newVec4f(0.5, 0.5, 0))
     }.toTable
   )
 
@@ -155,7 +155,7 @@ proc main() =
 
   # INIT RENDERER:
   const
-    shaderConfiguration = createShaderConfiguration(
+    shaderConfiguration1 = createShaderConfiguration(
       inputs=[
         attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
         attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
@@ -174,9 +174,20 @@ proc main() =
       vertexCode="""gl_Position = vec4(position + translate, 1.0); outcolor = color; materialIndexOut = materialIndex;""",
       fragmentCode="color = texture(my_little_texture[materialIndexOut], outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
+    shaderConfiguration2 = createShaderConfiguration(
+      inputs=[
+        attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
+        attr[Vec3f]("translate", perInstance=true),
+      ],
+      intermediates=[attr[Vec4f]("outcolor")],
+      outputs=[attr[Vec4f]("color")],
+      uniforms=[attr[Vec4f]("color")],
+      vertexCode="""gl_Position = vec4(position + translate, 1.0); outcolor = Uniforms.color;""",
+      fragmentCode="color = outcolor;",
+    )
   engine.initRenderer({
-    "my_material": shaderConfiguration,
-    "my_special_material": shaderConfiguration,
+    "my_material": shaderConfiguration1,
+    "my_special_material": shaderConfiguration2,
   }.toTable)
 
   # INIT SCENES
