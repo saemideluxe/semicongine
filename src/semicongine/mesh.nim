@@ -236,8 +236,10 @@ proc initAttribute*[T](mesh: Mesh, attribute: ShaderAttribute, value: T) =
 
 proc updateAttributeData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
+    assert data.len < mesh.vertexData[attribute].len
     setValues(mesh.vertexData[attribute], data)
   elif mesh.instanceData.contains(attribute):
+    assert data.len < mesh.instanceData[attribute].len
     setValues(mesh.instanceData[attribute], data)
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
@@ -245,8 +247,10 @@ proc updateAttributeData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: stri
 
 proc updateAttributeData*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, i: uint32, value: T) =
   if mesh.vertexData.contains(attribute):
+    assert i < mesh.vertexData[attribute].len
     setValue(mesh.vertexData[attribute], i, value)
   elif mesh.instanceData.contains(attribute):
+    assert i < mesh.instanceData[attribute].len
     setValue(mesh.instanceData[attribute], i, value)
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
