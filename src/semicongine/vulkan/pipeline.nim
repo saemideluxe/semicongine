@@ -27,7 +27,7 @@ func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
 func samplers*(pipeline: Pipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.samplers
 
-proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: Table[string, seq[VulkanTexture]], inFlightFrames: int): seq[DescriptorSet] =
+proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: var Table[string, seq[VulkanTexture]], inFlightFrames: int, emptyTexture: VulkanTexture): seq[DescriptorSet] =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 
@@ -46,11 +46,14 @@ proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffe
       elif descriptor.thetype == ImageSampler:
         if not (descriptor.name in textures):
           raise newException(Exception, &"Missing shader texture in scene: {descriptor.name}, available are {textures.keys.toSeq}")
-        if uint32(textures[descriptor.name].len) != descriptor.count:
-          raise newException(Exception, &"Incorrect number of textures in array for {descriptor.name}: has {textures[descriptor.name].len} but needs {descriptor.count}")
-        for t in textures[descriptor.name]:
-          descriptor.imageviews.add t.imageView
-          descriptor.samplers.add t.sampler
+
+        for textureIndex in 0 ..< int(descriptor.count):
+          if textureIndex < textures[descriptor.name].len:
+            descriptor.imageviews.add textures[descriptor.name][textureIndex].imageView
+            descriptor.samplers.add textures[descriptor.name][textureIndex].sampler
+          else:
+            descriptor.imageviews.add emptyTexture.imageView
+            descriptor.samplers.add emptyTexture.sampler
 
 proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32): Pipeline =
   assert renderPass.valid

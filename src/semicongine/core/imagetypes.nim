@@ -16,15 +16,12 @@ type
   Texture* = object
     name*: string
     image*: Image
-    sampler*: Sampler
-
-proc DefaultSampler*(): Sampler =
-  Sampler(
-    magnification: VK_FILTER_LINEAR,
-    minification: VK_FILTER_LINEAR,
-    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-  )
+    sampler*: Sampler = Sampler(
+      magnification: VK_FILTER_LINEAR,
+      minification: VK_FILTER_LINEAR,
+      wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    )
 
 proc `[]`*(image: Image, x, y: uint32): Pixel =
   assert x < image.width
@@ -54,3 +51,10 @@ proc newImage*(width, height: uint32, imagedata: seq[Pixel] = @[], fill=EMPTYPIX
       for x in 0 ..< width:
         result[x, y] = fill
 
+let EMPTYTEXTURE* = Texture(image: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: Sampler(
+    magnification: VK_FILTER_NEAREST,
+    minification: VK_FILTER_NEAREST,
+    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+  )
+)

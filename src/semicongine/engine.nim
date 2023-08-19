@@ -12,7 +12,6 @@ import ./vulkan/physicaldevice
 import ./vulkan/shader
 
 import ./scene
-import ./mesh
 import ./renderer
 import ./events
 import ./audio
@@ -81,7 +80,8 @@ proc initEngine*(
   if debug:
     instanceExtensions.add "VK_EXT_debug_utils"
     enabledLayers.add "VK_LAYER_KHRONOS_validation"
-    putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
+    # putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
+    putEnv("VK_LAYER_ENABLES", "")
 
   if defined(linux) and DEBUG:
     enabledLayers.add "VK_LAYER_MESA_overlay"
@@ -102,7 +102,7 @@ proc initEngine*(
   )
   startMixerThread()
 
-proc setRenderer*(engine: var Engine, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
+proc initRenderer*(engine: var Engine, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
 
   assert not engine.renderer.isSome
   engine.renderer = some(engine.device.initRenderer(shaders=shaders, clearColor=clearColor))

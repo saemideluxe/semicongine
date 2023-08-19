@@ -408,6 +408,10 @@ func setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is TMat4[float64]: value.mat4f64[] = data
   else: {. error: "Virtual datatype has no values" .}
 
+func toGPUValue*[T: GPUType](value: T): DataValue =
+  result = DataValue(thetype: getDataType[T]())
+  result.setValue(value)
+
 func newDataList*(thetype: DataType): DataList =
   result = DataList(thetype: thetype)
   case result.thetype
