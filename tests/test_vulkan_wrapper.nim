@@ -198,9 +198,11 @@ proc main() =
     newScene("flag", scene_multi_material(), transformAttribute=""),
   ]
 
+  scenes[3].addShaderGlobal("color", newVec4f(1, 0, 1))
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
     engine.addScene(scene)
+
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
