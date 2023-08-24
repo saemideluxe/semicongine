@@ -1,15 +1,15 @@
 import std/sequtils
 
 import ./core
-import ./scene
 
 const MAX_COLLISON_DETECTION_ITERATIONS = 20
 const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 20
 
 type
-  HitBox* = ref object of Component
+  HitBox* = object
     transform*: Mat4
-  HitSphere* = ref object of Component
+  HitSphere* = object
+    transform*: Mat4
     radius*: float32
 
 func between(value, b1, b2: float32): bool =
@@ -18,7 +18,7 @@ func between(value, b1, b2: float32): bool =
 func contains*(hitbox: HitBox, x: Vec3f): bool =
   # from https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
   let
-    t = hitbox.entity.getModelTransform() * hitbox.transform
+    t = hitbox.transform
     P1 = t * newVec3f(0, 0, 0) # origin
     P2 = t * Z
     P4 = t * X
@@ -53,10 +53,10 @@ func findFurthestPoint(points: openArray[Vec3f], direction: Vec3f): Vec3f =
 
 func findFurthestPoint(hitsphere: HitSphere, direction: Vec3f): Vec3f =
   let directionNormalizedToSphere = ((direction / direction.length) * hitsphere.radius)
-  return hitsphere.entity.getModelTransform() * directionNormalizedToSphere
+  return hitsphere.transform * directionNormalizedToSphere
 
 func findFurthestPoint(hitbox: HitBox, direction: Vec3f): Vec3f =
-  let transform = hitbox.entity.getModelTransform() * hitbox.transform
+  let transform = hitbox.transform
   return findFurthestPoint(
     [
       transform * newVec3f(0, 0, 0),
@@ -383,7 +383,7 @@ func calculateHitbox*(points: seq[Vec3f]): HitBox =
     scaleY = (maxY - minY)
     scaleZ = (maxZ - minZ)
 
-  HitBox(transform: translate3d(minX, minY, minZ) * scale3d(scaleX, scaleY, scaleZ))
+  HitBox(transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
 
 func calculateHitsphere*(points: seq[Vec3f]): HitSphere =
   result = HitSphere()

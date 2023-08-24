@@ -1,5 +1,6 @@
 import std/strformat
 import std/tables
+import std/hashes
 
 import ./vulkanapi
 import ./vector
@@ -98,7 +99,7 @@ type
     of Mat4F64: mat4f64: TMat4[float64]
     of Sampler2D: discard
   DataList* = object
-    len*: uint32
+    len*: int
     case thetype*: DataType
     of Float32: float32: ref seq[float32]
     of Float64: float64: ref seq[float64]
@@ -148,10 +149,104 @@ type
   ShaderAttribute* = object
     name*: string
     thetype*: DataType
-    arrayCount*: uint32
+    arrayCount*: int
     perInstance*: bool
     noInterpolation: bool
     memoryPerformanceHint*: MemoryPerformanceHint
+
+func hash*(value: DataList): Hash =
+  case value.thetype
+    of Float32: hash(cast[pointer](value.float32))
+    of Float64: hash(cast[pointer](value.float64))
+    of Int8: hash(cast[pointer](value.int8))
+    of Int16: hash(cast[pointer](value.int16))
+    of Int32: hash(cast[pointer](value.int32))
+    of Int64: hash(cast[pointer](value.int64))
+    of UInt8: hash(cast[pointer](value.uint8))
+    of UInt16: hash(cast[pointer](value.uint16))
+    of UInt32: hash(cast[pointer](value.uint32))
+    of UInt64: hash(cast[pointer](value.uint64))
+    of Vec2I32: hash(cast[pointer](value.vec2i32))
+    of Vec2I64: hash(cast[pointer](value.vec2i64))
+    of Vec3I32: hash(cast[pointer](value.vec3i32))
+    of Vec3I64: hash(cast[pointer](value.vec3i64))
+    of Vec4I32: hash(cast[pointer](value.vec4i32))
+    of Vec4I64: hash(cast[pointer](value.vec4i64))
+    of Vec2U32: hash(cast[pointer](value.vec2u32))
+    of Vec2U64: hash(cast[pointer](value.vec2u64))
+    of Vec3U32: hash(cast[pointer](value.vec3u32))
+    of Vec3U64: hash(cast[pointer](value.vec3u64))
+    of Vec4U32: hash(cast[pointer](value.vec4u32))
+    of Vec4U64: hash(cast[pointer](value.vec4u64))
+    of Vec2F32: hash(cast[pointer](value.vec2f32))
+    of Vec2F64: hash(cast[pointer](value.vec2f64))
+    of Vec3F32: hash(cast[pointer](value.vec3f32))
+    of Vec3F64: hash(cast[pointer](value.vec3f64))
+    of Vec4F32: hash(cast[pointer](value.vec4f32))
+    of Vec4F64: hash(cast[pointer](value.vec4f64))
+    of Mat2F32: hash(cast[pointer](value.mat2f32))
+    of Mat2F64: hash(cast[pointer](value.mat2f64))
+    of Mat23F32: hash(cast[pointer](value.mat23f32))
+    of Mat23F64: hash(cast[pointer](value.mat23f64))
+    of Mat32F32: hash(cast[pointer](value.mat32f32))
+    of Mat32F64: hash(cast[pointer](value.mat32f64))
+    of Mat3F32: hash(cast[pointer](value.mat3f32))
+    of Mat3F64: hash(cast[pointer](value.mat3f64))
+    of Mat34F32: hash(cast[pointer](value.mat34f32))
+    of Mat34F64: hash(cast[pointer](value.mat34f64))
+    of Mat43F32: hash(cast[pointer](value.mat43f32))
+    of Mat43F64: hash(cast[pointer](value.mat43f64))
+    of Mat4F32: hash(cast[pointer](value.mat4f32))
+    of Mat4F64: hash(cast[pointer](value.mat4f64))
+    of Sampler2D: raise newException(Exception, "hash not defined for Sampler2D")
+
+func `==`*(a, b: DataList): bool =
+  if a.thetype != b.thetype:
+    return false
+  case a.thetype
+    of Float32: return a.float32 == b.float32
+    of Float64: return a.float64 == b.float64
+    of Int8: return a.int8 == b.int8
+    of Int16: return a.int16 == b.int16
+    of Int32: return a.int32 == b.int32
+    of Int64: return a.int64 == b.int64
+    of UInt8: return a.uint8 == b.uint8
+    of UInt16: return a.uint16 == b.uint16
+    of UInt32: return a.uint32 == b.uint32
+    of UInt64: return a.uint64 == b.uint64
+    of Vec2I32: return a.vec2i32 == b.vec2i32
+    of Vec2I64: return a.vec2i64 == b.vec2i64
+    of Vec3I32: return a.vec3i32 == b.vec3i32
+    of Vec3I64: return a.vec3i64 == b.vec3i64
+    of Vec4I32: return a.vec4i32 == b.vec4i32
+    of Vec4I64: return a.vec4i64 == b.vec4i64
+    of Vec2U32: return a.vec2u32 == b.vec2u32
+    of Vec2U64: return a.vec2u64 == b.vec2u64
+    of Vec3U32: return a.vec3u32 == b.vec3u32
+    of Vec3U64: return a.vec3u64 == b.vec3u64
+    of Vec4U32: return a.vec4u32 == b.vec4u32
+    of Vec4U64: return a.vec4u64 == b.vec4u64
+    of Vec2F32: return a.vec2f32 == b.vec2f32
+    of Vec2F64: return a.vec2f64 == b.vec2f64
+    of Vec3F32: return a.vec3f32 == b.vec3f32
+    of Vec3F64: return a.vec3f64 == b.vec3f64
+    of Vec4F32: return a.vec4f32 == b.vec4f32
+    of Vec4F64: return a.vec4f64 == b.vec4f64
+    of Mat2F32: return a.mat2f32 == b.mat2f32
+    of Mat2F64: return a.mat2f64 == b.mat2f64
+    of Mat23F32: return a.mat23f32 == b.mat23f32
+    of Mat23F64: return a.mat23f64 == b.mat23f64
+    of Mat32F32: return a.mat32f32 == b.mat32f32
+    of Mat32F64: return a.mat32f64 == b.mat32f64
+    of Mat3F32: return a.mat3f32 == b.mat3f32
+    of Mat3F64: return a.mat3f64 == b.mat3f64
+    of Mat34F32: return a.mat34f32 == b.mat34f32
+    of Mat34F64: return a.mat34f64 == b.mat34f64
+    of Mat43F32: return a.mat43f32 == b.mat43f32
+    of Mat43F64: return a.mat43f64 == b.mat43f64
+    of Mat4F32: return a.mat4f32 == b.mat4f32
+    of Mat4F64: return a.mat4f64 == b.mat4f64
+    of Sampler2D: raise newException(Exception, "'==' not defined for Sampler2D")
 
 func vertexInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
   for attr in attributes:
@@ -163,14 +258,14 @@ func instanceInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
     if attr.perInstance == false:
       result.add attr
 
-func numberOfVertexInputAttributeDescriptors*(thetype: DataType): uint32 =
+func numberOfVertexInputAttributeDescriptors*(thetype: DataType): int =
   case thetype:
     of Mat2F32, Mat2F64, Mat23F32, Mat23F64: 2
     of Mat32F32, Mat32F64, Mat3F32, Mat3F64, Mat34F32, Mat34F64: 3
     of Mat43F32, Mat43F64, Mat4F32, Mat4F64: 4
     else: 1
 
-func size*(thetype: DataType): uint32 =
+func size*(thetype: DataType): int =
   case thetype:
     of Float32: 4
     of Float64: 8
@@ -216,7 +311,7 @@ func size*(thetype: DataType): uint32 =
     of Mat4F64: 128
     of Sampler2D: 0
 
-func size*(attribute: ShaderAttribute, perDescriptor=false): uint32 =
+func size*(attribute: ShaderAttribute, perDescriptor=false): int =
   if perDescriptor:
     attribute.thetype.size div attribute.thetype.numberOfVertexInputAttributeDescriptors
   else:
@@ -225,14 +320,14 @@ func size*(attribute: ShaderAttribute, perDescriptor=false): uint32 =
     else:
       attribute.thetype.size * attribute.arrayCount
 
-func size*(thetype: seq[ShaderAttribute]): uint32 =
+func size*(thetype: seq[ShaderAttribute]): int =
   for attribute in thetype:
     result += attribute.size
 
-func size*(value: DataValue): uint32 =
+func size*(value: DataValue): int =
   value.thetype.size
 
-func size*(value: DataList): uint32 =
+func size*(value: DataList): int =
   value.thetype.size * value.len
 
 func getDataType*[T: GPUType|int|uint|float](): DataType =
@@ -292,7 +387,7 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
 func attr*[T: GPUType](
   name: string,
   perInstance=false,
-  arrayCount=0'u32,
+  arrayCount=0,
   noInterpolation=false,
   memoryPerformanceHint=PreferFastRead,
 ): auto =
@@ -357,7 +452,7 @@ func getValue*[T: GPUType|int|uint|float](value: DataValue): T =
   else: {.error: "Virtual datatype has no value" .}
 
 func setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
-  value.len = uint32(data.len)
+  value.len = data.len
   when T is float32: value.float32[] = data
   elif T is float64: value.float64[] = data
   elif T is int8: value.int8[] = data
@@ -519,7 +614,7 @@ func getValues*[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
   elif T is TMat4[float64]: value.mat4f64
   else: {. error: "Virtual datatype has no values" .}
 
-func getRawData*(value: var DataValue): (pointer, uint32) =
+func getRawData*(value: DataValue): (pointer, int) =
   result[1] = value.thetype.size
   case value.thetype
     of Float32: result[0] = addr value.float32
@@ -566,9 +661,9 @@ func getRawData*(value: var DataValue): (pointer, uint32) =
     of Mat4F64: result[0] = addr value.mat4f64
     of Sampler2D: result[0] = nil
 
-func getRawData*(value: var DataList): (pointer, uint32) =
+func getRawData*(value: DataList): (pointer, int) =
   if value.len == 0:
-    return (nil, 0'u32)
+    return (nil, 0)
   result[1] = value.thetype.size * value.len
   case value.thetype
     of Float32: result[0] = addr value.float32[][0]
@@ -615,7 +710,7 @@ func getRawData*(value: var DataList): (pointer, uint32) =
     of Mat4F64: result[0] = addr value.mat4f64[][0]
     of Sampler2D: result[0] = nil
 
-func initData*(value: var DataList, len: uint32) =
+func initData*(value: var DataList, len: int) =
   value.len = len
   case value.thetype
     of Float32: value.float32[].setLen(len)
@@ -714,7 +809,7 @@ func setValue*[T: GPUType|int|uint|float](value: var DataValue, data: T) =
   else: {.error: "Virtual datatype has no value" .}
 
 func appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
-  value.len += uint32(data.len)
+  value.len += data.len
   when T is float32: value.float32[].add data
   elif T is float64: value.float64[].add data
   elif T is int8: value.int8[].add data
@@ -861,7 +956,7 @@ func appendValue*(value: var DataList, data: DataValue) =
   of Mat4F64: value.mat4f64[].add data.mat4f64
   else: raise newException(Exception, &"Unsupported data type for GPU data:" )
 
-func setValue*[T: GPUType|int|uint|float](value: var DataList, i: uint32, data: T) =
+func setValue*[T: GPUType|int|uint|float](value: var DataList, i: int, data: T) =
   assert i < value.len
   when T is float32: value.float32[][i] = data
   elif T is float64: value.float64[][i] = data
@@ -962,7 +1057,7 @@ func getVkFormat*(thetype: DataType): VkFormat =
   TYPEMAP[thetype]
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
-func nLocationSlots*(thetype: DataType): uint32 =
+func nLocationSlots*(thetype: DataType): int =
   #[
   single location:
     16-bit scalar and vector types, and
@@ -1063,7 +1158,7 @@ func glslType*(thetype: DataType): string =
 func glslInput*(group: openArray[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
-  var i = 0'u32
+  var i = 0
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for shader vertex attributes"
     let flat = if attribute.noInterpolation: "flat " else: ""
@@ -1097,7 +1192,7 @@ func glslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[str
 func glslOutput*(group: openArray[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
-  var i = 0'u32
+  var i = 0
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for outputs"
     let flat = if attribute.noInterpolation: "flat " else: ""

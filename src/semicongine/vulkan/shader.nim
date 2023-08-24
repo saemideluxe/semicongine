@@ -180,7 +180,7 @@ proc getVertexInputInfo*(
   for attribute in shaderConfiguration.inputs:
     bindings.add VkVertexInputBindingDescription(
       binding: binding,
-      stride: attribute.size,
+      stride: uint32(attribute.size),
       inputRate: if attribute.perInstance: VK_VERTEX_INPUT_RATE_INSTANCE else: VK_VERTEX_INPUT_RATE_VERTEX,
     )
     # allows to submit larger data structures like Mat44, for most other types will be 1
@@ -189,9 +189,9 @@ proc getVertexInputInfo*(
         binding: binding,
         location: location,
         format: attribute.thetype.getVkFormat,
-        offset: i * attribute.size(perDescriptor=true),
+        offset: uint32(i * attribute.size(perDescriptor=true)),
       )
-      location += attribute.thetype.nLocationSlots
+      location += uint32(attribute.thetype.nLocationSlots)
     inc binding
 
   return VkPipelineVertexInputStateCreateInfo(

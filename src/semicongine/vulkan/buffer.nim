@@ -14,7 +14,7 @@ type
   Buffer* = object
     device*: Device
     vk*: VkBuffer
-    size*: uint64
+    size*: int
     usage*: seq[VkBufferUsageFlagBits]
     case memoryAllocated*: bool
       of false: discard
@@ -67,7 +67,7 @@ proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool,
 # (shardingMode = VK_SHARING_MODE_CONCURRENT not supported)
 proc createBuffer*(
   device: Device,
-  size: uint64,
+  size: int,
   usage: openArray[VkBufferUsageFlagBits],
   requireMappable: bool,
   preferVRAM: bool,
@@ -84,7 +84,7 @@ proc createBuffer*(
   var createInfo = VkBufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
     flags: VkBufferCreateFlags(0),
-    size: size,
+    size: uint64(size),
     usage: toBits(result.usage),
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
   )
@@ -98,7 +98,7 @@ proc createBuffer*(
   result.allocateMemory(requireMappable=requireMappable, preferVRAM=preferVRAM, preferAutoFlush=preferAutoFlush)
 
 
-proc copy*(src, dst: Buffer, dstOffset=0'u64) =
+proc copy*(src, dst: Buffer, dstOffset=0) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -106,7 +106,7 @@ proc copy*(src, dst: Buffer, dstOffset=0'u64) =
   assert VK_BUFFER_USAGE_TRANSFER_SRC_BIT in src.usage
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 
-  var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: dstOffset)
+  var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: VkDeviceSize(dstOffset))
   withSingleUseCommandBuffer(src.device, true, commandBuffer):
     commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
 
@@ -126,10 +126,10 @@ proc destroy*(buffer: var Buffer) =
     )
   buffer.vk.reset
 
-proc setData*(dst: Buffer, src: pointer, size: uint64, bufferOffset=0'u64) =
+proc setData*(dst: Buffer, src: pointer, size: int, bufferOffset=0) =
   assert bufferOffset + size <= dst.size
   if dst.memory.canMap:
-    copyMem(cast[pointer](cast[uint64](dst.memory.data) + bufferOffset), src, size)
+    copyMem(cast[pointer](cast[int](dst.memory.data) + bufferOffset), src, size)
     if dst.memory.needsFlushing:
       dst.memory.flush()
   else: # use staging buffer, slower but required if memory is not host visible

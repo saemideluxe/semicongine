@@ -3,20 +3,17 @@ import std/strformat
 import std/logging
 
 import ../core
-import ../mesh
-import ../scene
 import ./buffer
 
 type
   Drawable* = object
-    mesh*: Mesh
-    elementCount*: uint32 # number of vertices or indices
-    bufferOffsets*: seq[(string, MemoryPerformanceHint, uint64)] # list of buffers and list of offset for each attribute in that buffer
-    instanceCount*: uint32 # number of instance
+    elementCount*: int # number of vertices or indices
+    bufferOffsets*: seq[(string, MemoryPerformanceHint, int)] # list of buffers and list of offset for each attribute in that buffer
+    instanceCount*: int # number of instance
     case indexed*: bool
     of true:
       indexType*: VkIndexType
-      indexBufferOffset*: uint64
+      indexBufferOffset*: int
     of false:
       discard
 
@@ -27,8 +24,6 @@ func `$`*(drawable: Drawable): string =
     &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
 proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer) =
-    if drawable.mesh.entity.transform == Mat4():
-      return
     debug "Draw ", drawable
 
     var buffers: seq[VkBuffer]
@@ -47,16 +42,16 @@ proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Ta
     if drawable.indexed:
       commandBuffer.vkCmdBindIndexBuffer(indexBuffer.vk, VkDeviceSize(drawable.indexBufferOffset), drawable.indexType)
       commandBuffer.vkCmdDrawIndexed(
-        indexCount=drawable.elementCount,
-        instanceCount=drawable.instanceCount,
+        indexCount=uint32(drawable.elementCount),
+        instanceCount=uint32(drawable.instanceCount),
         firstIndex=0,
         vertexOffset=0,
         firstInstance=0
       )
     else:
       commandBuffer.vkCmdDraw(
-        vertexCount=drawable.elementCount,
-        instanceCount=drawable.instanceCount,
+        vertexCount=uint32(drawable.elementCount),
+        instanceCount=uint32(drawable.instanceCount),
         firstVertex=0,
         firstInstance=0
       )

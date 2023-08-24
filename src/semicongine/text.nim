@@ -1,8 +1,6 @@
-import std/sequtils
 import std/tables
 import std/unicode
 
-import ./scene
 import ./mesh
 import ./core/vector
 import ./core/matrix
@@ -13,8 +11,8 @@ type
     Left
     Center
     Right
-  Textbox* = ref object of Entity
-    maxLen*: uint32
+  Textbox* = object
+    maxLen*: int
     text: seq[Rune]
     dirty: bool
     alignment*: TextAlignment
@@ -25,9 +23,9 @@ proc updateMesh(textbox: var Textbox) =
 
   # pre-calculate text-width
   var width = 0'f32
-  for i in 0 ..< min(uint32(textbox.text.len), textbox.maxLen):
+  for i in 0 ..< min(textbox.text.len, textbox.maxLen):
     width += textbox.font.glyphs[textbox.text[i]].advance
-    if i < uint32(textbox.text.len - 1):
+    if i < textbox.text.len - 1:
       width += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
 
   let centerX = width / 2
@@ -36,7 +34,7 @@ proc updateMesh(textbox: var Textbox) =
   var offsetX = 0'f32
   for i in 0 ..< textbox.maxLen:
     let vertexOffset = i * 4
-    if i < uint32(textbox.text.len):
+    if i < textbox.text.len:
       let
         glyph = textbox.font.glyphs[textbox.text[i]]
         left = offsetX + glyph.leftOffset
@@ -55,7 +53,7 @@ proc updateMesh(textbox: var Textbox) =
       textbox.mesh.updateAttributeData("uv", vertexOffset + 3, glyph.uvs[3])
 
       offsetX += glyph.advance
-      if i < uint32(textbox.text.len - 1):
+      if i < textbox.text.len - 1:
         offsetX += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
     else:
       textbox.mesh.updateAttributeData("position", vertexOffset + 0, newVec3f())
@@ -69,27 +67,23 @@ func text*(textbox: Textbox): seq[Rune] =
 
 proc `text=`*(textbox: var Textbox, text: seq[Rune]) =
   textbox.text = text
-  textbox.name = $text
   textbox.updateMesh()
 
-proc newTextbox*(maxLen: uint32, font: Font, text=toRunes("")): Textbox =
+proc newTextbox*(maxLen: int, font: Font, text=toRunes("")): Textbox =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
-    indices: seq[array[3, uint32]]
+    indices: seq[array[3, uint16]]
     uvs = newSeq[Vec2f](int(maxLen * 4))
   for i in 0 ..< maxLen:
     let offset = i * 4
-    indices.add [[offset + 0, offset + 1, offset + 2], [offset + 2, offset + 3, offset + 0]]
+    indices.add [
+      [uint16(offset + 0), uint16(offset + 1), uint16(offset + 2)],
+      [uint16(offset + 2), uint16(offset + 3), uint16(offset + 0)],
+    ]
 
   result = Textbox(maxLen: maxLen, text: text, font: font, dirty: true)
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs)
-  result.mesh.setInstanceTransforms(@[Unit4F32])
-  result.name = $text
-  Entity(result).transform = Unit4F32
 
   # wrap the text mesh in a new entity to preserve the font-scaling
-  var box = newEntity("box", {"mesh": Component(result.mesh)})
-  # box.transform = scale3d(font.fontscale * 0.002, font.fontscale * 0.002)
-  box.transform = scale3d(1 / font.resolution, 1 / font.resolution)
-  result.add box
+  result.mesh.transform = scale(1 / font.resolution, 1 / font.resolution)
   result.updateMesh()
