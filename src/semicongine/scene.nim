@@ -12,8 +12,6 @@ type
   Scene* = object
     name*: string
     shaderGlobals*: Table[string, DataList]
-    transformAttribute*: string = "transform"
-    materialIndexAttribute*: string = "materialIndex"
     meshes*: seq[Mesh]
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
