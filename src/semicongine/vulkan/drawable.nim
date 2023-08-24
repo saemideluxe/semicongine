@@ -8,7 +8,7 @@ import ./buffer
 type
   Drawable* = object
     elementCount*: int # number of vertices or indices
-    bufferOffsets*: seq[(string, MemoryPerformanceHint, int)] # list of buffers and list of offset for each attribute in that buffer
+    bufferOffsets*: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]] # list of buffers and list of offset for each attribute in that buffer
     instanceCount*: int # number of instance
     case indexed*: bool
     of true:
@@ -23,13 +23,13 @@ func `$`*(drawable: Drawable): string =
   else:
     &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
-proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer) =
+proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer, pipeline: VkPipeline) =
     debug "Draw ", drawable
 
     var buffers: seq[VkBuffer]
     var offsets: seq[VkDeviceSize]
 
-    for (name, performanceHint, offset) in drawable.bufferOffsets:
+    for (name, performanceHint, offset) in drawable.bufferOffsets[pipeline]:
       buffers.add vertexBuffers[performanceHint].vk
       offsets.add VkDeviceSize(offset)
 

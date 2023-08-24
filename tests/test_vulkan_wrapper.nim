@@ -189,7 +189,7 @@ proc main() =
       outputs=[attr[Vec4f]("color")],
       uniforms=[attr[Vec4f]("color")],
       vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = Uniforms.color;""",
-      fragmentCode="color = vec4(0, 0, 1, 1);",
+      fragmentCode="color = outcolor;",
     )
   engine.initRenderer({
     "my_material": shaderConfiguration1,
