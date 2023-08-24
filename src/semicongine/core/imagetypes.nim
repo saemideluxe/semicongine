@@ -3,8 +3,8 @@ import ./vulkanapi
 type
   Pixel* = array[4, uint8]
   ImageObject* = object
-    width*: uint32
-    height*: uint32
+    width*: int
+    height*: int
     imagedata*: seq[Pixel]
   Sampler* = object
     magnification*: VkFilter
@@ -23,26 +23,26 @@ type
       wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
     )
 
-proc `[]`*(image: Image, x, y: uint32): Pixel =
+proc `[]`*(image: Image, x, y: int): Pixel =
   assert x < image.width
   assert y < image.height
 
   image[].imagedata[y * image.width + x]
 
-proc `[]=`*(image: var Image, x, y: uint32, value: Pixel) =
+proc `[]=`*(image: var Image, x, y: int, value: Pixel) =
   assert x < image.width
   assert y < image.height
 
   image[].imagedata[y * image.width + x] = value
 
 const EMPTYPIXEL = [0'u8, 0'u8, 0'u8, 0'u8]
-proc newImage*(width, height: uint32, imagedata: seq[Pixel] = @[], fill=EMPTYPIXEL): Image =
+proc newImage*(width, height: int, imagedata: seq[Pixel] = @[], fill=EMPTYPIXEL): Image =
   assert width > 0 and height > 0
-  assert uint32(imagedata.len) == width * height or imagedata.len == 0
+  assert imagedata.len == width * height or imagedata.len == 0
 
   result = new Image
   result.imagedata = (if imagedata.len == 0: newSeq[Pixel](width * height) else: imagedata)
-  assert width * height == uint32(result.imagedata.len)
+  assert width * height == result.imagedata.len
 
   result.width = width
   result.height = height

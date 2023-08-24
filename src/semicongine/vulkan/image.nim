@@ -9,12 +9,12 @@ import ./memory
 import ./commandbuffer
 
 type
-  PixelDepth = 1'u32 .. 4'u32
+  PixelDepth = 1 .. 4
   VulkanImage* = object
     device*: Device
     vk*: VkImage
-    width*: uint32 # pixel
-    height*: uint32 # pixel
+    width*: int # pixel
+    height*: int # pixel
     depth*: PixelDepth
     format*: VkFormat
     usage*: seq[VkImageUsageFlagBits]
@@ -137,7 +137,7 @@ proc copy*(src: Buffer, dst: VulkanImage) =
       layerCount: 1,
     ),
     imageOffset: VkOffset3D(x: 0, y: 0, z: 0),
-    imageExtent: VkExtent3D(width: dst.width, height: dst.height, depth: 1)
+    imageExtent: VkExtent3D(width: uint32(dst.width), height: uint32(dst.height), depth: 1)
   )
   withSingleUseCommandBuffer(src.device, true, commandBuffer):
     commandBuffer.vkCmdCopyBufferToImage(
@@ -149,7 +149,7 @@ proc copy*(src: Buffer, dst: VulkanImage) =
     )
 
 # currently only usable for texture access from shader
-proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data: pointer): VulkanImage =
+proc createImage*(device: Device, width, height: int, depth: PixelDepth, data: pointer): VulkanImage =
   assert device.vk.valid
   assert width > 0
   assert height > 0
@@ -167,7 +167,7 @@ proc createImage*(device: Device, width, height: uint32, depth: PixelDepth, data
   var imageInfo = VkImageCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
     imageType: VK_IMAGE_TYPE_2D,
-    extent: VkExtent3D(width: width, height: height, depth: 1),
+    extent: VkExtent3D(width: uint32(width), height: uint32(height), depth: 1),
     mipLevels: 1,
     arrayLayers: 1,
     format: result.format,

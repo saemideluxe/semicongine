@@ -376,19 +376,21 @@ func rotate2d*[T](angle: T): TMat3[T] = TMat3[T](data: [
   sin(angle), cos(angle), T(0),
   T(0), T(0), T(1),
 ])
-func translate3d*(x=0'f32, y=0'f32, z=0'f32): TMat4[float32] = Mat4(data: [
+func translate*(x=0'f32, y=0'f32, z=0'f32): TMat4[float32] = Mat4(data: [
   1'f32, 0'f32, 0'f32, x,
   0'f32, 1'f32, 0'f32, y,
   0'f32, 0'f32, 1'f32, z,
   0'f32, 0'f32, 0'f32, 1'f32,
 ])
-func scale3d*(x=1'f32, y=1'f32, z=1'f32): Mat4 = Mat4(data: [
+func translate*[T: TVec3](v: T): TMat4[float32] = translate(v[0], v[1], v[2])
+func scale*(x=1'f32, y=1'f32, z=1'f32): Mat4 = Mat4(data: [
   x,     0'f32, 0'f32, 0'f32,
   0'f32, y,     0'f32, 0'f32,
   0'f32, 0'f32, z,     0'f32,
   0'f32, 0'f32, 0'f32, 1'f32,
 ])
-func rotate3d*(angle: float32, a: Vec3f): Mat4 =
+func scale*[T: TVec3](v: T): TMat4[float32] = scale(v[0], v[1], v[2])
+func rotate*(angle: float32, a: Vec3f): Mat4 =
   let
     cosa = cos(angle)
     sina = sin(angle)

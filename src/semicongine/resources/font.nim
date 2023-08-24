@@ -33,7 +33,7 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], color: V
   result.resolution = resolution
   result.fontscale = float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(resolution)))
   var
-    offsetX: uint32
+    offsetX = 0
     bitmaps: Table[Rune, (cstring, cint, cint)]
     topOffsets: Table[Rune, int]
   for codePoint in codePoints:
@@ -49,13 +49,13 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], color: V
       )
     bitmaps[codePoint] = (data, width, height)
     result.maxHeight = max(result.maxHeight, int(height))
-    offsetX += uint32(width + 1)
+    offsetX += width + 1
     topOffsets[codePoint] = offY
 
   result.name = name
   result.fontAtlas = Texture(
     name: name & "_texture",
-    image: newImage(offsetX, uint32(result.maxHeight + 1)),
+    image: newImage(offsetX, result.maxHeight + 1),
     sampler: FONTSAMPLER_SOFT
   )
 
@@ -63,8 +63,8 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], color: V
   for codePoint in codePoints:
     let
       bitmap = bitmaps[codePoint][0]
-      width = uint32(bitmaps[codePoint][1])
-      height = uint32(bitmaps[codePoint][2])
+      width = bitmaps[codePoint][1]
+      height = bitmaps[codePoint][2]
 
     # bitmap data
     for y in 0 ..< height:

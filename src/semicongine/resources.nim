@@ -9,8 +9,7 @@ import ./resources/image
 import ./resources/audio
 import ./resources/mesh
 import ./resources/font
-
-from ./scene import Entity, Scene
+import ./mesh
 
 export image
 export audio
@@ -134,15 +133,10 @@ proc loadFont*(path: string, name="", color=newVec4f(1, 1, 1, 1), resolution=100
   let defaultCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=+[{]};:,<.>/? ".toRunes()
   loadResource_intern(path).readTrueType(name, defaultCharset, color, resolution)
 
-proc loadMesh*(path: string): Entity =
-  loadResource_intern(path).readglTF()[0].root
+proc loadFirstMesh*(path: string): Mesh =
+  loadResource_intern(path).readglTF()[0].children[0].mesh
 
-proc loadScene*(path: string, name=""): Scene =
-  result = loadResource_intern(path).readglTF()[0]
-  if name != "":
-    result.name = name
-
-proc loadScenes*(path: string): seq[Scene] =
+proc loadMeshes*(path: string): seq[MeshTree] =
   loadResource_intern(path).readglTF()
 
 proc modList*(): seq[string] =

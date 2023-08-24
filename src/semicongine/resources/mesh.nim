@@ -6,7 +6,6 @@ import std/sequtils
 import std/strformat
 import std/streams
 
-import ../scene
 import ../mesh
 import ../core
 
@@ -20,6 +19,9 @@ type
   glTFData = object
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
+  MeshTree* = ref object
+    mesh*: Mesh
+    children*: seq[MeshTree]
 
 const
   JSON_CHUNK = 0x4E4F534A
@@ -95,7 +97,7 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
   result = newDataList(thetype=accessor.getGPUType())
-  result.initData(uint32(accessor["count"].getInt()))
+  result.initData(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
@@ -113,7 +115,7 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8])
     # we don't support stride, have to convert stuff here... does this even work?
     for i in 0 ..< int(result.len):
       copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], int(result.thetype.size))
-      dstPointer = cast[pointer](cast[uint64](dstPointer) + result.thetype.size)
+      dstPointer = cast[pointer](cast[int](dstPointer) + result.thetype.size)
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
@@ -212,7 +214,7 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
-  var vertexCount = 0'u32
+  var vertexCount = 0
   for attribute, accessor in primitiveNode["attributes"].pairs:
     let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
     mesh.appendAttributeData(attribute.toLowerAscii, data)
@@ -221,7 +223,7 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
   var materialId = 0'u16
   if primitiveNode.hasKey("material"):
     materialId = uint16(primitiveNode["material"].getInt())
-  mesh.appendAttributeData("materialIndex", newSeqWith[uint8](int(vertexCount), materialId))
+  mesh.appendAttributeData("materialIndex", newSeqWith[uint8](vertexCount, materialId))
   let material = loadMaterial(root, root["materials"][int(materialId)], mainBuffer, materialId)
   # if mesh.material != nil and mesh.material[] != material[]:
     # raise newException(Exception, &"Only one material per mesh supported at the moment")
@@ -231,18 +233,18 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
     assert mesh.indexType != None
     let data = root.getAccessorData(root["accessors"][primitiveNode["indices"].getInt()], mainBuffer)
     let baseIndex = mesh.indicesCount
-    var tri: seq[uint32]
+    var tri: seq[int]
     case data.thetype
       of UInt16:
         for entry in getValues[uint16](data)[]:
-          tri.add uint32(entry) + baseIndex
+          tri.add int(entry) + baseIndex
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
             mesh.appendIndicesData(tri[0], tri[2], tri[1])
             tri.setLen(0)
       of UInt32:
         for entry in getValues[uint32](data)[]:
-          tri.add uint32(entry)
+          tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
             mesh.appendIndicesData(tri[0], tri[2], tri[1])
@@ -265,7 +267,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
     else:
       indexType = Big
 
-  result = Mesh(instanceCount: 1, instanceTransforms: newSeqWith(1, Unit4F32), indexType: indexType)
+  result = Mesh(instanceTransforms: @[Unit4F32], indexType: indexType)
 
   # check we have the same attributes for all primitives
   let attributes = meshNode["primitives"][0]["attributes"].keys.toSeq
@@ -274,37 +276,34 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
 
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
-    result.setMeshData(attribute.toLowerAscii, newDataList(thetype=root["accessors"][accessor.getInt()].getGPUType()))
-  result.setMeshData("materialIndex", newDataList(theType=UInt16))
+    result.initVertexAttribute(attribute.toLowerAscii, root["accessors"][accessor.getInt()].getGPUType())
+  result.initInstanceAttribute("materialIndex", 0'u16)
 
   # add all mesh data
   for primitive in meshNode["primitives"]:
     result.addPrimitive(root, primitive, mainBuffer)
 
-  setInstanceData(result, "transform", newSeqWith(int(result.instanceCount), Unit4F32))
-
-proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entity =
-  var name = "<Unknown>"
-  if node.hasKey("name"):
-    name = node["name"].getStr()
-  result = newEntity(name)
+proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshTree =
+  # mesh
+  if node.hasKey("mesh"):
+    result.mesh = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
 
   # transformation
   if node.hasKey("matrix"):
     var mat: Mat4
     for i in 0 ..< node["matrix"].len:
       mat[i] = node["matrix"][i].getFloat()
-    result.transform = mat
+    result.mesh.transform = mat
   else:
     var (t, r, s) = (Unit4F32, Unit4F32, Unit4F32)
     if node.hasKey("translation"):
-      t = translate3d(
+      t = translate(
         float32(node["translation"][0].getFloat()),
         float32(node["translation"][1].getFloat()),
         float32(node["translation"][2].getFloat())
       )
     if node.hasKey("rotation"):
-      t = rotate3d(
+      t = rotate(
         float32(node["rotation"][3].getFloat()),
         newVec3f(
           float32(node["rotation"][0].getFloat()),
@@ -313,32 +312,25 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): Entit
         )
       )
     if node.hasKey("scale"):
-      t = scale3d(
+      t = scale(
         float32(node["scale"][0].getFloat()),
         float32(node["scale"][1].getFloat()),
         float32(node["scale"][2].getFloat())
       )
-    result.transform = t * r * s
+    result.mesh.transform = t * r * s
 
   # children
   if node.hasKey("children"):
     for childNode in node["children"]:
-      result.add loadNode(root, root["nodes"][childNode.getInt()], mainBuffer)
+      result.children.add loadNode(root, root["nodes"][childNode.getInt()], mainBuffer)
 
-  # mesh
-  if node.hasKey("mesh"):
-    result["mesh"] = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
-
-proc loadScene(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): Scene =
-  var rootEntity = newEntity("<root>")
+proc loadMeshTree(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): MeshTree =
+  result = MeshTree()
   for nodeId in scenenode["nodes"]:
-    var node = loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
-    rootEntity.add node
-
-  newScene(scenenode["name"].getStr(), rootEntity)
+    result.children.add loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
 
 
-proc readglTF*(stream: Stream): seq[Scene] =
+proc readglTF*(stream: Stream): seq[MeshTree] =
   var
     header: glTFHeader
     data: glTFData
@@ -368,4 +360,4 @@ proc readglTF*(stream: Stream): seq[Scene] =
   debug "Loading mesh: ", data.structuredContent.pretty
 
   for scenedata in data.structuredContent["scenes"]:
-    result.add data.structuredContent.loadScene(scenedata, data.binaryBufferData)
+    result.add data.structuredContent.loadMeshTree(scenedata, data.binaryBufferData)

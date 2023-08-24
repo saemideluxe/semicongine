@@ -107,7 +107,7 @@ proc initRenderer*(engine: var Engine, shaders: Table[string, ShaderConfiguratio
   assert not engine.renderer.isSome
   engine.renderer = some(engine.device.initRenderer(shaders=shaders, clearColor=clearColor))
 
-proc addScene*(engine: var Engine, scene: Scene) =
+proc addScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
   engine.renderer.get.setupDrawableBuffers(scene)
 
@@ -117,11 +117,6 @@ proc renderScene*(engine: var Engine, scene: var Scene) =
   engine.renderer.get.updateMeshData(scene)
   engine.renderer.get.updateUniformData(scene)
   engine.renderer.get.render(scene)
-
-proc updateAnimations*(engine: var Engine, scene: var Scene, dt: float32) =
-  assert engine.state == Running
-  assert engine.renderer.isSome
-  engine.renderer.get.updateAnimations(scene, dt)
 
 proc updateInputs*(engine: var Engine): EngineState =
   assert engine.state in [Starting, Running]

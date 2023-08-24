@@ -34,11 +34,11 @@ proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffe
   result = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
   
   for i in 0 ..< inFlightFrames:
-    var offset = 0'u64
+    var offset = 0
     # first descriptor is always uniform for globals, match should be better somehow
     for descriptor in result[i].layout.descriptors.mitems:
       if descriptor.thetype == Uniform and buffers.len > 0:
-        let size = VkDeviceSize(descriptor.size)
+        let size = descriptor.size
         descriptor.buffer = buffers[i]
         descriptor.offset = offset
         descriptor.size = size
@@ -76,7 +76,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
     descriptors.add Descriptor(
       name: sampler.name,
       thetype: ImageSampler,
-      count: (if sampler.arrayCount == 0: 1'u32 else: sampler.arrayCount),
+      count: (if sampler.arrayCount == 0: 1 else: sampler.arrayCount),
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
     )
   result.descriptorSetLayout = device.createDescriptorSetLayout(descriptors)

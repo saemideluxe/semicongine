@@ -101,7 +101,7 @@ proc readBMP*(stream: Stream): Image =
       data[row_mult * dibHeader.width + col]= pixel
     stream.setPosition(stream.getPosition() + padding)
 
-  result = newImage(width=uint32(dibHeader.width), height=uint32(abs(dibHeader.height)), imagedata=data)
+  result = newImage(width=dibHeader.width, height=abs(dibHeader.height), imagedata=data)
 
 {.compile: currentSourcePath.parentDir() & "/lodepng.c" .}
 
@@ -122,4 +122,4 @@ proc readPNG*(stream: Stream): Image =
 
   free(data)
 
-  result = newImage(width=w, height=h, imagedata=imagedata)
+  result = newImage(width=int(w), height=int(h), imagedata=imagedata)

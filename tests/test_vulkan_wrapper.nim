@@ -41,114 +41,120 @@ let
     name: "mat3",
     materialType: "my_special_material",
     constants: {
-      "color": toGPUValue(newVec4f(0.5, 0.5, 0))
+      "color": toGPUValue(newVec4f(0, 1, 0, 1))
     }.toTable
   )
 
-proc scene_different_mesh_types(): Entity =
-  result = newEntity("root", [],
-    newEntity("triangle1", {"mesh": Component(newMesh(
+proc scene_different_mesh_types(): seq[Mesh] =
+  @[
+    newMesh(
       positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       material=mat,
-    ))}),
-    newEntity("triangle1b", {"mesh": Component(newMesh(
+      transform=translate(-0.7, -0.5),
+    ),
+    newMesh(
       positions=[newVec3f(0.0, -0.4), newVec3f(0.4, 0.4), newVec3f(-0.4, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       material=mat,
-    ))}),
-    newEntity("triangle2a", {"mesh": Component(newMesh(
+      transform=translate(0, -0.5),
+    ),
+    newMesh(
       positions=[newVec3f(0.0, 0.5), newVec3f(0.5, -0.5), newVec3f(-0.5, -0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]],
       material=mat2,
-    ))}),
-    newEntity("triangle2b", {"mesh": Component(newMesh(
+      transform=translate(0.7, -0.5),
+    ),
+    newMesh(
       positions=[newVec3f(0.0, 0.4), newVec3f(0.4, -0.4), newVec3f(-0.4, -0.4)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]],
       material=mat2,
-    ))}),
-    newEntity("triangle3a", {"mesh": Component(newMesh(
+      transform=translate(-0.7, 0.5),
+    ),
+    newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false,
       material=mat2,
-    ))}),
-    newEntity("triangle3b", {"mesh": Component(newMesh(
+      transform=translate(0, 0.5),
+    ),
+    newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false,
       material=mat2,
-    ))}),
-  )
-  for mesh in allComponentsOfType[Mesh](result):
-    mesh.setInstanceData("translate", @[newVec3f()])
-  result[0]["mesh", Mesh()].updateInstanceData("translate", @[newVec3f(-0.6, -0.6)])
-  result[1]["mesh", Mesh()].updateInstanceData("translate", @[newVec3f(-0.6, 0.6)])
-  result[2]["mesh", Mesh()].updateInstanceData("translate", @[newVec3f(0.6, -0.6)])
-  result[3]["mesh", Mesh()].updateInstanceData("translate", @[newVec3f(0.6, 0.6)])
+      transform=translate(0.7, 0.5),
+    ),
+  ]
 
-proc scene_simple(): Entity =
-  var mymesh1 = newMesh(
-    positions=[newVec3f(0.0, -0.3), newVec3f(0.3, 0.3), newVec3f(-0.3, 0.3)],
-    colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-    material=mat,
-  )
-  var mymesh2 = newMesh(
-    positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
-    colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-    material=mat,
-  )
-  var mymesh3 = newMesh(
-    positions=[newVec3f(0.0, -0.6), newVec3f(0.6, 0.6), newVec3f(-0.6, 0.6)],
-    colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
-    indices=[[0'u32, 1'u32, 2'u32]],
-    autoResize=false,
-    material=mat,
-  )
-  var mymesh4 = newMesh(
-    positions=[newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
-    colors=[newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-    indices=[[0'u16, 1'u16, 2'u16]],
-    instanceCount=2,
-    material=mat,
-  )
-  mymesh1.setInstanceData("translate", @[newVec3f( 0.4,  0.4)])
-  mymesh2.setInstanceData("translate", @[newVec3f( 0.4, -0.4)])
-  mymesh3.setInstanceData("translate", @[newVec3f(-0.4, -0.4)])
-  mymesh4.setInstanceData("translate", @[newVec3f(-0.4,  0.4), newVec3f(0.0, 0.0)])
-  result = newEntity("root", [], newEntity("triangle", {"mesh1": Component(mymesh4), "mesh2": Component(mymesh3), "mesh3": Component(mymesh2), "mesh4": Component(mymesh1)}))
+proc scene_simple(): seq[Mesh] =
+  @[
+    newMesh(
+      positions=[newVec3f(0.0, -0.3), newVec3f(0.3, 0.3), newVec3f(-0.3, 0.3)],
+      colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      material=mat,
+      transform=translate(0.4, 0.4),
+    ),
+    newMesh(
+      positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
+      colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      material=mat,
+      transform=translate(0.4, -0.4),
+    ),
+    newMesh(
+      positions=[newVec3f(0.0, -0.6), newVec3f(0.6, 0.6), newVec3f(-0.6, 0.6)],
+      colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
+      indices=[[0'u32, 1'u32, 2'u32]],
+      autoResize=false,
+      material=mat,
+      transform=translate(-0.4, 0.4),
+    ),
+    newMesh(
+      positions=[newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
+      colors=[newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      indices=[[0'u16, 1'u16, 2'u16]],
+      instanceTransforms=[Unit4F32, Unit4F32],
+      material=mat,
+      transform=translate(-0.4, -0.4),
+    )
+  ]
 
-proc scene_primitives(): Entity =
+proc scene_primitives(): seq[Mesh] =
   var r = rect(color="ff0000")
   var t = tri(color="0000ff")
   var c = circle(color="00ff00")
   r.material = mat
   t.material = mat
   c.material = mat
+  r.transform = translate(newVec3f(0.5, -0.3))
+  t.transform = translate(newVec3f(0.3,  0.3))
+  c.transform = translate(newVec3f(-0.3,  0.1))
+  result = @[r, c, t]
 
-  r.setInstanceData("translate", @[newVec3f(0.5, -0.3)])
-  t.setInstanceData("translate", @[newVec3f(0.3,  0.3)])
-  c.setInstanceData("translate", @[newVec3f(-0.3,  0.1)])
-  result = newEntity("root", {"mesh1": Component(t), "mesh2": Component(r), "mesh3": Component(c)})
+proc scene_flag(): seq[Mesh] =
+  @[
+    newMesh(
+      positions=[newVec3f(-1.0, -1.0), newVec3f(1.0, -1.0), newVec3f(1.0, 1.0), newVec3f(-1.0, 1.0)],
+      colors=[newVec4f(-1, -1, 1, 1), newVec4f(1, -1, 1, 1), newVec4f(1, 1, 1, 1), newVec4f(-1, 1, 1, 1)],
+      indices=[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
+      material=mat,
+      transform=scale(0.5, 0.5)
+    )
+  ]
 
-proc scene_flag(): Entity =
-  var r = rect(color="ffffff")
-  r.material = mat
-  result = newEntity("root", {"mesh": Component(r)})
-
-proc scene_multi_material(): Entity =
+proc scene_multi_material(): seq[Mesh] =
   var
     r1 = rect(color="ffffff")
     r2 = rect(color="000000")
   r1.material = mat
   r2.material = mat3
-  r1.setInstanceData("translate", @[newVec3f(-0.5)])
-  r2.setInstanceData("translate", @[newVec3f(+0.5)])
-  result = newEntity("root", {"mesh1": Component(r1), "mesh2": Component(r2)})
+  r1.transform = translate(newVec3f(-0.5))
+  r2.transform = translate(newVec3f(+0.5))
+  result = @[r1, r2]
 
 proc main() =
   var engine = initEngine("Test")
@@ -159,7 +165,7 @@ proc main() =
       inputs=[
         attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
         attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
-        attr[Vec3f]("translate", perInstance=true),
+        attr[Mat4]("transform", perInstance=true),
         attr[uint16]("materialIndex", perInstance=true),
       ],
       intermediates=[
@@ -171,19 +177,19 @@ proc main() =
       samplers=[
         attr[Sampler2DType]("my_little_texture", arrayCount=2)
       ],
-      vertexCode="""gl_Position = vec4(position + translate, 1.0); outcolor = color; materialIndexOut = materialIndex;""",
+      vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = color; materialIndexOut = materialIndex;""",
       fragmentCode="color = texture(my_little_texture[materialIndexOut], outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
     shaderConfiguration2 = createShaderConfiguration(
       inputs=[
         attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-        attr[Vec3f]("translate", perInstance=true),
+        attr[Mat4]("transform", perInstance=true),
       ],
       intermediates=[attr[Vec4f]("outcolor")],
       outputs=[attr[Vec4f]("color")],
       uniforms=[attr[Vec4f]("color")],
-      vertexCode="""gl_Position = vec4(position + translate, 1.0); outcolor = Uniforms.color;""",
-      fragmentCode="color = outcolor;",
+      vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = Uniforms.color;""",
+      fragmentCode="color = vec4(0, 0, 1, 1);",
     )
   engine.initRenderer({
     "my_material": shaderConfiguration1,
@@ -192,22 +198,24 @@ proc main() =
 
   # INIT SCENES
   var scenes = [
-    newScene("simple", scene_simple(), transformAttribute=""),
-    newScene("different mesh types", scene_different_mesh_types(), transformAttribute=""),
-    newScene("primitives", scene_primitives(), transformAttribute=""),
-    newScene("flag", scene_multi_material(), transformAttribute=""),
+    # Scene(name: "simple", meshes: scene_simple()),
+    # Scene(name: "different mesh types", meshes: scene_different_mesh_types()),
+    # Scene(name: "primitives", meshes: scene_primitives()),
+    # Scene(name: "flag", meshes: scene_flag()),
+    # Scene(name: "multimaterial", meshes: scene_multi_material(), materialIndexAttribute: ""),
+    Scene(name: "multimaterial", meshes: scene_multi_material()),
   ]
 
-  scenes[3].addShaderGlobal("color", newVec4f(1, 0, 1))
+  scenes[0].addShaderGlobal("color", newVec4f(1, 0, 0, 1))
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
     engine.addScene(scene)
-
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
   for i in 0 ..< 3:
     for scene in scenes.mitems:
+      echo "rendering scene ", scene.name
       for i in 0 ..< 1000:
         if engine.updateInputs() != Running or engine.keyIsDown(Escape):
           engine.destroy()
