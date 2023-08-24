@@ -110,6 +110,7 @@ proc initRenderer*(engine: var Engine, shaders: Table[string, ShaderConfiguratio
 proc addScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
   engine.renderer.get.setupDrawableBuffers(scene)
+  engine.renderer.get.updateMeshData(scene, forceAll=true)
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running

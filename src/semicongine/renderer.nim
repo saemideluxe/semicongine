@@ -31,7 +31,7 @@ type
     uniformBuffers*: Table[VkPipeline, seq[Buffer]] # one per frame-in-flight
     textures*: Table[string, seq[VulkanTexture]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
-    attributeBindingNumber*: Table[string, int]
+    vertexBufferOffsets*: Table[(int, string), int]
     descriptorPools*: Table[VkPipeline, DescriptorPool]
     descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
     materials: seq[Material]
@@ -135,19 +135,13 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       preferVRAM=true,
     )
 
-  # create vertex buffers and calculcate offsets
+  # calculcate offsets for attributes in vertex buffers
   # trying to use one buffer per memory type
-  var
-    perLocationOffsets: Table[MemoryPerformanceHint, int]
-    perLocationSizes: Table[MemoryPerformanceHint, int]
-    bindingNumber = 0
+  var perLocationSizes: Table[MemoryPerformanceHint, int]
   for hint in MemoryPerformanceHint:
-    perLocationOffsets[hint] = 0
     perLocationSizes[hint] = 0
   for attribute in inputs:
     scenedata.attributeLocation[attribute.name] = attribute.memoryPerformanceHint
-    scenedata.attributeBindingNumber[attribute.name] = bindingNumber
-    inc bindingNumber
     # setup one buffer per attribute-location-type
     for mesh in scene.meshes:
       # align size to VERTEX_ATTRIB_ALIGNMENT bytes (the important thing is the correct alignment of the offsets, but
@@ -155,6 +149,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       if perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
         perLocationSizes[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
       perLocationSizes[attribute.memoryPerformanceHint] += mesh.attributeSize(attribute.name)
+
+  # create vertex buffers
   for memoryPerformanceHint, bufferSize in perLocationSizes.pairs:
     if bufferSize > 0:
       scenedata.vertexBuffers[memoryPerformanceHint] = renderer.device.createBuffer(
@@ -164,18 +160,26 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
         preferVRAM=true,
       )
 
-  # fill vertex buffers
+  # calculate offset of each attribute of all meshes
+  var perLocationOffsets: Table[MemoryPerformanceHint, int]
   var indexBufferOffset = 0
+  for hint in MemoryPerformanceHint:
+    perLocationOffsets[hint] = 0
   for (meshIndex, mesh) in enumerate(scene.meshes):
-    var offsets: seq[(string, MemoryPerformanceHint, int)]
     for attribute in inputs:
-      offsets.add (attribute.name, attribute.memoryPerformanceHint, perLocationOffsets[attribute.memoryPerformanceHint])
-      var (pdata, size) = mesh.getRawData(attribute.name)
-      if pdata != nil: # no data
-        scenedata.vertexBuffers[attribute.memoryPerformanceHint].setData(pdata, size, perLocationOffsets[attribute.memoryPerformanceHint])
-        perLocationOffsets[attribute.memoryPerformanceHint] += size
-        if perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
-          perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
+      scenedata.vertexBufferOffsets[(meshIndex, attribute.name)] = perLocationOffsets[attribute.memoryPerformanceHint]
+      let size = mesh.getRawData(attribute.name)[1]
+      perLocationOffsets[attribute.memoryPerformanceHint] += size
+      if perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
+        perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
+
+    # fill offsets (as sequence corresponds to shader input binding)
+    var offsets: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]]
+    for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
+      for materialType, pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.pairs:
+        offsets[pipeline.vk] = newSeq[(string, MemoryPerformanceHint, int)]()
+        for attribute in pipeline.inputs:
+          offsets[pipeline.vk].add (attribute.name, attribute.memoryPerformanceHint, scenedata.vertexBufferOffsets[(meshIndex, attribute.name)])
 
     let indexed = mesh.indexType != MeshIndexType.None
     var drawable = Drawable(
@@ -245,16 +249,16 @@ proc refreshMeshAttributeData(renderer: Renderer, scene: Scene, drawable: Drawab
     return
   var (pdata, size) = scene.meshes[meshIndex].getRawData(attribute)
   let memoryPerformanceHint = renderer.scenedata[scene].attributeLocation[attribute]
-  let bindingNumber = renderer.scenedata[scene].attributeBindingNumber[attribute]
-  renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(pdata, size, drawable.bufferOffsets[bindingNumber][2])
+  renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(pdata, size, renderer.scenedata[scene].vertexBufferOffsets[(meshIndex, attribute)])
 
-proc updateMeshData*(renderer: var Renderer, scene: var Scene) =
+proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
 
   for (drawable, meshIndex) in renderer.scenedata[scene].drawables.mitems:
     if scene.meshes[meshIndex].attributes.contains(TRANSFORMATTRIBUTE):
       scene.meshes[meshIndex].updateInstanceTransforms(TRANSFORMATTRIBUTE)
-    for attribute in scene.meshes[meshIndex].dirtyAttributes:
+    let attrs = (if forceAll: scene.meshes[meshIndex].attributes else: scene.meshes[meshIndex].dirtyAttributes)
+    for attribute in attrs:
       renderer.refreshMeshAttributeData(scene, drawable, meshIndex, attribute)
       debug &"Update mesh attribute {attribute}"
     scene.meshes[meshIndex].clearDirtyAttributes()
@@ -310,7 +314,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
 
         for (drawable, meshIndex) in renderer.scenedata[scene].drawables:
           if scene.meshes[meshIndex].material != nil and scene.meshes[meshIndex].material.materialType == materialType:
-            drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer)
+            drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer, pipeline.vk)
 
     if i < renderer.renderPass.subpasses.len - 1:
       commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)
