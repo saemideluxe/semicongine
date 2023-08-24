@@ -198,15 +198,14 @@ proc main() =
 
   # INIT SCENES
   var scenes = [
-    # Scene(name: "simple", meshes: scene_simple()),
-    # Scene(name: "different mesh types", meshes: scene_different_mesh_types()),
-    # Scene(name: "primitives", meshes: scene_primitives()),
-    # Scene(name: "flag", meshes: scene_flag()),
-    # Scene(name: "multimaterial", meshes: scene_multi_material(), materialIndexAttribute: ""),
+    Scene(name: "simple", meshes: scene_simple()),
+    Scene(name: "different mesh types", meshes: scene_different_mesh_types()),
+    Scene(name: "primitives", meshes: scene_primitives()),
+    Scene(name: "flag", meshes: scene_flag()),
     Scene(name: "multimaterial", meshes: scene_multi_material()),
   ]
 
-  scenes[0].addShaderGlobal("color", newVec4f(1, 0, 0, 1))
+  scenes[4].addShaderGlobal("color", newVec4f(1, 0, 0, 1))
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
     engine.addScene(scene)

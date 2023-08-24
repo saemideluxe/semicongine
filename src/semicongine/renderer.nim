@@ -165,6 +165,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   var indexBufferOffset = 0
   for hint in MemoryPerformanceHint:
     perLocationOffsets[hint] = 0
+
   for (meshIndex, mesh) in enumerate(scene.meshes):
     for attribute in inputs:
       scenedata.vertexBufferOffsets[(meshIndex, attribute.name)] = perLocationOffsets[attribute.memoryPerformanceHint]
@@ -173,7 +174,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       if perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
         perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
 
-    # fill offsets (as sequence corresponds to shader input binding)
+    # fill offsets per pipeline (as sequence corresponds to shader input binding)
     var offsets: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]]
     for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
       for materialType, pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.pairs:
@@ -181,6 +182,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
         for attribute in pipeline.inputs:
           offsets[pipeline.vk].add (attribute.name, attribute.memoryPerformanceHint, scenedata.vertexBufferOffsets[(meshIndex, attribute.name)])
 
+    # create drawables
     let indexed = mesh.indexType != MeshIndexType.None
     var drawable = Drawable(
       elementCount: if indexed: mesh.indicesCount else: mesh.vertexCount,
