@@ -30,11 +30,16 @@ type
     vertexData: Table[string, DataList]
     instanceData: Table[string, DataList]
     dirtyAttributes: seq[string]
-  Material* = ref object
+  Material* = object
     materialType*: string
     name*: string
     constants*: Table[string, DataValue]
     textures*: Table[string, Texture]
+
+let EMPTY_MATERIAL = Material(
+  materialType: "EMPTY MATERIAL",
+  name: "empty material"
+)
 
 func `$`*(mesh: Mesh): string =
   &"Mesh(vertexCount: {mesh.vertexCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
@@ -58,7 +63,7 @@ func attributes*(mesh: Mesh): seq[string] =
   mesh.vertexAttributes & mesh.instanceAttributes
 
 func hash*(material: Material): Hash =
-  hash(cast[pointer](material))
+  hash(material.name)
 
 func instanceCount*(mesh: Mesh): int =
   mesh.instanceTransforms.len
@@ -114,7 +119,7 @@ func newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: Material=nil,
+  material: Material=EMPTY_MATERIAL,
   autoResize=true,
 ): Mesh =
   assert colors.len == 0 or colors.len == positions.len
@@ -164,7 +169,7 @@ func newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: Material=nil,
+  material: Material=EMPTY_MATERIAL,
 ): Mesh =
   newMesh(
     positions=positions,
@@ -347,4 +352,4 @@ func circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
 
 func getCollisionPoints*(mesh: Mesh, positionAttribute="position"): seq[Vec3f] =
   for p in getAttribute[Vec3f](mesh, positionAttribute)[]:
-    result.add p
+    result.add mesh.transform * p

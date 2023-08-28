@@ -13,7 +13,7 @@ let
   (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
   mat = Material(
     name: "mat",
-    materialType: "my_material",
+    materialType: "textures_material",
     textures: {
       "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
@@ -26,7 +26,7 @@ let
   )
   mat2 = Material(
     name: "mat2",
-    materialType: "my_material",
+    materialType: "textures_material",
     textures: {
       "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, W, R, W, R,
@@ -39,7 +39,7 @@ let
   )
   mat3 = Material(
     name: "mat3",
-    materialType: "my_special_material",
+    materialType: "plain",
     constants: {
       "color": toGPUValue(newVec4f(0, 1, 0, 1))
     }.toTable
@@ -192,8 +192,8 @@ proc main() =
       fragmentCode="color = outcolor;",
     )
   engine.initRenderer({
-    "my_material": shaderConfiguration1,
-    "my_special_material": shaderConfiguration2,
+    "textures_material": shaderConfiguration1,
+    "plain": shaderConfiguration2,
   }.toTable)
 
   # INIT SCENES
@@ -205,7 +205,6 @@ proc main() =
     Scene(name: "multimaterial", meshes: scene_multi_material()),
   ]
 
-  scenes[4].addShaderGlobal("color", newVec4f(1, 0, 0, 1))
   for scene in scenes.mitems:
     scene.addShaderGlobal("time", 0.0'f32)
     engine.addScene(scene)

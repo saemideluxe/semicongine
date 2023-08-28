@@ -1,42 +1,44 @@
-import std/sequtils
-
 import ./core
 
 const MAX_COLLISON_DETECTION_ITERATIONS = 20
 const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 20
 
 type
-  HitBox* = object
-    transform*: Mat4
-  HitSphere* = object
-    transform*: Mat4
-    radius*: float32
+  ColliderType* = enum
+    Box, Sphere
+  Collider* = object
+    transform*: Mat4 = Unit4F32
+    case theType*: ColliderType
+      of Box: discard
+      of Sphere: radius*: float32
 
 func between(value, b1, b2: float32): bool =
   min(b1, b2) <= value and value <= max(b1, b2)
 
-func contains*(hitbox: HitBox, x: Vec3f): bool =
+func contains*(collider: Collider, x: Vec3f): bool =
   # from https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
-  let
-    t = hitbox.transform
-    P1 = t * newVec3f(0, 0, 0) # origin
-    P2 = t * Z
-    P4 = t * X
-    P5 = t * Y
-    u = (P1 - P4).cross(P1 - P5)
-    v = (P1 - P2).cross(P1 - P5)
-    w = (P1 - P2).cross(P1 - P4)
-    uP1 = u.dot(P1)
-    uP2 = u.dot(P2)
-    vP1 = v.dot(P1)
-    vP4 = v.dot(P4)
-    wP1 = w.dot(P1)
-    wP5 = w.dot(P5)
-    ux = u.dot(x)
-    vx = v.dot(x)
-    wx = w.dot(x)
-
-  result = ux.between(uP1, uP2) and vx.between(vP1, vP4) and wx.between(wP1, wP5)
+  case collider.theType:
+  of Box:
+    let
+      P1 = collider.transform * newVec3f(0, 0, 0) # origin
+      P2 = collider.transform * Z
+      P4 = collider.transform * X
+      P5 = collider.transform * Y
+      u = (P1 - P4).cross(P1 - P5)
+      v = (P1 - P2).cross(P1 - P5)
+      w = (P1 - P2).cross(P1 - P4)
+      uP1 = u.dot(P1)
+      uP2 = u.dot(P2)
+      vP1 = v.dot(P1)
+      vP4 = v.dot(P4)
+      wP1 = w.dot(P1)
+      wP5 = w.dot(P5)
+      ux = u.dot(x)
+      vx = v.dot(x)
+      wx = w.dot(x)
+    ux.between(uP1, uP2) and vx.between(vP1, vP4) and wx.between(wP1, wP5)
+  of Sphere:
+    (collider.transform * x).length < (collider.transform * newVec3f()).length
 
 # implementation of GJK, based on https://blog.winter.dev/2020/gjk-algorithm/
 
@@ -51,12 +53,7 @@ func findFurthestPoint(points: openArray[Vec3f], direction: Vec3f): Vec3f =
       maxDist = dist
       result = p
 
-func findFurthestPoint(hitsphere: HitSphere, direction: Vec3f): Vec3f =
-  let directionNormalizedToSphere = ((direction / direction.length) * hitsphere.radius)
-  return hitsphere.transform * directionNormalizedToSphere
-
-func findFurthestPoint(hitbox: HitBox, direction: Vec3f): Vec3f =
-  let transform = hitbox.transform
+func findFurthestPoint(transform: Mat4, direction: Vec3f): Vec3f =
   return findFurthestPoint(
     [
       transform * newVec3f(0, 0, 0),
@@ -70,8 +67,15 @@ func findFurthestPoint(hitbox: HitBox, direction: Vec3f): Vec3f =
     ],
     direction
   )
+func findFurthestPoint(collider: Collider, direction: Vec3f): Vec3f =
+  case collider.theType
+    of Sphere:
+      let directionNormalizedToSphere = ((direction / direction.length) * collider.radius)
+      collider.transform * directionNormalizedToSphere
+    of Box:
+      findFurthestPoint(collider.transform, direction)
 
-func supportPoint[A, B](a: A, b: B, direction: Vec3f): Vec3f =
+func supportPoint(a, b: Collider, direction: Vec3f): Vec3f =
   a.findFurthestPoint(direction) - b.findFurthestPoint(-direction)
 
 func sameDirection(direction: Vec3f, ao: Vec3f): bool =
@@ -191,7 +195,7 @@ func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional=f
   of 4: simplex.tetrahedron(direction)
   else: raise newException(Exception, "Error in simplex")
 
-func collisionPoint3D[A, B](simplex: var seq[Vec3f], a: A, b: B): tuple[normal: Vec3f, penetrationDepth: float32] =
+func collisionPoint3D(simplex: var seq[Vec3f], a, b: Collider): tuple[normal: Vec3f, penetrationDepth: float32] =
   var
     polytope = simplex
     faces = @[
@@ -263,7 +267,7 @@ func collisionPoint3D[A, B](simplex: var seq[Vec3f], a: A, b: B): tuple[normal: 
   result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
 
 
-func collisionPoint2D*[A, B](polytopeIn: seq[Vec3f], a: A, b: B): tuple[normal: Vec2f, penetrationDepth: float32] =
+func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec2f, penetrationDepth: float32] =
   var
     polytope = polytopeIn
     minIndex = 0
@@ -302,7 +306,7 @@ func collisionPoint2D*[A, B](polytopeIn: seq[Vec3f], a: A, b: B): tuple[normal: 
 
   result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
 
-func intersects*[A, B](a: A, b: B): bool =
+func intersects*(a, b: Collider): bool =
   var
     support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
@@ -321,7 +325,7 @@ func intersects*[A, B](a: A, b: B): bool =
       direction[0] = 0.0001
     inc n
 
-func collision*[A, B](a: A, b: B): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
+func collision*(a, b: Collider): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
   var
     support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
@@ -341,7 +345,7 @@ func collision*[A, B](a: A, b: B): tuple[hasCollision: bool, normal: Vec3f, pene
       direction[0] = 0.0001
     inc n
 
-func collision2D*[A, B](a: A, b: B): tuple[hasCollision: bool, normal: Vec2f, penetrationDepth: float32] =
+func collision2D*(a, b: Collider): tuple[hasCollision: bool, normal: Vec2f, penetrationDepth: float32] =
   var
     support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0)) # just random initial vector
     simplex = newSeq[Vec3f]()
@@ -361,7 +365,7 @@ func collision2D*[A, B](a: A, b: B): tuple[hasCollision: bool, normal: Vec2f, pe
       direction[0] = 0.0001
     inc n
 
-func calculateHitbox*(points: seq[Vec3f]): HitBox =
+func calculateCollider*(points: seq[Vec3f], theType: ColliderType): Collider =
   var
     minX = high(float32)
     maxX = low(float32)
@@ -369,6 +373,7 @@ func calculateHitbox*(points: seq[Vec3f]): HitBox =
     maxY = low(float32)
     minZ = high(float32)
     maxZ = low(float32)
+    center: Vec3f
 
   for p in points:
     minX = min(minX, p.x)
@@ -377,15 +382,17 @@ func calculateHitbox*(points: seq[Vec3f]): HitBox =
     maxY = max(maxY, p.y)
     minZ = min(minZ, p.z)
     maxZ = max(maxz, p.z)
+    center = center + p
+  center = center / float32(points.len)
 
   let
     scaleX = (maxX - minX)
     scaleY = (maxY - minY)
     scaleZ = (maxZ - minZ)
 
-  HitBox(transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
+  result = Collider(theType: theType, transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
 
-func calculateHitsphere*(points: seq[Vec3f]): HitSphere =
-  result = HitSphere()
-  for p in points:
-    result.radius = max(result.radius, p.length)
+  if theType == Sphere:
+    result.transform = translate(center)
+    for p in points:
+      result.radius = max(result.radius, (p - center).length)

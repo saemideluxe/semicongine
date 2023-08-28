@@ -46,6 +46,12 @@ type
 func usesMaterialType(scene: Scene, materialType: string): bool =
   return scene.meshes.anyIt(it.material.materialType == materialType)
 
+func getPipelineForMaterialtype(renderer: Renderer, materialType: string): Option[Pipeline] =
+  for i in 0 ..< renderer.renderPass.subpasses.len:
+    for pipelineMaterialType, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
+      if pipelineMaterialType == materialType:
+        return some(pipeline)
+
 proc initRenderer*(device: Device, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): Renderer =
   assert device.vk.valid
   
@@ -78,8 +84,65 @@ func samplers(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
       if scene.usesMaterialType(materialType):
         result.add pipeline.samplers
 
+func materialCompatibleWithPipeline(scene: Scene, material: Material, pipeline: Pipeline): (bool, string) =
+  for uniform in pipeline.uniforms:
+    if scene.shaderGlobals.contains(uniform.name):
+      if scene.shaderGlobals[uniform.name].theType != uniform.theType:
+        return (false, &"shader uniform needs type {uniform.theType} but scene global is of type {scene.shaderGlobals[uniform.name].theType}")
+    else:
+      var foundMatch = false
+      for name, constant in material.constants.pairs:
+        if name == uniform.name and constant.theType == uniform.theType:
+          foundMatch = true
+          break
+      if not foundMatch:
+        return (false, "shader uniform '{uniform.name}' was not found in scene globals or scene materials")
+  for sampler in pipeline.samplers:
+    var foundMatch = false
+    for name, value in material.textures:
+      if name == sampler.name:
+        foundMatch = true
+        break
+    if not foundMatch:
+      return (false, "Required texture for shader sampler '{sampler.name}' was not found in scene materials")
+
+  return (true, "")
+
+func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, pipeline: Pipeline): (bool, string) =
+  for input in pipeline.inputs:
+    if not (input.name in mesh.attributes):
+      return (false, &"Shader input '{input.name}' is not available for mesh '{mesh}'")
+    if input.theType != mesh.attributeType(input.name):
+      return (false, &"Shader input '{input.name}' expects type {input.theType}, but mesh '{mesh}' has {mesh.attributeType(input.name)}")
+    if input.perInstance != mesh.instanceAttributes.contains(input.name):
+      return (false, &"Shader input '{input.name}' expects to be per instance, but mesh '{mesh}' has is not as instance attribute")
+
+  return materialCompatibleWithPipeline(scene, mesh.material, pipeline)
+
+func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
+  var foundRenderableObject = false
+  var shaderTypes: seq[string]
+  for i in 0 ..< renderer.renderPass.subpasses.len:
+    for materialType, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
+      shaderTypes.add materialType
+      for mesh in scene.meshes:
+        if mesh.material.materialType == materialType:
+          foundRenderableObject = true
+          let (error, message) = scene.meshCompatibleWithPipeline(mesh, pipeline)
+          if error:
+            raise newException(Exception, &"Mesh '{mesh}' not compatible with assigned pipeline ({materialType}) because: {message}")
+
+  if not foundRenderableObject:
+    var materialTypes: seq[string]
+    for mesh in scene.meshes:
+      if not materialTypes.contains(mesh.material.materialType):
+          materialTypes.add mesh.material.materialType
+    raise newException(Exception, &"Scene {scene.name} has been added but materials are not compatible with any registered shader: Materials in scene: {materialTypes}, registered shader-materialtypes: {shaderTypes}")
+
 proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   assert not (scene in renderer.scenedata)
+  renderer.checkSceneIntegrity(scene)
+
   const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
 
   let
@@ -88,7 +151,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   var scenedata = SceneData()
 
   for mesh in scene.meshes:
-    if mesh.material != nil and not scenedata.materials.contains(mesh.material):
+    if not scenedata.materials.contains(mesh.material):
       scenedata.materials.add mesh.material
       for textureName, texture in mesh.material.textures.pairs:
         if not scenedata.textures.hasKey(textureName):
@@ -101,7 +164,6 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       if inputAttr.name == TRANSFORMATTRIBUTE:
         mesh.initInstanceAttribute(inputAttr.name, inputAttr.thetype)
       elif inputAttr.name == MATERIALINDEXATTRIBUTE:
-        assert mesh.material != nil, "Missing material specification for mesh. Set material attribute on mesh"
         let matIndex = scenedata.materials.find(mesh.material)
         if matIndex < 0:
           raise newException(Exception, &"Required material '{mesh.material}' not available in scene (available are: {scenedata.materials})")
@@ -178,9 +240,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     var offsets: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]]
     for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
       for materialType, pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.pairs:
-        offsets[pipeline.vk] = newSeq[(string, MemoryPerformanceHint, int)]()
-        for attribute in pipeline.inputs:
-          offsets[pipeline.vk].add (attribute.name, attribute.memoryPerformanceHint, scenedata.vertexBufferOffsets[(meshIndex, attribute.name)])
+        if scene.usesMaterialType(materialType):
+          offsets[pipeline.vk] = newSeq[(string, MemoryPerformanceHint, int)]()
+          for attribute in pipeline.inputs:
+            offsets[pipeline.vk].add (attribute.name, attribute.memoryPerformanceHint, scenedata.vertexBufferOffsets[(meshIndex, attribute.name)])
 
     # create drawables
     let indexed = mesh.indexType != MeshIndexType.None
@@ -274,12 +337,19 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene) =
         assert renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].vk.valid
         var offset = 0
         for uniform in pipeline.uniforms:
-          if not scene.shaderGlobals.hasKey(uniform.name):
-            raise newException(Exception, &"Uniform '{uniform.name}' not found in scene shaderGlobals")
-          if uniform.thetype != scene.shaderGlobals[uniform.name].thetype:
-            raise newException(Exception, &"Uniform '{uniform.name}' has wrong type {uniform.thetype}, required is {scene.shaderGlobals[uniform.name].thetype}")
-          debug &"Update uniforms {uniform.name}"
-          let (pdata, size) = scene.shaderGlobals[uniform.name].getRawData()
+          var value = newDataList(thetype=uniform.thetype)
+          if scene.shaderGlobals.hasKey(uniform.name):
+            assert scene.shaderGlobals[uniform.name].thetype == value.thetype
+            value = scene.shaderGlobals[uniform.name]
+          else:
+            for mat in renderer.scenedata[scene].materials:
+                for name, materialConstant in mat.constants.pairs:
+                  if uniform.name == name:
+                    value.appendValue(materialConstant)
+          if value.len == 0:
+            raise newException(Exception, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials")
+          debug &"Update uniform {uniform.name}"
+          let (pdata, size) = value.getRawData()
           renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].setData(pdata, size, offset)
           offset += size
 
@@ -315,7 +385,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
         commandBuffer.vkCmdBindDescriptorSets(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
 
         for (drawable, meshIndex) in renderer.scenedata[scene].drawables:
-          if scene.meshes[meshIndex].material != nil and scene.meshes[meshIndex].material.materialType == materialType:
+          if scene.meshes[meshIndex].material.materialType == materialType:
             drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer, pipeline.vk)
 
     if i < renderer.renderPass.subpasses.len - 1:
