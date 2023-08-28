@@ -14,7 +14,7 @@ type
     device*: Device
     vk*: VkPipeline
     layout*: VkPipelineLayout
-    shaderConfiguration: ShaderConfiguration
+    shaderConfiguration*: ShaderConfiguration
     shaderModules*: (ShaderModule, ShaderModule)
     descriptorSetLayout*: DescriptorSetLayout
 

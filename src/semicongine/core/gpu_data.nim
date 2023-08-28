@@ -54,7 +54,7 @@ type
     Mat4F64
     Sampler2D
   DataValue* = object
-    case thetype*: DataType
+    case theType*: DataType
     of Float32: float32: float32
     of Float64: float64: float64
     of Int8: int8: int8
@@ -100,7 +100,7 @@ type
     of Sampler2D: discard
   DataList* = object
     len*: int
-    case thetype*: DataType
+    case theType*: DataType
     of Float32: float32: ref seq[float32]
     of Float64: float64: ref seq[float64]
     of Int8: int8: ref seq[int8]
@@ -148,14 +148,14 @@ type
     PreferFastRead, PreferFastWrite
   ShaderAttribute* = object
     name*: string
-    thetype*: DataType
+    theType*: DataType
     arrayCount*: int
     perInstance*: bool
     noInterpolation: bool
     memoryPerformanceHint*: MemoryPerformanceHint
 
 func hash*(value: DataList): Hash =
-  case value.thetype
+  case value.theType
     of Float32: hash(cast[pointer](value.float32))
     of Float64: hash(cast[pointer](value.float64))
     of Int8: hash(cast[pointer](value.int8))
@@ -200,10 +200,10 @@ func hash*(value: DataList): Hash =
     of Mat4F64: hash(cast[pointer](value.mat4f64))
     of Sampler2D: raise newException(Exception, "hash not defined for Sampler2D")
 
-func `==`*(a, b: DataList): bool =
-  if a.thetype != b.thetype:
+func `==`*(a, b: DataList | DataValue): bool =
+  if a.theType != b.theType:
     return false
-  case a.thetype
+  case a.theType
     of Float32: return a.float32 == b.float32
     of Float64: return a.float64 == b.float64
     of Int8: return a.int8 == b.int8
@@ -258,15 +258,15 @@ func instanceInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
     if attr.perInstance == false:
       result.add attr
 
-func numberOfVertexInputAttributeDescriptors*(thetype: DataType): int =
-  case thetype:
+func numberOfVertexInputAttributeDescriptors*(theType: DataType): int =
+  case theType:
     of Mat2F32, Mat2F64, Mat23F32, Mat23F64: 2
     of Mat32F32, Mat32F64, Mat3F32, Mat3F64, Mat34F32, Mat34F64: 3
     of Mat43F32, Mat43F64, Mat4F32, Mat4F64: 4
     else: 1
 
-func size*(thetype: DataType): int =
-  case thetype:
+func size*(theType: DataType): int =
+  case theType:
     of Float32: 4
     of Float64: 8
     of Int8: 1
@@ -313,22 +313,22 @@ func size*(thetype: DataType): int =
 
 func size*(attribute: ShaderAttribute, perDescriptor=false): int =
   if perDescriptor:
-    attribute.thetype.size div attribute.thetype.numberOfVertexInputAttributeDescriptors
+    attribute.theType.size div attribute.theType.numberOfVertexInputAttributeDescriptors
   else:
     if attribute.arrayCount == 0:
-      attribute.thetype.size
+      attribute.theType.size
     else:
-      attribute.thetype.size * attribute.arrayCount
+      attribute.theType.size * attribute.arrayCount
 
-func size*(thetype: seq[ShaderAttribute]): int =
-  for attribute in thetype:
+func size*(theType: seq[ShaderAttribute]): int =
+  for attribute in theType:
     result += attribute.size
 
 func size*(value: DataValue): int =
-  value.thetype.size
+  value.theType.size
 
 func size*(value: DataList): int =
-  value.thetype.size * value.len
+  value.theType.size * value.len
 
 func getDataType*[T: GPUType|int|uint|float](): DataType =
   when T is float32: Float32
@@ -393,7 +393,7 @@ func attr*[T: GPUType](
 ): auto =
   ShaderAttribute(
     name: name,
-    thetype: getDataType[T](),
+    theType: getDataType[T](),
     perInstance: perInstance,
     arrayCount: arrayCount,
     noInterpolation: noInterpolation,
@@ -504,12 +504,12 @@ func setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   else: {. error: "Virtual datatype has no values" .}
 
 func toGPUValue*[T: GPUType](value: T): DataValue =
-  result = DataValue(thetype: getDataType[T]())
+  result = DataValue(theType: getDataType[T]())
   result.setValue(value)
 
-func newDataList*(thetype: DataType): DataList =
-  result = DataList(thetype: thetype)
-  case result.thetype
+func newDataList*(theType: DataType): DataList =
+  result = DataList(theType: theType)
+  case result.theType
     of Float32: result.float32 = new seq[float32]
     of Float64: result.float64 = new seq[float64]
     of Int8: result.int8 = new seq[int8]
@@ -615,8 +615,8 @@ func getValues*[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
   else: {. error: "Virtual datatype has no values" .}
 
 func getRawData*(value: DataValue): (pointer, int) =
-  result[1] = value.thetype.size
-  case value.thetype
+  result[1] = value.theType.size
+  case value.theType
     of Float32: result[0] = addr value.float32
     of Float64: result[0] = addr value.float64
     of Int8: result[0] = addr value.int8
@@ -664,8 +664,8 @@ func getRawData*(value: DataValue): (pointer, int) =
 func getRawData*(value: DataList): (pointer, int) =
   if value.len == 0:
     return (nil, 0)
-  result[1] = value.thetype.size * value.len
-  case value.thetype
+  result[1] = value.theType.size * value.len
+  case value.theType
     of Float32: result[0] = addr value.float32[][0]
     of Float64: result[0] = addr value.float64[][0]
     of Int8: result[0] = addr value.int8[][0]
@@ -712,7 +712,7 @@ func getRawData*(value: DataList): (pointer, int) =
 
 func initData*(value: var DataList, len: int) =
   value.len = len
-  case value.thetype
+  case value.theType
     of Float32: value.float32[].setLen(len)
     of Float64: value.float64[].setLen(len)
     of Int8: value.int8[].setLen(len)
@@ -861,9 +861,9 @@ func appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T])
   else: {. error: "Virtual datatype has no values" .}
 
 func appendValues*(value: var DataList, data: DataList) =
-  assert value.thetype == data.thetype
+  assert value.theType == data.theType
   value.len += data.len
-  case value.thetype:
+  case value.theType:
   of Float32: value.float32[].add data.float32[]
   of Float64: value.float64[].add data.float64[]
   of Int8: value.int8[].add data.int8[]
@@ -909,9 +909,9 @@ func appendValues*(value: var DataList, data: DataList) =
   else: raise newException(Exception, &"Unsupported data type for GPU data:" )
 
 func appendValue*(value: var DataList, data: DataValue) =
-  assert value.thetype == data.thetype
+  assert value.theType == data.theType, &"appendValue expected {value.theType} but got {data.theType}"
   value.len += 1
-  case value.thetype:
+  case value.theType:
   of Float32: value.float32[].add data.float32
   of Float64: value.float64[].add data.float64
   of Int8: value.int8[].add data.int8
@@ -1053,11 +1053,11 @@ const TYPEMAP = {
     Mat4F64: VK_FORMAT_R64G64B64A64_SFLOAT,
 }.toTable
 
-func getVkFormat*(thetype: DataType): VkFormat =
-  TYPEMAP[thetype]
+func getVkFormat*(theType: DataType): VkFormat =
+  TYPEMAP[theType]
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
-func nLocationSlots*(thetype: DataType): int =
+func nLocationSlots*(theType: DataType): int =
   #[
   single location:
     16-bit scalar and vector types, and
@@ -1066,7 +1066,7 @@ func nLocationSlots*(thetype: DataType): int =
   two locations
     64-bit three- and four-component vectors
   ]#
-  case thetype:
+  case theType:
     of Float32: 1
     of Float64: 1
     of Int8: 1
@@ -1111,12 +1111,12 @@ func nLocationSlots*(thetype: DataType): int =
     of Mat4F64: 2
     of Sampler2D: 1
 
-func glslType*(thetype: DataType): string =
+func glslType*(theType: DataType): string =
   # todo: likely not correct as we would need to enable some 
   # extensions somewhere (Vulkan/GLSL compiler?) to have 
   # everything work as intended. Or maybe the GPU driver does
   # some automagic conversion stuf..
-  case thetype:
+  case theType:
     of Float32: "float"
     of Float64: "double"
     of Int8, Int16, Int32, Int64: "int"
@@ -1162,9 +1162,9 @@ func glslInput*(group: openArray[ShaderAttribute]): seq[string] =
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for shader vertex attributes"
     let flat = if attribute.noInterpolation: "flat " else: ""
-    result.add &"layout(location = {i}) {flat}in {attribute.thetype.glslType} {attribute.name};"
-    for j in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
-      i += attribute.thetype.nLocationSlots
+    result.add &"layout(location = {i}) {flat}in {attribute.theType.glslType} {attribute.name};"
+    for j in 0 ..< attribute.theType.numberOfVertexInputAttributeDescriptors:
+      i += attribute.theType.nLocationSlots
 
 func glslUniforms*(group: openArray[ShaderAttribute], blockName="Uniforms", binding: int): seq[string] =
   if group.len == 0:
@@ -1175,7 +1175,7 @@ func glslUniforms*(group: openArray[ShaderAttribute], blockName="Uniforms", bind
     var arrayDecl = ""
     if attribute.arrayCount > 0:
       arrayDecl = &"[{attribute.arrayCount}]"
-    result.add(&"    {attribute.thetype.glslType} {attribute.name}{arrayDecl};")
+    result.add(&"    {attribute.theType.glslType} {attribute.name}{arrayDecl};")
   result.add(&"}} {blockName};")
 
 func glslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[string] =
@@ -1186,7 +1186,7 @@ func glslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[str
     var arrayDecl = ""
     if attribute.arrayCount > 0:
       arrayDecl = &"[{attribute.arrayCount}]"
-    result.add(&"layout(binding = {thebinding}) uniform {attribute.thetype.glslType} {attribute.name}{arrayDecl};")
+    result.add(&"layout(binding = {thebinding}) uniform {attribute.theType.glslType} {attribute.name}{arrayDecl};")
     inc thebinding
 
 func glslOutput*(group: openArray[ShaderAttribute]): seq[string] =
@@ -1196,5 +1196,5 @@ func glslOutput*(group: openArray[ShaderAttribute]): seq[string] =
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for outputs"
     let flat = if attribute.noInterpolation: "flat " else: ""
-    result.add &"layout(location = {i}) {flat}out {attribute.thetype.glslType} {attribute.name};"
+    result.add &"layout(location = {i}) {flat}out {attribute.theType.glslType} {attribute.name};"
     i += 1

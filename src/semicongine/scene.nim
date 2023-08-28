@@ -1,11 +1,7 @@
-import std/strformat
-import std/strutils
 import std/tables
 import std/hashes
-import std/typetraits
 
 import ./core
-import ./animation
 import ./mesh
 
 type
