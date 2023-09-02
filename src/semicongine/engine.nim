@@ -15,6 +15,7 @@ import ./scene
 import ./renderer
 import ./events
 import ./audio
+import ./text
 
 type
   EngineState* = enum
@@ -105,12 +106,19 @@ proc initEngine*(
 proc initRenderer*(engine: var Engine, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
 
   assert not engine.renderer.isSome
-  engine.renderer = some(engine.device.initRenderer(shaders=shaders, clearColor=clearColor))
+  var materialShaderMap = shaders
+  materialShaderMap[TEXT_MATERIAL] = TEXT_SHADER
+  engine.renderer = some(engine.device.initRenderer(shaders=materialShaderMap, clearColor=clearColor))
+
+proc initRenderer*(engine: var Engine, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
+  var materialShaderMap: Table[string, ShaderConfiguration]
+  engine.initRenderer(materialShaderMap, clearColor)
 
 proc addScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
   engine.renderer.get.setupDrawableBuffers(scene)
   engine.renderer.get.updateMeshData(scene, forceAll=true)
+  engine.renderer.get.updateUniformData(scene, forceAll=true)
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running

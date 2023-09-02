@@ -8,8 +8,8 @@ func cleanString*(str: openArray[char]): string =
       result = join(str[0 ..< i])
       break
 
-func toCPointer*[T](list: var seq[T]): ptr T =
-  if list.len > 0: addr list[0] else: nil
+func toCPointer*[T](list: seq[T]): ptr T =
+  if list.len > 0: addr(list[0]) else: nil
 
 proc staticExecChecked*(command: string, input = ""): string {.compileTime.} =
   let (output, exitcode) = gorgeEx(

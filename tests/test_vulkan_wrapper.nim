@@ -13,7 +13,6 @@ let
   (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
   mat = Material(
     name: "mat",
-    materialType: "textures_material",
     textures: {
       "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
@@ -26,7 +25,6 @@ let
   )
   mat2 = Material(
     name: "mat2",
-    materialType: "textures_material",
     textures: {
       "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, W, R, W, R,
@@ -39,9 +37,8 @@ let
   )
   mat3 = Material(
     name: "mat3",
-    materialType: "plain",
     constants: {
-      "color": toGPUValue(newVec4f(0, 1, 0, 1))
+      "color": toGPUValue(@[newVec4f(0, 1, 0, 1)])
     }.toTable
   )
 
@@ -166,19 +163,17 @@ proc main() =
         attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
         attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
         attr[Mat4]("transform", perInstance=true),
-        attr[uint16]("materialIndex", perInstance=true),
       ],
       intermediates=[
         attr[Vec4f]("outcolor"),
-        attr[uint16]("materialIndexOut", noInterpolation=true),
       ],
       outputs=[attr[Vec4f]("color")],
       uniforms=[attr[float32]("time")],
       samplers=[
-        attr[Sampler2DType]("my_little_texture", arrayCount=2)
+        attr[Sampler2DType]("my_little_texture")
       ],
-      vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = color; materialIndexOut = materialIndex;""",
-      fragmentCode="color = texture(my_little_texture[materialIndexOut], outcolor.xy) * 0.5 + outcolor * 0.5;",
+      vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = color;""",
+      fragmentCode="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
     shaderConfiguration2 = createShaderConfiguration(
       inputs=[
@@ -187,13 +182,14 @@ proc main() =
       ],
       intermediates=[attr[Vec4f]("outcolor")],
       outputs=[attr[Vec4f]("color")],
-      uniforms=[attr[Vec4f]("color")],
-      vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = Uniforms.color;""",
+      uniforms=[attr[Vec4f]("color", arrayCount=1)],
+      vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = Uniforms.color[0];""",
       fragmentCode="color = outcolor;",
     )
   engine.initRenderer({
-    "textures_material": shaderConfiguration1,
-    "plain": shaderConfiguration2,
+    "mat": shaderConfiguration1,
+    "mat2": shaderConfiguration1,
+    "mat3": shaderConfiguration2,
   }.toTable)
 
   # INIT SCENES

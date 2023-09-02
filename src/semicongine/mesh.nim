@@ -31,13 +31,11 @@ type
     instanceData: Table[string, DataList]
     dirtyAttributes: seq[string]
   Material* = object
-    materialType*: string
     name*: string
-    constants*: Table[string, DataValue]
+    constants*: Table[string, DataList]
     textures*: Table[string, Texture]
 
 let EMPTY_MATERIAL = Material(
-  materialType: "EMPTY MATERIAL",
   name: "empty material"
 )
 
@@ -214,7 +212,7 @@ func getRawIndexData*(mesh: Mesh): (pointer, int) =
     of Small: rawData(mesh.smallIndices)
     of Big: rawData(mesh.bigIndices)
 
-func getRawData*(mesh: Mesh, attribute: string): (pointer, int) =
+func getRawData*(mesh: var Mesh, attribute: string): (pointer, int) =
   if mesh.vertexData.contains(attribute):
     mesh.vertexData[attribute].getRawData()
   elif mesh.instanceData.contains(attribute):
@@ -222,7 +220,7 @@ func getRawData*(mesh: Mesh, attribute: string): (pointer, int) =
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc getAttribute*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): ref seq[T] =
+proc getAttribute*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): seq[T] =
   if mesh.vertexData.contains(attribute):
     getValues[T](mesh.vertexData[attribute])
   elif mesh.instanceData.contains(attribute):
@@ -294,11 +292,11 @@ proc clearDirtyAttributes*(mesh: var Mesh) =
 
 proc transform*[T: GPUType](mesh: Mesh, attribute: string, transform: Mat4) =
   if mesh.vertexData.contains(attribute):
-    for v in getValues[T](mesh.vertexData[attribute])[].mitems:
-      v = transform * v
+    for i in 0 ..< mesh.vertexData[attribute].len:
+      setValue(mesh.vertexData[attribute], i, transform * getValue[T](mesh.vertexData[attribute], i))
   elif mesh.instanceData.contains(attribute):
-    for v in getValues[T](mesh.instanceData[attribute])[].mitems:
-      v = transform * v
+    for i in 0 ..< mesh.instanceData[attribute].len:
+      setValue(mesh.instanceData[attribute], i, transform * getValue[T](mesh.vertexData[attribute], i))
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
@@ -351,5 +349,5 @@ func circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
   result.initVertexAttribute("color", col)
 
 func getCollisionPoints*(mesh: Mesh, positionAttribute="position"): seq[Vec3f] =
-  for p in getAttribute[Vec3f](mesh, positionAttribute)[]:
+  for p in getAttribute[Vec3f](mesh, positionAttribute):
     result.add mesh.transform * p

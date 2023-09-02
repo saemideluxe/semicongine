@@ -48,7 +48,7 @@ const
     10497: VK_SAMPLER_ADDRESS_MODE_REPEAT
   }.toTable
 
-func getGPUType(accessor: JsonNode): DataType =
+proc getGPUType(accessor: JsonNode): DataType =
   # TODO: no full support for all datatypes that glTF may provide
   # semicongine/core/gpu_data should maybe generated with macros to allow for all combinations
   let componentType = ACCESSOR_TYPE_MAP[accessor["componentType"].getInt()]
@@ -157,57 +157,57 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]
   let pbr = materialNode["pbrMetallicRoughness"]
 
   # color
-  result.constants["baseColorFactor"] = DataValue(thetype: Vec4F32)
+  result.constants["baseColorFactor"] = newDataList(thetype=Vec4F32)
   if pbr.hasKey("baseColorFactor"):
-    setValue(result.constants["baseColorFactor"], newVec4f(
+    setValue(result.constants["baseColorFactor"], @[newVec4f(
       pbr["baseColorFactor"][0].getFloat(),
       pbr["baseColorFactor"][1].getFloat(),
       pbr["baseColorFactor"][2].getFloat(),
       pbr["baseColorFactor"][3].getFloat(),
-    ))
+    )])
   else:
-    setValue(result.constants["baseColorFactor"], newVec4f(1, 1, 1, 1))
+    setValue(result.constants["baseColorFactor"], @[newVec4f(1, 1, 1, 1)])
 
   # pbr material constants
   for factor in ["metallicFactor", "roughnessFactor"]:
-    result.constants[factor] = DataValue(thetype: Float32)
+    result.constants[factor] = newDataList(thetype=Float32)
     if pbr.hasKey(factor):
-      setValue(result.constants[factor], float32(pbr[factor].getFloat()))
+      setValue(result.constants[factor], @[float32(pbr[factor].getFloat())])
     else:
-      setValue(result.constants[factor], 0.5'f32)
+      setValue(result.constants[factor], @[0.5'f32])
 
   # pbr material textures
   for texture in ["baseColorTexture", "metallicRoughnessTexture"]:
     if pbr.hasKey(texture):
       result.textures[texture] = loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], pbr[texture].getOrDefault("texCoord").getInt(0).uint8)
+      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.constants[texture & "Index"], @[pbr[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
       result.textures[texture] = EMPTYTEXTURE
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], 0'u8)
+      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.constants[texture & "Index"], @[0'u8])
 
   # generic material textures
   for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
     if materialNode.hasKey(texture):
       result.textures[texture] = loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], materialNode[texture].getOrDefault("texCoord").getInt(0).uint8)
+      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.constants[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
       result.textures[texture] = EMPTYTEXTURE
-      result.constants[texture & "Index"] = DataValue(thetype: UInt8)
-      setValue(result.constants[texture & "Index"], 0'u8)
+      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.constants[texture & "Index"], @[0'u8])
 
   # emissiv color
-  result.constants["emissiveFactor"] = DataValue(thetype: Vec3F32)
+  result.constants["emissiveFactor"] = newDataList(thetype=Vec3F32)
   if materialNode.hasKey("emissiveFactor"):
-    setValue(result.constants["emissiveFactor"], newVec3f(
+    setValue(result.constants["emissiveFactor"], @[newVec3f(
       materialNode["emissiveFactor"][0].getFloat(),
       materialNode["emissiveFactor"][1].getFloat(),
       materialNode["emissiveFactor"][2].getFloat(),
-    ))
+    )])
   else:
-    setValue(result.constants["emissiveFactor"], newVec3f(1'f32, 1'f32, 1'f32))
+    setValue(result.constants["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
 
 
 proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
@@ -236,14 +236,14 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
     var tri: seq[int]
     case data.thetype
       of UInt16:
-        for entry in getValues[uint16](data)[]:
+        for entry in getValues[uint16](data):
           tri.add int(entry) + baseIndex
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
             mesh.appendIndicesData(tri[0], tri[2], tri[1])
             tri.setLen(0)
       of UInt32:
-        for entry in getValues[uint32](data)[]:
+        for entry in getValues[uint32](data):
           tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
