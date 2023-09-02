@@ -4,48 +4,13 @@ import std/tables
 import semicongine
 
 proc main() =
-  var sampler = DefaultSampler()
-  sampler.magnification = VK_FILTER_NEAREST
-  sampler.minification = VK_FILTER_NEAREST
   var font = loadFont("DejaVuSans.ttf", color=newVec4f(1, 0.5, 0.5, 1), resolution=20)
-
-  var scene = newScene("main", root=newEntity("rect"))
-
-  var flag = rect()
-  flag.setInstanceData("material", @[0'u8])
-  # scene.root.add flag
-  scene.addMaterial Material(name: "material", textures: {"textures": Texture(image: loadImage("flag.png"), sampler: sampler)}.toTable)
-
-  var textbox = newTextbox(32, font, "".toRunes)
-  scene.addMaterial Material(name: "fontMaterial", textures: {"textures": font.fontAtlas}.toTable)
-  textbox.mesh.setInstanceData("material", @[1'u8])
-  textbox.transform = scale3d(0.1, 0.1)
-  scene.root.add textbox
-
-  const
-    vertexInput = @[
-      attr[Mat4]("transform", memoryPerformanceHint=PreferFastRead, perInstance=true),
-      attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-      attr[Vec2f]("uv", memoryPerformanceHint=PreferFastRead),
-      attr[uint8]("material", memoryPerformanceHint=PreferFastRead, perInstance=true),
-    ]
-    intermediate = @[attr[Vec2f]("uvout"), attr[uint8]("materialId", noInterpolation=true)]
-    samplers = @[attr[Sampler2DType]("textures", arrayCount=2)]
-    uniforms = @[attr[Mat4]("perspective")]
-    fragOutput = @[attr[Vec4f]("color")]
-    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
-      inputs=vertexInput,
-      intermediate=intermediate,
-      outputs=fragOutput,
-      samplers=samplers,
-      uniforms=uniforms,
-      vertexCode="""gl_Position = vec4(position, 1.0) * (transform * Uniforms.perspective); uvout = uv; materialId = material;""",
-      fragmentCode="""color = texture(textures[materialId], uvout);""",
-    )
-
+  
+  var textbox = initTextbox(32, font, "".toRunes)
+  var scene = Scene(name: "main", meshes: @[textbox.mesh])
   var engine = initEngine("Test fonts")
-  engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  engine.addScene(scene, vertexInput, samplers, materialIndexAttribute="")
+  engine.initRenderer()
+  engine.addScene(scene)
   scene.addShaderGlobal("perspective", Unit4F32)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):

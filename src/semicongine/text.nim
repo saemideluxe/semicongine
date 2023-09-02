@@ -1,10 +1,9 @@
 import std/tables
 import std/unicode
 
+import ./core
 import ./mesh
-import ./core/vector
-import ./core/matrix
-import ./core/fonttypes
+import ./vulkan/shader
 
 type
   TextAlignment = enum
@@ -18,6 +17,26 @@ type
     alignment*: TextAlignment
     font*: Font
     mesh*: Mesh
+
+const
+  TEXT_MATERIAL* = "default-text"
+  TEXT_SHADER* = createShaderConfiguration(
+    inputs=[
+      attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite),
+      attr[Vec3f]("position", memoryPerformanceHint=PreferFastWrite),
+      attr[Vec2f]("uv", memoryPerformanceHint=PreferFastWrite),
+    ],
+    intermediates=[attr[Vec2f]("uvFrag")],
+    outputs=[attr[Vec4f]("color")],
+    samplers=[attr[Sampler2DType]("fontAtlas")],
+    uniforms=[
+      attr[Mat4]("perspective"),
+    ],
+    vertexCode="""gl_Position = vec4(position, 1.0) * (transform * Uniforms.perspective); uvFrag = uv;""",
+    # vertexCode="""gl_Position = vec4(position, 1.0);""",
+    fragmentCode="""color = texture(fontAtlas, uvFrag);""",
+    # fragmentCode="""color = vec4(1, 0, 0, 1);""",
+  )
 
 proc updateMesh(textbox: var Textbox) =
 
@@ -69,7 +88,7 @@ proc `text=`*(textbox: var Textbox, text: seq[Rune]) =
   textbox.text = text
   textbox.updateMesh()
 
-proc newTextbox*(maxLen: int, font: Font, text=toRunes("")): Textbox =
+proc initTextbox*(maxLen: int, font: Font, text=toRunes("")): Textbox =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -83,6 +102,11 @@ proc newTextbox*(maxLen: int, font: Font, text=toRunes("")): Textbox =
 
   result = Textbox(maxLen: maxLen, text: text, font: font, dirty: true)
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs)
+  result.mesh.material = Material(
+    name: TEXT_MATERIAL,
+    # constants: {"glyphCoordinates": }.toTable,
+    textures: {"fontAtlas": font.fontAtlas}.toTable,
+  )
 
   # wrap the text mesh in a new entity to preserve the font-scaling
   result.mesh.transform = scale(1 / font.resolution, 1 / font.resolution)
