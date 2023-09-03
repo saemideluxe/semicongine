@@ -7,21 +7,16 @@ type
     height*: int
     imagedata*: seq[Pixel]
   Sampler* = object
-    magnification*: VkFilter
-    minification*: VkFilter
-    wrapModeS*: VkSamplerAddressMode
-    wrapModeT*: VkSamplerAddressMode
+    magnification*: VkFilter = VK_FILTER_LINEAR
+    minification*: VkFilter = VK_FILTER_LINEAR
+    wrapModeS*: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
+    wrapModeT*: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
 
   Image* = ref ImageObject
   Texture* = object
     name*: string
     image*: Image
-    sampler*: Sampler = Sampler(
-      magnification: VK_FILTER_LINEAR,
-      minification: VK_FILTER_LINEAR,
-      wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-      wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-    )
+    sampler*: Sampler
 
 proc `[]`*(image: Image, x, y: int): Pixel =
   assert x < image.width
