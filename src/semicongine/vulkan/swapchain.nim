@@ -77,7 +77,6 @@ proc createSwapchain*(
     imageCount = max(imageCount, capabilities.minImageCount)
     if capabilities.maxImageCount != 0:
       imageCount = min(imageCount, capabilities.maxImageCount)
-
   var createInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: device.physicalDevice.surface,

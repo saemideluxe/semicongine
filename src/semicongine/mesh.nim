@@ -16,7 +16,7 @@ type
     Tiny # up to 2^8 vertices # TODO: need to check and enable support for this
     Small # up to 2^16 vertices
     Big # up to 2^32 vertices
-  Mesh* = object
+  MeshObject* = object
     vertexCount*: int
     case indexType*: MeshIndexType
       of None: discard
@@ -30,6 +30,7 @@ type
     vertexData: Table[string, DataList]
     instanceData: Table[string, DataList]
     dirtyAttributes: seq[string]
+  Mesh* = ref MeshObject
   Material* = object
     name*: string
     constants*: Table[string, DataList]
@@ -39,8 +40,10 @@ let EMPTY_MATERIAL = Material(
   name: "empty material"
 )
 
-func `$`*(mesh: Mesh): string =
+func `$`*(mesh: MeshObject): string =
   &"Mesh(vertexCount: {mesh.vertexCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
+func `$`*(mesh: Mesh): string =
+  $mesh[]
 
 proc `$`*(material: Material): string =
   var constants: seq[string]
@@ -51,19 +54,22 @@ proc `$`*(material: Material): string =
     textures.add &"{key}"
   return &"""{material.name} | Values: {constants.join(", ")} | Textures: {textures.join(", ")}"""
 
-func vertexAttributes*(mesh: Mesh): seq[string] =
+func vertexAttributes*(mesh: MeshObject): seq[string] =
   mesh.vertexData.keys.toSeq
 
-func instanceAttributes*(mesh: Mesh): seq[string] =
+func instanceAttributes*(mesh: MeshObject): seq[string] =
   mesh.instanceData.keys.toSeq
 
-func attributes*(mesh: Mesh): seq[string] =
+func attributes*(mesh: MeshObject): seq[string] =
   mesh.vertexAttributes & mesh.instanceAttributes
 
 func hash*(material: Material): Hash =
   hash(material.name)
 
-func instanceCount*(mesh: Mesh): int =
+func hash*(mesh: Mesh): Hash =
+  hash(cast[ptr MeshObject](mesh))
+
+func instanceCount*(mesh: MeshObject): int =
   mesh.instanceTransforms.len
 
 converter toVulkan*(indexType: MeshIndexType): VkIndexType =
@@ -73,7 +79,7 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
     of Small: VK_INDEX_TYPE_UINT16
     of Big: VK_INDEX_TYPE_UINT32
 
-func indicesCount*(mesh: Mesh): int =
+func indicesCount*(mesh: MeshObject): int =
   (
     case mesh.indexType
     of None: 0
@@ -82,35 +88,35 @@ func indicesCount*(mesh: Mesh): int =
     of Big: mesh.bigIndices.len
   ) * 3
 
-func initVertexAttribute*[T](mesh: var Mesh, attribute: string, value: seq[T]) =
+func initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=getDataType[T]())
   mesh.vertexData[attribute].initData(mesh.vertexCount)
   mesh.vertexData[attribute].setValues(value)
-func initVertexAttribute*[T](mesh: var Mesh, attribute: string, value: T) =
+func initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initVertexAttribute(mesh, attribute, newSeqWith(mesh.vertexCount, value))
-func initVertexAttribute*[T](mesh: var Mesh, attribute: string) =
+func initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
   initVertexAttribute(mesh=mesh, attribute=attribute, value=default(T))
-func initVertexAttribute*(mesh: var Mesh, attribute: string, datatype: DataType) =
+func initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=datatype)
   mesh.vertexData[attribute].initData(mesh.vertexCount)
 
-func initInstanceAttribute*[T](mesh: var Mesh, attribute: string, value: seq[T]) =
+func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=getDataType[T]())
   mesh.instanceData[attribute].initData(mesh.instanceCount)
   mesh.instanceData[attribute].setValues(value)
-func initInstanceAttribute*[T](mesh: var Mesh, attribute: string, value: T) =
+func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initInstanceAttribute(mesh, attribute, newSeqWith(mesh.instanceCount, value))
-func initInstanceAttribute*[T](mesh: var Mesh, attribute: string) =
+func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
   initInstanceAttribute(mesh=mesh, attribute=attribute, value=default(T))
-func initInstanceAttribute*(mesh: var Mesh, attribute: string, datatype: DataType) =
+func initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=datatype)
   mesh.instanceData[attribute].initData(mesh.instanceCount)
 
-func newMesh*(
+proc newMesh*(
   positions: openArray[Vec3f],
   indices: openArray[array[3, uint32|uint16|uint8]],
   colors: openArray[Vec4f]=[],
@@ -140,28 +146,28 @@ func newMesh*(
     material: material,
   )
 
-  result.initVertexAttribute("position", positions.toSeq)
-  if colors.len > 0: result.initVertexAttribute("color", colors.toSeq)
-  if uvs.len > 0: result.initVertexAttribute("uv", uvs.toSeq)
+  result[].initVertexAttribute("position", positions.toSeq)
+  if colors.len > 0: result[].initVertexAttribute("color", colors.toSeq)
+  if uvs.len > 0: result[].initVertexAttribute("uv", uvs.toSeq)
 
   # assert all indices are valid
   for i in indices:
-    assert int(i[0]) < result.vertexCount
-    assert int(i[1]) < result.vertexCount
-    assert int(i[2]) < result.vertexCount
+    assert int(i[0]) < result[].vertexCount
+    assert int(i[1]) < result[].vertexCount
+    assert int(i[2]) < result[].vertexCount
 
   # cast index values to appropiate type
-  if result.indexType == Tiny and uint32(positions.len) < uint32(high(uint8)) and false: # TODO: check feature support
+  if result[].indexType == Tiny and uint32(positions.len) < uint32(high(uint8)) and false: # TODO: check feature support
     for i, tri in enumerate(indices):
-      result.tinyIndices.add [uint8(tri[0]), uint8(tri[1]), uint8(tri[2])]
-  elif result.indexType == Small and uint32(positions.len) < uint32(high(uint16)):
+      result[].tinyIndices.add [uint8(tri[0]), uint8(tri[1]), uint8(tri[2])]
+  elif result[].indexType == Small and uint32(positions.len) < uint32(high(uint16)):
     for i, tri in enumerate(indices):
-      result.smallIndices.add [uint16(tri[0]), uint16(tri[1]), uint16(tri[2])]
-  elif result.indexType == Big:
+      result[].smallIndices.add [uint16(tri[0]), uint16(tri[1]), uint16(tri[2])]
+  elif result[].indexType == Big:
     for i, tri in enumerate(indices):
-      result.bigIndices.add [uint32(tri[0]), uint32(tri[1]), uint32(tri[2])]
+      result[].bigIndices.add [uint32(tri[0]), uint32(tri[1]), uint32(tri[2])]
 
-func newMesh*(
+proc newMesh*(
   positions: openArray[Vec3f],
   colors: openArray[Vec4f]=[],
   uvs: openArray[Vec2f]=[],
@@ -179,7 +185,7 @@ func newMesh*(
     material=material,
   )
 
-func attributeSize*(mesh: Mesh, attribute: string): int =
+func attributeSize*(mesh: MeshObject, attribute: string): int =
   if mesh.vertexData.contains(attribute):
     mesh.vertexData[attribute].size
   elif mesh.instanceData.contains(attribute):
@@ -187,7 +193,7 @@ func attributeSize*(mesh: Mesh, attribute: string): int =
   else:
     0
 
-func attributeType*(mesh: Mesh, attribute: string): DataType =
+func attributeType*(mesh: MeshObject, attribute: string): DataType =
   if mesh.vertexData.contains(attribute):
     mesh.vertexData[attribute].theType
   elif mesh.instanceData.contains(attribute):
@@ -195,7 +201,7 @@ func attributeType*(mesh: Mesh, attribute: string): DataType =
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-func indexSize*(mesh: Mesh): int =
+func indexSize*(mesh: MeshObject): int =
   case mesh.indexType
     of None: 0
     of Tiny: mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0))
@@ -205,14 +211,14 @@ func indexSize*(mesh: Mesh): int =
 func rawData[T: seq](value: T): (pointer, int) =
   (pointer(addr(value[0])), sizeof(get(genericParams(typeof(value)), 0)) * value.len)
 
-func getRawIndexData*(mesh: Mesh): (pointer, int) =
+func getRawIndexData*(mesh: MeshObject): (pointer, int) =
   case mesh.indexType:
     of None: raise newException(Exception, "Trying to get index data for non-indexed mesh")
     of Tiny: rawData(mesh.tinyIndices)
     of Small: rawData(mesh.smallIndices)
     of Big: rawData(mesh.bigIndices)
 
-func getRawData*(mesh: var Mesh, attribute: string): (pointer, int) =
+func getRawData*(mesh: var MeshObject, attribute: string): (pointer, int) =
   if mesh.vertexData.contains(attribute):
     mesh.vertexData[attribute].getRawData()
   elif mesh.instanceData.contains(attribute):
@@ -220,7 +226,7 @@ func getRawData*(mesh: var Mesh, attribute: string): (pointer, int) =
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc getAttribute*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): seq[T] =
+proc getAttribute*[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string): seq[T] =
   if mesh.vertexData.contains(attribute):
     getValues[T](mesh.vertexData[attribute])
   elif mesh.instanceData.contains(attribute):
@@ -228,7 +234,7 @@ proc getAttribute*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string): se
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
     assert data.len == mesh.vertexCount
     setValues(mesh.vertexData[attribute], data)
@@ -237,9 +243,10 @@ proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: 
     setValues(mesh.instanceData[attribute], data)
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
-  mesh.dirtyAttributes.add attribute
+  if not mesh.dirtyAttributes.contains(attribute):
+    mesh.dirtyAttributes.add attribute
 
-proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, i: int, value: T) =
+proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, i: int, value: T) =
   if mesh.vertexData.contains(attribute):
     assert i < mesh.vertexData[attribute].len
     setValue(mesh.vertexData[attribute], i, value)
@@ -248,19 +255,21 @@ proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: 
     setValue(mesh.instanceData[attribute], i, value)
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
-  mesh.dirtyAttributes.add attribute
+  if not mesh.dirtyAttributes.contains(attribute):
+    mesh.dirtyAttributes.add attribute
 
-proc appendAttributeData*[T: GPUType|int|uint|float](mesh: var Mesh, attribute: string, data: seq[T]) =
+proc appendAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
     appendValues(mesh.vertexData[attribute], data)
   elif mesh.instanceData.contains(attribute):
     appendValues(mesh.instanceData[attribute], data)
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
-  mesh.dirtyAttributes.add attribute
+  if not mesh.dirtyAttributes.contains(attribute):
+    mesh.dirtyAttributes.add attribute
 
 # currently only used for loading from files, shouls
-proc appendAttributeData*(mesh: var Mesh, attribute: string, data: DataList) =
+proc appendAttributeData*(mesh: var MeshObject, attribute: string, data: DataList) =
   if mesh.vertexData.contains(attribute):
     assert data.thetype == mesh.vertexData[attribute].thetype
     appendValues(mesh.vertexData[attribute], data)
@@ -269,28 +278,29 @@ proc appendAttributeData*(mesh: var Mesh, attribute: string, data: DataList) =
     appendValues(mesh.instanceData[attribute], data)
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
-  mesh.dirtyAttributes.add attribute
+  if not mesh.dirtyAttributes.contains(attribute):
+    mesh.dirtyAttributes.add attribute
 
-proc appendIndicesData*(mesh: var Mesh, v1, v2, v3: int) =
+proc appendIndicesData*(mesh: var MeshObject, v1, v2, v3: int) =
   case mesh.indexType
   of None: raise newException(Exception, "Mesh does not support indexed data")
   of Tiny: mesh.tinyIndices.add([uint8(v1), uint8(v2), uint8(v3)])
   of Small: mesh.smallIndices.add([uint16(v1), uint16(v2), uint16(v3)])
   of Big: mesh.bigIndices.add([uint32(v1), uint32(v2), uint32(v3)])
 
-proc updateInstanceTransforms*(mesh: var Mesh, attribute: string) =
+proc updateInstanceTransforms*(mesh: var MeshObject, attribute: string) =
   let currentTransforms = mesh.instanceTransforms.mapIt(mesh.transform * it)
   if currentTransforms != mesh.transformCache:
     mesh.updateAttributeData(attribute, currentTransforms)
     mesh.transformCache = currentTransforms
 
-func dirtyAttributes*(mesh: Mesh): seq[string] =
+func dirtyAttributes*(mesh: MeshObject): seq[string] =
   mesh.dirtyAttributes
 
-proc clearDirtyAttributes*(mesh: var Mesh) =
-  mesh.dirtyAttributes = @[]
+proc clearDirtyAttributes*(mesh: var MeshObject) =
+  mesh.dirtyAttributes.reset
 
-proc transform*[T: GPUType](mesh: Mesh, attribute: string, transform: Mat4) =
+proc transform*[T: GPUType](mesh: MeshObject, attribute: string, transform: Mat4) =
   if mesh.vertexData.contains(attribute):
     for i in 0 ..< mesh.vertexData[attribute].len:
       setValue(mesh.vertexData[attribute], i, transform * getValue[T](mesh.vertexData[attribute], i))
@@ -300,7 +310,7 @@ proc transform*[T: GPUType](mesh: Mesh, attribute: string, transform: Mat4) =
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
+proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = Mesh(
     vertexCount: 4,
     instanceTransforms: @[Unit4F32],
@@ -314,21 +324,21 @@ func rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
     pos = @[newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
     c = hexToColorAlpha(color)
 
-  result.initVertexAttribute("position", pos)
-  result.initVertexAttribute("color", @[c, c, c, c])
-  result.initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
+  result[].initVertexAttribute("position", pos)
+  result[].initVertexAttribute("color", @[c, c, c, c])
+  result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
-func tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
+proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = Mesh(vertexCount: 3, instanceTransforms: @[Unit4F32])
   let
     half_w = width / 2
     half_h = height / 2
     colorVec = hexToColorAlpha(color)
 
-  result.initVertexAttribute("position", @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
-  result.initVertexAttribute("color", @[colorVec, colorVec, colorVec])
+  result[].initVertexAttribute("position", @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
+  result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
 
-func circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
+proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
   assert nSegments >= 3
   result = Mesh(vertexCount: 3 + nSegments, instanceTransforms: @[Unit4F32], indexType: Small)
 
@@ -343,11 +353,11 @@ func circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
   for i in 0 .. nSegments:
     pos.add newVec3f(cos(float32(i) * step) * half_w, sin(float32(i) * step) * half_h)
     col.add c
-    result.smallIndices.add [uint16(0), uint16(i + 1), uint16(i + 2)]
+    result[].smallIndices.add [uint16(0), uint16(i + 1), uint16(i + 2)]
 
-  result.initVertexAttribute("position", pos)
-  result.initVertexAttribute("color", col)
+  result[].initVertexAttribute("position", pos)
+  result[].initVertexAttribute("color", col)
 
-func getCollisionPoints*(mesh: Mesh, positionAttribute="position"): seq[Vec3f] =
+func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
   for p in getAttribute[Vec3f](mesh, positionAttribute):
     result.add mesh.transform * p

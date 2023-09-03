@@ -20,7 +20,7 @@ type
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
   MeshTree* = ref object
-    mesh*: Mesh
+    mesh*: MeshObject
     children*: seq[MeshTree]
 
 const
@@ -210,7 +210,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]
     setValue(result.constants["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
 
 
-proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
+proc addPrimitive(mesh: var MeshObject, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
@@ -253,7 +253,7 @@ proc addPrimitive(mesh: var Mesh, root: JsonNode, primitiveNode: JsonNode, mainB
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
 
 # TODO: use one mesh per primitive?? right now we are merging primitives... check addPrimitive below
-proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh =
+proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): MeshObject =
 
   # check if and how we use indexes
   var indexCount = 0
@@ -267,7 +267,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
     else:
       indexType = Big
 
-  result = Mesh(instanceTransforms: @[Unit4F32], indexType: indexType)
+  result = MeshObject(instanceTransforms: @[Unit4F32], indexType: indexType)
 
   # check we have the same attributes for all primitives
   let attributes = meshNode["primitives"][0]["attributes"].keys.toSeq
