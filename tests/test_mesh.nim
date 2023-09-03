@@ -1,67 +1,73 @@
+import std/algorithm
 import std/sequtils
 import std/tables
 import semicongine
 
 proc main() =
-  var ent1 = newEntity("hoho", {"mesh": Component(rect())})
-  var ent2 = newEntity("hehe", [], ent1)
-  var myScene = newScene("hi", ent2)
-  myScene.root.transform = translate3d(0.2'f32, 0'f32, 0'f32)
-  myScene.root[0].transform = translate3d(0'f32, 0.2'f32, 0'f32)
+  # var myScene = Scene(name: "hi", meshes: @[rect()])
+  # myScene.meshes[0].transform = translate3d(0.2'f32, 0'f32, 0'f32)
+  # myScene.root[0].transform = translate3d(0'f32, 0.2'f32, 0'f32)
   var scenes = [
     # loadScene("default_cube.glb", "1"),
     # loadScene("default_cube1.glb", "3"),
     # loadScene("default_cube2.glb", "4"),
     # loadScene("flat.glb", "5"),
-    loadScene("tutorialk-donat.glb", "6"),
+    Scene(name: "Donut", meshes: loadMeshes("tutorialk-donat.glb")[0].toSeq),
     # myScene,
     # loadScene("personv3.glb", "2"),
   ]
 
   var engine = initEngine("Test meshes")
   const
-    vertexInput = @[
-      attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-      attr[uint16]("materialIndex", memoryPerformanceHint=PreferFastRead),
-      attr[Vec2f]("texcoord_0", memoryPerformanceHint=PreferFastRead),
-      attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
-    ]
-    intermediate = @[
-      attr[Vec4f]("vertexColor"),
-      attr[Vec2f]("colorTexCoord"),
-      attr[uint16]("materialIndexOut", noInterpolation=true)
-    ]
-    fragOutput = @[attr[Vec4f]("color")]
-    uniforms = @[
-      attr[Mat4]("projection"),
-      attr[Mat4]("view"),
-      attr[Vec4f]("baseColorFactor", arrayCount=4),
-    ]
-    samplers = @[attr[Sampler2DType]("baseColorTexture", arrayCount=4)]
-    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
-      inputs=vertexInput,
-      intermediate=intermediate,
-      outputs=fragOutput,
-      uniforms=uniforms,
-      samplers=samplers,
+    shaderConfiguration = createShaderConfiguration(
+      inputs=[
+        attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
+        attr[uint16]("materialIndex", memoryPerformanceHint=PreferFastRead),
+        attr[Vec2f]("texcoord_0", memoryPerformanceHint=PreferFastRead),
+        attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
+      ],
+      intermediates=[
+        attr[Vec4f]("vertexColor"),
+        attr[Vec2f]("colorTexCoord"),
+        attr[uint16]("materialIndexOut", noInterpolation=true)
+      ],
+      outputs=[attr[Vec4f]("color")],
+      uniforms=[
+        attr[Mat4]("projection"),
+        attr[Mat4]("view"),
+        attr[Vec4f]("baseColorFactor", arrayCount=4),
+      ],
+      samplers=[attr[Texture]("baseColorTexture", arrayCount=4)],
       vertexCode="""
-gl_Position =  vec4(position, 1.0) * (transform * Uniforms.view * Uniforms.projection);
-vertexColor = Uniforms.baseColorFactor[materialIndex];
-colorTexCoord = texcoord_0;
-materialIndexOut = materialIndex;
-""",
-      fragmentCode="""
-// vec4 col[4] = vec4[4](vec4(1, 0, 0, 1), vec4(0, 1, 0, 1), vec4(0, 0, 1, 1), vec4(1, 1, 1, 1));
-color = texture(baseColorTexture[materialIndexOut], colorTexCoord) * vertexColor;
-"""
+  gl_Position =  vec4(position, 1.0) * (transform * Uniforms.view * Uniforms.projection);
+  vertexColor = Uniforms.baseColorFactor[materialIndex];
+  colorTexCoord = texcoord_0;
+  materialIndexOut = materialIndex;
+  """,
+      fragmentCode="color = texture(baseColorTexture[materialIndexOut], colorTexCoord) * vertexColor;"
     )
-  engine.setRenderer(engine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0, 1)))
+  engine.initRenderer({
+    "Material": shaderConfiguration,
+    "Material.001": shaderConfiguration,
+    "Material.002": shaderConfiguration,
+    "Material.004": shaderConfiguration,
+  }.toTable)
+
   for scene in scenes.mitems:
-    engine.addScene(scene, vertexInput, samplers)
-    scene.addShaderGlobal("projection", Unit4)
-    scene.addShaderGlobal("view", Unit4)
-    let baseColors = scene.materials.map(proc(i: Material): Vec4f = getValue[Vec4f](i[].constants["baseColorFactor"]))
+    scene.addShaderGlobal("projection", Unit4F32)
+    scene.addShaderGlobal("view", Unit4F32)
+    var materials: Table[uint16, Material]
+    for mesh in scene.meshes:
+      if not materials.contains(mesh.material.index):
+        materials[mesh.material.index] = mesh.material
+    let baseColors = sortedByIt(values(materials).toSeq, it.index).mapIt(getValue[Vec4f](it.constants["baseColorFactor"], 0))
+    let baseTextures = sortedByIt(values(materials).toSeq, it.index).mapIt(it.textures["baseColorTexture"])
+    for t in baseTextures:
+      echo "- ", t
     scene.addShaderGlobalArray("baseColorFactor", baseColors)
+    scene.addShaderGlobalArray("baseColorTexture", baseTextures)
+    engine.addScene(scene)
+
   var
     size = 1'f32
     elevation = 0'f32
@@ -94,7 +100,7 @@ color = texture(baseColorTexture[materialIndexOut], colorTexCoord) * vertexColor
     scenes[currentScene].setShaderGlobal("projection", ortho(-ratio, ratio, -1, 1, -1, 1))
     scenes[currentScene].setShaderGlobal(
       "view",
-       scale3d(size, size, size) * rotate3d(elevation, newVec3f(1, 0, 0)) * rotate3d(azimut, Yf32)
+       scale(size, size, size) * rotate(elevation, newVec3f(1, 0, 0)) * rotate(azimut, Yf32)
     )
     engine.renderScene(scenes[currentScene])
   engine.destroy()

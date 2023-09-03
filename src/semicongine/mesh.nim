@@ -35,6 +35,7 @@ type
     name*: string
     constants*: Table[string, DataList]
     textures*: Table[string, Texture]
+    index*: uint16 # optional, may be used to index into uniform arrays in shader
 
 let EMPTY_MATERIAL = Material(
   name: "empty material"
@@ -300,7 +301,7 @@ func dirtyAttributes*(mesh: MeshObject): seq[string] =
 proc clearDirtyAttributes*(mesh: var MeshObject) =
   mesh.dirtyAttributes.reset
 
-proc transform*[T: GPUType](mesh: MeshObject, attribute: string, transform: Mat4) =
+proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: Mat4) =
   if mesh.vertexData.contains(attribute):
     for i in 0 ..< mesh.vertexData[attribute].len:
       setValue(mesh.vertexData[attribute], i, transform * getValue[T](mesh.vertexData[attribute], i))
@@ -309,6 +310,12 @@ proc transform*[T: GPUType](mesh: MeshObject, attribute: string, transform: Mat4
       setValue(mesh.instanceData[attribute], i, transform * getValue[T](mesh.vertexData[attribute], i))
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+
+func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
+  for p in getAttribute[Vec3f](mesh, positionAttribute):
+    result.add mesh.transform * p
+
+# GENERATORS ============================================================================
 
 proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = Mesh(
@@ -358,6 +365,25 @@ proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
   result[].initVertexAttribute("position", pos)
   result[].initVertexAttribute("color", col)
 
-func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
-  for p in getAttribute[Vec3f](mesh, positionAttribute):
-    result.add mesh.transform * p
+# MESH TREES =============================================================================
+
+type
+  MeshTree* = ref object
+    mesh*: Mesh
+    transform*: Mat4 = Unit4F32
+    children*: seq[MeshTree]
+
+proc toSeq*(tree: MeshTree): seq[Mesh] =
+  var queue = @[tree]
+  while queue.len > 0:
+    var current = queue.pop
+    if not current.mesh.isNil:
+      result.add current.mesh
+    queue.add current.children
+
+proc updateTransforms*(tree: MeshTree, parentTransform=Unit4F32) =
+  let currentTransform = parentTransform * tree.transform
+  if not tree.mesh.isNil:
+    tree.mesh.transform = currentTransform
+  for child in tree.children:
+    child.updateTransforms(currentTransform)

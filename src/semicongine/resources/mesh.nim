@@ -19,9 +19,6 @@ type
   glTFData = object
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
-  MeshTree* = ref object
-    mesh*: MeshObject
-    children*: seq[MeshTree]
 
 const
   JSON_CHUNK = 0x4E4F534A
@@ -152,8 +149,7 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Tex
 
 
 proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8], materialIndex: uint16): Material =
-  result = Material(name: materialNode["name"].getStr())
-
+  result = Material(name: materialNode["name"].getStr(), index: materialIndex)
   let pbr = materialNode["pbrMetallicRoughness"]
 
   # color
@@ -183,7 +179,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]
       result.constants[texture & "Index"] = newDataList(thetype=UInt8)
       setValue(result.constants[texture & "Index"], @[pbr[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
-      result.textures[texture] = EMPTYTEXTURE
+      result.textures[texture] = EMPTY_TEXTURE
       result.constants[texture & "Index"] = newDataList(thetype=UInt8)
       setValue(result.constants[texture & "Index"], @[0'u8])
 
@@ -194,7 +190,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]
       result.constants[texture & "Index"] = newDataList(thetype=UInt8)
       setValue(result.constants[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
-      result.textures[texture] = EMPTYTEXTURE
+      result.textures[texture] = EMPTY_TEXTURE
       result.constants[texture & "Index"] = newDataList(thetype=UInt8)
       setValue(result.constants[texture & "Index"], @[0'u8])
 
@@ -209,30 +205,31 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]
   else:
     setValue(result.constants["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
 
-
-proc addPrimitive(mesh: var MeshObject, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
+proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
   var vertexCount = 0
   for attribute, accessor in primitiveNode["attributes"].pairs:
     let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
-    mesh.appendAttributeData(attribute.toLowerAscii, data)
+    mesh[].appendAttributeData(attribute.toLowerAscii, data)
+    assert data.len == vertexCount or vertexCount == 0
     vertexCount = data.len
 
   var materialId = 0'u16
   if primitiveNode.hasKey("material"):
     materialId = uint16(primitiveNode["material"].getInt())
-  mesh.appendAttributeData("materialIndex", newSeqWith[uint8](vertexCount, materialId))
+  mesh[].appendAttributeData("materialIndex", newSeqWith(vertexCount, materialId))
   let material = loadMaterial(root, root["materials"][int(materialId)], mainBuffer, materialId)
-  # if mesh.material != nil and mesh.material[] != material[]:
-    # raise newException(Exception, &"Only one material per mesh supported at the moment")
-  mesh.material = material
+  # FIX: materialIndex is designed to support multiple different materials per mesh (as it is per vertex),
+  # but or current mesh/rendering implementation is only designed for a single material
+  # currently this is usually handled by adding the values as shader globals
+  mesh[].material = material
 
   if primitiveNode.hasKey("indices"):
-    assert mesh.indexType != None
+    assert mesh[].indexType != None
     let data = root.getAccessorData(root["accessors"][primitiveNode["indices"].getInt()], mainBuffer)
-    let baseIndex = mesh.indicesCount
+    let baseIndex = mesh[].indicesCount
     var tri: seq[int]
     case data.thetype
       of UInt16:
@@ -240,20 +237,20 @@ proc addPrimitive(mesh: var MeshObject, root: JsonNode, primitiveNode: JsonNode,
           tri.add int(entry) + baseIndex
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
-            mesh.appendIndicesData(tri[0], tri[2], tri[1])
+            mesh[].appendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
       of UInt32:
         for entry in getValues[uint32](data):
           tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
-            mesh.appendIndicesData(tri[0], tri[2], tri[1])
+            mesh[].appendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
 
 # TODO: use one mesh per primitive?? right now we are merging primitives... check addPrimitive below
-proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): MeshObject =
+proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh =
 
   # check if and how we use indexes
   var indexCount = 0
@@ -267,7 +264,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): MeshO
     else:
       indexType = Big
 
-  result = MeshObject(instanceTransforms: @[Unit4F32], indexType: indexType)
+  result = Mesh(instanceTransforms: @[Unit4F32], indexType: indexType)
 
   # check we have the same attributes for all primitives
   let attributes = meshNode["primitives"][0]["attributes"].keys.toSeq
@@ -276,14 +273,15 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): MeshO
 
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
-    result.initVertexAttribute(attribute.toLowerAscii, root["accessors"][accessor.getInt()].getGPUType())
-  result.initInstanceAttribute("materialIndex", 0'u16)
+    result[].initVertexAttribute(attribute.toLowerAscii, root["accessors"][accessor.getInt()].getGPUType())
+  result[].initVertexAttribute("materialIndex", UInt16)
 
   # add all mesh data
   for primitive in meshNode["primitives"]:
     result.addPrimitive(root, primitive, mainBuffer)
 
 proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshTree =
+  result = MeshTree()
   # mesh
   if node.hasKey("mesh"):
     result.mesh = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
@@ -293,7 +291,7 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshT
     var mat: Mat4
     for i in 0 ..< node["matrix"].len:
       mat[i] = node["matrix"][i].getFloat()
-    result.mesh.transform = mat
+    result.transform = mat
   else:
     var (t, r, s) = (Unit4F32, Unit4F32, Unit4F32)
     if node.hasKey("translation"):
@@ -317,7 +315,7 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshT
         float32(node["scale"][1].getFloat()),
         float32(node["scale"][2].getFloat())
       )
-    result.mesh.transform = t * r * s
+    result.transform = t * r * s
 
   # children
   if node.hasKey("children"):
@@ -328,6 +326,8 @@ proc loadMeshTree(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8
   result = MeshTree()
   for nodeId in scenenode["nodes"]:
     result.children.add loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
+  result.transform = scale(1, -1, 1)
+  result.updateTransforms()
 
 
 proc readglTF*(stream: Stream): seq[MeshTree] =

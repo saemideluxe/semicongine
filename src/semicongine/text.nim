@@ -28,7 +28,7 @@ const
     ],
     intermediates=[attr[Vec2f]("uvFrag")],
     outputs=[attr[Vec4f]("color")],
-    samplers=[attr[Sampler2DType]("fontAtlas")],
+    samplers=[attr[Texture]("fontAtlas")],
     vertexCode="""gl_Position = vec4(position, 1.0) * transform; uvFrag = uv;""",
     fragmentCode="""color = texture(fontAtlas, uvFrag);""",
   )
