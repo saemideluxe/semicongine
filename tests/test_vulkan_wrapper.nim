@@ -168,7 +168,6 @@ proc main() =
         attr[Vec4f]("outcolor"),
       ],
       outputs=[attr[Vec4f]("color")],
-      uniforms=[attr[float32]("time")],
       samplers=[
         attr[Sampler2DType]("my_little_texture")
       ],
@@ -202,7 +201,6 @@ proc main() =
   ]
 
   for scene in scenes.mitems:
-    scene.addShaderGlobal("time", 0.0'f32)
     engine.addScene(scene)
 
   # MAINLOOP
@@ -214,7 +212,6 @@ proc main() =
         if engine.updateInputs() != Running or engine.keyIsDown(Escape):
           engine.destroy()
           return
-        setShaderGlobal(scene, "time", getShaderGlobal[float32](scene, "time") + 0.0005'f)
         engine.renderScene(scene)
   echo "Rendered ", engine.framesRendered, " frames"
   echo "Processed ", engine.eventsProcessed, " events"

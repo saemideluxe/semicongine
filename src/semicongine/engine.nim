@@ -130,12 +130,15 @@ proc renderScene*(engine: var Engine, scene: var Scene) =
 proc updateInputs*(engine: var Engine): EngineState =
   assert engine.state in [Starting, Running]
 
+  # reset input states
   engine.input.keyWasPressed = {}
   engine.input.keyWasReleased = {}
   engine.input.mouseWasPressed = {}
   engine.input.mouseWasReleased = {}
   engine.input.mouseWheel = 0
   engine.input.mouseMove = newVec2f()
+  engine.input.windowWasResized = false
+
   if engine.state == Starting:
     engine.input.windowWasResized = true
     var mpos = engine.window.getMousePosition()

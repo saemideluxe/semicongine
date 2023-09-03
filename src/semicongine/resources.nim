@@ -133,9 +133,6 @@ proc loadFont*(path: string, name="", color=newVec4f(1, 1, 1, 1), resolution=100
   let defaultCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=+[{]};:,<.>/? ".toRunes()
   loadResource_intern(path).readTrueType(name, defaultCharset, color, resolution)
 
-proc loadFirstMesh*(path: string): Mesh =
-  loadResource_intern(path).readglTF()[0].children[0].mesh
-
 proc loadMeshes*(path: string): seq[MeshTree] =
   loadResource_intern(path).readglTF()
 

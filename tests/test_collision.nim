@@ -5,9 +5,9 @@ import semicongine
 proc main() =
   var scene = Scene(name: "main")
 
-  scene.meshes.add rect(color="f00f")
-  scene.meshes.add rect()
-  scene.meshes.add circle(color="0f0f")
+  scene.add rect(color="f00f")
+  scene.add rect()
+  scene.add circle(color="0f0f")
   scene.meshes[1].transform = scale(0.8, 0.8)
   scene.meshes[2].transform = scale(0.1, 0.1)
   scene.addShaderGlobal("perspective", Unit4F32)

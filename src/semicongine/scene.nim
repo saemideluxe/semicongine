@@ -9,14 +9,29 @@ type
     name*: string
     shaderGlobals*: Table[string, DataList]
     meshes*: seq[Mesh]
+    dirtyShaderGlobals: seq[string]
+
+proc add*(scene: var Scene, mesh: MeshObject) =
+  var tmp = new Mesh
+  tmp[] = mesh
+  scene.meshes.add tmp
+
+proc add*(scene: var Scene, mesh: Mesh) =
+  scene.meshes.add mesh
+
+# generic way to add objects that have a mesh-attribute
+proc add*[T](scene: var Scene, obj: T) =
+  scene.meshes.add obj.mesh
 
 func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
   setValues(scene.shaderGlobals[name], @[data])
+  scene.dirtyShaderGlobals.add name
 
 func addShaderGlobalArray*[T](scene: var Scene, name: string, data: seq[T]) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
   setValues(scene.shaderGlobals[name], data)
+  scene.dirtyShaderGlobals.add name
 
 func getShaderGlobal*[T](scene: Scene, name: string): T =
   getValues[T](scene.shaderGlobals[name])[0]
@@ -26,12 +41,24 @@ func getShaderGlobalArray*[T](scene: Scene, name: string): seq[T] =
 
 func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
   setValues[T](scene.shaderGlobals[name], @[value])
+  if not scene.dirtyShaderGlobals.contains(name):
+    scene.dirtyShaderGlobals.add name
 
 func setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
   setValues[T](scene.shaderGlobals[name], value)
+  if not scene.dirtyShaderGlobals.contains(name):
+    scene.dirtyShaderGlobals.add name
 
 func appendShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
   appendValues[T](scene.shaderGlobals[name], value)
+  if not scene.dirtyShaderGlobals.contains(name):
+    scene.dirtyShaderGlobals.add name
+
+func dirtyShaderGlobals*(scene: Scene): seq[string] =
+  scene.dirtyShaderGlobals
+
+func clearDirtyShaderGlobals*(scene: var Scene) =
+  scene.dirtyShaderGlobals.reset
 
 func hash*(scene: Scene): Hash =
   hash(scene.name)

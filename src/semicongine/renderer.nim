@@ -3,7 +3,6 @@ import std/tables
 import std/strformat
 import std/sequtils
 import std/logging
-import std/enumerate
 
 import ./core
 import ./vulkan/buffer
@@ -25,13 +24,13 @@ const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
 
 type
   SceneData = object
-    drawables*: seq[tuple[drawable: Drawable, meshIndex: int]]
+    drawables*: seq[tuple[drawable: Drawable, mesh: Mesh]]
     vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
     uniformBuffers*: Table[VkPipeline, seq[Buffer]] # one per frame-in-flight
     textures*: Table[string, seq[VulkanTexture]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
-    vertexBufferOffsets*: Table[(int, string), int]
+    vertexBufferOffsets*: Table[(Mesh, string), int]
     descriptorPools*: Table[VkPipeline, DescriptorPool]
     descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
     materials: seq[Material]
@@ -106,11 +105,11 @@ func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, pipeline: Pipeline): (
   for input in pipeline.inputs:
     if input.name == TRANSFORMATTRIBUTE: # will be populated automatically
       continue
-    if not (input.name in mesh.attributes):
+    if not (input.name in mesh[].attributes):
       return (true, &"Shader input '{input.name}' is not available for mesh '{mesh}'")
-    if input.theType != mesh.attributeType(input.name):
-      return (true, &"Shader input '{input.name}' expects type {input.theType}, but mesh '{mesh}' has {mesh.attributeType(input.name)}")
-    if input.perInstance != mesh.instanceAttributes.contains(input.name):
+    if input.theType != mesh[].attributeType(input.name):
+      return (true, &"Shader input '{input.name}' expects type {input.theType}, but mesh '{mesh}' has {mesh[].attributeType(input.name)}")
+    if input.perInstance != mesh[].instanceAttributes.contains(input.name):
       return (true, &"Shader input '{input.name}' expects to be per instance, but mesh '{mesh}' has is not as instance attribute")
 
   return materialCompatibleWithPipeline(scene, mesh.material, pipeline)
@@ -159,20 +158,20 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   for mesh in scene.meshes.mitems:
     for inputAttr in inputs:
       if inputAttr.name == TRANSFORMATTRIBUTE:
-        mesh.initInstanceAttribute(inputAttr.name, inputAttr.thetype)
-      elif not mesh.attributes.contains(inputAttr.name):
+        mesh[].initInstanceAttribute(inputAttr.name, inputAttr.thetype)
+      elif not mesh[].attributes.contains(inputAttr.name):
         warn(&"Mesh is missing data for shader attribute {inputAttr.name}, auto-filling with empty values")
         if inputAttr.perInstance:
-          mesh.initInstanceAttribute(inputAttr.name, inputAttr.thetype)
+          mesh[].initInstanceAttribute(inputAttr.name, inputAttr.thetype)
         else:
-          mesh.initVertexAttribute(inputAttr.name, inputAttr.thetype)
-      assert mesh.attributeType(inputAttr.name) == inputAttr.thetype, &"mesh attribute {inputAttr.name} has type {mesh.attributeType(inputAttr.name)} but shader expects {inputAttr.thetype}"
+          mesh[].initVertexAttribute(inputAttr.name, inputAttr.thetype)
+      assert mesh[].attributeType(inputAttr.name) == inputAttr.thetype, &"mesh attribute {inputAttr.name} has type {mesh[].attributeType(inputAttr.name)} but shader expects {inputAttr.thetype}"
   
   # create index buffer if necessary
   var indicesBufferSize = 0
   for mesh in scene.meshes:
-    if mesh.indexType != MeshIndexType.None:
-      let indexAlignment = case mesh.indexType
+    if mesh[].indexType != MeshIndexType.None:
+      let indexAlignment = case mesh[].indexType
         of MeshIndexType.None: 0
         of Tiny: 1
         of Small: 2
@@ -180,7 +179,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       # index value alignment required by Vulkan
       if indicesBufferSize mod indexAlignment != 0:
         indicesBufferSize += indexAlignment - (indicesBufferSize mod indexAlignment)
-      indicesBufferSize += mesh.indexSize
+      indicesBufferSize += mesh[].indexSize
   if indicesBufferSize > 0:
     scenedata.indexBuffer = renderer.device.createBuffer(
       size=indicesBufferSize,
@@ -202,7 +201,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       # we need to expand the buffer size as well, therefore considering alignment already here as well
       if perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
         perLocationSizes[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationSizes[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
-      perLocationSizes[attribute.memoryPerformanceHint] += mesh.attributeSize(attribute.name)
+      perLocationSizes[attribute.memoryPerformanceHint] += mesh[].attributeSize(attribute.name)
 
   # create vertex buffers
   for memoryPerformanceHint, bufferSize in perLocationSizes.pairs:
@@ -220,10 +219,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   for hint in MemoryPerformanceHint:
     perLocationOffsets[hint] = 0
 
-  for (meshIndex, mesh) in enumerate(scene.meshes.mitems):
+  for mesh in scene.meshes:
     for attribute in inputs:
-      scenedata.vertexBufferOffsets[(meshIndex, attribute.name)] = perLocationOffsets[attribute.memoryPerformanceHint]
-      let size = mesh.getRawData(attribute.name)[1]
+      scenedata.vertexBufferOffsets[(mesh, attribute.name)] = perLocationOffsets[attribute.memoryPerformanceHint]
+      let size = mesh[].getRawData(attribute.name)[1]
       perLocationOffsets[attribute.memoryPerformanceHint] += size
       if perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
         perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
@@ -235,14 +234,14 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
         if scene.usesMaterial(materialName):
           offsets[pipeline.vk] = newSeq[(string, MemoryPerformanceHint, int)]()
           for attribute in pipeline.inputs:
-            offsets[pipeline.vk].add (attribute.name, attribute.memoryPerformanceHint, scenedata.vertexBufferOffsets[(meshIndex, attribute.name)])
+            offsets[pipeline.vk].add (attribute.name, attribute.memoryPerformanceHint, scenedata.vertexBufferOffsets[(mesh, attribute.name)])
 
     # create drawables
     let indexed = mesh.indexType != MeshIndexType.None
     var drawable = Drawable(
-      elementCount: if indexed: mesh.indicesCount else: mesh.vertexCount,
+      elementCount: if indexed: mesh[].indicesCount else: mesh[].vertexCount,
       bufferOffsets: offsets,
-      instanceCount: mesh.instanceCount,
+      instanceCount: mesh[].instanceCount,
       indexed: indexed,
     )
     if indexed:
@@ -256,10 +255,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
         indexBufferOffset += indexAlignment - (indexBufferOffset mod indexAlignment)
       drawable.indexBufferOffset = indexBufferOffset
       drawable.indexType = mesh.indexType
-      var (pdata, size) = mesh.getRawIndexData()
+      var (pdata, size) = mesh[].getRawIndexData()
       scenedata.indexBuffer.setData(pdata, size, indexBufferOffset)
       indexBufferOffset += size
-    scenedata.drawables.add (drawable, meshIndex)
+    scenedata.drawables.add (drawable, mesh)
 
   # setup uniforms and samplers
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
@@ -299,39 +298,58 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   renderer.scenedata[scene] = scenedata
 
-proc refreshMeshAttributeData(renderer: Renderer, scene: var Scene, drawable: Drawable, meshIndex: int, attribute: string) =
-  debug &"Refreshing data on mesh {scene.meshes[meshIndex]} for {attribute}"
+proc refreshMeshAttributeData(renderer: Renderer, scene: var Scene, drawable: Drawable, mesh: Mesh, attribute: string) =
+  debug &"Refreshing data on mesh mesh for {attribute}"
   # ignore attributes that are not used in this shader
   if not (attribute in renderer.scenedata[scene].attributeLocation):
     return
-  let (pdata, size) = scene.meshes[meshIndex].getRawData(attribute)
+  let (pdata, size) = mesh[].getRawData(attribute)
   let memoryPerformanceHint = renderer.scenedata[scene].attributeLocation[attribute]
 
-  renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(pdata, size, renderer.scenedata[scene].vertexBufferOffsets[(meshIndex, attribute)])
+  renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(pdata, size, renderer.scenedata[scene].vertexBufferOffsets[(mesh, attribute)])
 
 proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
 
-  for (drawable, meshIndex) in renderer.scenedata[scene].drawables.mitems:
-    if scene.meshes[meshIndex].attributes.contains(TRANSFORMATTRIBUTE):
-      scene.meshes[meshIndex].updateInstanceTransforms(TRANSFORMATTRIBUTE)
-    let attrs = (if forceAll: scene.meshes[meshIndex].attributes else: scene.meshes[meshIndex].dirtyAttributes)
+  for (drawable, mesh) in renderer.scenedata[scene].drawables.mitems:
+    if mesh[].attributes.contains(TRANSFORMATTRIBUTE):
+      mesh[].updateInstanceTransforms(TRANSFORMATTRIBUTE)
+    let attrs = (if forceAll: mesh[].attributes else: mesh[].dirtyAttributes)
     for attribute in attrs:
-      renderer.refreshMeshAttributeData(scene, drawable, meshIndex, attribute)
+      renderer.refreshMeshAttributeData(scene, drawable, mesh, attribute)
       debug &"Update mesh attribute {attribute}"
-    scene.meshes[meshIndex].clearDirtyAttributes()
+    mesh[].clearDirtyAttributes()
 
-# TODO: only update if uniform values changed
-proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=true) =
+proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
+  # TODO: maybe check for dirty materials too, but atm we copy materials into the
+  # renderers scenedata, so they will are immutable after initialization, would 
+  # need to allow updates of materials too in order to make sense
+
+  let dirty = scene.dirtyShaderGlobals
+  if not forceAll and dirty.len == 0:
+    return
+
+  if forceAll:
+    debug "Update uniforms because 'forceAll' was given"
+  else:
+    debug &"Update uniforms because of dirty scene globals: {dirty}"
 
   # loop over all used shaders/pipelines
   for i in 0 ..< renderer.renderPass.subpasses.len:
     for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
-      if scene.usesMaterial(materialName) and renderer.scenedata[scene].uniformBuffers.hasKey(pipeline.vk) and renderer.scenedata[scene].uniformBuffers[pipeline.vk].len != 0:
+      if (
+        scene.usesMaterial(materialName) and
+        renderer.scenedata[scene].uniformBuffers.hasKey(pipeline.vk) and
+        renderer.scenedata[scene].uniformBuffers[pipeline.vk].len != 0
+      ):
         assert renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].vk.valid
+        if forceAll:
+          for buffer in renderer.scenedata[scene].uniformBuffers[pipeline.vk]:
+            assert buffer.vk.valid
+
         var offset = 0
-        # loop over all uniforms of the shader
+        # loop over all uniforms of the shader-pipeline
         for uniform in pipeline.uniforms:
           var foundValue = false
           var value: DataList
@@ -349,10 +367,16 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=true)
               if foundValue: break
           if not foundValue:
             raise newException(Exception, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials")
-          debug &"Update uniform {uniform.name}"
+          debug &"  update uniform {uniform.name} with value: {value}"
           let (pdata, size) = value.getRawData()
-          renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].setData(pdata, size, offset)
+          if dirty.contains(uniform.name) or forceAll: # only update if necessary
+            if forceAll: # need to update all in-flight frames, when forced to do all
+              for buffer in renderer.scenedata[scene].uniformBuffers[pipeline.vk]:
+                buffer.setData(pdata, size, offset)
+            else:
+              renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].setData(pdata, size, offset)
           offset += size
+  scene.clearDirtyShaderGlobals()
 
 proc render*(renderer: var Renderer, scene: Scene) =
   assert scene in renderer.scenedata
@@ -385,8 +409,8 @@ proc render*(renderer: var Renderer, scene: Scene) =
         commandBuffer.vkCmdBindPipeline(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.vk)
         commandBuffer.vkCmdBindDescriptorSets(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
 
-        for (drawable, meshIndex) in renderer.scenedata[scene].drawables:
-          if scene.meshes[meshIndex].material.name == materialName:
+        for (drawable, mesh) in renderer.scenedata[scene].drawables:
+          if mesh.material.name == materialName:
             drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer, pipeline.vk)
 
     if i < renderer.renderPass.subpasses.len - 1:
