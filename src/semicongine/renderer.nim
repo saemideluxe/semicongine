@@ -91,13 +91,17 @@ func materialCompatibleWithPipeline(scene: Scene, material: Material, pipeline: 
       if not foundMatch:
         return (true, &"shader uniform '{uniform.name}' was not found in scene globals or scene materials")
   for sampler in pipeline.samplers:
-    var foundMatch = true
-    for name, value in material.textures:
-      if name == sampler.name:
-        foundMatch = true
-        break
-    if not foundMatch:
-      return (true, &"Required texture for shader sampler '{sampler.name}' was not found in scene materials")
+    if scene.shaderGlobals.contains(sampler.name):
+      if scene.shaderGlobals[sampler.name].theType != sampler.theType:
+        return (true, &"shader sampler '{sampler.name}' needs type {sampler.theType} but scene global is of type {scene.shaderGlobals[sampler.name].theType}")
+    else:
+      var foundMatch = true
+      for name, value in material.textures:
+        if name == sampler.name:
+          foundMatch = true
+          break
+      if not foundMatch:
+        return (true, &"Required texture for shader sampler '{sampler.name}' was not found in scene materials")
 
   return (false, "")
 
@@ -109,8 +113,10 @@ func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, pipeline: Pipeline): (
       return (true, &"Shader input '{input.name}' is not available for mesh '{mesh}'")
     if input.theType != mesh[].attributeType(input.name):
       return (true, &"Shader input '{input.name}' expects type {input.theType}, but mesh '{mesh}' has {mesh[].attributeType(input.name)}")
-    if input.perInstance != mesh[].instanceAttributes.contains(input.name):
-      return (true, &"Shader input '{input.name}' expects to be per instance, but mesh '{mesh}' has is not as instance attribute")
+    if not input.perInstance and not mesh[].vertexAttributes.contains(input.name):
+      return (true, &"Shader input '{input.name}' expected to be vertex attribute, but mesh has no such vertex attribute (available are: {mesh[].vertexAttributes})")
+    if input.perInstance and not mesh[].instanceAttributes.contains(input.name):
+      return (true, &"Shader input '{input.name}' expected to be per instance attribute, but mesh has no such instance attribute (available are: {mesh[].instanceAttributes})")
 
   return materialCompatibleWithPipeline(scene, mesh.material, pipeline)
 
@@ -150,9 +156,20 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     if not scenedata.materials.contains(mesh.material):
       scenedata.materials.add mesh.material
       for textureName, texture in mesh.material.textures.pairs:
-        if not scenedata.textures.hasKey(textureName):
-          scenedata.textures[textureName] = @[]
-        scenedata.textures[textureName].add renderer.device.uploadTexture(texture)
+        if scene.shaderGlobals.contains(textureName) and scene.shaderGlobals[textureName].theType == Sampler2D:
+          warn &"Ignoring material texture '{textureName}' as scene-global textures with the same name have been defined"
+        else:
+          if not scenedata.textures.hasKey(textureName):
+            scenedata.textures[textureName] = @[]
+          scenedata.textures[textureName].add renderer.device.uploadTexture(texture)
+
+  for name, value in scene.shaderGlobals.pairs:
+    if value.theType == Sampler2D:
+      assert not scenedata.textures.contains(name) # should be handled by the above code
+      scenedata.textures[name] = @[]
+      for texture in getValues[Texture](value):
+        scenedata.textures[name].add renderer.device.uploadTexture(texture)
+
 
   # find all meshes, populate missing attribute values for shader
   for mesh in scene.meshes.mitems:

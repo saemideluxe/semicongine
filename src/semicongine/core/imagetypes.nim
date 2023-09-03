@@ -46,7 +46,14 @@ proc newImage*(width, height: int, imagedata: seq[Pixel] = @[], fill=EMPTYPIXEL)
       for x in 0 ..< width:
         result[x, y] = fill
 
-let EMPTYTEXTURE* = Texture(image: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: Sampler(
+let INVALID_TEXTURE* = Texture(image: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: Sampler(
+    magnification: VK_FILTER_NEAREST,
+    minification: VK_FILTER_NEAREST,
+    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+  )
+)
+let EMPTY_TEXTURE* = Texture(image: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: Sampler(
     magnification: VK_FILTER_NEAREST,
     minification: VK_FILTER_NEAREST,
     wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
