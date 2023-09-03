@@ -169,7 +169,7 @@ proc main() =
       ],
       outputs=[attr[Vec4f]("color")],
       samplers=[
-        attr[Sampler2DType]("my_little_texture")
+        attr[Texture]("my_little_texture")
       ],
       vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = color;""",
       fragmentCode="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;",

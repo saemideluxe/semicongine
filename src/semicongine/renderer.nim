@@ -387,11 +387,11 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
           debug &"  update uniform {uniform.name} with value: {value}"
           let (pdata, size) = value.getRawData()
           if dirty.contains(uniform.name) or forceAll: # only update if necessary
-            if forceAll: # need to update all in-flight frames, when forced to do all
-              for buffer in renderer.scenedata[scene].uniformBuffers[pipeline.vk]:
-                buffer.setData(pdata, size, offset)
-            else:
-              renderer.scenedata[scene].uniformBuffers[pipeline.vk][renderer.swapchain.currentInFlight].setData(pdata, size, offset)
+            # TODO: technically we would only need to update the uniform buffer of the current
+            # frameInFlight, but we don't track for which frame the shaderglobals are no longer dirty
+            # therefore we have to update the uniform values in all buffers, of all inFlightframes (usually 2)
+            for buffer in renderer.scenedata[scene].uniformBuffers[pipeline.vk]:
+              buffer.setData(pdata, size, offset)
           offset += size
   scene.clearDirtyShaderGlobals()
 
