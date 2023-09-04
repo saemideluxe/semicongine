@@ -1,4 +1,5 @@
 import std/sequtils
+import std/tables
 import std/random
 
 import ../src/semicongine
@@ -42,19 +43,15 @@ when isMainModule:
 
 
   const
-    inputs = @[
-      attr[Vec3f]("position"),
-      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
-      attr[uint32]("index"),
-    ]
-    intermediate = @[attr[Vec4f]("outcolor")]
-    uniforms = @[attr[float32]("time")]
-    outputs = @[attr[Vec4f]("color")]
-    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
-      inputs=inputs,
-      intermediate=intermediate,
-      outputs=outputs,
-      uniforms=uniforms,
+    shaderConfiguration = createShaderConfiguration(
+      inputs=[
+        attr[Vec3f]("position"),
+        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
+        attr[uint32]("index"),
+      ],
+      intermediates=[attr[Vec4f]("outcolor")],
+      uniforms=[attr[float32]("time")],
+      outputs=[attr[Vec4f]("color")],
       vertexCode="""
 float pos_weight = index / 100.0; // add some gamma correction?
 float t = sin(Uniforms.time * 0.5) * 0.5 + 0.5;
@@ -69,17 +66,18 @@ gl_Position = vec4(position, 1.0);
     positions=vertices,
     indices=indices,
     colors=colors,
+    material=Material(name: "default")
   )
-  setMeshData[uint32](squaremesh, "index", iValues.toSeq)
+  squaremesh[].initVertexAttribute("index", iValues.toSeq)
 
   var myengine = initEngine("Squares")
-  myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
+  myengine.initRenderer({"default": shaderConfiguration}.toTable)
 
-  var scene = newScene("scene", newEntity("scene", [], newEntity("squares", {"mesh": Component(squaremesh)})))
-  myengine.addScene(scene, inputs, @[], transformAttribute="")
+  var scene = Scene(name: "scene", meshes: @[squaremesh])
   scene.addShaderGlobal("time", 0.0'f32)
+  myengine.addScene(scene)
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
-    setShaderGlobal(scene, "time", getShaderGlobal[float32](scene, "time") + 0.0005'f)
+    scene.setShaderGlobal("time", getShaderGlobal[float32](scene, "time") + 0.0005'f)
     myengine.renderScene(scene)
 
   myengine.destroy()

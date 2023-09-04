@@ -21,12 +21,12 @@ var
     meshes: @[newMesh(
       [newVec3f(-0.5, 0.5), newVec3f(0, -0.5), newVec3f(0.5, 0.5)],
       [newVec4f(1, 0, 0, 1), newVec4f(0, 1, 0, 1), newVec4f(0, 0, 1, 1)],
-      material=Material(name: "")
+      material=Material(name: "default")
     )]
   )
   myengine = initEngine("Hello triangle")
 
-myengine.initRenderer({"": shaderConfiguration}.toTable)
+myengine.initRenderer({"default": shaderConfiguration}.toTable)
 myengine.addScene(triangle)
 
 while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
