@@ -30,7 +30,7 @@ Rendering:
 - [x] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
 - [x] Textures
 - [x] Materials (vertices with material indices)
-- [ ] Allow different shaders (ie pipelines) for different meshes
+- [x] Allow different shaders (ie pipelines) for different meshes
 
 Required for 3D rendering:
 
@@ -68,9 +68,8 @@ Other important features:
 - [ ] Sprite system
 - [ ] Particle system
 - [ ] Sound-animation
-- [x] Named entity components
 - [ ] Paletton-export-loader
-- [ ] Arrange buffer memory types based on per-mesh-attribute type instead of per-shader-attribute type
+- [ ] Arrange buffer memory types based on per-mesh-attribute type instead of per-shader-attribute type (possible?)
 
 Other less important features:
 
