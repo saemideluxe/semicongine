@@ -8,6 +8,7 @@
 #
 
 
+import std/tables
 import std/times
 
 import ../src/semicongine
@@ -52,35 +53,31 @@ when isMainModule:
   var myengine = initEngine("Hello cube")
 
   const
-    inputs = @[
-      attr[Vec3f]("position"),
-      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
-    ]
-    intermediate = @[attr[Vec4f]("outcolor")]
-    uniforms = @[
-      attr[Mat4]("projection"),
-      attr[Mat4]("view"),
-      attr[Mat4]("model"),
-    ]
-    fragOutput = @[attr[Vec4f]("color")]
-    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
-      inputs=inputs,
-      intermediate=intermediate,
-      outputs=fragOutput,
-      uniforms=uniforms,
+    shaderConfiguration = createShaderConfiguration(
+      inputs=[
+        attr[Vec3f]("position"),
+        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
+      ],
+      intermediates=[attr[Vec4f]("outcolor")],
+      uniforms=[
+        attr[Mat4]("projection"),
+        attr[Mat4]("view"),
+        attr[Mat4]("model"),
+      ],
+      outputs=[attr[Vec4f]("color")],
       vertexCode="""outcolor = color; gl_Position = (Uniforms.projection * Uniforms.view * Uniforms.model) * vec4(position, 1);""",
       fragmentCode="color = outcolor;",
     )
-  myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode))
-  var cube = newScene("scene", newEntity("cube", {"mesh": Component(newMesh(positions=cube_pos, indices=tris, colors=cube_color))}))
+  myengine.initRenderer({"default": shaderConfiguration}.toTable)
+  var cube = Scene(name: "scene", meshes: @[newMesh(positions=cube_pos, indices=tris, colors=cube_color, material=Material(name: "default"))])
   cube.addShaderGlobal("projection", Unit4f32)
   cube.addShaderGlobal("view", Unit4f32)
   cube.addShaderGlobal("model", Unit4f32)
-  myengine.addScene(cube, inputs, @[], transformAttribute="")
+  myengine.addScene(cube)
 
   var t: float32 = cpuTime()
   while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
-    setShaderGlobal(cube, "model", translate3d(0'f32, 0'f32, 10'f32) * rotate3d(t, Yf32))
+    setShaderGlobal(cube, "model", translate(0'f32, 0'f32, 10'f32) * rotate(t, Yf32))
     setShaderGlobal(cube, "projection",
       perspective(
         float32(PI / 4),
@@ -90,7 +87,6 @@ when isMainModule:
       )
     )
     t = cpuTime()
-
     myengine.renderScene(cube)
 
   myengine.destroy()

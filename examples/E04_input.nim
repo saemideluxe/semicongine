@@ -1,4 +1,5 @@
 import std/enumerate
+import std/tables
 import std/typetraits
 import std/math
 
@@ -107,15 +108,17 @@ when isMainModule:
 
   # define mesh objects
   var
+    material = Material(name: "default")
     cursormesh = newMesh(
       positions=positions,
       colors=arrow_colors,
-      instanceCount=1,
+      material=material,
     )
     keyboardmesh = newMesh(
       positions=keyvertexpos,
       colors=keyvertexcolor,
-      indices=keymeshindices
+      indices=keymeshindices,
+      material=material,
     )
     backgroundmesh = newMesh(
       positions= @[
@@ -131,48 +134,42 @@ when isMainModule:
         backgroundColor,
       ],
       indices= @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
+      material=material,
     )
 
   # define mesh objects
-  scene = newScene("scene", newEntity("scene"))
-  scene.root.add newEntity("background", {"mesh": Component(backgroundmesh)})
-  let keyboard = newEntity("keyboard", {"mesh": Component(keyboardmesh)})
-  keyboard.transform = translate3d(
+  var keyboard_center = translate(
     -float32(rowWidth) / 2'f32,
     -float32(tupleLen(keyRows) * (keyDimension + keyGap) - keyGap) / 2'f32,
     0'f32
   )
-  scene.root.add newEntity("keyboard-center", [], keyboard)
-  scene.root.add newEntity("cursor", {"mesh": Component(cursormesh)})
+  scene = Scene(name: "scene", meshes: @[backgroundmesh, keyboardmesh, cursormesh])
 
   # shaders
   const
-    inputs = @[
-      attr[Vec3f]("position"),
-      attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
-      attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
-    ]
-    intermediate = @[attr[Vec4f]("outcolor")]
-    uniforms = @[attr[Mat4]("projection")]
-    outputs = @[attr[Vec4f]("color")]
-    (vertexCode, fragmentCode) = compileVertexFragmentShaderSet(
-      inputs=inputs,
-      intermediate=intermediate,
-      outputs=outputs,
-      uniforms=uniforms,
+    shaderConfiguration = createShaderConfiguration(
+      inputs=[
+        attr[Vec3f]("position"),
+        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
+        attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
+      ],
+      intermediates=[attr[Vec4f]("outcolor")],
+      uniforms=[attr[Mat4]("projection")],
+      outputs=[attr[Vec4f]("color")],
       vertexCode="""outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);""",
       fragmentCode="color = outcolor;",
     )
 
   # set up rendering
-  myengine.setRenderer(myengine.gpuDevice.simpleForwardRenderPass(vertexCode, fragmentCode, clearColor=newVec4f(0, 0, 0.5)))
-  myengine.addScene(scene, inputs, @[], transformAttribute="transform")
+  myengine.initRenderer({"default": shaderConfiguration}.toTable)
   scene.addShaderGlobal("projection", Unit4f32)
+  myengine.addScene(scene)
+  myengine.hideSystemCursor()
 
   # mainloop
   while myengine.updateInputs() == Running:
     if myengine.windowWasResized():
-      setShaderGlobal(scene, "projection",
+      scene.setShaderGlobal("projection",
         ortho(
           0, float32(myengine.getWindow().size[0]),
           0, float32(myengine.getWindow().size[1]),
@@ -181,27 +178,26 @@ when isMainModule:
       )
       let
         winsize = myengine.getWindow().size
-        center = translate3d(float32(winsize[0]) / 2'f32, float32(winsize[1]) / 2'f32, 0.1'f32)
-      scene.root.firstWithName("keyboard-center").transform = center
-      scene.root.firstWithName("background").transform = scale3d(float32(winsize[0]), float32(winsize[1]), 1'f32)
+        center = translate(float32(winsize[0]) / 2'f32, float32(winsize[1]) / 2'f32, 0.1'f32)
+      keyboardmesh.transform = keyboard_center * center
+      backgroundmesh.transform = scale(float32(winsize[0]), float32(winsize[1]), 1'f32)
 
-    let mousePos = translate3d(myengine.mousePosition().x + 20, myengine.mousePosition().y + 20, 0'f32)
-    scene.root.firstWithName("cursor").transform = mousePos
+    let mousePos = translate(myengine.mousePosition().x + 20, myengine.mousePosition().y + 20, 0'f32)
+    cursormesh.transform = mousePos
 
-    var mesh = Mesh(scene.root.firstWithName("keyboard")["mesh"])
     for (index, key) in enumerate(keyIndices):
       if myengine.keyWasPressed(key):
-        let baseIndex = uint32(index * 4)
-        mesh.updateMeshData("color", baseIndex + 0, activeColor)
-        mesh.updateMeshData("color", baseIndex + 1, activeColor)
-        mesh.updateMeshData("color", baseIndex + 2, activeColor)
-        mesh.updateMeshData("color", baseIndex + 3, activeColor)
+        let baseIndex = index * 4
+        keyboardmesh[].updateAttributeData("color", baseIndex + 0, activeColor)
+        keyboardmesh[].updateAttributeData("color", baseIndex + 1, activeColor)
+        keyboardmesh[].updateAttributeData("color", baseIndex + 2, activeColor)
+        keyboardmesh[].updateAttributeData("color", baseIndex + 3, activeColor)
       if myengine.keyWasReleased(key):
-        let baseIndex = uint32(index * 4)
-        mesh.updateMeshData("color", baseIndex + 0, baseColor)
-        mesh.updateMeshData("color", baseIndex + 1, baseColor)
-        mesh.updateMeshData("color", baseIndex + 2, baseColor)
-        mesh.updateMeshData("color", baseIndex + 3, baseColor)
+        let baseIndex = index * 4
+        keyboardmesh[].updateAttributeData("color", baseIndex + 0, baseColor)
+        keyboardmesh[].updateAttributeData("color", baseIndex + 1, baseColor)
+        keyboardmesh[].updateAttributeData("color", baseIndex + 2, baseColor)
+        keyboardmesh[].updateAttributeData("color", baseIndex + 3, baseColor)
 
     myengine.renderScene(scene)
 
