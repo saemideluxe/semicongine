@@ -5,12 +5,13 @@ const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 20
 
 type
   ColliderType* = enum
-    Box, Sphere
+    Box, Sphere, Points
   Collider* = object
     transform*: Mat4 = Unit4F32
     case theType*: ColliderType
       of Box: discard
       of Sphere: radius*: float32
+      of Points: points*: seq[Vec3f]
 
 func between(value, b1, b2: float32): bool =
   min(b1, b2) <= value and value <= max(b1, b2)
@@ -39,6 +40,8 @@ func contains*(collider: Collider, x: Vec3f): bool =
     ux.between(uP1, uP2) and vx.between(vP1, vP4) and wx.between(wP1, wP5)
   of Sphere:
     (collider.transform * x).length < (collider.transform * newVec3f()).length
+  of Points:
+    raise newException(Exception, "Points are not supported yet for 'contains'")
 
 # implementation of GJK, based on https://blog.winter.dev/2020/gjk-algorithm/
 
@@ -69,11 +72,13 @@ func findFurthestPoint(transform: Mat4, direction: Vec3f): Vec3f =
   )
 func findFurthestPoint(collider: Collider, direction: Vec3f): Vec3f =
   case collider.theType
-    of Sphere:
-      let directionNormalizedToSphere = ((direction / direction.length) * collider.radius)
-      collider.transform * directionNormalizedToSphere
-    of Box:
-      findFurthestPoint(collider.transform, direction)
+  of Sphere:
+    let directionNormalizedToSphere = ((direction / direction.length) * collider.radius)
+    collider.transform * directionNormalizedToSphere
+  of Box:
+    findFurthestPoint(collider.transform, direction)
+  of Points:
+    findFurthestPoint(collider.points, direction)
 
 func supportPoint(a, b: Collider, direction: Vec3f): Vec3f =
   a.findFurthestPoint(direction) - b.findFurthestPoint(-direction)
@@ -390,9 +395,12 @@ func calculateCollider*(points: seq[Vec3f], theType: ColliderType): Collider =
     scaleY = (maxY - minY)
     scaleZ = (maxZ - minZ)
 
-  result = Collider(theType: theType, transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
+  if theType == Points:
+    result = Collider(theType: Points, points: points)
+  else:
+    result = Collider(theType: theType, transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
 
-  if theType == Sphere:
-    result.transform = translate(center)
-    for p in points:
-      result.radius = max(result.radius, (p - center).length)
+    if theType == Sphere:
+      result.transform = translate(center)
+      for p in points:
+        result.radius = max(result.radius, (p - center).length)

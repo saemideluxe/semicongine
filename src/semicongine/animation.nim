@@ -123,7 +123,7 @@ func resetPlayer*(player: var AnimationPlayer) =
   player.currentDirection = if player.animation.direction == Backward: -1 else : 1
   player.currentIteration = player.animation.iterations
 
-func newAnimator*[T](animation: Animation[T]): AnimationPlayer[T] =
+func newAnimationPlayer*[T](animation: Animation[T]): AnimationPlayer[T] =
   result = AnimationPlayer[T]( animation: animation, playing: false,)
   result.resetPlayer()
 
@@ -134,7 +134,7 @@ func stop*(player: var AnimationPlayer) =
   player.playing = false
 
 func advance*[T](player: var AnimationPlayer[T], dt: float32) =
-  # TODO: check, not 100% correct I think
+  # TODO: check this function, not 100% correct I think
   if player.playing:
     player.currentTime += float32(player.currentDirection) * dt
     if abs(player.currentTime) > player.animation.duration:

@@ -90,7 +90,7 @@ func indicesCount*(mesh: MeshObject): int =
   ) * 3
 
 func initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
-  assert not mesh.vertexData.contains(attribute)
+  assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=getDataType[T]())
   mesh.vertexData[attribute].initData(mesh.vertexCount)
   mesh.vertexData[attribute].setValues(value)
@@ -99,12 +99,12 @@ func initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) 
 func initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
   initVertexAttribute(mesh=mesh, attribute=attribute, value=default(T))
 func initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
-  assert not mesh.vertexData.contains(attribute)
+  assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=datatype)
   mesh.vertexData[attribute].initData(mesh.vertexCount)
 
 func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
-  assert not mesh.instanceData.contains(attribute)
+  assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=getDataType[T]())
   mesh.instanceData[attribute].initData(mesh.instanceCount)
   mesh.instanceData[attribute].setValues(value)
@@ -113,7 +113,7 @@ func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T
 func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
   initInstanceAttribute(mesh=mesh, attribute=attribute, value=default(T))
 func initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
-  assert not mesh.instanceData.contains(attribute)
+  assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=datatype)
   mesh.instanceData[attribute].initData(mesh.instanceCount)
 
@@ -372,6 +372,18 @@ type
     mesh*: Mesh
     transform*: Mat4 = Unit4F32
     children*: seq[MeshTree]
+
+func toStringRec*(tree: MeshTree, theindent=0): seq[string] =
+  if tree.mesh.isNil:
+    result.add "*"
+  else:
+    result.add indent($tree.mesh, theindent)
+  for child in tree.children:
+    result.add child.toStringRec(theindent + 4)
+
+func `$`*(tree: MeshTree): string =
+  toStringRec(tree).join("\n")
+
 
 proc toSeq*(tree: MeshTree): seq[Mesh] =
   var queue = @[tree]

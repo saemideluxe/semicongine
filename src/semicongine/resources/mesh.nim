@@ -215,6 +215,7 @@ proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffe
     mesh[].appendAttributeData(attribute.toLowerAscii, data)
     assert data.len == vertexCount or vertexCount == 0
     vertexCount = data.len
+  mesh.vertexCount += vertexCount
 
   var materialId = 0'u16
   if primitiveNode.hasKey("material"):
