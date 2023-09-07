@@ -234,14 +234,14 @@ proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffe
     var tri: seq[int]
     case data.thetype
       of UInt16:
-        for entry in getValues[uint16](data):
+        for entry in getValues[uint16](data)[]:
           tri.add int(entry) + baseIndex
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
             mesh[].appendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
       of UInt32:
-        for entry in getValues[uint32](data):
+        for entry in getValues[uint32](data)[]:
           tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
