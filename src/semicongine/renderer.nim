@@ -167,7 +167,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     if value.theType == Sampler2D:
       assert not scenedata.textures.contains(name) # should be handled by the above code
       scenedata.textures[name] = @[]
-      for texture in getValues[Texture](value):
+      for texture in getValues[Texture](value)[]:
         scenedata.textures[name].add renderer.device.uploadTexture(texture)
 
 
@@ -320,9 +320,9 @@ proc refreshMeshAttributeData(renderer: Renderer, scene: var Scene, drawable: Dr
   # ignore attributes that are not used in this shader
   if not (attribute in renderer.scenedata[scene].attributeLocation):
     return
+
   let (pdata, size) = mesh[].getRawData(attribute)
   let memoryPerformanceHint = renderer.scenedata[scene].attributeLocation[attribute]
-
   renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(pdata, size, renderer.scenedata[scene].vertexBufferOffsets[(mesh, attribute)])
 
 proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =

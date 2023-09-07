@@ -89,30 +89,30 @@ func indicesCount*(mesh: MeshObject): int =
     of Big: mesh.bigIndices.len
   ) * 3
 
-func initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
+proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=getDataType[T]())
   mesh.vertexData[attribute].initData(mesh.vertexCount)
   mesh.vertexData[attribute].setValues(value)
-func initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
+proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initVertexAttribute(mesh, attribute, newSeqWith(mesh.vertexCount, value))
-func initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
+proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
   initVertexAttribute(mesh=mesh, attribute=attribute, value=default(T))
-func initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
+proc initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=datatype)
   mesh.vertexData[attribute].initData(mesh.vertexCount)
 
-func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
+proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=getDataType[T]())
   mesh.instanceData[attribute].initData(mesh.instanceCount)
   mesh.instanceData[attribute].setValues(value)
-func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
+proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initInstanceAttribute(mesh, attribute, newSeqWith(mesh.instanceCount, value))
-func initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
+proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
   initInstanceAttribute(mesh=mesh, attribute=attribute, value=default(T))
-func initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
+proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=datatype)
   mesh.instanceData[attribute].initData(mesh.instanceCount)
@@ -227,7 +227,7 @@ func getRawData*(mesh: var MeshObject, attribute: string): (pointer, int) =
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string): seq[T] =
+proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string): ref seq[T] =
   if mesh.vertexData.contains(attribute):
     getValues[T](mesh.vertexData[attribute])
   elif mesh.instanceData.contains(attribute):
@@ -235,9 +235,9 @@ proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-template `[]`*(mesh: MeshObject, attribute: string, t: typedesc): seq[t] =
+template `[]`*(mesh: MeshObject, attribute: string, t: typedesc): ref seq[t] =
   getAttribute[t](mesh, attribute)
-template `[]`*(mesh: Mesh, attribute: string, t: typedesc): seq[t] =
+template `[]`*(mesh: Mesh, attribute: string, t: typedesc): ref seq[t] =
   getAttribute[t](mesh[], attribute)
 
 proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
@@ -332,7 +332,7 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
 func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
-  for p in mesh[positionAttribute, Vec3f]:
+  for p in mesh[positionAttribute, Vec3f][]:
     result.add mesh.transform * p
 
 # GENERATORS ============================================================================

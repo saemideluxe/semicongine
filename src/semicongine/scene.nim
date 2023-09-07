@@ -23,12 +23,12 @@ proc add*(scene: var Scene, mesh: Mesh) =
 proc add*[T](scene: var Scene, obj: T) =
   scene.meshes.add obj.mesh
 
-func addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
+proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
   setValues(scene.shaderGlobals[name], @[data])
   scene.dirtyShaderGlobals.add name
 
-func addShaderGlobalArray*[T](scene: var Scene, name: string, data: seq[T]) =
+proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: seq[T]) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
   setValues(scene.shaderGlobals[name], data)
   scene.dirtyShaderGlobals.add name
@@ -39,12 +39,12 @@ func getShaderGlobal*[T](scene: Scene, name: string): T =
 func getShaderGlobalArray*[T](scene: Scene, name: string): seq[T] =
   getValues[T](scene.shaderGlobals[name])
 
-func setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
+proc setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
   setValues[T](scene.shaderGlobals[name], @[value])
   if not scene.dirtyShaderGlobals.contains(name):
     scene.dirtyShaderGlobals.add name
 
-func setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
+proc setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
   setValues[T](scene.shaderGlobals[name], value)
   if not scene.dirtyShaderGlobals.contains(name):
     scene.dirtyShaderGlobals.add name
