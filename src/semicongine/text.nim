@@ -56,24 +56,24 @@ proc updateMesh(textbox: var Textbox) =
         top = glyph.topOffset
         bottom = glyph.topOffset + glyph.dimension.y
 
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 0, newVec3f(left - centerX, bottom + centerY))
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 1, newVec3f(left - centerX, top + centerY))
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 2, newVec3f(right - centerX, top + centerY))
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 3, newVec3f(right - centerX, bottom + centerY))
+      textbox.mesh["position", vertexOffset + 0] = newVec3f(left - centerX, bottom + centerY)
+      textbox.mesh["position", vertexOffset + 1] = newVec3f(left - centerX, top + centerY)
+      textbox.mesh["position", vertexOffset + 2] = newVec3f(right - centerX, top + centerY)
+      textbox.mesh["position", vertexOffset + 3] = newVec3f(right - centerX, bottom + centerY)
 
-      textbox.mesh[].updateAttributeData("uv", vertexOffset + 0, glyph.uvs[0])
-      textbox.mesh[].updateAttributeData("uv", vertexOffset + 1, glyph.uvs[1])
-      textbox.mesh[].updateAttributeData("uv", vertexOffset + 2, glyph.uvs[2])
-      textbox.mesh[].updateAttributeData("uv", vertexOffset + 3, glyph.uvs[3])
+      textbox.mesh["uv", vertexOffset + 0] = glyph.uvs[0]
+      textbox.mesh["uv", vertexOffset + 1] = glyph.uvs[1]
+      textbox.mesh["uv", vertexOffset + 2] = glyph.uvs[2]
+      textbox.mesh["uv", vertexOffset + 3] = glyph.uvs[3]
 
       offsetX += glyph.advance
       if i < textbox.text.len - 1:
         offsetX += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
     else:
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 0, newVec3f())
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 1, newVec3f())
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 2, newVec3f())
-      textbox.mesh[].updateAttributeData("position", vertexOffset + 3, newVec3f())
+      textbox.mesh["position", vertexOffset + 0] = newVec3f()
+      textbox.mesh["position", vertexOffset + 1] = newVec3f()
+      textbox.mesh["position", vertexOffset + 2] = newVec3f()
+      textbox.mesh["position", vertexOffset + 3] = newVec3f()
 
 
 func text*(textbox: Textbox): seq[Rune] =
