@@ -188,16 +188,16 @@ when isMainModule:
     for (index, key) in enumerate(keyIndices):
       if myengine.keyWasPressed(key):
         let baseIndex = index * 4
-        keyboardmesh[].updateAttributeData("color", baseIndex + 0, activeColor)
-        keyboardmesh[].updateAttributeData("color", baseIndex + 1, activeColor)
-        keyboardmesh[].updateAttributeData("color", baseIndex + 2, activeColor)
-        keyboardmesh[].updateAttributeData("color", baseIndex + 3, activeColor)
+        keyboardmesh["color", baseIndex + 0] = activeColor
+        keyboardmesh["color", baseIndex + 1] = activeColor
+        keyboardmesh["color", baseIndex + 2] = activeColor
+        keyboardmesh["color", baseIndex + 3] = activeColor
       if myengine.keyWasReleased(key):
         let baseIndex = index * 4
-        keyboardmesh[].updateAttributeData("color", baseIndex + 0, baseColor)
-        keyboardmesh[].updateAttributeData("color", baseIndex + 1, baseColor)
-        keyboardmesh[].updateAttributeData("color", baseIndex + 2, baseColor)
-        keyboardmesh[].updateAttributeData("color", baseIndex + 3, baseColor)
+        keyboardmesh["color", baseIndex + 0] = baseColor
+        keyboardmesh["color", baseIndex + 1] = baseColor
+        keyboardmesh["color", baseIndex + 2] = baseColor
+        keyboardmesh["color", baseIndex + 3] = baseColor
 
     myengine.renderScene(scene)
 

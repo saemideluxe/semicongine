@@ -227,7 +227,7 @@ func getRawData*(mesh: var MeshObject, attribute: string): (pointer, int) =
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc getAttribute*[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string): seq[T] =
+proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string): seq[T] =
   if mesh.vertexData.contains(attribute):
     getValues[T](mesh.vertexData[attribute])
   elif mesh.instanceData.contains(attribute):
@@ -235,7 +235,12 @@ proc getAttribute*[T: GPUType|int|uint|float](mesh: MeshObject, attribute: strin
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
+template `[]`*(mesh: MeshObject, attribute: string, t: typedesc): seq[t] =
+  getAttribute[t](mesh, attribute)
+template `[]`*(mesh: Mesh, attribute: string, t: typedesc): seq[t] =
+  getAttribute[t](mesh[], attribute)
+
+proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
     assert data.len == mesh.vertexCount
     setValues(mesh.vertexData[attribute], data)
@@ -247,7 +252,7 @@ proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attri
   if not mesh.dirtyAttributes.contains(attribute):
     mesh.dirtyAttributes.add attribute
 
-proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, i: int, value: T) =
+proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, i: int, value: T) =
   if mesh.vertexData.contains(attribute):
     assert i < mesh.vertexData[attribute].len
     setValue(mesh.vertexData[attribute], i, value)
@@ -258,6 +263,21 @@ proc updateAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attri
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
   if not mesh.dirtyAttributes.contains(attribute):
     mesh.dirtyAttributes.add attribute
+
+proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
+  updateAttributeData[T](mesh, attribute, data)
+proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
+  updateAttributeData[t](mesh[], attribute, data)
+
+proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, value: T) =
+  updateAttributeData[T](mesh, attribute, newSeqWith(mesh.vertexCount, value))
+proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, value: T) =
+  updateAttributeData[T](mesh[], attribute, newSeqWith(mesh.vertexCount, value))
+
+proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, i: int, value: T) =
+  updateAttributeData[T](mesh, attribute, i, value)
+proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, i: int, value: T) =
+  updateAttributeData[T](mesh[], attribute, i, value)
 
 proc appendAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
@@ -292,7 +312,7 @@ proc appendIndicesData*(mesh: var MeshObject, v1, v2, v3: int) =
 proc updateInstanceTransforms*(mesh: var MeshObject, attribute: string) =
   let currentTransforms = mesh.instanceTransforms.mapIt(mesh.transform * it)
   if currentTransforms != mesh.transformCache:
-    mesh.updateAttributeData(attribute, currentTransforms)
+    mesh[attribute] = currentTransforms
     mesh.transformCache = currentTransforms
 
 func dirtyAttributes*(mesh: MeshObject): seq[string] =
@@ -312,7 +332,7 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
 func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
-  for p in getAttribute[Vec3f](mesh, positionAttribute):
+  for p in mesh[positionAttribute, Vec3f]:
     result.add mesh.transform * p
 
 # GENERATORS ============================================================================

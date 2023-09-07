@@ -23,7 +23,7 @@ const TRANSFORMATTRIBUTE = "transform"
 const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
 
 type
-  SceneData = object
+  SceneData = ref object
     drawables*: seq[tuple[drawable: Drawable, mesh: Mesh]]
     vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
