@@ -82,8 +82,10 @@ func text*(textbox: Textbox): seq[Rune] =
 proc `text=`*(textbox: var Textbox, text: seq[Rune]) =
   textbox.text = text
   textbox.updateMesh()
+proc `text=`*(textbox: var Textbox, text: string) =
+  `text=`(textbox, text.toRunes)
 
-proc initTextbox*(maxLen: int, font: Font, text=toRunes("")): Textbox =
+proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -103,3 +105,6 @@ proc initTextbox*(maxLen: int, font: Font, text=toRunes("")): Textbox =
   )
 
   result.updateMesh()
+
+proc initTextbox*(maxLen: int, font: Font, text=""): Textbox =
+  initTextbox(maxLen=maxLen, font=font, text=text.toRunes)

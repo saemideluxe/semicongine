@@ -6,7 +6,7 @@ import semicongine
 proc main() =
   var font = loadFont("DejaVuSans.ttf", color=newVec4f(1, 0.5, 0.5, 1), resolution=20)
   
-  var textbox = initTextbox(32, font, "".toRunes)
+  var textbox = initTextbox(32, font, "")
   var scene = Scene(name: "main")
   scene.add textbox
   textbox.mesh.transform = scale(0.01, 0.01)

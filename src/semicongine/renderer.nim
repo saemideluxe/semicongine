@@ -66,7 +66,9 @@ func inputs(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
       if scene.usesMaterial(materialName):
         for input in pipeline.inputs:
           if found.contains(input.name):
-            assert input == found[input.name], &"{input} != {found[input.name]}"
+            assert input.name == found[input.name].name, &"{input.name} != {found[input.name].name}"
+            assert input.theType == found[input.name].theType, &"{input.theType} != {found[input.name].theType}"
+            assert input.arrayCount == found[input.name].arrayCount, &"{input.arrayCount} != {found[input.name].arrayCount}"
           else:
             result.add input
             found[input.name] = input
