@@ -507,20 +507,20 @@ func newDataList*(theType: DataType): DataList =
     of Mat4F64: result.mat4f64 = new seq[TMat4[float64]]
     of Sampler2D: discard
 
-func newDataList*[T: GPUType](len=0): DataList =
+proc newDataList*[T: GPUType](len=0): DataList =
   result = newDataList(getDataType[T]())
   if len > 0:
     result.initData(len)
 
-func newDataList*[T: GPUType](data: seq[T]): DataList =
+proc newDataList*[T: GPUType](data: seq[T]): DataList =
   result = newDataList(getDataType[T]())
   setValues[T](result, data)
 
-func toGPUValue*[T: GPUType](value: T): DataValue =
+proc toGPUValue*[T: GPUType](value: T): DataValue =
   result = DataValue(theType: getDataType[T]())
   result.setValue(value)
 
-func toGPUValue*[T: GPUType](value: seq[T]): DataList =
+proc toGPUValue*[T: GPUType](value: seq[T]): DataList =
   result = newDataList[T](value.len)
   result.setValue(value)
 

@@ -315,6 +315,16 @@ proc updateInstanceTransforms*(mesh: var MeshObject, attribute: string) =
     mesh[attribute] = currentTransforms
     mesh.transformCache = currentTransforms
 
+proc renameAttribute*(mesh: var MeshObject, oldname, newname: string) =
+  if mesh.vertexData.contains(oldname):
+    mesh.vertexData[newname] = mesh.vertexData[oldname]
+    mesh.vertexData.del oldname
+  elif mesh.instanceData.contains(oldname):
+    mesh.instanceData[newname] = mesh.vertexData[oldname]
+    mesh.instanceData.del oldname
+  else:
+    raise newException(Exception, &"Attribute {oldname} is not defined for mesh {mesh}")
+
 func dirtyAttributes*(mesh: MeshObject): seq[string] =
   mesh.dirtyAttributes
 

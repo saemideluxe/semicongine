@@ -1,10 +1,12 @@
 import std/tables
 import std/unicode
+import std/strformat
 
 import ./core
 import ./mesh
 import ./vulkan/shader
 
+const SHADER_ATTRIB_PREFIX = "semicon_text_"
 type
   TextAlignment = enum
     Left
@@ -19,18 +21,21 @@ type
     mesh*: Mesh
 
 const
+  TRANSFORM_ATTRIB = "transform"
+  POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
+  UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
   TEXT_MATERIAL* = "default-text"
   TEXT_SHADER* = createShaderConfiguration(
     inputs=[
-      attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
-      attr[Vec3f]("position", memoryPerformanceHint=PreferFastWrite),
-      attr[Vec2f]("uv", memoryPerformanceHint=PreferFastWrite),
+      attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint=PreferFastWrite, perInstance=true),
+      attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint=PreferFastWrite),
+      attr[Vec2f](UV_ATTRIB, memoryPerformanceHint=PreferFastWrite),
     ],
     intermediates=[attr[Vec2f]("uvFrag")],
     outputs=[attr[Vec4f]("color")],
     samplers=[attr[Texture]("fontAtlas")],
-    vertexCode="""gl_Position = vec4(position, 1.0) * transform; uvFrag = uv;""",
-    fragmentCode="""color = texture(fontAtlas, uvFrag);""",
+    vertexCode= &"""gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB}; uvFrag = {UV_ATTRIB};""",
+    fragmentCode= &"""color = texture(fontAtlas, uvFrag);""",
   )
 
 proc updateMesh(textbox: var Textbox) =
@@ -56,24 +61,24 @@ proc updateMesh(textbox: var Textbox) =
         top = glyph.topOffset
         bottom = glyph.topOffset + glyph.dimension.y
 
-      textbox.mesh["position", vertexOffset + 0] = newVec3f(left - centerX, bottom + centerY)
-      textbox.mesh["position", vertexOffset + 1] = newVec3f(left - centerX, top + centerY)
-      textbox.mesh["position", vertexOffset + 2] = newVec3f(right - centerX, top + centerY)
-      textbox.mesh["position", vertexOffset + 3] = newVec3f(right - centerX, bottom + centerY)
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - centerX, bottom + centerY)
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - centerX, top + centerY)
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - centerX, top + centerY)
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - centerX, bottom + centerY)
 
-      textbox.mesh["uv", vertexOffset + 0] = glyph.uvs[0]
-      textbox.mesh["uv", vertexOffset + 1] = glyph.uvs[1]
-      textbox.mesh["uv", vertexOffset + 2] = glyph.uvs[2]
-      textbox.mesh["uv", vertexOffset + 3] = glyph.uvs[3]
+      textbox.mesh[UV_ATTRIB, vertexOffset + 0] = glyph.uvs[0]
+      textbox.mesh[UV_ATTRIB, vertexOffset + 1] = glyph.uvs[1]
+      textbox.mesh[UV_ATTRIB, vertexOffset + 2] = glyph.uvs[2]
+      textbox.mesh[UV_ATTRIB, vertexOffset + 3] = glyph.uvs[3]
 
       offsetX += glyph.advance
       if i < textbox.text.len - 1:
         offsetX += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
     else:
-      textbox.mesh["position", vertexOffset + 0] = newVec3f()
-      textbox.mesh["position", vertexOffset + 1] = newVec3f()
-      textbox.mesh["position", vertexOffset + 2] = newVec3f()
-      textbox.mesh["position", vertexOffset + 3] = newVec3f()
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
+      textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
 
 
 func text*(textbox: Textbox): seq[Rune] =
@@ -99,6 +104,8 @@ proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
 
   result = Textbox(maxLen: maxLen, text: text, font: font, dirty: true)
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs)
+  result.mesh[].renameAttribute("position", POSITION_ATTRIB)
+  result.mesh[].renameAttribute("uv", UV_ATTRIB)
   result.mesh.material = Material(
     name: TEXT_MATERIAL,
     textures: {"fontAtlas": font.fontAtlas}.toTable,
