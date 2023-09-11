@@ -29,8 +29,7 @@ proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.dirtyShaderGlobals.add name
 
 proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: seq[T]) =
-  scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
-  setValues(scene.shaderGlobals[name], data)
+  scene.shaderGlobals[name] = newDataList(data)
   scene.dirtyShaderGlobals.add name
 
 func getShaderGlobal*[T](scene: Scene, name: string): T =
