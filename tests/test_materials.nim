@@ -52,7 +52,7 @@ proc main() =
     )
   engine.initRenderer({
     "material": shaderConfiguration1,
-  }.toTable)
+  })
   engine.addScene(scene)
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):

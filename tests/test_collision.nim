@@ -1,5 +1,3 @@
-import std/tables
-
 import semicongine
 
 proc main() =
@@ -28,7 +26,7 @@ proc main() =
 
   var engine = initEngine("Test collisions")
 
-  engine.initRenderer({"": shaderConfiguration}.toTable)
+  engine.initRenderer({"": shaderConfiguration})
   engine.addScene(scene)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
