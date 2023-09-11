@@ -152,4 +152,4 @@ func advance*[T](player: var AnimationPlayer[T], dt: float32) =
             player.currentDirection = -player.currentDirection
             player.currentTime += float32(player.currentDirection) * dt * 2'f32
 
-  player.currentValue = valueAt(player.animation, abs(player.currentTime) / player.animation.duration)
+  player.currentValue = valueAt(player.animation, (abs(player.currentTime) / player.animation.duration) mod high(AnimationTime))
