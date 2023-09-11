@@ -51,7 +51,7 @@ proc main() =
     "Material.001": shaderConfiguration,
     "Material.002": shaderConfiguration,
     "Material.004": shaderConfiguration,
-  }.toTable)
+  })
 
   for scene in scenes.mitems:
     scene.addShaderGlobal("projection", Unit4F32)

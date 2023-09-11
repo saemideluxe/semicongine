@@ -189,7 +189,7 @@ proc main() =
     "mat": shaderConfiguration1,
     "mat2": shaderConfiguration1,
     "mat3": shaderConfiguration2,
-  }.toTable)
+  })
 
   # INIT SCENES
   var scenes = [
