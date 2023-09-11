@@ -26,6 +26,7 @@ type
     material*: Material
     transform*: Mat4 = Unit4F32
     instanceTransforms*: seq[Mat4]
+    visible*: bool = true
     transformCache: seq[Mat4]
     vertexData: Table[string, DataList]
     instanceData: Table[string, DataList]
