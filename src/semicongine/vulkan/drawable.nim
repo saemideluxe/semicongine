@@ -34,9 +34,6 @@ proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Ta
       buffers.add vertexBuffers[performanceHint].vk
       offsets.add VkDeviceSize(offset)
 
-      # echo "####### ", name
-      # echo "####### ", (cast[ptr array[4, Vec3f]](vertexBuffers[performanceHint].memory.data))[]
-
     commandBuffer.vkCmdBindVertexBuffers(
       firstBinding=0'u32,
       bindingCount=uint32(buffers.len),

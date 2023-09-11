@@ -103,16 +103,15 @@ proc initEngine*(
   )
   startMixerThread()
 
-proc initRenderer*(engine: var Engine, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
+proc initRenderer*(engine: var Engine, shaders: openArray[(string, ShaderConfiguration)], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
 
   assert not engine.renderer.isSome
-  var materialShaderMap = shaders
-  materialShaderMap[TEXT_MATERIAL] = TEXT_SHADER
-  engine.renderer = some(engine.device.initRenderer(shaders=materialShaderMap, clearColor=clearColor))
+  var allShaders = @shaders
+  allShaders.add (TEXT_MATERIAL, TEXT_SHADER)
+  engine.renderer = some(engine.device.initRenderer(shaders=allShaders.toTable, clearColor=clearColor))
 
 proc initRenderer*(engine: var Engine, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
-  var materialShaderMap: Table[string, ShaderConfiguration]
-  engine.initRenderer(materialShaderMap, clearColor)
+  engine.initRenderer(@[], clearColor)
 
 proc addScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
