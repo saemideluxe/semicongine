@@ -408,7 +408,7 @@ func getValue*[T: GPUType|int|uint|float](value: DataValue): T =
   else: {.error: "Virtual datatype has no value" .}
 
 proc setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
-  value.len = data.len
+  value.initData(data.len)
   when T is float32: value.float32[] = data
   elif T is float64: value.float64[] = data
   elif T is int8: value.int8[] = data
@@ -505,7 +505,7 @@ func newDataList*(theType: DataType): DataList =
     of Mat43F64: result.mat43f64 = new seq[TMat43[float64]]
     of Mat4F32: result.mat4f32 = new seq[TMat4[float32]]
     of Mat4F64: result.mat4f64 = new seq[TMat4[float64]]
-    of Sampler2D: discard
+    of Sampler2D: result.texture = new seq[Texture]
 
 proc newDataList*[T: GPUType](len=0): DataList =
   result = newDataList(getDataType[T]())
@@ -514,7 +514,7 @@ proc newDataList*[T: GPUType](len=0): DataList =
 
 proc newDataList*[T: GPUType](data: seq[T]): DataList =
   result = newDataList(getDataType[T]())
-  setValues[T](result, data)
+  result.setValues(data)
 
 proc toGPUValue*[T: GPUType](value: T): DataValue =
   result = DataValue(theType: getDataType[T]())
