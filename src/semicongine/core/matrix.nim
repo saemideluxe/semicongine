@@ -449,3 +449,8 @@ func orthoWindowAspect*(windowAspect: float32): Mat4 =
     let space = 2 * (1 / windowAspect - 1) / 2
     ortho(-1 - space, 1 + space, -1, 1, -1, 1)
 
+func position*(mat: Mat4): Vec3f =
+  mat.col(3).toVec3
+
+func scaling*(mat: Mat4): Vec3f =
+  newVec3f(mat[0, 0], mat[1, 1], mat[2, 2])

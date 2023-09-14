@@ -24,7 +24,7 @@ type
       of Small: smallIndices: seq[array[3, uint16]]
       of Big: bigIndices: seq[array[3, uint32]]
     material*: Material
-    transform*: Mat4 = Unit4F32
+    transform*: Mat4 = Unit4
     instanceTransforms*: seq[Mat4]
     visible*: bool = true
     transformCache: seq[Mat4]
@@ -93,7 +93,7 @@ func indicesCount*(mesh: MeshObject): int =
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=getDataType[T]())
-  mesh.vertexData[attribute].initData(mesh.vertexCount)
+  mesh.vertexData[attribute].setLen(mesh.vertexCount)
   mesh.vertexData[attribute].setValues(value)
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initVertexAttribute(mesh, attribute, newSeqWith(mesh.vertexCount, value))
@@ -102,12 +102,12 @@ proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
 proc initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = newDataList(thetype=datatype)
-  mesh.vertexData[attribute].initData(mesh.vertexCount)
+  mesh.vertexData[attribute].setLen(mesh.vertexCount)
 
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=getDataType[T]())
-  mesh.instanceData[attribute].initData(mesh.instanceCount)
+  mesh.instanceData[attribute].setLen(mesh.instanceCount)
   mesh.instanceData[attribute].setValues(value)
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initInstanceAttribute(mesh, attribute, newSeqWith(mesh.instanceCount, value))
@@ -116,7 +116,7 @@ proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
 proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=datatype)
-  mesh.instanceData[attribute].initData(mesh.instanceCount)
+  mesh.instanceData[attribute].setLen(mesh.instanceCount)
 
 proc newMesh*(
   positions: openArray[Vec3f],
@@ -345,6 +345,50 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
 func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
   for p in mesh[positionAttribute, Vec3f][]:
     result.add mesh.transform * p
+
+proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
+  if mesh.indexType == None:
+    return mesh
+
+  result = MeshObject(
+    vertexCount: mesh.indicesCount,
+    indexType: None,
+    material: mesh.material,
+    transform: mesh.transform,
+    instanceTransforms: mesh.instanceTransforms,
+    visible: mesh.visible,
+  )
+  for attribute, datalist in mesh.vertexData.pairs:
+    result.initVertexAttribute(attribute, datalist.theType)
+  for attribute, datalist in mesh.instanceData.pairs:
+    result.instanceData[attribute] = datalist.copy()
+  var i = 0
+  case mesh.indexType
+  of Tiny:
+    for indices in mesh.tinyIndices:
+      for attribute, value in mesh.vertexData.pairs:
+        result.vertexData[attribute].appendFrom(i, mesh.vertexData[attribute], int(indices[0]))
+        result.vertexData[attribute].appendFrom(i + 1, mesh.vertexData[attribute], int(indices[1]))
+        result.vertexData[attribute].appendFrom(i + 2, mesh.vertexData[attribute], int(indices[2]))
+      i += 3
+  of Small:
+    for indices in mesh.smallIndices:
+      for attribute, value in mesh.vertexData.pairs:
+        result.vertexData[attribute].appendFrom(i, value, int(indices[0]))
+        result.vertexData[attribute].appendFrom(i + 1, value, int(indices[1]))
+        result.vertexData[attribute].appendFrom(i + 2, value, int(indices[2]))
+      i += 3
+  of Big:
+    for indices in mesh.bigIndices:
+      for attribute, value in mesh.vertexData.pairs:
+        result.vertexData[attribute].appendFrom(i, mesh.vertexData[attribute], int(indices[0]))
+        result.vertexData[attribute].appendFrom(i + 1, mesh.vertexData[attribute], int(indices[1]))
+        result.vertexData[attribute].appendFrom(i + 2, mesh.vertexData[attribute], int(indices[2]))
+      i += 3
+  else:
+    discard
+  return result
+
 
 # GENERATORS ============================================================================
 
