@@ -94,7 +94,7 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
   result = newDataList(thetype=accessor.getGPUType())
-  result.initData(accessor["count"].getInt())
+  result.setLen(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
