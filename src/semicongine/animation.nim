@@ -133,7 +133,7 @@ func start*(player: var AnimationPlayer) =
 func stop*(player: var AnimationPlayer) =
   player.playing = false
 
-func advance*[T](player: var AnimationPlayer[T], dt: float32) =
+func advance*[T](player: var AnimationPlayer[T], dt: float32): T =
   # TODO: check this function, not 100% correct I think
   if player.playing:
     player.currentTime += float32(player.currentDirection) * dt
@@ -153,3 +153,4 @@ func advance*[T](player: var AnimationPlayer[T], dt: float32) =
             player.currentTime += float32(player.currentDirection) * dt * 2'f32
 
   player.currentValue = valueAt(player.animation, (abs(player.currentTime) / player.animation.duration) mod high(AnimationTime))
+  return player.currentValue

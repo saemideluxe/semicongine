@@ -136,5 +136,15 @@ proc testMatrix() =
   echo TMat3[float32]().randomized() * One3.randomized()
   echo TMat4[float32]().randomized() * One4.randomized()
 
+  echo float32(rand(1'f32)) * TMat2[float32]().randomized()
+  echo TMat2[float]().randomized() * rand(1'f)
+  echo TMat2[float]().randomized() * rand(1'f)
+  echo TMat23[float]().randomized() * rand(1'f)
+  echo TMat23[float]().randomized() * rand(1'f)
+  echo TMat3[float]().randomized() * rand(1'f)
+  echo TMat34[float]().randomized() * rand(1'f)
+  echo TMat43[float]().randomized() * rand(1'f)
+  echo TMat4[float]().randomized() * rand(1'f)
+
 randomize()
 testMatrix()

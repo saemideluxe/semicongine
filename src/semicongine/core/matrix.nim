@@ -412,7 +412,7 @@ template makeRandomInit(mattype: typedesc) =
         result.data[i] = rand(low(typeof(m.data[0])) .. high(typeof(m.data[0])))
     proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
       for i in 0 ..< result.data.len:
-        result.data[i] = rand(1.0)
+        result.data[i] = rand(T(1.0))
 
 makeRandomInit(TMat2)
 makeRandomInit(TMat23)

@@ -425,10 +425,9 @@ proc render*(renderer: var Renderer, scene: Scene) =
   for i in 0 ..< renderer.renderPass.subpasses.len:
     for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
       if scene.usesMaterial(materialName):
-        debug &"Start pipeline for {materialName}"
+        debug &"Start pipeline for '{materialName}'"
         commandBuffer.vkCmdBindPipeline(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.vk)
         commandBuffer.vkCmdBindDescriptorSets(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
-
         for (drawable, mesh) in renderer.scenedata[scene].drawables.filterIt(it[1].visible and it[1].material.name == materialName):
             drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer, pipeline.vk)
 
