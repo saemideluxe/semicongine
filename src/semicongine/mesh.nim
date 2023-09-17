@@ -39,12 +39,15 @@ type
     textures*: Table[string, Texture]
     index*: uint16 # optional, may be used to index into uniform arrays in shader
 
-let DEFAULT_MATERIAL = Material(
+let DEFAULT_MATERIAL* = Material(
   name: "default material"
 )
 
+func instanceCount*(mesh: MeshObject): int =
+  mesh.instanceTransforms.len
+
 func `$`*(mesh: MeshObject): string =
-  &"Mesh(vertexCount: {mesh.vertexCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
+  &"Mesh(vertexCount: {mesh.vertexCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
 func `$`*(mesh: Mesh): string =
   $mesh[]
 
@@ -71,9 +74,6 @@ func hash*(material: Material): Hash =
 
 func hash*(mesh: Mesh): Hash =
   hash(cast[ptr MeshObject](mesh))
-
-func instanceCount*(mesh: MeshObject): int =
-  mesh.instanceTransforms.len
 
 converter toVulkan*(indexType: MeshIndexType): VkIndexType =
   case indexType:
