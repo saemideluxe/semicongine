@@ -26,6 +26,7 @@ type
     material*: Material
     transform*: Mat4 = Unit4
     instanceTransforms*: seq[Mat4]
+    applyMeshTransformToInstances*: bool = true # if true, the transform attribute for the shader will apply the instance transform AND the mesh transform, to each instance
     visible*: bool = true
     transformCache: seq[Mat4]
     vertexData: Table[string, DataList]
@@ -38,8 +39,8 @@ type
     textures*: Table[string, Texture]
     index*: uint16 # optional, may be used to index into uniform arrays in shader
 
-let EMPTY_MATERIAL = Material(
-  name: "empty material"
+let DEFAULT_MATERIAL = Material(
+  name: "default material"
 )
 
 func `$`*(mesh: MeshObject): string =
@@ -125,7 +126,7 @@ proc newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: Material=EMPTY_MATERIAL,
+  material: Material=DEFAULT_MATERIAL,
   autoResize=true,
 ): Mesh =
   assert colors.len == 0 or colors.len == positions.len
@@ -175,7 +176,7 @@ proc newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: Material=EMPTY_MATERIAL,
+  material: Material=DEFAULT_MATERIAL,
 ): Mesh =
   newMesh(
     positions=positions,
@@ -311,7 +312,11 @@ proc appendIndicesData*(mesh: var MeshObject, v1, v2, v3: int) =
   of Big: mesh.bigIndices.add([uint32(v1), uint32(v2), uint32(v3)])
 
 proc updateInstanceTransforms*(mesh: var MeshObject, attribute: string) =
-  let currentTransforms = mesh.instanceTransforms.mapIt(mesh.transform * it)
+  var currentTransforms: seq[Mat4]
+  if mesh.applyMeshTransformToInstances:
+    currentTransforms = mesh.instanceTransforms.mapIt(mesh.transform * it)
+  else:
+    currentTransforms = mesh.instanceTransforms
   if currentTransforms != mesh.transformCache:
     mesh[attribute] = currentTransforms
     mesh.transformCache = currentTransforms
@@ -398,36 +403,37 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
     instanceTransforms: @[Unit4F32],
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
+    material: DEFAULT_MATERIAL
   )
 
   let
     half_w = width / 2
     half_h = height / 2
     pos = @[newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
-    c = hexToColorAlpha(color)
+    c = toRGBA(color)
 
   result[].initVertexAttribute("position", pos)
   result[].initVertexAttribute("color", @[c, c, c, c])
   result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
 proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = Mesh(vertexCount: 3, instanceTransforms: @[Unit4F32])
+  result = Mesh(vertexCount: 3, instanceTransforms: @[Unit4F32], material: DEFAULT_MATERIAL)
   let
     half_w = width / 2
     half_h = height / 2
-    colorVec = hexToColorAlpha(color)
+    colorVec = toRGBA(color)
 
   result[].initVertexAttribute("position", @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
   result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
 
 proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
   assert nSegments >= 3
-  result = Mesh(vertexCount: 3 + nSegments, instanceTransforms: @[Unit4F32], indexType: Small)
+  result = Mesh(vertexCount: 3 + nSegments, instanceTransforms: @[Unit4F32], indexType: Small, material: DEFAULT_MATERIAL)
 
   let
     half_w = width / 2
     half_h = height / 2
-    c = hexToColorAlpha(color)
+    c = toRGBA(color)
     step = (2'f32 * PI) / float32(nSegments)
   var
     pos = @[newVec3f(0, 0), newVec3f(0, half_h)]
