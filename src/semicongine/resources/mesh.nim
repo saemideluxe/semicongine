@@ -45,7 +45,7 @@ const
     10497: VK_SAMPLER_ADDRESS_MODE_REPEAT
   }.toTable
 
-proc getGPUType(accessor: JsonNode): DataType =
+proc getGPUType(accessor: JsonNode, attribute: string): DataType =
   # TODO: no full support for all datatypes that glTF may provide
   # semicongine/core/gpu_data should maybe generated with macros to allow for all combinations
   let componentType = ACCESSOR_TYPE_MAP[accessor["componentType"].getInt()]
@@ -57,29 +57,29 @@ proc getGPUType(accessor: JsonNode): DataType =
     case componentType
     of UInt32: return Vec2U32
     of Float32: return Vec2F32
-    else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
+    else: raise newException(Exception, &"Unsupported data type for attribute '{attribute}': {componentType} {theType}")
   of "VEC3":
     case componentType
     of UInt32: return Vec3U32
     of Float32: return Vec3F32
-    else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
+    else: raise newException(Exception, &"Unsupported data type for attribute '{attribute}': {componentType} {theType}")
   of "VEC4":
     case componentType
     of UInt32: return Vec4U32
     of Float32: return Vec4F32
-    else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
+    else: raise newException(Exception, &"Unsupported data type for attribute '{attribute}': {componentType} {theType}")
   of "MAT2":
     case componentType
     of Float32: return Vec4F32
-    else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
+    else: raise newException(Exception, &"Unsupported data type for attribute '{attribute}': {componentType} {theType}")
   of "MAT3":
     case componentType
     of Float32: return Vec4F32
-    else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
+    else: raise newException(Exception, &"Unsupported data type for attribute '{attribute}': {componentType} {theType}")
   of "MAT4":
     case componentType
     of Float32: return Vec4F32
-    else: raise newException(Exception, &"Unsupported data type: {componentType} {theType}")
+    else: raise newException(Exception, &"Unsupported data type for attribute '{attribute}': {componentType} {theType}")
 
 proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferOffset=0): seq[uint8] =
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
@@ -93,7 +93,7 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
   copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
-  result = newDataList(thetype=accessor.getGPUType())
+  result = newDataList(thetype=accessor.getGPUType("??"))
   result.setLen(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
@@ -221,11 +221,14 @@ proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffe
   if primitiveNode.hasKey("material"):
     materialId = uint16(primitiveNode["material"].getInt())
   mesh[].appendAttributeData("materialIndex", newSeqWith(vertexCount, materialId))
-  let material = loadMaterial(root, root["materials"][int(materialId)], mainBuffer, materialId)
-  # FIX: materialIndex is designed to support multiple different materials per mesh (as it is per vertex),
-  # but or current mesh/rendering implementation is only designed for a single material
-  # currently this is usually handled by adding the values as shader globals
-  mesh[].material = material
+  if "materials" in root and int(materialId) < root["materials"].len:
+    let material = loadMaterial(root, root["materials"][int(materialId)], mainBuffer, materialId)
+    # FIX: materialIndex is designed to support multiple different materials per mesh (as it is per vertex),
+    # but or current mesh/rendering implementation is only designed for a single material
+    # currently this is usually handled by adding the values as shader globals
+    mesh[].material = material
+  else:
+    mesh[].material = DEFAULT_MATERIAL
 
   if primitiveNode.hasKey("indices"):
     assert mesh[].indexType != None
@@ -274,7 +277,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
 
   # prepare mesh attributes
   for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
-    result[].initVertexAttribute(attribute.toLowerAscii, root["accessors"][accessor.getInt()].getGPUType())
+    result[].initVertexAttribute(attribute.toLowerAscii, root["accessors"][accessor.getInt()].getGPUType(attribute))
   result[].initVertexAttribute("materialIndex", UInt16)
 
   # add all mesh data
