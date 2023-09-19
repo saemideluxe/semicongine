@@ -370,7 +370,7 @@ func collision2D*(a, b: Collider): tuple[hasCollision: bool, normal: Vec2f, pene
       direction[0] = 0.0001
     inc n
 
-func calculateCollider*(points: seq[Vec3f], theType: ColliderType): Collider =
+func calculateCollider*(points: openArray[Vec3f], theType: ColliderType): Collider =
   var
     minX = high(float32)
     maxX = low(float32)
@@ -396,7 +396,7 @@ func calculateCollider*(points: seq[Vec3f], theType: ColliderType): Collider =
     scaleZ = (maxZ - minZ)
 
   if theType == Points:
-    result = Collider(theType: Points, points: points)
+    result = Collider(theType: Points, points: @points)
   else:
     result = Collider(theType: theType, transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
 
