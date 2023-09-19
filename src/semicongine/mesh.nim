@@ -237,10 +237,22 @@ proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
+proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string, i: int): T =
+  if mesh.vertexData.contains(attribute):
+    getValue[T](mesh.vertexData[attribute], i)
+  elif mesh.instanceData.contains(attribute):
+    getValue[T](mesh.instanceData[attribute], i)
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+
 template `[]`*(mesh: MeshObject, attribute: string, t: typedesc): ref seq[t] =
   getAttribute[t](mesh, attribute)
 template `[]`*(mesh: Mesh, attribute: string, t: typedesc): ref seq[t] =
   getAttribute[t](mesh[], attribute)
+template `[]`*(mesh: MeshObject, attribute: string, i: int, t: typedesc): untyped =
+  getAttribute[t](mesh, attribute, i)
+template `[]`*(mesh: Mesh, attribute: string, i: int, t: typedesc): untyped =
+  getAttribute[t](mesh[], attribute, i)
 
 proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
