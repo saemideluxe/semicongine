@@ -227,9 +227,9 @@ proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffe
     # but or current mesh/rendering implementation is only designed for a single material
     # currently this is usually handled by adding the values as shader globals
     # TODO: this is bad
-    mesh[].materials = @[material]
+    mesh[].materials.add material
   else:
-    mesh[].materials = @[DEFAULT_MATERIAL]
+    mesh[].materials.add DEFAULT_MATERIAL
 
   if primitiveNode.hasKey("indices"):
     assert mesh[].indexType != None
