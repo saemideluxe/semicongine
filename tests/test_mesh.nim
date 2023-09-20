@@ -58,12 +58,11 @@ proc main() =
     scene.addShaderGlobal("view", Unit4F32)
     var materials: Table[uint16, Material]
     for mesh in scene.meshes:
-      if not materials.contains(mesh.material.index):
-        materials[mesh.material.index] = mesh.material
+      for material in mesh.materials:
+        if not materials.contains(material.index):
+          materials[material.index] = material
     let baseColors = sortedByIt(values(materials).toSeq, it.index).mapIt(getValue[Vec4f](it.constants["baseColorFactor"], 0))
     let baseTextures = sortedByIt(values(materials).toSeq, it.index).mapIt(it.textures["baseColorTexture"])
-    for t in baseTextures:
-      echo "- ", t
     scene.addShaderGlobalArray("baseColorFactor", baseColors)
     scene.addShaderGlobalArray("baseColorTexture", baseTextures)
     engine.addScene(scene)

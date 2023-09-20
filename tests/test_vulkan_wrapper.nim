@@ -124,9 +124,9 @@ proc scene_primitives(): seq[Mesh] =
   var r = rect(color="ff0000")
   var t = tri(color="0000ff")
   var c = circle(color="00ff00")
-  r.material = mat
-  t.material = mat
-  c.material = mat
+  r.materials = @[mat]
+  t.materials = @[mat]
+  c.materials = @[mat]
   r.transform = translate(newVec3f(0.5, -0.3))
   t.transform = translate(newVec3f(0.3,  0.3))
   c.transform = translate(newVec3f(-0.3,  0.1))
@@ -147,8 +147,8 @@ proc scene_multi_material(): seq[Mesh] =
   var
     r1 = rect(color="ffffff")
     r2 = rect(color="000000")
-  r1.material = mat
-  r2.material = mat3
+  r1.materials = @[mat]
+  r2.materials = @[mat3]
   r1.transform = translate(newVec3f(-0.5))
   r2.transform = translate(newVec3f(+0.5))
   result = @[r1, r2]
