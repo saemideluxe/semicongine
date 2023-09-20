@@ -227,9 +227,11 @@ proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffe
     # but or current mesh/rendering implementation is only designed for a single material
     # currently this is usually handled by adding the values as shader globals
     # TODO: this is bad
-    mesh[].materials.add material
+    if not mesh[].materials.contains(material):
+      mesh[].materials.add material
   else:
-    mesh[].materials.add DEFAULT_MATERIAL
+    if not mesh[].materials.contains(DEFAULT_MATERIAL):
+      mesh[].materials.add DEFAULT_MATERIAL
 
   if primitiveNode.hasKey("indices"):
     assert mesh[].indexType != None
@@ -284,6 +286,14 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
   # add all mesh data
   for primitive in meshNode["primitives"]:
     result.addPrimitive(root, primitive, mainBuffer)
+
+  var maxMaterialIndex = 0
+  for material in result[].materials:
+    maxMaterialIndex = max(int(material.index), maxMaterialIndex)
+  var materials = result[].materials
+  result[].materials = newSeqWith(maxMaterialIndex + 1, DEFAULT_MATERIAL)
+  for material in materials:
+    result[].materials[material.index] = material
 
 proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
