@@ -2,6 +2,7 @@ import std/options
 import std/tables
 import std/strformat
 import std/sequtils
+import std/strutils
 import std/logging
 
 import ./core
@@ -43,7 +44,7 @@ type
     emptyTexture: VulkanTexture
 
 func usesMaterial(scene: Scene, materialName: string): bool =
-  return scene.meshes.anyIt(it.material.name == materialName)
+  return scene.meshes.anyIt(it.materials.anyIt(it.name == materialName))
 
 proc initRenderer*(device: Device, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): Renderer =
   assert device.vk.valid
@@ -121,7 +122,10 @@ func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, pipeline: Pipeline): (
     if input.perInstance and not mesh[].instanceAttributes.contains(input.name):
       return (true, &"Shader input '{input.name}' expected to be per instance attribute, but mesh has no such instance attribute (available are: {mesh[].instanceAttributes})")
 
-  return materialCompatibleWithPipeline(scene, mesh.material, pipeline)
+  var pipelineCompatabilities = mesh.materials.mapIt(materialCompatibleWithPipeline(scene, it, pipeline))
+  if pipelineCompatabilities.filterIt(not it[0]).len == 0:
+    return (true, pipelineCompatabilities.mapIt(it[1]).join(" / "))
+  return (false, "")
 
 func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
   if scene.meshes.len == 0:
@@ -133,7 +137,7 @@ func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
     for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
       shaderTypes.add materialName
       for mesh in scene.meshes:
-        if mesh.material.name == materialName:
+        if mesh.materials.anyIt(it.name == materialName):
           foundRenderableObject = true
           let (error, message) = scene.meshCompatibleWithPipeline(mesh, pipeline)
           if error:
@@ -142,8 +146,9 @@ func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
   if not foundRenderableObject:
     var materialTypes: seq[string]
     for mesh in scene.meshes:
-      if not materialTypes.contains(mesh.material.name):
-          materialTypes.add mesh.material.name
+      for material in mesh.materials:
+        if not materialTypes.contains(material.name):
+            materialTypes.add material.name
     raise newException(Exception, &"Scene '{scene.name}' has been added but materials are not compatible with any registered shader: Materials in scene: {materialTypes}, registered shader-materialtypes: {shaderTypes}")
 
 proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
@@ -156,15 +161,16 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   var scenedata = SceneData()
 
   for mesh in scene.meshes:
-    if not scenedata.materials.contains(mesh.material):
-      scenedata.materials.add mesh.material
-      for textureName, texture in mesh.material.textures.pairs:
-        if scene.shaderGlobals.contains(textureName) and scene.shaderGlobals[textureName].theType == Sampler2D:
-          warn &"Ignoring material texture '{textureName}' as scene-global textures with the same name have been defined"
-        else:
-          if not scenedata.textures.hasKey(textureName):
-            scenedata.textures[textureName] = @[]
-          scenedata.textures[textureName].add renderer.device.uploadTexture(texture)
+    for material in mesh.materials:
+      if not scenedata.materials.contains(material):
+        scenedata.materials.add material
+        for textureName, texture in material.textures.pairs:
+          if scene.shaderGlobals.contains(textureName) and scene.shaderGlobals[textureName].theType == Sampler2D:
+            warn &"Ignoring material texture '{textureName}' as scene-global textures with the same name have been defined"
+          else:
+            if not scenedata.textures.hasKey(textureName):
+              scenedata.textures[textureName] = @[]
+            scenedata.textures[textureName].add renderer.device.uploadTexture(texture)
 
   for name, value in scene.shaderGlobals.pairs:
     if value.theType == Sampler2D:
@@ -428,7 +434,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
         debug &"Start pipeline for '{materialName}'"
         commandBuffer.vkCmdBindPipeline(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.vk)
         commandBuffer.vkCmdBindDescriptorSets(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[pipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
-        for (drawable, mesh) in renderer.scenedata[scene].drawables.filterIt(it[1].visible and it[1].material.name == materialName):
+        for (drawable, mesh) in renderer.scenedata[scene].drawables.filterIt(it[1].visible and it[1].materials.anyIt(it.name == materialName)):
           drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer, pipeline.vk)
 
     if i < renderer.renderPass.subpasses.len - 1:

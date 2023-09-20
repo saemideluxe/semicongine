@@ -23,7 +23,7 @@ type
       of Tiny: tinyIndices: seq[array[3, uint8]]
       of Small: smallIndices: seq[array[3, uint16]]
       of Big: bigIndices: seq[array[3, uint32]]
-    material*: Material
+    materials*: seq[Material]
     transform*: Mat4 = Unit4
     instanceTransforms*: seq[Mat4]
     applyMeshTransformToInstances*: bool = true # if true, the transform attribute for the shader will apply the instance transform AND the mesh transform, to each instance
@@ -146,7 +146,7 @@ proc newMesh*(
     vertexCount: positions.len,
     instanceTransforms: @instanceTransforms,
     transform: transform,
-    material: material,
+    materials: @[material],
   )
 
   result[].initVertexAttribute("position", positions.toSeq)
@@ -370,7 +370,7 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
   result = MeshObject(
     vertexCount: mesh.indicesCount,
     indexType: None,
-    material: mesh.material,
+    materials: mesh.materials,
     transform: mesh.transform,
     instanceTransforms: mesh.instanceTransforms,
     visible: mesh.visible,
@@ -415,7 +415,7 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
     instanceTransforms: @[Unit4F32],
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
-    material: DEFAULT_MATERIAL
+    materials: @[DEFAULT_MATERIAL]
   )
 
   let
@@ -429,7 +429,7 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
 proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = Mesh(vertexCount: 3, instanceTransforms: @[Unit4F32], material: DEFAULT_MATERIAL)
+  result = Mesh(vertexCount: 3, instanceTransforms: @[Unit4F32], materials: @[DEFAULT_MATERIAL])
   let
     half_w = width / 2
     half_h = height / 2
@@ -440,7 +440,7 @@ proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
 
 proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
   assert nSegments >= 3
-  result = Mesh(vertexCount: 3 + nSegments, instanceTransforms: @[Unit4F32], indexType: Small, material: DEFAULT_MATERIAL)
+  result = Mesh(vertexCount: 3 + nSegments, instanceTransforms: @[Unit4F32], indexType: Small, materials: @[DEFAULT_MATERIAL])
 
   let
     half_w = width / 2

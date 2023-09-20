@@ -21,7 +21,7 @@ let
 
 proc main() =
   var flag = rect()
-  flag.material = material
+  flag.materials = @[material]
   var scene = Scene(name: "main", meshes: @[flag])
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
