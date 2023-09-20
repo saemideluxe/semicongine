@@ -26,7 +26,7 @@ proc main() =
 
   var engine = initEngine("Test collisions")
 
-  engine.initRenderer({"": shaderConfiguration})
+  engine.initRenderer({"default material": shaderConfiguration})
   engine.addScene(scene)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
