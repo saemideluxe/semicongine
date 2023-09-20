@@ -5,7 +5,7 @@ import semicongine
 
 let
   sampler = Sampler(magnification: VK_FILTER_NEAREST, minification: VK_FILTER_NEAREST)
-  (RT, WT, PT) = (hexToColorAlpha("A51931").asPixel, hexToColorAlpha("F4F5F8").asPixel, hexToColorAlpha("2D2A4A").asPixel)
+  (RT, WT, PT) = (toRGBA("A51931").asPixel, toRGBA("F4F5F8").asPixel, toRGBA("2D2A4A").asPixel)
   thai = Image(width: 7, height: 5, imagedata: @[
     RT, RT, RT, RT, RT, RT, RT,
     WT, WT, WT, WT, WT, WT, WT,
