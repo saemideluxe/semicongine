@@ -236,7 +236,7 @@ proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffe
   if primitiveNode.hasKey("indices"):
     assert mesh[].indexType != None
     let data = root.getAccessorData(root["accessors"][primitiveNode["indices"].getInt()], mainBuffer)
-    let baseIndex = mesh[].indicesCount
+    let baseIndex = mesh[].vertexCount - vertexCount
     var tri: seq[int]
     case data.thetype
       of UInt16:
@@ -248,7 +248,7 @@ proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffe
             tri.setLen(0)
       of UInt32:
         for entry in getValues[uint32](data)[]:
-          tri.add int(entry)
+          tri.add int(entry) + baseIndex
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
             mesh[].appendIndicesData(tri[0], tri[1], tri[2])
