@@ -46,8 +46,20 @@ let DEFAULT_MATERIAL* = Material(
 func instanceCount*(mesh: MeshObject): int =
   mesh.instanceTransforms.len
 
+func indicesCount*(mesh: MeshObject): int =
+  (
+    case mesh.indexType
+    of None: 0
+    of Tiny: mesh.tinyIndices.len
+    of Small: mesh.smallIndices.len
+    of Big: mesh.bigIndices.len
+  ) * 3
+
 func `$`*(mesh: MeshObject): string =
-  &"Mesh(vertexCount: {mesh.vertexCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
+  if mesh.indexType == None:
+    &"Mesh(vertexCount: {mesh.vertexCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
+  else:
+    &"Mesh(vertexCount: {mesh.vertexCount}, indexCount: {mesh.indicesCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
 func `$`*(mesh: Mesh): string =
   $mesh[]
 
@@ -81,15 +93,6 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
     of Tiny: VK_INDEX_TYPE_UINT8_EXT
     of Small: VK_INDEX_TYPE_UINT16
     of Big: VK_INDEX_TYPE_UINT32
-
-func indicesCount*(mesh: MeshObject): int =
-  (
-    case mesh.indexType
-    of None: 0
-    of Tiny: mesh.tinyIndices.len
-    of Small: mesh.smallIndices.len
-    of Big: mesh.bigIndices.len
-  ) * 3
 
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
