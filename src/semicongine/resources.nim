@@ -139,6 +139,7 @@ proc loadMeshes*(path: string): seq[MeshTree] =
 proc modList*(): seq[string] =
   modList_intern()
 
-iterator walkResources*(): string =
+iterator walkResources*(dir=""): string =
   for i in walkResources_intern():
-    yield i
+    if i.startsWith(dir):
+      yield i
