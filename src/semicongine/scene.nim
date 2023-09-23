@@ -17,11 +17,18 @@ proc add*(scene: var Scene, mesh: MeshObject) =
   scene.meshes.add tmp
 
 proc add*(scene: var Scene, mesh: Mesh) =
+  assert not mesh.isNil, "Cannot add a mesh that is 'nil'"
   scene.meshes.add mesh
 
 # generic way to add objects that have a mesh-attribute
 proc add*[T](scene: var Scene, obj: T) =
-  scene.meshes.add obj.mesh
+  for name, value in obj.fieldPairs:
+    when typeof(value) is Mesh:
+      assert not value.isNil, &"Cannot add a mesh that is 'nil': " & name
+      scene.meshes.add value
+    when typeof(value) is seq[Mesh]:
+      assert not value.isNil, &"Cannot add a mesh that is 'nil': " & name
+      scene.meshes.add value
 
 proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
