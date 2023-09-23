@@ -28,7 +28,7 @@ proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   setValues(scene.shaderGlobals[name], @[data])
   scene.dirtyShaderGlobals.add name
 
-proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: seq[T]) =
+proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: openArray[T]) =
   scene.shaderGlobals[name] = newDataList(data)
   scene.dirtyShaderGlobals.add name
 

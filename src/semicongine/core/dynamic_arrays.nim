@@ -208,9 +208,9 @@ proc newDataList*[T: GPUType](len=0): DataList =
   if len > 0:
     result.setLen(len)
 
-proc newDataList*[T: GPUType](data: seq[T]): DataList =
+proc newDataList*[T: GPUType](data: openArray[T]): DataList =
   result = newDataList(getDataType[T]())
-  result.setValues(data)
+  result.setValues(@data)
 
 proc toGPUValue*[T: GPUType](value: seq[T]): DataList =
   result = newDataList[T](value.len)

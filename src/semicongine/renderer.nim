@@ -114,9 +114,9 @@ func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, pipeline: Pipeline): (
     if input.name == TRANSFORMATTRIBUTE: # will be populated automatically
       continue
     if not (input.name in mesh[].attributes):
-      return (true, &"Shader input '{input.name}' is not available for mesh '{mesh}'")
+      return (true, &"Shader input '{input.name}' is not available for mesh")
     if input.theType != mesh[].attributeType(input.name):
-      return (true, &"Shader input '{input.name}' expects type {input.theType}, but mesh '{mesh}' has {mesh[].attributeType(input.name)}")
+      return (true, &"Shader input '{input.name}' expects type {input.theType}, but mesh has {mesh[].attributeType(input.name)}")
     if not input.perInstance and not mesh[].vertexAttributes.contains(input.name):
       return (true, &"Shader input '{input.name}' expected to be vertex attribute, but mesh has no such vertex attribute (available are: {mesh[].vertexAttributes})")
     if input.perInstance and not mesh[].instanceAttributes.contains(input.name):
@@ -178,7 +178,6 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       scenedata.textures[name] = @[]
       for texture in getValues[Texture](value)[]:
         scenedata.textures[name].add renderer.device.uploadTexture(texture)
-
 
   # find all meshes, populate missing attribute values for shader
   for mesh in scene.meshes.mitems:

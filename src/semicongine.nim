@@ -1,3 +1,6 @@
+import std/tables
+export tables # necessary to use some features without weird compilation error
+
 import semicongine/core
 export core
 
