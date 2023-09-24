@@ -1,4 +1,5 @@
 import std/tables
+import std/sequtils
 import std/hashes
 
 import ./core
@@ -24,7 +25,7 @@ proc add*(scene: var Scene, mesh: Mesh) =
 proc add*[T](scene: var Scene, obj: T) =
   for name, value in obj.fieldPairs:
     when typeof(value) is Mesh:
-      assert not value.isNil, &"Cannot add a mesh that is 'nil': " & name
+      assert not value.isNil, "Cannot add a mesh that is 'nil': " & name
       scene.meshes.add value
     when typeof(value) is seq[Mesh]:
       assert not value.isNil, &"Cannot add a mesh that is 'nil': " & name
@@ -71,3 +72,6 @@ func hash*(scene: Scene): Hash =
 
 func `==`*(a, b: Scene): bool =
   a.name == b.name
+
+func usesMaterial*(scene: Scene, materialName: string): bool =
+  return scene.meshes.anyIt(it.materials.anyIt(it.name == materialName))

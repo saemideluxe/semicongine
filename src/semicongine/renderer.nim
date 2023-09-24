@@ -43,9 +43,6 @@ type
     scenedata: Table[Scene, SceneData]
     emptyTexture: VulkanTexture
 
-func usesMaterial(scene: Scene, materialName: string): bool =
-  return scene.meshes.anyIt(it.materials.anyIt(it.name == materialName))
-
 proc initRenderer*(device: Device, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): Renderer =
   assert device.vk.valid
   
