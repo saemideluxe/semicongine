@@ -452,6 +452,25 @@ func framesRendered*(renderer: Renderer): uint64 =
 func valid*(renderer: Renderer): bool =
   renderer.device.vk.valid
 
+proc destroy*(renderer: var Renderer, scene: Scene) =
+  var scenedata = renderer.scenedata[scene]
+
+  for buffer in scenedata.vertexBuffers.mvalues:
+    assert buffer.vk.valid
+    buffer.destroy()
+  if scenedata.indexBuffer.vk.valid:
+    assert scenedata.indexBuffer.vk.valid
+    scenedata.indexBuffer.destroy()
+  for pipelineUniforms in scenedata.uniformBuffers.mvalues:
+    for buffer in pipelineUniforms.mitems:
+      assert buffer.vk.valid
+      buffer.destroy()
+  for textures in scenedata.textures.mvalues:
+    for texture in textures.mitems:
+      texture.destroy()
+  for descriptorPool in scenedata.descriptorPools.mvalues:
+    descriptorPool.destroy()
+
 proc destroy*(renderer: var Renderer) =
   for scenedata in renderer.scenedata.mvalues:
     for buffer in scenedata.vertexBuffers.mvalues:

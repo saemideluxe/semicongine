@@ -113,11 +113,15 @@ proc initRenderer*(engine: var Engine, shaders: openArray[(string, ShaderConfigu
 proc initRenderer*(engine: var Engine, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
   engine.initRenderer(@[], clearColor)
 
-proc addScene*(engine: var Engine, scene: var Scene) =
+proc loadScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
+  assert not scene.loaded
   engine.renderer.get.setupDrawableBuffers(scene)
   engine.renderer.get.updateMeshData(scene, forceAll=true)
   engine.renderer.get.updateUniformData(scene, forceAll=true)
+
+proc unloadScene*(engine: var Engine, scene: Scene) =
+  engine.renderer.get.destroy(scene)
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
