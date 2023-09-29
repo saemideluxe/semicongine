@@ -404,6 +404,27 @@ func rotate*(angle: float32, a: Vec3f): Mat4 =
     0'f32,                         0'f32,                         0'f32,                         1'f32,
   ])
 
+func asMat3(m: Mat4): auto =
+  Mat3(data: [
+    m[0, 0], m[0, 1], m[0, 2],
+    m[1, 0], m[1, 1], m[1, 2],
+    m[2, 0], m[2, 1], m[2, 2],
+  ])
+
+
+func inversed*(m: Mat4): Mat4 =
+  var m3 = m.asMat3.transposed
+  m3[0, 0] = 1'f32 / m3[0, 0]
+  m3[1, 1] = 1'f32 / m3[1, 1]
+  m3[2, 2] = 1'f32 / m3[2, 2]
+  let col3 = -(m3 * m.col(3).xyz)
+  return Mat4(data: [
+        m3[0, 0],     m3[0, 1],     m3[0, 2], col3.x,
+        m3[1, 0],     m3[1, 1],     m3[1, 2], col3.y,
+        m3[2, 0],     m3[2, 1],     m3[2, 2], col3.z,
+               0,            0,            0,      1,
+  ])
+
 
 # call e.g. TMat32[int]().randomized() to get a random matrix
 template makeRandomInit(mattype: typedesc) =
@@ -444,10 +465,10 @@ func ortho*(left, right, top, bottom, zNear, zFar: float32): Mat4 =
 func orthoWindowAspect*(windowAspect: float32): Mat4 =
   if windowAspect > 1:
     let space = 2 * (windowAspect - 1) / 2
-    ortho(-1, 1, -1 - space, 1 + space, -1, 1)
+    ortho(-1, 1, -1 - space, 1 + space, 0, 1)
   else:
     let space = 2 * (1 / windowAspect - 1) / 2
-    ortho(-1 - space, 1 + space, -1, 1, -1, 1)
+    ortho(-1 - space, 1 + space, -1, 1, 0, 1)
 
 func position*(mat: Mat4): Vec3f =
   mat.col(3).toVec3
