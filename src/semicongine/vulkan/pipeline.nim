@@ -55,7 +55,7 @@ proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffe
             descriptor.imageviews.add emptyTexture.imageView
             descriptor.samplers.add emptyTexture.sampler
 
-proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32): Pipeline =
+proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling=true): Pipeline =
   assert renderPass.valid
   assert device.vk.valid
 
@@ -118,7 +118,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
       rasterizerDiscardEnable: VK_FALSE,
       polygonMode: VK_POLYGON_MODE_FILL,
       lineWidth: 1.0,
-      cullMode: toBits [VK_CULL_MODE_BACK_BIT],
+      cullMode: if backFaceCulling: toBits [VK_CULL_MODE_BACK_BIT] else: VkCullModeFlags(0),
       frontFace: VK_FRONT_FACE_CLOCKWISE,
       depthBiasEnable: VK_FALSE,
       depthBiasConstantFactor: 0.0,

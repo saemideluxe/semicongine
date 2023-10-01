@@ -272,7 +272,7 @@ func collisionPoint3D(simplex: var seq[Vec3f], a, b: Collider): tuple[normal: Ve
   result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
 
 
-func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec2f, penetrationDepth: float32] =
+func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec3f, penetrationDepth: float32] =
   var
     polytope = polytopeIn
     minIndex = 0
@@ -309,11 +309,11 @@ func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec
       polytope.insert(support, minIndex)
     inc iterCount
 
-  result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
+  result = (normal: newVec3f(minNormal.x, minNormal.y), penetrationDepth: minDistance + 0.001'f32)
 
-func intersects*(a, b: Collider): bool =
+func intersects*(a, b: Collider, as2D=false): bool =
   var
-    support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0.5786)) # just random initial vector
+    support = supportPoint(a, b, newVec3f(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
     direction = -support
     n = 0
@@ -323,16 +323,16 @@ func intersects*(a, b: Collider): bool =
     if support.dot(direction) <= 0:
         return false
     simplex.insert(support, 0)
-    if nextSimplex(simplex, direction):
+    if nextSimplex(simplex, direction, twoDimensional=as2D):
       return true
     # prevent numeric instability
     if direction == newVec3f(0, 0, 0):
       direction[0] = 0.0001
     inc n
 
-func collision*(a, b: Collider): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
+func collision*(a, b: Collider, as2D=false): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
   var
-    support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0.5786)) # just random initial vector
+    support = supportPoint(a, b, newVec3f(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
     direction = -support
     n = 0
@@ -342,28 +342,8 @@ func collision*(a, b: Collider): tuple[hasCollision: bool, normal: Vec3f, penetr
     if support.dot(direction) <= 0:
         return result
     simplex.insert(support, 0)
-    if nextSimplex(simplex, direction):
-      let (normal, depth) = collisionPoint3D(simplex, a, b)
-      return (true, normal, depth)
-    # prevent numeric instability
-    if direction == newVec3f(0, 0, 0):
-      direction[0] = 0.0001
-    inc n
-
-func collision2D*(a, b: Collider): tuple[hasCollision: bool, normal: Vec2f, penetrationDepth: float32] =
-  var
-    support = supportPoint(a, b, newVec3f(0.8153, -0.4239, 0)) # just random initial vector
-    simplex = newSeq[Vec3f]()
-    direction = -support
-    n = 0
-  simplex.insert(support, 0)
-  while n < MAX_COLLISON_DETECTION_ITERATIONS:
-    support = supportPoint(a, b, direction)
-    if support.dot(direction) <= 0:
-        return result
-    simplex.insert(support, 0)
-    if nextSimplex(simplex, direction, twoDimensional=true):
-      let (normal, depth) = collisionPoint2D(simplex, a, b)
+    if nextSimplex(simplex, direction, twoDimensional=as2D):
+      let (normal, depth) = if as2D: collisionPoint2D(simplex, a, b) else: collisionPoint3D(simplex, a, b)
       return (true, normal, depth)
     # prevent numeric instability
     if direction == newVec3f(0, 0, 0):
