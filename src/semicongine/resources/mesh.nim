@@ -135,6 +135,7 @@ proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: seq[uint8]): Image =
 proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Texture =
   let textureNode = root["textures"][textureIndex]
   result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
+  result.name = root["images"][textureNode["source"].getInt()]["name"].getStr()
 
   if textureNode.hasKey("sampler"):
     let sampler = root["samplers"][textureNode["sampler"].getInt()]
@@ -271,7 +272,11 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
     else:
       indexType = Big
 
-  result = Mesh(instanceTransforms: @[Unit4F32], indexType: indexType)
+  result = Mesh(
+    instanceTransforms: @[Unit4F32],
+    indexType: indexType,
+    name: meshNode["name"].getStr()
+  )
 
   # check we have the same attributes for all primitives
   let attributes = meshNode["primitives"][0]["attributes"].keys.toSeq
@@ -286,6 +291,7 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
   # add all mesh data
   for primitive in meshNode["primitives"]:
     result.addPrimitive(root, primitive, mainBuffer)
+  transform[Vec3f](result[], "position", scale(1, -1, 1))
 
   var maxMaterialIndex = 0
   for material in result[].materials:
@@ -341,7 +347,6 @@ proc loadMeshTree(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8
   result = MeshTree()
   for nodeId in scenenode["nodes"]:
     result.children.add loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
-  result.transform = scale(1, -1, 1)
   result.updateTransforms()
 
 

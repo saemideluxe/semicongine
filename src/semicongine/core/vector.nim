@@ -321,3 +321,6 @@ makeRandomInit(TVec4)
 
 converter Vec2VkExtent*(vec: TVec2[uint32]): VkExtent2D = VkExtent2D(width: vec[0], height: vec[1])
 converter Vec3VkExtent*(vec: TVec2[uint32]): VkExtent3D = VkExtent3D(width: vec[0], height: vec[1], depth: vec[2])
+
+func angleBetween*(a, b: Vec3f): float32 =
+  arccos(a.dot(b) / (a.length * b.length))

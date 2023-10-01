@@ -10,6 +10,8 @@ import std/sequtils
 import ./core
 import ./collision
 
+var instanceCounter = 0
+
 type
   MeshIndexType* = enum
     None
@@ -17,12 +19,13 @@ type
     Small # up to 2^16 vertices
     Big # up to 2^32 vertices
   MeshObject* = object
+    name*: string
     vertexCount*: int
     case indexType*: MeshIndexType
       of None: discard
-      of Tiny: tinyIndices: seq[array[3, uint8]]
-      of Small: smallIndices: seq[array[3, uint16]]
-      of Big: bigIndices: seq[array[3, uint32]]
+      of Tiny: tinyIndices*: seq[array[3, uint8]]
+      of Small: smallIndices*: seq[array[3, uint16]]
+      of Big: bigIndices*: seq[array[3, uint32]]
     materials*: seq[Material]
     transform*: Mat4 = Unit4
     instanceTransforms*: seq[Mat4]
@@ -57,9 +60,9 @@ func indicesCount*(mesh: MeshObject): int =
 
 func `$`*(mesh: MeshObject): string =
   if mesh.indexType == None:
-    &"Mesh(vertexCount: {mesh.vertexCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
+    &"Mesh('{mesh.name}', vertexCount: {mesh.vertexCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType}, materials: {mesh.materials})"
   else:
-    &"Mesh(vertexCount: {mesh.vertexCount}, indexCount: {mesh.indicesCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType})"
+    &"Mesh('{mesh.name}', vertexCount: {mesh.vertexCount}, indexCount: {mesh.indicesCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType}, materials: {mesh.materials})"
 func `$`*(mesh: Mesh): string =
   $mesh[]
 
@@ -108,6 +111,7 @@ proc initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: Dat
   mesh.vertexData[attribute] = newDataList(thetype=datatype)
   mesh.vertexData[attribute].setLen(mesh.vertexCount)
 
+
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = newDataList(thetype=getDataType[T]())
@@ -131,9 +135,14 @@ proc newMesh*(
   instanceTransforms: openArray[Mat4]=[Unit4F32],
   material: Material=DEFAULT_MATERIAL,
   autoResize=true,
+  name: string=""
 ): Mesh =
   assert colors.len == 0 or colors.len == positions.len
   assert uvs.len == 0 or uvs.len == positions.len
+  var theName = name
+  if theName == "":
+    theName = &"mesh-{instanceCounter}"
+    inc instanceCounter
 
   # determine index type (uint8, uint16, uint32)
   var indexType = None
@@ -145,6 +154,7 @@ proc newMesh*(
       indexType = Small
 
   result = Mesh(
+    name: theName,
     indexType: indexType,
     vertexCount: positions.len,
     instanceTransforms: @instanceTransforms,
@@ -180,6 +190,7 @@ proc newMesh*(
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
   material: Material=DEFAULT_MATERIAL,
+  name: string="",
 ): Mesh =
   newMesh(
     positions=positions,
@@ -189,6 +200,7 @@ proc newMesh*(
     transform=transform,
     instanceTransforms=instanceTransforms,
     material=material,
+    name=name,
   )
 
 func attributeSize*(mesh: MeshObject, attribute: string): int =
@@ -319,6 +331,14 @@ proc appendAttributeData*(mesh: var MeshObject, attribute: string, data: DataLis
   if not mesh.dirtyAttributes.contains(attribute):
     mesh.dirtyAttributes.add attribute
 
+proc removeAttribute*(mesh: var MeshObject, attribute: string) =
+  if mesh.vertexData.contains(attribute):
+    mesh.vertexData.del(attribute)
+  elif mesh.instanceData.contains(attribute):
+    mesh.instanceData.del(attribute)
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+
 proc appendIndicesData*(mesh: var MeshObject, v1, v2, v3: int) =
   case mesh.indexType
   of None: raise newException(Exception, "Mesh does not support indexed data")
@@ -365,6 +385,9 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
 func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
   for p in mesh[positionAttribute, Vec3f][]:
     result.add mesh.transform * p
+
+func getCollider*(mesh: MeshObject, positionAttribute="position"): Collider =
+  return mesh.getCollisionPoints(positionAttribute).calculateCollider(Points)
 
 proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
   if mesh.indexType == None:
@@ -418,8 +441,10 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
     instanceTransforms: @[Unit4F32],
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
-    materials: @[DEFAULT_MATERIAL]
+    materials: @[DEFAULT_MATERIAL],
+    name: &"rect-{instanceCounter}",
   )
+  inc instanceCounter
 
   let
     half_w = width / 2
@@ -432,7 +457,13 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
 proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
-  result = Mesh(vertexCount: 3, instanceTransforms: @[Unit4F32], materials: @[DEFAULT_MATERIAL])
+  result = Mesh(
+    vertexCount: 3,
+    instanceTransforms: @[Unit4F32],
+    materials: @[DEFAULT_MATERIAL],
+    name: &"tri-{instanceCounter}",
+  )
+  inc instanceCounter
   let
     half_w = width / 2
     half_h = height / 2
@@ -443,7 +474,14 @@ proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
 
 proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
   assert nSegments >= 3
-  result = Mesh(vertexCount: 3 + nSegments, instanceTransforms: @[Unit4F32], indexType: Small, materials: @[DEFAULT_MATERIAL])
+  result = Mesh(
+    vertexCount: 3 + nSegments,
+    instanceTransforms: @[Unit4F32],
+    indexType: Small,
+    materials: @[DEFAULT_MATERIAL],
+    name: &"circle-{instanceCounter}",
+  )
+  inc instanceCounter
 
   let
     half_w = width / 2

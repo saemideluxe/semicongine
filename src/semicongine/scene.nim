@@ -25,6 +25,12 @@ proc add*(scene: var Scene, mesh: Mesh) =
   assert not mesh.isNil, "Cannot add a mesh that is 'nil'"
   scene.meshes.add mesh
 
+proc add*(scene: var Scene, meshes: seq[Mesh]) =
+  assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add meshes"
+  for mesh in meshes:
+    assert not mesh.isNil, "Cannot add a mesh that is 'nil'"
+  scene.meshes.add meshes
+
 # generic way to add objects that have a mesh-attribute
 proc add*[T](scene: var Scene, obj: T) =
   assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add meshes"

@@ -43,11 +43,11 @@ type
     scenedata: Table[Scene, SceneData]
     emptyTexture: VulkanTexture
 
-proc initRenderer*(device: Device, shaders: Table[string, ShaderConfiguration], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])): Renderer =
+proc initRenderer*(device: Device, shaders: openArray[(string, ShaderConfiguration)], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling=true): Renderer =
   assert device.vk.valid
   
   result.device = device
-  result.renderPass = device.simpleForwardRenderPass(shaders, clearColor=clearColor)
+  result.renderPass = device.simpleForwardRenderPass(shaders, clearColor=clearColor, backFaceCulling=backFaceCulling)
   result.surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
   # use last renderpass as output for swapchain
   let swapchain = device.createSwapchain(result.renderPass.vk, result.surfaceFormat, device.firstGraphicsQueue().get().family)
@@ -60,7 +60,7 @@ proc initRenderer*(device: Device, shaders: Table[string, ShaderConfiguration], 
 func inputs(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
   var found: Table[string, ShaderAttribute]
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
+    for (materialName, pipeline) in renderer.renderPass.subpasses[i].pipelines:
       if scene.usesMaterial(materialName):
         for input in pipeline.inputs:
           if found.contains(input.name):
@@ -74,7 +74,7 @@ func inputs(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
 
 func samplers(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
+    for (materialName, pipeline) in renderer.renderPass.subpasses[i].pipelines:
       if scene.usesMaterial(materialName):
         result.add pipeline.samplers
 
@@ -131,7 +131,7 @@ func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
   var foundRenderableObject = false
   var shaderTypes: seq[string]
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
+    for (materialName, pipeline) in renderer.renderPass.subpasses[i].pipelines:
       shaderTypes.add materialName
       for mesh in scene.meshes:
         if mesh.materials.anyIt(it.name == materialName):
@@ -252,7 +252,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     # fill offsets per pipeline (as sequence corresponds to shader input binding)
     var offsets: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]]
     for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
-      for materialName, pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.pairs:
+      for (materialName, pipeline) in renderer.renderPass.subpasses[subpass_i].pipelines:
         if scene.usesMaterial(materialName):
           offsets[pipeline.vk] = newSeq[(string, MemoryPerformanceHint, int)]()
           for attribute in pipeline.inputs:
@@ -284,7 +284,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   # setup uniforms and samplers
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
-    for materialName, pipeline in renderer.renderPass.subpasses[subpass_i].pipelines.pairs:
+    for (materialName, pipeline) in renderer.renderPass.subpasses[subpass_i].pipelines:
       if scene.usesMaterial(materialName):
         var uniformBufferSize = 0
         for uniform in pipeline.uniforms:
@@ -359,7 +359,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
 
   # loop over all used shaders/pipelines
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
+    for (materialName, pipeline) in renderer.renderPass.subpasses[i].pipelines:
       if (
         scene.usesMaterial(materialName) and
         renderer.scenedata[scene].uniformBuffers.hasKey(pipeline.vk) and
@@ -425,7 +425,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
   debug "  Index buffer: ", renderer.scenedata[scene].indexBuffer
 
   for i in 0 ..< renderer.renderPass.subpasses.len:
-    for materialName, pipeline in renderer.renderPass.subpasses[i].pipelines.pairs:
+    for (materialName, pipeline) in renderer.renderPass.subpasses[i].pipelines:
       if scene.usesMaterial(materialName):
         debug &"Start pipeline for '{materialName}'"
         commandBuffer.vkCmdBindPipeline(renderer.renderPass.subpasses[i].pipelineBindPoint, pipeline.vk)

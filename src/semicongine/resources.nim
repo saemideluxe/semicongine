@@ -136,6 +136,9 @@ proc loadFont*(path: string, name="", color=newVec4f(1, 1, 1, 1), resolution=100
 proc loadMeshes*(path: string): seq[MeshTree] =
   loadResource_intern(path).readglTF()
 
+proc loadFirstMesh*(path: string): Mesh =
+  loadResource_intern(path).readglTF()[0].toSeq[0]
+
 proc modList*(): seq[string] =
   modList_intern()
 
