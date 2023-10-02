@@ -7,6 +7,8 @@ import ./mesh
 import ./vulkan/shader
 
 const SHADER_ATTRIB_PREFIX = "semicon_text_"
+var instanceCounter = 0
+
 type
   TextAlignment = enum
     Left
@@ -16,7 +18,7 @@ type
     maxLen*: int
     text: seq[Rune]
     dirty: bool
-    alignment*: TextAlignment
+    alignment*: TextAlignment = Center
     font*: Font
     mesh*: Mesh
 
@@ -103,7 +105,8 @@ proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
     ]
 
   result = Textbox(maxLen: maxLen, text: text, font: font, dirty: true)
-  result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs)
+  result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"textbox-{instanceCounter}")
+  inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
   result.mesh.materials = @[Material(

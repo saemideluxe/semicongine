@@ -130,7 +130,7 @@ proc loadFont*(path: string, name="", color=newVec4f(1, 1, 1, 1), resolution=100
   var thename = name
   if thename == "":
     thename = path.splitFile().name
-  let defaultCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=+[{]};:,<.>/? ".toRunes()
+  let defaultCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=+[{]};:,<.>/? $!@#%^&*()\"'".toRunes()
   loadResource_intern(path).readTrueType(name, defaultCharset, color, resolution)
 
 proc loadMeshes*(path: string): seq[MeshTree] =

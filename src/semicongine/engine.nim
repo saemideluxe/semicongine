@@ -189,6 +189,7 @@ proc updateInputs*(engine: var Engine): EngineState =
 # wrappers for internal things
 func keyIsDown*(engine: Engine, key: Key): auto = key in engine.input.keyIsDown
 func keyWasPressed*(engine: Engine, key: Key): auto = key in engine.input.keyWasPressed
+func keyWasPressed*(engine: Engine): auto = engine.input.keyWasPressed.len > 0
 func keyWasReleased*(engine: Engine, key: Key): auto = key in engine.input.keyWasReleased
 func mouseIsDown*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseIsDown
 func mouseWasPressed*(engine: Engine, button: MouseButton): auto = button in engine.input.mouseWasPressed
