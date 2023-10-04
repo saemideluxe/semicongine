@@ -7,6 +7,7 @@ import ./buffer
 
 type
   Drawable* = object
+    name*: string
     elementCount*: int # number of vertices or indices
     bufferOffsets*: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]] # list of buffers and list of offset for each attribute in that buffer
     instanceCount*: int # number of instance
@@ -19,9 +20,9 @@ type
 
 func `$`*(drawable: Drawable): string =
   if drawable.indexed:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets}, indexType: {drawable.indexType}, indexBufferOffset: {drawable.indexBufferOffset})"
+    &"Drawable({drawable.name}, elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets}, indexType: {drawable.indexType}, indexBufferOffset: {drawable.indexBufferOffset})"
   else:
-    &"Drawable(elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
+    &"Drawable({drawable.name}, elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
 proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer, pipeline: VkPipeline) =
     debug "Draw ", drawable
