@@ -261,6 +261,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     # create drawables
     let indexed = mesh.indexType != MeshIndexType.None
     var drawable = Drawable(
+      name: mesh.name,
       elementCount: if indexed: mesh[].indicesCount else: mesh[].vertexCount,
       bufferOffsets: offsets,
       instanceCount: mesh[].instanceCount,
