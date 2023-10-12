@@ -14,6 +14,7 @@ const RESOURCEROOT* {.strdefine.}: string = "resources"
 task build, "build":
   switch("d", "BUNDLETYPE=" & BUNDLETYPE)
   switch("d", "RESOURCEROOT=" & RESOURCEROOT)
+  switch("d", "nimPreviewHashRef")
   switch("mm", "orc")
   switch("experimental", "strictEffects")
   switch("threads", "on")

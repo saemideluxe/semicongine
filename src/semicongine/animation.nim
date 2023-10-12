@@ -1,7 +1,7 @@
+import std/sugar
 import std/tables
 import std/math
 import std/sequtils
-import std/strformat
 import std/algorithm
 
 import ./core/matrix
@@ -17,7 +17,7 @@ type
     Expo
     Sine
     Circ
-  AnimationTime = 0'f32 .. 1'f32
+  AnimationTime* = 0'f32 .. 1'f32
   Direction* = enum
     Forward
     Backward
@@ -28,7 +28,7 @@ type
     easeIn: Ease
     easeOut: Ease
   Animation*[T] = object
-    keyframes*: seq[Keyframe[T]]
+    animationFunction: (t: AnimationTime) -> T
     duration: float32
     direction: Direction
     iterations: int
@@ -49,9 +49,6 @@ func easePow5(x: float32): float32 = x * x * x * x * x
 func easeExpo(x: float32): float32 = ( if x == 0: 0'f32 else: pow(2'f32, 10'f32 * x - 10'f32) )
 func easeSine(x: float32): float32 = 1'f32 - cos((x * PI) / 2'f32)
 func easeCirc(x: float32): float32 = 1'f32 - sqrt(1'f32 - pow(x, 2'f32))
-
-func `$`*(animation: Animation): string =
-  &"{animation.keyframes.len} keyframes, {animation.duration}s"
 
 const EASEFUNC_MAP = {
     None: easeConst,
@@ -96,36 +93,50 @@ func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, dire
     assert kf.timestamp > last, "Succeding keyframes must have increasing timestamps"
     last = kf.timestamp
 
+  let theKeyframes = keyframes.toSeq
+
+  proc animationFunc(t: AnimationTime): T =
+    var i = 0
+    while i < theKeyframes.len - 1:
+      if theKeyframes[i].timestamp > t:
+        break
+      inc i
+
+    let
+      keyFrameDist = theKeyframes[i].timestamp - theKeyframes[i - 1].timestamp
+      timestampDist = t - theKeyframes[i - 1].timestamp
+      x = timestampDist / keyFrameDist
+
+    let value = theKeyframes[i - 1].interpol(x)
+    return theKeyframes[i].value * value + theKeyframes[i - 1].value * (1 - value)
+
   Animation[T](
-    keyframes: keyframes.toSeq,
+    animationFunction: animationFunc,
     duration: duration,
     direction: direction,
     iterations: iterations
   )
 
-func valueAt[T](animation: Animation[T], timestamp: AnimationTime): T =
-  var i = 0
-  while i < animation.keyframes.len - 1:
-    if animation.keyframes[i].timestamp > timestamp:
-      break
-    inc i
-
-  let
-    keyFrameDist = animation.keyframes[i].timestamp - animation.keyframes[i - 1].timestamp
-    timestampDist = timestamp - animation.keyframes[i - 1].timestamp
-    x = timestampDist / keyFrameDist
-
-  let newX = animation.keyframes[i - 1].interpol(x)
-  return animation.keyframes[i].value * newX + animation.keyframes[i - 1].value * (1 - newX)
+func newAnimation*[T](fun: (t: AnimationTime) -> T, duration: float32, direction=Forward, iterations=1): Animation[T] =
+  Animation[T](
+    animationFunction: fun,
+    duration: duration,
+    direction: direction,
+    iterations: iterations
+  )
 
 func resetPlayer*(player: var AnimationPlayer) =
   player.currentTime = 0
   player.currentDirection = if player.animation.direction == Backward: -1 else : 1
   player.currentIteration = player.animation.iterations
 
+
 func newAnimationPlayer*[T](animation: Animation[T]): AnimationPlayer[T] =
-  result = AnimationPlayer[T]( animation: animation, playing: false,)
+  result = AnimationPlayer[T](animation: animation, playing: false)
   result.resetPlayer()
+
+func newAnimationPlayer*[T](value: T = default(T)): AnimationPlayer[T] =
+  newAnimationPlayer[T](newAnimation[T]((t: AnimationTime) => value, 0))
 
 func start*(player: var AnimationPlayer) =
   player.playing = true
@@ -133,7 +144,7 @@ func start*(player: var AnimationPlayer) =
 func stop*(player: var AnimationPlayer) =
   player.playing = false
 
-func advance*[T](player: var AnimationPlayer[T], dt: float32): T =
+proc advance*[T](player: var AnimationPlayer[T], dt: float32): T =
   # TODO: check this function, not 100% correct I think
   if player.playing:
     player.currentTime += float32(player.currentDirection) * dt
@@ -152,5 +163,5 @@ func advance*[T](player: var AnimationPlayer[T], dt: float32): T =
             player.currentDirection = -player.currentDirection
             player.currentTime += float32(player.currentDirection) * dt * 2'f32
 
-  player.currentValue = valueAt(player.animation, (abs(player.currentTime) / player.animation.duration) mod high(AnimationTime))
+  player.currentValue = player.animation.animationFunction((abs(player.currentTime) / player.animation.duration) mod high(AnimationTime))
   return player.currentValue

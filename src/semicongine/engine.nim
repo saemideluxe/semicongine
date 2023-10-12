@@ -1,4 +1,3 @@
-import std/tables
 import std/options
 import std/logging
 import std/os
