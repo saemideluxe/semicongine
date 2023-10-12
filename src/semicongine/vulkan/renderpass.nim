@@ -1,5 +1,4 @@
 import std/options
-import std/tables
 
 import ../core
 import ./device

@@ -51,7 +51,7 @@ type
     Mat43F64
     Mat4F32
     Mat4F64
-    Sampler2D
+    TextureType
   MemoryPerformanceHint* = enum
     PreferFastRead, PreferFastWrite
   ShaderAttribute* = object
@@ -123,7 +123,7 @@ func size*(theType: DataType): int =
     of Mat43F64: 92
     of Mat4F32: 64
     of Mat4F64: 128
-    of Sampler2D: 0
+    of TextureType: 0
 
 func size*(attribute: ShaderAttribute, perDescriptor=false): int =
   if perDescriptor:
@@ -187,7 +187,7 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
   elif T is TMat43[float64]: Mat43F64
   elif T is TMat4[float32]: Mat4F32
   elif T is TMat4[float64]: Mat4F64
-  elif T is Texture: Sampler2D
+  elif T is Texture: TextureType
   else:
     static:
       raise newException(Exception, &"Unsupported data type for GPU data: {name(T)}" )
@@ -309,7 +309,7 @@ func nLocationSlots*(theType: DataType): int =
     of Mat43F64: 2
     of Mat4F32: 1
     of Mat4F64: 2
-    of Sampler2D: 1
+    of TextureType: 1
 
 func glslType*(theType: DataType): string =
   # todo: likely not correct as we would need to enable some 
@@ -353,7 +353,7 @@ func glslType*(theType: DataType): string =
     of Mat43F64: "dmat43"
     of Mat4F32: "mat4"
     of Mat4F64: "dmat4"
-    of Sampler2D: "sampler2D"
+    of TextureType: "sampler2D"
 
 func glslInput*(group: openArray[ShaderAttribute]): seq[string] =
   if group.len == 0:

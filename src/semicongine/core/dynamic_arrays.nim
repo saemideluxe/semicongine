@@ -1,3 +1,5 @@
+import std/hashes
+
 import ./gpu_types
 import ./vector
 import ./matrix
@@ -50,10 +52,56 @@ type
     of Mat43F64: mat43f64: ref seq[TMat43[float64]]
     of Mat4F32: mat4f32: ref seq[TMat4[float32]]
     of Mat4F64: mat4f64: ref seq[TMat4[float64]]
-    of Sampler2D: texture: ref seq[Texture]
+    of TextureType: texture: ref seq[Texture]
 
 func size*(value: DataList): int =
   value.theType.size * value.len
+
+func hash*(value: DataList): Hash =
+  case value.theType
+    of Float32: hash(value.float32)
+    of Float64: hash(value.float64)
+    of Int8: hash(value.int8)
+    of Int16: hash(value.int16)
+    of Int32: hash(value.int32)
+    of Int64: hash(value.int64)
+    of UInt8: hash(value.uint8)
+    of UInt16: hash(value.uint16)
+    of UInt32: hash(value.uint32)
+    of UInt64: hash(value.uint64)
+    of Vec2I32: hash(value.vec2i32)
+    of Vec2I64: hash(value.vec2i64)
+    of Vec3I32: hash(value.vec3i32)
+    of Vec3I64: hash(value.vec3i64)
+    of Vec4I32: hash(value.vec4i32)
+    of Vec4I64: hash(value.vec4i64)
+    of Vec2U32: hash(value.vec2u32)
+    of Vec2U64: hash(value.vec2u64)
+    of Vec3U32: hash(value.vec3u32)
+    of Vec3U64: hash(value.vec3u64)
+    of Vec4U32: hash(value.vec4u32)
+    of Vec4U64: hash(value.vec4u64)
+    of Vec2F32: hash(value.vec2f32)
+    of Vec2F64: hash(value.vec2f64)
+    of Vec3F32: hash(value.vec3f32)
+    of Vec3F64: hash(value.vec3f64)
+    of Vec4F32: hash(value.vec4f32)
+    of Vec4F64: hash(value.vec4f64)
+    of Mat2F32: hash(value.mat2f32)
+    of Mat2F64: hash(value.mat2f64)
+    of Mat23F32: hash(value.mat23f32)
+    of Mat23F64: hash(value.mat23f64)
+    of Mat32F32: hash(value.mat32f32)
+    of Mat32F64: hash(value.mat32f64)
+    of Mat3F32: hash(value.mat3f32)
+    of Mat3F64: hash(value.mat3f64)
+    of Mat34F32: hash(value.mat34f32)
+    of Mat34F64: hash(value.mat34f64)
+    of Mat43F32: hash(value.mat43f32)
+    of Mat43F64: hash(value.mat43f64)
+    of Mat4F32: hash(value.mat4f32)
+    of Mat4F64: hash(value.mat4f64)
+    of TextureType: hash(value.texture)
 
 func `==`*(a, b: DataList): bool =
   if a.theType != b.theType:
@@ -101,7 +149,7 @@ func `==`*(a, b: DataList): bool =
     of Mat43F64: return a.mat43f64 == b.mat43f64
     of Mat4F32: return a.mat4f32 == b.mat4f32
     of Mat4F64: return a.mat4f64 == b.mat4f64
-    of Sampler2D: a.texture == b.texture
+    of TextureType: a.texture == b.texture
 
 proc setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   value.setLen(data.len)
@@ -201,7 +249,7 @@ func newDataList*(theType: DataType): DataList =
     of Mat43F64: result.mat43f64 = new seq[TMat43[float64]]
     of Mat4F32: result.mat4f32 = new seq[TMat4[float32]]
     of Mat4F64: result.mat4f64 = new seq[TMat4[float64]]
-    of Sampler2D: result.texture = new seq[Texture]
+    of TextureType: result.texture = new seq[Texture]
 
 proc newDataList*[T: GPUType](len=0): DataList =
   result = newDataList(getDataType[T]())
@@ -367,7 +415,7 @@ func getRawData*(value: var DataList): (pointer, int) =
     of Mat43F64: result[0] = value.mat43f64[].toCPointer
     of Mat4F32: result[0] = value.mat4f32[].toCPointer
     of Mat4F64: result[0] = value.mat4f64[].toCPointer
-    of Sampler2D: result[0] = nil
+    of TextureType: result[0] = nil
 
 proc setLen*(value: var DataList, len: int) =
   value.len = len
@@ -414,7 +462,7 @@ proc setLen*(value: var DataList, len: int) =
     of Mat43F64: value.mat43f64[].setLen(len)
     of Mat4F32: value.mat4f32[].setLen(len)
     of Mat4F64: value.mat4f64[].setLen(len)
-    of Sampler2D: discard
+    of TextureType: discard
 
 proc appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   value.len += data.len
@@ -515,7 +563,7 @@ proc appendValues*(value: var DataList, data: DataList) =
   of Mat43F64: value.mat43f64[].add data.mat43f64[]
   of Mat4F32: value.mat4f32[].add data.mat4f32[]
   of Mat4F64: value.mat4f64[].add data.mat4f64[]
-  of Sampler2D: value.texture[].add data.texture[]
+  of TextureType: value.texture[].add data.texture[]
 
 proc setValue*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   when T is float32: value.float32[] = data
@@ -667,7 +715,7 @@ proc appendFrom*(a: var DataList, i: int, b: DataList, j: int) =
     of Mat43F64: a.mat43f64[i] = b.mat43f64[j]
     of Mat4F32: a.mat4f32[i] = b.mat4f32[j]
     of Mat4F64: a.mat4f64[i] = b.mat4f64[j]
-    of Sampler2D: a.texture[i] = b.texture[j]
+    of TextureType: a.texture[i] = b.texture[j]
 
 proc copy*(datalist: DataList): DataList =
   result = newDataList(datalist.theType)
@@ -717,4 +765,4 @@ func `$`*(list: DataList): string =
     of Mat43F64: $list.mat43f64[]
     of Mat4F32: $list.mat4f32[]
     of Mat4F64: $list.mat4f64[]
-    of Sampler2D: $list.texture[]
+    of TextureType: $list.texture[]

@@ -4,6 +4,7 @@ import std/strformat
 
 import ./core
 import ./mesh
+import ./material
 import ./vulkan/shader
 
 const SHADER_ATTRIB_PREFIX = "semicon_text_"
@@ -109,7 +110,7 @@ proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
   inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
-  result.mesh.materials = @[Material(
+  result.mesh.materials = @[MaterialData(
     name: TEXT_MATERIAL,
     textures: {"fontAtlas": font.fontAtlas}.toTable,
   )]

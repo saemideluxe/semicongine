@@ -7,6 +7,7 @@ import std/strformat
 import std/streams
 
 import ../mesh
+import ../material
 import ../core
 
 import ./image
@@ -149,62 +150,62 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Tex
       result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
 
 
-proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8], materialIndex: uint16): Material =
-  result = Material(name: materialNode["name"].getStr(), index: materialIndex)
+proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8], materialIndex: uint16): MaterialData =
+  result = MaterialData(name: materialNode["name"].getStr(), index: materialIndex)
   let pbr = materialNode["pbrMetallicRoughness"]
 
   # color
-  result.constants["baseColorFactor"] = newDataList(thetype=Vec4F32)
+  result.values["baseColorFactor"] = newDataList(thetype=Vec4F32)
   if pbr.hasKey("baseColorFactor"):
-    setValue(result.constants["baseColorFactor"], @[newVec4f(
+    setValue(result.values["baseColorFactor"], @[newVec4f(
       pbr["baseColorFactor"][0].getFloat(),
       pbr["baseColorFactor"][1].getFloat(),
       pbr["baseColorFactor"][2].getFloat(),
       pbr["baseColorFactor"][3].getFloat(),
     )])
   else:
-    setValue(result.constants["baseColorFactor"], @[newVec4f(1, 1, 1, 1)])
+    setValue(result.values["baseColorFactor"], @[newVec4f(1, 1, 1, 1)])
 
-  # pbr material constants
+  # pbr material values
   for factor in ["metallicFactor", "roughnessFactor"]:
-    result.constants[factor] = newDataList(thetype=Float32)
+    result.values[factor] = newDataList(thetype=Float32)
     if pbr.hasKey(factor):
-      setValue(result.constants[factor], @[float32(pbr[factor].getFloat())])
+      setValue(result.values[factor], @[float32(pbr[factor].getFloat())])
     else:
-      setValue(result.constants[factor], @[0.5'f32])
+      setValue(result.values[factor], @[0.5'f32])
 
   # pbr material textures
   for texture in ["baseColorTexture", "metallicRoughnessTexture"]:
     if pbr.hasKey(texture):
       result.textures[texture] = loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)
-      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.constants[texture & "Index"], @[pbr[texture].getOrDefault("texCoord").getInt(0).uint8])
+      result.values[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.values[texture & "Index"], @[pbr[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
       result.textures[texture] = EMPTY_TEXTURE
-      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.constants[texture & "Index"], @[0'u8])
+      result.values[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.values[texture & "Index"], @[0'u8])
 
   # generic material textures
   for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
     if materialNode.hasKey(texture):
       result.textures[texture] = loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)
-      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.constants[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
+      result.values[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.values[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
       result.textures[texture] = EMPTY_TEXTURE
-      result.constants[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.constants[texture & "Index"], @[0'u8])
+      result.values[texture & "Index"] = newDataList(thetype=UInt8)
+      setValue(result.values[texture & "Index"], @[0'u8])
 
   # emissiv color
-  result.constants["emissiveFactor"] = newDataList(thetype=Vec3F32)
+  result.values["emissiveFactor"] = newDataList(thetype=Vec3F32)
   if materialNode.hasKey("emissiveFactor"):
-    setValue(result.constants["emissiveFactor"], @[newVec3f(
+    setValue(result.values["emissiveFactor"], @[newVec3f(
       materialNode["emissiveFactor"][0].getFloat(),
       materialNode["emissiveFactor"][1].getFloat(),
       materialNode["emissiveFactor"][2].getFloat(),
     )])
   else:
-    setValue(result.constants["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
+    setValue(result.values["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
 
 proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:

@@ -19,6 +19,7 @@ import ./vulkan/image
 
 import ./scene
 import ./mesh
+import ./material
 
 const TRANSFORMATTRIBUTE = "transform"
 const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
@@ -34,7 +35,7 @@ type
     vertexBufferOffsets*: Table[(Mesh, string), int]
     descriptorPools*: Table[VkPipeline, DescriptorPool]
     descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
-    materials: seq[Material]
+    materials: seq[MaterialData]
   Renderer* = object
     device: Device
     surfaceFormat: VkSurfaceFormatKHR
@@ -78,14 +79,14 @@ func samplers(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
       if scene.usesMaterial(materialName):
         result.add pipeline.samplers
 
-func materialCompatibleWithPipeline(scene: Scene, material: Material, pipeline: Pipeline): (bool, string) =
+func materialCompatibleWithPipeline(scene: Scene, material: MaterialData, pipeline: Pipeline): (bool, string) =
   for uniform in pipeline.uniforms:
     if scene.shaderGlobals.contains(uniform.name):
       if scene.shaderGlobals[uniform.name].theType != uniform.theType:
         return (true, &"shader uniform needs type {uniform.theType} but scene global is of type {scene.shaderGlobals[uniform.name].theType}")
     else:
       var foundMatch = true
-      for name, constant in material.constants.pairs:
+      for name, constant in material.values.pairs:
         if name == uniform.name and constant.theType == uniform.theType:
           foundMatch = true
           break
@@ -162,7 +163,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       if not scenedata.materials.contains(material):
         scenedata.materials.add material
         for textureName, texture in material.textures.pairs:
-          if scene.shaderGlobals.contains(textureName) and scene.shaderGlobals[textureName].theType == Sampler2D:
+          if scene.shaderGlobals.contains(textureName) and scene.shaderGlobals[textureName].theType == TextureType:
             warn &"Ignoring material texture '{textureName}' as scene-global textures with the same name have been defined"
           else:
             if not scenedata.textures.hasKey(textureName):
@@ -170,7 +171,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
             scenedata.textures[textureName].add renderer.device.uploadTexture(texture)
 
   for name, value in scene.shaderGlobals.pairs:
-    if value.theType == Sampler2D:
+    if value.theType == TextureType:
       assert not scenedata.textures.contains(name) # should be handled by the above code
       scenedata.textures[name] = @[]
       for texture in getValues[Texture](value)[]:
@@ -382,7 +383,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
             foundValue = true
           else:
             for mat in renderer.scenedata[scene].materials:
-              for name, materialConstant in mat.constants.pairs:
+              for name, materialConstant in mat.values.pairs:
                 if uniform.name == name:
                   value = materialConstant
                   foundValue = true

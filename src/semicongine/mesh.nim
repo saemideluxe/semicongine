@@ -9,8 +9,9 @@ import std/sequtils
 
 import ./core
 import ./collision
+import ./material
 
-var instanceCounter = 0
+var instanceCounter* = 0
 
 type
   MeshIndexType* = enum
@@ -26,7 +27,7 @@ type
       of Tiny: tinyIndices*: seq[array[3, uint8]]
       of Small: smallIndices*: seq[array[3, uint16]]
       of Big: bigIndices*: seq[array[3, uint32]]
-    materials*: seq[Material]
+    materials*: seq[MaterialData]
     transform*: Mat4 = Unit4
     instanceTransforms*: seq[Mat4]
     applyMeshTransformToInstances*: bool = true # if true, the transform attribute for the shader will apply the instance transform AND the mesh transform, to each instance
@@ -36,15 +37,6 @@ type
     instanceData: Table[string, DataList]
     dirtyAttributes: seq[string]
   Mesh* = ref MeshObject
-  Material* = object
-    name*: string
-    constants*: Table[string, DataList]
-    textures*: Table[string, Texture]
-    index*: uint16 # optional, may be used to index into uniform arrays in shader
-
-let DEFAULT_MATERIAL* = Material(
-  name: "default material"
-)
 
 func instanceCount*(mesh: MeshObject): int =
   mesh.instanceTransforms.len
@@ -66,15 +58,6 @@ func `$`*(mesh: MeshObject): string =
 func `$`*(mesh: Mesh): string =
   $mesh[]
 
-proc `$`*(material: Material): string =
-  var constants: seq[string]
-  for key, value in material.constants.pairs:
-    constants.add &"{key}: {value}"
-  var textures: seq[string]
-  for key in material.textures.keys:
-    textures.add &"{key}"
-  return &"""{material.name} | Values: {constants.join(", ")} | Textures: {textures.join(", ")}"""
-
 func vertexAttributes*(mesh: MeshObject): seq[string] =
   mesh.vertexData.keys.toSeq
 
@@ -83,9 +66,6 @@ func instanceAttributes*(mesh: MeshObject): seq[string] =
 
 func attributes*(mesh: MeshObject): seq[string] =
   mesh.vertexAttributes & mesh.instanceAttributes
-
-func hash*(material: Material): Hash =
-  hash(material.name)
 
 func hash*(mesh: Mesh): Hash =
   hash(cast[ptr MeshObject](mesh))
@@ -133,7 +113,7 @@ proc newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: Material=DEFAULT_MATERIAL,
+  material: MaterialData=DEFAULT_MATERIAL,
   autoResize=true,
   name: string=""
 ): Mesh =
@@ -189,7 +169,7 @@ proc newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: Material=DEFAULT_MATERIAL,
+  material: MaterialData=DEFAULT_MATERIAL,
   name: string="",
 ): Mesh =
   newMesh(

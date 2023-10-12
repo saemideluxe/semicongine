@@ -1,4 +1,5 @@
 import ./vulkanapi
+import ./vector
 
 type
   Pixel* = array[4, uint8]
@@ -17,6 +18,9 @@ type
     name*: string
     image*: Image
     sampler*: Sampler
+
+converter toRGBA*(p: Pixel): Vec4f =
+  newVec4f(float32(p[0]) / 255'f32, float32(p[1]) / 255'f32, float32(p[2]) / 255'f32, float32(p[3]) / 255'f32)
 
 proc `[]`*(image: Image, x, y: int): Pixel =
   assert x < image.width
