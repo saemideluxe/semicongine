@@ -11,34 +11,34 @@ let
     wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
   )
   (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
-  mat = Material(
-    name: "mat",
-    textures: {
-      "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
+  mat = SINGLE_TEXTURE_MATERIAL.initMaterialData(
+    name="mat",
+    attributes={
+      "texture1": initDataList(@[Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
       R, R, W, R, R,
       R, W, W, W, R,
       R, R, W, R, R,
       R, R, R, R, R,
-      ]), sampler: sampler)
+      ]), sampler: sampler)])
     }.toTable
   )
-  mat2 = Material(
-    name: "mat2",
-    textures: {
-      "my_little_texture": Texture(image: Image(width: 5, height: 5, imagedata: @[
+  mat2 = SINGLE_TEXTURE_MATERIAL.initMaterialData(
+    name="mat2",
+    attributes={
+      "texture1": initDataList(@[Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, W, R, W, R,
       W, R, W, R, W,
       R, W, R, W, R,
       W, R, W, R, W,
       R, W, R, W, R,
-      ]), sampler: sampler)
+      ]), sampler: sampler)])
     }.toTable
   )
-  mat3 = Material(
-    name: "mat3",
-    constants: {
-      "color": toGPUValue(@[newVec4f(0, 1, 0, 1)])
+  mat3 = SINGLE_COLOR_MATERIAL.initMaterialData(
+    name="mat3",
+    attributes={
+      "color": initDataList(@[newVec4f(0, 1, 0, 1)])
     }.toTable
   )
 
@@ -46,18 +46,21 @@ proc scene_different_mesh_types(): seq[Mesh] =
   @[
     newMesh(
       positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
+      uvs=[newVec2f(0.0, -0.5), newVec2f(0.5, 0.5), newVec2f(-0.5, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       material=mat,
       transform=translate(-0.7, -0.5),
     ),
     newMesh(
       positions=[newVec3f(0.0, -0.4), newVec3f(0.4, 0.4), newVec3f(-0.4, 0.5)],
+      uvs=[newVec2f(0.0, -0.4), newVec2f(0.4, 0.4), newVec2f(-0.4, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       material=mat,
       transform=translate(0, -0.5),
     ),
     newMesh(
       positions=[newVec3f(0.0, 0.5), newVec3f(0.5, -0.5), newVec3f(-0.5, -0.5)],
+      uvs=[newVec2f(0.0, 0.5), newVec2f(0.5, -0.5), newVec2f(-0.5, -0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]],
       material=mat2,
@@ -65,6 +68,7 @@ proc scene_different_mesh_types(): seq[Mesh] =
     ),
     newMesh(
       positions=[newVec3f(0.0, 0.4), newVec3f(0.4, -0.4), newVec3f(-0.4, -0.4)],
+      uvs=[newVec2f(0.0, 0.4), newVec2f(0.4, -0.4), newVec2f(-0.4, -0.4)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
       indices=[[0'u16, 2'u16, 1'u16]],
       material=mat2,
@@ -72,6 +76,7 @@ proc scene_different_mesh_types(): seq[Mesh] =
     ),
     newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
+      uvs=[newVec2f(0.4, 0.5), newVec2f(0.9, -0.3), newVec2f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false,
@@ -80,6 +85,7 @@ proc scene_different_mesh_types(): seq[Mesh] =
     ),
     newMesh(
       positions=[newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
+      uvs=[newVec2f(0.4, 0.5), newVec2f(0.9, -0.3), newVec2f(0.0, -0.3)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
       indices=[[0'u32, 2'u32, 1'u32]],
       autoResize=false,
@@ -93,18 +99,21 @@ proc scene_simple(): seq[Mesh] =
     newMesh(
       positions=[newVec3f(0.0, -0.3), newVec3f(0.3, 0.3), newVec3f(-0.3, 0.3)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      uvs=[newVec2f(0.0, -0.3), newVec2f(0.3, 0.3), newVec2f(-0.3, 0.3)],
       material=mat,
       transform=translate(0.4, 0.4),
     ),
     newMesh(
       positions=[newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
       colors=[newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      uvs=[newVec2f(0.0, -0.5), newVec2f(0.5, 0.5), newVec2f(-0.5, 0.5)],
       material=mat,
       transform=translate(0.4, -0.4),
     ),
     newMesh(
       positions=[newVec3f(0.0, -0.6), newVec3f(0.6, 0.6), newVec3f(-0.6, 0.6)],
       colors=[newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
+      uvs=[newVec2f(0.0, -0.6), newVec2f(0.6, 0.6), newVec2f(-0.6, 0.6)],
       indices=[[0'u32, 1'u32, 2'u32]],
       autoResize=false,
       material=mat,
@@ -113,6 +122,7 @@ proc scene_simple(): seq[Mesh] =
     newMesh(
       positions=[newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
       colors=[newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      uvs=[newVec2f(0.0, -0.8), newVec2f(0.8, 0.8), newVec2f(-0.8, 0.8)],
       indices=[[0'u16, 1'u16, 2'u16]],
       instanceTransforms=[Unit4F32, Unit4F32],
       material=mat,
@@ -124,9 +134,9 @@ proc scene_primitives(): seq[Mesh] =
   var r = rect(color="ff0000")
   var t = tri(color="0000ff")
   var c = circle(color="00ff00")
-  r.materials = @[mat]
-  t.materials = @[mat]
-  c.materials = @[mat]
+  r.material = mat
+  t.material = mat
+  c.material = mat
   r.transform = translate(newVec3f(0.5, -0.3))
   t.transform = translate(newVec3f(0.3,  0.3))
   c.transform = translate(newVec3f(-0.3,  0.1))
@@ -136,6 +146,7 @@ proc scene_flag(): seq[Mesh] =
   @[
     newMesh(
       positions=[newVec3f(-1.0, -1.0), newVec3f(1.0, -1.0), newVec3f(1.0, 1.0), newVec3f(-1.0, 1.0)],
+      uvs=[newVec2f(-1.0, -1.0), newVec2f(1.0, -1.0), newVec2f(1.0, 1.0), newVec2f(-1.0, 1.0)],
       colors=[newVec4f(-1, -1, 1, 1), newVec4f(1, -1, 1, 1), newVec4f(1, 1, 1, 1), newVec4f(-1, 1, 1, 1)],
       indices=[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
       material=mat,
@@ -147,8 +158,8 @@ proc scene_multi_material(): seq[Mesh] =
   var
     r1 = rect(color="ffffff")
     r2 = rect(color="000000")
-  r1.materials = @[mat]
-  r2.materials = @[mat3]
+  r1.material = mat
+  r2.material = mat3
   r1.transform = translate(newVec3f(-0.5))
   r2.transform = translate(newVec3f(+0.5))
   result = @[r1, r2]
@@ -169,10 +180,10 @@ proc main() =
       ],
       outputs=[attr[Vec4f]("color")],
       samplers=[
-        attr[Texture]("my_little_texture")
+        attr[Texture]("texture1")
       ],
       vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = color;""",
-      fragmentCode="color = texture(my_little_texture, outcolor.xy) * 0.5 + outcolor * 0.5;",
+      fragmentCode="color = texture(texture1, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
     shaderConfiguration2 = createShaderConfiguration(
       inputs=[
@@ -186,9 +197,9 @@ proc main() =
       fragmentCode="color = outcolor;",
     )
   engine.initRenderer({
-    "mat": shaderConfiguration1,
-    "mat2": shaderConfiguration1,
-    "mat3": shaderConfiguration2,
+    SINGLE_TEXTURE_MATERIAL: shaderConfiguration1,
+    SINGLE_TEXTURE_MATERIAL: shaderConfiguration1,
+    SINGLE_COLOR_MATERIAL: shaderConfiguration2,
   })
 
   # INIT SCENES
@@ -201,7 +212,7 @@ proc main() =
   ]
 
   for scene in scenes.mitems:
-    engine.addScene(scene)
+    engine.loadScene(scene)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
