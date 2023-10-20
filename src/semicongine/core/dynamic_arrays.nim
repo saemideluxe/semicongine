@@ -151,6 +151,54 @@ func `==`*(a, b: DataList): bool =
     of Mat4F64: return a.mat4f64 == b.mat4f64
     of TextureType: a.texture == b.texture
 
+proc setLen*(value: var DataList, len: int) =
+  value.len = len
+  case value.theType
+    of Float32: value.float32[].setLen(len)
+    of Float64: value.float64[].setLen(len)
+    of Int8: value.int8[].setLen(len)
+    of Int16: value.int16[].setLen(len)
+    of Int32: value.int32[].setLen(len)
+    of Int64: value.int64[].setLen(len)
+    of UInt8: value.uint8[].setLen(len)
+    of UInt16: value.uint16[].setLen(len)
+    of UInt32: value.uint32[].setLen(len)
+    of UInt64: value.uint64[].setLen(len)
+    of Vec2I32: value.vec2i32[].setLen(len)
+    of Vec2I64: value.vec2i64[].setLen(len)
+    of Vec3I32: value.vec3i32[].setLen(len)
+    of Vec3I64: value.vec3i64[].setLen(len)
+    of Vec4I32: value.vec4i32[].setLen(len)
+    of Vec4I64: value.vec4i64[].setLen(len)
+    of Vec2U32: value.vec2u32[].setLen(len)
+    of Vec2U64: value.vec2u64[].setLen(len)
+    of Vec3U32: value.vec3u32[].setLen(len)
+    of Vec3U64: value.vec3u64[].setLen(len)
+    of Vec4U32: value.vec4u32[].setLen(len)
+    of Vec4U64: value.vec4u64[].setLen(len)
+    of Vec2F32: value.vec2f32[].setLen(len)
+    of Vec2F64: value.vec2f64[].setLen(len)
+    of Vec3F32: value.vec3f32[].setLen(len)
+    of Vec3F64: value.vec3f64[].setLen(len)
+    of Vec4F32: value.vec4f32[].setLen(len)
+    of Vec4F64: value.vec4f64[].setLen(len)
+    of Mat2F32: value.mat2f32[].setLen(len)
+    of Mat2F64: value.mat2f64[].setLen(len)
+    of Mat23F32: value.mat23f32[].setLen(len)
+    of Mat23F64: value.mat23f64[].setLen(len)
+    of Mat32F32: value.mat32f32[].setLen(len)
+    of Mat32F64: value.mat32f64[].setLen(len)
+    of Mat3F32: value.mat3f32[].setLen(len)
+    of Mat3F64: value.mat3f64[].setLen(len)
+    of Mat34F32: value.mat34f32[].setLen(len)
+    of Mat34F64: value.mat34f64[].setLen(len)
+    of Mat43F32: value.mat43f32[].setLen(len)
+    of Mat43F64: value.mat43f64[].setLen(len)
+    of Mat4F32: value.mat4f32[].setLen(len)
+    of Mat4F64: value.mat4f64[].setLen(len)
+    of TextureType: discard
+
+
 proc setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   value.setLen(data.len)
   when T is float32: value.float32[] = data
@@ -204,7 +252,7 @@ proc setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is Texture: value.texture[] = data
   else: {. error: "Virtual datatype has no values" .}
 
-func newDataList*(theType: DataType): DataList =
+proc initDataList*(theType: DataType, len=1): DataList =
   result = DataList(theType: theType)
   case result.theType
     of Float32: result.float32 = new seq[float32]
@@ -250,19 +298,15 @@ func newDataList*(theType: DataType): DataList =
     of Mat4F32: result.mat4f32 = new seq[TMat4[float32]]
     of Mat4F64: result.mat4f64 = new seq[TMat4[float64]]
     of TextureType: result.texture = new seq[Texture]
+  result.setLen(len)
 
-proc newDataList*[T: GPUType](len=0): DataList =
-  result = newDataList(getDataType[T]())
-  if len > 0:
-    result.setLen(len)
+proc initDataList*[T: GPUType](len=1): DataList =
+  result = initDataList(getDataType[T]())
+  result.setLen(len)
 
-proc newDataList*[T: GPUType](data: openArray[T]): DataList =
-  result = newDataList(getDataType[T]())
+proc initDataList*[T: GPUType](data: openArray[T]): DataList =
+  result = initDataList(getDataType[T]())
   result.setValues(@data)
-
-proc toGPUValue*[T: GPUType](value: seq[T]): DataList =
-  result = newDataList[T](value.len)
-  result.setValue(value)
 
 func getValues*[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
   when T is float32: value.float32
@@ -416,53 +460,6 @@ func getRawData*(value: var DataList): (pointer, int) =
     of Mat4F32: result[0] = value.mat4f32[].toCPointer
     of Mat4F64: result[0] = value.mat4f64[].toCPointer
     of TextureType: result[0] = nil
-
-proc setLen*(value: var DataList, len: int) =
-  value.len = len
-  case value.theType
-    of Float32: value.float32[].setLen(len)
-    of Float64: value.float64[].setLen(len)
-    of Int8: value.int8[].setLen(len)
-    of Int16: value.int16[].setLen(len)
-    of Int32: value.int32[].setLen(len)
-    of Int64: value.int64[].setLen(len)
-    of UInt8: value.uint8[].setLen(len)
-    of UInt16: value.uint16[].setLen(len)
-    of UInt32: value.uint32[].setLen(len)
-    of UInt64: value.uint64[].setLen(len)
-    of Vec2I32: value.vec2i32[].setLen(len)
-    of Vec2I64: value.vec2i64[].setLen(len)
-    of Vec3I32: value.vec3i32[].setLen(len)
-    of Vec3I64: value.vec3i64[].setLen(len)
-    of Vec4I32: value.vec4i32[].setLen(len)
-    of Vec4I64: value.vec4i64[].setLen(len)
-    of Vec2U32: value.vec2u32[].setLen(len)
-    of Vec2U64: value.vec2u64[].setLen(len)
-    of Vec3U32: value.vec3u32[].setLen(len)
-    of Vec3U64: value.vec3u64[].setLen(len)
-    of Vec4U32: value.vec4u32[].setLen(len)
-    of Vec4U64: value.vec4u64[].setLen(len)
-    of Vec2F32: value.vec2f32[].setLen(len)
-    of Vec2F64: value.vec2f64[].setLen(len)
-    of Vec3F32: value.vec3f32[].setLen(len)
-    of Vec3F64: value.vec3f64[].setLen(len)
-    of Vec4F32: value.vec4f32[].setLen(len)
-    of Vec4F64: value.vec4f64[].setLen(len)
-    of Mat2F32: value.mat2f32[].setLen(len)
-    of Mat2F64: value.mat2f64[].setLen(len)
-    of Mat23F32: value.mat23f32[].setLen(len)
-    of Mat23F64: value.mat23f64[].setLen(len)
-    of Mat32F32: value.mat32f32[].setLen(len)
-    of Mat32F64: value.mat32f64[].setLen(len)
-    of Mat3F32: value.mat3f32[].setLen(len)
-    of Mat3F64: value.mat3f64[].setLen(len)
-    of Mat34F32: value.mat34f32[].setLen(len)
-    of Mat34F64: value.mat34f64[].setLen(len)
-    of Mat43F32: value.mat43f32[].setLen(len)
-    of Mat43F64: value.mat43f64[].setLen(len)
-    of Mat4F32: value.mat4f32[].setLen(len)
-    of Mat4F64: value.mat4f64[].setLen(len)
-    of TextureType: discard
 
 proc appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   value.len += data.len
@@ -718,7 +715,7 @@ proc appendFrom*(a: var DataList, i: int, b: DataList, j: int) =
     of TextureType: a.texture[i] = b.texture[j]
 
 proc copy*(datalist: DataList): DataList =
-  result = newDataList(datalist.theType)
+  result = initDataList(datalist.theType)
   result.appendValues(datalist)
 
 func `$`*(list: DataList): string =

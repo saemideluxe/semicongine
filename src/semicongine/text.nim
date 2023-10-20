@@ -27,7 +27,11 @@ const
   TRANSFORM_ATTRIB = "transform"
   POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
-  TEXT_MATERIAL* = "default-text"
+  TEXT_MATERIAL_TYPE* = MaterialType(
+    name: "default-text-material-type",
+    meshAttributes: {TRANSFORM_ATTRIB: Mat4F32, POSITION_ATTRIB: Vec3F32, UV_ATTRIB: Vec2F32}.toTable,
+    attributes: {"fontAtlas": TextureType}.toTable,
+  )
   TEXT_SHADER* = createShaderConfiguration(
     inputs=[
       attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint=PreferFastWrite, perInstance=true),
@@ -110,10 +114,10 @@ proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
   inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
-  result.mesh.materials = @[MaterialData(
-    name: TEXT_MATERIAL,
-    textures: {"fontAtlas": font.fontAtlas}.toTable,
-  )]
+  result.mesh.material = MaterialData(
+    name: font.name & " text",
+    attributes: {"fontAtlas": initDataList(@[font.fontAtlas])}.toTable,
+  )
 
   result.updateMesh()
 

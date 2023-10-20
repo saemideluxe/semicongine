@@ -11,6 +11,7 @@ import ./vulkan/physicaldevice
 import ./vulkan/shader
 
 import ./scene
+import ./material
 import ./renderer
 import ./events
 import ./audio
@@ -102,11 +103,11 @@ proc initEngine*(
   )
   startMixerThread()
 
-proc initRenderer*(engine: var Engine, shaders: openArray[(string, ShaderConfiguration)], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling=true) =
+proc initRenderer*(engine: var Engine, shaders: openArray[(MaterialType, ShaderConfiguration)], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling=true) =
 
   assert not engine.renderer.isSome
   var allShaders = @shaders
-  allShaders.add (TEXT_MATERIAL, TEXT_SHADER)
+  allShaders.add (TEXT_MATERIAL_TYPE, TEXT_SHADER)
   engine.renderer = some(engine.device.initRenderer(shaders=allShaders, clearColor=clearColor, backFaceCulling=backFaceCulling))
 
 proc initRenderer*(engine: var Engine, clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =

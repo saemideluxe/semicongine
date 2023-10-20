@@ -5,6 +5,7 @@ import std/hashes
 
 import ./core
 import ./mesh
+import ./material
 
 type
   Scene* = object
@@ -44,13 +45,13 @@ proc add*[T](scene: var Scene, obj: T) =
 
 proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add shader values"
-  scene.shaderGlobals[name] = newDataList(thetype=getDataType[T]())
+  scene.shaderGlobals[name] = initDataList(thetype=getDataType[T]())
   setValues(scene.shaderGlobals[name], @[data])
   scene.dirtyShaderGlobals.add name
 
 proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: openArray[T]) =
   assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add shader values"
-  scene.shaderGlobals[name] = newDataList(data)
+  scene.shaderGlobals[name] = initDataList(data)
   scene.dirtyShaderGlobals.add name
 
 func getShaderGlobal*[T](scene: Scene, name: string): T =
@@ -81,5 +82,5 @@ func hash*(scene: Scene): Hash =
 func `==`*(a, b: Scene): bool =
   a.name == b.name
 
-func usesMaterial*(scene: Scene, materialName: string): bool =
-  return scene.meshes.anyIt(it.materials.anyIt(it.name == materialName))
+func usesMaterial*(scene: Scene, materialType: MaterialType): bool =
+  return scene.meshes.anyIt(it.material.theType == materialType)

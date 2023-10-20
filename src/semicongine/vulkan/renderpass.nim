@@ -1,6 +1,7 @@
 import std/options
 
 import ../core
+import ../material
 import ./device
 import ./physicaldevice
 import ./pipeline
@@ -14,7 +15,7 @@ type
     flags: VkSubpassDescriptionFlags
     outputs: seq[VkAttachmentReference]
     depthStencil: Option[VkAttachmentReference]
-    pipelines*: seq[(string, Pipeline)]
+    pipelines*: seq[(MaterialType, Pipeline)]
   RenderPass* = object
     vk*: VkRenderPass
     device*: Device
@@ -61,7 +62,7 @@ proc createRenderPass*(
 
 proc simpleForwardRenderPass*(
   device: Device,
-  shaders: openArray[(string, ShaderConfiguration)],
+  shaders: openArray[(MaterialType, ShaderConfiguration)],
   inFlightFrames=2,
   clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]),
   backFaceCulling=true,
@@ -70,7 +71,7 @@ proc simpleForwardRenderPass*(
   {.warning: "Need to implement material -> shader compatability" .}
   
   assert device.vk.valid
-  for (material, shaderconfig) in shaders:
+  for (_, shaderconfig) in shaders:
     assert shaderconfig.outputs.len == 1
   var
     attachments = @[VkAttachmentDescription(
@@ -100,8 +101,8 @@ proc simpleForwardRenderPass*(
       dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
     )]
   result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
-  for (material, shaderconfig) in shaders:
-    result.subpasses[0].pipelines.add (material, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling=backFaceCulling))
+  for (materialtype, shaderconfig) in shaders:
+    result.subpasses[0].pipelines.add (materialtype, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling=backFaceCulling))
 
 
 proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
@@ -160,6 +161,6 @@ proc destroy*(renderPass: var RenderPass) =
   renderPass.device.vk.vkDestroyRenderPass(renderPass.vk, nil)
   renderPass.vk.reset
   for i in 0 ..< renderPass.subpasses.len:
-    for material, pipeline in renderPass.subpasses[i].pipelines.mitems:
+    for _, pipeline in renderPass.subpasses[i].pipelines.mitems:
       pipeline.destroy()
   renderPass.subpasses = @[]
