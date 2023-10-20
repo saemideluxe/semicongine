@@ -27,7 +27,7 @@ type
       of Tiny: tinyIndices*: seq[array[3, uint8]]
       of Small: smallIndices*: seq[array[3, uint16]]
       of Big: bigIndices*: seq[array[3, uint32]]
-    materials*: seq[MaterialData]
+    material*: MaterialData
     transform*: Mat4 = Unit4
     instanceTransforms*: seq[Mat4]
     applyMeshTransformToInstances*: bool = true # if true, the transform attribute for the shader will apply the instance transform AND the mesh transform, to each instance
@@ -37,6 +37,19 @@ type
     instanceData: Table[string, DataList]
     dirtyAttributes: seq[string]
   Mesh* = ref MeshObject
+
+func material*(mesh: MeshObject): MaterialData =
+  mesh.material
+
+func `material=`*(mesh: var MeshObject, material: MaterialData) =
+  for name, theType in material.theType.meshAttributes:
+    if mesh.vertexData.contains(name):
+      assert mesh.vertexData[name].theType == theType, &"{material.theType} expected mesh attribute '{name}' to be '{theType}' but it is {mesh.vertexData[name].theType}"
+    elif mesh.instanceData.contains(name):
+      assert mesh.instanceData[name].theType == theType, &"{material.theType} expected mesh attribute '{name}' to be '{theType}' but it is {mesh.instanceData[name].theType}"
+    else:
+      assert false, &"Mesh '{mesh.name}' is missing required mesh attribute '{name}: {theType}' for {material.theType}"
+  mesh.material = material
 
 func instanceCount*(mesh: MeshObject): int =
   mesh.instanceTransforms.len
@@ -52,9 +65,9 @@ func indicesCount*(mesh: MeshObject): int =
 
 func `$`*(mesh: MeshObject): string =
   if mesh.indexType == None:
-    &"Mesh('{mesh.name}', vertexCount: {mesh.vertexCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType}, materials: {mesh.materials})"
+    &"Mesh('{mesh.name}', vertexCount: {mesh.vertexCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType}, material: {mesh.material})"
   else:
-    &"Mesh('{mesh.name}', vertexCount: {mesh.vertexCount}, indexCount: {mesh.indicesCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType}, materials: {mesh.materials})"
+    &"Mesh('{mesh.name}', vertexCount: {mesh.vertexCount}, indexCount: {mesh.indicesCount}, instanceCount: {mesh.instanceCount}, vertexData: {mesh.vertexData.keys().toSeq()}, instanceData: {mesh.instanceData.keys().toSeq()}, indexType: {mesh.indexType}, material: {mesh.material})"
 func `$`*(mesh: Mesh): string =
   $mesh[]
 
@@ -79,7 +92,7 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
 
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.vertexData[attribute] = newDataList(thetype=getDataType[T]())
+  mesh.vertexData[attribute] = initDataList(thetype=getDataType[T]())
   mesh.vertexData[attribute].setLen(mesh.vertexCount)
   mesh.vertexData[attribute].setValues(value)
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
@@ -88,13 +101,16 @@ proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
   initVertexAttribute(mesh=mesh, attribute=attribute, value=default(T))
 proc initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.vertexData[attribute] = newDataList(thetype=datatype)
+  mesh.vertexData[attribute] = initDataList(thetype=datatype)
   mesh.vertexData[attribute].setLen(mesh.vertexCount)
+proc initVertexAttribute*(mesh: var MeshObject, attribute: string, data: DataList) =
+  assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
+  mesh.vertexData[attribute] = data
 
 
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.instanceData[attribute] = newDataList(thetype=getDataType[T]())
+  mesh.instanceData[attribute] = initDataList(thetype=getDataType[T]())
   mesh.instanceData[attribute].setLen(mesh.instanceCount)
   mesh.instanceData[attribute].setValues(value)
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
@@ -103,8 +119,11 @@ proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
   initInstanceAttribute(mesh=mesh, attribute=attribute, value=default(T))
 proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.instanceData[attribute] = newDataList(thetype=datatype)
+  mesh.instanceData[attribute] = initDataList(thetype=datatype)
   mesh.instanceData[attribute].setLen(mesh.instanceCount)
+proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, data: DataList) =
+  assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
+  mesh.instanceData[attribute] = data
 
 proc newMesh*(
   positions: openArray[Vec3f],
@@ -139,12 +158,13 @@ proc newMesh*(
     vertexCount: positions.len,
     instanceTransforms: @instanceTransforms,
     transform: transform,
-    materials: @[material],
   )
 
   result[].initVertexAttribute("position", positions.toSeq)
   if colors.len > 0: result[].initVertexAttribute("color", colors.toSeq)
   if uvs.len > 0: result[].initVertexAttribute("uv", uvs.toSeq)
+
+  `material=`(result[], material)
 
   # assert all indices are valid
   for i in indices:
@@ -249,6 +269,20 @@ template `[]`*(mesh: MeshObject, attribute: string, i: int, t: typedesc): untype
 template `[]`*(mesh: Mesh, attribute: string, i: int, t: typedesc): untyped =
   getAttribute[t](mesh[], attribute, i)
 
+proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: DataList) =
+  if mesh.vertexData.contains(attribute):
+    assert data.len == mesh.vertexCount
+    assert data.theType == mesh.vertexData[attribute].theType
+    mesh.vertexData[attribute] = data
+  elif mesh.instanceData.contains(attribute):
+    assert data.len == mesh.instanceCount
+    assert data.theType == mesh.instanceData[attribute].theType
+    mesh.instanceData[attribute] = data
+  else:
+    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+  if not mesh.dirtyAttributes.contains(attribute):
+    mesh.dirtyAttributes.add attribute
+
 proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
     assert data.len == mesh.vertexCount
@@ -273,6 +307,11 @@ proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attrib
   if not mesh.dirtyAttributes.contains(attribute):
     mesh.dirtyAttributes.add attribute
 
+proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: DataList) =
+  updateAttributeData[T](mesh, attribute, data)
+proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: DataList) =
+  updateAttributeData[t](mesh[], attribute, data)
+
 proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   updateAttributeData[T](mesh, attribute, data)
 proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
@@ -287,29 +326,6 @@ proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, 
   updateAttributeData[T](mesh, attribute, i, value)
 proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, i: int, value: T) =
   updateAttributeData[T](mesh[], attribute, i, value)
-
-proc appendAttributeData*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
-  if mesh.vertexData.contains(attribute):
-    appendValues(mesh.vertexData[attribute], data)
-  elif mesh.instanceData.contains(attribute):
-    appendValues(mesh.instanceData[attribute], data)
-  else:
-    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
-  if not mesh.dirtyAttributes.contains(attribute):
-    mesh.dirtyAttributes.add attribute
-
-# currently only used for loading from files, shouls
-proc appendAttributeData*(mesh: var MeshObject, attribute: string, data: DataList) =
-  if mesh.vertexData.contains(attribute):
-    assert data.thetype == mesh.vertexData[attribute].thetype
-    appendValues(mesh.vertexData[attribute], data)
-  elif mesh.instanceData.contains(attribute):
-    assert data.thetype == mesh.instanceData[attribute].thetype
-    appendValues(mesh.instanceData[attribute], data)
-  else:
-    raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
-  if not mesh.dirtyAttributes.contains(attribute):
-    mesh.dirtyAttributes.add attribute
 
 proc removeAttribute*(mesh: var MeshObject, attribute: string) =
   if mesh.vertexData.contains(attribute):
@@ -376,11 +392,11 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
   result = MeshObject(
     vertexCount: mesh.indicesCount,
     indexType: None,
-    materials: mesh.materials,
     transform: mesh.transform,
     instanceTransforms: mesh.instanceTransforms,
     visible: mesh.visible,
   )
+  `material=`(result, mesh.material)
   for attribute, datalist in mesh.vertexData.pairs:
     result.initVertexAttribute(attribute, datalist.theType)
   for attribute, datalist in mesh.instanceData.pairs:
@@ -421,9 +437,9 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
     instanceTransforms: @[Unit4F32],
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
-    materials: @[DEFAULT_MATERIAL],
     name: &"rect-{instanceCounter}",
   )
+  `material=`(result[], DEFAULT_MATERIAL)
   inc instanceCounter
 
   let
@@ -440,9 +456,9 @@ proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
   result = Mesh(
     vertexCount: 3,
     instanceTransforms: @[Unit4F32],
-    materials: @[DEFAULT_MATERIAL],
     name: &"tri-{instanceCounter}",
   )
+  `material=`(result[], DEFAULT_MATERIAL)
   inc instanceCounter
   let
     half_w = width / 2
@@ -458,9 +474,9 @@ proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
     vertexCount: 3 + nSegments,
     instanceTransforms: @[Unit4F32],
     indexType: Small,
-    materials: @[DEFAULT_MATERIAL],
     name: &"circle-{instanceCounter}",
   )
+  `material=`(result[], DEFAULT_MATERIAL)
   inc instanceCounter
 
   let

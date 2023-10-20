@@ -2,7 +2,6 @@ import std/strutils
 import std/json
 import std/logging
 import std/tables
-import std/sequtils
 import std/strformat
 import std/streams
 
@@ -94,7 +93,7 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
   copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
-  result = newDataList(thetype=accessor.getGPUType("??"))
+  result = initDataList(thetype=accessor.getGPUType("??"))
   result.setLen(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
@@ -150,124 +149,72 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Tex
       result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
 
 
-proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8], materialIndex: uint16): MaterialData =
-  result = MaterialData(name: materialNode["name"].getStr(), index: materialIndex)
+proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]): MaterialData =
+  result = MaterialData(name: materialNode["name"].getStr())
   let pbr = materialNode["pbrMetallicRoughness"]
 
   # color
-  result.values["baseColorFactor"] = newDataList(thetype=Vec4F32)
+  result.attributes["baseColorFactor"] = initDataList(thetype=Vec4F32)
   if pbr.hasKey("baseColorFactor"):
-    setValue(result.values["baseColorFactor"], @[newVec4f(
+    setValue(result.attributes["baseColorFactor"], @[newVec4f(
       pbr["baseColorFactor"][0].getFloat(),
       pbr["baseColorFactor"][1].getFloat(),
       pbr["baseColorFactor"][2].getFloat(),
       pbr["baseColorFactor"][3].getFloat(),
     )])
   else:
-    setValue(result.values["baseColorFactor"], @[newVec4f(1, 1, 1, 1)])
+    setValue(result.attributes["baseColorFactor"], @[newVec4f(1, 1, 1, 1)])
 
   # pbr material values
   for factor in ["metallicFactor", "roughnessFactor"]:
-    result.values[factor] = newDataList(thetype=Float32)
+    result.attributes[factor] = initDataList(thetype=Float32)
     if pbr.hasKey(factor):
-      setValue(result.values[factor], @[float32(pbr[factor].getFloat())])
+      setValue(result.attributes[factor], @[float32(pbr[factor].getFloat())])
     else:
-      setValue(result.values[factor], @[0.5'f32])
+      setValue(result.attributes[factor], @[0.5'f32])
 
   # pbr material textures
   for texture in ["baseColorTexture", "metallicRoughnessTexture"]:
+    result.attributes[texture] = initDataList(thetype=TextureType)
+    result.attributes[texture & "Index"] = initDataList(thetype=UInt8)
     if pbr.hasKey(texture):
-      result.textures[texture] = loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)
-      result.values[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.values[texture & "Index"], @[pbr[texture].getOrDefault("texCoord").getInt(0).uint8])
+      setValue(result.attributes[texture], @[loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)])
+      setValue(result.attributes[texture & "Index"], @[pbr[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
-      result.textures[texture] = EMPTY_TEXTURE
-      result.values[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.values[texture & "Index"], @[0'u8])
+      setValue(result.attributes[texture & "Index"], @[EMPTY_TEXTURE])
+      setValue(result.attributes[texture & "Index"], @[0'u8])
 
   # generic material textures
   for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
+    result.attributes[texture] = initDataList(thetype=TextureType)
+    result.attributes[texture & "Index"] = initDataList(thetype=UInt8)
     if materialNode.hasKey(texture):
-      result.textures[texture] = loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)
-      result.values[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.values[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
+      setValue(result.attributes[texture], @[loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)])
+      setValue(result.attributes[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
     else:
-      result.textures[texture] = EMPTY_TEXTURE
-      result.values[texture & "Index"] = newDataList(thetype=UInt8)
-      setValue(result.values[texture & "Index"], @[0'u8])
+      setValue(result.attributes[texture], @[EMPTY_TEXTURE])
+      setValue(result.attributes[texture & "Index"], @[0'u8])
 
   # emissiv color
-  result.values["emissiveFactor"] = newDataList(thetype=Vec3F32)
+  result.attributes["emissiveFactor"] = initDataList(thetype=Vec3F32)
   if materialNode.hasKey("emissiveFactor"):
-    setValue(result.values["emissiveFactor"], @[newVec3f(
+    setValue(result.attributes["emissiveFactor"], @[newVec3f(
       materialNode["emissiveFactor"][0].getFloat(),
       materialNode["emissiveFactor"][1].getFloat(),
       materialNode["emissiveFactor"][2].getFloat(),
     )])
   else:
-    setValue(result.values["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
+    setValue(result.attributes["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
 
-proc addPrimitive(mesh: Mesh, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]) =
+proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]): Mesh =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
-  var vertexCount = 0
-  for attribute, accessor in primitiveNode["attributes"].pairs:
-    let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
-    mesh[].appendAttributeData(attribute.toLowerAscii, data)
-    assert data.len == vertexCount or vertexCount == 0
-    vertexCount = data.len
-  mesh.vertexCount += vertexCount
-
-  var materialId = 0'u16
-  if primitiveNode.hasKey("material"):
-    materialId = uint16(primitiveNode["material"].getInt())
-  mesh[].appendAttributeData("materialIndex", newSeqWith(vertexCount, materialId))
-  if "materials" in root and int(materialId) < root["materials"].len:
-    let material = loadMaterial(root, root["materials"][int(materialId)], mainBuffer, materialId)
-    # FIX: materialIndex is designed to support multiple different materials per mesh (as it is per vertex),
-    # but or current mesh/rendering implementation is only designed for a single material
-    # currently this is usually handled by adding the values as shader globals
-    # TODO: this is bad
-    if not mesh[].materials.contains(material):
-      mesh[].materials.add material
-  else:
-    if not mesh[].materials.contains(DEFAULT_MATERIAL):
-      mesh[].materials.add DEFAULT_MATERIAL
-
-  if primitiveNode.hasKey("indices"):
-    assert mesh[].indexType != None
-    let data = root.getAccessorData(root["accessors"][primitiveNode["indices"].getInt()], mainBuffer)
-    let baseIndex = mesh[].vertexCount - vertexCount
-    var tri: seq[int]
-    case data.thetype
-      of UInt16:
-        for entry in getValues[uint16](data)[]:
-          tri.add int(entry) + baseIndex
-          if tri.len == 3:
-            # FYI gltf uses counter-clockwise indexing
-            mesh[].appendIndicesData(tri[0], tri[1], tri[2])
-            tri.setLen(0)
-      of UInt32:
-        for entry in getValues[uint32](data)[]:
-          tri.add int(entry) + baseIndex
-          if tri.len == 3:
-            # FYI gltf uses counter-clockwise indexing
-            mesh[].appendIndicesData(tri[0], tri[1], tri[2])
-            tri.setLen(0)
-      else:
-        raise newException(Exception, &"Unsupported index data type: {data.thetype}")
-
-# TODO: use one mesh per primitive?? right now we are merging primitives... check addPrimitive below
-proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh =
-
-  # check if and how we use indexes
-  var indexCount = 0
   var indexType = None
-  let indexed = meshNode["primitives"][0].hasKey("indices")
+  let indexed = primitiveNode.hasKey("indices")
   if indexed:
-    for primitive in meshNode["primitives"]:
-      indexCount += root["accessors"][primitive["indices"].getInt()]["count"].getInt()
+    # TODO: Tiny indices
+    var indexCount = root["accessors"][primitiveNode["indices"].getInt()]["count"].getInt()
     if indexCount < int(high(uint16)):
       indexType = Small
     else:
@@ -276,37 +223,53 @@ proc loadMesh(root: JsonNode, meshNode: JsonNode, mainBuffer: seq[uint8]): Mesh 
   result = Mesh(
     instanceTransforms: @[Unit4F32],
     indexType: indexType,
-    name: meshNode["name"].getStr()
+    name: meshname,
+    vertexCount: 0,
   )
 
-  # check we have the same attributes for all primitives
-  let attributes = meshNode["primitives"][0]["attributes"].keys.toSeq
-  for primitive in meshNode["primitives"]:
-    assert primitive["attributes"].keys.toSeq == attributes
+  for attribute, accessor in primitiveNode["attributes"].pairs:
+    let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
+    if result.vertexCount == 0:
+      result.vertexCount = data.len
+    assert data.len == result.vertexCount
+    result[].initVertexAttribute(attribute.toLowerAscii, data)
 
-  # prepare mesh attributes
-  for attribute, accessor in meshNode["primitives"][0]["attributes"].pairs:
-    result[].initVertexAttribute(attribute.toLowerAscii, root["accessors"][accessor.getInt()].getGPUType(attribute))
-  result[].initVertexAttribute("materialIndex", UInt16)
+  if primitiveNode.hasKey("material"):
+    let materialId = primitiveNode["material"].getInt()
+    result[].material = loadMaterial(root, root["materials"][materialId], mainBuffer)
+  else:
+    result[].material = DEFAULT_MATERIAL
 
-  # add all mesh data
-  for primitive in meshNode["primitives"]:
-    result.addPrimitive(root, primitive, mainBuffer)
+  if primitiveNode.hasKey("indices"):
+    assert result[].indexType != None
+    let data = root.getAccessorData(root["accessors"][primitiveNode["indices"].getInt()], mainBuffer)
+    var tri: seq[int]
+    case data.thetype
+      of UInt16:
+        for entry in getValues[uint16](data)[]:
+          tri.add int(entry)
+          if tri.len == 3:
+            # FYI gltf uses counter-clockwise indexing
+            result[].appendIndicesData(tri[0], tri[1], tri[2])
+            tri.setLen(0)
+      of UInt32:
+        for entry in getValues[uint32](data)[]:
+          tri.add int(entry)
+          if tri.len == 3:
+            # FYI gltf uses counter-clockwise indexing
+            result[].appendIndicesData(tri[0], tri[1], tri[2])
+            tri.setLen(0)
+      else:
+        raise newException(Exception, &"Unsupported index data type: {data.thetype}")
   transform[Vec3f](result[], "position", scale(1, -1, 1))
-
-  var maxMaterialIndex = 0
-  for material in result[].materials:
-    maxMaterialIndex = max(int(material.index), maxMaterialIndex)
-  var materials = result[].materials
-  result[].materials = newSeqWith(maxMaterialIndex + 1, DEFAULT_MATERIAL)
-  for material in materials:
-    result[].materials[material.index] = material
 
 proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
   # mesh
   if node.hasKey("mesh"):
-    result.mesh = loadMesh(root, root["meshes"][node["mesh"].getInt()], mainBuffer)
+    let mesh = root["meshes"][node["mesh"].getInt()]
+    for primitive in mesh["primitives"]:
+      result.children.add MeshTree(mesh: loadMesh(mesh["name"].getStr(), root, primitive, mainBuffer))
 
   # transformation
   if node.hasKey("matrix"):
