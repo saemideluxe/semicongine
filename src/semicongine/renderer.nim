@@ -21,7 +21,8 @@ import ./scene
 import ./mesh
 import ./material
 
-const TRANSFORMATTRIBUTE = "transform"
+const TRANSFORM_ATTRIBUTE = "transform"
+const MATERIALINDEX_ATTRIBUTE = "materialIndex"
 const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
 
 type
@@ -109,7 +110,7 @@ func materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, pi
 
 func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, pipeline: Pipeline): (bool, string) =
   for input in pipeline.inputs:
-    if input.name == TRANSFORMATTRIBUTE: # will be populated automatically
+    if input.name == TRANSFORM_ATTRIBUTE: # will be populated automatically
       continue
     if not (input.name in mesh[].attributes):
       return (true, &"Shader input '{input.name}' is not available for mesh")
@@ -143,14 +144,31 @@ func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
             raise newException(Exception, &"Mesh '{mesh}' not compatible with assigned pipeline ({materialType}) because: {message}")
 
   if not foundRenderableObject:
-    var matTypes: seq[string]
+    var matTypes: Table[string, MaterialType]
     for mesh in scene.meshes:
       if not matTypes.contains(mesh.material.name):
-          matTypes.add mesh.material.name
-    raise newException(Exception, &"Scene '{scene.name}' has been added but materials are not compatible with any registered shader: Materials in scene: {matTypes}, registered shader-materialtypes: {materialTypes}")
+          matTypes[mesh.material.name] = mesh.material.theType
+    assert false, &"Scene '{scene.name}' has been added but materials are not compatible with any registered shader: Materials in scene: {matTypes}, registered shader-materialtypes: {materialTypes}"
 
 proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   assert not (scene in renderer.scenedata)
+
+  # find all material data and group it by material type
+  var materials: Table[MaterialType, seq[MaterialData]]
+
+  for mesh in scene.meshes:
+    if not materials.contains(mesh.material.theType):
+      materials[mesh.material.theType] = @[]
+    if not materials[mesh.material.theType].contains(mesh.material):
+      materials[mesh.material.theType].add mesh.material
+
+  # automatically populate material and tranform attributes
+  for mesh in scene.meshes:
+    if not (TRANSFORM_ATTRIBUTE in mesh[].attributes):
+        mesh[].initInstanceAttribute(TRANSFORM_ATTRIBUTE, Unit4)
+    if not (MATERIALINDEX_ATTRIBUTE in mesh[].attributes):
+      mesh[].initInstanceAttribute(MATERIALINDEX_ATTRIBUTE, uint16(materials[mesh.material.theType].find(mesh.material)))
+
   renderer.checkSceneIntegrity(scene)
 
   let
@@ -158,6 +176,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     samplers = renderer.samplers(scene)
   var scenedata = SceneData()
 
+  # collect textures from mesh materials, add them to scenedata and upload to GPU
   for mesh in scene.meshes:
     if not scenedata.materials.contains(mesh.material):
       scenedata.materials.add mesh.material
@@ -170,6 +189,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
               scenedata.textures[name] = @[]
             scenedata.textures[name].add renderer.device.uploadTexture(getValue[Texture](value, 0))
 
+  # collect textures from shader globals, add them to scenedata and upload to GPU
   for name, value in scene.shaderGlobals.pairs:
     if value.theType == TextureType:
       assert not scenedata.textures.contains(name) # should be handled by the above code
@@ -177,10 +197,11 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       for texture in getValues[Texture](value)[]:
         scenedata.textures[name].add renderer.device.uploadTexture(texture)
 
+ #[ this might be a bad idea, I think originaly just a work around
   # find all meshes, populate missing attribute values for shader
   for mesh in scene.meshes.mitems:
     for inputAttr in inputs:
-      if inputAttr.name == TRANSFORMATTRIBUTE:
+      if inputAttr.name == TRANSFORM_ATTRIBUTE:
         mesh[].initInstanceAttribute(inputAttr.name, inputAttr.thetype)
       elif not mesh[].attributes.contains(inputAttr.name):
         warn(&"Mesh is missing data for shader attribute {inputAttr.name}, auto-filling with empty values")
@@ -189,6 +210,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
         else:
           mesh[].initVertexAttribute(inputAttr.name, inputAttr.thetype)
       assert mesh[].attributeType(inputAttr.name) == inputAttr.thetype, &"mesh attribute {inputAttr.name} has type {mesh[].attributeType(inputAttr.name)} but shader expects {inputAttr.thetype}"
+  ]#
   
   # create index buffer if necessary
   var indicesBufferSize = 0
@@ -336,8 +358,8 @@ proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
 
   for (drawable, mesh) in renderer.scenedata[scene].drawables.mitems:
-    if mesh[].attributes.contains(TRANSFORMATTRIBUTE):
-      mesh[].updateInstanceTransforms(TRANSFORMATTRIBUTE)
+    if mesh[].attributes.contains(TRANSFORM_ATTRIBUTE):
+      mesh[].updateInstanceTransforms(TRANSFORM_ATTRIBUTE)
     let attrs = (if forceAll: mesh[].attributes else: mesh[].dirtyAttributes)
     for attribute in attrs:
       renderer.refreshMeshAttributeData(scene, drawable, mesh, attribute)

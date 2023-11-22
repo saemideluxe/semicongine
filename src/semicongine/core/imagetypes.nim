@@ -1,3 +1,5 @@
+import std/strformat
+
 import ./vulkanapi
 import ./vector
 
@@ -21,6 +23,12 @@ type
 
 converter toRGBA*(p: Pixel): Vec4f =
   newVec4f(float32(p[0]) / 255'f32, float32(p[1]) / 255'f32, float32(p[2]) / 255'f32, float32(p[3]) / 255'f32)
+
+proc `$`*(image: Image): string =
+  &"{image.width}x{image.height}"
+
+proc `$`*(texture: Texture): string =
+  &"{texture.name} {texture.image}"
 
 proc `[]`*(image: Image, x, y: int): Pixel =
   assert x < image.width
@@ -50,14 +58,14 @@ proc newImage*(width, height: int, imagedata: seq[Pixel] = @[], fill=EMPTYPIXEL)
       for x in 0 ..< width:
         result[x, y] = fill
 
-let INVALID_TEXTURE* = Texture(image: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: Sampler(
+let INVALID_TEXTURE* = Texture(name: "Invalid texture", image: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: Sampler(
     magnification: VK_FILTER_NEAREST,
     minification: VK_FILTER_NEAREST,
     wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
     wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
   )
 )
-let EMPTY_TEXTURE* = Texture(image: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: Sampler(
+let EMPTY_TEXTURE* = Texture(name: "Empty texture", image: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: Sampler(
     magnification: VK_FILTER_NEAREST,
     minification: VK_FILTER_NEAREST,
     wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,

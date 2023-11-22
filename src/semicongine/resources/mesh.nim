@@ -44,6 +44,17 @@ const
     33648: VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
     10497: VK_SAMPLER_ADDRESS_MODE_REPEAT
   }.toTable
+  GLTF_MATERIAL_MAPPING = {
+    "color": "baseColorFactor",
+    "emissiveColor": "emissiveFactor",
+    "metallic": "metallicFactor",
+    "roughness", "roughnessFactor",
+    "baseTexture": "baseColorTexture",
+    "metallicRoughnessTexture": "metallicRoughnessTexture",
+    "normalTexture": "normalTexture",
+    "occlusionTexture": "occlusionTexture",
+    "emissiveTexture": "emissiveTexture",
+  }.toTable
 
 proc getGPUType(accessor: JsonNode, attribute: string): DataType =
   # TODO: no full support for all datatypes that glTF may provide
@@ -136,6 +147,8 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Tex
   let textureNode = root["textures"][textureIndex]
   result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
   result.name = root["images"][textureNode["source"].getInt()]["name"].getStr()
+  if result.name == "":
+    result.name = &"Texture{textureIndex}"
 
   if textureNode.hasKey("sampler"):
     let sampler = root["samplers"][textureNode["sampler"].getInt()]
@@ -149,64 +162,71 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Tex
       result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
 
 
-proc loadMaterial(root: JsonNode, materialNode: JsonNode, mainBuffer: seq[uint8]): MaterialData =
-  result = MaterialData(name: materialNode["name"].getStr())
+proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: MaterialType, mainBuffer: seq[uint8]): MaterialData =
   let pbr = materialNode["pbrMetallicRoughness"]
+  var attributes: Table[string, DataList]
 
   # color
-  result.attributes["baseColorFactor"] = initDataList(thetype=Vec4F32)
-  if pbr.hasKey("baseColorFactor"):
-    setValue(result.attributes["baseColorFactor"], @[newVec4f(
-      pbr["baseColorFactor"][0].getFloat(),
-      pbr["baseColorFactor"][1].getFloat(),
-      pbr["baseColorFactor"][2].getFloat(),
-      pbr["baseColorFactor"][3].getFloat(),
-    )])
-  else:
-    setValue(result.attributes["baseColorFactor"], @[newVec4f(1, 1, 1, 1)])
-
-  # pbr material values
-  for factor in ["metallicFactor", "roughnessFactor"]:
-    result.attributes[factor] = initDataList(thetype=Float32)
-    if pbr.hasKey(factor):
-      setValue(result.attributes[factor], @[float32(pbr[factor].getFloat())])
+  if defaultMaterial.attributes.contains("color"):
+    attributes["color"] = initDataList(thetype=Vec4F32)
+    if pbr.hasKey(GLTF_MATERIAL_MAPPING["color"]):
+      setValue(attributes["color"], @[newVec4f(
+        pbr[GLTF_MATERIAL_MAPPING["color"]][0].getFloat(),
+        pbr[GLTF_MATERIAL_MAPPING["color"]][1].getFloat(),
+        pbr[GLTF_MATERIAL_MAPPING["color"]][2].getFloat(),
+        pbr[GLTF_MATERIAL_MAPPING["color"]][3].getFloat(),
+      )])
     else:
-      setValue(result.attributes[factor], @[0.5'f32])
+      setValue(attributes["color"], @[newVec4f(1, 1, 1, 1)])
+
+    # pbr material values
+    for factor in ["metallic", "roughness"]:
+      if defaultMaterial.attributes.contains(factor):
+        attributes[factor] = initDataList(thetype=Float32)
+        if pbr.hasKey(GLTF_MATERIAL_MAPPING[factor]):
+          setValue(attributes[factor], @[float32(pbr[GLTF_MATERIAL_MAPPING[factor]].getFloat())])
+        else:
+          setValue(attributes[factor], @[0.5'f32])
 
   # pbr material textures
-  for texture in ["baseColorTexture", "metallicRoughnessTexture"]:
-    result.attributes[texture] = initDataList(thetype=TextureType)
-    result.attributes[texture & "Index"] = initDataList(thetype=UInt8)
-    if pbr.hasKey(texture):
-      setValue(result.attributes[texture], @[loadTexture(root, pbr[texture]["index"].getInt(), mainBuffer)])
-      setValue(result.attributes[texture & "Index"], @[pbr[texture].getOrDefault("texCoord").getInt(0).uint8])
-    else:
-      setValue(result.attributes[texture & "Index"], @[EMPTY_TEXTURE])
-      setValue(result.attributes[texture & "Index"], @[0'u8])
+  for texture in ["baseTexture", "metallicRoughnessTexture"]:
+    if defaultMaterial.attributes.contains(texture):
+      attributes[texture] = initDataList(thetype=TextureType)
+      # attributes[texture & "Index"] = initDataList(thetype=UInt8)
+      if pbr.hasKey(GLTF_MATERIAL_MAPPING[texture]):
+        setValue(attributes[texture], @[loadTexture(root, pbr[GLTF_MATERIAL_MAPPING[texture]]["index"].getInt(), mainBuffer)])
+        # setValue(attributes[texture & "Index"], @[pbr[GLTF_MATERIAL_MAPPING[texture]].getOrDefault("texCoord").getInt(0).uint8])
+      else:
+        setValue(attributes[texture], @[EMPTY_TEXTURE])
+        # setValue(attributes[texture & "Index"], @[0'u8])
 
   # generic material textures
   for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
-    result.attributes[texture] = initDataList(thetype=TextureType)
-    result.attributes[texture & "Index"] = initDataList(thetype=UInt8)
-    if materialNode.hasKey(texture):
-      setValue(result.attributes[texture], @[loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)])
-      setValue(result.attributes[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
-    else:
-      setValue(result.attributes[texture], @[EMPTY_TEXTURE])
-      setValue(result.attributes[texture & "Index"], @[0'u8])
+    if defaultMaterial.attributes.contains(texture):
+      attributes[texture] = initDataList(thetype=TextureType)
+      # attributes[texture & "Index"] = initDataList(thetype=UInt8)
+      if materialNode.hasKey(GLTF_MATERIAL_MAPPING[texture]):
+        setValue(attributes[texture], @[loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)])
+        # setValue(attributes[texture & "Index"], @[materialNode[texture].getOrDefault("texCoord").getInt(0).uint8])
+      else:
+        setValue(attributes[texture], @[EMPTY_TEXTURE])
+        # setValue(attributes[texture & "Index"], @[0'u8])
 
   # emissiv color
-  result.attributes["emissiveFactor"] = initDataList(thetype=Vec3F32)
-  if materialNode.hasKey("emissiveFactor"):
-    setValue(result.attributes["emissiveFactor"], @[newVec3f(
-      materialNode["emissiveFactor"][0].getFloat(),
-      materialNode["emissiveFactor"][1].getFloat(),
-      materialNode["emissiveFactor"][2].getFloat(),
-    )])
-  else:
-    setValue(result.attributes["emissiveFactor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
+  if defaultMaterial.attributes.contains("emissiveColor"):
+    attributes["emissiveColor"] = initDataList(thetype=Vec3F32)
+    if materialNode.hasKey(GLTF_MATERIAL_MAPPING["emissiveColor"]):
+      setValue(attributes["emissiveColor"], @[newVec3f(
+        materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][0].getFloat(),
+        materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][1].getFloat(),
+        materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][2].getFloat(),
+      )])
+    else:
+      setValue(attributes["emissiveColor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
 
-proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, mainBuffer: seq[uint8]): Mesh =
+  result = initMaterialData(materialType=defaultMaterial, name=materialNode["name"].getStr(), attributes=attributes)
+
+proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, defaultMaterial: MaterialType, mainBuffer: seq[uint8]): Mesh =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
@@ -236,7 +256,7 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, mainBuf
 
   if primitiveNode.hasKey("material"):
     let materialId = primitiveNode["material"].getInt()
-    result[].material = loadMaterial(root, root["materials"][materialId], mainBuffer)
+    result[].material = loadMaterial(root, root["materials"][materialId], defaultMaterial, mainBuffer)
   else:
     result[].material = DEFAULT_MATERIAL
 
@@ -263,13 +283,13 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, mainBuf
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
   transform[Vec3f](result[], "position", scale(1, -1, 1))
 
-proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshTree =
+proc loadNode(root: JsonNode, node: JsonNode, defaultMaterial: MaterialType, mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
   # mesh
   if node.hasKey("mesh"):
     let mesh = root["meshes"][node["mesh"].getInt()]
     for primitive in mesh["primitives"]:
-      result.children.add MeshTree(mesh: loadMesh(mesh["name"].getStr(), root, primitive, mainBuffer))
+      result.children.add MeshTree(mesh: loadMesh(mesh["name"].getStr(), root, primitive, defaultMaterial, mainBuffer))
 
   # transformation
   if node.hasKey("matrix"):
@@ -305,16 +325,16 @@ proc loadNode(root: JsonNode, node: JsonNode, mainBuffer: var seq[uint8]): MeshT
   # children
   if node.hasKey("children"):
     for childNode in node["children"]:
-      result.children.add loadNode(root, root["nodes"][childNode.getInt()], mainBuffer)
+      result.children.add loadNode(root, root["nodes"][childNode.getInt()], defaultMaterial, mainBuffer)
 
-proc loadMeshTree(root: JsonNode, scenenode: JsonNode, mainBuffer: var seq[uint8]): MeshTree =
+proc loadMeshTree(root: JsonNode, scenenode: JsonNode, defaultMaterial: MaterialType, mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
   for nodeId in scenenode["nodes"]:
-    result.children.add loadNode(root, root["nodes"][nodeId.getInt()], mainBuffer)
+    result.children.add loadNode(root, root["nodes"][nodeId.getInt()], defaultMaterial, mainBuffer)
   result.updateTransforms()
 
 
-proc readglTF*(stream: Stream): seq[MeshTree] =
+proc readglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
   var
     header: glTFHeader
     data: glTFData
@@ -344,4 +364,4 @@ proc readglTF*(stream: Stream): seq[MeshTree] =
   debug "Loading mesh: ", data.structuredContent.pretty
 
   for scenedata in data.structuredContent["scenes"]:
-    result.add data.structuredContent.loadMeshTree(scenedata, data.binaryBufferData)
+    result.add data.structuredContent.loadMeshTree(scenedata, defaultMaterial, data.binaryBufferData)
