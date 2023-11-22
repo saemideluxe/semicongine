@@ -3,15 +3,17 @@ import std/unicode
 import semicongine
 
 proc main() =
-  var font = loadFont("DejaVuSans.ttf", color=newVec4f(1, 0.5, 0.5, 1), resolution=20)
-  
-  var textbox = initTextbox(32, font, "")
-  var scene = Scene(name: "main")
-  scene.add textbox
-  textbox.mesh.transform = scale(0.01, 0.01)
+  # setup engine
   var engine = initEngine("Test fonts")
   engine.initRenderer([])
-  engine.addScene(scene)
+
+  # build scene
+  var scene = Scene(name: "main")
+  var font = loadFont("DejaVuSans.ttf", color=newVec4f(1, 0.5, 0.5, 1), resolution=20)
+  var textbox = initTextbox(32, font, "")
+  scene.add textbox
+  textbox.mesh.transform = scale(0.01, 0.01)
+  engine.loadScene(scene)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     if engine.windowWasResized():

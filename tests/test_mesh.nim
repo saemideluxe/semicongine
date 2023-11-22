@@ -4,17 +4,8 @@ import std/tables
 import semicongine
 
 proc main() =
-  # var myScene = Scene(name: "hi", meshes: @[rect()])
-  # myScene.meshes[0].transform = translate3d(0.2'f32, 0'f32, 0'f32)
-  # myScene.root[0].transform = translate3d(0'f32, 0.2'f32, 0'f32)
   var scenes = [
-    # loadScene("default_cube.glb", "1"),
-    # loadScene("default_cube1.glb", "3"),
-    # loadScene("default_cube2.glb", "4"),
-    # loadScene("flat.glb", "5"),
-    Scene(name: "Donut", meshes: loadMeshes("tutorialk-donat.glb")[0].toSeq),
-    # myScene,
-    # loadScene("personv3.glb", "2"),
+    Scene(name: "Donut", meshes: loadMeshes("tutorialk-donat.glb", COLORED_SINGLE_TEXTURE_MATERIAL)[0].toSeq),
   ]
 
   var engine = initEngine("Test meshes")
@@ -22,7 +13,7 @@ proc main() =
     shaderConfiguration = createShaderConfiguration(
       inputs=[
         attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-        attr[uint16]("materialIndex", memoryPerformanceHint=PreferFastRead),
+        attr[uint16]("materialIndex", memoryPerformanceHint=PreferFastRead, perInstance=true),
         attr[Vec2f]("texcoord_0", memoryPerformanceHint=PreferFastRead),
         attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
       ],
@@ -35,37 +26,23 @@ proc main() =
       uniforms=[
         attr[Mat4]("projection"),
         attr[Mat4]("view"),
-        attr[Vec4f]("baseColorFactor", arrayCount=4),
+        attr[Vec4f]("color", arrayCount=4),
       ],
-      samplers=[attr[Texture]("baseColorTexture", arrayCount=4)],
+      samplers=[attr[Texture]("baseTexture", arrayCount=4)],
       vertexCode="""
   gl_Position =  vec4(position, 1.0) * (transform * Uniforms.view * Uniforms.projection);
-  vertexColor = Uniforms.baseColorFactor[materialIndex];
+  vertexColor = Uniforms.color[materialIndex];
   colorTexCoord = texcoord_0;
   materialIndexOut = materialIndex;
   """,
-      fragmentCode="color = texture(baseColorTexture[materialIndexOut], colorTexCoord) * vertexColor;"
+      fragmentCode="color = texture(baseTexture[materialIndexOut], colorTexCoord) * vertexColor;"
     )
-  engine.initRenderer({
-    "Material": shaderConfiguration,
-    "Material.001": shaderConfiguration,
-    "Material.002": shaderConfiguration,
-    "Material.004": shaderConfiguration,
-  })
+  engine.initRenderer({COLORED_SINGLE_TEXTURE_MATERIAL: shaderConfiguration})
 
   for scene in scenes.mitems:
     scene.addShaderGlobal("projection", Unit4F32)
     scene.addShaderGlobal("view", Unit4F32)
-    var materials: Table[uint16, Material]
-    for mesh in scene.meshes:
-      for material in mesh.materials:
-        if not materials.contains(material.index):
-          materials[material.index] = material
-    let baseColors = sortedByIt(values(materials).toSeq, it.index).mapIt(getValue[Vec4f](it.constants["baseColorFactor"], 0))
-    let baseTextures = sortedByIt(values(materials).toSeq, it.index).mapIt(it.textures["baseColorTexture"])
-    scene.addShaderGlobalArray("baseColorFactor", baseColors)
-    scene.addShaderGlobalArray("baseColorTexture", baseTextures)
-    engine.addScene(scene)
+    engine.loadScene(scene)
 
   var
     size = 1'f32
