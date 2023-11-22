@@ -6,6 +6,9 @@ proc main() =
   scene.add rect(color="f00f")
   scene.add rect()
   scene.add circle(color="0f0f")
+  scene.meshes[0].material = VERTEX_COLORED_MATERIAL.initMaterialData()
+  scene.meshes[1].material = VERTEX_COLORED_MATERIAL.initMaterialData()
+  scene.meshes[2].material = VERTEX_COLORED_MATERIAL.initMaterialData()
   scene.meshes[1].transform = scale(0.8, 0.8)
   scene.meshes[2].transform = scale(0.1, 0.1)
   scene.addShaderGlobal("perspective", Unit4F32)
@@ -26,8 +29,8 @@ proc main() =
 
   var engine = initEngine("Test collisions")
 
-  engine.initRenderer({"default material": shaderConfiguration})
-  engine.addScene(scene)
+  engine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration})
+  engine.loadScene(scene)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     if engine.windowWasResized():

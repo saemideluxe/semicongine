@@ -14,7 +14,7 @@ let
   mat = SINGLE_TEXTURE_MATERIAL.initMaterialData(
     name="mat",
     attributes={
-      "texture1": initDataList(@[Texture(image: Image(width: 5, height: 5, imagedata: @[
+      "baseTexture": initDataList(@[Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
       R, R, W, R, R,
       R, W, W, W, R,
@@ -26,7 +26,7 @@ let
   mat2 = SINGLE_TEXTURE_MATERIAL.initMaterialData(
     name="mat2",
     attributes={
-      "texture1": initDataList(@[Texture(image: Image(width: 5, height: 5, imagedata: @[
+      "baseTexture": initDataList(@[Texture(image: Image(width: 5, height: 5, imagedata: @[
       R, W, R, W, R,
       W, R, W, R, W,
       R, W, R, W, R,
@@ -180,10 +180,10 @@ proc main() =
       ],
       outputs=[attr[Vec4f]("color")],
       samplers=[
-        attr[Texture]("texture1")
+        attr[Texture]("baseTexture")
       ],
       vertexCode="""gl_Position = vec4(position, 1.0) * transform; outcolor = color;""",
-      fragmentCode="color = texture(texture1, outcolor.xy) * 0.5 + outcolor * 0.5;",
+      fragmentCode="color = texture(baseTexture, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
     shaderConfiguration2 = createShaderConfiguration(
       inputs=[
