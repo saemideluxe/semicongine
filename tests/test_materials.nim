@@ -14,14 +14,26 @@ let
     RT, RT, RT, RT, RT, RT, RT,
   ])
   swiss = loadImage("flag.png")
-  material = Material(name: "material", textures: {
-    "tex1": Texture(image: thai, sampler: sampler),
-    "tex2": Texture(image: swiss, sampler: sampler),
-  }.toTable)
+  doubleTextureMaterial = MaterialType(
+    name:"Double texture",
+    meshAttributes: {
+      "position": Vec3F32,
+      "uv": Vec2F32,
+    }.toTable,
+    attributes: {"tex1": TextureType, "tex2": TextureType}.toTable
+  )
+  material = MaterialData(
+    theType: doubleTextureMaterial,
+    name: "swiss-thai",
+    attributes: {
+      "tex1": initDataList(@[Texture(image: thai, sampler: sampler)]),
+      "tex2": initDataList(@[Texture(image: swiss, sampler: sampler)]),
+    }.toTable
+  )
 
 proc main() =
   var flag = rect()
-  flag.materials = @[material]
+  flag.material = material
   var scene = Scene(name: "main", meshes: @[flag])
   scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
 
@@ -51,9 +63,9 @@ proc main() =
       """,
     )
   engine.initRenderer({
-    "material": shaderConfiguration1,
+    doubleTextureMaterial: shaderConfiguration1,
   })
-  engine.addScene(scene)
+  engine.loadScene(scene)
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     var d = float32(cpuTime() - t)

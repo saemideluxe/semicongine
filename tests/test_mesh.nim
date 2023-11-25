@@ -1,11 +1,8 @@
-import std/algorithm
-import std/sequtils
-import std/tables
 import semicongine
 
 proc main() =
   var scenes = [
-    Scene(name: "Donut", meshes: loadMeshes("tutorialk-donat.glb", COLORED_SINGLE_TEXTURE_MATERIAL)[0].toSeq),
+    Scene(name: "Donut", meshes: loadMeshes("donut.glb", COLORED_SINGLE_TEXTURE_MATERIAL)[0].toSeq),
   ]
 
   var engine = initEngine("Test meshes")
