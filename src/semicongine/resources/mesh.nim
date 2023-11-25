@@ -281,7 +281,8 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, default
             tri.setLen(0)
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
-  transform[Vec3f](result[], "position", scale(1, -1, 1))
+  # TODO: getting from gltf to vulkan system is still messed up somehow, see other TODO
+  # transform[Vec3f](result[], "position", scale(1, -1, 1))
 
 proc loadNode(root: JsonNode, node: JsonNode, defaultMaterial: MaterialType, mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
@@ -331,6 +332,8 @@ proc loadMeshTree(root: JsonNode, scenenode: JsonNode, defaultMaterial: Material
   result = MeshTree()
   for nodeId in scenenode["nodes"]:
     result.children.add loadNode(root, root["nodes"][nodeId.getInt()], defaultMaterial, mainBuffer)
+  # TODO: getting from gltf to vulkan system is still messed up somehow (i.e. not consistent for different files), see other TODO
+  result.transform = scale(1, -1, 1)
   result.updateTransforms()
 
 

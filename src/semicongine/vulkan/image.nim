@@ -1,3 +1,4 @@
+import std/strformat
 import std/tables
 import std/logging
 
@@ -273,6 +274,10 @@ proc destroy*(imageview: var ImageView) =
   assert imageview.vk.valid
   imageview.image.device.vk.vkDestroyImageView(imageview.vk, nil)
   imageview.vk.reset()
+
+func `$`*(texture: VulkanTexture): string =
+  &"VulkanTexture({texture.image.width}x{texture.image.height})"
+
 
 proc uploadTexture*(device: Device, texture: Texture): VulkanTexture =
   assert device.vk.valid
