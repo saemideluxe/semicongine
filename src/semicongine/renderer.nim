@@ -31,12 +31,12 @@ type
     vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
     uniformBuffers*: Table[VkPipeline, seq[Buffer]] # one per frame-in-flight
-    textures*: Table[string, seq[VulkanTexture]] # per frame-in-flight
+    textures*: Table[VkPipeline, Table[string, seq[VulkanTexture]]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
     vertexBufferOffsets*: Table[(Mesh, string), int]
     descriptorPools*: Table[VkPipeline, DescriptorPool]
     descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
-    materials: seq[MaterialData]
+    materials: Table[MaterialType, seq[MaterialData]]
   Renderer* = object
     device: Device
     surfaceFormat: VkSurfaceFormatKHR
@@ -74,12 +74,6 @@ func inputs(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
             result.add input
             found[input.name] = input
 
-func samplers(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
-  for i in 0 ..< renderer.renderPass.subpasses.len:
-    for (materialType, pipeline) in renderer.renderPass.subpasses[i].pipelines:
-      if scene.usesMaterial(materialType):
-        result.add pipeline.samplers
-
 func materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, pipeline: Pipeline): (bool, string) =
   for uniform in pipeline.uniforms:
     if scene.shaderGlobals.contains(uniform.name):
@@ -93,18 +87,18 @@ func materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, pi
           break
       if not foundMatch:
         return (true, &"shader uniform '{uniform.name}' was not found in scene globals or scene materials")
-  for sampler in pipeline.samplers:
-    if scene.shaderGlobals.contains(sampler.name):
-      if scene.shaderGlobals[sampler.name].theType != sampler.theType:
-        return (true, &"shader sampler '{sampler.name}' needs type {sampler.theType} but scene global is of type {scene.shaderGlobals[sampler.name].theType}")
+  for texture in pipeline.samplers:
+    if scene.shaderGlobals.contains(texture.name):
+      if scene.shaderGlobals[texture.name].theType != texture.theType:
+        return (true, &"shader texture '{texture.name}' needs type {texture.theType} but scene global is of type {scene.shaderGlobals[texture.name].theType}")
     else:
       var foundMatch = true
       for name in materialType.attributes.keys:
-        if name == sampler.name:
+        if name == texture.name:
           foundMatch = true
           break
       if not foundMatch:
-        return (true, &"Required texture for shader sampler '{sampler.name}' was not found in scene materials")
+        return (true, &"Required texture for shader texture '{texture.name}' was not found in scene materials")
 
   return (false, "")
 
@@ -140,8 +134,7 @@ func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
         if mesh.material.theType == materialType:
           foundRenderableObject = true
           let (error, message) = scene.meshCompatibleWithPipeline(mesh, pipeline)
-          if error:
-            raise newException(Exception, &"Mesh '{mesh}' not compatible with assigned pipeline ({materialType}) because: {message}")
+          assert not error, &"Mesh '{mesh}' not compatible with assigned pipeline ({materialType}) because: {message}"
 
   if not foundRenderableObject:
     var matTypes: Table[string, MaterialType]
@@ -153,33 +146,30 @@ func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
 proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   assert not (scene in renderer.scenedata)
 
-  # find all material data and group it by material type
-  var materials: Table[MaterialType, seq[MaterialData]]
+  var scenedata = SceneData()
 
+  # find all material data and group it by material type
   for mesh in scene.meshes:
-    if not materials.contains(mesh.material.theType):
-      materials[mesh.material.theType] = @[]
-    if not materials[mesh.material.theType].contains(mesh.material):
-      materials[mesh.material.theType].add mesh.material
+    if not scenedata.materials.contains(mesh.material.theType):
+      scenedata.materials[mesh.material.theType] = @[]
+    if not scenedata.materials[mesh.material.theType].contains(mesh.material):
+      scenedata.materials[mesh.material.theType].add mesh.material
 
   # automatically populate material and tranform attributes
   for mesh in scene.meshes:
     if not (TRANSFORM_ATTRIBUTE in mesh[].attributes):
         mesh[].initInstanceAttribute(TRANSFORM_ATTRIBUTE, Unit4)
     if not (MATERIALINDEX_ATTRIBUTE in mesh[].attributes):
-      mesh[].initInstanceAttribute(MATERIALINDEX_ATTRIBUTE, uint16(materials[mesh.material.theType].find(mesh.material)))
+      mesh[].initInstanceAttribute(MATERIALINDEX_ATTRIBUTE, uint16(scenedata.materials[mesh.material.theType].find(mesh.material)))
 
   renderer.checkSceneIntegrity(scene)
 
   let
     inputs = renderer.inputs(scene)
-    samplers = renderer.samplers(scene)
-  var scenedata = SceneData()
 
+  #[ 
   # collect textures from mesh materials, add them to scenedata and upload to GPU
   for mesh in scene.meshes:
-    if not scenedata.materials.contains(mesh.material):
-      scenedata.materials.add mesh.material
       for name, value in mesh.material.attributes.pairs:
         if value.theType == TextureType:
           if scene.shaderGlobals.contains(name) and scene.shaderGlobals[name].theType == TextureType:
@@ -196,22 +186,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       scenedata.textures[name] = @[]
       for texture in getValues[Texture](value)[]:
         scenedata.textures[name].add renderer.device.uploadTexture(texture)
-
- #[ this might be a bad idea, I think originaly just a work around
-  # find all meshes, populate missing attribute values for shader
-  for mesh in scene.meshes.mitems:
-    for inputAttr in inputs:
-      if inputAttr.name == TRANSFORM_ATTRIBUTE:
-        mesh[].initInstanceAttribute(inputAttr.name, inputAttr.thetype)
-      elif not mesh[].attributes.contains(inputAttr.name):
-        warn(&"Mesh is missing data for shader attribute {inputAttr.name}, auto-filling with empty values")
-        if inputAttr.perInstance:
-          mesh[].initInstanceAttribute(inputAttr.name, inputAttr.thetype)
-        else:
-          mesh[].initVertexAttribute(inputAttr.name, inputAttr.thetype)
-      assert mesh[].attributeType(inputAttr.name) == inputAttr.thetype, &"mesh attribute {inputAttr.name} has type {mesh[].attributeType(inputAttr.name)} but shader expects {inputAttr.thetype}"
   ]#
-  
+
   # create index buffer if necessary
   var indicesBufferSize = 0
   for mesh in scene.meshes:
@@ -306,10 +282,45 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       indexBufferOffset += size
     scenedata.drawables.add (drawable, mesh)
 
-  # setup uniforms and samplers
+  # setup uniforms and textures (anything descriptor)
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
     for (materialType, pipeline) in renderer.renderPass.subpasses[subpass_i].pipelines:
       if scene.usesMaterial(materialType):
+
+        # gather textures
+        scenedata.textures[pipeline.vk] = initTable[string, seq[VulkanTexture]]()
+        var uploadedTextures: Table[Texture, VulkanTexture]
+        for texture in pipeline.samplers:
+          scenedata.textures[pipeline.vk][texture.name] = newSeq[VulkanTexture]()
+          if scene.shaderGlobals.contains(texture.name):
+            for textureValue in getValues[Texture](scene.shaderGlobals[texture.name])[]:
+              if not uploadedTextures.contains(textureValue):
+                uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
+              scenedata.textures[pipeline.vk][texture.name].add uploadedTextures[textureValue]
+          else:
+            var foundTexture = false
+            var uploadedMaterials: seq[MaterialData]
+            for mesh in scene.meshes:
+              if not uploadedMaterials.contains(mesh.material):
+                for name, value in mesh.material.attributes.pairs:
+                  if name == texture.name:
+                    if not foundTexture:
+                      foundTexture = true
+                    assert value.theType == TextureType, &"Mesh material has attribute '{name}' which is expected to be of type 'Texture' but is of type {value.theType}"
+                    assert value.len == 1, &"Mesh material attribute '{name}' has texture-array, but only single textures are allowed"
+                    let textureValue = getValues[Texture](value)[][0]
+                    echo &"Mesh {mesh} -> Material {mesh.material} -> {name}: {textureValue}"
+                    if not uploadedTextures.contains(textureValue):
+                      uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
+                    scenedata.textures[pipeline.vk][texture.name].add uploadedTextures[textureValue]
+                    uploadedMaterials.add mesh.material
+              else:
+                foundTexture = true
+            assert foundTexture, "No texture found in shaderGlobals or materials for '{texture.name}'"
+          let nTextures = scenedata.textures[pipeline.vk][texture.name].len
+          assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount == nTextures, &"Shader expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
+
+        # gather uniform sizes
         var uniformBufferSize = 0
         for uniform in pipeline.uniforms:
           uniformBufferSize += uniform.size
@@ -323,19 +334,20 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
               preferVRAM=true,
             )
             
+        # setup descriptors
         var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, renderer.swapchain.inFlightFrames)]
-        if samplers.len > 0:
-          var samplercount = 0
-          for sampler in samplers:
-            samplercount += (if sampler.arrayCount == 0: 1 else: sampler.arrayCount)
-          poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, renderer.swapchain.inFlightFrames * samplercount * 2)
+        if scenedata.textures[pipeline.vk].len > 0:
+          var textureCount = 0
+          for textures in scenedata.textures[pipeline.vk].values:
+            textureCount += textures.len
+          poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, renderer.swapchain.inFlightFrames * textureCount * 2)
       
         scenedata.descriptorPools[pipeline.vk] = renderer.device.createDescriptorSetPool(poolsizes)
     
         scenedata.descriptorSets[pipeline.vk] = pipeline.setupDescriptors(
           scenedata.descriptorPools[pipeline.vk],
           scenedata.uniformBuffers.getOrDefault(pipeline.vk, @[]),
-          scenedata.textures,
+          scenedata.textures[pipeline.vk],
           inFlightFrames=renderer.swapchain.inFlightFrames,
           emptyTexture=renderer.emptyTexture,
         )
@@ -369,7 +381,7 @@ proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
 proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
   # TODO: maybe check for dirty materials too, but atm we copy materials into the
-  # renderers scenedata, so they will are immutable after initialization, would 
+  # renderers scenedata, so they are immutable after initialization, would 
   # need to allow updates of materials too in order to make sense
 
   let dirty = scene.dirtyShaderGlobals
@@ -397,31 +409,34 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
         var offset = 0
         # loop over all uniforms of the shader-pipeline
         for uniform in pipeline.uniforms:
-          var foundValue = false
-          var value: DataList
-          if scene.shaderGlobals.hasKey(uniform.name):
-            assert scene.shaderGlobals[uniform.name].thetype == uniform.thetype
-            value = scene.shaderGlobals[uniform.name]
-            foundValue = true
-          else:
-            for mat in renderer.scenedata[scene].materials:
-              for name, materialConstant in mat.attributes.pairs:
-                if uniform.name == name:
-                  value = materialConstant
-                  foundValue = true
-                  break
-              if foundValue: break
-          if not foundValue:
-            raise newException(Exception, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials")
-          debug &"  update uniform {uniform.name} with value: {value}"
-          let (pdata, size) = value.getRawData()
           if dirty.contains(uniform.name) or forceAll: # only update if necessary
+            var value: DataList
+            if scene.shaderGlobals.hasKey(uniform.name):
+              assert scene.shaderGlobals[uniform.name].thetype == uniform.thetype
+              value = scene.shaderGlobals[uniform.name]
+            else:
+              var foundValue = false
+              for material in renderer.scenedata[scene].materials[materialType]:
+                for name, materialValue in material.attributes.pairs:
+                  if uniform.name == name:
+                    if not foundValue:
+                      foundValue = true
+                      value = initDataList(materialValue.theType, 0)
+                    else:
+                      assert value.theType == materialValue.theType, &"Material for uniform '{uniform.name}' was found multiple times with different types: {value.theType} and {materialValue.theType}"
+                    value.appendValues(materialValue)
+                    break
+              assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
+            assert (uniform.arrayCount == 0 and value.len == 1) or value.len == uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials only provide {value.len})"
+            let (pdata, size) = value.getRawData()
+            assert size == uniform.size, "During uniform update: gathered value has size {size} but uniform expects size {uniform.size}"
+            debug &"  update uniform {uniform.name} with value: {value}"
             # TODO: technically we would only need to update the uniform buffer of the current
             # frameInFlight, but we don't track for which frame the shaderglobals are no longer dirty
             # therefore we have to update the uniform values in all buffers, of all inFlightframes (usually 2)
             for buffer in renderer.scenedata[scene].uniformBuffers[pipeline.vk]:
               buffer.setData(pdata, size, offset)
-          offset += size
+          offset += uniform.size
   scene.clearDirtyShaderGlobals()
 
 proc render*(renderer: var Renderer, scene: Scene) =
@@ -489,9 +504,10 @@ proc destroy*(renderer: var Renderer, scene: Scene) =
     for buffer in pipelineUniforms.mitems:
       assert buffer.vk.valid
       buffer.destroy()
-  for textures in scenedata.textures.mvalues:
-    for texture in textures.mitems:
-      texture.destroy()
+  for pipelineTextures in scenedata.textures.mvalues:
+    for textures in pipelineTextures.mvalues:
+      for texture in textures.mitems:
+        texture.destroy()
   for descriptorPool in scenedata.descriptorPools.mvalues:
     descriptorPool.destroy()
 
@@ -507,9 +523,10 @@ proc destroy*(renderer: var Renderer) =
       for buffer in pipelineUniforms.mitems:
         assert buffer.vk.valid
         buffer.destroy()
-    for textures in scenedata.textures.mvalues:
-      for texture in textures.mitems:
-        texture.destroy()
+    for pipelineTextures in scenedata.textures.mvalues:
+      for textures in pipelineTextures.mvalues:
+        for texture in textures.mitems:
+          texture.destroy()
     for descriptorPool in scenedata.descriptorPools.mvalues:
       descriptorPool.destroy()
   renderer.emptyTexture.destroy()
