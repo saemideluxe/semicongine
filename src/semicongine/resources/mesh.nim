@@ -258,7 +258,7 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, default
     let materialId = primitiveNode["material"].getInt()
     result[].material = loadMaterial(root, root["materials"][materialId], defaultMaterial, mainBuffer)
   else:
-    result[].material = DEFAULT_MATERIAL
+    result[].material = EMPTY_MATERIAL.initMaterialData()
 
   if primitiveNode.hasKey("indices"):
     assert result[].indexType != None
@@ -282,7 +282,7 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, default
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
   # TODO: getting from gltf to vulkan system is still messed up somehow, see other TODO
-  # transform[Vec3f](result[], "position", scale(1, -1, 1))
+  transform[Vec3f](result[], "position", scale(1, -1, 1))
 
 proc loadNode(root: JsonNode, node: JsonNode, defaultMaterial: MaterialType, mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
@@ -321,7 +321,8 @@ proc loadNode(root: JsonNode, node: JsonNode, defaultMaterial: MaterialType, mai
         float32(node["scale"][1].getFloat()),
         float32(node["scale"][2].getFloat())
       )
-    result.transform = t * r * s
+    result.transform =  t * r * s
+  result.transform =  scale(1, -1, 1) * result.transform
 
   # children
   if node.hasKey("children"):
@@ -333,7 +334,7 @@ proc loadMeshTree(root: JsonNode, scenenode: JsonNode, defaultMaterial: Material
   for nodeId in scenenode["nodes"]:
     result.children.add loadNode(root, root["nodes"][nodeId.getInt()], defaultMaterial, mainBuffer)
   # TODO: getting from gltf to vulkan system is still messed up somehow (i.e. not consistent for different files), see other TODO
-  result.transform = scale(1, -1, 1)
+  # result.transform = scale(1, -1, 1)
   result.updateTransforms()
 
 

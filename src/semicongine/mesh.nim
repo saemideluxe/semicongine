@@ -11,6 +11,8 @@ import ./core
 import ./collision
 import ./material
 
+const DEFAULT_POSITION_ATTRIBUTE = "position"
+
 var instanceCounter* = 0
 
 type
@@ -132,7 +134,7 @@ proc newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: MaterialData=DEFAULT_MATERIAL,
+  material=EMPTY_MATERIAL.initMaterialData(),
   autoResize=true,
   name: string=""
 ): Mesh =
@@ -158,13 +160,12 @@ proc newMesh*(
     vertexCount: positions.len,
     instanceTransforms: @instanceTransforms,
     transform: transform,
+    material: material
   )
 
-  result[].initVertexAttribute("position", positions.toSeq)
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE , positions.toSeq)
   if colors.len > 0: result[].initVertexAttribute("color", colors.toSeq)
   if uvs.len > 0: result[].initVertexAttribute("uv", uvs.toSeq)
-
-  `material=`(result[], material)
 
   # assert all indices are valid
   for i in indices:
@@ -189,7 +190,7 @@ proc newMesh*(
   uvs: openArray[Vec2f]=[],
   transform: Mat4=Unit4F32,
   instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material: MaterialData=DEFAULT_MATERIAL,
+  material=EMPTY_MATERIAL.initMaterialData(),
   name: string="",
 ): Mesh =
   newMesh(
@@ -378,11 +379,17 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-func getCollisionPoints*(mesh: MeshObject, positionAttribute="position"): seq[Vec3f] =
+proc applyTransformToVertices*(mesh: var MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE) =
+  for i in 0 ..< mesh.vertexData[positionAttribute].len:
+    setValue(mesh.vertexData[positionAttribute], i, mesh.transform * getValue[Vec3f](mesh.vertexData[positionAttribute], i))
+  mesh.transform = Unit4
+
+
+func getCollisionPoints*(mesh: MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE): seq[Vec3f] =
   for p in mesh[positionAttribute, Vec3f][]:
     result.add mesh.transform * p
 
-func getCollider*(mesh: MeshObject, positionAttribute="position"): Collider =
+func getCollider*(mesh: MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE): Collider =
   return mesh.getCollisionPoints(positionAttribute).calculateCollider(Points)
 
 proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
@@ -431,15 +438,15 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
 
 # GENERATORS ============================================================================
 
-proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
+proc rect*(width=1'f32, height=1'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 4,
     instanceTransforms: @[Unit4F32],
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
     name: &"rect-{instanceCounter}",
+    material: material,
   )
-  `material=`(result[], DEFAULT_MATERIAL)
   inc instanceCounter
 
   let
@@ -448,35 +455,35 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
     pos = @[newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
     c = toRGBA(color)
 
-  result[].initVertexAttribute("position", pos)
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", @[c, c, c, c])
   result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
-proc tri*(width=1'f32, height=1'f32, color="ffffffff"): Mesh =
+proc tri*(width=1'f32, height=1'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 3,
     instanceTransforms: @[Unit4F32],
     name: &"tri-{instanceCounter}",
+    material: material,
   )
-  `material=`(result[], DEFAULT_MATERIAL)
   inc instanceCounter
   let
     half_w = width / 2
     half_h = height / 2
     colorVec = toRGBA(color)
 
-  result[].initVertexAttribute("position", @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
   result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
 
-proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
+proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
   assert nSegments >= 3
   result = Mesh(
     vertexCount: 3 + nSegments,
     instanceTransforms: @[Unit4F32],
     indexType: Small,
     name: &"circle-{instanceCounter}",
+    material: material,
   )
-  `material=`(result[], DEFAULT_MATERIAL)
   inc instanceCounter
 
   let
@@ -492,7 +499,7 @@ proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff"): Mesh =
     col.add c
     result[].smallIndices.add [uint16(0), uint16(i + 1), uint16(i + 2)]
 
-  result[].initVertexAttribute("position", pos)
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
 
 # MESH TREES =============================================================================
