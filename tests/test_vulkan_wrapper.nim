@@ -23,7 +23,15 @@ let
       ]), sampler: sampler)])
     }.toTable
   )
-  mat2 = SINGLE_TEXTURE_MATERIAL.initMaterialData(
+  Mat2Type = MaterialType(
+    name: "single texture material 2",
+    meshAttributes: {
+      "position": Vec3F32,
+      "uv": Vec2F32,
+    }.toTable,
+    attributes: {"baseTexture": TextureType}.toTable
+  )
+  mat2 = Mat2Type.initMaterialData(
     name="mat2",
     attributes={
       "baseTexture": initDataList(@[Texture(image: Image(width: 5, height: 5, imagedata: @[
@@ -199,6 +207,7 @@ proc main() =
   engine.initRenderer({
     SINGLE_TEXTURE_MATERIAL: shaderConfiguration1,
     SINGLE_TEXTURE_MATERIAL: shaderConfiguration1,
+    Mat2Type: shaderConfiguration1,
     SINGLE_COLOR_MATERIAL: shaderConfiguration2,
   })
 
