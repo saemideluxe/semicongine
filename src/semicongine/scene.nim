@@ -84,3 +84,8 @@ func `==`*(a, b: Scene): bool =
 
 func usesMaterial*(scene: Scene, materialType: MaterialType): bool =
   return scene.meshes.anyIt(it.material.theType == materialType)
+
+func getMaterials*(scene: Scene, materialType: MaterialType): seq[MaterialData] =
+  for mesh in scene.meshes:
+    if mesh.material.theType == materialType and (not result.contains(mesh.material)):
+      result.add mesh.material

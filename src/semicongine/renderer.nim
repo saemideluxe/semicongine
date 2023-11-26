@@ -164,29 +164,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   renderer.checkSceneIntegrity(scene)
 
-  let
-    inputs = renderer.inputs(scene)
-
-  #[ 
-  # collect textures from mesh materials, add them to scenedata and upload to GPU
-  for mesh in scene.meshes:
-      for name, value in mesh.material.attributes.pairs:
-        if value.theType == TextureType:
-          if scene.shaderGlobals.contains(name) and scene.shaderGlobals[name].theType == TextureType:
-            warn &"Ignoring material texture '{name}' as scene-global textures with the same name have been defined"
-          else:
-            if not scenedata.textures.hasKey(name):
-              scenedata.textures[name] = @[]
-            scenedata.textures[name].add renderer.device.uploadTexture(getValue[Texture](value, 0))
-
-  # collect textures from shader globals, add them to scenedata and upload to GPU
-  for name, value in scene.shaderGlobals.pairs:
-    if value.theType == TextureType:
-      assert not scenedata.textures.contains(name) # should be handled by the above code
-      scenedata.textures[name] = @[]
-      for texture in getValues[Texture](value)[]:
-        scenedata.textures[name].add renderer.device.uploadTexture(texture)
-  ]#
+  let inputs = renderer.inputs(scene)
 
   # create index buffer if necessary
   var indicesBufferSize = 0
@@ -283,13 +261,12 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     scenedata.drawables.add (drawable, mesh)
 
   # setup uniforms and textures (anything descriptor)
+  var uploadedTextures: Table[Texture, VulkanTexture]
   for subpass_i in 0 ..< renderer.renderPass.subpasses.len:
     for (materialType, pipeline) in renderer.renderPass.subpasses[subpass_i].pipelines:
       if scene.usesMaterial(materialType):
-
         # gather textures
         scenedata.textures[pipeline.vk] = initTable[string, seq[VulkanTexture]]()
-        var uploadedTextures: Table[Texture, VulkanTexture]
         for texture in pipeline.samplers:
           scenedata.textures[pipeline.vk][texture.name] = newSeq[VulkanTexture]()
           if scene.shaderGlobals.contains(texture.name):
@@ -299,26 +276,21 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
               scenedata.textures[pipeline.vk][texture.name].add uploadedTextures[textureValue]
           else:
             var foundTexture = false
-            var uploadedMaterials: seq[MaterialData]
-            for mesh in scene.meshes:
-              if not uploadedMaterials.contains(mesh.material):
-                for name, value in mesh.material.attributes.pairs:
-                  if name == texture.name:
-                    if not foundTexture:
-                      foundTexture = true
-                    assert value.theType == TextureType, &"Mesh material has attribute '{name}' which is expected to be of type 'Texture' but is of type {value.theType}"
-                    assert value.len == 1, &"Mesh material attribute '{name}' has texture-array, but only single textures are allowed"
-                    let textureValue = getValues[Texture](value)[][0]
-                    echo &"Mesh {mesh} -> Material {mesh.material} -> {name}: {textureValue}"
-                    if not uploadedTextures.contains(textureValue):
-                      uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
-                    scenedata.textures[pipeline.vk][texture.name].add uploadedTextures[textureValue]
-                    uploadedMaterials.add mesh.material
-              else:
-                foundTexture = true
-            assert foundTexture, "No texture found in shaderGlobals or materials for '{texture.name}'"
+            for material in scene.getMaterials(materialType):
+              for materialAttribName, value in material.attributes.pairs:
+                if materialAttribName == texture.name:
+                  if not foundTexture:
+                    foundTexture = true
+                  assert value.theType == TextureType, &"Mesh material has attribute '{materialAttribName}' which is expected to be of type 'Texture' but is of type {value.theType}"
+                  assert value.len == 1, &"Mesh material attribute '{materialAttribName}' has texture-array, but only single textures are allowed"
+                  let textureValue = getValues[Texture](value)[][0]
+                  if not uploadedTextures.contains(textureValue):
+                    uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
+                  scenedata.textures[pipeline.vk][texture.name].add uploadedTextures[textureValue]
+                  break
+            assert foundTexture, &"No texture found in shaderGlobals or materials for '{texture.name}'"
           let nTextures = scenedata.textures[pipeline.vk][texture.name].len
-          assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount == nTextures, &"Shader expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
+          assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount == nTextures, &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
 
         # gather uniform sizes
         var uniformBufferSize = 0
