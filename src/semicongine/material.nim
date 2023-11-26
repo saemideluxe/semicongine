@@ -9,7 +9,8 @@ import ./core
 type
   MaterialType* = object
     name*: string
-    meshAttributes*: Table[string, DataType]
+    vertexAttributes*: Table[string, DataType]
+    instanceAttributes*: Table[string, DataType]
     attributes*: Table[string, DataType]
   MaterialData* = object
     theType*: MaterialType
@@ -30,30 +31,30 @@ proc `==`*(a, b: MaterialData): bool =
 
 let EMPTY_MATERIAL* = MaterialType(
   name: "empty material",
-  meshAttributes: {"position": Vec3F32}.toTable,
+  vertexAttributes: {"position": Vec3F32}.toTable,
 )
 let COLORED_MATERIAL* = MaterialType(
   name: "single color material",
-  meshAttributes: {"position": Vec3F32}.toTable,
+  vertexAttributes: {"position": Vec3F32}.toTable,
   attributes: {"color": Vec4F32}.toTable,
 )
 let VERTEX_COLORED_MATERIAL* = MaterialType(
   name: "vertex color material",
-  meshAttributes: {
+  vertexAttributes: {
     "position": Vec3F32,
     "color": Vec4F32,
   }.toTable,
 )
 let SINGLE_COLOR_MATERIAL* = MaterialType(
   name: "single color material",
-  meshAttributes: {
+  vertexAttributes: {
     "position": Vec3F32,
   }.toTable,
   attributes: {"color": Vec4F32}.toTable
 )
 let SINGLE_TEXTURE_MATERIAL* = MaterialType(
   name: "single texture material",
-  meshAttributes: {
+  vertexAttributes: {
     "position": Vec3F32,
     "uv": Vec2F32,
   }.toTable,
@@ -61,7 +62,7 @@ let SINGLE_TEXTURE_MATERIAL* = MaterialType(
 )
 let COLORED_SINGLE_TEXTURE_MATERIAL* = MaterialType(
   name: "colored single texture material",
-  meshAttributes: {
+  vertexAttributes: {
     "position": Vec3F32,
     "uv": Vec2F32,
   }.toTable,

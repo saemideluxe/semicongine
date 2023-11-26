@@ -10,7 +10,7 @@ import ./buffer
 import ./image
 
 type
-  Pipeline* = object
+  ShaderPipeline* = object
     device*: Device
     vk*: VkPipeline
     layout*: VkPipelineLayout
@@ -18,16 +18,16 @@ type
     shaderModules*: (ShaderModule, ShaderModule)
     descriptorSetLayout*: DescriptorSetLayout
 
-func inputs*(pipeline: Pipeline): seq[ShaderAttribute] =
+func inputs*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.inputs
 
-func uniforms*(pipeline: Pipeline): seq[ShaderAttribute] =
+func uniforms*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.uniforms
 
-func samplers*(pipeline: Pipeline): seq[ShaderAttribute] =
+func samplers*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.samplers
 
-proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: var Table[string, seq[VulkanTexture]], inFlightFrames: int, emptyTexture: VulkanTexture): seq[DescriptorSet] =
+proc setupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: var Table[string, seq[VulkanTexture]], inFlightFrames: int, emptyTexture: VulkanTexture): seq[DescriptorSet] =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 
@@ -55,7 +55,7 @@ proc setupDescriptors*(pipeline: Pipeline, descriptorPool: DescriptorPool, buffe
             descriptor.imageviews.add emptyTexture.imageView
             descriptor.samplers.add emptyTexture.sampler
 
-proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling=true): Pipeline =
+proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling=true): ShaderPipeline =
   assert renderPass.valid
   assert device.vk.valid
 
@@ -187,7 +187,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
   discard result.uniforms # just for assertion
 
 
-proc destroy*(pipeline: var Pipeline) =
+proc destroy*(pipeline: var ShaderPipeline) =
   assert pipeline.device.vk.valid
   assert pipeline.vk.valid
   assert pipeline.layout.valid

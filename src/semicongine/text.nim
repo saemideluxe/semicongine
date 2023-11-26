@@ -29,7 +29,7 @@ const
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
   TEXT_MATERIAL_TYPE* = MaterialType(
     name: "default-text-material-type",
-    meshAttributes: {TRANSFORM_ATTRIB: Mat4F32, POSITION_ATTRIB: Vec3F32, UV_ATTRIB: Vec2F32}.toTable,
+    vertexAttributes: {TRANSFORM_ATTRIB: Mat4F32, POSITION_ATTRIB: Vec3F32, UV_ATTRIB: Vec2F32}.toTable,
     attributes: {"fontAtlas": TextureType}.toTable,
   )
   TEXT_SHADER* = createShaderConfiguration(
