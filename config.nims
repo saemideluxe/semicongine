@@ -15,9 +15,9 @@ task build, "build":
   switch("d", "BUNDLETYPE=" & BUNDLETYPE)
   switch("d", "RESOURCEROOT=" & RESOURCEROOT)
   switch("d", "nimPreviewHashRef")
-  switch("mm", "orc")
   switch("experimental", "strictEffects")
-  switch("threads", "on")
+  switch("experimental", "strictFuncs")
+  switch("nimblePath", "nimbledeps/pkgs2")
   var buildType = DEBUG
   var platformDir = ""
   if defined(linux):
@@ -124,8 +124,6 @@ task generate_vulkan_api, "Generate Vulkan API":
 
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
   --path:src
-  --mm:orc
-  --threads:on
   if defined(linux):
     --d:VK_USE_PLATFORM_XLIB_KHR
   if defined(windows):
