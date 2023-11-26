@@ -15,7 +15,7 @@ type
     flags: VkSubpassDescriptionFlags
     outputs: seq[VkAttachmentReference]
     depthStencil: Option[VkAttachmentReference]
-    pipelines*: seq[(MaterialType, Pipeline)]
+    shaderPipelines*: seq[(MaterialType, ShaderPipeline)]
   RenderPass* = object
     vk*: VkRenderPass
     device*: Device
@@ -102,7 +102,7 @@ proc simpleForwardRenderPass*(
     )]
   result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
   for (materialtype, shaderconfig) in shaders:
-    result.subpasses[0].pipelines.add (materialtype, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling=backFaceCulling))
+    result.subpasses[0].shaderPipelines.add (materialtype, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling=backFaceCulling))
 
 
 proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
@@ -161,6 +161,6 @@ proc destroy*(renderPass: var RenderPass) =
   renderPass.device.vk.vkDestroyRenderPass(renderPass.vk, nil)
   renderPass.vk.reset
   for i in 0 ..< renderPass.subpasses.len:
-    for _, pipeline in renderPass.subpasses[i].pipelines.mitems:
+    for _, pipeline in renderPass.subpasses[i].shaderPipelines.mitems:
       pipeline.destroy()
   renderPass.subpasses = @[]

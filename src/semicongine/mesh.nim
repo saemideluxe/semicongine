@@ -42,7 +42,7 @@ func material*(mesh: MeshObject): MaterialData =
   mesh.material
 
 func `material=`*(mesh: var MeshObject, material: MaterialData) =
-  for name, theType in material.theType.meshAttributes:
+  for name, theType in material.theType.vertexAttributes:
     if mesh.vertexData.contains(name):
       assert mesh.vertexData[name].theType == theType, &"{material.theType} expected mesh attribute '{name}' to be '{theType}' but it is {mesh.vertexData[name].theType}"
     elif mesh.instanceData.contains(name):
@@ -395,8 +395,8 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
     transform: mesh.transform,
     instanceTransforms: mesh.instanceTransforms,
     visible: mesh.visible,
+    material: mesh.material
   )
-  `material=`(result, mesh.material)
   for attribute, datalist in mesh.vertexData.pairs:
     result.initVertexAttribute(attribute, datalist.theType)
   for attribute, datalist in mesh.instanceData.pairs:
