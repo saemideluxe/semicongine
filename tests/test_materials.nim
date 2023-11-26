@@ -50,8 +50,8 @@ proc main() =
       ],
       uniforms=[attr[float32]("test2", arrayCount=2)],
       samplers = @[
-        attr[Texture]("tex1", arrayCount=2),
-        attr[Texture]("tex2", arrayCount=2),
+        attr[Texture]("tex1", arrayCount=1),
+        attr[Texture]("tex2", arrayCount=1),
       ],
       outputs=[attr[Vec4f]("color")],
       vertexCode="""
