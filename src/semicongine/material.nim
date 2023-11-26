@@ -101,14 +101,10 @@ proc initMaterialData*(
 proc initMaterialData*(
   materialType: MaterialType,
   name: string = "",
-  attributes: seq[(string, DataList)] = @[],
+  attributes: openArray[(string, DataList)] = @[],
 ): MaterialData =
   var theName = name
   if theName == "":
     theName = &"material instance of '{materialType}'"
   initMaterialData(materialType=materialType, name=theName, attributes=attributes.toTable)
-
-let DEFAULT_MATERIAL* = MaterialData(
-  name: "default material"
-)
 
