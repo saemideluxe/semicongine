@@ -34,7 +34,7 @@ type
     iterations: int
   AnimationPlayer*[T] = object
     animation*: Animation[T]
-    currentTime: float32
+    currentTime*: float32
     playing*: bool
     currentDirection: int
     currentIteration: int
@@ -125,17 +125,18 @@ func newAnimation*[T](fun: (t: AnimationTime) -> T, duration: float32, direction
     iterations: iterations
   )
 
-func resetPlayer*(player: var AnimationPlayer) =
+proc reset*(player: var AnimationPlayer) =
+  player.currentValue = player.animation.animationFunction(0)
   player.currentTime = 0
   player.currentDirection = if player.animation.direction == Backward: -1 else : 1
   player.currentIteration = player.animation.iterations
 
 
-func newAnimationPlayer*[T](animation: Animation[T]): AnimationPlayer[T] =
+proc newAnimationPlayer*[T](animation: Animation[T]): AnimationPlayer[T] =
   result = AnimationPlayer[T](animation: animation, playing: false)
-  result.resetPlayer()
+  result.reset()
 
-func newAnimationPlayer*[T](value: T = default(T)): AnimationPlayer[T] =
+proc newAnimationPlayer*[T](value: T = default(T)): AnimationPlayer[T] =
   newAnimationPlayer[T](newAnimation[T]((t: AnimationTime) => value, 0))
 
 func start*(player: var AnimationPlayer) =
@@ -148,11 +149,13 @@ proc advance*[T](player: var AnimationPlayer[T], dt: float32): T =
   # TODO: check this function, not 100% correct I think
   if player.playing:
     player.currentTime += float32(player.currentDirection) * dt
-    if abs(player.currentTime) > player.animation.duration:
+    if player.currentTime > player.animation.duration:
       dec player.currentIteration
+      # last iteration reached
       if player.currentIteration <= 0 and player.animation.iterations != 0:
+        player.currentTime = player.animation.duration
         player.stop()
-        player.resetPlayer()
+      # more iterations
       else:
         case player.animation.direction:
           of Forward:
@@ -163,5 +166,5 @@ proc advance*[T](player: var AnimationPlayer[T], dt: float32): T =
             player.currentDirection = -player.currentDirection
             player.currentTime += float32(player.currentDirection) * dt * 2'f32
 
-  player.currentValue = player.animation.animationFunction((abs(player.currentTime) / player.animation.duration) mod high(AnimationTime))
+    player.currentValue = player.animation.animationFunction(player.currentTime / player.animation.duration)
   return player.currentValue
