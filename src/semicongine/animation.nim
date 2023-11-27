@@ -149,11 +149,10 @@ proc advance*[T](player: var AnimationPlayer[T], dt: float32): T =
   # TODO: check this function, not 100% correct I think
   if player.playing:
     player.currentTime += float32(player.currentDirection) * dt
-    if player.currentTime > player.animation.duration:
+    if not (0 <= player.currentTime and player.currentTime < player.animation.duration):
       dec player.currentIteration
       # last iteration reached
       if player.currentIteration <= 0 and player.animation.iterations != 0:
-        player.currentTime = player.animation.duration
         player.stop()
       # more iterations
       else:
@@ -166,5 +165,7 @@ proc advance*[T](player: var AnimationPlayer[T], dt: float32): T =
             player.currentDirection = -player.currentDirection
             player.currentTime += float32(player.currentDirection) * dt * 2'f32
 
-    player.currentValue = player.animation.animationFunction(player.currentTime / player.animation.duration)
+    player.currentValue = player.animation.animationFunction(
+      max(low(AnimationTime), min(player.currentTime / player.animation.duration, high(AnimationTime)))
+    )
   return player.currentValue
