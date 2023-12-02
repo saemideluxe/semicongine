@@ -1,11 +1,13 @@
 import std/strformat
 import std/os
 
-proc semicongine_build*(buildType: string, bundleType: string, resourceRoot="resources", builddir="./build"): string =
+proc semicongine_build*(buildname: string, bundleType: string, resourceRoot: string, builddir="./build"): string =
   switch("experimental", "strictEffects")
   switch("experimental", "strictFuncs")
   switch("define", "nimPreviewHashRef")
 
+  switch("define", &"BUNDLETYPE={bundleType}")
+  switch("define", &"RESOURCEROOT={resourceRoot}")
 
   var platformDir = "unkown"
   if defined(linux):
@@ -15,7 +17,7 @@ proc semicongine_build*(buildType: string, bundleType: string, resourceRoot="res
     switch("define", "VK_USE_PLATFORM_WIN32_KHR")
     platformDir = "windows"
 
-  var outdir = builddir / buildType / platformDir / projectName()
+  var outdir = builddir / buildname / platformDir / projectName()
   switch("outdir", outdir)
   setCommand "c"
   rmDir(outdir)
