@@ -9,7 +9,7 @@ backend       = "c"
 
 # Dependencies
 
-requires "nim >= 1.6.10"
+requires "nim >= 2.0"
 requires "winim"
 requires "x11"
 requires "zippy"
