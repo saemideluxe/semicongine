@@ -11,13 +11,14 @@ const WINDOWS = "windows"
 const BUNDLETYPE* {.strdefine.}: string = "dir" # dir, zip, exe
 const RESOURCEROOT* {.strdefine.}: string = "resources"
 
+switch("d", "nimPreviewHashRef")
+switch("experimental", "strictEffects")
+switch("experimental", "strictFuncs")
+switch("nimblePath", "nimbledeps/pkgs2")
+
 task build, "build":
   switch("d", "BUNDLETYPE=" & BUNDLETYPE)
   switch("d", "RESOURCEROOT=" & RESOURCEROOT)
-  switch("d", "nimPreviewHashRef")
-  switch("experimental", "strictEffects")
-  switch("experimental", "strictFuncs")
-  switch("nimblePath", "nimbledeps/pkgs2")
   var buildType = DEBUG
   var platformDir = ""
   if defined(linux):
@@ -123,7 +124,6 @@ task generate_vulkan_api, "Generate Vulkan API":
   cpDir "src/vulkan_api/output/platform", "src/semicongine/vulkan/platform"
 
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
-  --path:src
   if defined(linux):
     --d:VK_USE_PLATFORM_XLIB_KHR
   if defined(windows):
