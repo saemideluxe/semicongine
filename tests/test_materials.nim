@@ -16,7 +16,7 @@ let
   swiss = loadImage("flag.png")
   doubleTextureMaterial = MaterialType(
     name:"Double texture",
-    meshAttributes: {
+    vertexAttributes: {
       "position": Vec3F32,
       "uv": Vec2F32,
     }.toTable,

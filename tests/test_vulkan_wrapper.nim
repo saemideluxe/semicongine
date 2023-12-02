@@ -25,7 +25,7 @@ let
   )
   Mat2Type = MaterialType(
     name: "single texture material 2",
-    meshAttributes: {
+    vertexAttributes: {
       "position": Vec3F32,
       "uv": Vec2F32,
     }.toTable,

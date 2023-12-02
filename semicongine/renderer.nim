@@ -478,12 +478,16 @@ proc destroy*(renderer: var Renderer, scene: Scene) =
     for buffer in pipelineUniforms.mitems:
       assert buffer.vk.valid
       buffer.destroy()
+  var destroyedTextures: seq[VkImage]
   for pipelineTextures in scenedata.textures.mvalues:
     for textures in pipelineTextures.mvalues:
       for texture in textures.mitems:
-        texture.destroy()
+        if not destroyedTextures.contains(texture.image.vk):
+          destroyedTextures.add texture.image.vk
+          texture.destroy()
   for descriptorPool in scenedata.descriptorPools.mvalues:
     descriptorPool.destroy()
+  renderer.scenedata.del(scene)
 
 proc destroy*(renderer: var Renderer) =
   for scenedata in renderer.scenedata.mvalues:
@@ -497,12 +501,17 @@ proc destroy*(renderer: var Renderer) =
       for buffer in pipelineUniforms.mitems:
         assert buffer.vk.valid
         buffer.destroy()
+    var destroyedTextures: seq[VkImage]
     for pipelineTextures in scenedata.textures.mvalues:
       for textures in pipelineTextures.mvalues:
         for texture in textures.mitems:
-          texture.destroy()
+          if not destroyedTextures.contains(texture.image.vk):
+            destroyedTextures.add texture.image.vk
+            texture.destroy()
     for descriptorPool in scenedata.descriptorPools.mvalues:
       descriptorPool.destroy()
+  for scene in renderer.scenedata.keys.toSeq:
+    renderer.scenedata.del(scene)
   renderer.emptyTexture.destroy()
   renderer.renderPass.destroy()
   renderer.swapchain.destroy()
