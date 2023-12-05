@@ -42,11 +42,3 @@ proc semicongine_build*(buildname: string, bundleType: string, resourceRoot: str
           exec &"powershell Compress-Archive * {outputfile}"
         cd(oldcwd)
   return outdir
-
-proc semicongine_import_mesh*(blender_file: string, output_file: string) =
-  assert blender_file.fileExists
-  let converter_script  = currentSourcePath.parentDir().parentDir().joinPath("scripts/blender_gltf_converter.py")
-  exec &"blender --background --python {converter_script} -- {blender_file} {output_file}"
-
-proc semicongine_import_audio*(in_file: string, output_file: string) =
-  exec &"ffmpeg -i {in_file} -ar {AUDIO_SAMPLE_RATE} {output_file}"
