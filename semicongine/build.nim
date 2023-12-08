@@ -1,38 +1,33 @@
 import std/strformat
 import std/os
+import std/strutils
 
 import ./core/audiotypes
 
-proc semicongine_outdir*(buildname: string, builddir="./build"): string =
+const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("scripts/blender_gltf_converter.py")
+
+proc semicongine_builddir*(buildname: string, builddir="./build"): string =
   var platformDir = "unkown"
+
   if defined(linux):
-    switch("define", "VK_USE_PLATFORM_XLIB_KHR")
     platformDir = "linux"
-  if defined(windows):
-    switch("define", "VK_USE_PLATFORM_WIN32_KHR")
+  elif defined(windows):
     platformDir = "windows"
 
   return builddir / buildname / platformDir / projectName()
 
-proc semicongine_build*(buildname: string, bundleType: string, resourceRoot: string, builddir="./build"): string =
+proc semicongine_build_switches*(buildname: string, builddir="./build") =
   switch("experimental", "strictEffects")
   switch("experimental", "strictFuncs")
   switch("define", "nimPreviewHashRef")
+  if defined(linux): switch("define", "VK_USE_PLATFORM_XLIB_KHR")
+  if defined(windows): switch("define", "VK_USE_PLATFORM_WIN32_KHR")
+  switch("outdir", semicongine_builddir(buildname, builddir=builddir))
 
-  switch("define", &"BUNDLETYPE={bundleType}")
-  switch("define", &"RESOURCEROOT={resourceRoot}")
+proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string) =
+  switch("define", "BUNDLETYPE=" & bundleType)
+  switch("define", "RESOURCEROOT=" & resourceRoot)
 
-  var platformDir = "unkown"
-  if defined(linux):
-    switch("define", "VK_USE_PLATFORM_XLIB_KHR")
-    platformDir = "linux"
-  if defined(windows):
-    switch("define", "VK_USE_PLATFORM_WIN32_KHR")
-    platformDir = "windows"
-
-  var outdir = builddir / buildname / platformDir / projectName()
-  switch("outdir", outdir)
-  setCommand "c"
   rmDir(outdir)
   mkDir(outdir)
   let resourcedir = joinPath(projectDir(), resourceRoot)
@@ -49,7 +44,6 @@ proc semicongine_build*(buildname: string, bundleType: string, resourceRoot: str
             exec &"zip -r {outputfile} ."
           elif defined(windows):
             exec &"powershell Compress-Archive * {outputfile}"
-  return outdir
 
 proc semicongine_zip*(dir: string) =
   withdir dir.parentDir:
@@ -58,3 +52,56 @@ proc semicongine_zip*(dir: string) =
     elif defined(windows):
       exec &"powershell Compress-Archive * {dir.lastPathPart}"
 
+
+# need this because fileNewer from std/os does not work in Nim VM
+proc fileNewerStatic(file1, file2: string): bool =
+  assert file1.fileExists
+  assert file2.fileExists
+  when defined(linux):
+    let command = "/usr/bin/test " & file1 & " -nt " & file2
+    let ex = gorgeEx(command)
+    return ex.exitCode == 0
+  elif defined(window):
+    {.error "Resource imports not supported on windows for now".}
+
+proc import_meshes*(files: seq[(string, string)]) =
+  if files.len == 0:
+    return
+
+  var args = @["--background", "--python", BLENDER_CONVERT_SCRIPT, "--"]
+  for (input, output) in files:
+    args.add input
+    args.add output
+
+  exec("blender " & args.join(" "))
+
+proc import_audio*(files: seq[(string, string)]) =
+  for (input, output) in files:
+    let command = "ffmpeg " & ["-y", "-i", input, "-ar", $AUDIO_SAMPLE_RATE, output].join(" ")
+    exec(command)
+
+proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)]) =
+  when not defined(linux):
+    {.warning: "Resource files can only be imported on linux, please make sure that the required files are created by runing the build on a linux machine.".}
+    return
+  var meshfiles: seq[(string, string)]
+  var audiofiles: seq[(string, string)]
+
+  for (target_rel, source_rel) in resourceMap:
+    let target = joinPath(thisDir(), target_rel)
+    let source = joinPath(thisDir(), source_rel)
+    if not source.fileExists:
+      raise newException(IOError, &"Not found: {source}")
+    if not target.fileExists or source.fileNewerStatic(target):
+      echo &"{target} is outdated"
+      if source.endsWith("blend"):
+        meshfiles.add (source, target)
+      elif source.endsWith("mp3") or source.endsWith("ogg") or source.endsWith("wav"):
+        audiofiles.add (source, target)
+      else:
+        raise newException(Exception, &"unkown file type: {source}")
+      target.parentDir().mkDir()
+    else:
+      echo &"{target} is up-to-date"
+  import_meshes meshfiles
+  import_audio audiofiles
