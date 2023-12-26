@@ -14,10 +14,11 @@ proc test1() =
   let s2 = mixer[].play("test2", loop=true)
 
   let t0 = now()
+  mixer[].setLevel(0.5)
   while true:
     let runtime = (now() - t0).inMilliseconds()
     if runtime > 1500:
-      mixer[].setLevel(0.1)
+      mixer[].setLevel(0.2)
     if runtime > 3000:
       mixer[].stop(s2)
     if runtime > 6000:
@@ -72,9 +73,9 @@ proc test3() =
 
 when isMainModule:
   startMixerThread()
-  test1()
-  mixer[].stop()
-  test2()
-  mixer[].stop()
-  # test3()
+  # test1()
   # mixer[].stop()
+  # test2()
+  # mixer[].stop()
+  test3()
+  mixer[].stop()

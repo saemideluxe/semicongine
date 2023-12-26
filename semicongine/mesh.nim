@@ -502,6 +502,29 @@ proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff", material
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
 
+proc grid*(rows, columns, cellSize=1.0'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
+  
+  result = Mesh(
+    vertexCount: rows * columns + (rows + columns + 1),
+    instanceTransforms: @[Unit4F32],
+    indexType: Small,
+    name: &"grid-{instanceCounter}",
+    material: material,
+  )
+  inc instanceCounter
+
+  var
+    pos = @[newVec3f(0, 0)]
+    col = @[c, c]
+  for h in 0 ..< rows:
+    for w in 0 ..< columns:
+      pos.add newVec3f(cos(float32(i) * step) * half_w, sin(float32(i) * step) * half_h)
+      col.add c
+      result[].smallIndices.add [uint16(0), uint16(i + 1), uint16(i + 2)]
+
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
+  result[].initVertexAttribute("color", col)
+
 # MESH TREES =============================================================================
 
 type

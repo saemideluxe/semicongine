@@ -23,6 +23,7 @@ type
     loop: bool
     levelLeft: Level
     levelRight: Level
+    paused: bool
   Track = object
     playing: Table[uint64, Playback]
     level: Level
@@ -80,7 +81,8 @@ proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false,
       position: 0,
       loop: loop,
       levelLeft: levelLeft,
-      levelRight: levelRight
+      levelRight: levelRight,
+      paused: false,
     )
   result = mixer.playbackCounter
   inc mixer.playbackCounter
@@ -133,16 +135,45 @@ proc stop*(mixer: var Mixer, playbackId: uint64) =
         track.playing.del(playbackId)
         break
 
+proc pause*(mixer: var Mixer, value: bool) =
+  mixer.lock.withLock():
+    for track in mixer.tracks.mvalues:
+      for playback in track.playing.mvalues:
+        playback.paused = value
+
+proc pause*(mixer: var Mixer, track: string, value: bool) =
+  mixer.lock.withLock():
+    for playback in mixer.tracks[track].playing.mvalues:
+      playback.paused = value
+
+proc pause*(mixer: var Mixer, playbackId: uint64, value: bool) =
+  mixer.lock.withLock():
+    for track in mixer.tracks.mvalues:
+      if playbackId in track.playing:
+        track.playing[playbackId].paused = value
+
+proc pause*(mixer: var Mixer) = mixer.pause(true)
+proc pause*(mixer: var Mixer, track: string) = mixer.pause(track, true)
+proc pause*(mixer: var Mixer, playbackId: uint64) = mixer.pause(playbackId, true)
+proc unpause*(mixer: var Mixer) = mixer.pause(false)
+proc unpause*(mixer: var Mixer, track: string) = mixer.pause(track, false)
+proc unpause*(mixer: var Mixer, playbackId: uint64) = mixer.pause(playbackId, false)
+
 proc isPlaying*(mixer: var Mixer): bool =
   mixer.lock.withLock():
     for track in mixer.tracks.mvalues:
-      if track.playing.len > 0:
-        return true
+      for playback in track.playing.values:
+        if not playback.paused:
+          return true
   return false
 
 proc isPlaying*(mixer: var Mixer, track: string): bool =
   mixer.lock.withLock():
-    return mixer.tracks.contains(track) and mixer.tracks[track].playing.len > 0
+    if mixer.tracks.contains(track):
+      for playback in mixer.tracks[track].playing.values:
+        if not playback.paused:
+          return true
+    return false
 
 func applyLevel(sample: Sample, levelLeft, levelRight: Level): Sample =
   [int16(float(sample[0]) * levelLeft), int16(float(sample[1]) * levelRight)]
@@ -160,17 +191,19 @@ func mix(a, b: Sample): Sample =
 proc updateSoundBuffer(mixer: var Mixer) =
   # mix
   for i in 0 ..< mixer.buffers[mixer.currentBuffer].len:
-    var currentSample = [0'i16, 0'i16]
+    var mixedSample = [0'i16, 0'i16]
     mixer.lock.withLock():
       for track in mixer.tracks.mvalues:
         var stoppedSounds: seq[uint64]
         for (id, playback) in track.playing.mpairs:
+          if playback.paused:
+            continue
           let sample = applyLevel(
             playback.sound[][playback.position],
             mixer.level * track.level * playback.levelLeft,
             mixer.level * track.level * playback.levelRight,
           )
-          currentSample = mix(currentSample, sample)
+          mixedSample = mix(mixedSample, sample)
           inc playback.position
           if playback.position >= playback.sound[].len:
             if playback.loop:
@@ -179,11 +212,42 @@ proc updateSoundBuffer(mixer: var Mixer) =
               stoppedSounds.add id
         for id in stoppedSounds:
           track.playing.del(id)
-      mixer.buffers[mixer.currentBuffer][i] = currentSample
+      mixer.buffers[mixer.currentBuffer][i] = mixedSample
   # send data to sound device
   mixer.device.writeSoundData(mixer.currentBuffer)
   mixer.currentBuffer = (mixer.currentBuffer + 1) mod mixer.buffers.len
 
+# DSP functions
+
+proc lowPassFilter(data: var SoundData, cutoff: int) =
+  let alpha = float(cutoff) / AUDIO_SAMPLE_RATE
+  var value = data[0]
+  for i in 0 ..< data.len:
+    value[0] += int16(alpha * float(data[i][0] - value[0]))
+    value[1] += int16(alpha * float(data[i][1] - value[1]))
+    data[i] = value
+
+proc downsample(data: var SoundData, n: int) =
+  let newLen = (data.len - 1) div n + 1
+  for i in 0 ..< newLen:
+    data[i] = data[i * n]
+  data.setLen(newLen)
+
+proc upsample(data: var SoundData, m: int) =
+  data.setLen(data.len * m)
+  var i = data.len - 1
+  while i < 0:
+    if i mod m == 0:
+      data[i] = data[i div m]
+    else:
+      data[i] = [0, 0]
+    i.dec
+
+proc slowdown(data: var SoundData, m, n: int) =
+  data.upsample(m)
+  # TODO
+  # data.lowPassFilter(m)
+  data.downsample(n)
 
 proc destroy*(mixer: var Mixer) =
   mixer.lock.deinitLock()
