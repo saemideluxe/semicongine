@@ -54,9 +54,6 @@ const LOGLEVEL {.strdefine.}: string = (when DEBUG: "lvlWarn" else: "lvlWarn")
 const ENGINE_LOGLEVEL* = parseEnum[Level](LOGLEVEL)
 
 # resource bundleing settings, need to be configured per project
-const RESOURCEROOT* {.strdefine.}: string = "" # should be the "mod" directory
 const BUNDLETYPE* {.strdefine.}: string = "" # dir, zip, exe
-
 static:
-  assert RESOURCEROOT != "", ENGINENAME & " requires -d:RESOURCEROOT=resources"
   assert BUNDLETYPE in ["dir", "zip", "exe"], ENGINENAME & " requires one of -d:BUNDLETYPE=dir -d:BUNDLETYPE=zip -d:BUNDLETYPE=exe"

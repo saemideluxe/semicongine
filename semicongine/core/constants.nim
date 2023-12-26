@@ -1,0 +1,1 @@
+const RESOURCEROOT*: string = "resources"

@@ -1,8 +1,11 @@
+# this should be used with nimscript
+
 import std/strformat
 import std/os
 import std/strutils
 
 import ./core/audiotypes
+import ./core/constants
 
 const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("scripts/blender_gltf_converter.py")
 
@@ -26,24 +29,23 @@ proc semicongine_build_switches*(buildname: string, builddir="./build") =
 
 proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string) =
   switch("define", "BUNDLETYPE=" & bundleType)
-  switch("define", "RESOURCEROOT=" & resourceRoot)
 
   rmDir(outdir)
   mkDir(outdir)
-  let resourcedir = joinPath(projectDir(), resourceRoot)
-  if os.dirExists(resourcedir):
-    let outdir_resources = joinPath(outdir, resourceRoot)
-    if bundleType == "dir":
-      cpDir(resourcedir, outdir_resources)
-    elif bundleType == "zip":
-      mkDir(outdir_resources)
-      for resource in listDirs(resourcedir):
-        let outputfile = joinPath(outdir_resources, resource.splitPath().tail & ".zip")
-        withdir resource:
-          if defined(linux):
-            exec &"zip -r {outputfile} ."
-          elif defined(windows):
-            exec &"powershell Compress-Archive * {outputfile}"
+
+  echo "BUILD: Packing assets from '" & resourceRoot & "' into directory '" & outdir & "'"
+  let outdir_resources = joinPath(outdir, RESOURCEROOT)
+  if bundleType == "dir":
+    cpDir(resourceRoot, outdir_resources)
+  elif bundleType == "zip":
+    mkDir(outdir_resources)
+    for resource in listDirs(resourceRoot):
+      let outputfile = joinPath(outdir_resources, resource.splitPath().tail & ".zip")
+      withdir resource:
+        if defined(linux):
+          exec &"zip -r {outputfile} ."
+        elif defined(windows):
+          exec &"powershell Compress-Archive * {outputfile}"
 
 proc semicongine_zip*(dir: string) =
   withdir dir.parentDir:
