@@ -67,9 +67,6 @@ proc simpleForwardRenderPass*(
   clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]),
   backFaceCulling=true,
 ): RenderPass =
-  # TODO: check wether materials are compatible with the assigned shaders
-  {.warning: "Need to implement material -> shader compatability" .}
-  
   assert device.vk.valid
   for (_, shaderconfig) in shaders:
     assert shaderconfig.outputs.len == 1
