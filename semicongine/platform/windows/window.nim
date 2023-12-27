@@ -2,6 +2,7 @@ import std/options
 import winim
 
 import ../../core/vector
+import ../../core/buildconfig
 import ./virtualkey_map
 import ../../events
 
@@ -63,6 +64,12 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
 
 
 proc createWindow*(title: string): NativeWindow =
+  when DEBUG:
+    AllocConsole()
+    discard stdin.reopen("conIN$", fmRead)
+    discard stdout.reopen("conOUT$", fmWrite)
+    discard stderr.reopen("conOUT$", fmWrite)
+  
   result.hInstance = HINSTANCE(GetModuleHandle(nil))
   var
     windowClassName = T"EngineWindowClass"
@@ -91,7 +98,7 @@ proc createWindow*(title: string): NativeWindow =
     )
 
   result.g_wpPrev.length = UINT(sizeof(WINDOWPLACEMENT))
-  discard ShowWindow(result.hwnd, SW_SHOW)
+  discard result.hwnd.ShowWindow(SW_SHOW)
 
 # inspired by the one and only, Raymond Chen
 # https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
