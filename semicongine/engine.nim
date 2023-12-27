@@ -210,5 +210,6 @@ func showSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
 func hideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
 func fullscreen*(engine: Engine): bool = engine.fullscreen
 proc `fullscreen=`*(engine: var Engine, enable: bool) =
-  engine.fullscreen = enable
-  engine.window.fullscreen(engine.fullscreen)
+  if enable != engine.fullscreen:
+    engine.fullscreen = enable
+    engine.window.fullscreen(engine.fullscreen)
