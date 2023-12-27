@@ -45,6 +45,7 @@ type
     exitHandler: proc(engine: var Engine)
     resizeHandler: proc(engine: var Engine)
     eventHandler: proc(engine: var Engine, event: Event)
+    fullscreen: bool
 
 
 proc destroy*(engine: var Engine) =
@@ -207,4 +208,7 @@ func getWindow*(engine: Engine): auto = engine.window
 func windowWasResized*(engine: Engine): auto = engine.input.windowWasResized
 func showSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
 func hideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
-proc fullscreen*(engine: var Engine, enable: bool) = engine.window.fullscreen(enable)
+func fullscreen*(engine: Engine): bool = engine.fullscreen
+proc `fullscreen=`*(engine: var Engine, enable: bool) =
+  engine.fullscreen = enable
+  engine.window.fullscreen(engine.fullscreen)
