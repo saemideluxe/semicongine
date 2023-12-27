@@ -9,8 +9,8 @@ static:
   assert compileOption("threads"), ENGINENAME & " requires --threads=on"
   assert defined(nimPreviewHashRef), ENGINENAME & " requires -d:nimPreviewHashRef"
 
-  if defined(release):
-    assert compileOption("app", "gui"), ENGINENAME & " requires --app=gui for release builds"
+  if defined(release) or defined(windows):
+    assert compileOption("app", "gui"), ENGINENAME & " requires --app=gui for release builds and all windows builds"
 
 
   if defined(linux):

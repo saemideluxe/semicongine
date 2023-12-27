@@ -24,7 +24,9 @@ proc semicongine_build_switches*(buildname: string, builddir="./build") =
   switch("experimental", "strictFuncs")
   switch("define", "nimPreviewHashRef")
   if defined(linux): switch("define", "VK_USE_PLATFORM_XLIB_KHR")
-  if defined(windows): switch("define", "VK_USE_PLATFORM_WIN32_KHR")
+  if defined(windows):
+    switch("define", "VK_USE_PLATFORM_WIN32_KHR")
+    switch("app", "gui")
   switch("outdir", semicongine_builddir(buildname, builddir=builddir))
 
 proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string) =
