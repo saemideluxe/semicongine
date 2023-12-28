@@ -524,7 +524,8 @@ proc grid*(columns, rows: int, cellSize=1.0'f32, color="ffffffff", material=EMPT
     for w in 0 .. columns:
       pos.add newVec3f(center_offset_x + float32(w) * cellSize, center_offset_y + float32(h) * cellSize)
       col.add color
-      result[].smallIndices.add [uint16(0), uint16(1), uint16(2)]
+      if w > 0 and h > 0:
+        result[].smallIndices.add [uint16(0), uint16(1), uint16(2)]
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
