@@ -502,7 +502,7 @@ proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff", material
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
 
-proc grid*(columns, rows: int, cellSize=1.0'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc grid*(columns, rows: uint16, cellSize=1.0'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
   
   result = Mesh(
     vertexCount: int((rows + 1) * (columns + 1)),
@@ -520,12 +520,15 @@ proc grid*(columns, rows: int, cellSize=1.0'f32, color="ffffffff", material=EMPT
   var
     pos = @[newVec3f(center_offset_x, center_offset_y)]
     col = @[color, color]
-  for h in 0 .. rows:
-    for w in 0 .. columns:
+    i = 0'u16
+  for h in 0'u16 .. rows:
+    for w in 0'u16 .. columns:
       pos.add newVec3f(center_offset_x + float32(w) * cellSize, center_offset_y + float32(h) * cellSize)
       col.add color
       if w > 0 and h > 0:
-        result[].smallIndices.add [uint16(0), uint16(1), uint16(2)]
+        result[].smallIndices.add [i, i - 1, i - w - 1]
+        result[].smallIndices.add [i, i - w - 1, i - w]
+      i.inc
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
