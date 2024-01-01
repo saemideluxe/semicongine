@@ -518,20 +518,25 @@ proc grid*(columns, rows: uint16, cellSize=1.0'f32, color="ffffffff", material=E
     center_offset_x = -(float32(columns) * cellSize) / 2'f32
     center_offset_y = -(float32(rows) * cellSize) / 2'f32
   var
-    pos = @[newVec3f(center_offset_x, center_offset_y)]
-    col = @[color, color]
+    pos: seq[Vec3f]
+    col: seq[Vec4f]
     i = 0'u16
   for h in 0'u16 .. rows:
     for w in 0'u16 .. columns:
       pos.add newVec3f(center_offset_x + float32(w) * cellSize, center_offset_y + float32(h) * cellSize)
       col.add color
       if w > 0 and h > 0:
-        result[].smallIndices.add [i, i - 1, i - w - 1]
-        result[].smallIndices.add [i, i - w - 1, i - w]
+        result[].smallIndices.add [i, i - 1, i - rows - 2]
+        result[].smallIndices.add [i, i - rows - 2, i - rows - 1]
       i.inc
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
+
+  echo pos
+  echo result[].smallIndices
+  echo result
+
 
 # MESH TREES =============================================================================
 
