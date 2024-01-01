@@ -80,24 +80,14 @@ func materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, sh
       if scene.shaderGlobals[uniform.name].theType != uniform.theType:
         return (true, &"shader uniform needs type {uniform.theType} but scene global is of type {scene.shaderGlobals[uniform.name].theType}")
     else:
-      var foundMatch = true
-      for name, theType in materialType.attributes.pairs:
-        if name == uniform.name and theType == uniform.theType:
-          foundMatch = true
-          break
-      if not foundMatch:
+      if not materialType.hasMatchingAttribute(uniform):
         return (true, &"shader uniform '{uniform.name}' was not found in scene globals or scene materials")
   for texture in shaderPipeline.samplers:
     if scene.shaderGlobals.contains(texture.name):
       if scene.shaderGlobals[texture.name].theType != texture.theType:
         return (true, &"shader texture '{texture.name}' needs type {texture.theType} but scene global is of type {scene.shaderGlobals[texture.name].theType}")
     else:
-      var foundMatch = true
-      for name in materialType.attributes.keys:
-        if name == texture.name:
-          foundMatch = true
-          break
-      if not foundMatch:
+      if not materialType.hasMatchingAttribute(texture):
         return (true, &"Required texture for shader texture '{texture.name}' was not found in scene materials")
 
   return (false, "")
@@ -279,17 +269,15 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
           else:
             var foundTexture = false
             for material in scene.getMaterials(materialType):
-              for materialAttribName, value in material.attributes.pairs:
-                if materialAttribName == texture.name:
-                  if not foundTexture:
-                    foundTexture = true
-                  assert value.theType == TextureType, &"Mesh material has attribute '{materialAttribName}' which is expected to be of type 'Texture' but is of type {value.theType}"
-                  assert value.len == 1, &"Mesh material attribute '{materialAttribName}' has texture-array, but only single textures are allowed"
-                  let textureValue = getValues[Texture](value)[][0]
-                  if not uploadedTextures.contains(textureValue):
-                    uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
-                  scenedata.textures[shaderPipeline.vk][texture.name].add uploadedTextures[textureValue]
-                  break
+              if material.hasMatchingAttribute(texture):
+                foundTexture = true
+                assert value.len == 1, &"Mesh material attribute '{materialAttribName}' has texture-array, but only single textures are allowed"
+                let textureValue = getValues[Texture](value)[][0]
+                if not uploadedTextures.contains(textureValue):
+                  uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
+                scenedata.textures[shaderPipeline.vk][texture.name].add uploadedTextures[textureValue]
+
+                break
             assert foundTexture, &"No texture found in shaderGlobals or materials for '{texture.name}'"
           let nTextures = scenedata.textures[shaderPipeline.vk][texture.name].len
           assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount == nTextures, &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
@@ -360,6 +348,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
 
   let dirty = scene.dirtyShaderGlobals
   if not forceAll and dirty.len == 0:
+    echo "Nothing dirty"
     return
 
   if forceAll:
@@ -383,6 +372,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
         var offset = 0
         # loop over all uniforms of the shader-shaderPipeline
         for uniform in shaderPipeline.uniforms:
+          echo "UNIFORM: ", uniform
           if dirty.contains(uniform.name) or forceAll: # only update if necessary
             var value: DataList
             if scene.shaderGlobals.hasKey(uniform.name):

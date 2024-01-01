@@ -15,7 +15,13 @@ type
   MaterialData* = object
     theType*: MaterialType
     name*: string
-    attributes*: Table[string, DataList]
+    attributes: Table[string, DataList]
+
+func hasMatchingAttribute*(materialType: MaterialType, attr: ShaderAttribute): bool =
+  return materialType.attributes.contains(attr.name) and materialType.attributes[attr.name] == attr.theType
+
+func hasMatchingAttribute*(material: MaterialData, attr: ShaderAttribute): bool =
+  return material.attributes.contains(attr.name) and material.attributes[attr.name].theType == attr.theType
 
 proc hash*(materialType: MaterialType): Hash =
   return hash(materialType.name)
@@ -28,6 +34,9 @@ proc `==`*(a, b: MaterialType): bool =
 
 proc `==`*(a, b: MaterialData): bool =
   return a.name == b.name
+
+proc get*(material: MaterialData, attributeName: string): DataList =
+  material.attributes[attributeName]
 
 let EMPTY_MATERIAL* = MaterialType(
   name: "empty material",
