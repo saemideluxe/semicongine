@@ -533,10 +533,6 @@ proc grid*(columns, rows: uint16, cellSize=1.0'f32, color="ffffffff", material=E
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
 
-  echo pos
-  echo result[].smallIndices
-  echo result
-
 
 # MESH TREES =============================================================================
 
