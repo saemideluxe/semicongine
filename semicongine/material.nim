@@ -35,8 +35,14 @@ proc `==`*(a, b: MaterialType): bool =
 proc `==`*(a, b: MaterialData): bool =
   return a.name == b.name
 
-proc get*(material: MaterialData, attributeName: string): DataList =
+proc get*[T](material: MaterialData, attributeName: string): seq[T] =
+  getValues[T](material.attributes[attributeName])[]
+
+proc getDataList*(material: MaterialData, attributeName: string): DataList =
   material.attributes[attributeName]
+
+proc getSingle*[T](material: MaterialData, attributeName: string): T =
+  getValues[T](material.attributes[attributeName])[][0]
 
 let EMPTY_MATERIAL* = MaterialType(
   name: "empty material",
@@ -91,29 +97,29 @@ proc `$`*(material: MaterialData): string =
   return &"""Material '{material.name}' | Attributes: {attributes.join(", ")}"""
 
 proc initMaterialData*(
-  materialType: MaterialType,
+  theType: MaterialType,
   name: string,
   attributes: Table[string, DataList],
 ): MaterialData =
   var theName = name
   if theName == "":
-    theName = &"material instance of '{materialType}'"
-  for matName, theType in materialType.attributes.pairs:
-    assert attributes.contains(matName), &"missing material attribute '{matName}' for {materialType}"
+    theName = &"material instance of '{theType}'"
+  for matName, theType in theType.attributes.pairs:
+    assert attributes.contains(matName), &"missing material attribute '{matName}' for {theType}"
     assert attributes[matName].theType == theType
   MaterialData(
-    theType: materialType,
+    theType: theType,
     name: theName,
     attributes: attributes,
   )
 
 proc initMaterialData*(
-  materialType: MaterialType,
+  theType: MaterialType,
   name: string = "",
   attributes: openArray[(string, DataList)] = @[],
 ): MaterialData =
   var theName = name
   if theName == "":
-    theName = &"material instance of '{materialType}'"
-  initMaterialData(materialType=materialType, name=theName, attributes=attributes.toTable)
+    theName = &"material instance of '{theType}'"
+  initMaterialData(theType=theType, name=theName, attributes=attributes.toTable)
 

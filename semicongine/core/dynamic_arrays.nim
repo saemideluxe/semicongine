@@ -1,4 +1,5 @@
 import std/hashes
+import std/strformat
 
 import ./gpu_types
 import ./vector
@@ -252,7 +253,7 @@ proc setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is Texture: value.texture[] = data
   else: {. error: "Virtual datatype has no values" .}
 
-proc initDataList*(theType: DataType, len=1): DataList =
+proc initDataList*(theType: DataType, len=0): DataList =
   result = DataList(theType: theType)
   case result.theType
     of Float32: result.float32 = new seq[float32]
@@ -515,7 +516,7 @@ proc appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T])
   else: {. error: "Virtual datatype has no values" .}
 
 proc appendValues*(value: var DataList, data: DataList) =
-  assert value.theType == data.theType
+  assert value.theType == data.theType, &"Expected datalist of type {value.theType} but got {data.theType}"
   value.len += data.len
   case value.theType:
   of Float32: value.float32[].add data.float32[]
@@ -563,6 +564,7 @@ proc appendValues*(value: var DataList, data: DataList) =
   of TextureType: value.texture[].add data.texture[]
 
 proc setValue*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
+  value.len = data.len
   when T is float32: value.float32[] = data
   elif T is float64: value.float64[] = data
   elif T is int8: value.int8[] = data
