@@ -22,13 +22,13 @@ let
     }.toTable,
     attributes: {"tex1": TextureType, "tex2": TextureType}.toTable
   )
-  material = MaterialData(
-    theType: doubleTextureMaterial,
-    name: "swiss-thai",
-    attributes: {
+  material = initMaterialData(
+    theType=doubleTextureMaterial,
+    name="swiss-thai",
+    attributes={
       "tex1": initDataList(@[Texture(image: thai, sampler: sampler)]),
       "tex2": initDataList(@[Texture(image: swiss, sampler: sampler)]),
-    }.toTable
+    }
   )
 
 proc main() =

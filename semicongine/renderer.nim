@@ -271,13 +271,11 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
             for material in scene.getMaterials(materialType):
               if material.hasMatchingAttribute(texture):
                 foundTexture = true
-                assert value.len == 1, &"Mesh material attribute '{materialAttribName}' has texture-array, but only single textures are allowed"
-                let textureValue = getValues[Texture](value)[][0]
-                if not uploadedTextures.contains(textureValue):
-                  uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
-                scenedata.textures[shaderPipeline.vk][texture.name].add uploadedTextures[textureValue]
-
-                break
+                let value = get[Texture](material, texture.name)
+                assert value.len == 1, &"Mesh material attribute '{texture.name}' has texture-array, but only single textures are allowed"
+                if not uploadedTextures.contains(value[0]):
+                  uploadedTextures[value[0]] = renderer.device.uploadTexture(value[0])
+                scenedata.textures[shaderPipeline.vk][texture.name].add uploadedTextures[value[0]]
             assert foundTexture, &"No texture found in shaderGlobals or materials for '{texture.name}'"
           let nTextures = scenedata.textures[shaderPipeline.vk][texture.name].len
           assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount == nTextures, &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
@@ -348,7 +346,6 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
 
   let dirty = scene.dirtyShaderGlobals
   if not forceAll and dirty.len == 0:
-    echo "Nothing dirty"
     return
 
   if forceAll:
@@ -372,31 +369,24 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
         var offset = 0
         # loop over all uniforms of the shader-shaderPipeline
         for uniform in shaderPipeline.uniforms:
-          echo "UNIFORM: ", uniform
-          if dirty.contains(uniform.name) or forceAll: # only update if necessary
-            var value: DataList
+          if dirty.contains(uniform.name) or forceAll: # only update uniforms if necessary
+            var value = initDataList(uniform.theType)
             if scene.shaderGlobals.hasKey(uniform.name):
               assert scene.shaderGlobals[uniform.name].thetype == uniform.thetype
               value = scene.shaderGlobals[uniform.name]
             else:
               var foundValue = false
               for material in renderer.scenedata[scene].materials[materialType]:
-                for name, materialValue in material.attributes.pairs:
-                  if uniform.name == name:
-                    if not foundValue:
-                      foundValue = true
-                      value = initDataList(materialValue.theType, 0)
-                    else:
-                      assert value.theType == materialValue.theType, &"Material for uniform '{uniform.name}' was found multiple times with different types: {value.theType} and {materialValue.theType}"
-                    value.appendValues(materialValue)
-                    break
+                if material.hasMatchingAttribute(uniform):
+                  value.appendValues(material.getDataList(uniform.name))
+                  foundValue = true
               assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
-            assert (uniform.arrayCount == 0 and value.len == 1) or value.len == uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials only provide {value.len})"
+            assert (uniform.arrayCount == 0 and value.len == 1) or value.len == uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
             let (pdata, size) = value.getRawData()
             assert size == uniform.size, "During uniform update: gathered value has size {size} but uniform expects size {uniform.size}"
             debug &"  update uniform {uniform.name} with value: {value}"
             # TODO: technically we would only need to update the uniform buffer of the current
-            # frameInFlight, but we don't track for which frame the shaderglobals are no longer dirty
+            # frameInFlight (I think), but we don't track for which frame the shaderglobals are no longer dirty
             # therefore we have to update the uniform values in all buffers, of all inFlightframes (usually 2)
             for buffer in renderer.scenedata[scene].uniformBuffers[shaderPipeline.vk]:
               buffer.setData(pdata, size, offset)

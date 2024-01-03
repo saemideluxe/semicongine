@@ -224,7 +224,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
     else:
       setValue(attributes["emissiveColor"], @[newVec3f(1'f32, 1'f32, 1'f32)])
 
-  result = initMaterialData(materialType=defaultMaterial, name=materialNode["name"].getStr(), attributes=attributes)
+  result = initMaterialData(theType=defaultMaterial, name=materialNode["name"].getStr(), attributes=attributes)
 
 proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, defaultMaterial: MaterialType, mainBuffer: seq[uint8]): Mesh =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:

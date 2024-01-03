@@ -114,10 +114,10 @@ proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
   inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
-  result.mesh.material = MaterialData(
-    theType: TEXT_MATERIAL_TYPE,
-    name: font.name & " text",
-    attributes: {"fontAtlas": initDataList(@[font.fontAtlas])}.toTable,
+  result.mesh.material = initMaterialData(
+    theType=TEXT_MATERIAL_TYPE,
+    name=font.name & " text",
+    attributes={"fontAtlas": initDataList(@[font.fontAtlas])},
   )
 
   result.updateMesh()

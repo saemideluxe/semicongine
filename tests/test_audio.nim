@@ -73,9 +73,9 @@ proc test3() =
 
 when isMainModule:
   startMixerThread()
-  # test1()
-  # mixer[].stop()
-  # test2()
-  # mixer[].stop()
-  test3()
+  test1()
   mixer[].stop()
+  test2()
+  mixer[].stop()
+  # test3()
+  # mixer[].stop()
