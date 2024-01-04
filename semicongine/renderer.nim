@@ -262,7 +262,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
         for texture in shaderPipeline.samplers:
           scenedata.textures[shaderPipeline.vk][texture.name] = newSeq[VulkanTexture]()
           if scene.shaderGlobals.contains(texture.name):
-            for textureValue in getValues[Texture](scene.shaderGlobals[texture.name])[]:
+            for textureValue in scene.shaderGlobals[texture.name][Texture][]:
               if not uploadedTextures.contains(textureValue):
                 uploadedTextures[textureValue] = renderer.device.uploadTexture(textureValue)
               scenedata.textures[shaderPipeline.vk][texture.name].add uploadedTextures[textureValue]
@@ -271,7 +271,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
             for material in scene.getMaterials(materialType):
               if material.hasMatchingAttribute(texture):
                 foundTexture = true
-                let value = get[Texture](material, texture.name)
+                let value = material[texture.name, Texture][]
                 assert value.len == 1, &"Mesh material attribute '{texture.name}' has texture-array, but only single textures are allowed"
                 if not uploadedTextures.contains(value[0]):
                   uploadedTextures[value[0]] = renderer.device.uploadTexture(value[0])
@@ -378,7 +378,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
               var foundValue = false
               for material in renderer.scenedata[scene].materials[materialType]:
                 if material.hasMatchingAttribute(uniform):
-                  value.appendValues(material.getDataList(uniform.name))
+                  value.appendValues(material[uniform.name])
                   foundValue = true
               assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
             assert (uniform.arrayCount == 0 and value.len == 1) or value.len == uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"

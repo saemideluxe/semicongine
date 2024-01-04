@@ -247,17 +247,17 @@ func getRawData*(mesh: var MeshObject, attribute: string): (pointer, int) =
 
 proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string): ref seq[T] =
   if mesh.vertexData.contains(attribute):
-    getValues[T](mesh.vertexData[attribute])
+    mesh.vertexData[attribute][T]
   elif mesh.instanceData.contains(attribute):
-    getValues[T](mesh.instanceData[attribute])
+    mesh.instanceData[attribute][T]
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
 proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string, i: int): T =
   if mesh.vertexData.contains(attribute):
-    getValue[T](mesh.vertexData[attribute], i)
+    mesh.vertexData[attribute][i, T]
   elif mesh.instanceData.contains(attribute):
-    getValue[T](mesh.instanceData[attribute], i)
+    mesh.instanceData[attribute][i, T]
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
@@ -372,16 +372,16 @@ proc clearDirtyAttributes*(mesh: var MeshObject) =
 proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: Mat4) =
   if mesh.vertexData.contains(attribute):
     for i in 0 ..< mesh.vertexData[attribute].len:
-      setValue(mesh.vertexData[attribute], i, transform * getValue[T](mesh.vertexData[attribute], i))
+      setValue(mesh.vertexData[attribute], i, transform * mesh.vertexData[attribute][i, T])
   elif mesh.instanceData.contains(attribute):
     for i in 0 ..< mesh.instanceData[attribute].len:
-      setValue(mesh.instanceData[attribute], i, transform * getValue[T](mesh.vertexData[attribute], i))
+      setValue(mesh.instanceData[attribute], i, transform * mesh.vertexData[attribute][i, T])
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
 proc applyTransformToVertices*(mesh: var MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE) =
   for i in 0 ..< mesh.vertexData[positionAttribute].len:
-    setValue(mesh.vertexData[positionAttribute], i, mesh.transform * getValue[Vec3f](mesh.vertexData[positionAttribute], i))
+    setValue(mesh.vertexData[positionAttribute], i, mesh.transform * mesh.vertexData[positionAttribute][i, Vec3f])
   mesh.transform = Unit4
 
 

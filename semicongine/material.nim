@@ -35,14 +35,14 @@ proc `==`*(a, b: MaterialType): bool =
 proc `==`*(a, b: MaterialData): bool =
   return a.name == b.name
 
-proc get*[T](material: MaterialData, attributeName: string): seq[T] =
-  getValues[T](material.attributes[attributeName])[]
-
-proc getDataList*(material: MaterialData, attributeName: string): DataList =
+template `[]`*(material: MaterialData, attributeName: string): DataList =
   material.attributes[attributeName]
 
-proc getSingle*[T](material: MaterialData, attributeName: string): T =
-  getValues[T](material.attributes[attributeName])[][0]
+template `[]`*(material: MaterialData, attributeName: string, t: typedesc): ref seq[t] =
+  material.attributes[attributeName][t]
+
+template `[]`*(material: MaterialData, attributeName: string, i: int, t: typedesc): untyped =
+  material.attributes[attributeName][i, t]
 
 let EMPTY_MATERIAL* = MaterialType(
   name: "empty material",

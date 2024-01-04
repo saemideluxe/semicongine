@@ -55,10 +55,10 @@ proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: openArray[T]
   scene.dirtyShaderGlobals.add name
 
 func getShaderGlobal*[T](scene: Scene, name: string): T =
-  getValues[T](scene.shaderGlobals[name])[0]
+  scene.shaderGlobals[name][T, 0]
 
-func getShaderGlobalArray*[T](scene: Scene, name: string): seq[T] =
-  getValues[T](scene.shaderGlobals[name])
+func getShaderGlobalArray*[T](scene: Scene, name: string): ref seq[T] =
+  scene.shaderGlobals[name][T]
 
 proc setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
   setValues[T](scene.shaderGlobals[name], @[value])
