@@ -309,7 +309,7 @@ proc initDataList*[T: GPUType](data: openArray[T]): DataList =
   result = initDataList(getDataType[T]())
   result.setValues(@data)
 
-func getValues*[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
+func getValues[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
   when T is float32: value.float32
   elif T is float64: value.float64
   elif T is int8: value.int8
@@ -361,7 +361,7 @@ func getValues*[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
   elif T is Texture: value.texture
   else: {. error: "Virtual datatype has no values" .}
 
-func getValue*[T: GPUType|int|uint|float](value: DataList, i: int): T =
+func getValue[T: GPUType|int|uint|float](value: DataList, i: int): T =
   when T is float32: value.float32[i]
   elif T is float64: value.float64[i]
   elif T is int8: value.int8[i]
@@ -412,6 +412,11 @@ func getValue*[T: GPUType|int|uint|float](value: DataList, i: int): T =
   elif T is TMat4[float64]: value.mat4f64[i]
   elif T is Texture: value.texture[i]
   else: {. error: "Virtual datatype has no values" .}
+
+template `[]`*(list: DataList, t: typedesc): ref seq[t] =
+  getValues[t](list)
+template `[]`*(list: DataList, i: int, t: typedesc): untyped =
+  getValue[t](list, i)
 
 func getRawData*(value: var DataList): (pointer, int) =
   if value.len == 0:

@@ -266,14 +266,14 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, default
     var tri: seq[int]
     case data.thetype
       of UInt16:
-        for entry in getValues[uint16](data)[]:
+        for entry in data[uint16][]:
           tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
             result[].appendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
       of UInt32:
-        for entry in getValues[uint32](data)[]:
+        for entry in data[uint32][]:
           tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
