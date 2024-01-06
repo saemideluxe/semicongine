@@ -96,7 +96,8 @@ proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = initDataList(thetype=getDataType[T]())
   mesh.vertexData[attribute].setLen(mesh.vertexCount)
-  mesh.vertexData[attribute].setValues(value)
+  mesh.vertexData[attribute] = value
+  # `=`(mesh.vertexData[attribute], value)
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initVertexAttribute(mesh, attribute, newSeqWith(mesh.vertexCount, value))
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
@@ -114,7 +115,7 @@ proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: s
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = initDataList(thetype=getDataType[T]())
   mesh.instanceData[attribute].setLen(mesh.instanceCount)
-  mesh.instanceData[attribute].setValues(value)
+  mesh.instanceData[attribute] = value
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initInstanceAttribute(mesh, attribute, newSeqWith(mesh.instanceCount, value))
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
@@ -237,11 +238,11 @@ func getRawIndexData*(mesh: MeshObject): (pointer, int) =
     of Small: rawData(mesh.smallIndices)
     of Big: rawData(mesh.bigIndices)
 
-func getRawData*(mesh: var MeshObject, attribute: string): (pointer, int) =
+func getPointer*(mesh: var MeshObject, attribute: string): pointer =
   if mesh.vertexData.contains(attribute):
-    mesh.vertexData[attribute].getRawData()
+    mesh.vertexData[attribute].getPointer()
   elif mesh.instanceData.contains(attribute):
-    mesh.instanceData[attribute].getRawData()
+    mesh.instanceData[attribute].getPointer()
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
@@ -263,12 +264,17 @@ proc getAttribute[T: GPUType|int|uint|float](mesh: MeshObject, attribute: string
 
 template `[]`*(mesh: MeshObject, attribute: string, t: typedesc): ref seq[t] =
   getAttribute[t](mesh, attribute)
-template `[]`*(mesh: Mesh, attribute: string, t: typedesc): ref seq[t] =
-  getAttribute[t](mesh[], attribute)
 template `[]`*(mesh: MeshObject, attribute: string, i: int, t: typedesc): untyped =
   getAttribute[t](mesh, attribute, i)
+template `[]=`*[T](mesh: MeshObject, attribute: string, value: seq[T]) =
+  getAttribute[t](mesh, attribute)
+template `[]=`*[T](mesh: MeshObject, attribute: string, i: int, value: T) =
+  getAttribute[t](mesh, attribute, i)
+
+template `[]`*(mesh: Mesh, attribute: string, t: typedesc): ref seq[t] =
+  mesh[][attribute, t]
 template `[]`*(mesh: Mesh, attribute: string, i: int, t: typedesc): untyped =
-  getAttribute[t](mesh[], attribute, i)
+  mesh[][attribute, i, t]
 
 proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: DataList) =
   if mesh.vertexData.contains(attribute):
@@ -287,10 +293,10 @@ proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attrib
 proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   if mesh.vertexData.contains(attribute):
     assert data.len == mesh.vertexCount
-    setValues(mesh.vertexData[attribute], data)
+    mesh.vertexData[attribute] = data
   elif mesh.instanceData.contains(attribute):
     assert data.len == mesh.instanceCount
-    setValues(mesh.instanceData[attribute], data)
+    mesh.instanceData[attribute] = data
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
   if not mesh.dirtyAttributes.contains(attribute):
@@ -299,10 +305,10 @@ proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attrib
 proc updateAttributeData[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, i: int, value: T) =
   if mesh.vertexData.contains(attribute):
     assert i < mesh.vertexData[attribute].len
-    setValue(mesh.vertexData[attribute], i, value)
+    mesh.vertexData[attribute][i] = value
   elif mesh.instanceData.contains(attribute):
     assert i < mesh.instanceData[attribute].len
-    setValue(mesh.instanceData[attribute], i, value)
+    mesh.instanceData[attribute][i] = value
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
   if not mesh.dirtyAttributes.contains(attribute):
@@ -372,18 +378,17 @@ proc clearDirtyAttributes*(mesh: var MeshObject) =
 proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: Mat4) =
   if mesh.vertexData.contains(attribute):
     for i in 0 ..< mesh.vertexData[attribute].len:
-      setValue(mesh.vertexData[attribute], i, transform * mesh.vertexData[attribute][i, T])
+      mesh.vertexData[attribute][i] = transform * mesh.vertexData[attribute][i, T]
   elif mesh.instanceData.contains(attribute):
     for i in 0 ..< mesh.instanceData[attribute].len:
-      setValue(mesh.instanceData[attribute], i, transform * mesh.vertexData[attribute][i, T])
+      mesh.instanceData[attribute][i] = transform * mesh.vertexData[attribute][i, T]
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
 proc applyTransformToVertices*(mesh: var MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE) =
   for i in 0 ..< mesh.vertexData[positionAttribute].len:
-    setValue(mesh.vertexData[positionAttribute], i, mesh.transform * mesh.vertexData[positionAttribute][i, Vec3f])
+    mesh.vertexData[positionAttribute][i] = mesh.transform * mesh.vertexData[positionAttribute][i, Vec3f]
   mesh.transform = Unit4
-
 
 func getCollisionPoints*(mesh: MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE): seq[Vec3f] =
   for p in mesh[positionAttribute, Vec3f][]:

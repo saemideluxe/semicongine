@@ -1,4 +1,5 @@
 import std/hashes
+import std/tables
 import std/strformat
 
 import ./gpu_types
@@ -200,7 +201,7 @@ proc setLen*(value: var DataList, len: int) =
     of TextureType: discard
 
 
-proc setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
+proc setValues[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   value.setLen(data.len)
   when T is float32: value.float32[] = data
   elif T is float64: value.float64[] = data
@@ -251,6 +252,59 @@ proc setValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is TMat4[float32]: value.mat4f32[] = data
   elif T is TMat4[float64]: value.mat4f64[] = data
   elif T is Texture: value.texture[] = data
+  else: {. error: "Virtual datatype has no values" .}
+
+proc setValue[T: GPUType|int|uint|float](value: var DataList, i: int, data: T) =
+  assert i < value.len
+  when T is float32: value.float32[i] = data
+  elif T is float64: value.float64[i] = data
+  elif T is int8: value.int8[i] = data
+  elif T is int16: value.int16[i] = data
+  elif T is int32: value.int32[i] = data
+  elif T is int64: value.int64[i] = data
+  elif T is uint8: value.uint8[i] = data
+  elif T is uint16: value.uint16[i] = data
+  elif T is uint32: value.uint32[i] = data
+  elif T is uint64: value.uint64[i] = data
+  elif T is int and sizeof(int) == sizeof(int32): value.int32[i] = data
+  elif T is int and sizeof(int) == sizeof(int64): value.int64[i] = data
+  elif T is uint and sizeof(uint) == sizeof(uint32): value.uint32[i] = data
+  elif T is uint and sizeof(uint) == sizeof(uint64): value.uint64[i] = data
+  elif T is float and sizeof(float) == sizeof(float32): value.float32[i] = data
+  elif T is float and sizeof(float) == sizeof(float64): value.float64[i] = data
+  elif T is TVec2[int32]: value.vec2i32[i] = data
+  elif T is TVec2[int64]: value.vec2i64[i] = data
+  elif T is TVec3[int32]: value.vec3i32[i] = data
+  elif T is TVec3[int64]: value.vec3i64[i] = data
+  elif T is TVec4[int32]: value.vec4i32[i] = data
+  elif T is TVec4[int64]: value.vec4i64[i] = data
+  elif T is TVec2[uint32]: value.vec2u32[i] = data
+  elif T is TVec2[uint64]: value.vec2u64[i] = data
+  elif T is TVec3[uint32]: value.vec3u32[i] = data
+  elif T is TVec3[uint64]: value.vec3u64[i] = data
+  elif T is TVec4[uint32]: value.vec4u32[i] = data
+  elif T is TVec4[uint64]: value.vec4u64[i] = data
+  elif T is TVec2[float32]: value.vec2f32[i] = data
+  elif T is TVec2[float64]: value.vec2f64[i] = data
+  elif T is TVec3[float32]: value.vec3f32[i] = data
+  elif T is TVec3[float64]: value.vec3f64[i] = data
+  elif T is TVec4[float32]: value.vec4f32[i] = data
+  elif T is TVec4[float64]: value.vec4f64[i] = data
+  elif T is TMat2[float32]: value.mat2f32[i] = data
+  elif T is TMat2[float64]: value.mat2f64[i] = data
+  elif T is TMat23[float32]: value.mat23f32[i] = data
+  elif T is TMat23[float64]: value.mat23f64[i] = data
+  elif T is TMat32[float32]: value.mat32f32[i] = data
+  elif T is TMat32[float64]: value.mat32f64[i] = data
+  elif T is TMat3[float32]: value.mat3f32[i] = data
+  elif T is TMat3[float64]: value.mat3f64[i] = data
+  elif T is TMat34[float32]: value.mat34f32[i] = data
+  elif T is TMat34[float64]: value.mat34f64[i] = data
+  elif T is TMat43[float32]: value.mat43f32[i] = data
+  elif T is TMat43[float64]: value.mat43f64[i] = data
+  elif T is TMat4[float32]: value.mat4f32[i] = data
+  elif T is TMat4[float64]: value.mat4f64[i] = data
+  elif T is Texture: value.texture[i] = data
   else: {. error: "Virtual datatype has no values" .}
 
 proc initDataList*(theType: DataType, len=0): DataList =
@@ -418,54 +472,65 @@ template `[]`*(list: DataList, t: typedesc): ref seq[t] =
 template `[]`*(list: DataList, i: int, t: typedesc): untyped =
   getValue[t](list, i)
 
-func getRawData*(value: var DataList): (pointer, int) =
+# since we use this often with tables, add this for an easy assignment
+template `[]=`*[T](table: var Table[string, DataList], key: string, values: seq[T]) =
+  if key in table:
+    table[key].setValues(values)
+  else:
+    table[key] = initDataList(values)
+
+template `[]=`*[T](list: var DataList, values: seq[T]) =
+  list.setValues(values)
+template `[]=`*[T](list: var DataList, i: int, value: T) =
+  list.setValue(i, value)
+
+func getPointer*(value: var DataList): pointer =
   if value.len == 0:
-    return (nil, 0)
-  result[1] = value.theType.size * value.len
+    result = nil
   case value.theType
-    of Float32: result[0] = value.float32[].toCPointer
-    of Float64: result[0] = value.float64[].toCPointer
-    of Int8: result[0] = value.int8[].toCPointer
-    of Int16: result[0] = value.int16[].toCPointer
-    of Int32: result[0] = value.int32[].toCPointer
-    of Int64: result[0] = value.int64[].toCPointer
-    of UInt8: result[0] = value.uint8[].toCPointer
-    of UInt16: result[0] = value.uint16[].toCPointer
-    of UInt32: result[0] = value.uint32[].toCPointer
-    of UInt64: result[0] = value.uint64[].toCPointer
-    of Vec2I32: result[0] = value.vec2i32[].toCPointer
-    of Vec2I64: result[0] = value.vec2i64[].toCPointer
-    of Vec3I32: result[0] = value.vec3i32[].toCPointer
-    of Vec3I64: result[0] = value.vec3i64[].toCPointer
-    of Vec4I32: result[0] = value.vec4i32[].toCPointer
-    of Vec4I64: result[0] = value.vec4i64[].toCPointer
-    of Vec2U32: result[0] = value.vec2u32[].toCPointer
-    of Vec2U64: result[0] = value.vec2u64[].toCPointer
-    of Vec3U32: result[0] = value.vec3u32[].toCPointer
-    of Vec3U64: result[0] = value.vec3u64[].toCPointer
-    of Vec4U32: result[0] = value.vec4u32[].toCPointer
-    of Vec4U64: result[0] = value.vec4u64[].toCPointer
-    of Vec2F32: result[0] = value.vec2f32[].toCPointer
-    of Vec2F64: result[0] = value.vec2f64[].toCPointer
-    of Vec3F32: result[0] = value.vec3f32[].toCPointer
-    of Vec3F64: result[0] = value.vec3f64[].toCPointer
-    of Vec4F32: result[0] = value.vec4f32[].toCPointer
-    of Vec4F64: result[0] = value.vec4f64[].toCPointer
-    of Mat2F32: result[0] = value.mat2f32[].toCPointer
-    of Mat2F64: result[0] = value.mat2f64[].toCPointer
-    of Mat23F32: result[0] = value.mat23f32[].toCPointer
-    of Mat23F64: result[0] = value.mat23f64[].toCPointer
-    of Mat32F32: result[0] = value.mat32f32[].toCPointer
-    of Mat32F64: result[0] = value.mat32f64[].toCPointer
-    of Mat3F32: result[0] = value.mat3f32[].toCPointer
-    of Mat3F64: result[0] = value.mat3f64[].toCPointer
-    of Mat34F32: result[0] = value.mat34f32[].toCPointer
-    of Mat34F64: result[0] = value.mat34f64[].toCPointer
-    of Mat43F32: result[0] = value.mat43f32[].toCPointer
-    of Mat43F64: result[0] = value.mat43f64[].toCPointer
-    of Mat4F32: result[0] = value.mat4f32[].toCPointer
-    of Mat4F64: result[0] = value.mat4f64[].toCPointer
-    of TextureType: result[0] = nil
+    of Float32: result = value.float32[].toCPointer
+    of Float64: result = value.float64[].toCPointer
+    of Int8: result = value.int8[].toCPointer
+    of Int16: result = value.int16[].toCPointer
+    of Int32: result = value.int32[].toCPointer
+    of Int64: result = value.int64[].toCPointer
+    of UInt8: result = value.uint8[].toCPointer
+    of UInt16: result = value.uint16[].toCPointer
+    of UInt32: result = value.uint32[].toCPointer
+    of UInt64: result = value.uint64[].toCPointer
+    of Vec2I32: result = value.vec2i32[].toCPointer
+    of Vec2I64: result = value.vec2i64[].toCPointer
+    of Vec3I32: result = value.vec3i32[].toCPointer
+    of Vec3I64: result = value.vec3i64[].toCPointer
+    of Vec4I32: result = value.vec4i32[].toCPointer
+    of Vec4I64: result = value.vec4i64[].toCPointer
+    of Vec2U32: result = value.vec2u32[].toCPointer
+    of Vec2U64: result = value.vec2u64[].toCPointer
+    of Vec3U32: result = value.vec3u32[].toCPointer
+    of Vec3U64: result = value.vec3u64[].toCPointer
+    of Vec4U32: result = value.vec4u32[].toCPointer
+    of Vec4U64: result = value.vec4u64[].toCPointer
+    of Vec2F32: result = value.vec2f32[].toCPointer
+    of Vec2F64: result = value.vec2f64[].toCPointer
+    of Vec3F32: result = value.vec3f32[].toCPointer
+    of Vec3F64: result = value.vec3f64[].toCPointer
+    of Vec4F32: result = value.vec4f32[].toCPointer
+    of Vec4F64: result = value.vec4f64[].toCPointer
+    of Mat2F32: result = value.mat2f32[].toCPointer
+    of Mat2F64: result = value.mat2f64[].toCPointer
+    of Mat23F32: result = value.mat23f32[].toCPointer
+    of Mat23F64: result = value.mat23f64[].toCPointer
+    of Mat32F32: result = value.mat32f32[].toCPointer
+    of Mat32F64: result = value.mat32f64[].toCPointer
+    of Mat3F32: result = value.mat3f32[].toCPointer
+    of Mat3F64: result = value.mat3f64[].toCPointer
+    of Mat34F32: result = value.mat34f32[].toCPointer
+    of Mat34F64: result = value.mat34f64[].toCPointer
+    of Mat43F32: result = value.mat43f32[].toCPointer
+    of Mat43F64: result = value.mat43f64[].toCPointer
+    of Mat4F32: result = value.mat4f32[].toCPointer
+    of Mat4F64: result = value.mat4f64[].toCPointer
+    of TextureType: nil
 
 proc appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   value.len += data.len
@@ -567,112 +632,6 @@ proc appendValues*(value: var DataList, data: DataList) =
   of Mat4F32: value.mat4f32[].add data.mat4f32[]
   of Mat4F64: value.mat4f64[].add data.mat4f64[]
   of TextureType: value.texture[].add data.texture[]
-
-proc setValue*[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
-  value.len = data.len
-  when T is float32: value.float32[] = data
-  elif T is float64: value.float64[] = data
-  elif T is int8: value.int8[] = data
-  elif T is int16: value.int16[] = data
-  elif T is int32: value.int32[] = data
-  elif T is int64: value.int64[] = data
-  elif T is uint8: value.uint8[] = data
-  elif T is uint16: value.uint16[] = data
-  elif T is uint32: value.uint32[] = data
-  elif T is uint64: value.uint64[] = data
-  elif T is int and sizeof(int) == sizeof(int32): value.int32[] = data
-  elif T is int and sizeof(int) == sizeof(int64): value.int64[] = data
-  elif T is uint and sizeof(uint) == sizeof(uint32): value.uint32[] = data
-  elif T is uint and sizeof(uint) == sizeof(uint64): value.uint64[] = data
-  elif T is float and sizeof(float) == sizeof(float32): value.float32[] = data
-  elif T is float and sizeof(float) == sizeof(float64): value.float64[] = data
-  elif T is TVec2[int32]: value.vec2i32[] = data
-  elif T is TVec2[int64]: value.vec2i64[] = data
-  elif T is TVec3[int32]: value.vec3i32[] = data
-  elif T is TVec3[int64]: value.vec3i64[] = data
-  elif T is TVec4[int32]: value.vec4i32[] = data
-  elif T is TVec4[int64]: value.vec4i64[] = data
-  elif T is TVec2[uint32]: value.vec2u32[] = data
-  elif T is TVec2[uint64]: value.vec2u64[] = data
-  elif T is TVec3[uint32]: value.vec3u32[] = data
-  elif T is TVec3[uint64]: value.vec3u64[] = data
-  elif T is TVec4[uint32]: value.vec4u32[] = data
-  elif T is TVec4[uint64]: value.vec4u64[] = data
-  elif T is TVec2[float32]: value.vec2f32[] = data
-  elif T is TVec2[float64]: value.vec2f64[] = data
-  elif T is TVec3[float32]: value.vec3f32[] = data
-  elif T is TVec3[float64]: value.vec3f64[] = data
-  elif T is TVec4[float32]: value.vec4f32[] = data
-  elif T is TVec4[float64]: value.vec4f64[] = data
-  elif T is TMat2[float32]: value.mat2f32[] = data
-  elif T is TMat2[float64]: value.mat2f64[] = data
-  elif T is TMat23[float32]: value.mat23f32[] = data
-  elif T is TMat23[float64]: value.mat23f64[] = data
-  elif T is TMat32[float32]: value.mat32f32[] = data
-  elif T is TMat32[float64]: value.mat32f64[] = data
-  elif T is TMat3[float32]: value.mat3f32[] = data
-  elif T is TMat3[float64]: value.mat3f64[] = data
-  elif T is TMat34[float32]: value.mat34f32[] = data
-  elif T is TMat34[float64]: value.mat34f64[] = data
-  elif T is TMat43[float32]: value.mat43f32[] = data
-  elif T is TMat43[float64]: value.mat43f64[] = data
-  elif T is TMat4[float32]: value.mat4f32[] = data
-  elif T is TMat4[float64]: value.mat4f64[] = data
-  elif T is Texture: value.texture[] = data
-  else: {. error: "Virtual datatype has no values" .}
-
-proc setValue*[T: GPUType|int|uint|float](value: var DataList, i: int, data: T) =
-  assert i < value.len
-  when T is float32: value.float32[i] = data
-  elif T is float64: value.float64[i] = data
-  elif T is int8: value.int8[i] = data
-  elif T is int16: value.int16[i] = data
-  elif T is int32: value.int32[i] = data
-  elif T is int64: value.int64[i] = data
-  elif T is uint8: value.uint8[i] = data
-  elif T is uint16: value.uint16[i] = data
-  elif T is uint32: value.uint32[i] = data
-  elif T is uint64: value.uint64[i] = data
-  elif T is int and sizeof(int) == sizeof(int32): value.int32[i] = data
-  elif T is int and sizeof(int) == sizeof(int64): value.int64[i] = data
-  elif T is uint and sizeof(uint) == sizeof(uint32): value.uint32[i] = data
-  elif T is uint and sizeof(uint) == sizeof(uint64): value.uint64[i] = data
-  elif T is float and sizeof(float) == sizeof(float32): value.float32[i] = data
-  elif T is float and sizeof(float) == sizeof(float64): value.float64[i] = data
-  elif T is TVec2[int32]: value.vec2i32[i] = data
-  elif T is TVec2[int64]: value.vec2i64[i] = data
-  elif T is TVec3[int32]: value.vec3i32[i] = data
-  elif T is TVec3[int64]: value.vec3i64[i] = data
-  elif T is TVec4[int32]: value.vec4i32[i] = data
-  elif T is TVec4[int64]: value.vec4i64[i] = data
-  elif T is TVec2[uint32]: value.vec2u32[i] = data
-  elif T is TVec2[uint64]: value.vec2u64[i] = data
-  elif T is TVec3[uint32]: value.vec3u32[i] = data
-  elif T is TVec3[uint64]: value.vec3u64[i] = data
-  elif T is TVec4[uint32]: value.vec4u32[i] = data
-  elif T is TVec4[uint64]: value.vec4u64[i] = data
-  elif T is TVec2[float32]: value.vec2f32[i] = data
-  elif T is TVec2[float64]: value.vec2f64[i] = data
-  elif T is TVec3[float32]: value.vec3f32[i] = data
-  elif T is TVec3[float64]: value.vec3f64[i] = data
-  elif T is TVec4[float32]: value.vec4f32[i] = data
-  elif T is TVec4[float64]: value.vec4f64[i] = data
-  elif T is TMat2[float32]: value.mat2f32[i] = data
-  elif T is TMat2[float64]: value.mat2f64[i] = data
-  elif T is TMat23[float32]: value.mat23f32[i] = data
-  elif T is TMat23[float64]: value.mat23f64[i] = data
-  elif T is TMat32[float32]: value.mat32f32[i] = data
-  elif T is TMat32[float64]: value.mat32f64[i] = data
-  elif T is TMat3[float32]: value.mat3f32[i] = data
-  elif T is TMat3[float64]: value.mat3f64[i] = data
-  elif T is TMat34[float32]: value.mat34f32[i] = data
-  elif T is TMat34[float64]: value.mat34f64[i] = data
-  elif T is TMat43[float32]: value.mat43f32[i] = data
-  elif T is TMat43[float64]: value.mat43f64[i] = data
-  elif T is TMat4[float32]: value.mat4f32[i] = data
-  elif T is TMat4[float64]: value.mat4f64[i] = data
-  elif T is Texture: value.texture[i] = data
-  else: {. error: "Virtual datatype has no values" .}
 
 proc appendFrom*(a: var DataList, i: int, b: DataList, j: int) =
   assert  a.theType == b.theType

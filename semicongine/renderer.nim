@@ -213,8 +213,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     for attribute in inputs:
       scenedata.vertexBufferOffsets[(mesh, attribute.name)] = perLocationOffsets[attribute.memoryPerformanceHint]
       if mesh[].attributes.contains(attribute.name):
-        let size = mesh[].getRawData(attribute.name)[1]
-        perLocationOffsets[attribute.memoryPerformanceHint] += size
+        perLocationOffsets[attribute.memoryPerformanceHint] += mesh[].attributeSize(attribute.name)
         if perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT != 0:
           perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
 
@@ -322,9 +321,12 @@ proc refreshMeshAttributeData(renderer: Renderer, scene: var Scene, drawable: Dr
   if not (attribute in renderer.scenedata[scene].attributeLocation):
     return
 
-  let (pdata, size) = mesh[].getRawData(attribute)
   let memoryPerformanceHint = renderer.scenedata[scene].attributeLocation[attribute]
-  renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(pdata, size, renderer.scenedata[scene].vertexBufferOffsets[(mesh, attribute)])
+  renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(
+    mesh[].getPointer(attribute),
+    mesh[].attributeSize(attribute),
+    renderer.scenedata[scene].vertexBufferOffsets[(mesh, attribute)]
+  )
 
 proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
@@ -340,13 +342,10 @@ proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
 
 proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
-  # TODO: maybe check for dirty materials too, but atm we copy materials into the
-  # renderers scenedata, so they are immutable after initialization, would 
-  # need to allow updates of materials too in order to make sense
 
   let dirty = scene.dirtyShaderGlobals
-  if not forceAll and dirty.len == 0:
-    return
+  # if not forceAll and dirty.len == 0:
+    # return
 
   if forceAll:
     debug "Update uniforms because 'forceAll' was given"
@@ -361,6 +360,10 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
         renderer.scenedata[scene].uniformBuffers.hasKey(shaderPipeline.vk) and
         renderer.scenedata[scene].uniformBuffers[shaderPipeline.vk].len != 0
       ):
+        var dirtyMaterialAttribs: seq[string]
+        for material in renderer.scenedata[scene].materials[materialType].mitems:
+          dirtyMaterialAttribs.add material.dirtyAttributes
+          material.clearDirtyAttributes()
         assert renderer.scenedata[scene].uniformBuffers[shaderPipeline.vk][renderer.swapchain.currentInFlight].vk.valid
         if forceAll:
           for buffer in renderer.scenedata[scene].uniformBuffers[shaderPipeline.vk]:
@@ -369,7 +372,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
         var offset = 0
         # loop over all uniforms of the shader-shaderPipeline
         for uniform in shaderPipeline.uniforms:
-          if dirty.contains(uniform.name) or forceAll: # only update uniforms if necessary
+          if dirty.contains(uniform.name) or dirtyMaterialAttribs.contains(uniform.name) or forceAll: # only update uniforms if necessary
             var value = initDataList(uniform.theType)
             if scene.shaderGlobals.hasKey(uniform.name):
               assert scene.shaderGlobals[uniform.name].thetype == uniform.thetype
@@ -382,14 +385,13 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
                   foundValue = true
               assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
             assert (uniform.arrayCount == 0 and value.len == 1) or value.len == uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
-            let (pdata, size) = value.getRawData()
-            assert size == uniform.size, "During uniform update: gathered value has size {size} but uniform expects size {uniform.size}"
+            assert value.size == uniform.size, "During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
             debug &"  update uniform {uniform.name} with value: {value}"
             # TODO: technically we would only need to update the uniform buffer of the current
             # frameInFlight (I think), but we don't track for which frame the shaderglobals are no longer dirty
             # therefore we have to update the uniform values in all buffers, of all inFlightframes (usually 2)
             for buffer in renderer.scenedata[scene].uniformBuffers[shaderPipeline.vk]:
-              buffer.setData(pdata, size, offset)
+              buffer.setData(value.getPointer(), value.size, offset)
           offset += uniform.size
   scene.clearDirtyShaderGlobals()
 

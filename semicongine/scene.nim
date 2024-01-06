@@ -46,7 +46,7 @@ proc add*[T](scene: var Scene, obj: T) =
 proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add shader values"
   scene.shaderGlobals[name] = initDataList(thetype=getDataType[T]())
-  setValues(scene.shaderGlobals[name], @[data])
+  scene.shaderGlobals[name] = @[data]
   scene.dirtyShaderGlobals.add name
 
 proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: openArray[T]) =
@@ -61,12 +61,12 @@ func getShaderGlobalArray*[T](scene: Scene, name: string): ref seq[T] =
   scene.shaderGlobals[name][T]
 
 proc setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
-  setValues[T](scene.shaderGlobals[name], @[value])
+  scene.shaderGlobals[name] = @[value]
   if not scene.dirtyShaderGlobals.contains(name):
     scene.dirtyShaderGlobals.add name
 
 proc setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
-  setValues[T](scene.shaderGlobals[name], value)
+  scene.shaderGlobals[name] = value
   if not scene.dirtyShaderGlobals.contains(name):
     scene.dirtyShaderGlobals.add name
 
