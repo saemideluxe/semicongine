@@ -12,15 +12,16 @@ type
     vertexAttributes*: Table[string, DataType]
     instanceAttributes*: Table[string, DataType]
     attributes*: Table[string, DataType]
-  MaterialData* = object
+  MaterialData* = ref object
     theType*: MaterialType
     name*: string
     attributes: Table[string, DataList]
+    dirtyAttributes: seq[string]
 
-func hasMatchingAttribute*(materialType: MaterialType, attr: ShaderAttribute): bool =
+proc hasMatchingAttribute*(materialType: MaterialType, attr: ShaderAttribute): bool =
   return materialType.attributes.contains(attr.name) and materialType.attributes[attr.name] == attr.theType
 
-func hasMatchingAttribute*(material: MaterialData, attr: ShaderAttribute): bool =
+proc hasMatchingAttribute*(material: MaterialData, attr: ShaderAttribute): bool =
   return material.attributes.contains(attr.name) and material.attributes[attr.name].theType == attr.theType
 
 proc hash*(materialType: MaterialType): Hash =
@@ -37,12 +38,29 @@ proc `==`*(a, b: MaterialData): bool =
 
 template `[]`*(material: MaterialData, attributeName: string): DataList =
   material.attributes[attributeName]
-
 template `[]`*(material: MaterialData, attributeName: string, t: typedesc): ref seq[t] =
   material.attributes[attributeName][t]
-
 template `[]`*(material: MaterialData, attributeName: string, i: int, t: typedesc): untyped =
   material.attributes[attributeName][i, t]
+
+template `[]=`*(material: var MaterialData, attribute: string, newList: DataList) =
+  material.attributes[attribute] = newList
+  if not material.dirtyAttributes.contains(attribute):
+    material.dirtyAttributes.add attribute
+template `[]=`*[T](material: var MaterialData, attribute: string, newList: seq[T]) =
+  material.attributes[attribute][] = newList
+  if not material.dirtyAttributes.contains(attribute):
+    material.dirtyAttributes.add attribute
+template `[]=`*[T](material: var MaterialData, attribute: string, i: int, newValue: T) =
+  material.attributes[attribute][i] = newValue
+  if not material.dirtyAttributes.contains(attribute):
+    material.dirtyAttributes.add attribute
+
+func dirtyAttributes*(material: MaterialData): seq[string] =
+  material.dirtyAttributes
+
+proc clearDirtyAttributes*(material: var MaterialData) =
+  material.dirtyAttributes.reset
 
 let EMPTY_MATERIAL* = MaterialType(
   name: "empty material",
