@@ -371,11 +371,14 @@ func glslUniforms*(group: openArray[ShaderAttribute], blockName="Uniforms", bind
     return @[]
   # currently only a single uniform block supported, therefore binding = 0
   result.add(&"layout(std430, binding = {binding}) uniform T{blockName} {{")
+  var last_size = high(int)
   for attribute in group:
+    assert attribute.size <= last_size, &"The attribute '{attribute.name}' is bigger than the attribute before, which is not allowed" # using smaller uniform-types first will lead to problems (I think due to alignment, there is also some stuff on the internet about this ;)
     var arrayDecl = ""
     if attribute.arrayCount > 0:
       arrayDecl = &"[{attribute.arrayCount}]"
     result.add(&"    {attribute.theType.glslType} {attribute.name}{arrayDecl};")
+    last_size = attribute.size
   result.add(&"}} {blockName};")
 
 func glslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[string] =
