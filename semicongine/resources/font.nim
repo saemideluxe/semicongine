@@ -77,7 +77,6 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
     else:
       images.add empty_image
 
-
     free(data)
 
   let packed = pack(images)
