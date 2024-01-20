@@ -1,8 +1,11 @@
-import os
+import std/os
+# import std/syncio
 import std/streams
 import std/bitops
+import std/strformat
 
 import ../core/imagetypes
+import ../core/utils
 
 const COMPRESSION_BI_RGB = 0'u32
 const COMPRESSION_BI_BITFIELDS = 3'u32
@@ -36,7 +39,7 @@ type
     gammaGreen: uint32 # not used yet
     gammaBlue: uint32 # not used yet
 
-proc readBMP*(stream: Stream): Image =
+proc readBMP*(stream: Stream): Image[RGBAPixel] =
   var
     bitmapFileHeader: BitmapFileHeader
     dibHeader: DIBHeader
@@ -73,13 +76,13 @@ proc readBMP*(stream: Stream): Image =
   stream.setPosition(int(bitmapFileHeader.dataStart))
   var
     padding = ((int32(dibHeader.bitsPerPixel div 8)) * dibHeader.width) mod 4
-    data = newSeq[Pixel](dibHeader.width * abs(dibHeader.height))
+    data = newSeq[RGBAPixel](dibHeader.width * abs(dibHeader.height))
   if padding > 0:
     padding = 4 - padding
   for row in 0 ..< abs(dibHeader.height):
     for col in 0 ..< dibHeader.width:
 
-      var pixel: Pixel = [0'u8, 0'u8, 0'u8, 255'u8]
+      var pixel: RGBAPixel = [0'u8, 0'u8, 0'u8, 255'u8]
       # if we got channeld bitmasks
       if dibHeader.compression in [COMPRESSION_BI_BITFIELDS, COMPRESSION_BI_ALPHABITFIELDS]:
         var value = stream.readUint32()
@@ -106,9 +109,11 @@ proc readBMP*(stream: Stream): Image =
 {.compile: currentSourcePath.parentDir() & "/lodepng.c" .}
 
 proc lodepng_decode32(out_data: ptr cstring, w: ptr cuint, h: ptr cuint, in_data: cstring, insize: csize_t): cuint {.importc.}
+proc lodepng_encode_memory(out_data: ptr cstring, outsize: ptr csize_t, image: cstring, w: cuint, h: cuint, colorType: cint, bitdepth: cuint): cuint {.importc.}
+
 proc free(p: pointer) {.importc.} # for some reason the lodepng pointer can only properly be freed with the native free
 
-proc readPNG*(stream: Stream): Image =
+proc readPNG*(stream: Stream): Image[RGBAPixel] =
   let indata = stream.readAll()
   var w, h: cuint
   var data: cstring
@@ -117,9 +122,45 @@ proc readPNG*(stream: Stream): Image =
     raise newException(Exception, "An error occured while loading PNG file")
 
   let imagesize = w * h * 4
-  var imagedata = newSeq[Pixel](w * h)
+  var imagedata = newSeq[RGBAPixel](w * h)
   copyMem(addr imagedata[0], data, imagesize)
 
   free(data)
 
   result = newImage(width=int(w), height=int(h), imagedata=imagedata)
+
+proc toPNG*[T: Pixel](image: Image[T]): seq[uint8] =
+  when T is GrayPixel:
+    let pngType = 0 # hardcoded in lodepng.h
+  else:
+    let pngType = 6 # hardcoded in lodepng.h
+  var
+    pngData: cstring 
+    pngSize: csize_t
+  for y in 0 ..< image.height:
+    for x in 0 ..< image.width:
+      discard
+      # stdout.write image[x, y]
+      # stdout.write ' '
+    # echo ""
+  let ret = lodepng_encode_memory(
+    addr pngData,
+    addr pngSize,
+    cast[cstring](image.imagedata.toCPointer),
+    cuint(image.width),
+    cuint(image.height),
+    cint(pngType),
+    8,
+  )
+  assert ret == 0, &"There was an error with generating the PNG data for image {image}, result was: {ret}"
+  result = newSeq[uint8](pngSize)
+  for i in 0 ..< pngSize:
+    result[i] = uint8(pngData[i])
+  free(pngData)
+
+proc writePNG*[T: Pixel](image: Image[T], filename: string) =
+  let f = filename.open(mode=fmWrite)
+  let data = image.toPNG()
+  let written = f.writeBytes(data, 0, data.len)
+  assert written == data.len, &"There was an error while saving '{filename}': only {written} of {data.len} bytes were written"
+  f.close()

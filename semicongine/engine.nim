@@ -213,3 +213,6 @@ proc `fullscreen=`*(engine: var Engine, enable: bool) =
   if enable != engine.fullscreen:
     engine.fullscreen = enable
     engine.window.fullscreen(engine.fullscreen)
+
+func limits*(engine: Engine): VkPhysicalDeviceLimits =
+  engine.gpuDevice().physicalDevice.properties.limits

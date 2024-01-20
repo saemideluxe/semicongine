@@ -32,5 +32,4 @@ type
     fontAtlas*: Texture
     maxHeight*: int
     kerning*: Table[(Rune, Rune), float32]
-    resolution*: float32
     fontscale*: float32

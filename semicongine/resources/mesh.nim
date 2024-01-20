@@ -127,7 +127,7 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8])
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
-proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: seq[uint8]): Image =
+proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: seq[uint8]): Image[RGBAPixel] =
   if root["images"][imageIndex].hasKey("uri"):
     raise newException(Exception, "Unsupported feature: Load images from external files")
 
@@ -145,7 +145,8 @@ proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: seq[uint8]): Image =
 
 proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Texture =
   let textureNode = root["textures"][textureIndex]
-  result.image = loadImage(root, textureNode["source"].getInt(), mainBuffer)
+  result = Texture(isGrayscale: false)
+  result.colorImage = loadImage(root, textureNode["source"].getInt(), mainBuffer)
   result.name = root["images"][textureNode["source"].getInt()]["name"].getStr()
   if result.name == "":
     result.name = &"Texture{textureIndex}"

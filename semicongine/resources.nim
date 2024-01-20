@@ -1,5 +1,6 @@
 import std/streams
 import std/strutils
+import std/sequtils
 import std/strformat
 import std/os
 import std/unicode
@@ -22,7 +23,10 @@ type
     Zip # Zip files
     Exe # Embeded in executable
 
-const thebundletype = parseEnum[ResourceBundlingType](BUNDLETYPE.toLowerAscii().capitalizeAscii())
+const
+  thebundletype = parseEnum[ResourceBundlingType](BUNDLETYPE.toLowerAscii().capitalizeAscii())
+  ASCII_CHARSET = PrintableChars.toSeq.toRunes
+
 var selectedMod* = "default"
 
 # resource loading
@@ -127,12 +131,17 @@ proc loadAudio*(path: string): Sound =
   else:
     raise newException(Exception, "Unsupported audio file type: " & path)
 
-proc loadFont*(path: string, name="", color=newVec4f(1, 1, 1, 1), resolution=100'f32): Font =
+proc loadFont*(
+  path: string,
+  name="",
+  lineHeightPixels=80'f32,
+  additional_codepoints: openArray[Rune]=[],
+  charset=ASCII_CHARSET
+): Font =
   var thename = name
   if thename == "":
     thename = path.splitFile().name
-  let defaultCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=+[{]};:,<.>/? $!@#%^&*()\"'".toRunes()
-  loadResource_intern(path).readTrueType(name, defaultCharset, color, resolution)
+  loadResource_intern(path).readTrueType(name, charset & additional_codepoints.toSeq, lineHeightPixels)
 
 proc loadMeshes*(path: string, defaultMaterial: MaterialType): seq[MeshTree] =
   loadResource_intern(path).readglTF(defaultMaterial)
