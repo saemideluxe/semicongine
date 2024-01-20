@@ -10,9 +10,9 @@ proc main() =
   # build scene
   var scene = Scene(name: "main")
   # var font = loadFont("DejaVuSans.ttf", lineHeightPixels=90'f32, charset="abcdefghijklmnopqrstuvwxyz ".toRunes)
-  var font = loadFont("DejaVuSans.ttf", lineHeightPixels=90'f32)
+  var font = loadFont("DejaVuSans.ttf", lineHeightPixels=180'f32)
   var textbox = initText(32, font, "", color=newVec4f(1, 0, 0, 1))
-  let fontscale = 0.005
+  let fontscale = 0.001
   scene.add textbox
   textbox.mesh.transform = scale(fontscale, fontscale)
   engine.loadScene(scene)

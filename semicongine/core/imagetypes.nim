@@ -59,12 +59,12 @@ proc `[]=`*(image: var Image, x, y: int, value: Pixel) =
 
   image[].imagedata[y * image.width + x] = value
 
-proc newImage*[T: Pixel](width, height: int, imagedata: seq[T]= @[]): Image[T] =
+proc newImage*[T: Pixel](width, height: int, imagedata: openArray[T]= []): Image[T] =
   assert width > 0 and height > 0
   assert imagedata.len == width * height or imagedata.len == 0
 
   result = new Image[T]
-  result.imagedata = (if imagedata.len == 0: newSeq[T](width * height) else: imagedata)
+  result.imagedata = (if imagedata.len == 0: newSeq[T](width * height) else: @imagedata)
   assert width * height == result.imagedata.len
 
   result.width = width
