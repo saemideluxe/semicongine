@@ -15,13 +15,14 @@ type
     Left
     Center
     Right
-  Textbox* = object
+  Text* = object
     maxLen*: int
     text: seq[Rune]
     dirty: bool
     alignment*: TextAlignment = Center
     font*: Font
     mesh*: Mesh
+    color*: Vec4f
 
 const
   TRANSFORM_ATTRIB = "transform"
@@ -30,7 +31,7 @@ const
   TEXT_MATERIAL_TYPE* = MaterialType(
     name: "default-text-material-type",
     vertexAttributes: {TRANSFORM_ATTRIB: Mat4F32, POSITION_ATTRIB: Vec3F32, UV_ATTRIB: Vec2F32}.toTable,
-    attributes: {"fontAtlas": TextureType}.toTable,
+    attributes: {"fontAtlas": TextureType, "color": Vec4F32}.toTable,
   )
   TEXT_SHADER* = createShaderConfiguration(
     inputs=[
@@ -40,21 +41,29 @@ const
     ],
     intermediates=[attr[Vec2f]("uvFrag")],
     outputs=[attr[Vec4f]("color")],
+    uniforms=[attr[Vec4f]("color")],
     samplers=[attr[Texture]("fontAtlas")],
     vertexCode= &"""gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB}; uvFrag = {UV_ATTRIB};""",
-    fragmentCode= &"""color = texture(fontAtlas, uvFrag);""",
+    fragmentCode= &"""color = vec4(Uniforms.color.rgb, Uniforms.color.a * texture(fontAtlas, uvFrag).r);"""
   )
 
-proc updateMesh(textbox: var Textbox) =
+proc updateMesh(textbox: var Text) =
 
   # pre-calculate text-width
   var width = 0'f32
+  var maxWidth = 0'f32
+  var height = 0 # todo: finish implementation to handle newline, start here
+  const newline = ['\n'].toRunes()[0]
   for i in 0 ..< min(textbox.text.len, textbox.maxLen):
+    if textbox.text[i] == newline:
+      maxWidth = max(width, maxWidth)
+      width = 0'f32
     width += textbox.font.glyphs[textbox.text[i]].advance
     if i < textbox.text.len - 1:
       width += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
+  maxWidth = max(width, maxWidth)
 
-  let centerX = width / 2
+  let centerX = maxWidth / 2
   let centerY = textbox.font.maxHeight / 2
 
   var offsetX = 0'f32
@@ -88,16 +97,16 @@ proc updateMesh(textbox: var Textbox) =
       textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
 
 
-func text*(textbox: Textbox): seq[Rune] =
+func text*(textbox: Text): seq[Rune] =
   textbox.text
 
-proc `text=`*(textbox: var Textbox, text: seq[Rune]) =
+proc `text=`*(textbox: var Text, text: seq[Rune]) =
   textbox.text = text
   textbox.updateMesh()
-proc `text=`*(textbox: var Textbox, text: string) =
+proc `text=`*(textbox: var Text, text: string) =
   `text=`(textbox, text.toRunes)
 
-proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
+proc initText*(maxLen: int, font: Font, text="".toRunes, color=newVec4f(0, 0, 0, 1)): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -109,7 +118,7 @@ proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
       [uint16(offset + 2), uint16(offset + 3), uint16(offset + 0)],
     ]
 
-  result = Textbox(maxLen: maxLen, text: text, font: font, dirty: true)
+  result = Text(maxLen: maxLen, text: text, font: font, dirty: true)
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"textbox-{instanceCounter}")
   inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
@@ -117,10 +126,10 @@ proc initTextbox*(maxLen: int, font: Font, text="".toRunes): Textbox =
   result.mesh.material = initMaterialData(
     theType=TEXT_MATERIAL_TYPE,
     name=font.name & " text",
-    attributes={"fontAtlas": initDataList(@[font.fontAtlas])},
+    attributes={"fontAtlas": initDataList(@[font.fontAtlas]), "color": initDataList(@[color])},
   )
 
   result.updateMesh()
 
-proc initTextbox*(maxLen: int, font: Font, text=""): Textbox =
-  initTextbox(maxLen=maxLen, font=font, text=text.toRunes)
+proc initText*(maxLen: int, font: Font, text="", color=newVec4f(0, 0, 0, 1)): Text =
+  initText(maxLen=maxLen, font=font, text=text.toRunes, color=color)

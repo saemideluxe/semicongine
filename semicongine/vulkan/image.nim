@@ -281,7 +281,10 @@ func `$`*(texture: VulkanTexture): string =
 
 proc uploadTexture*(device: Device, texture: Texture): VulkanTexture =
   assert device.vk.valid
-  result.image = createImage(device=device, width=texture.image.width, height=texture.image.height, depth=4, data=addr texture.image.imagedata[0][0])
+  if texture.isGrayscale:
+    result.image = createImage(device=device, width=texture.grayImage.width, height=texture.grayImage.height, depth=1, data=addr texture.grayImage.imagedata[0])
+  else:
+    result.image = createImage(device=device, width=texture.colorImage.width, height=texture.colorImage.height, depth=4, data=addr texture.colorImage.imagedata[0][0])
   result.imageView = result.image.createImageView()
   result.sampler = result.image.device.createSampler(texture.sampler)
 
