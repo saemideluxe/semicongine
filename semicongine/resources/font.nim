@@ -1,7 +1,5 @@
-import times
 import std/tables
 import std/strformat
-import std/sequtils
 import std/streams
 import std/os
 import std/unicode
@@ -11,7 +9,6 @@ import ../core/vector
 import ../core/imagetypes
 import ../core/fonttypes
 import ../algorithms
-import ./image
 
 {.emit: "#define STBTT_STATIC" .}
 {.emit: "#define STB_TRUETYPE_IMPLEMENTATION" .}
@@ -19,17 +16,17 @@ import ./image
 
 type stbtt_fontinfo {.importc, incompleteStruct .} = object
 
-const MAX_TEXTURE_WIDTH = 4096
-
 proc stbtt_InitFont(info: ptr stbtt_fontinfo, data: ptr char, offset: cint): cint {.importc, nodecl.}
 proc stbtt_ScaleForPixelHeight(info: ptr stbtt_fontinfo, pixels: cfloat): cfloat {.importc, nodecl.}
 
 proc stbtt_GetCodepointBitmap(info: ptr stbtt_fontinfo, scale_x: cfloat, scale_y: cfloat, codepoint: cint, width, height, xoff, yoff: ptr cint): cstring {.importc, nodecl.}
-proc stbtt_GetCodepointBitmapBox(info: ptr stbtt_fontinfo, codepoint: cint, scale_x, scale_y: cfloat, ix0, iy0, ix1, iy1: ptr cint) {.importc, nodecl.}
+# proc stbtt_GetCodepointBitmapBox(info: ptr stbtt_fontinfo, codepoint: cint, scale_x, scale_y: cfloat, ix0, iy0, ix1, iy1: ptr cint) {.importc, nodecl.}
 
 proc stbtt_GetCodepointHMetrics(info: ptr stbtt_fontinfo, codepoint: cint, advance, leftBearing: ptr cint) {.importc, nodecl.}
 proc stbtt_GetCodepointKernAdvance(info: ptr stbtt_fontinfo, ch1, ch2: cint): cint {.importc, nodecl.}
 proc stbtt_FindGlyphIndex(info: ptr stbtt_fontinfo, codepoint: cint): cint {.importc, nodecl.}
+
+proc stbtt_GetFontVMetrics(info: ptr stbtt_fontinfo, ascent, descent, lineGap: ptr cint) {.importc, nodecl.}
 
 proc free(p: pointer) {.importc.}
 
@@ -43,13 +40,16 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
   result.name = name
   result.fontscale = float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels)))
 
+  var ascent, descent, lineGap: cint
+  stbtt_GetFontVMetrics(addr fontinfo, addr ascent, addr descent, addr lineGap)
+  result.lineAdvance = float32(ascent - descent + lineGap) * result.fontscale
+
   # ensure all codepoints are available in the font
   for codePoint in codePoints:
     if stbtt_FindGlyphIndex(addr fontinfo, cint(codePoint)) == 0:
       warn &"Loading font {name}: Codepoint '{codePoint}' ({cint(codePoint)}) has no glyph"
 
   var
-    bitmaps: Table[Rune, (cstring, cint, cint)]
     topOffsets: Table[Rune, int]
     images: seq[Image[GrayPixel]]
   let empty_image = newImage[GrayPixel](1, 1, [0'u8])

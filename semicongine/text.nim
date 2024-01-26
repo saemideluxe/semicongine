@@ -25,7 +25,6 @@ type
     color*: Vec4f
 
 const
-  TRANSFORM_ATTRIB = "transform"
   POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
   TEXT_MATERIAL_TYPE* = MaterialType(
@@ -52,44 +51,52 @@ proc updateMesh(textbox: var Text) =
   # pre-calculate text-width
   var width = 0'f32
   var maxWidth = 0'f32
-  var height = 0 # todo: finish implementation to handle newline, start here
-  const newline = ['\n'].toRunes()[0]
+  var height = 0'f32 # todo: finish implementation to handle newline, start here
+  const newline = Rune('\n')
   for i in 0 ..< min(textbox.text.len, textbox.maxLen):
     if textbox.text[i] == newline:
       maxWidth = max(width, maxWidth)
       width = 0'f32
-    width += textbox.font.glyphs[textbox.text[i]].advance
-    if i < textbox.text.len - 1:
-      width += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
+      height += textbox.font.lineAdvance
+    else:
+      width += textbox.font.glyphs[textbox.text[i]].advance
+      if i < textbox.text.len - 1:
+        width += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
   maxWidth = max(width, maxWidth)
 
   let centerX = maxWidth / 2
-  let centerY = textbox.font.maxHeight / 2
+  let centerY = height / 2
 
   var offsetX = 0'f32
+  var offsetY = 0'f32
+
   for i in 0 ..< textbox.maxLen:
     let vertexOffset = i * 4
     if i < textbox.text.len:
-      let
-        glyph = textbox.font.glyphs[textbox.text[i]]
-        left = offsetX + glyph.leftOffset
-        right = offsetX + glyph.leftOffset + glyph.dimension.x
-        top = glyph.topOffset
-        bottom = glyph.topOffset + glyph.dimension.y
+      if textbox.text[i] == Rune('\n'):
+        offsetX = 0
+        offsetY += textbox.font.lineAdvance
+      else:
+        let
+          glyph = textbox.font.glyphs[textbox.text[i]]
+          left = offsetX + glyph.leftOffset
+          right = offsetX + glyph.leftOffset + glyph.dimension.x
+          top = offsetY + glyph.topOffset
+          bottom = offsetY + glyph.topOffset + glyph.dimension.y
 
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - centerX, bottom + centerY)
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - centerX, top + centerY)
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - centerX, top + centerY)
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - centerX, bottom + centerY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - centerX, bottom - centerY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - centerX, top - centerY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - centerX, top - centerY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - centerX, bottom - centerY)
 
-      textbox.mesh[UV_ATTRIB, vertexOffset + 0] = glyph.uvs[0]
-      textbox.mesh[UV_ATTRIB, vertexOffset + 1] = glyph.uvs[1]
-      textbox.mesh[UV_ATTRIB, vertexOffset + 2] = glyph.uvs[2]
-      textbox.mesh[UV_ATTRIB, vertexOffset + 3] = glyph.uvs[3]
+        textbox.mesh[UV_ATTRIB, vertexOffset + 0] = glyph.uvs[0]
+        textbox.mesh[UV_ATTRIB, vertexOffset + 1] = glyph.uvs[1]
+        textbox.mesh[UV_ATTRIB, vertexOffset + 2] = glyph.uvs[2]
+        textbox.mesh[UV_ATTRIB, vertexOffset + 3] = glyph.uvs[3]
 
-      offsetX += glyph.advance
-      if i < textbox.text.len - 1:
-        offsetX += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
+        offsetX += glyph.advance
+        if i < textbox.text.len - 1:
+          offsetX += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
     else:
       textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
       textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()

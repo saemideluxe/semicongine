@@ -6,17 +6,17 @@ import ./imagetypes
 import ./vector
 
 var FONTSAMPLER_SOFT* = Sampler(
-    magnification: VK_FILTER_LINEAR,
-    minification: VK_FILTER_LINEAR,
-    wrapModeS: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-    wrapModeT: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-  )
+  magnification: VK_FILTER_LINEAR,
+  minification: VK_FILTER_LINEAR,
+  wrapModeS: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+  wrapModeT: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+)
 var FONTSAMPLER_HARD* = Sampler(
-    magnification: VK_FILTER_NEAREST,
-    minification: VK_FILTER_NEAREST,
-    wrapModeS: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-    wrapModeT: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-  )
+  magnification: VK_FILTER_NEAREST,
+  minification: VK_FILTER_NEAREST,
+  wrapModeS: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+  wrapModeT: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+)
 
 
 type
@@ -33,3 +33,4 @@ type
     maxHeight*: int
     kerning*: Table[(Rune, Rune), float32]
     fontscale*: float32
+    lineAdvance*: float32
