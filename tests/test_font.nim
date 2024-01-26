@@ -27,8 +27,10 @@ proc main() =
           textbox.text = textbox.text & ($c).toRunes
         else:
           textbox.text = textbox.text & ($c).toRunes[0].toLower()
+    if engine.keyWasPressed(Enter):
+        textbox.text = textbox.text & Rune('\n')
     if engine.keyWasPressed(Space):
-        textbox.text = textbox.text & " ".toRunes[0]
+        textbox.text = textbox.text & Rune(' ')
     if engine.keyWasPressed(Backspace) and textbox.text.len > 0:
           textbox.text = textbox.text[0 ..< ^1]
     engine.renderScene(scene)

@@ -21,7 +21,6 @@ import ./scene
 import ./mesh
 import ./material
 
-const TRANSFORM_ATTRIBUTE = "transform"
 const MATERIALINDEX_ATTRIBUTE = "materialIndex"
 const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
 
@@ -94,7 +93,7 @@ func materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, sh
 
 func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, shaderPipeline: ShaderPipeline): (bool, string) =
   for input in shaderPipeline.inputs:
-    if input.name in [TRANSFORM_ATTRIBUTE, MATERIALINDEX_ATTRIBUTE]: # will be populated automatically
+    if input.name in [TRANSFORM_ATTRIB, MATERIALINDEX_ATTRIBUTE]: # will be populated automatically
       assert input.perInstance == true, &"Currently the {input.name} attribute must be a per instance attribute"
       continue
     if not (input.name in mesh[].attributes):
@@ -148,8 +147,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   # automatically populate material and tranform attributes
   for mesh in scene.meshes:
-    if not (TRANSFORM_ATTRIBUTE in mesh[].attributes):
-      mesh[].initInstanceAttribute(TRANSFORM_ATTRIBUTE, Unit4)
+    if not (TRANSFORM_ATTRIB in mesh[].attributes):
+      mesh[].initInstanceAttribute(TRANSFORM_ATTRIB, Unit4)
     if not (MATERIALINDEX_ATTRIBUTE in mesh[].attributes):
       mesh[].initInstanceAttribute(MATERIALINDEX_ATTRIBUTE, uint16(scenedata.materials[mesh.material.theType].find(mesh.material)))
 
@@ -332,8 +331,8 @@ proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
   assert scene in renderer.scenedata
 
   for (drawable, mesh) in renderer.scenedata[scene].drawables.mitems:
-    if mesh[].attributes.contains(TRANSFORM_ATTRIBUTE):
-      mesh[].updateInstanceTransforms(TRANSFORM_ATTRIBUTE)
+    if mesh[].attributes.contains(TRANSFORM_ATTRIB):
+      mesh[].updateInstanceTransforms(TRANSFORM_ATTRIB)
     let attrs = (if forceAll: mesh[].attributes else: mesh[].dirtyAttributes)
     for attribute in attrs:
       renderer.refreshMeshAttributeData(scene, drawable, mesh, attribute)
