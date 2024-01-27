@@ -33,17 +33,17 @@ const
     attributes: {"fontAtlas": TextureType, "color": Vec4F32}.toTable,
   )
   TEXT_SHADER* = createShaderConfiguration(
-    inputs=[
-      attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint=PreferFastWrite, perInstance=true),
-      attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint=PreferFastWrite),
-      attr[Vec2f](UV_ATTRIB, memoryPerformanceHint=PreferFastWrite),
+    inputs = [
+      attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
+      attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint = PreferFastWrite),
+      attr[Vec2f](UV_ATTRIB, memoryPerformanceHint = PreferFastWrite),
     ],
-    intermediates=[attr[Vec2f]("uvFrag")],
-    outputs=[attr[Vec4f]("color")],
-    uniforms=[attr[Vec4f]("color")],
-    samplers=[attr[Texture]("fontAtlas")],
-    vertexCode= &"""gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB}; uvFrag = {UV_ATTRIB};""",
-    fragmentCode= &"""color = vec4(Uniforms.color.rgb, Uniforms.color.a * texture(fontAtlas, uvFrag).r);"""
+    intermediates = [attr[Vec2f]("uvFrag")],
+    outputs = [attr[Vec4f]("color")],
+    uniforms = [attr[Vec4f]("color")],
+    samplers = [attr[Texture]("fontAtlas")],
+    vertexCode = &"""gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB}; uvFrag = {UV_ATTRIB};""",
+    fragmentCode = &"""color = vec4(Uniforms.color.rgb, Uniforms.color.a * texture(fontAtlas, uvFrag).r);"""
   )
 
 proc updateMesh(textbox: var Text) =
@@ -64,8 +64,9 @@ proc updateMesh(textbox: var Text) =
         width += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
   maxWidth = max(width, maxWidth)
 
-  let centerX = maxWidth / 2
-  let centerY = height / 2
+  let anchorX = maxWidth / 2
+  # let anchorY = height / 2 # use this for vertical centering
+  let anchorY = 0'f32
 
   var offsetX = 0'f32
   var offsetY = 0'f32
@@ -84,10 +85,10 @@ proc updateMesh(textbox: var Text) =
           top = offsetY + glyph.topOffset
           bottom = offsetY + glyph.topOffset + glyph.dimension.y
 
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - centerX, bottom - centerY)
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - centerX, top - centerY)
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - centerX, top - centerY)
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - centerX, bottom - centerY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - anchorX, bottom - anchorY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - anchorX, top - anchorY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - anchorX, top - anchorY)
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - anchorX, bottom - anchorY)
 
         textbox.mesh[UV_ATTRIB, vertexOffset + 0] = glyph.uvs[0]
         textbox.mesh[UV_ATTRIB, vertexOffset + 1] = glyph.uvs[1]
@@ -108,12 +109,15 @@ func text*(textbox: Text): seq[Rune] =
   textbox.text
 
 proc `text=`*(textbox: var Text, text: seq[Rune]) =
-  textbox.text = text
-  textbox.updateMesh()
+  let newText = text[0 ..< min(text.len, textbox.maxLen)]
+  if textbox.text != newText:
+    textbox.text = newText
+    textbox.updateMesh()
+
 proc `text=`*(textbox: var Text, text: string) =
   `text=`(textbox, text.toRunes)
 
-proc initText*(maxLen: int, font: Font, text="".toRunes, color=newVec4f(0, 0, 0, 1)): Text =
+proc initText*(maxLen: int, font: Font, text = "".toRunes, color = newVec4f(0, 0, 0, 1)): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -131,12 +135,13 @@ proc initText*(maxLen: int, font: Font, text="".toRunes, color=newVec4f(0, 0, 0,
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
   result.mesh.material = initMaterialData(
-    theType=TEXT_MATERIAL_TYPE,
-    name=font.name & " text",
-    attributes={"fontAtlas": initDataList(@[font.fontAtlas]), "color": initDataList(@[color])},
+    theType = TEXT_MATERIAL_TYPE,
+    name = font.name & " text",
+    attributes = {"fontAtlas": initDataList(@[font.fontAtlas]),
+        "color": initDataList(@[color])},
   )
 
   result.updateMesh()
 
-proc initText*(maxLen: int, font: Font, text="", color=newVec4f(0, 0, 0, 1)): Text =
-  initText(maxLen=maxLen, font=font, text=text.toRunes, color=color)
+proc initText*(maxLen: int, font: Font, text = "", color = newVec4f(0, 0, 0, 1)): Text =
+  initText(maxLen = maxLen, font = font, text = text.toRunes, color = color)
