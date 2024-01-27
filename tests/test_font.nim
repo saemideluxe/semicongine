@@ -22,18 +22,19 @@ proc main() =
     if engine.windowWasResized():
       var winSize = engine.getWindow().size
       textbox.mesh.transform = scale(fontscale * (winSize[1] / winSize[0]), fontscale)
-    for c in [Key.A, Key.B, Key.C, Key.D, Key.E, Key.F, Key.G, Key.H, Key.I,
-        Key.J, Key.K, Key.L, Key.M, Key.N, Key.O, Key.P, Key.Q, Key.R, Key.S,
-        Key.T, Key.U, Key.V, Key.W, Key.X, Key.Y, Key.Z]:
-      if engine.keyWasPressed(c):
-        if engine.keyIsDown(ShiftL) or engine.keyIsDown(ShiftR):
-          textbox.text = textbox.text[0 ..< ^1] & ($c).toRunes & cursor
-        else:
-          textbox.text = textbox.text[0 ..< ^1] & ($c).toRunes[0].toLower() & cursor
-    if engine.keyWasPressed(Enter):
-      textbox.text = textbox.text[0 ..< ^1] & Rune('\n') & cursor
-    if engine.keyWasPressed(Space):
-      textbox.text = textbox.text[0 ..< ^1] & Rune(' ') & cursor
+    if textbox.text.len < textbox.maxLen - 1:
+      for c in [Key.A, Key.B, Key.C, Key.D, Key.E, Key.F, Key.G, Key.H, Key.I,
+          Key.J, Key.K, Key.L, Key.M, Key.N, Key.O, Key.P, Key.Q, Key.R, Key.S,
+          Key.T, Key.U, Key.V, Key.W, Key.X, Key.Y, Key.Z]:
+        if engine.keyWasPressed(c):
+          if engine.keyIsDown(ShiftL) or engine.keyIsDown(ShiftR):
+            textbox.text = textbox.text[0 ..< ^1] & ($c).toRunes & cursor
+          else:
+            textbox.text = textbox.text[0 ..< ^1] & ($c).toRunes[0].toLower() & cursor
+      if engine.keyWasPressed(Enter):
+        textbox.text = textbox.text[0 ..< ^1] & Rune('\n') & cursor
+      if engine.keyWasPressed(Space):
+        textbox.text = textbox.text[0 ..< ^1] & Rune(' ') & cursor
     if engine.keyWasPressed(Backspace) and textbox.text.len > 1:
       textbox.text = textbox.text[0 ..< ^2] & cursor
     engine.renderScene(scene)

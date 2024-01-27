@@ -1,4 +1,5 @@
 import std/tables
+# import std/sequtils
 import std/unicode
 import std/strformat
 
@@ -11,20 +12,26 @@ const SHADER_ATTRIB_PREFIX = "semicon_text_"
 var instanceCounter = 0
 
 type
-  TextAlignment = enum
+  HorizontalAlignment = enum
     Left
     Center
     Right
+  VerticalAlignment = enum
+    Top
+    Center
+    Bottom
   Text* = object
     maxLen*: int
     text: seq[Rune]
     dirty: bool
-    alignment*: TextAlignment = Center
+    horizontalAlignment*: HorizontalAlignment = Center
+    verticalAlignment*: VerticalAlignment = Center
     font*: Font
     mesh*: Mesh
     color*: Vec4f
 
 const
+  NEWLINE = Rune('\n')
   POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
   TEXT_MATERIAL_TYPE* = MaterialType(
@@ -50,33 +57,47 @@ proc updateMesh(textbox: var Text) =
 
   # pre-calculate text-width
   var width = 0'f32
-  var maxWidth = 0'f32
-  var height = 0'f32 # todo: finish implementation to handle newline, start here
-  const newline = Rune('\n')
+  var lineWidths: seq[float32]
   for i in 0 ..< min(textbox.text.len, textbox.maxLen):
-    if textbox.text[i] == newline:
-      maxWidth = max(width, maxWidth)
+    if textbox.text[i] == NEWLINE:
+      lineWidths.add width
       width = 0'f32
-      height += textbox.font.lineAdvance
     else:
       width += textbox.font.glyphs[textbox.text[i]].advance
       if i < textbox.text.len - 1:
         width += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
-  maxWidth = max(width, maxWidth)
+  lineWidths.add width
+  let
+    height = float32(lineWidths.len) * textbox.font.lineAdvance
 
-  let anchorX = maxWidth / 2
-  # let anchorY = height / 2 # use this for vertical centering
-  let anchorY = 0'f32
+  let anchorY = (case textbox.verticalAlignment
+    of Top: 0'f32
+    of Center: height / 2
+    of Bottom: height) - textbox.font.lineAdvance
 
-  var offsetX = 0'f32
-  var offsetY = 0'f32
-
+  var
+    offsetX = 0'f32
+    offsetY = 0'f32
+    lineIndex = 0
+    anchorX = case textbox.horizontalAlignment
+      of Left: 0'f32
+      of Center: lineWidths[lineIndex] / 2
+      of Right: lineWidths.max
   for i in 0 ..< textbox.maxLen:
     let vertexOffset = i * 4
     if i < textbox.text.len:
       if textbox.text[i] == Rune('\n'):
         offsetX = 0
         offsetY += textbox.font.lineAdvance
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
+        textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
+        inc lineIndex
+        anchorX = case textbox.horizontalAlignment
+          of Left: 0'f32
+          of Center: lineWidths[lineIndex] / 2
+          of Right: lineWidths.max
       else:
         let
           glyph = textbox.font.glyphs[textbox.text[i]]
@@ -116,6 +137,20 @@ proc `text=`*(textbox: var Text, text: seq[Rune]) =
 
 proc `text=`*(textbox: var Text, text: string) =
   `text=`(textbox, text.toRunes)
+
+proc horizontalAlignment*(textbox: Text): HorizontalAlignment =
+  textbox.horizontalAlignment
+proc verticalAlignment*(textbox: Text): VerticalAlignment =
+  textbox.verticalAlignment
+proc `horizontalAlignment=`*(textbox: var Text, value: HorizontalAlignment) =
+  if value != textbox.horizontalAlignment:
+    textbox.horizontalAlignment = value
+    textbox.updateMesh()
+proc `verticalAlignment=`*(textbox: var Text, value: VerticalAlignment) =
+  if value != textbox.verticalAlignment :
+    textbox.verticalAlignment = value
+    textbox.updateMesh()
+
 
 proc initText*(maxLen: int, font: Font, text = "".toRunes, color = newVec4f(0, 0, 0, 1)): Text =
   var
