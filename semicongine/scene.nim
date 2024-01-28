@@ -45,7 +45,7 @@ proc add*[T](scene: var Scene, obj: T) =
 
 proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add shader values"
-  scene.shaderGlobals[name] = initDataList(thetype=getDataType[T]())
+  scene.shaderGlobals[name] = initDataList(thetype = getDataType[T]())
   scene.shaderGlobals[name] = @[data]
   scene.dirtyShaderGlobals.add name
 

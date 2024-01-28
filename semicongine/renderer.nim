@@ -21,7 +21,6 @@ import ./scene
 import ./mesh
 import ./material
 
-const MATERIALINDEX_ATTRIBUTE = "materialIndex"
 const VERTEX_ATTRIB_ALIGNMENT = 4 # used for buffer alignment
 
 type
@@ -29,7 +28,7 @@ type
     drawables*: seq[tuple[drawable: Drawable, mesh: Mesh]]
     vertexBuffers*: Table[MemoryPerformanceHint, Buffer]
     indexBuffer*: Buffer
-    uniformBuffers*: Table[VkPipeline, seq[Buffer]] # one per frame-in-flight
+    uniformBuffers*: Table[VkPipeline, seq[Buffer]]                 # one per frame-in-flight
     textures*: Table[VkPipeline, Table[string, seq[VulkanTexture]]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
     vertexBufferOffsets*: Table[(Mesh, string), int]
@@ -44,11 +43,11 @@ type
     scenedata: Table[Scene, SceneData]
     emptyTexture: VulkanTexture
 
-proc initRenderer*(device: Device, shaders: openArray[(MaterialType, ShaderConfiguration)], clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling=true): Renderer =
+proc initRenderer*(device: Device, shaders: openArray[(MaterialType, ShaderConfiguration)], clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling = true): Renderer =
   assert device.vk.valid
-  
+
   result.device = device
-  result.renderPass = device.simpleForwardRenderPass(shaders, clearColor=clearColor, backFaceCulling=backFaceCulling)
+  result.renderPass = device.simpleForwardRenderPass(shaders, clearColor = clearColor, backFaceCulling = backFaceCulling)
   result.surfaceFormat = device.physicalDevice.getSurfaceFormats().filterSurfaceFormat()
   # use last renderpass as output for swapchain
   let swapchain = device.createSwapchain(result.renderPass.vk, result.surfaceFormat, device.firstGraphicsQueue().get().family)
@@ -130,7 +129,7 @@ func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
     var matTypes: Table[string, MaterialType]
     for mesh in scene.meshes:
       if not matTypes.contains(mesh.material.name):
-          matTypes[mesh.material.name] = mesh.material.theType
+        matTypes[mesh.material.name] = mesh.material.theType
     assert false, &"Scene '{scene.name}' has been added but materials are not compatible with any registered shader: Materials in scene: {matTypes}, registered shader-materialtypes: {materialTypes}"
 
 proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
@@ -171,10 +170,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       indicesBufferSize += mesh[].indexSize
   if indicesBufferSize > 0:
     scenedata.indexBuffer = renderer.device.createBuffer(
-      size=indicesBufferSize,
-      usage=[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
-      requireMappable=false,
-      preferVRAM=true,
+      size = indicesBufferSize,
+      usage = [VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
+      requireMappable = false,
+      preferVRAM = true,
     )
 
   # calculcate offsets for attributes in vertex buffers
@@ -196,10 +195,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   for memoryPerformanceHint, bufferSize in perLocationSizes.pairs:
     if bufferSize > 0:
       scenedata.vertexBuffers[memoryPerformanceHint] = renderer.device.createBuffer(
-        size=bufferSize,
-        usage=[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
-        requireMappable=memoryPerformanceHint==PreferFastWrite,
-        preferVRAM=true,
+        size = bufferSize,
+        usage = [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
+        requireMappable = memoryPerformanceHint == PreferFastWrite,
+        preferVRAM = true,
       )
 
   # calculate offset of each attribute for all meshes
@@ -276,7 +275,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
                 scenedata.textures[shaderPipeline.vk][texture.name].add uploadedTextures[value[0]]
             assert foundTexture, &"No texture found in shaderGlobals or materials for '{texture.name}'"
           let nTextures = scenedata.textures[shaderPipeline.vk][texture.name].len
-          assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount == nTextures, &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
+          assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount >= nTextures, &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
+          if texture.arrayCount < nTextures:
+            warn &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
 
         # gather uniform sizes
         var uniformBufferSize = 0
@@ -286,12 +287,12 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
           scenedata.uniformBuffers[shaderPipeline.vk] = newSeq[Buffer]()
           for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
             scenedata.uniformBuffers[shaderPipeline.vk].add renderer.device.createBuffer(
-              size=uniformBufferSize,
-              usage=[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
-              requireMappable=true,
-              preferVRAM=true,
+              size = uniformBufferSize,
+              usage = [VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
+              requireMappable = true,
+              preferVRAM = true,
             )
-            
+
         # setup descriptors
         var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, renderer.swapchain.inFlightFrames)]
         if scenedata.textures[shaderPipeline.vk].len > 0:
@@ -299,15 +300,15 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
           for textures in scenedata.textures[shaderPipeline.vk].values:
             textureCount += textures.len
           poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, renderer.swapchain.inFlightFrames * textureCount * 2)
-      
+
         scenedata.descriptorPools[shaderPipeline.vk] = renderer.device.createDescriptorSetPool(poolsizes)
-    
+
         scenedata.descriptorSets[shaderPipeline.vk] = shaderPipeline.setupDescriptors(
           scenedata.descriptorPools[shaderPipeline.vk],
           scenedata.uniformBuffers.getOrDefault(shaderPipeline.vk, @[]),
           scenedata.textures[shaderPipeline.vk],
-          inFlightFrames=renderer.swapchain.inFlightFrames,
-          emptyTexture=renderer.emptyTexture,
+          inFlightFrames = renderer.swapchain.inFlightFrames,
+          emptyTexture = renderer.emptyTexture,
         )
         for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
           scenedata.descriptorSets[shaderPipeline.vk][frame_i].writeDescriptorSet()
@@ -327,7 +328,7 @@ proc refreshMeshAttributeData(renderer: Renderer, scene: var Scene, drawable: Dr
     renderer.scenedata[scene].vertexBufferOffsets[(mesh, attribute)]
   )
 
-proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
+proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll = false) =
   assert scene in renderer.scenedata
 
   for (drawable, mesh) in renderer.scenedata[scene].drawables.mitems:
@@ -339,7 +340,7 @@ proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
       debug &"Update mesh attribute {attribute}"
     mesh[].clearDirtyAttributes()
 
-proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false) =
+proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = false) =
   assert scene in renderer.scenedata
 
   let dirty = scene.dirtyShaderGlobals
@@ -383,8 +384,12 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll=false
                   value.appendValues(material[uniform.name])
                   foundValue = true
               assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
-            assert (uniform.arrayCount == 0 and value.len == 1) or value.len == uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
-            assert value.size == uniform.size, "During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
+            assert (uniform.arrayCount == 0 and value.len == 1) or value.len <= uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
+            if value.len <= uniform.arrayCount:
+              warn &"Uniform '{uniform.name}' found has short length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
+            assert value.size <= uniform.size, &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
+            if value.size <= uniform.size:
+              warn &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
             debug &"  update uniform {uniform.name} with value: {value}"
             # TODO: technically we would only need to update the uniform buffer of the current
             # frameInFlight (I think), but we don't track for which frame the shaderglobals are no longer dirty
@@ -425,7 +430,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
         commandBuffer.vkCmdBindPipeline(renderer.renderPass.subpasses[i].pipelineBindPoint, shaderPipeline.vk)
         commandBuffer.vkCmdBindDescriptorSets(renderer.renderPass.subpasses[i].pipelineBindPoint, shaderPipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[shaderPipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
         for (drawable, mesh) in renderer.scenedata[scene].drawables.filterIt(it[1].visible and it[1].material.theType == materialType):
-          drawable.draw(commandBuffer, vertexBuffers=renderer.scenedata[scene].vertexBuffers, indexBuffer=renderer.scenedata[scene].indexBuffer, shaderPipeline.vk)
+          drawable.draw(commandBuffer, vertexBuffers = renderer.scenedata[scene].vertexBuffers, indexBuffer = renderer.scenedata[scene].indexBuffer, shaderPipeline.vk)
 
     if i < renderer.renderPass.subpasses.len - 1:
       commandBuffer.vkCmdNextSubpass(VK_SUBPASS_CONTENTS_INLINE)

@@ -8,7 +8,9 @@ import ./mesh
 import ./material
 import ./vulkan/shader
 
-const SHADER_ATTRIB_PREFIX = "semicon_text_"
+const
+  SHADER_ATTRIB_PREFIX = "semicon_text_"
+  MAX_TEXT_MATERIALS = 10
 var instanceCounter = 0
 
 type
@@ -50,13 +52,21 @@ const
       attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
       attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint = PreferFastWrite),
       attr[Vec2f](UV_ATTRIB, memoryPerformanceHint = PreferFastWrite),
+      attr[uint16](MATERIALINDEX_ATTRIBUTE, memoryPerformanceHint = PreferFastRead, perInstance = true),
     ],
-    intermediates = [attr[Vec2f]("uvFrag")],
+    intermediates = [
+      attr[Vec2f]("uvFrag"),
+      attr[uint16]("materialIndexOut", noInterpolation = true)
+    ],
     outputs = [attr[Vec4f]("color")],
-    uniforms = [attr[Vec4f]("color")],
-    samplers = [attr[Texture]("fontAtlas")],
-    vertexCode = &"""gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB}; uvFrag = {UV_ATTRIB};""",
-    fragmentCode = &"""color = vec4(Uniforms.color.rgb, Uniforms.color.a * texture(fontAtlas, uvFrag).r);"""
+    uniforms = [attr[Vec4f]("color", arrayCount = MAX_TEXT_MATERIALS)],
+    samplers = [attr[Texture]("fontAtlas", arrayCount = MAX_TEXT_MATERIALS)],
+    vertexCode = &"""
+  gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB};
+  uvFrag = {UV_ATTRIB};
+  materialIndexOut = {MATERIALINDEX_ATTRIBUTE};
+  """,
+    fragmentCode = &"""color = vec4(Uniforms.color[materialIndexOut].rgb, Uniforms.color[materialIndexOut].a * texture(fontAtlas[materialIndexOut], uvFrag).r);"""
   )
 
 func `$`*(text: Text): string =
