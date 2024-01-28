@@ -1,7 +1,6 @@
 import std/tables
 import std/strformat
 import std/strutils
-import std/hashes
 
 
 import ./core
@@ -12,7 +11,7 @@ type
     vertexAttributes*: Table[string, DataType]
     instanceAttributes*: Table[string, DataType]
     attributes*: Table[string, DataType]
-  MaterialData* = ref object
+  MaterialData* = object
     theType*: MaterialType
     name*: string
     attributes: Table[string, DataList]
@@ -23,18 +22,6 @@ proc hasMatchingAttribute*(materialType: MaterialType, attr: ShaderAttribute): b
 
 proc hasMatchingAttribute*(material: MaterialData, attr: ShaderAttribute): bool =
   return material.attributes.contains(attr.name) and material.attributes[attr.name].theType == attr.theType
-
-proc hash*(materialType: MaterialType): Hash =
-  return hash(materialType.name)
-
-proc hash*(materialData: MaterialData): Hash =
-  return hash(materialData.name)
-
-proc `==`*(a, b: MaterialType): bool =
-  return a.name == b.name
-
-proc `==`*(a, b: MaterialData): bool =
-  return a.name == b.name
 
 template `[]`*(material: MaterialData, attributeName: string): DataList =
   material.attributes[attributeName]
@@ -139,5 +126,5 @@ proc initMaterialData*(
   var theName = name
   if theName == "":
     theName = &"material instance of '{theType}'"
-  initMaterialData(theType=theType, name=theName, attributes=attributes.toTable)
+  initMaterialData(theType = theType, name = theName, attributes = attributes.toTable)
 

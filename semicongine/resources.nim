@@ -45,12 +45,12 @@ when thebundletype == Dir:
     newFileStream(realpath, fmRead)
 
   proc modList_intern(): seq[string] =
-    for kind, file in walkDir(resourceRoot(), relative=true):
+    for kind, file in walkDir(resourceRoot(), relative = true):
       if kind == pcDir:
         result.add file
 
   iterator walkResources_intern(): string =
-    for file in walkDirRec(modRoot(), relative=true):
+    for file in walkDirRec(modRoot(), relative = true):
       yield file
 
 elif thebundletype == Zip:
@@ -71,7 +71,7 @@ elif thebundletype == Zip:
     archive.close()
 
   proc modList_intern(): seq[string] =
-    for kind, file in walkDir(resourceRoot(), relative=true):
+    for kind, file in walkDir(resourceRoot(), relative = true):
       if kind == pcFile and file.endsWith(".zip"):
         result.add file[0 ..< ^4]
 
@@ -95,7 +95,7 @@ elif thebundletype == Exe:
       if kind == pcDir:
         let modname = moddir.splitPath.tail
         result[modname] = Table[string, string]()
-        for resourcefile in walkDirRec(moddir, relative=true):
+        for resourcefile in walkDirRec(moddir, relative = true):
         # TODO: add Lempel–Ziv–Welch compression or something similar simple
           result[modname][resourcefile] = staticRead(joinPath(moddir, resourcefile))
   const bundledResources = loadResources()
@@ -115,7 +115,7 @@ elif thebundletype == Exe:
 proc loadResource*(path: string): Stream =
   loadResource_intern(path)
 
-proc loadImage*(path: string): Image =
+proc loadImage*[T](path: string): Image[RGBAPixel] =
   if path.splitFile().ext.toLowerAscii == ".bmp":
     loadResource_intern(path).readBMP()
   elif path.splitFile().ext.toLowerAscii == ".png":
@@ -133,10 +133,10 @@ proc loadAudio*(path: string): Sound =
 
 proc loadFont*(
   path: string,
-  name="",
-  lineHeightPixels=80'f32,
-  additional_codepoints: openArray[Rune]=[],
-  charset=ASCII_CHARSET
+  name = "",
+  lineHeightPixels = 80'f32,
+  additional_codepoints: openArray[Rune] = [],
+  charset = ASCII_CHARSET
 ): Font =
   var thename = name
   if thename == "":
@@ -152,7 +152,7 @@ proc loadFirstMesh*(path: string, defaultMaterial: MaterialType): Mesh =
 proc modList*(): seq[string] =
   modList_intern()
 
-iterator walkResources*(dir=""): string =
+iterator walkResources*(dir = ""): string =
   for i in walkResources_intern():
     if i.startsWith(dir):
       yield i

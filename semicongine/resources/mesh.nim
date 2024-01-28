@@ -92,7 +92,7 @@ proc getGPUType(accessor: JsonNode, attribute: string): DataType =
     of Float32: return Vec4F32
     else: raise newException(Exception, &"Unsupported data type for attribute '{attribute}': {componentType} {theType}")
 
-proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferOffset=0): seq[uint8] =
+proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferOffset = 0): seq[uint8] =
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
 
   result = newSeq[uint8](bufferView["byteLength"].getInt())
@@ -104,7 +104,7 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
   copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
-  result = initDataList(thetype=accessor.getGPUType("??"))
+  result = initDataList(thetype = accessor.getGPUType("??"))
   result.setLen(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
@@ -169,7 +169,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
 
   # color
   if defaultMaterial.attributes.contains("color"):
-    attributes["color"] = initDataList(thetype=Vec4F32)
+    attributes["color"] = initDataList(thetype = Vec4F32)
     if pbr.hasKey(GLTF_MATERIAL_MAPPING["color"]):
       attributes["color"] = @[newVec4f(
         pbr[GLTF_MATERIAL_MAPPING["color"]][0].getFloat(),
@@ -183,7 +183,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
     # pbr material values
     for factor in ["metallic", "roughness"]:
       if defaultMaterial.attributes.contains(factor):
-        attributes[factor] = initDataList(thetype=Float32)
+        attributes[factor] = initDataList(thetype = Float32)
         if pbr.hasKey(GLTF_MATERIAL_MAPPING[factor]):
           attributes[factor] = @[float32(pbr[GLTF_MATERIAL_MAPPING[factor]].getFloat())]
         else:
@@ -192,7 +192,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
   # pbr material textures
   for texture in ["baseTexture", "metallicRoughnessTexture"]:
     if defaultMaterial.attributes.contains(texture):
-      attributes[texture] = initDataList(thetype=TextureType)
+      attributes[texture] = initDataList(thetype = TextureType)
       # attributes[texture & "Index"] = initDataList(thetype=UInt8)
       if pbr.hasKey(GLTF_MATERIAL_MAPPING[texture]):
         attributes[texture] = @[loadTexture(root, pbr[GLTF_MATERIAL_MAPPING[texture]]["index"].getInt(), mainBuffer)]
@@ -202,7 +202,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
   # generic material textures
   for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
     if defaultMaterial.attributes.contains(texture):
-      attributes[texture] = initDataList(thetype=TextureType)
+      attributes[texture] = initDataList(thetype = TextureType)
       # attributes[texture & "Index"] = initDataList(thetype=UInt8)
       if materialNode.hasKey(GLTF_MATERIAL_MAPPING[texture]):
         attributes[texture] = @[loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)]
@@ -211,7 +211,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
 
   # emissiv color
   if defaultMaterial.attributes.contains("emissiveColor"):
-    attributes["emissiveColor"] = initDataList(thetype=Vec3F32)
+    attributes["emissiveColor"] = initDataList(thetype = Vec3F32)
     if materialNode.hasKey(GLTF_MATERIAL_MAPPING["emissiveColor"]):
       attributes["emissiveColor"] = @[newVec3f(
         materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][0].getFloat(),
@@ -221,9 +221,9 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
     else:
       attributes["emissiveColor"] = @[newVec3f(1'f32, 1'f32, 1'f32)]
 
-  result = initMaterialData(theType=defaultMaterial, name=materialNode["name"].getStr(), attributes=attributes)
+  result = initMaterialData(theType = defaultMaterial, name = materialNode["name"].getStr(), attributes = attributes)
 
-proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, defaultMaterial: MaterialType, mainBuffer: seq[uint8]): Mesh =
+proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, materials: seq[MaterialData], mainBuffer: seq[uint8]): Mesh =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
@@ -253,7 +253,7 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, default
 
   if primitiveNode.hasKey("material"):
     let materialId = primitiveNode["material"].getInt()
-    result[].material = loadMaterial(root, root["materials"][materialId], defaultMaterial, mainBuffer)
+    result[].material = materials[materialId]
   else:
     result[].material = EMPTY_MATERIAL.initMaterialData()
 
@@ -281,13 +281,13 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, default
   # TODO: getting from gltf to vulkan system is still messed up somehow, see other TODO
   transform[Vec3f](result[], "position", scale(1, -1, 1))
 
-proc loadNode(root: JsonNode, node: JsonNode, defaultMaterial: MaterialType, mainBuffer: var seq[uint8]): MeshTree =
+proc loadNode(root: JsonNode, node: JsonNode, materials: seq[MaterialData], mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
   # mesh
   if node.hasKey("mesh"):
     let mesh = root["meshes"][node["mesh"].getInt()]
     for primitive in mesh["primitives"]:
-      result.children.add MeshTree(mesh: loadMesh(mesh["name"].getStr(), root, primitive, defaultMaterial, mainBuffer))
+      result.children.add MeshTree(mesh: loadMesh(mesh["name"].getStr(), root, primitive, materials, mainBuffer))
 
   # transformation
   if node.hasKey("matrix"):
@@ -318,18 +318,18 @@ proc loadNode(root: JsonNode, node: JsonNode, defaultMaterial: MaterialType, mai
         float32(node["scale"][1].getFloat()),
         float32(node["scale"][2].getFloat())
       )
-    result.transform =  t * r * s
-  result.transform =  scale(1, -1, 1) * result.transform
+    result.transform = t * r * s
+  result.transform = scale(1, -1, 1) * result.transform
 
   # children
   if node.hasKey("children"):
     for childNode in node["children"]:
-      result.children.add loadNode(root, root["nodes"][childNode.getInt()], defaultMaterial, mainBuffer)
+      result.children.add loadNode(root, root["nodes"][childNode.getInt()], materials, mainBuffer)
 
-proc loadMeshTree(root: JsonNode, scenenode: JsonNode, defaultMaterial: MaterialType, mainBuffer: var seq[uint8]): MeshTree =
+proc loadMeshTree(root: JsonNode, scenenode: JsonNode, materials: seq[MaterialData], mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
   for nodeId in scenenode["nodes"]:
-    result.children.add loadNode(root, root["nodes"][nodeId.getInt()], defaultMaterial, mainBuffer)
+    result.children.add loadNode(root, root["nodes"][nodeId.getInt()], materials, mainBuffer)
   # TODO: getting from gltf to vulkan system is still messed up somehow (i.e. not consistent for different files), see other TODO
   # result.transform = scale(1, -1, 1)
   result.updateTransforms()
@@ -364,5 +364,9 @@ proc readglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
 
   debug "Loading mesh: ", data.structuredContent.pretty
 
+  var materials: seq[MaterialData]
+  for materialnode in data.structuredContent["materials"]:
+    materials.add data.structuredContent.loadMaterial(materialnode, defaultMaterial, data.binaryBufferData)
+
   for scenedata in data.structuredContent["scenes"]:
-    result.add data.structuredContent.loadMeshTree(scenedata, defaultMaterial, data.binaryBufferData)
+    result.add data.structuredContent.loadMeshTree(scenedata, materials, data.binaryBufferData)
