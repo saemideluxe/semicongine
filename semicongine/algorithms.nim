@@ -1,5 +1,4 @@
 import std/algorithm
-import std/sequtils
 
 import ./core
 
@@ -18,19 +17,6 @@ func overlap(a1, a2, b1, b2: int): bool =
 
 # FYI: also serves as "overlaps"
 func advanceIfOverlap(fix, newRect: Rect): (bool, int) =
-  let
-    p1 = [
-      (fix.x,             fix.y),
-      (fix.x + fix.w - 1, fix.y),
-      (fix.x,             fix.y + fix.h - 1),
-      (fix.x + fix.w - 1, fix.y + fix.h - 1)
-    ]
-    p2 = [
-      (newRect.x,                 newRect.y),
-      (newRect.x + newRect.w - 1, newRect.y),
-      (newRect.x,                 newRect.y + newRect.h - 1),
-      (newRect.x + newRect.w - 1, newRect.y + newRect.h - 1)
-    ]
   let overlapping = overlap(fix.x, fix.x + fix.w - 1, newRect.x, newRect.x + newRect.w - 1) and
                     overlap(fix.y, fix.y + fix.h - 1, newRect.y, newRect.y + newRect.h - 1)
   if overlapping: (true, fix.x + fix.w) # next free x coordinate to the right
@@ -72,7 +58,7 @@ proc pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[
 
   for area in areasBySize:
     var pos = find_insertion_position(assignedAreas, area, maxDim)
-    while not pos[0]: # this should actually never loop more than once, but weird things happen ¯\_(ツ)_/¯ 
+    while not pos[0]: # this should actually never loop more than once, but weird things happen ¯\_(ツ)_/¯
       maxDim = maxDim * 2
       assert maxDim <= MAX_ATLAS_SIZE, &"Atlas gets bigger than {MAX_ATLAS_SIZE}, cannot pack images"
       pos = find_insertion_position(assignedAreas, area, maxDim)
@@ -89,7 +75,6 @@ proc pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[
   for rect in assignedAreas:
     for y in 0 ..< rect.h:
       for x in 0 ..< rect.w:
-        let v = images[rect.i][x, y]
         assert result.atlas[rect.x + x, rect.y + y] == 0, "Atlas texture packing encountered an overlap error"
         result.atlas[rect.x + x, rect.y + y] = images[rect.i][x, y]
         result.coords[rect.i] = (x: rect.x, y: rect.y)
