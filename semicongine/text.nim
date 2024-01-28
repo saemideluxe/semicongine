@@ -12,23 +12,29 @@ const SHADER_ATTRIB_PREFIX = "semicon_text_"
 var instanceCounter = 0
 
 type
-  HorizontalAlignment = enum
+  HorizontalAlignment* = enum
     Left
     Center
     Right
-  VerticalAlignment = enum
+  VerticalAlignment* = enum
     Top
     Center
     Bottom
   Text* = object
     maxLen*: int
-    text: seq[Rune]
-    dirty: bool
-    horizontalAlignment*: HorizontalAlignment = Center
-    verticalAlignment*: VerticalAlignment = Center
     font*: Font
-    mesh*: Mesh
     color*: Vec4f
+    text: seq[Rune]
+    # attributes:
+    position: Vec2f
+    horizontalAlignment: HorizontalAlignment = Center
+    verticalAlignment: VerticalAlignment = Center
+    scale: float32
+    aspect_ratio: float32
+    # management:
+    dirty: bool                 # is true if any of the attributes changed
+    lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
+    mesh: Mesh
 
 const
   NEWLINE = Rune('\n')
@@ -53,106 +59,131 @@ const
     fragmentCode = &"""color = vec4(Uniforms.color.rgb, Uniforms.color.a * texture(fontAtlas, uvFrag).r);"""
   )
 
-proc updateMesh(textbox: var Text) =
+func `$`*(text: Text): string =
+  "\"" & $text.text[0 ..< min(text.text.len, 16)] & "\""
 
+proc refresh*(text: var Text) =
+  if not text.dirty and text.text == text.lastRenderedText:
+    return
+
+  echo "Refresh ", text
   # pre-calculate text-width
   var width = 0'f32
   var lineWidths: seq[float32]
-  for i in 0 ..< min(textbox.text.len, textbox.maxLen):
-    if textbox.text[i] == NEWLINE:
+  for i in 0 ..< min(text.text.len, text.maxLen):
+    if text.text[i] == NEWLINE:
       lineWidths.add width
       width = 0'f32
     else:
-      width += textbox.font.glyphs[textbox.text[i]].advance
-      if i < textbox.text.len - 1:
-        width += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
+      width += text.font.glyphs[text.text[i]].advance
+      if i < text.text.len - 1:
+        width += text.font.kerning[(text.text[i], text.text[i + 1])]
   lineWidths.add width
   let
-    height = float32(lineWidths.len) * textbox.font.lineAdvance
+    height = float32(lineWidths.len) * text.font.lineAdvance
 
-  let anchorY = (case textbox.verticalAlignment
+  let anchorY = (case text.verticalAlignment
     of Top: 0'f32
     of Center: height / 2
-    of Bottom: height) - textbox.font.lineAdvance
+    of Bottom: height) - text.font.lineAdvance
 
   var
     offsetX = 0'f32
     offsetY = 0'f32
     lineIndex = 0
-    anchorX = case textbox.horizontalAlignment
+    anchorX = case text.horizontalAlignment
       of Left: 0'f32
       of Center: lineWidths[lineIndex] / 2
-      of Right: lineWidths.max
-  for i in 0 ..< textbox.maxLen:
+      of Right: lineWidths[lineIndex]
+  for i in 0 ..< text.maxLen:
     let vertexOffset = i * 4
-    if i < textbox.text.len:
-      if textbox.text[i] == Rune('\n'):
+    if i < text.text.len:
+      if text.text[i] == Rune('\n'):
         offsetX = 0
-        offsetY += textbox.font.lineAdvance
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
+        offsetY += text.font.lineAdvance
+        text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
+        text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
+        text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
+        text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
         inc lineIndex
-        anchorX = case textbox.horizontalAlignment
+        anchorX = case text.horizontalAlignment
           of Left: 0'f32
           of Center: lineWidths[lineIndex] / 2
-          of Right: lineWidths.max
+          of Right: lineWidths[lineIndex]
       else:
         let
-          glyph = textbox.font.glyphs[textbox.text[i]]
+          glyph = text.font.glyphs[text.text[i]]
           left = offsetX + glyph.leftOffset
           right = offsetX + glyph.leftOffset + glyph.dimension.x
           top = offsetY + glyph.topOffset
           bottom = offsetY + glyph.topOffset + glyph.dimension.y
 
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - anchorX, bottom - anchorY)
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - anchorX, top - anchorY)
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - anchorX, top - anchorY)
-        textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - anchorX, bottom - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - anchorX, bottom - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - anchorX, top - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - anchorX, top - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - anchorX, bottom - anchorY)
 
-        textbox.mesh[UV_ATTRIB, vertexOffset + 0] = glyph.uvs[0]
-        textbox.mesh[UV_ATTRIB, vertexOffset + 1] = glyph.uvs[1]
-        textbox.mesh[UV_ATTRIB, vertexOffset + 2] = glyph.uvs[2]
-        textbox.mesh[UV_ATTRIB, vertexOffset + 3] = glyph.uvs[3]
+        text.mesh[UV_ATTRIB, vertexOffset + 0] = glyph.uvs[0]
+        text.mesh[UV_ATTRIB, vertexOffset + 1] = glyph.uvs[1]
+        text.mesh[UV_ATTRIB, vertexOffset + 2] = glyph.uvs[2]
+        text.mesh[UV_ATTRIB, vertexOffset + 3] = glyph.uvs[3]
 
         offsetX += glyph.advance
-        if i < textbox.text.len - 1:
-          offsetX += textbox.font.kerning[(textbox.text[i], textbox.text[i + 1])]
+        if i < text.text.len - 1:
+          offsetX += text.font.kerning[(text.text[i], text.text[i + 1])]
     else:
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
-      textbox.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
+  text.mesh.transform = translate(text.position.x, text.position.y, 0) * scale(text.scale, text.scale * text.aspect_ratio)
+  text.lastRenderedText = text.text
+  text.dirty = false
 
+func text*(text: Text): seq[Rune] =
+  text.text
+proc `text=`*(text: var Text, newText: seq[Rune]) =
+  text.text = newText[0 ..< min(newText.len, text.maxLen)]
+proc `text=`*(text: var Text, newText: string) =
+  `text=`(text, newText.toRunes)
 
-func text*(textbox: Text): seq[Rune] =
-  textbox.text
+proc position*(text: Text): Vec2f =
+  text.position
+proc `position=`*(text: var Text, value: Vec2f) =
+  if value != text.position:
+    text.position = value
+    text.dirty = true
 
-proc `text=`*(textbox: var Text, text: seq[Rune]) =
-  let newText = text[0 ..< min(text.len, textbox.maxLen)]
-  if textbox.text != newText:
-    textbox.text = newText
-    textbox.updateMesh()
+proc horizontalAlignment*(text: Text): HorizontalAlignment =
+  text.horizontalAlignment
 
-proc `text=`*(textbox: var Text, text: string) =
-  `text=`(textbox, text.toRunes)
+proc `horizontalAlignment=`*(text: var Text, value: HorizontalAlignment) =
+  if value != text.horizontalAlignment:
+    text.horizontalAlignment = value
+    text.dirty = true
 
-proc horizontalAlignment*(textbox: Text): HorizontalAlignment =
-  textbox.horizontalAlignment
-proc verticalAlignment*(textbox: Text): VerticalAlignment =
-  textbox.verticalAlignment
-proc `horizontalAlignment=`*(textbox: var Text, value: HorizontalAlignment) =
-  if value != textbox.horizontalAlignment:
-    textbox.horizontalAlignment = value
-    textbox.updateMesh()
-proc `verticalAlignment=`*(textbox: var Text, value: VerticalAlignment) =
-  if value != textbox.verticalAlignment :
-    textbox.verticalAlignment = value
-    textbox.updateMesh()
+proc verticalAlignment*(text: Text): VerticalAlignment =
+  text.verticalAlignment
+proc `verticalAlignment=`*(text: var Text, value: VerticalAlignment) =
+  if value != text.verticalAlignment:
+    text.verticalAlignment = value
+    text.dirty = true
 
+proc scale*(text: Text): float32 =
+  text.scale
+proc `scale=`*(text: var Text, value: float32) =
+  if value != text.scale:
+    text.scale = value
+    text.dirty = true
 
-proc initText*(maxLen: int, font: Font, text = "".toRunes, color = newVec4f(0, 0, 0, 1)): Text =
+proc aspect_ratio*(text: Text): float32 =
+  text.aspect_ratio
+proc `aspect_ratio=`*(text: var Text, value: float32) =
+  if value != text.aspect_ratio:
+    text.aspect_ratio = value
+    text.dirty = true
+
+proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -164,19 +195,18 @@ proc initText*(maxLen: int, font: Font, text = "".toRunes, color = newVec4f(0, 0
       [uint16(offset + 2), uint16(offset + 3), uint16(offset + 0)],
     ]
 
-  result = Text(maxLen: maxLen, text: text, font: font, dirty: true)
-  result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"textbox-{instanceCounter}")
+  result = Text(maxLen: maxLen, text: text, font: font, dirty: true, scale: scale, position: position, aspect_ratio: 1, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment)
+  result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"text-{instanceCounter}")
   inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
   result.mesh.material = initMaterialData(
     theType = TEXT_MATERIAL_TYPE,
     name = font.name & " text",
-    attributes = {"fontAtlas": initDataList(@[font.fontAtlas]),
-        "color": initDataList(@[color])},
+    attributes = {"fontAtlas": initDataList(@[font.fontAtlas]), "color": initDataList(@[color])},
   )
 
-  result.updateMesh()
+  result.refresh()
 
-proc initText*(maxLen: int, font: Font, text = "", color = newVec4f(0, 0, 0, 1)): Text =
-  initText(maxLen = maxLen, font = font, text = text.toRunes, color = color)
+proc initText*(font: Font, text = "", maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center): Text =
+  initText(font = font, text = text.toRunes, maxLen = maxLen, color = color, scale = scale, position = position, horizontalAlignment = horizontalAlignment, verticalAlignment = verticalAlignment)
