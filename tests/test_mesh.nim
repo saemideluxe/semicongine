@@ -8,31 +8,31 @@ proc main() =
   var engine = initEngine("Test meshes")
   const
     shaderConfiguration = createShaderConfiguration(
-      inputs=[
-        attr[Vec3f]("position", memoryPerformanceHint=PreferFastRead),
-        attr[uint16]("materialIndex", memoryPerformanceHint=PreferFastRead, perInstance=true),
-        attr[Vec2f]("texcoord_0", memoryPerformanceHint=PreferFastRead),
-        attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
+      inputs = [
+        attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
+        attr[uint16](MATERIALINDEX_ATTRIBUTE, memoryPerformanceHint = PreferFastRead, perInstance = true),
+        attr[Vec2f]("texcoord_0", memoryPerformanceHint = PreferFastRead),
+        attr[Mat4]("transform", memoryPerformanceHint = PreferFastWrite, perInstance = true),
       ],
-      intermediates=[
+      intermediates = [
         attr[Vec4f]("vertexColor"),
         attr[Vec2f]("colorTexCoord"),
-        attr[uint16]("materialIndexOut", noInterpolation=true)
+        attr[uint16]("materialIndexOut", noInterpolation = true)
       ],
-      outputs=[attr[Vec4f]("color")],
-      uniforms=[
+      outputs = [attr[Vec4f]("color")],
+      uniforms = [
         attr[Mat4]("projection"),
         attr[Mat4]("view"),
-        attr[Vec4f]("color", arrayCount=4),
+        attr[Vec4f]("color", arrayCount = 4),
       ],
-      samplers=[attr[Texture]("baseTexture", arrayCount=4)],
-      vertexCode="""
+      samplers = [attr[Texture]("baseTexture", arrayCount = 4)],
+      vertexCode = &"""
   gl_Position =  vec4(position, 1.0) * (transform * Uniforms.view * Uniforms.projection);
-  vertexColor = Uniforms.color[materialIndex];
+  vertexColor = Uniforms.color[{MATERIALINDEX_ATTRIBUTE}];
   colorTexCoord = texcoord_0;
-  materialIndexOut = materialIndex;
+  materialIndexOut = {MATERIALINDEX_ATTRIBUTE};
   """,
-      fragmentCode="color = texture(baseTexture[materialIndexOut], colorTexCoord) * vertexColor;"
+      fragmentCode = "color = texture(baseTexture[materialIndexOut], colorTexCoord) * vertexColor;"
     )
   engine.initRenderer({COLORED_SINGLE_TEXTURE_MATERIAL: shaderConfiguration})
 
