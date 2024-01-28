@@ -66,7 +66,6 @@ proc refresh*(text: var Text) =
   if not text.dirty and text.text == text.lastRenderedText:
     return
 
-  echo "Refresh ", text
   # pre-calculate text-width
   var width = 0'f32
   var lineWidths: seq[float32]
