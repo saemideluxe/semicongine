@@ -26,14 +26,15 @@ type
     maxLen*: int
     font*: Font
     color*: Vec4f
+    maxWidth: float32 = 0
+    # properties:
     text: seq[Rune]
-    # attributes:
     position: Vec2f
     horizontalAlignment: HorizontalAlignment = Center
     verticalAlignment: VerticalAlignment = Center
     scale: float32
     aspect_ratio: float32
-    # management:
+    # management/internal:
     dirty: bool                 # is true if any of the attributes changed
     lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
     mesh: Mesh
@@ -153,6 +154,29 @@ func text*(text: Text): seq[Rune] =
   text.text
 proc `text=`*(text: var Text, newText: seq[Rune]) =
   text.text = newText[0 ..< min(newText.len, text.maxLen)]
+
+  if text.maxWidth > 0:
+    # todo: do word wrap instead of character wrap
+    var insertNewlinesAt: seq[int]
+    var currentWidth = 0'f32
+
+    for i in 0 ..< text.text.len:
+      if text.text[i] == NEWLINE:
+        currentWidth = 0'f32
+      else:
+        currentWidth += text.font.glyphs[text.text[i]].advance
+
+        if currentWidth > text.maxWidth / text.scale and i > 0:
+          currentWidth = text.font.glyphs[text.text[i]].advance
+          insertNewlinesAt.add(i - 1)
+
+        if i < text.text.len - 1:
+          currentWidth += text.font.kerning[(text.text[i], text.text[i + 1])]
+    var n = 0
+    for newLinePos in insertNewlinesAt:
+      text.text.insert(NEWLINE, newLinePos + n)
+
+
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
 
@@ -192,7 +216,7 @@ proc `aspect_ratio=`*(text: var Text, value: float32) =
     text.aspect_ratio = value
     text.dirty = true
 
-proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center): Text =
+proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -204,7 +228,7 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
       [uint16(offset + 2), uint16(offset + 3), uint16(offset + 0)],
     ]
 
-  result = Text(maxLen: maxLen, text: text, font: font, dirty: true, scale: scale, position: position, aspect_ratio: 1, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment)
+  result = Text(maxLen: maxLen, text: text, font: font, dirty: true, scale: scale, position: position, aspect_ratio: 1, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, maxWidth: maxWidth)
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"text-{instanceCounter}")
   inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
@@ -217,5 +241,5 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
 
   result.refresh()
 
-proc initText*(font: Font, text = "", maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center): Text =
-  initText(font = font, text = text.toRunes, maxLen = maxLen, color = color, scale = scale, position = position, horizontalAlignment = horizontalAlignment, verticalAlignment = verticalAlignment)
+proc initText*(font: Font, text = "", maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32): Text =
+  initText(font = font, text = text.toRunes, maxLen = maxLen, color = color, scale = scale, position = position, horizontalAlignment = horizontalAlignment, verticalAlignment = verticalAlignment, maxWidth = maxWidth)
