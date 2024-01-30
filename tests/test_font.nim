@@ -12,7 +12,7 @@ proc main() =
   var scene = Scene(name: "main")
   # var font = loadFont("DejaVuSans.ttf", lineHeightPixels=90'f32, charset="abcdefghijklmnopqrstuvwxyz ".toRunes)
   var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
-  var main_text = font.initText("", 32, color = newVec4f(1, 0.15, 0.15, 1), scale = 0.001)
+  var main_text = font.initText("", maxLen = 255, color = newVec4f(1, 0.15, 0.15, 1), scale = 0.0005, maxWidth = 1.0)
   var help_text = font.initText("""Controls
 
 Horizontal alignment:

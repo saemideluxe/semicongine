@@ -293,14 +293,13 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
               preferVRAM = true,
             )
 
-        # setup descriptors
+        # TODO: rework the whole descriptor/pool/layout stuff, a bit unclear
         var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, renderer.swapchain.inFlightFrames)]
-        if scenedata.textures[shaderPipeline.vk].len > 0:
-          var textureCount = 0
-          for textures in scenedata.textures[shaderPipeline.vk].values:
-            textureCount += textures.len
-          poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, renderer.swapchain.inFlightFrames * textureCount * 2)
-
+        var nTextures = 0
+        for descriptor in shaderPipeline.descriptorSetLayout.descriptors:
+          if descriptor.thetype == ImageSampler:
+            nTextures += descriptor.count
+        poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, nTextures * renderer.swapchain.inFlightFrames)
         scenedata.descriptorPools[shaderPipeline.vk] = renderer.device.createDescriptorSetPool(poolsizes)
 
         scenedata.descriptorSets[shaderPipeline.vk] = shaderPipeline.setupDescriptors(
