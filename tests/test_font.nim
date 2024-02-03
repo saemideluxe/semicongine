@@ -25,6 +25,7 @@ Vertical alignment:
   scene.add main_text
   scene.add help_text
   engine.loadScene(scene)
+  mixer[].loadSound("key", "key.ogg")
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     if engine.windowWasResized():
@@ -39,17 +40,21 @@ Vertical alignment:
           Key.J, Key.K, Key.L, Key.M, Key.N, Key.O, Key.P, Key.Q, Key.R, Key.S,
           Key.T, Key.U, Key.V, Key.W, Key.X, Key.Y, Key.Z]:
         if engine.keyWasPressed(c):
+          discard mixer[].play("key")
           if engine.keyIsDown(ShiftL) or engine.keyIsDown(ShiftR):
             main_text.text = main_text.text & ($c).toRunes
           else:
             main_text.text = main_text.text & ($c).toRunes[0].toLower()
       if engine.keyWasPressed(Enter):
+        discard mixer[].play("key")
         main_text.text = main_text.text & Rune('\n')
       if engine.keyWasPressed(Space):
+        discard mixer[].play("key")
         main_text.text = main_text.text & Rune(' ')
 
     # remove character
     if engine.keyWasPressed(Backspace) and main_text.text.len > 0:
+      discard mixer[].play("key")
       main_text.text = main_text.text[0 ..< ^1]
 
     # alignemtn with F-keys
