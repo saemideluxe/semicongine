@@ -220,6 +220,9 @@ proc `text=`*(text: var Text, newText: seq[Rune]) =
   text.processedText = text.text
   if text.maxWidth > 0:
     text.processedText = text.processedText.wordWrapped(text.font, text.maxWidth / text.scale)
+    echo "--------------------------"
+    echo text.processedText
+    echo "##########################"
 
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
