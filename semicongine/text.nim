@@ -83,17 +83,19 @@ proc refresh*(text: var Text) =
   # pre-calculate text-width
   var width = 0'f32
   var lineWidths: seq[float32]
-  for i in 0 ..< min(text.processedText.len, text.maxLen):
+  for i in 0 ..< text.processedText.len:
     if text.processedText[i] == NEWLINE:
       lineWidths.add width
       width = 0'f32
     else:
-      width += text.font.glyphs[text.processedText[i]].advance
+      if not (i == text.processedText.len - 1 and text.processedText[i].isWhiteSpace):
+        width += text.font.glyphs[text.processedText[i]].advance
       if i < text.processedText.len - 1:
         width += text.font.kerning[(text.processedText[i], text.processedText[i + 1])]
   lineWidths.add width
-  let
-    height = float32(lineWidths.len) * text.font.lineAdvance
+  var height = float32(lineWidths.len) * text.font.lineAdvance
+  if lineWidths[^1] == 0 and lineWidths.len > 1:
+    height -= 1
 
   let anchorY = (case text.verticalAlignment
     of Top: 0'f32
@@ -200,7 +202,10 @@ func wordWrapped(text: seq[Rune], font: Font, maxWidth: float32): seq[Rune] =
         remaining.add currentWord[subWord.len .. ^1] # process rest of the word in next iteration
       else:
         if (currentLine & SPACE & currentWord).width(font) <= maxWidth:
-          currentLine = currentLine & SPACE & currentWord
+          if currentLine.len == 0:
+            currentLine = currentWord
+          else:
+            currentLine = currentLine & SPACE & currentWord
         else:
           result.add currentLine & NEWLINE
           remaining.add currentWord
@@ -220,9 +225,6 @@ proc `text=`*(text: var Text, newText: seq[Rune]) =
   text.processedText = text.text
   if text.maxWidth > 0:
     text.processedText = text.processedText.wordWrapped(text.font, text.maxWidth / text.scale)
-    echo "--------------------------"
-    echo text.processedText
-    echo "##########################"
 
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
