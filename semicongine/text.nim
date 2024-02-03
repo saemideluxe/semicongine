@@ -1,4 +1,5 @@
 import std/tables
+import std/algorithm
 # import std/sequtils
 import std/unicode
 import std/strformat
@@ -36,11 +37,13 @@ type
     aspect_ratio: float32
     # management/internal:
     dirty: bool                 # is true if any of the attributes changed
+    processedText: seq[Rune]    # used to store processed (word-wrapper) text to preserve original
     lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
     mesh: Mesh
 
 const
   NEWLINE = Rune('\n')
+  SPACE = Rune(' ')
   POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
   TEXT_MATERIAL_TYPE* = MaterialType(
@@ -74,20 +77,20 @@ func `$`*(text: Text): string =
   "\"" & $text.text[0 ..< min(text.text.len, 16)] & "\""
 
 proc refresh*(text: var Text) =
-  if not text.dirty and text.text == text.lastRenderedText:
+  if not text.dirty and text.processedText == text.lastRenderedText:
     return
 
   # pre-calculate text-width
   var width = 0'f32
   var lineWidths: seq[float32]
-  for i in 0 ..< min(text.text.len, text.maxLen):
-    if text.text[i] == NEWLINE:
+  for i in 0 ..< min(text.processedText.len, text.maxLen):
+    if text.processedText[i] == NEWLINE:
       lineWidths.add width
       width = 0'f32
     else:
-      width += text.font.glyphs[text.text[i]].advance
-      if i < text.text.len - 1:
-        width += text.font.kerning[(text.text[i], text.text[i + 1])]
+      width += text.font.glyphs[text.processedText[i]].advance
+      if i < text.processedText.len - 1:
+        width += text.font.kerning[(text.processedText[i], text.processedText[i + 1])]
   lineWidths.add width
   let
     height = float32(lineWidths.len) * text.font.lineAdvance
@@ -107,8 +110,8 @@ proc refresh*(text: var Text) =
       of Right: lineWidths[lineIndex]
   for i in 0 ..< text.maxLen:
     let vertexOffset = i * 4
-    if i < text.text.len:
-      if text.text[i] == Rune('\n'):
+    if i < text.processedText.len:
+      if text.processedText[i] == Rune('\n'):
         offsetX = 0
         offsetY += text.font.lineAdvance
         text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
@@ -122,7 +125,7 @@ proc refresh*(text: var Text) =
           of Right: lineWidths[lineIndex]
       else:
         let
-          glyph = text.font.glyphs[text.text[i]]
+          glyph = text.font.glyphs[text.processedText[i]]
           left = offsetX + glyph.leftOffset
           right = offsetX + glyph.leftOffset + glyph.dimension.x
           top = offsetY + glyph.topOffset
@@ -139,43 +142,84 @@ proc refresh*(text: var Text) =
         text.mesh[UV_ATTRIB, vertexOffset + 3] = glyph.uvs[3]
 
         offsetX += glyph.advance
-        if i < text.text.len - 1:
-          offsetX += text.font.kerning[(text.text[i], text.text[i + 1])]
+        if i < text.processedText.len - 1:
+          offsetX += text.font.kerning[(text.processedText[i], text.processedText[i + 1])]
     else:
       text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
       text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
       text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
       text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
   text.mesh.transform = translate(text.position.x, text.position.y, 0) * scale(text.scale, text.scale * text.aspect_ratio)
-  text.lastRenderedText = text.text
+  text.lastRenderedText = text.processedText
   text.dirty = false
+
+
+func width(text: seq[Rune], font: Font): float32 =
+  var currentWidth = 0'f32
+  var lineWidths: seq[float32]
+  for i in 0 ..< text.len:
+    if text[i] == NEWLINE:
+      lineWidths.add currentWidth
+      currentWidth = 0'f32
+    else:
+      if not (i == text.len - 1 and text[i].isWhiteSpace):
+        currentWidth += font.glyphs[text[i]].advance
+      if i < text.len - 1:
+        currentWidth += font.kerning[(text[i], text[i + 1])]
+  lineWidths.add currentWidth
+  return lineWidths.max
+
+func wordWrapped(text: seq[Rune], font: Font, maxWidth: float32): seq[Rune] =
+  var remaining: seq[seq[Rune]] = @[@[]]
+  for c in text:
+    if c == SPACE:
+      remaining.add newSeq[Rune]()
+    else:
+      remaining[^1].add c
+  remaining.reverse()
+
+  var currentLine: seq[Rune]
+
+  while remaining.len > 0:
+    var currentWord = remaining.pop()
+    assert not (SPACE in currentWord)
+
+    if currentWord.len == 0:
+      currentLine.add SPACE
+    else:
+      assert currentWord[^1] != SPACE
+      # if this is the first word of the line and it is too long we need to
+      # split by character
+      if currentLine.len == 0 and (SPACE & currentWord).width(font) > maxWidth:
+        var subWord = @[currentWord[0]]
+        for c in currentWord[1 .. ^1]:
+          if (subWord & c).width(font) > maxWidth:
+            break
+          subWord.add c
+        result.add subWord & NEWLINE
+        remaining.add currentWord[subWord.len .. ^1] # process rest of the word in next iteration
+      else:
+        if (currentLine & SPACE & currentWord).width(font) <= maxWidth:
+          currentLine = currentLine & SPACE & currentWord
+        else:
+          result.add currentLine & NEWLINE
+          remaining.add currentWord
+          currentLine = @[]
+  if currentLine.len > 0 and currentLine != @[SPACE]:
+    result.add currentLine
+
+  return result
+
 
 func text*(text: Text): seq[Rune] =
   text.text
+
 proc `text=`*(text: var Text, newText: seq[Rune]) =
   text.text = newText[0 ..< min(newText.len, text.maxLen)]
 
+  text.processedText = text.text
   if text.maxWidth > 0:
-    # todo: do word wrap instead of character wrap
-    var insertNewlinesAt: seq[int]
-    var currentWidth = 0'f32
-
-    for i in 0 ..< text.text.len:
-      if text.text[i] == NEWLINE:
-        currentWidth = 0'f32
-      else:
-        currentWidth += text.font.glyphs[text.text[i]].advance
-
-        if currentWidth > text.maxWidth / text.scale and i > 0:
-          currentWidth = text.font.glyphs[text.text[i]].advance
-          insertNewlinesAt.add(i - 1)
-
-        if i < text.text.len - 1:
-          currentWidth += text.font.kerning[(text.text[i], text.text[i + 1])]
-    var n = 0
-    for newLinePos in insertNewlinesAt:
-      text.text.insert(NEWLINE, newLinePos + n)
-
+    text.processedText = text.processedText.wordWrapped(text.font, text.maxWidth / text.scale)
 
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
