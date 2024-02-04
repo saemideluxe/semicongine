@@ -10,8 +10,8 @@ proc test1() =
   mixer[].addSound("test2", newSound(sineSoundData(500, 2, 44100)))
 
 
-  let s1 = mixer[].play("test1", loop=true)
-  let s2 = mixer[].play("test2", loop=true)
+  let s1 = mixer[].play("test1", loop = true)
+  let s2 = mixer[].play("test2", loop = true)
 
   let t0 = now()
   mixer[].setLevel(0.5)
@@ -62,14 +62,11 @@ proc test2() =
     sleep(1)
 
 proc test3() =
-  mixer[].addSound("pianosong", loadAudio("test.ogg"))
+  mixer[].addSound("toccata et fugue", loadAudio("toccata_et_fugue.ogg"))
   mixer[].addSound("ping", newSound(sineSoundData(500, 0.05, 44100)))
   mixer[].addTrack("effects")
-  discard mixer[].play("pianosong")
+  discard mixer[].play("toccata et fugue")
 
-  while mixer[].isPlaying():
-    discard mixer[].play("ping", track="effects", stopOtherSounds=true, level=0.5)
-    discard stdin.readLine()
 
 when isMainModule:
   startMixerThread()
@@ -77,5 +74,10 @@ when isMainModule:
   mixer[].stop()
   test2()
   mixer[].stop()
-  # test3()
-  # mixer[].stop()
+  test3()
+
+  while mixer[].isPlaying():
+    discard mixer[].play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
+    echo "Press q and enter to exit"
+    if stdin.readLine() == "q":
+      mixer[].stop()
