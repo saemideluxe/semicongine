@@ -11,7 +11,7 @@ type
     vertexAttributes*: Table[string, DataType]
     instanceAttributes*: Table[string, DataType]
     attributes*: Table[string, DataType]
-  MaterialData* = object
+  MaterialData* = ref object # needs to be ref, so we can update stuff from other locations
     theType*: MaterialType
     name*: string
     attributes: Table[string, DataList]

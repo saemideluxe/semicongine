@@ -15,18 +15,9 @@ const
 var instanceCounter = 0
 
 type
-  HorizontalAlignment* = enum
-    Left
-    Center
-    Right
-  VerticalAlignment* = enum
-    Top
-    Center
-    Bottom
   Text* = object
     maxLen*: int
     font*: Font
-    color*: Vec4f
     maxWidth: float32 = 0
     # properties:
     text: seq[Rune]
@@ -236,9 +227,14 @@ proc `position=`*(text: var Text, value: Vec2f) =
     text.position = value
     text.dirty = true
 
+proc color*(text: Text): Vec4f =
+  text.mesh.material["color", 0, Vec4f]
+proc `color=`*(text: var Text, value: Vec4f) =
+  if value != text.color:
+    text.mesh.material["color", 0] = value
+
 proc horizontalAlignment*(text: Text): HorizontalAlignment =
   text.horizontalAlignment
-
 proc `horizontalAlignment=`*(text: var Text, value: HorizontalAlignment) =
   if value != text.horizontalAlignment:
     text.horizontalAlignment = value

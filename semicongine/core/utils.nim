@@ -2,6 +2,16 @@ import std/typetraits
 import std/strutils
 import std/strformat
 
+type
+  HorizontalAlignment* = enum
+    Left
+    Center
+    Right
+  VerticalAlignment* = enum
+    Top
+    Center
+    Bottom
+
 func cleanString*(str: openArray[char]): string =
   for i in 0 ..< len(str):
     if str[i] == char(0):

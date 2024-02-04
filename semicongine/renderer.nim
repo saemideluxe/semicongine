@@ -343,8 +343,6 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
   assert scene in renderer.scenedata
 
   let dirty = scene.dirtyShaderGlobals
-  # if not forceAll and dirty.len == 0:
-    # return
 
   if forceAll:
     debug "Update uniforms because 'forceAll' was given"
