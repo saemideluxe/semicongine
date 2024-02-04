@@ -1,3 +1,4 @@
+import std/times
 import std/unicode
 
 import semicongine
@@ -26,13 +27,15 @@ Vertical alignment:
   scene.add help_text
   engine.loadScene(scene)
   mixer[].loadSound("key", "key.ogg")
+  mixer[].setLevel(0.5)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
+    var t = cpuTime()
+    main_text.color = newVec4f(sin(t) * 0.5 + 0.5, 0.15, 0.15, 1)
     if engine.windowWasResized():
       var winSize = engine.getWindow().size
       main_text.aspect_ratio = winSize[0] / winSize[1]
       help_text.aspect_ratio = winSize[0] / winSize[1]
-      help_text.position = newVec2f(-0.99, -0.99)
 
     # add character
     if main_text.text.len < main_text.maxLen - 1:
