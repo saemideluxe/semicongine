@@ -1,8 +1,11 @@
+import std/strformat
+
 import ./core
+import ./mesh
 
 const
-  SHADER_ATTRIB_PREFIX = "semicon_text_"
-  MAX_TEXT_MATERIALS = 10
+  SHADER_ATTRIB_PREFIX = "semicon_panel_"
+  MAX_PANEL_MATERIALS = 10
 
 var instanceCounter = 0
 
@@ -12,12 +15,26 @@ type
     size: Vec2f
     color*: Vec4f
 
+    texture: Texture
     horizontalAlignment: HorizontalAlignment = Center
     verticalAlignment: VerticalAlignment = Center
     aspect_ratio: float32
-    texture: Vec4f
     dirty: bool
     mesh: Mesh
+
+proc initPanel*(position = newVec2f(), size = newVec2f(), color = newVec4f(1, 1, 1, 1), texture = EMPTY_TEXTURE, horizontalAlignment = HorizontalAlignment.Center, verticalAlignment = VerticalAlignment.Center): Panel =
+
+  result = Panel(position: position, size: size, color: color, texture: texture, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, aspect_ratio: 1)
+
+  inc instanceCounter
+  var
+    positions = newSeq[Vec3f](4)
+    indices = @[
+      [uint16(0), uint16(1), uint16(2)],
+      [uint16(2), uint16(3), uint16(0)],
+    ]
+    uvs = newSeq[Vec2f](4)
+  result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"panel-{instanceCounter}")
 
 proc position*(panel: Panel): Vec2f =
   panel.position

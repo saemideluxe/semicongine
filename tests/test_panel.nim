@@ -10,7 +10,7 @@ proc main() =
 
   # build scene
   var scene = Scene(name: "main")
-  var panel = initPanel(position: newVec2f(0, 0), size: newVec2f(0.1, 0.1))
+  var panel = Panel(position: newVec2f(0, 0), size: newVec2f(0.1, 0.1))
 
   scene.add panel
   engine.loadScene(scene)
