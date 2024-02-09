@@ -13,6 +13,7 @@ import semicongine/events
 import semicongine/material
 import semicongine/mesh
 import semicongine/noise
+import semicongine/panel
 import semicongine/renderer
 import semicongine/resources
 import semicongine/settings
@@ -29,6 +30,7 @@ export events
 export material
 export mesh
 export noise
+export panel
 export renderer
 export resources
 export settings
