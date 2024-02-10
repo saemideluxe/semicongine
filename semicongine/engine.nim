@@ -218,3 +218,25 @@ proc `fullscreen=`*(engine: var Engine, enable: bool) =
 
 func limits*(engine: Engine): VkPhysicalDeviceLimits =
   engine.gpuDevice().physicalDevice.properties.limits
+
+proc processEventsFor*(engine: Engine, panel: var Panel) =
+  let hasMouseNow = panel.contains(engine.mousePositionNormalized())
+
+  # enter/leave events
+  if hasMouseNow:
+    if panel.hasMouse:
+      if panel.onMouseMove != nil: panel.onMouseMove(panel)
+    else:
+      if panel.onMouseEnter != nil: panel.onMouseEnter(panel)
+  else:
+    if panel.hasMouse:
+      if panel.onMouseLeave != nil: panel.onMouseLeave(panel)
+
+  # button events
+  if hasMouseNow:
+    if engine.input.mouseWasPressed.len > 0:
+      if panel.onMouseDown != nil: panel.onMouseDown(panel, engine.input.mouseWasPressed)
+    if engine.input.mouseWasReleased.len > 0:
+      if panel.onMouseUp != nil: panel.onMouseUp(panel, engine.input.mouseWasReleased)
+
+  panel.hasMouse = hasMouseNow

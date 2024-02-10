@@ -5,6 +5,7 @@ import ./core
 import ./mesh
 import ./material
 import ./vulkan/shader
+import ./events
 
 const
   # font shader
@@ -45,13 +46,19 @@ type
   Panel* = object
     position: Vec2f
     size: Vec2f
-
     texture: Texture
     horizontalAlignment: HorizontalAlignment = Center
     verticalAlignment: VerticalAlignment = Center
     aspect_ratio: float32
     dirty: bool
     mesh: Mesh
+    # input handling
+    onMouseDown*: proc(panel: var Panel, buttons: set[MouseButton])
+    onMouseUp*: proc(panel: var Panel, buttons: set[MouseButton])
+    onMouseEnter*: proc(panel: var Panel)
+    onMouseMove*: proc(panel: var Panel)
+    onMouseLeave*: proc(panel: var Panel)
+    hasMouse*: bool
 
 proc `$`*(panel: Panel): string =
   &"Panel {panel.position} (size {panel.size})"
@@ -89,9 +96,33 @@ proc refresh*(panel: var Panel) =
 
   panel.dirty = false
 
-proc initPanel*(position = newVec2f(), size = newVec2f(), color = newVec4f(1, 1, 1, 1), texture = EMPTY_TEXTURE, horizontalAlignment = HorizontalAlignment.Center, verticalAlignment = VerticalAlignment.Center): Panel =
+proc initPanel*(
+  position = newVec2f(),
+  size = newVec2f(),
+  color = newVec4f(1, 1, 1, 1),
+  texture = EMPTY_TEXTURE,
+  horizontalAlignment = HorizontalAlignment.Center,
+  verticalAlignment = VerticalAlignment.Center,
+  onMouseDown: proc(panel: var Panel, buttons: set[MouseButton]) = nil,
+  onMouseUp: proc(panel: var Panel, buttons: set[MouseButton]) = nil,
+  onMouseEnter: proc(panel: var Panel) = nil,
+  onMouseMove: proc(panel: var Panel) = nil,
+  onMouseLeave: proc(panel: var Panel) = nil,
+): Panel =
 
-  result = Panel(position: position, size: size, texture: texture, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, aspect_ratio: 1)
+  result = Panel(
+    position: position,
+    size: size,
+    texture: texture,
+    horizontalAlignment: horizontalAlignment,
+    verticalAlignment: verticalAlignment,
+    aspect_ratio: 1,
+    onMouseDown: onMouseDown,
+    onMouseUp: onMouseUp,
+    onMouseEnter: onMouseEnter,
+    onMouseMove: onMouseMove,
+    onMouseLeave: onMouseLeave,
+  )
 
   result.mesh = newMesh(
     positions = newSeq[Vec3f](4),
@@ -151,3 +182,14 @@ proc `aspect_ratio=`*(panel: var Panel, value: float32) =
   if value != panel.aspect_ratio:
     panel.aspect_ratio = value
     panel.dirty = true
+
+proc contains*(panel: Panel, p: Vec2f): bool =
+  let cursor = panel.mesh.transform * p.toVec3
+  let p1 = panel.mesh[POSITION_ATTRIB, 0, Vec3f]
+  let p2 = panel.mesh[POSITION_ATTRIB, 2, Vec3f]
+  let
+    left = min(p1.x, p2.x)
+    right = max(p1.x, p2.x)
+    top = min(p1.y, p2.y)
+    bottom = max(p1.y, p2.y)
+  return left <= cursor.x and cursor.x <= right and top <= cursor.y and cursor.y <= bottom
