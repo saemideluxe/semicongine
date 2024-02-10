@@ -59,7 +59,7 @@ proc `[]=`*(image: var Image, x, y: int, value: Pixel) =
 
   image[].imagedata[y * image.width + x] = value
 
-proc newImage*[T: Pixel](width, height: int, imagedata: openArray[T]= []): Image[T] =
+proc newImage*[T: Pixel](width, height: int, imagedata: openArray[T] = []): Image[T] =
   assert width > 0 and height > 0
   assert imagedata.len == width * height or imagedata.len == 0
 
@@ -70,17 +70,19 @@ proc newImage*[T: Pixel](width, height: int, imagedata: openArray[T]= []): Image
   result.width = width
   result.height = height
 
-let INVALID_TEXTURE* = Texture(name: "Invalid texture", isGrayscale: false, colorImage: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: Sampler(
+const
+  LINEAR_SAMPLER* = Sampler(
+    magnification: VK_FILTER_LINEAR,
+    minification: VK_FILTER_LINEAR,
+    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
+  )
+  NEAREST_SAMPLER* = Sampler(
     magnification: VK_FILTER_NEAREST,
     minification: VK_FILTER_NEAREST,
     wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
     wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
   )
-)
-let EMPTY_TEXTURE* = Texture(name: "Empty texture", isGrayscale: false, colorImage: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: Sampler(
-    magnification: VK_FILTER_NEAREST,
-    minification: VK_FILTER_NEAREST,
-    wrapModeS: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-    wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-  )
-)
+let
+  INVALID_TEXTURE* = Texture(name: "Invalid texture", isGrayscale: false, colorImage: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: NEAREST_SAMPLER)
+  EMPTY_TEXTURE* = Texture(name: "Empty texture", isGrayscale: false, colorImage: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: NEAREST_SAMPLER)
