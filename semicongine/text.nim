@@ -1,6 +1,5 @@
 import std/tables
 import std/algorithm
-# import std/sequtils
 import std/unicode
 import std/strformat
 
@@ -10,31 +9,12 @@ import ./material
 import ./vulkan/shader
 
 const
-  SHADER_ATTRIB_PREFIX = "semicon_text_"
-  MAX_TEXT_MATERIALS = 10
-var instanceCounter = 0
-
-type
-  Text* = object
-    maxLen*: int
-    font*: Font
-    maxWidth: float32 = 0
-    # properties:
-    text: seq[Rune]
-    position: Vec2f
-    horizontalAlignment: HorizontalAlignment = Center
-    verticalAlignment: VerticalAlignment = Center
-    scale: float32
-    aspect_ratio: float32
-    # management/internal:
-    dirty: bool                 # is true if any of the attributes changed
-    processedText: seq[Rune]    # used to store processed (word-wrapper) text to preserve original
-    lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
-    mesh: Mesh
-
-const
   NEWLINE = Rune('\n')
   SPACE = Rune(' ')
+
+  # font shader
+  MAX_TEXT_MATERIALS = 10
+  SHADER_ATTRIB_PREFIX = "semicon_text_"
   POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
   TEXT_MATERIAL_TYPE* = MaterialType(
@@ -63,6 +43,26 @@ const
   """,
     fragmentCode = &"""color = vec4(Uniforms.color[materialIndexOut].rgb, Uniforms.color[materialIndexOut].a * texture(fontAtlas[materialIndexOut], uvFrag).r);"""
   )
+
+var instanceCounter = 0
+
+type
+  Text* = object
+    maxLen*: int
+    font*: Font
+    maxWidth: float32 = 0
+    # properties:
+    text: seq[Rune]
+    position: Vec2f
+    horizontalAlignment: HorizontalAlignment = Center
+    verticalAlignment: VerticalAlignment = Center
+    scale: float32
+    aspect_ratio: float32
+    # management/internal:
+    dirty: bool                 # is true if any of the attributes changed
+    processedText: seq[Rune]    # used to store processed (word-wrapper) text to preserve original
+    lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
+    mesh: Mesh
 
 func `$`*(text: Text): string =
   "\"" & $text.text[0 ..< min(text.text.len, 16)] & "\""
@@ -273,9 +273,9 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
       [uint16(offset + 2), uint16(offset + 3), uint16(offset + 0)],
     ]
 
-  result = Text(maxLen: maxLen, text: text, font: font, dirty: true, scale: scale, position: position, aspect_ratio: 1, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, maxWidth: maxWidth)
+  result = Text(maxLen: maxLen, font: font, dirty: true, scale: scale, position: position, aspect_ratio: 1, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, maxWidth: maxWidth)
+  `text=`(result, text)
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"text-{instanceCounter}")
-  inc instanceCounter
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
   result.mesh.material = initMaterialData(
@@ -283,6 +283,7 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
     name = font.name & " text",
     attributes = {"fontAtlas": initDataList(@[font.fontAtlas]), "color": initDataList(@[color])},
   )
+  inc instanceCounter
 
   result.refresh()
 

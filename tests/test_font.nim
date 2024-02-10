@@ -22,7 +22,7 @@ Horizontal alignment:
 Vertical alignment:
   F4: Top
   F5: Center
-  F6: Bottom""", scale = 0.0002, position = newVec2f(0, 0), horizontalAlignment = Left, verticalAlignment = Top)
+  F6: Bottom""", scale = 0.0002, position = newVec2f(-0.9, -0.9), horizontalAlignment = Left, verticalAlignment = Top)
   scene.add main_text
   scene.add help_text
   engine.loadScene(scene)
