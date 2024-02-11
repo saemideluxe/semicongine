@@ -88,15 +88,15 @@ elif thebundletype == Exe:
   import std/tables
   import std/sequtils
 
-  proc loadResources(): Table[string, Table[string, string]] {.compileTime.} =
+  const BUILD_RESOURCEROOT* {.strdefine.}: string = ""
 
-    let srcdir = joinPath(parentDir(querySetting(projectFull)), RESOURCEROOT)
-    for kind, moddir in walkDir(srcdir):
+  proc loadResources(): Table[string, Table[string, string]] {.compileTime.} =
+    assert BUILD_RESOURCEROOT != "", "define BUILD_RESOURCEROOT to build for bundle type 'exe'"
+    for kind, moddir in walkDir(BUILD_RESOURCEROOT):
       if kind == pcDir:
         let modname = moddir.splitPath.tail
         result[modname] = Table[string, string]()
         for resourcefile in walkDirRec(moddir, relative = true):
-        # TODO: add Lempel–Ziv–Welch compression or something similar simple
           result[modname][resourcefile] = staticRead(joinPath(moddir, resourcefile))
   const bundledResources = loadResources()
 
