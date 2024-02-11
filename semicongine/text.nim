@@ -84,14 +84,14 @@ proc refresh*(text: var Text) =
       if i < text.processedText.len - 1:
         width += text.font.kerning[(text.processedText[i], text.processedText[i + 1])]
   lineWidths.add width
-  var height = float32(lineWidths.len) * text.font.lineAdvance
+  var height = float32(lineWidths.len - 1) * text.font.lineAdvance + text.font.capHeight
   if lineWidths[^1] == 0 and lineWidths.len > 1:
     height -= 1
 
   let anchorY = (case text.verticalAlignment
     of Top: 0'f32
     of Center: height / 2
-    of Bottom: height) - text.font.lineAdvance
+    of Bottom: height) - text.font.capHeight
 
   var
     offsetX = 0'f32

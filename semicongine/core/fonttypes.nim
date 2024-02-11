@@ -33,4 +33,7 @@ type
     maxHeight*: int
     kerning*: Table[(Rune, Rune), float32]
     fontscale*: float32
+    lineHeight*: float32
     lineAdvance*: float32
+    capHeight*: float32
+    xHeight*: float32

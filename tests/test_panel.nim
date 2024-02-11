@@ -29,7 +29,7 @@ proc main() =
     font = loadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
     scene = Scene(name: "main")
     origin = initPanel(
-      size = newVec2f(0.02, 0.02),
+      size = newVec2f(0.005, 0.005),
       color = newVec4f(1, 1, 1, 1),
       texture = Texture(isGrayscale: false, colorImage: newImage[RGBAPixel](3, 3, [T, B, T, B, B, B, T, B, T]), sampler: NEAREST_SAMPLER),
     )
@@ -49,7 +49,10 @@ Horizontal alignment:
 Vertical alignment:
   F4: Top
   F5: Center
-  F6: Bottom""", scale = 0.0002, position = newVec2f(-0.9, -0.9), horizontalAlignment = Left, verticalAlignment = Top)
+  F6: Bottom
+Mouse:
+  Left click: Increase counter
+  Right click: Decrease counter""", scale = 0.0002, position = newVec2f(-0.9, -0.9), horizontalAlignment = Left, verticalAlignment = Top)
 
   counterText = font.initText($counter, maxLen = 99, scale = 0.0004)
 

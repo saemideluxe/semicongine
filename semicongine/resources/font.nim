@@ -1,4 +1,5 @@
 import std/tables
+import std/strutils
 import std/strformat
 import std/streams
 import std/os
@@ -10,11 +11,11 @@ import ../core/imagetypes
 import ../core/fonttypes
 import ../algorithms
 
-{.emit: "#define STBTT_STATIC" .}
-{.emit: "#define STB_TRUETYPE_IMPLEMENTATION" .}
-{.emit: "#include \"" & currentSourcePath.parentDir() & "/stb_truetype.h\"" .}
+{.emit: "#define STBTT_STATIC".}
+{.emit: "#define STB_TRUETYPE_IMPLEMENTATION".}
+{.emit: "#include \"" & currentSourcePath.parentDir() & "/stb_truetype.h\"".}
 
-type stbtt_fontinfo {.importc, incompleteStruct .} = object
+type stbtt_fontinfo {.importc, incompleteStruct.} = object
 
 proc stbtt_InitFont(info: ptr stbtt_fontinfo, data: ptr char, offset: cint): cint {.importc, nodecl.}
 proc stbtt_ScaleForPixelHeight(info: ptr stbtt_fontinfo, pixels: cfloat): cfloat {.importc, nodecl.}
@@ -42,6 +43,8 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
 
   var ascent, descent, lineGap: cint
   stbtt_GetFontVMetrics(addr fontinfo, addr ascent, addr descent, addr lineGap)
+
+  result.lineHeight = float32(ascent - descent) * result.fontscale
   result.lineAdvance = float32(ascent - descent + lineGap) * result.fontscale
 
   # ensure all codepoints are available in the font
@@ -68,6 +71,11 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
         addr offX, addr offY
       )
     topOffsets[codePoint] = offY
+
+    if char(codePoint) in UppercaseLetters:
+      result.capHeight = float32(height)
+    if codePoint == Rune('x'):
+      result.xHeight = float32(height)
 
     if width > 0 and height > 0:
       var bitmap = newSeq[GrayPixel](width * height)
@@ -104,9 +112,9 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
     result.glyphs[codePoint] = GlyphInfo(
       dimension: newVec2f(float32(image.width), float32(image.height)),
       uvs: [
-        newVec2f((coord.x + 0.5 )     / w, (coord.y + ih - 0.5) / h),
-        newVec2f((coord.x + 0.5 )     / w, (coord.y + 0.5)      / h),
-        newVec2f((coord.x + iw - 0.5) / w, (coord.y + 0.5)      / h),
+        newVec2f((coord.x + 0.5) / w, (coord.y + ih - 0.5) / h),
+        newVec2f((coord.x + 0.5) / w, (coord.y + 0.5) / h),
+        newVec2f((coord.x + iw - 0.5) / w, (coord.y + 0.5) / h),
         newVec2f((coord.x + iw - 0.5) / w, (coord.y + ih - 0.5) / h),
       ],
       topOffset: float32(topOffsets[codePoint]),

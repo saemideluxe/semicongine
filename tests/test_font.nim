@@ -12,6 +12,7 @@ proc main() =
   # build scene
   var scene = Scene(name: "main")
   var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
+  var origin = initPanel(size = newVec2f(0.01, 0.01))
   var main_text = font.initText("", maxLen = 255, color = newVec4f(1, 0.15, 0.15, 1), scale = 0.0005, maxWidth = 1.0)
   var help_text = font.initText("""Controls
 
@@ -23,6 +24,7 @@ Vertical alignment:
   F4: Top
   F5: Center
   F6: Bottom""", scale = 0.0002, position = newVec2f(-0.9, -0.9), horizontalAlignment = Left, verticalAlignment = Top)
+  scene.add origin
   scene.add main_text
   scene.add help_text
   engine.loadScene(scene)
@@ -35,6 +37,7 @@ Vertical alignment:
     if engine.windowWasResized():
       var winSize = engine.getWindow().size
       main_text.aspect_ratio = winSize[0] / winSize[1]
+      origin.aspect_ratio = winSize[0] / winSize[1]
       help_text.aspect_ratio = winSize[0] / winSize[1]
 
     # add character
@@ -68,6 +71,7 @@ Vertical alignment:
     elif engine.keyWasPressed(F5): main_text.verticalAlignment = Center
     elif engine.keyWasPressed(F6): main_text.verticalAlignment = Bottom
 
+    origin.refresh()
     main_text.text = main_text.text & Rune('_')
     main_text.refresh()
     main_text.text = main_text.text[0 ..< ^1]

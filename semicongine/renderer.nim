@@ -383,10 +383,10 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
               assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
             assert (uniform.arrayCount == 0 and value.len == 1) or value.len <= uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
             if value.len <= uniform.arrayCount:
-              warn &"Uniform '{uniform.name}' found has short length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
+              debug &"Uniform '{uniform.name}' found has short length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
             assert value.size <= uniform.size, &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
             if value.size <= uniform.size:
-              warn &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
+              debug &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
             debug &"  update uniform {uniform.name} with value: {value}"
             # TODO: technically we would only need to update the uniform buffer of the current
             # frameInFlight (I think), but we don't track for which frame the shaderglobals are no longer dirty
