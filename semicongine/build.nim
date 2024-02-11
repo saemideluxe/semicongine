@@ -9,7 +9,7 @@ import ./core/constants
 
 const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("scripts/blender_gltf_converter.py")
 
-proc semicongine_builddir*(buildname: string, builddir="./build"): string =
+proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
   var platformDir = "unkown"
 
   if defined(linux):
@@ -19,7 +19,7 @@ proc semicongine_builddir*(buildname: string, builddir="./build"): string =
 
   return builddir / buildname / platformDir / projectName()
 
-proc semicongine_build_switches*(buildname: string, builddir="./build") =
+proc semicongine_build_switches*(buildname: string, builddir = "./build") =
   switch("experimental", "strictEffects")
   switch("experimental", "strictFuncs")
   switch("define", "nimPreviewHashRef")
@@ -27,7 +27,7 @@ proc semicongine_build_switches*(buildname: string, builddir="./build") =
   if defined(windows):
     switch("define", "VK_USE_PLATFORM_WIN32_KHR")
     switch("app", "gui")
-  switch("outdir", semicongine_builddir(buildname, builddir=builddir))
+  switch("outdir", semicongine_builddir(buildname, builddir = builddir))
 
 proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string) =
   switch("define", "BUNDLETYPE=" & bundleType)
@@ -48,6 +48,8 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string)
           exec &"zip -r {outputfile} ."
         elif defined(windows):
           exec &"powershell Compress-Archive * {outputfile}"
+  elif bundleType == "exe":
+    switch("define", "BUILD_RESOURCEROOT=" & joinPath(getCurrentDir(), resourceRoot)) # required for in-exe packing of resources, must be absolute
 
 proc semicongine_zip*(dir: string) =
   withdir dir.parentDir:

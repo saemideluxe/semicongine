@@ -62,7 +62,7 @@ type
     dirty: bool                 # is true if any of the attributes changed
     processedText: seq[Rune]    # used to store processed (word-wrapper) text to preserve original
     lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
-    mesh: Mesh
+    mesh*: Mesh
 
 func `$`*(text: Text): string =
   "\"" & $text.text[0 ..< min(text.text.len, 16)] & "\""
@@ -286,6 +286,3 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
   inc instanceCounter
 
   result.refresh()
-
-proc initText*(font: Font, text = "", maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32): Text =
-  initText(font = font, text = text.toRunes, maxLen = maxLen, color = color, scale = scale, position = position, horizontalAlignment = horizontalAlignment, verticalAlignment = verticalAlignment, maxWidth = maxWidth)
