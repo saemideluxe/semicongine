@@ -2,8 +2,8 @@ import std/tables
 import std/strformat
 import std/strutils
 
-
 import ./core
+import ./vulkan/shader
 
 type
   MaterialType* = object
@@ -49,46 +49,6 @@ func dirtyAttributes*(material: MaterialData): seq[string] =
 proc clearDirtyAttributes*(material: var MaterialData) =
   material.dirtyAttributes.reset
 
-let EMPTY_MATERIAL* = MaterialType(
-  name: "empty material",
-  vertexAttributes: {"position": Vec3F32}.toTable,
-)
-let COLORED_MATERIAL* = MaterialType(
-  name: "single color material",
-  vertexAttributes: {"position": Vec3F32}.toTable,
-  attributes: {"color": Vec4F32}.toTable,
-)
-let VERTEX_COLORED_MATERIAL* = MaterialType(
-  name: "vertex color material",
-  vertexAttributes: {
-    "position": Vec3F32,
-    "color": Vec4F32,
-  }.toTable,
-)
-let SINGLE_COLOR_MATERIAL* = MaterialType(
-  name: "single color material",
-  vertexAttributes: {
-    "position": Vec3F32,
-  }.toTable,
-  attributes: {"color": Vec4F32}.toTable
-)
-let SINGLE_TEXTURE_MATERIAL* = MaterialType(
-  name: "single texture material",
-  vertexAttributes: {
-    "position": Vec3F32,
-    "uv": Vec2F32,
-  }.toTable,
-  attributes: {"baseTexture": TextureType}.toTable
-)
-let COLORED_SINGLE_TEXTURE_MATERIAL* = MaterialType(
-  name: "colored single texture material",
-  vertexAttributes: {
-    "position": Vec3F32,
-    "uv": Vec2F32,
-  }.toTable,
-  attributes: {"baseTexture": TextureType, "color": Vec4F32}.toTable
-)
-
 proc `$`*(materialType: MaterialType): string =
   var attributes: seq[string]
   for key, value in materialType.attributes.pairs:
@@ -128,3 +88,52 @@ proc initMaterialData*(
     theName = &"material instance of '{theType}'"
   initMaterialData(theType = theType, name = theName, attributes = attributes.toTable)
 
+const
+  EMPTY_MATERIAL* = MaterialType(
+    name: "empty material",
+    vertexAttributes: {"position": Vec3F32}.toTable,
+  )
+  COLORED_MATERIAL* = MaterialType(
+    name: "single color material",
+    vertexAttributes: {"position": Vec3F32}.toTable,
+    attributes: {"color": Vec4F32}.toTable,
+  )
+  VERTEX_COLORED_MATERIAL* = MaterialType(
+    name: "vertex color material",
+    vertexAttributes: {
+      "position": Vec3F32,
+      "color": Vec4F32,
+    }.toTable,
+  )
+  SINGLE_COLOR_MATERIAL* = MaterialType(
+    name: "single color material",
+    vertexAttributes: {
+      "position": Vec3F32,
+    }.toTable,
+    attributes: {"color": Vec4F32}.toTable
+  )
+  SINGLE_TEXTURE_MATERIAL* = MaterialType(
+    name: "single texture material",
+    vertexAttributes: {
+      "position": Vec3F32,
+      "uv": Vec2F32,
+    }.toTable,
+    attributes: {"baseTexture": TextureType}.toTable
+  )
+  COLORED_SINGLE_TEXTURE_MATERIAL* = MaterialType(
+    name: "colored single texture material",
+    vertexAttributes: {
+      "position": Vec3F32,
+      "uv": Vec2F32,
+    }.toTable,
+    attributes: {"baseTexture": TextureType, "color": Vec4F32}.toTable
+  )
+  EMPTY_SHADER* = createShaderConfiguration(
+    inputs = [
+      attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
+      attr[Vec3f]("position", memoryPerformanceHint = PreferFastWrite),
+    ],
+    outputs = [attr[Vec4f]("color")],
+    vertexCode = &"gl_Position = vec4(position, 1.0) * {TRANSFORM_ATTRIB};",
+    fragmentCode = &"color = vec4(1, 0, 1, 1);"
+  )

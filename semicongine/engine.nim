@@ -109,8 +109,9 @@ proc initRenderer*(engine: var Engine, shaders: openArray[(MaterialType, ShaderC
 
   assert not engine.renderer.isSome
   var allShaders = @shaders
-  allShaders.add (TEXT_MATERIAL_TYPE, TEXT_SHADER)
+  allShaders.add (EMPTY_MATERIAL, EMPTY_SHADER)
   allShaders.add (PANEL_MATERIAL_TYPE, PANEL_SHADER)
+  allShaders.add (TEXT_MATERIAL_TYPE, TEXT_SHADER)
   engine.renderer = some(engine.device.initRenderer(shaders = allShaders, clearColor = clearColor, backFaceCulling = backFaceCulling))
 
 proc initRenderer*(engine: var Engine, clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =

@@ -155,6 +155,12 @@ proc `color=`*(panel: var Panel, value: Vec4f) =
   if value != panel.color:
     panel.mesh.material["color", 0] = value
 
+proc transform*(panel: Panel): Mat4 =
+  panel.mesh.transform
+proc `transform=`*(panel: var Panel, value: Mat4) =
+  if value != panel.transform:
+    panel.mesh.transform = value
+
 proc size*(panel: Panel): Vec2f =
   panel.size
 proc `size=`*(panel: var Panel, value: Vec2f) =
