@@ -8,7 +8,7 @@ const RELEASE = "release"
 const LINUX = "linux"
 const WINDOWS = "windows"
 
-const BUNDLETYPE* {.strdefine.}: string = "dir" # dir, zip, exe
+const PACKAGETYPE* {.strdefine.}: string = "dir" # dir, zip, exe
 const RESOURCEROOT* {.strdefine.}: string = "resources"
 
 switch("d", "nimPreviewHashRef")
@@ -17,7 +17,7 @@ switch("experimental", "strictFuncs")
 switch("nimblePath", "nimbledeps/pkgs2")
 
 task build, "build":
-  switch("d", "BUNDLETYPE=" & BUNDLETYPE)
+  switch("d", "PACKAGETYPE=" & PACKAGETYPE)
   switch("d", "RESOURCEROOT=" & RESOURCEROOT)
   var buildType = DEBUG
   var platformDir = ""
@@ -41,9 +41,9 @@ task build, "build":
   let resourcedir = joinPath(projectDir(), RESOURCEROOT)
   if dirExists(resourcedir):
     let outdir_resources = joinPath(outdir, RESOURCEROOT)
-    if BUNDLETYPE == "dir":
+    if PACKAGETYPE == "dir":
       cpDir(resourcedir, outdir_resources)
-    elif BUNDLETYPE == "zip":
+    elif PACKAGETYPE == "zip":
       mkDir(outdir_resources)
       for resource in listDirs(resourcedir):
         let
@@ -70,8 +70,12 @@ task build_all_release, "build all examples for release":
 
 task test_all, "Run all test programs":
   for file in listFiles("tests"):
-    if file.endsWith(".nim"):
+    if file.endsWith(".nim") and not file.endsWith("test_resources.nim"):
       exec(&"nim build --run {file}")
+
+  exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=dir --run tests/test_resources.nim")
+  exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=zip --run tests/test_resources.nim")
+  exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=exe --run tests/test_resources.nim")
 
 task clean, "remove all build files":
   exec(&"rm -rf {BUILDBASE}")
@@ -125,6 +129,6 @@ task generate_vulkan_api, "Generate Vulkan API":
 
 if getCommand() in ["c", "compile", "r", "dump", "check", "idetools"]:
   if defined(linux):
-    --d:VK_USE_PLATFORM_XLIB_KHR
+    --d: VK_USE_PLATFORM_XLIB_KHR
   if defined(windows):
-    --d:VK_USE_PLATFORM_WIN32_KHR
+    --d: VK_USE_PLATFORM_WIN32_KHR
