@@ -112,6 +112,7 @@ elif thebundletype == Zip:
         else:
           if not (components[0] in yielded):
             yield (kind: pcDir, path: components[0])
+        yielded.incl components[0]
     archive.close()
 
 elif thebundletype == Exe:
@@ -157,6 +158,7 @@ elif thebundletype == Exe:
         else:
           if not (components[0] in yielded):
             yield (kind: pcDir, path: components[0])
+        yielded.incl components[0]
 
 proc loadResource*(path: string, package = DEFAULT_PACKAGE): Stream =
   loadResource_intern(path, package = package)
