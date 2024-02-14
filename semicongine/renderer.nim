@@ -153,8 +153,6 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   renderer.checkSceneIntegrity(scene)
 
-  let inputs = renderer.inputs(scene)
-
   # create index buffer if necessary
   var indicesBufferSize = 0
   for mesh in scene.meshes:
@@ -181,6 +179,9 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   var perLocationSizes: Table[MemoryPerformanceHint, int]
   for hint in MemoryPerformanceHint:
     perLocationSizes[hint] = 0
+
+  let inputs = renderer.inputs(scene)
+
   for attribute in inputs:
     scenedata.attributeLocation[attribute.name] = attribute.memoryPerformanceHint
     # setup one buffer per attribute-location-type

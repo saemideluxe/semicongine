@@ -1,8 +1,10 @@
 import std/streams
+import std/algorithm
 import std/strutils
 import std/sequtils
 import std/strformat
 import std/os
+import std/sets
 import std/unicode
 
 import ./core
@@ -24,24 +26,33 @@ type
     Exe # Embeded in executable
 
 const
-  thebundletype = parseEnum[ResourceBundlingType](BUNDLETYPE.toLowerAscii().capitalizeAscii())
+  thebundletype = parseEnum[ResourceBundlingType](PACKAGETYPE.toLowerAscii().capitalizeAscii())
   ASCII_CHARSET = PrintableChars.toSeq.toRunes
-
-var selectedMod* = "default"
+  DEFAULT_PACKAGE = "default"
 
 # resource loading
+
+func normalizeDir(dir: string): string =
+  result = dir
+  if result.startsWith("./"):
+    result = result[2 .. ^1]
+  if result.startsWith("/"):
+    result = result[1 .. ^1]
+  result = dir.replace('\\', '/')
+  if not result.endsWith("/") and result != "":
+    result = result & "/"
 
 when thebundletype == Dir:
 
   proc resourceRoot(): string =
-    joinPath(absolutePath(getAppDir()), RESOURCEROOT)
-  proc modRoot(): string =
-    joinPath(resourceRoot(), selectedMod)
+    getAppDir().absolutePath().joinPath(RESOURCEROOT)
+  proc packageRoot(package: string): string =
+    resourceRoot().joinPath(package)
 
-  proc loadResource_intern(path: string): Stream =
-    let realpath = joinPath(modRoot(), path)
+  proc loadResource_intern(path: string, package: string): Stream =
+    let realpath = package.packageRoot().joinPath(path)
     if not realpath.fileExists():
-      raise newException(Exception, &"Resource {path} not found")
+      raise newException(Exception, &"Resource {path} not found (checked {realpath})")
     newFileStream(realpath, fmRead)
 
   proc modList_intern(): seq[string] =
@@ -49,25 +60,29 @@ when thebundletype == Dir:
       if kind == pcDir:
         result.add file
 
-  iterator walkResources_intern(): string =
-    for file in walkDirRec(modRoot(), relative = true):
+  iterator walkResources_intern(dir: string, package = DEFAULT_PACKAGE): string =
+    for file in walkDirRec(package.packageRoot().joinPath(dir), relative = true):
       yield file
+
+  iterator ls_intern(dir: string, package: string): tuple[kind: PathComponent, path: string] =
+    for i in walkDir(package.packageRoot().joinPath(dir), relative = true):
+      yield i
 
 elif thebundletype == Zip:
 
   import zippy/ziparchives
 
   proc resourceRoot(): string =
-    joinPath(absolutePath(getAppDir()), RESOURCEROOT)
-  proc modRoot(): string =
-    joinPath(resourceRoot(), selectedMod)
+    absolutePath(getAppDir()).joinPath(RESOURCEROOT)
+  proc packageRoot(package: string): string =
+    resourceRoot().joinPath(package)
 
-  proc loadResource_intern(path: string): Stream =
-    if not path.fileExists():
+  proc loadResource_intern(path: string, package: string): Stream =
+    let archive = openZipArchive(package.packageRoot() & ".zip")
+    try:
+      result = newStringStream(archive.extractFile(path))
+    except ZippyError:
       raise newException(Exception, &"Resource {path} not found")
-    let archive = openZipArchive(modRoot() & ".zip")
-    # read all here so we can close the stream
-    result = newStringStream(archive.extractFile(path))
     archive.close()
 
   proc modList_intern(): seq[string] =
@@ -75,11 +90,28 @@ elif thebundletype == Zip:
       if kind == pcFile and file.endsWith(".zip"):
         result.add file[0 ..< ^4]
 
-  iterator walkResources_intern(): string =
-    let archive = openZipArchive(modRoot() & ".zip")
+  iterator walkResources_intern(dir: string, package = DEFAULT_PACKAGE): string =
+    let archive = openZipArchive(package.packageRoot() & ".zip")
+    let normDir = dir.normalizeDir()
     for i in archive.walkFiles:
-      if i[^1] != '/':
+      if i.startsWith(normDir):
         yield i
+    archive.close()
+
+  iterator ls_intern(dir: string, package: string): tuple[kind: PathComponent, path: string] =
+    let archive = openZipArchive(package.packageRoot() & ".zip")
+    let normDir = dir.normalizeDir()
+    var yielded: HashSet[string]
+
+    for i in archive.walkFiles:
+      if i.startsWith(normDir):
+        let components = i[normDir.len .. ^1].split('/', maxsplit = 1)
+        if components.len == 1:
+          if not (components[0] in yielded):
+            yield (kind: pcFile, path: components[0])
+        else:
+          if not (components[0] in yielded):
+            yield (kind: pcDir, path: components[0])
     archive.close()
 
 elif thebundletype == Exe:
@@ -92,42 +124,56 @@ elif thebundletype == Exe:
 
   proc loadResources(): Table[string, Table[string, string]] {.compileTime.} =
     assert BUILD_RESOURCEROOT != "", "define BUILD_RESOURCEROOT to build for bundle type 'exe'"
-    for kind, moddir in walkDir(BUILD_RESOURCEROOT):
+    for kind, packageDir in walkDir(BUILD_RESOURCEROOT):
       if kind == pcDir:
-        let modname = moddir.splitPath.tail
-        result[modname] = Table[string, string]()
-        for resourcefile in walkDirRec(moddir, relative = true):
-          result[modname][resourcefile] = staticRead(joinPath(moddir, resourcefile))
+        let package = packageDir.splitPath.tail
+        result[package] = Table[string, string]()
+        for resourcefile in walkDirRec(packageDir, relative = true):
+          result[package][resourcefile] = staticRead(packageDir.joinPath(resourcefile))
   const bundledResources = loadResources()
 
-  proc loadResource_intern(path: string): Stream =
-    if not (path in bundledResources[selectedMod]):
+  proc loadResource_intern(path: string, package: string): Stream =
+    if not (path in bundledResources[package]):
       raise newException(Exception, &"Resource {path} not found")
-    newStringStream(bundledResources[selectedMod][path])
+    newStringStream(bundledResources[package][path])
 
   proc modList_intern(): seq[string] =
     result = bundledResources.keys().toSeq()
 
-  iterator walkResources_intern(): string =
-    for i in bundledResources[selectedMod].keys:
+  iterator walkResources_intern(dir: string, package = DEFAULT_PACKAGE): string =
+    for i in bundledResources[package].keys:
       yield i
 
-proc loadResource*(path: string): Stream =
-  loadResource_intern(path)
+  iterator ls_intern(dir: string, package: string): tuple[kind: PathComponent, path: string] =
+    let normDir = dir.normalizeDir()
+    var yielded: HashSet[string]
 
-proc loadImage*[T](path: string): Image[RGBAPixel] =
+    for i in bundledResources[package].keys:
+      if i.startsWith(normDir):
+        let components = i[normDir.len .. ^1].split('/', maxsplit = 1)
+        if components.len == 1:
+          if not (components[0] in yielded):
+            yield (kind: pcFile, path: components[0])
+        else:
+          if not (components[0] in yielded):
+            yield (kind: pcDir, path: components[0])
+
+proc loadResource*(path: string, package = DEFAULT_PACKAGE): Stream =
+  loadResource_intern(path, package = package)
+
+proc loadImage*[T](path: string, package = DEFAULT_PACKAGE): Image[RGBAPixel] =
   if path.splitFile().ext.toLowerAscii == ".bmp":
-    loadResource_intern(path).readBMP()
+    loadResource_intern(path, package = package).readBMP()
   elif path.splitFile().ext.toLowerAscii == ".png":
-    loadResource_intern(path).readPNG()
+    loadResource_intern(path, package = package).readPNG()
   else:
     raise newException(Exception, "Unsupported image file type: " & path)
 
-proc loadAudio*(path: string): Sound =
+proc loadAudio*(path: string, package = DEFAULT_PACKAGE): Sound =
   if path.splitFile().ext.toLowerAscii == ".au":
-    loadResource_intern(path).readAU()
+    loadResource_intern(path, package = package).readAU()
   elif path.splitFile().ext.toLowerAscii == ".ogg":
-    loadResource_intern(path).readVorbis()
+    loadResource_intern(path, package = package).readVorbis()
   else:
     raise newException(Exception, "Unsupported audio file type: " & path)
 
@@ -136,23 +182,30 @@ proc loadFont*(
   name = "",
   lineHeightPixels = 80'f32,
   additional_codepoints: openArray[Rune] = [],
-  charset = ASCII_CHARSET
+  charset = ASCII_CHARSET,
+  package = DEFAULT_PACKAGE
 ): Font =
   var thename = name
   if thename == "":
     thename = path.splitFile().name
-  loadResource_intern(path).readTrueType(name, charset & additional_codepoints.toSeq, lineHeightPixels)
+  loadResource_intern(path, package = package).readTrueType(name, charset & additional_codepoints.toSeq, lineHeightPixels)
 
-proc loadMeshes*(path: string, defaultMaterial: MaterialType): seq[MeshTree] =
-  loadResource_intern(path).readglTF(defaultMaterial)
+proc loadMeshes*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): seq[MeshTree] =
+  loadResource_intern(path, package = package).readglTF(defaultMaterial)
 
-proc loadFirstMesh*(path: string, defaultMaterial: MaterialType): Mesh =
-  loadResource_intern(path).readglTF(defaultMaterial)[0].toSeq[0]
+proc loadFirstMesh*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): Mesh =
+  loadResource_intern(path, package = package).readglTF(defaultMaterial)[0].toSeq[0]
 
-proc modList*(): seq[string] =
+proc packages*(): seq[string] =
   modList_intern()
 
-iterator walkResources*(dir = ""): string =
-  for i in walkResources_intern():
+proc walkResources*(dir = "", package = DEFAULT_PACKAGE): seq[string] =
+  for i in walkResources_intern(dir, package = package):
     if i.startsWith(dir):
-      yield i
+      result.add i
+  result.sort()
+
+proc ls*(dir: string, package = DEFAULT_PACKAGE): seq[tuple[kind: PathComponent, path: string]] =
+  for i in ls_intern(dir = dir, package = package):
+    result.add i
+  result.sort()

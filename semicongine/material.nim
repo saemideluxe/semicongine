@@ -131,7 +131,7 @@ const
   EMPTY_SHADER* = createShaderConfiguration(
     inputs = [
       attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
-      attr[Vec3f]("position", memoryPerformanceHint = PreferFastWrite),
+      attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
     ],
     outputs = [attr[Vec4f]("color")],
     vertexCode = &"gl_Position = vec4(position, 1.0) * {TRANSFORM_ATTRIB};",
