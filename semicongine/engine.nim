@@ -221,6 +221,11 @@ proc `fullscreen=`*(engine: var Engine, enable: bool) =
 func limits*(engine: Engine): VkPhysicalDeviceLimits =
   engine.gpuDevice().physicalDevice.properties.limits
 
+proc processEventsFor*(engine: Engine, text: var Text) =
+  if engine.input.windowWasResized:
+    text.aspect_ratio = engine.getAspectRatio()
+  text.refresh()
+
 proc processEventsFor*(engine: Engine, panel: var Panel) =
   if engine.input.windowWasResized:
     panel.aspect_ratio = engine.getAspectRatio()

@@ -142,7 +142,7 @@ proc refresh*(text: var Text) =
       text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
       text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
       text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
-  text.mesh.transform = translate(text.position.x, text.position.y, 0) * scale(text.scale, text.scale * text.aspect_ratio)
+  text.mesh.transform = translate(text.position.x, text.position.y * text.aspect_ratio, 0) * scale(text.scale, text.scale * text.aspect_ratio)
   text.lastRenderedText = text.processedText
   text.dirty = false
 
