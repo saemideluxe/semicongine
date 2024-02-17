@@ -46,9 +46,9 @@ proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool,
 
   let requirements = buffer.requirements()
   let memoryType = requirements.memoryTypes.selectBestMemoryType(
-    requireMappable=requireMappable,
-    preferVRAM=preferVRAM,
-    preferAutoFlush=preferAutoFlush
+    requireMappable = requireMappable,
+    preferVRAM = preferVRAM,
+    preferAutoFlush = preferAutoFlush
   )
 
   debug "Allocating memory for buffer: ", buffer.size, " bytes of type ", memoryType
@@ -71,7 +71,7 @@ proc createBuffer*(
   usage: openArray[VkBufferUsageFlagBits],
   requireMappable: bool,
   preferVRAM: bool,
-  preferAutoFlush=true,
+  preferAutoFlush = true,
 ): Buffer =
   assert device.vk.valid
   assert size > 0
@@ -90,15 +90,15 @@ proc createBuffer*(
   )
 
   checkVkResult vkCreateBuffer(
-    device=device.vk,
-    pCreateInfo=addr createInfo,
-    pAllocator=nil,
-    pBuffer=addr result.vk
+    device = device.vk,
+    pCreateInfo = addr createInfo,
+    pAllocator = nil,
+    pBuffer = addr result.vk
   )
-  result.allocateMemory(requireMappable=requireMappable, preferVRAM=preferVRAM, preferAutoFlush=preferAutoFlush)
+  result.allocateMemory(requireMappable = requireMappable, preferVRAM = preferVRAM, preferAutoFlush = preferAutoFlush)
 
 
-proc copy*(src, dst: Buffer, dstOffset=0) =
+proc copy*(src, dst: Buffer, dstOffset = 0) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -126,21 +126,21 @@ proc destroy*(buffer: var Buffer) =
     )
   buffer.vk.reset
 
-proc setData*(dst: Buffer, src: pointer, size: int, bufferOffset=0) =
+proc setData*(dst: Buffer, src: pointer, size: int, bufferOffset = 0) =
   assert bufferOffset + size <= dst.size
   if dst.memory.canMap:
     copyMem(cast[pointer](cast[int](dst.memory.data) + bufferOffset), src, size)
     if dst.memory.needsFlushing:
       dst.memory.flush()
   else: # use staging buffer, slower but required if memory is not host visible
-    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable=true, preferVRAM=false, preferAutoFlush=true)
+    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
     setData(stagingBuffer, src, size, 0)
     stagingBuffer.copy(dst, bufferOffset)
     stagingBuffer.destroy()
 
-proc setData*[T: seq](dst: Buffer, src: ptr T, offset=0'u64) =
-  dst.setData(src, sizeof(get(genericParams(T), 0)) * src[].len, offset=offset)
+proc setData*[T: seq](dst: Buffer, src: ptr T, offset = 0'u64) =
+  dst.setData(src, sizeof(get(genericParams(T), 0)) * src[].len, offset = offset)
 
-proc setData*[T](dst: Buffer, src: ptr T, offset=0'u64) =
-  dst.setData(src, sizeof(T), offset=offset)
+proc setData*[T](dst: Buffer, src: ptr T, offset = 0'u64) =
+  dst.setData(src, sizeof(T), offset = offset)
 

@@ -88,7 +88,7 @@ proc getQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies , queuFamilies.toCPointer)
+  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, queuFamilies.toCPointer)
   for i in 0 ..< nQueuefamilies:
     result.add QueueFamily(
       device: device,

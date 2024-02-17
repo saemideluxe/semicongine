@@ -24,7 +24,7 @@ type
     Alternate
   Keyframe[T] = object
     timestamp: AnimationTime
-    value : T
+    value: T
     easeIn: Ease
     easeOut: Ease
   Animation*[T] = object
@@ -46,7 +46,7 @@ func easePow2(x: float32): float32 = x * x
 func easePow3(x: float32): float32 = x * x * x
 func easePow4(x: float32): float32 = x * x * x * x
 func easePow5(x: float32): float32 = x * x * x * x * x
-func easeExpo(x: float32): float32 = ( if x == 0: 0'f32 else: pow(2'f32, 10'f32 * x - 10'f32) )
+func easeExpo(x: float32): float32 = (if x == 0: 0'f32 else: pow(2'f32, 10'f32 * x - 10'f32))
 func easeSine(x: float32): float32 = 1'f32 - cos((x * PI) / 2'f32)
 func easeCirc(x: float32): float32 = 1'f32 - sqrt(1'f32 - pow(x, 2'f32))
 
@@ -81,10 +81,10 @@ func interpol(keyframe: Keyframe, t: float32): float32 =
   else:
     return combine(EASEFUNC_MAP[keyframe.easeIn], makeEaseOut(EASEFUNC_MAP[keyframe.easeOut]))(t)
 
-func keyframe*[T](timestamp: AnimationTime, value: T, easeIn=Linear, easeOut=None): Keyframe[T] =
+func keyframe*[T](timestamp: AnimationTime, value: T, easeIn = Linear, easeOut = None): Keyframe[T] =
   Keyframe[T](timestamp: timestamp, value: value, easeIn: easeIn, easeOut: easeOut)
 
-func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, direction=Forward, iterations=1): Animation[T] =
+func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, direction = Forward, iterations = 1): Animation[T] =
   assert keyframes.len >= 2, "An animation needs at least 2 keyframes"
   assert keyframes[0].timestamp == 0, "An animation's first keyframe needs to have timestamp=0"
   assert keyframes[^1].timestamp == 1, "An animation's last keyframe needs to have timestamp=1"
@@ -117,7 +117,7 @@ func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, dire
     iterations: iterations
   )
 
-func newAnimation*[T](fun: (t: AnimationTime) -> T, duration: float32, direction=Forward, iterations=1): Animation[T] =
+func newAnimation*[T](fun: (t: AnimationTime) -> T, duration: float32, direction = Forward, iterations = 1): Animation[T] =
   Animation[T](
     animationFunction: fun,
     duration: duration,
@@ -128,7 +128,7 @@ func newAnimation*[T](fun: (t: AnimationTime) -> T, duration: float32, direction
 proc reset*(player: var AnimationPlayer) =
   player.currentValue = player.animation.animationFunction(0)
   player.currentTime = 0
-  player.currentDirection = if player.animation.direction == Backward: -1 else : 1
+  player.currentDirection = if player.animation.direction == Backward: -1 else: 1
   player.currentIteration = player.animation.iterations
 
 

@@ -18,9 +18,9 @@ var instanceCounter* = 0
 type
   MeshIndexType* = enum
     None
-    Tiny # up to 2^8 vertices # TODO: need to check and enable support for this
+    Tiny  # up to 2^8 vertices # TODO: need to check and enable support for this
     Small # up to 2^16 vertices
-    Big # up to 2^32 vertices
+    Big   # up to 2^32 vertices
   MeshObject* = object
     name*: string
     vertexCount*: int
@@ -94,17 +94,17 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
 
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.vertexData[attribute] = initDataList(thetype=getDataType[T]())
+  mesh.vertexData[attribute] = initDataList(thetype = getDataType[T]())
   mesh.vertexData[attribute].setLen(mesh.vertexCount)
   mesh.vertexData[attribute] = value
   # `=`(mesh.vertexData[attribute], value)
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initVertexAttribute(mesh, attribute, newSeqWith(mesh.vertexCount, value))
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
-  initVertexAttribute(mesh=mesh, attribute=attribute, value=default(T))
+  initVertexAttribute(mesh = mesh, attribute = attribute, value = default(T))
 proc initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.vertexData[attribute] = initDataList(thetype=datatype)
+  mesh.vertexData[attribute] = initDataList(thetype = datatype)
   mesh.vertexData[attribute].setLen(mesh.vertexCount)
 proc initVertexAttribute*(mesh: var MeshObject, attribute: string, data: DataList) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
@@ -113,16 +113,16 @@ proc initVertexAttribute*(mesh: var MeshObject, attribute: string, data: DataLis
 
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.instanceData[attribute] = initDataList(thetype=getDataType[T]())
+  mesh.instanceData[attribute] = initDataList(thetype = getDataType[T]())
   mesh.instanceData[attribute].setLen(mesh.instanceCount)
   mesh.instanceData[attribute] = value
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initInstanceAttribute(mesh, attribute, newSeqWith(mesh.instanceCount, value))
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
-  initInstanceAttribute(mesh=mesh, attribute=attribute, value=default(T))
+  initInstanceAttribute(mesh = mesh, attribute = attribute, value = default(T))
 proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.instanceData[attribute] = initDataList(thetype=datatype)
+  mesh.instanceData[attribute] = initDataList(thetype = datatype)
   mesh.instanceData[attribute].setLen(mesh.instanceCount)
 proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, data: DataList) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
@@ -131,13 +131,13 @@ proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, data: DataL
 proc newMesh*(
   positions: openArray[Vec3f],
   indices: openArray[array[3, uint32|uint16|uint8]],
-  colors: openArray[Vec4f]=[],
-  uvs: openArray[Vec2f]=[],
-  transform: Mat4=Unit4F32,
-  instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material=EMPTY_MATERIAL.initMaterialData(),
-  autoResize=true,
-  name: string=""
+  colors: openArray[Vec4f] = [],
+  uvs: openArray[Vec2f] = [],
+  transform: Mat4 = Unit4F32,
+  instanceTransforms: openArray[Mat4] = [Unit4F32],
+  material = EMPTY_MATERIAL.initMaterialData(),
+  autoResize = true,
+  name: string = ""
 ): Mesh =
   assert colors.len == 0 or colors.len == positions.len
   assert uvs.len == 0 or uvs.len == positions.len
@@ -164,7 +164,7 @@ proc newMesh*(
     material: material
   )
 
-  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE , positions.toSeq)
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, positions.toSeq)
   if colors.len > 0: result[].initVertexAttribute("color", colors.toSeq)
   if uvs.len > 0: result[].initVertexAttribute("uv", uvs.toSeq)
 
@@ -187,22 +187,22 @@ proc newMesh*(
 
 proc newMesh*(
   positions: openArray[Vec3f],
-  colors: openArray[Vec4f]=[],
-  uvs: openArray[Vec2f]=[],
-  transform: Mat4=Unit4F32,
-  instanceTransforms: openArray[Mat4]=[Unit4F32],
-  material=EMPTY_MATERIAL.initMaterialData(),
-  name: string="",
+  colors: openArray[Vec4f] = [],
+  uvs: openArray[Vec2f] = [],
+  transform: Mat4 = Unit4F32,
+  instanceTransforms: openArray[Mat4] = [Unit4F32],
+  material = EMPTY_MATERIAL.initMaterialData(),
+  name: string = "",
 ): Mesh =
   newMesh(
-    positions=positions,
-    indices=newSeq[array[3, uint16]](),
-    colors=colors,
-    uvs=uvs,
-    transform=transform,
-    instanceTransforms=instanceTransforms,
-    material=material,
-    name=name,
+    positions = positions,
+    indices = newSeq[array[3, uint16]](),
+    colors = colors,
+    uvs = uvs,
+    transform = transform,
+    instanceTransforms = instanceTransforms,
+    material = material,
+    name = name,
   )
 
 func attributeSize*(mesh: MeshObject, attribute: string): int =
@@ -385,16 +385,16 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-proc applyTransformToVertices*(mesh: var MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE) =
+proc applyTransformToVertices*(mesh: var MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE) =
   for i in 0 ..< mesh.vertexData[positionAttribute].len:
     mesh.vertexData[positionAttribute][i] = mesh.transform * mesh.vertexData[positionAttribute][i, Vec3f]
   mesh.transform = Unit4
 
-func getCollisionPoints*(mesh: MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE): seq[Vec3f] =
+func getCollisionPoints*(mesh: MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE): seq[Vec3f] =
   for p in mesh[positionAttribute, Vec3f][]:
     result.add mesh.transform * p
 
-func getCollider*(mesh: MeshObject, positionAttribute=DEFAULT_POSITION_ATTRIBUTE): Collider =
+func getCollider*(mesh: MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE): Collider =
   return mesh.getCollisionPoints(positionAttribute).calculateCollider(Points)
 
 proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
@@ -443,7 +443,7 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
 
 # GENERATORS ============================================================================
 
-proc rect*(width=1'f32, height=1'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 4,
     instanceTransforms: @[Unit4F32],
@@ -457,14 +457,14 @@ proc rect*(width=1'f32, height=1'f32, color="ffffffff", material=EMPTY_MATERIAL.
   let
     half_w = width / 2
     half_h = height / 2
-    pos = @[newVec3f(-half_w, -half_h), newVec3f( half_w, -half_h), newVec3f( half_w,  half_h), newVec3f(-half_w,  half_h)]
+    pos = @[newVec3f(-half_w, -half_h), newVec3f(half_w, -half_h), newVec3f(half_w, half_h), newVec3f(-half_w, half_h)]
     c = toRGBA(color)
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", @[c, c, c, c])
   result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
 
-proc tri*(width=1'f32, height=1'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 3,
     instanceTransforms: @[Unit4F32],
@@ -477,10 +477,10 @@ proc tri*(width=1'f32, height=1'f32, color="ffffffff", material=EMPTY_MATERIAL.i
     half_h = height / 2
     colorVec = toRGBA(color)
 
-  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, @[newVec3f(0, -half_h), newVec3f( half_w, half_h), newVec3f(-half_w,  half_h)])
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, @[newVec3f(0, -half_h), newVec3f(half_w, half_h), newVec3f(-half_w, half_h)])
   result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
 
-proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   assert nSegments >= 3
   result = Mesh(
     vertexCount: 3 + nSegments,
@@ -507,8 +507,8 @@ proc circle*(width=1'f32, height=1'f32, nSegments=12, color="ffffffff", material
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
 
-proc grid*(columns, rows: uint16, cellSize=1.0'f32, color="ffffffff", material=EMPTY_MATERIAL.initMaterialData()): Mesh =
-  
+proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
+
   result = Mesh(
     vertexCount: int((rows + 1) * (columns + 1)),
     instanceTransforms: @[Unit4F32],
@@ -547,7 +547,7 @@ type
     transform*: Mat4 = Unit4F32
     children*: seq[MeshTree]
 
-func toStringRec*(tree: MeshTree, theindent=0): seq[string] =
+func toStringRec*(tree: MeshTree, theindent = 0): seq[string] =
   if tree.mesh.isNil:
     result.add "*"
   else:
@@ -567,7 +567,7 @@ proc toSeq*(tree: MeshTree): seq[Mesh] =
       result.add current.mesh
     queue.add current.children
 
-proc updateTransforms*(tree: MeshTree, parentTransform=Unit4F32) =
+proc updateTransforms*(tree: MeshTree, parentTransform = Unit4F32) =
   let currentTransform = parentTransform * tree.transform
   if not tree.mesh.isNil:
     tree.mesh.transform = currentTransform

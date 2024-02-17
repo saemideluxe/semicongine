@@ -125,7 +125,7 @@ func size*(theType: DataType): int =
     of Mat4F64: 128
     of TextureType: 0
 
-func size*(attribute: ShaderAttribute, perDescriptor=false): int =
+func size*(attribute: ShaderAttribute, perDescriptor = false): int =
   if perDescriptor:
     attribute.theType.size div attribute.theType.numberOfVertexInputAttributeDescriptors
   else:
@@ -190,14 +190,14 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
   elif T is Texture: TextureType
   else:
     static:
-      raise newException(Exception, &"Unsupported data type for GPU data: {name(T)}" )
+      raise newException(Exception, &"Unsupported data type for GPU data: {name(T)}")
 
 func attr*[T: GPUType](
   name: string,
-  perInstance=false,
-  arrayCount=0,
-  noInterpolation=false,
-  memoryPerformanceHint=PreferFastRead,
+  perInstance = false,
+  arrayCount = 0,
+  noInterpolation = false,
+  memoryPerformanceHint = PreferFastRead,
 ): auto =
   ShaderAttribute(
     name: name,
@@ -312,8 +312,8 @@ func nLocationSlots*(theType: DataType): int =
     of TextureType: 1
 
 func glslType*(theType: DataType): string =
-  # todo: likely not correct as we would need to enable some 
-  # extensions somewhere (Vulkan/GLSL compiler?) to have 
+  # todo: likely not correct as we would need to enable some
+  # extensions somewhere (Vulkan/GLSL compiler?) to have
   # everything work as intended. Or maybe the GPU driver does
   # some automagic conversion stuf..
   case theType:
@@ -366,7 +366,7 @@ func glslInput*(group: openArray[ShaderAttribute]): seq[string] =
     for j in 0 ..< attribute.theType.numberOfVertexInputAttributeDescriptors:
       i += attribute.theType.nLocationSlots
 
-func glslUniforms*(group: openArray[ShaderAttribute], blockName="Uniforms", binding: int): seq[string] =
+func glslUniforms*(group: openArray[ShaderAttribute], blockName = "Uniforms", binding: int): seq[string] =
   if group.len == 0:
     return @[]
   # currently only a single uniform block supported, therefore binding = 0

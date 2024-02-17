@@ -43,23 +43,23 @@ func ConstR[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(0), T(0)]
 func ConstG[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(1), T(0)])
 func ConstB[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(0), T(1)])
 
-func newVec2f*(x=0'f32, y=0'f32): auto =
+func newVec2f*(x = 0'f32, y = 0'f32): auto =
   Vec2f([x, y])
-func newVec3f*(x=0'f32, y=0'f32, z=0'f32): auto =
+func newVec3f*(x = 0'f32, y = 0'f32, z = 0'f32): auto =
   Vec3f([x, y, z])
-func newVec4f*(x=0'f32, y=0'f32, z=0'f32, a=0'f32): auto =
+func newVec4f*(x = 0'f32, y = 0'f32, z = 0'f32, a = 0'f32): auto =
   Vec4f([x, y, z, a])
-func newVec2i*(x=0'i32, y=0'i32): auto =
+func newVec2i*(x = 0'i32, y = 0'i32): auto =
   Vec2i([x, y])
-func newVec3i*(x=0'i32, y=0'i32, z=0'i32): auto =
+func newVec3i*(x = 0'i32, y = 0'i32, z = 0'i32): auto =
   Vec3i([x, y, z])
-func newVec4i*(x=0'i32, y=0'i32, z=0'i32, a=0'i32): auto =
+func newVec4i*(x = 0'i32, y = 0'i32, z = 0'i32, a = 0'i32): auto =
   Vec4i([x, y, z, a])
-func newVec2u*(x=0'u32, y=0'u32): auto =
+func newVec2u*(x = 0'u32, y = 0'u32): auto =
   Vec2u([x, y])
-func newVec3u*(x=0'u32, y=0'u32, z=0'u32): auto =
+func newVec3u*(x = 0'u32, y = 0'u32, z = 0'u32): auto =
   Vec3u([x, y, z])
-func newVec4u*(x=0'u32, y=0'u32, z=0'u32, a=0'u32): auto =
+func newVec4u*(x = 0'u32, y = 0'u32, z = 0'u32, a = 0'u32): auto =
   Vec4u([x, y, z, a])
 
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
@@ -282,8 +282,8 @@ proc vectorAttributeAccessor(accessor: string): seq[NimNode] =
     nnkGenericParams.newTree(nnkIdentDefs.newTree(newIdentNode("T"), newEmptyNode(), newEmptyNode())),
     nnkFormalParams.newTree(
       newEmptyNode(),
-      nnkIdentDefs.newTree( newIdentNode("vec"), nnkVarTy.newTree(newIdentNode("TVec")), newEmptyNode()),
-      nnkIdentDefs.newTree( newIdentNode("value"), newIdentNode("T"), newEmptyNode())
+      nnkIdentDefs.newTree(newIdentNode("vec"), nnkVarTy.newTree(newIdentNode("TVec")), newEmptyNode()),
+      nnkIdentDefs.newTree(newIdentNode("value"), newIdentNode("T"), newEmptyNode())
     ),
     newEmptyNode(),
     newEmptyNode(),

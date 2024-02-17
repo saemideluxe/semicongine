@@ -117,7 +117,7 @@ proc createDebugMessenger*(
   instance: Instance,
   severityLevels: openArray[VkDebugUtilsMessageSeverityFlagBitsEXT] = @[],
   types: openArray[VkDebugUtilsMessageTypeFlagBitsEXT] = @[],
-  callback: DebugCallback=defaultDebugCallback
+  callback: DebugCallback = defaultDebugCallback
 ): Debugger =
   assert instance.vk.valid
   result.instance = instance
