@@ -32,7 +32,7 @@ proc setupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool,
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 
   result = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
-  
+
   for i in 0 ..< inFlightFrames:
     var offset = 0
     # first descriptor is always uniform for globals, match should be better somehow
@@ -55,14 +55,14 @@ proc setupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool,
             descriptor.imageviews.add emptyTexture.imageView
             descriptor.samplers.add emptyTexture.sampler
 
-proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling=true): ShaderPipeline =
+proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling = true): ShaderPipeline =
   assert renderPass.valid
   assert device.vk.valid
 
   result.device = device
   result.shaderModules = device.createShaderModules(shaderConfiguration)
   result.shaderConfiguration = shaderConfiguration
-  
+
   var descriptors: seq[Descriptor]
   if result.shaderConfiguration.uniforms.len > 0:
     descriptors.add Descriptor(
@@ -94,7 +94,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
       setLayoutCount: uint32(descriptorSetLayouts.len),
       pSetLayouts: descriptorSetLayouts.toCPointer,
       # pushConstantRangeCount: uint32(pushConstants.len),
-      # pPushConstantRanges: pushConstants.toCPointer,
+        # pPushConstantRanges: pushConstants.toCPointer,
     )
   checkVkResult vkCreatePipelineLayout(device.vk, addr(pipelineLayoutInfo), nil, addr(result.layout))
 

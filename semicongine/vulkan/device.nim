@@ -51,7 +51,7 @@ proc createDevice*(
   var queueList = deviceQueues.values.toSeq
 
   var uniformBufferLayoutFeature = VkPhysicalDeviceUniformBufferStandardLayoutFeatures(
-    stype:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES,
+    stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES,
     uniformBufferStandardLayout: true,
   )
   var features2 = VkPhysicalDeviceFeatures2(
@@ -72,10 +72,10 @@ proc createDevice*(
   )
 
   checkVkResult vkCreateDevice(
-    physicalDevice=physicalDevice.vk,
-    pCreateInfo=addr createInfo,
-    pAllocator=nil,
-    pDevice=addr result.vk
+    physicalDevice = physicalDevice.vk,
+    pCreateInfo = addr createInfo,
+    pAllocator = nil,
+    pDevice = addr result.vk
   )
   deallocCStringArray(enabledLayersC)
   deallocCStringArray(enabledExtensionsC)

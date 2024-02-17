@@ -65,12 +65,12 @@ proc replaceSound*(mixer: var Mixer, name: string, sound: Sound) =
   assert (name in mixer.sounds)
   mixer.sounds[name] = sound
 
-proc addTrack*(mixer: var Mixer, name: string, level: Level=1'f) =
+proc addTrack*(mixer: var Mixer, name: string, level: Level = 1'f) =
   assert not (name in mixer.tracks)
   mixer.lock.withLock():
     mixer.tracks[name] = Track(level: level)
 
-proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false, loop=false, levelLeft, levelRight: Level): uint64 =
+proc play*(mixer: var Mixer, soundName: string, track = "", stopOtherSounds = false, loop = false, levelLeft, levelRight: Level): uint64 =
   assert track in mixer.tracks
   assert soundName in mixer.sounds, soundName & " not loaded"
   mixer.lock.withLock():
@@ -87,15 +87,15 @@ proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false,
   result = mixer.playbackCounter
   inc mixer.playbackCounter
 
-proc play*(mixer: var Mixer, soundName: string, track="", stopOtherSounds=false, loop=false, level: Level=1'f): uint64 =
+proc play*(mixer: var Mixer, soundName: string, track = "", stopOtherSounds = false, loop = false, level: Level = 1'f): uint64 =
   play(
-    mixer=mixer,
-    soundName=soundName,
-    track=track,
-    stopOtherSounds=stopOtherSounds,
-    loop=loop,
-    levelLeft=level,
-    levelRight=level
+    mixer = mixer,
+    soundName = soundName,
+    track = track,
+    stopOtherSounds = stopOtherSounds,
+    loop = loop,
+    levelLeft = level,
+    levelRight = level
   )
 
 proc stop*(mixer: var Mixer) =
@@ -105,7 +105,7 @@ proc stop*(mixer: var Mixer) =
 
 proc getLevel*(mixer: var Mixer): Level = mixer.level
 proc getLevel*(mixer: var Mixer, track: string): Level = mixer.tracks[track].level
-proc getLevel*(mixer: var Mixer, playbackId : uint64): (Level, Level) =
+proc getLevel*(mixer: var Mixer, playbackId: uint64): (Level, Level) =
   for track in mixer.tracks.mvalues:
     if playbackId in track.playing:
       return (track.playing[playbackId].levelLeft, track.playing[playbackId].levelRight)
@@ -120,7 +120,7 @@ proc setLevel*(mixer: var Mixer, playbackId: uint64, levelLeft, levelRight: Leve
       if playbackId in track.playing:
         track.playing[playbackId].levelLeft = levelLeft
         track.playing[playbackId].levelRight = levelRight
-proc setLevel*(mixer: var Mixer, playbackId : uint64, level: Level) =
+proc setLevel*(mixer: var Mixer, playbackId: uint64, level: Level) =
   setLevel(mixer, playbackId, level, level)
 
 proc stop*(mixer: var Mixer, track: string) =

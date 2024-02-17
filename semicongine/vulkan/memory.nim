@@ -91,15 +91,15 @@ proc allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemo
 
   if result.canMap:
     checkVkResult result.device.vk.vkMapMemory(
-      memory=result.vk,
-      offset=VkDeviceSize(0),
-      size=VkDeviceSize(result.size),
-      flags=VkMemoryMapFlags(0), # unused up to Vulkan 1.3
-      ppData=addr(result.data)
+      memory = result.vk,
+      offset = VkDeviceSize(0),
+      size = VkDeviceSize(result.size),
+      flags = VkMemoryMapFlags(0), # unused up to Vulkan 1.3
+      ppData = addr(result.data)
     )
 
 # flush host -> device
-proc flush*(memory: DeviceMemory, offset=0'u64, size=0'u64) =
+proc flush*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
   assert memory.device.vk.valid
   assert memory.vk.valid
   assert memory.needsFlushing
@@ -113,10 +113,10 @@ proc flush*(memory: DeviceMemory, offset=0'u64, size=0'u64) =
     offset: VkDeviceSize(offset),
     size: VkDeviceSize(size)
   )
-  checkVkResult memory.device.vk.vkFlushMappedMemoryRanges(memoryRangeCount=1, pMemoryRanges=addr(flushrange))
+  checkVkResult memory.device.vk.vkFlushMappedMemoryRanges(memoryRangeCount = 1, pMemoryRanges = addr(flushrange))
 
 # flush device -> host
-proc invalidate*(memory: DeviceMemory, offset=0'u64, size=0'u64) =
+proc invalidate*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
   assert memory.device.vk.valid
   assert memory.vk.valid
   assert memory.needsFlushing
@@ -130,7 +130,7 @@ proc invalidate*(memory: DeviceMemory, offset=0'u64, size=0'u64) =
     offset: VkDeviceSize(offset),
     size: VkDeviceSize(size)
   )
-  checkVkResult memory.device.vk.vkInvalidateMappedMemoryRanges(memoryRangeCount=1, pMemoryRanges=addr(flushrange))
+  checkVkResult memory.device.vk.vkInvalidateMappedMemoryRanges(memoryRangeCount = 1, pMemoryRanges = addr(flushrange))
 
 proc free*(memory: var DeviceMemory) =
   assert memory.device.vk.valid

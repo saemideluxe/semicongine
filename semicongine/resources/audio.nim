@@ -59,7 +59,7 @@ proc readAU*(stream: Stream): Sound =
   while not stream.atEnd():
     result[].add stream.readSample(header.encoding, int(header.channels))
 
-{.compile: currentSourcePath.parentDir() & "/stb_vorbis.c" .}
+{.compile: currentSourcePath.parentDir() & "/stb_vorbis.c".}
 
 proc stb_vorbis_decode_memory(mem: pointer, len: cint, channels: ptr cint, sample_rate: ptr cint, output: ptr ptr cshort): cint {.importc.}
 proc free(p: pointer) {.importc.}

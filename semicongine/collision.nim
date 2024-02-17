@@ -91,7 +91,7 @@ func line(simplex: var seq[Vec3f], direction: var Vec3f): bool =
     a = simplex[0]
     b = simplex[1]
     ab = b - a
-    ao =   - a
+    ao = - a
 
   if sameDirection(ab, ao):
     direction = cross(cross(ab, ao), ab)
@@ -101,16 +101,16 @@ func line(simplex: var seq[Vec3f], direction: var Vec3f): bool =
 
   return false
 
-func triangle(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional=false): bool =
+func triangle(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional = false): bool =
   let
     a = simplex[0]
     b = simplex[1]
     c = simplex[2]
     ab = b - a
     ac = c - a
-    ao =   - a
+    ao = - a
     abc = ab.cross(ac)
- 
+
   if sameDirection(abc.cross(ac), ao):
     if sameDirection(ac, ao):
       simplex = @[a, c]
@@ -128,7 +128,7 @@ func triangle(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional=fals
       if (sameDirection(abc, ao)):
         direction = abc
       else:
-        simplex = @[ a, c, b]
+        simplex = @[a, c, b]
         direction = -abc
 
   return false
@@ -142,11 +142,11 @@ func tetrahedron(simplex: var seq[Vec3f], direction: var Vec3f): bool =
     ab = b - a
     ac = c - a
     ad = d - a
-    ao =   - a
+    ao = - a
     abc = ab.cross(ac)
     acd = ac.cross(ad)
     adb = ad.cross(ab)
- 
+
   if sameDirection(abc, ao):
     simplex = @[a, b, c]
     return triangle(simplex, direction)
@@ -156,7 +156,7 @@ func tetrahedron(simplex: var seq[Vec3f], direction: var Vec3f): bool =
   if sameDirection(adb, ao):
     simplex = @[a, d, b]
     return triangle(simplex, direction)
- 
+
   return true
 
 func getFaceNormals(polytope: seq[Vec3f], faces: seq[int]): (seq[Vec4f], int) =
@@ -193,7 +193,7 @@ func addIfUniqueEdge(edges: var seq[(int, int)], faces: seq[int], a: int, b: int
   else:
     edges.add (faces[a], faces[b])
 
-func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional=false): bool =
+func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional = false): bool =
   case simplex.len
   of 2: simplex.line(direction)
   of 3: simplex.triangle(direction, twoDimensional)
@@ -220,7 +220,7 @@ func collisionPoint3D(simplex: var seq[Vec3f], a, b: Collider): tuple[normal: Ve
     var
       support = supportPoint(a, b, minNormal)
       sDistance = minNormal.dot(support)
-    
+
     if abs(sDistance - minDistance) > 0.001'f32:
       minDistance = high(float32)
       var uniqueEdges: seq[(int, int)]
@@ -247,7 +247,7 @@ func collisionPoint3D(simplex: var seq[Vec3f], a, b: Collider): tuple[normal: Ve
         newFaces.add edgeIndex1
         newFaces.add edgeIndex2
         newFaces.add polytope.len
-       
+
       polytope.add support
 
       var (newNormals, newMinFace) = getFaceNormals(polytope, newFaces)
@@ -311,7 +311,7 @@ func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec
 
   result = (normal: newVec3f(minNormal.x, minNormal.y), penetrationDepth: minDistance + 0.001'f32)
 
-func intersects*(a, b: Collider, as2D=false): bool =
+func intersects*(a, b: Collider, as2D = false): bool =
   var
     support = supportPoint(a, b, newVec3f(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
@@ -321,16 +321,16 @@ func intersects*(a, b: Collider, as2D=false): bool =
   while n < MAX_COLLISON_DETECTION_ITERATIONS:
     support = supportPoint(a, b, direction)
     if support.dot(direction) <= 0:
-        return false
+      return false
     simplex.insert(support, 0)
-    if nextSimplex(simplex, direction, twoDimensional=as2D):
+    if nextSimplex(simplex, direction, twoDimensional = as2D):
       return true
     # prevent numeric instability
     if direction == newVec3f(0, 0, 0):
       direction[0] = 0.0001
     inc n
 
-func collision*(a, b: Collider, as2D=false): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
+func collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
   var
     support = supportPoint(a, b, newVec3f(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
@@ -340,9 +340,9 @@ func collision*(a, b: Collider, as2D=false): tuple[hasCollision: bool, normal: V
   while n < MAX_COLLISON_DETECTION_ITERATIONS:
     support = supportPoint(a, b, direction)
     if support.dot(direction) <= 0:
-        return result
+      return result
     simplex.insert(support, 0)
-    if nextSimplex(simplex, direction, twoDimensional=as2D):
+    if nextSimplex(simplex, direction, twoDimensional = as2D):
       let (normal, depth) = if as2D: collisionPoint2D(simplex, a, b) else: collisionPoint3D(simplex, a, b)
       return (true, normal, depth)
     # prevent numeric instability

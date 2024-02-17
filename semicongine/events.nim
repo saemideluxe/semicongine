@@ -13,7 +13,7 @@ type
     A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z
     Tab, CapsLock, ShiftL, ShiftR, CtrlL, CtrlR, SuperL, SuperR, AltL, AltR,
         Space, Enter, Backspace
-    LetterRow1Extra1, LetterRow1Extra2 # open bracket, close brackt, backslash
+    LetterRow1Extra1, LetterRow1Extra2                   # open bracket, close brackt, backslash
     LetterRow2Extra1, LetterRow2Extra2, LetterRow2Extra3 # semicolon, quote
     LetterRow3Extra1, LetterRow3Extra2, LetterRow3Extra3 # comma, period, slash
     Up, Down, Left, Right

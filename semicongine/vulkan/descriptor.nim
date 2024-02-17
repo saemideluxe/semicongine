@@ -28,10 +28,10 @@ type
     device: Device
     vk*: VkDescriptorSetLayout
     descriptors*: seq[Descriptor]
-  DescriptorPool* = object # required for allocation of DescriptorSet
+  DescriptorPool* = object                # required for allocation of DescriptorSet
     device: Device
     vk*: VkDescriptorPool
-    maxSets*: int # maximum number of allocatable descriptor sets
+    maxSets*: int                         # maximum number of allocatable descriptor sets
     counts*: seq[(VkDescriptorType, int)] # maximum number for each descriptor type to allocate
 
 const DESCRIPTOR_TYPE_MAP = {
@@ -121,7 +121,7 @@ proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
   for descriptorSet in descriptorSets:
     result.add DescriptorSet(vk: descriptorSet, layout: layout)
 
-proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
+proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
   # assumes descriptors of the descriptorSet are arranged interleaved in buffer
   assert descriptorSet.layout.device.vk.valid
   assert descriptorSet.layout.vk.valid
@@ -131,7 +131,7 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase=0'u32) =
   var bufferInfos: seq[VkDescriptorBufferInfo]
 
   var i = bindingBase
-  # need to keep this sequence out of the loop, otherwise it will be 
+  # need to keep this sequence out of the loop, otherwise it will be
   # gc-ed before the final update call and pointers are invalid :(
   var imgInfos: seq[seq[VkDescriptorImageInfo]]
   for descriptor in descriptorSet.layout.descriptors:

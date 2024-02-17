@@ -14,7 +14,7 @@ type
   VulkanImage* = object
     device*: Device
     vk*: VkImage
-    width*: int # pixel
+    width*: int  # pixel
     height*: int # pixel
     depth*: PixelDepth
     format*: VkFormat
@@ -60,9 +60,9 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
 
   let requirements = image.requirements()
   let memoryType = requirements.memoryTypes.selectBestMemoryType(
-    requireMappable=requireMappable,
-    preferVRAM=preferVRAM,
-    preferAutoFlush=preferAutoFlush
+    requireMappable = requireMappable,
+    preferVRAM = preferVRAM,
+    preferAutoFlush = preferAutoFlush
   )
 
   debug "Allocating memory for image: ", image.width, "x", image.height, "x", image.depth, ", ", requirements.size, " bytes of type ", memoryType
@@ -103,10 +103,10 @@ proc transitionImageLayout*(image: VulkanImage, oldLayout, newLayout: VkImageLay
     sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
     destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT
   elif oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL and newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-      barrier.srcAccessMask = toBits [VK_ACCESS_TRANSFER_WRITE_BIT]
-      barrier.dstAccessMask = toBits [VK_ACCESS_SHADER_READ_BIT]
-      sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT
-      destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+    barrier.srcAccessMask = toBits [VK_ACCESS_TRANSFER_WRITE_BIT]
+    barrier.dstAccessMask = toBits [VK_ACCESS_SHADER_READ_BIT]
+    sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT
+    destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
   else:
     raise newException(Exception, "Unsupported layout transition!")
 
@@ -179,11 +179,11 @@ proc createImage*(device: Device, width, height: int, depth: PixelDepth, data: p
     samples: VK_SAMPLE_COUNT_1_BIT,
   )
   checkVkResult device.vk.vkCreateImage(addr imageInfo, nil, addr result.vk)
-  result.allocateMemory(requireMappable=false, preferVRAM=true, preferAutoFlush=false)
+  result.allocateMemory(requireMappable = false, preferVRAM = true, preferAutoFlush = false)
   result.transitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
 
-  var stagingBuffer = device.createBuffer(size=size, usage=[VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable=true, preferVRAM=false, preferAutoFlush=true)
-  stagingBuffer.setData(src=data, size=size)
+  var stagingBuffer = device.createBuffer(size = size, usage = [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
+  stagingBuffer.setData(src = data, size = size)
   stagingBuffer.copy(result)
   result.transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
   stagingBuffer.destroy()
@@ -238,11 +238,11 @@ proc destroy*(sampler: var VulkanSampler) =
 
 proc createImageView*(
   image: VulkanImage,
-  imageviewtype=VK_IMAGE_VIEW_TYPE_2D,
-  baseMipLevel=0'u32,
-  levelCount=1'u32,
-  baseArrayLayer=0'u32,
-  layerCount=1'u32
+  imageviewtype = VK_IMAGE_VIEW_TYPE_2D,
+  baseMipLevel = 0'u32,
+  levelCount = 1'u32,
+  baseArrayLayer = 0'u32,
+  layerCount = 1'u32
 ): ImageView =
   assert image.device.vk.valid
   assert image.vk.valid
@@ -282,9 +282,9 @@ func `$`*(texture: VulkanTexture): string =
 proc uploadTexture*(device: Device, texture: Texture): VulkanTexture =
   assert device.vk.valid
   if texture.isGrayscale:
-    result.image = createImage(device=device, width=texture.grayImage.width, height=texture.grayImage.height, depth=1, data=addr texture.grayImage.imagedata[0])
+    result.image = createImage(device = device, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, data = addr texture.grayImage.imagedata[0])
   else:
-    result.image = createImage(device=device, width=texture.colorImage.width, height=texture.colorImage.height, depth=4, data=addr texture.colorImage.imagedata[0][0])
+    result.image = createImage(device = device, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, data = addr texture.colorImage.imagedata[0][0])
   result.imageView = result.image.createImageView()
   result.sampler = result.image.device.createSampler(texture.sampler)
 

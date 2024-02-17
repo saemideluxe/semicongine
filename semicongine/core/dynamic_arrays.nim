@@ -252,7 +252,7 @@ proc setValues[T: GPUType|int|uint|float](value: var DataList, data: seq[T]) =
   elif T is TMat4[float32]: value.mat4f32[] = data
   elif T is TMat4[float64]: value.mat4f64[] = data
   elif T is Texture: value.texture[] = data
-  else: {. error: "Virtual datatype has no values" .}
+  else: {.error: "Virtual datatype has no values".}
 
 proc setValue[T: GPUType|int|uint|float](value: var DataList, i: int, data: T) =
   assert i < value.len
@@ -305,9 +305,9 @@ proc setValue[T: GPUType|int|uint|float](value: var DataList, i: int, data: T) =
   elif T is TMat4[float32]: value.mat4f32[i] = data
   elif T is TMat4[float64]: value.mat4f64[i] = data
   elif T is Texture: value.texture[i] = data
-  else: {. error: "Virtual datatype has no values" .}
+  else: {.error: "Virtual datatype has no values".}
 
-proc initDataList*(theType: DataType, len=0): DataList =
+proc initDataList*(theType: DataType, len = 0): DataList =
   result = DataList(theType: theType)
   case result.theType
     of Float32: result.float32 = new seq[float32]
@@ -355,7 +355,7 @@ proc initDataList*(theType: DataType, len=0): DataList =
     of TextureType: result.texture = new seq[Texture]
   result.setLen(len)
 
-proc initDataList*[T: GPUType](len=1): DataList =
+proc initDataList*[T: GPUType](len = 1): DataList =
   result = initDataList(getDataType[T]())
   result.setLen(len)
 
@@ -413,7 +413,7 @@ func getValues[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
   elif T is TMat4[float32]: value.mat4f32
   elif T is TMat4[float64]: value.mat4f64
   elif T is Texture: value.texture
-  else: {. error: "Virtual datatype has no values" .}
+  else: {.error: "Virtual datatype has no values".}
 
 func getValue[T: GPUType|int|uint|float](value: DataList, i: int): T =
   when T is float32: value.float32[i]
@@ -465,7 +465,7 @@ func getValue[T: GPUType|int|uint|float](value: DataList, i: int): T =
   elif T is TMat4[float32]: value.mat4f32[i]
   elif T is TMat4[float64]: value.mat4f64[i]
   elif T is Texture: value.texture[i]
-  else: {. error: "Virtual datatype has no values" .}
+  else: {.error: "Virtual datatype has no values".}
 
 template `[]`*(list: DataList, t: typedesc): ref seq[t] =
   getValues[t](list)
@@ -583,7 +583,7 @@ proc appendValues*[T: GPUType|int|uint|float](value: var DataList, data: seq[T])
   elif T is TMat4[float32]: value.mat4f32[].add data
   elif T is TMat4[float64]: value.mat4f64[].add data
   elif T is Texture: value.texture[].add data
-  else: {. error: "Virtual datatype has no values" .}
+  else: {.error: "Virtual datatype has no values".}
 
 proc appendValues*(value: var DataList, data: DataList) =
   assert value.theType == data.theType, &"Expected datalist of type {value.theType} but got {data.theType}"
@@ -634,7 +634,7 @@ proc appendValues*(value: var DataList, data: DataList) =
   of TextureType: value.texture[].add data.texture[]
 
 proc appendFrom*(a: var DataList, i: int, b: DataList, j: int) =
-  assert  a.theType == b.theType
+  assert a.theType == b.theType
   case a.theType
     of Float32: a.float32[i] = b.float32[j]
     of Float64: a.float64[i] = b.float64[j]

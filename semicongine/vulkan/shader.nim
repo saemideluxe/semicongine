@@ -84,19 +84,19 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
 
 proc compileGlslCode*(
   stage: VkShaderStageFlagBits,
-  inputs: openArray[ShaderAttribute]=[],
-  uniforms: openArray[ShaderAttribute]=[],
-  samplers: openArray[ShaderAttribute]=[],
-  outputs: openArray[ShaderAttribute]=[],
-  version=DEFAULT_SHADER_VERSION ,
-  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
+  inputs: openArray[ShaderAttribute] = [],
+  uniforms: openArray[ShaderAttribute] = [],
+  samplers: openArray[ShaderAttribute] = [],
+  outputs: openArray[ShaderAttribute] = [],
+  version = DEFAULT_SHADER_VERSION,
+  entrypoint = DEFAULT_SHADER_ENTRYPOINT,
   main: string
 ): seq[uint32] {.compileTime.} =
 
   let code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
     (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
-    (if uniforms.len > 0: uniforms.glslUniforms(binding=0) & @[""] else: @[]) &
-    (if samplers.len > 0: samplers.glslSamplers(basebinding=if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
+    (if uniforms.len > 0: uniforms.glslUniforms(binding = 0) & @[""] else: @[]) &
+    (if samplers.len > 0: samplers.glslSamplers(basebinding = if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
     (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
     @[&"void {entrypoint}(){{"] &
     main &
@@ -104,32 +104,32 @@ proc compileGlslCode*(
   compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
 
 proc createShaderConfiguration*(
-  inputs: openArray[ShaderAttribute]=[],
-  intermediates: openArray[ShaderAttribute]=[],
-  outputs: openArray[ShaderAttribute]=[],
-  uniforms: openArray[ShaderAttribute]=[],
-  samplers: openArray[ShaderAttribute]=[],
-  version=DEFAULT_SHADER_VERSION ,
-  entrypoint=DEFAULT_SHADER_ENTRYPOINT ,
+  inputs: openArray[ShaderAttribute] = [],
+  intermediates: openArray[ShaderAttribute] = [],
+  outputs: openArray[ShaderAttribute] = [],
+  uniforms: openArray[ShaderAttribute] = [],
+  samplers: openArray[ShaderAttribute] = [],
+  version = DEFAULT_SHADER_VERSION,
+  entrypoint = DEFAULT_SHADER_ENTRYPOINT,
   vertexCode: string,
   fragmentCode: string,
 ): ShaderConfiguration {.compileTime.} =
   ShaderConfiguration(
     vertexBinary: compileGlslCode(
-      stage=VK_SHADER_STAGE_VERTEX_BIT,
-      inputs=inputs,
-      outputs=intermediates,
-      uniforms=uniforms,
-      samplers=samplers,
-      main=vertexCode,
+      stage = VK_SHADER_STAGE_VERTEX_BIT,
+      inputs = inputs,
+      outputs = intermediates,
+      uniforms = uniforms,
+      samplers = samplers,
+      main = vertexCode,
     ),
     fragmentBinary: compileGlslCode(
-      stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-      inputs=intermediates,
-      outputs=outputs,
-      uniforms=uniforms,
-      samplers=samplers,
-      main=fragmentCode,
+      stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+      inputs = intermediates,
+      outputs = outputs,
+      uniforms = uniforms,
+      samplers = samplers,
+      main = fragmentCode,
     ),
     entrypoint: entrypoint,
     inputs: @inputs,
@@ -172,7 +172,7 @@ proc getVertexInputInfo*(
   shaderConfiguration: ShaderConfiguration,
   bindings: var seq[VkVertexInputBindingDescription],
   attributes: var seq[VkVertexInputAttributeDescription],
-  baseBinding=0'u32
+  baseBinding = 0'u32
 ): VkPipelineVertexInputStateCreateInfo =
   var location = 0'u32
   var binding = baseBinding
@@ -189,7 +189,7 @@ proc getVertexInputInfo*(
         binding: binding,
         location: location,
         format: attribute.thetype.getVkFormat,
-        offset: uint32(i * attribute.size(perDescriptor=true)),
+        offset: uint32(i * attribute.size(perDescriptor = true)),
       )
       location += uint32(attribute.thetype.nLocationSlots)
     inc binding

@@ -32,7 +32,7 @@ proc getFile(namespace: string): string =
   joinPath(configRoot(), namespace & "." & CONFIGEXTENSION)
 
 iterator walkConfigNamespaces(): string =
-  for file in walkDirRec(dir=configRoot(), relative=true, checkDir=true):
+  for file in walkDirRec(dir = configRoot(), relative = true, checkDir = true):
     if file.endsWith("." & CONFIGEXTENSION):
       yield file[0 ..< ^(CONFIGEXTENSION.len + 1)]
 

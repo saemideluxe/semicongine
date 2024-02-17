@@ -39,10 +39,10 @@ proc createSwapchain*(
   renderPass: VkRenderPass,
   surfaceFormat: VkSurfaceFormatKHR,
   queueFamily: QueueFamily,
-  desiredNumberOfImages=3'u32,
-  preferedPresentMode: VkPresentModeKHR=VK_PRESENT_MODE_MAILBOX_KHR,
-  inFlightFrames=2,
-  oldSwapchain=VkSwapchainKHR(0)
+  desiredNumberOfImages = 3'u32,
+  preferedPresentMode: VkPresentModeKHR = VK_PRESENT_MODE_MAILBOX_KHR,
+  inFlightFrames = 2,
+  oldSwapchain = VkSwapchainKHR(0)
 ): Option[Swapchain] =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
@@ -221,11 +221,11 @@ proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
   assert swapchain.vk.valid
   assert swapchain.device.vk.valid
   result = createSwapchain(
-    device=swapchain.device,
-    renderPass=swapchain.renderPass,
-    surfaceFormat=swapchain.surfaceFormat,
-    queueFamily=swapchain.queueFamily,
-    desiredNumberOfImages=swapchain.imageCount,
-    inFlightFrames=swapchain.inFlightFrames,
-    oldSwapchain=swapchain.vk,
+    device = swapchain.device,
+    renderPass = swapchain.renderPass,
+    surfaceFormat = swapchain.surfaceFormat,
+    queueFamily = swapchain.queueFamily,
+    desiredNumberOfImages = swapchain.imageCount,
+    inFlightFrames = swapchain.inFlightFrames,
+    oldSwapchain = swapchain.vk,
   )

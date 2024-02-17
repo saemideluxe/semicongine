@@ -63,9 +63,9 @@ proc createRenderPass*(
 proc simpleForwardRenderPass*(
   device: Device,
   shaders: openArray[(MaterialType, ShaderConfiguration)],
-  inFlightFrames=2,
-  clearColor=Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]),
-  backFaceCulling=true,
+  inFlightFrames = 2,
+  clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]),
+  backFaceCulling = true,
 ): RenderPass =
   assert device.vk.valid
   for (_, shaderconfig) in shaders:
@@ -97,9 +97,9 @@ proc simpleForwardRenderPass*(
       dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
       dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
     )]
-  result = device.createRenderPass(attachments=attachments, subpasses=subpasses, dependencies=dependencies)
+  result = device.createRenderPass(attachments = attachments, subpasses = subpasses, dependencies = dependencies)
   for (materialtype, shaderconfig) in shaders:
-    result.subpasses[0].shaderPipelines.add (materialtype, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling=backFaceCulling))
+    result.subpasses[0].shaderPipelines.add (materialtype, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling = backFaceCulling))
 
 
 proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
@@ -144,8 +144,8 @@ proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass
   checkVkResult commandBuffer.vkResetCommandBuffer(VkCommandBufferResetFlags(0))
   checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
   commandBuffer.vkCmdBeginRenderPass(addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
-  commandBuffer.vkCmdSetViewport(firstViewport=0, viewportCount=1, addr(viewport))
-  commandBuffer.vkCmdSetScissor(firstScissor=0, scissorCount=1, addr(scissor))
+  commandBuffer.vkCmdSetViewport(firstViewport = 0, viewportCount = 1, addr(viewport))
+  commandBuffer.vkCmdSetScissor(firstScissor = 0, scissorCount = 1, addr(scissor))
 
 proc endRenderCommands*(commandBuffer: VkCommandBuffer) =
   commandBuffer.vkCmdEndRenderPass()
