@@ -40,11 +40,11 @@ type
   Mat43* = TMat43[float32]
   Mat4* = TMat4[float32]
 
-func unit2[T: SomeNumber](): auto {.compiletime.} = TMat2[T](data:[
+func unit2[T: SomeNumber](): auto {.compiletime.} = TMat2[T](data: [
   T(1), T(0),
   T(0), T(1),
 ])
-func unit3[T: SomeNumber](): auto {.compiletime.} = TMat3[T](data:[
+func unit3[T: SomeNumber](): auto {.compiletime.} = TMat3[T](data: [
   T(1), T(0), T(0),
   T(0), T(1), T(0),
   T(0), T(0), T(1),
@@ -177,13 +177,13 @@ proc createMatMatMultiplicationOperator(leftType: typedesc, rightType: typedesc,
 
   return newProc(
     postfix(nnkAccQuoted.newTree(ident("*")), "*"),
-    params=[
+    params = [
       ident("auto"),
       newIdentDefs(ident("a"), ident(leftType.name)),
       newIdentDefs(ident("b"), ident(rightType.name))
     ],
-    body=nnkObjConstr.newTree(ident(outType.name), nnkExprColonExpr.newTree(ident("data"), data)),
-    procType=nnkFuncDef,
+    body = nnkObjConstr.newTree(ident(outType.name), nnkExprColonExpr.newTree(ident("data"), data)),
+    procType = nnkFuncDef,
   )
 
 proc createMatMatAdditionOperator(theType: typedesc): NimNode =
@@ -198,13 +198,13 @@ proc createMatMatAdditionOperator(theType: typedesc): NimNode =
 
   return newProc(
     postfix(nnkAccQuoted.newTree(ident("+")), "*"),
-    params=[
+    params = [
       ident("auto"),
       newIdentDefs(ident("a"), ident(theType.name)),
       newIdentDefs(ident("b"), ident(theType.name))
     ],
-    body=nnkObjConstr.newTree(ident(theType.name), nnkExprColonExpr.newTree(ident("data"), data)),
-    procType=nnkFuncDef,
+    body = nnkObjConstr.newTree(ident(theType.name), nnkExprColonExpr.newTree(ident("data"), data)),
+    procType = nnkFuncDef,
   )
 
 proc createVecMatMultiplicationOperator(matType: typedesc, vecType: typedesc): NimNode =
@@ -240,7 +240,7 @@ proc createVecMatMultiplicationOperator(matType: typedesc, vecType: typedesc): N
     newEmptyNode(),
     resultVec
   )
-   
+
 
 proc createMatScalarOperator(matType: typedesc, op: string): NimNode =
   result = newStmtList()
@@ -250,23 +250,23 @@ proc createMatScalarOperator(matType: typedesc, op: string): NimNode =
     data.add(infix(nnkBracketExpr.newTree(newDotExpr(ident("a"), ident("data")), newLit(i)), op, ident("b")))
   result.add(newProc(
     postfix(nnkAccQuoted.newTree(ident(op)), "*"),
-    params=[
+    params = [
       ident("auto"),
       newIdentDefs(ident("a"), ident(matType.name)),
       newIdentDefs(ident("b"), ident("SomeNumber")),
     ],
-    body=nnkObjConstr.newTree(ident(matType.name), nnkExprColonExpr.newTree(ident("data"), data)),
-    procType=nnkFuncDef,
+    body = nnkObjConstr.newTree(ident(matType.name), nnkExprColonExpr.newTree(ident("data"), data)),
+    procType = nnkFuncDef,
   ))
   result.add(newProc(
     postfix(nnkAccQuoted.newTree(ident(op)), "*"),
-    params=[
+    params = [
       ident("auto"),
       newIdentDefs(ident("b"), ident("SomeNumber")),
       newIdentDefs(ident("a"), ident(matType.name)),
     ],
-    body=nnkObjConstr.newTree(ident(matType.name), nnkExprColonExpr.newTree(ident("data"), data)),
-    procType=nnkFuncDef,
+    body = nnkObjConstr.newTree(ident(matType.name), nnkExprColonExpr.newTree(ident("data"), data)),
+    procType = nnkFuncDef,
   ))
   if op == "-":
     var data2 = nnkBracket.newTree()
@@ -274,12 +274,12 @@ proc createMatScalarOperator(matType: typedesc, op: string): NimNode =
       data2.add(prefix(nnkBracketExpr.newTree(newDotExpr(ident("a"), ident("data")), newLit(i)), op))
     result.add(newProc(
       postfix(nnkAccQuoted.newTree(ident(op)), "*"),
-      params=[
+      params = [
         ident("auto"),
         newIdentDefs(ident("a"), ident(matType.name)),
       ],
-      body=nnkObjConstr.newTree(ident(matType.name), nnkExprColonExpr.newTree(ident("data"), data2)),
-      procType=nnkFuncDef,
+      body = nnkObjConstr.newTree(ident(matType.name), nnkExprColonExpr.newTree(ident("data"), data2)),
+      procType = nnkFuncDef,
     ))
 
 macro createAllMultiplicationOperators() =
@@ -376,17 +376,17 @@ func rotate2d*[T](angle: T): TMat3[T] = TMat3[T](data: [
   sin(angle), cos(angle), T(0),
   T(0), T(0), T(1),
 ])
-func translate*(x=0'f32, y=0'f32, z=0'f32): TMat4[float32] = Mat4(data: [
+func translate*(x = 0'f32, y = 0'f32, z = 0'f32): TMat4[float32] = Mat4(data: [
   1'f32, 0'f32, 0'f32, x,
   0'f32, 1'f32, 0'f32, y,
   0'f32, 0'f32, 1'f32, z,
   0'f32, 0'f32, 0'f32, 1'f32,
 ])
 func translate*[T: TVec3](v: T): TMat4[float32] = translate(v[0], v[1], v[2])
-func scale*(x=1'f32, y=1'f32, z=1'f32): Mat4 = Mat4(data: [
-  x,     0'f32, 0'f32, 0'f32,
-  0'f32, y,     0'f32, 0'f32,
-  0'f32, 0'f32, z,     0'f32,
+func scale*(x = 1'f32, y = 1'f32, z = 1'f32): Mat4 = Mat4(data: [
+  x, 0'f32, 0'f32, 0'f32,
+  0'f32, y, 0'f32, 0'f32,
+  0'f32, 0'f32, z, 0'f32,
   0'f32, 0'f32, 0'f32, 1'f32,
 ])
 func scale*[T: TVec3](v: T): TMat4[float32] = scale(v[0], v[1], v[2])
@@ -398,10 +398,10 @@ func rotate*(angle: float32, a: Vec3f): Mat4 =
     y = a[1]
     z = a[2]
   Mat4(data: [
-    x * x * (1 - cosa) + cosa,     y * x * (1 - cosa) - z * sina, z * x * (1 - cosa) + y * sina, 0'f32,
-    x * y * (1 - cosa) + z * sina, y * y * (1 - cosa) + cosa,     z * y * (1 - cosa) - x * sina, 0'f32,
-    x * z * (1 - cosa) - y * sina, y * z * (1 - cosa) + x * sina, z * z * (1 - cosa) + cosa,     0'f32,
-    0'f32,                         0'f32,                         0'f32,                         1'f32,
+    x * x * (1 - cosa) + cosa, y * x * (1 - cosa) - z * sina, z * x * (1 - cosa) + y * sina, 0'f32,
+    x * y * (1 - cosa) + z * sina, y * y * (1 - cosa) + cosa, z * y * (1 - cosa) - x * sina, 0'f32,
+    x * z * (1 - cosa) - y * sina, y * z * (1 - cosa) + x * sina, z * z * (1 - cosa) + cosa, 0'f32,
+    0'f32, 0'f32, 0'f32, 1'f32,
   ])
 
 func asMat3(m: Mat4): auto =
@@ -419,21 +419,21 @@ func inversed*(m: Mat4): Mat4 =
   m3[2, 2] = 1'f32 / m3[2, 2]
   let col3 = -(m3 * m.col(3).xyz)
   return Mat4(data: [
-        m3[0, 0],     m3[0, 1],     m3[0, 2], col3.x,
-        m3[1, 0],     m3[1, 1],     m3[1, 2], col3.y,
-        m3[2, 0],     m3[2, 1],     m3[2, 2], col3.z,
-               0,            0,            0,      1,
+        m3[0, 0], m3[0, 1], m3[0, 2], col3.x,
+        m3[1, 0], m3[1, 1], m3[1, 2], col3.y,
+        m3[2, 0], m3[2, 1], m3[2, 2], col3.z,
+               0, 0, 0, 1,
   ])
 
 
 # call e.g. TMat32[int]().randomized() to get a random matrix
 template makeRandomInit(mattype: typedesc) =
-    proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
-      for i in 0 ..< result.data.len:
-        result.data[i] = rand(low(typeof(m.data[0])) .. high(typeof(m.data[0])))
-    proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
-      for i in 0 ..< result.data.len:
-        result.data[i] = rand(T(1.0))
+  proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
+    for i in 0 ..< result.data.len:
+      result.data[i] = rand(low(typeof(m.data[0])) .. high(typeof(m.data[0])))
+  proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
+    for i in 0 ..< result.data.len:
+      result.data[i] = rand(T(1.0))
 
 makeRandomInit(TMat2)
 makeRandomInit(TMat23)
@@ -445,29 +445,29 @@ makeRandomInit(TMat4)
 
 func perspective*(fovy, aspect, zNear, zFar: float32): Mat4 =
   let tanHalfFovy = tan(fovy / 2)
-  return Mat4(data:[
-    1 / (aspect * tanHalfFovy), 0,               0,                     0,
-    0,                          1 / tanHalfFovy, 0,                     0,
-    0,                          0,               zFar / (zFar - zNear), -(zFar * zNear) / (zFar - zNear),
-    0,                          0,               1,                     1,
+  return Mat4(data: [
+    1 / (aspect * tanHalfFovy), 0, 0, 0,
+    0, 1 / tanHalfFovy, 0, 0,
+    0, 0, zFar / (zFar - zNear), -(zFar * zNear) / (zFar - zNear),
+    0, 0, 1, 1,
   ])
 
 func ortho*(left, right, top, bottom, zNear, zFar: float32): Mat4 =
-  Mat4(data:[
-    2 / (right - left), 0,                  0,                  -(right + left) / (right - left),
-    0,                  2 / (bottom - top), 0,                  -(bottom + top) / (bottom - top),
-    0,                  0,                  1 / (zFar - zNear), -zNear / (zFar - zNear),
-    0,                  0,                  1,                   1,
+  Mat4(data: [
+    2 / (right - left), 0, 0, -(right + left) / (right - left),
+    0, 2 / (bottom - top), 0, -(bottom + top) / (bottom - top),
+    0, 0, 1 / (zFar - zNear), -zNear / (zFar - zNear),
+    0, 0, 1, 1,
   ])
 
 # create an orthographic perspective that will map from -1 .. 1 on all axis and keep a 1:1 aspect ratio
 # the smaller dimension (width or height) will always be 1 and the larger dimension will be larger, to keep the ratio
 func orthoWindowAspect*(windowAspect: float32): Mat4 =
-  if windowAspect > 1:
-    let space = 2 * (windowAspect - 1) / 2
+  if windowAspect < 1:
+    let space = 2 * (1 / windowAspect - 1) / 2
     ortho(-1, 1, -1 - space, 1 + space, 0, 1)
   else:
-    let space = 2 * (1 / windowAspect - 1) / 2
+    let space = 2 * (windowAspect - 1) / 2
     ortho(-1 - space, 1 + space, -1, 1, 0, 1)
 
 func position*(mat: Mat4): Vec3f =

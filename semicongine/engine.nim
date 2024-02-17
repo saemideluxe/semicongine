@@ -208,6 +208,7 @@ func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
 func framesRendered*(engine: Engine): uint64 = (if engine.renderer.isSome: engine.renderer.get.framesRendered else: 0)
 func gpuDevice*(engine: Engine): Device = engine.device
 func getWindow*(engine: Engine): auto = engine.window
+func getAspectRatio*(engine: Engine): auto = engine.getWindow().size[0] / engine.getWindow().size[1]
 func windowWasResized*(engine: Engine): auto = engine.input.windowWasResized
 func showSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
 func hideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
@@ -221,6 +222,10 @@ func limits*(engine: Engine): VkPhysicalDeviceLimits =
   engine.gpuDevice().physicalDevice.properties.limits
 
 proc processEventsFor*(engine: Engine, panel: var Panel) =
+  if engine.input.windowWasResized:
+    panel.aspect_ratio = engine.getAspectRatio()
+  panel.refresh()
+
   let hasMouseNow = panel.contains(engine.mousePositionNormalized())
 
   # enter/leave events
