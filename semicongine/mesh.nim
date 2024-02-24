@@ -133,8 +133,8 @@ proc newMesh*(
   indices: openArray[array[3, uint32|uint16|uint8]],
   colors: openArray[Vec4f] = [],
   uvs: openArray[Vec2f] = [],
-  transform: Mat4 = Unit4F32,
-  instanceTransforms: openArray[Mat4] = [Unit4F32],
+  transform: Mat4 = Unit4,
+  instanceTransforms: openArray[Mat4] = [Unit4],
   material = EMPTY_MATERIAL.initMaterialData(),
   autoResize = true,
   name: string = ""
@@ -189,8 +189,8 @@ proc newMesh*(
   positions: openArray[Vec3f],
   colors: openArray[Vec4f] = [],
   uvs: openArray[Vec2f] = [],
-  transform: Mat4 = Unit4F32,
-  instanceTransforms: openArray[Mat4] = [Unit4F32],
+  transform: Mat4 = Unit4,
+  instanceTransforms: openArray[Mat4] = [Unit4],
   material = EMPTY_MATERIAL.initMaterialData(),
   name: string = "",
 ): Mesh =
@@ -446,7 +446,7 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
 proc rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 4,
-    instanceTransforms: @[Unit4F32],
+    instanceTransforms: @[Unit4],
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
     name: &"rect-{instanceCounter}",
@@ -467,7 +467,7 @@ proc rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_M
 proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 3,
-    instanceTransforms: @[Unit4F32],
+    instanceTransforms: @[Unit4],
     name: &"tri-{instanceCounter}",
     material: material,
   )
@@ -484,7 +484,7 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
   assert nSegments >= 3
   result = Mesh(
     vertexCount: 3 + nSegments,
-    instanceTransforms: @[Unit4F32],
+    instanceTransforms: @[Unit4],
     indexType: Small,
     name: &"circle-{instanceCounter}",
     material: material,
@@ -511,7 +511,7 @@ proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", materi
 
   result = Mesh(
     vertexCount: int((rows + 1) * (columns + 1)),
-    instanceTransforms: @[Unit4F32],
+    instanceTransforms: @[Unit4],
     indexType: Small,
     name: &"grid-{instanceCounter}",
     material: material,
@@ -544,7 +544,7 @@ proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", materi
 type
   MeshTree* = ref object
     mesh*: Mesh
-    transform*: Mat4 = Unit4F32
+    transform*: Mat4 = Unit4
     children*: seq[MeshTree]
 
 func toStringRec*(tree: MeshTree, theindent = 0): seq[string] =
@@ -567,7 +567,7 @@ proc toSeq*(tree: MeshTree): seq[Mesh] =
       result.add current.mesh
     queue.add current.children
 
-proc updateTransforms*(tree: MeshTree, parentTransform = Unit4F32) =
+proc updateTransforms*(tree: MeshTree, parentTransform = Unit4) =
   let currentTransform = parentTransform * tree.transform
   if not tree.mesh.isNil:
     tree.mesh.transform = currentTransform

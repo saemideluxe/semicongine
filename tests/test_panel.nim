@@ -12,9 +12,11 @@ proc click(panel: var Panel, buttons: set[MouseButton]) =
     counter.dec
   counterText.text = $counter
 proc enter(panel: var Panel) =
-  panel.size = newVec2f(0.22, 0.22)
+  panel.mesh.transform = panel.mesh.transform * scale(1.05, 1.05)
+  panel.color = newVec4f(1, 0, 0, 0.3)
 proc leave(panel: var Panel) =
-  panel.size = newVec2f(0.2, 0.2)
+  panel.mesh.transform = panel.mesh.transform * scale(1 / 1.05, 1 / 1.05)
+  panel.color = newVec4f(1, 0, 0, 0.5)
 
 proc main() =
   # setup engine
@@ -29,12 +31,12 @@ proc main() =
     font = loadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
     scene = Scene(name: "main")
     origin = initPanel(
-      size = newVec2f(0.005, 0.005),
+      transform = scale(0.005, 0.005),
       color = newVec4f(1, 1, 1, 1),
       texture = Texture(isGrayscale: false, colorImage: newImage[RGBAPixel](3, 3, [T, B, T, B, B, B, T, B, T]), sampler: NEAREST_SAMPLER),
     )
-    panel = initPanel(
-      size = newVec2f(0.2, 0.2),
+    button = initPanel(
+      transform = translate(0.2, 0.1) * scale(0.3, 0.1),
       color = newVec4f(1, 0, 0, 0.5),
       onMouseDown = click,
       onMouseEnter = enter,
@@ -52,46 +54,39 @@ Vertical alignment:
   F6: Bottom
 Mouse:
   Left click: Increase counter
-  Right click: Decrease counter""", scale = 0.0002, position = newVec2f(-0.9, -0.9), horizontalAlignment = Left, verticalAlignment = Top)
+  Right click: Decrease counter""".toRunes, horizontalAlignment = Left, verticalAlignment = Top, transform = translate(-0.9, -0.9) * scale(0.0002, 0.0002))
 
-  counterText = font.initText($counter, maxLen = 99, scale = 0.0004)
+  counterText = font.initText(($counter).toRunes, maxLen = 99, transform = translate(0.2, 0.1) * scale(0.0004, 0.0004))
 
   scene.add counterText
-  scene.add panel
+  scene.add button
   scene.add help_text
   scene.add origin
   engine.loadScene(scene)
 
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
-    if engine.windowWasResized():
-      var winSize = engine.getWindow().size
-      panel.aspect_ratio = winSize[0] / winSize[1]
-      counterText.aspect_ratio = winSize[0] / winSize[1]
-      origin.aspect_ratio = winSize[0] / winSize[1]
-      help_text.aspect_ratio = winSize[0] / winSize[1]
-
     if engine.keyWasPressed(F1):
-      panel.horizontalAlignment = Left
+      button.horizontalAlignment = Left
       counterText.horizontalAlignment = Left
     elif engine.keyWasPressed(F2):
-      panel.horizontalAlignment = Center
+      button.horizontalAlignment = Center
       counterText.horizontalAlignment = Center
     elif engine.keyWasPressed(F3):
-      panel.horizontalAlignment = Right
+      button.horizontalAlignment = Right
       counterText.horizontalAlignment = Right
     elif engine.keyWasPressed(F4):
-      panel.verticalAlignment = Top
+      button.verticalAlignment = Top
       counterText.verticalAlignment = Top
     elif engine.keyWasPressed(F5):
-      panel.verticalAlignment = Center
+      button.verticalAlignment = Center
       counterText.verticalAlignment = Center
     elif engine.keyWasPressed(F6):
-      panel.verticalAlignment = Bottom
+      button.verticalAlignment = Bottom
       counterText.verticalAlignment = Bottom
 
-    engine.processEventsFor(panel)
+    engine.processEvents(button)
 
-    panel.refresh()
+    button.refresh()
     counterText.refresh()
     origin.refresh()
     help_text.refresh()

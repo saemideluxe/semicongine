@@ -30,10 +30,10 @@ const
       attr[uint16]("materialIndexOut", noInterpolation = true)
     ],
     outputs = [attr[Vec4f]("color")],
-    uniforms = [attr[Vec4f]("color", arrayCount = MAX_PANEL_MATERIALS)],
+    uniforms = [attr[Vec4f]("color", arrayCount = MAX_PANEL_MATERIALS), attr[float32](ASPECT_RATIO_ATTRIBUTE)],
     samplers = [attr[Texture]("panelTexture", arrayCount = MAX_PANEL_MATERIALS)],
     vertexCode = &"""
-  gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB};
+  gl_Position = vec4({POSITION_ATTRIB}.x, {POSITION_ATTRIB}.y * Uniforms.{ASPECT_RATIO_ATTRIBUTE}, {POSITION_ATTRIB}.z, 1.0) * {TRANSFORM_ATTRIB};
   uvFrag = {UV_ATTRIB};
   materialIndexOut = {MATERIALINDEX_ATTRIBUTE};
   """,
@@ -44,14 +44,11 @@ var instanceCounter = 0
 
 type
   Panel* = object
-    position: Vec2f
-    size: Vec2f
     texture: Texture
     horizontalAlignment: HorizontalAlignment = Center
     verticalAlignment: VerticalAlignment = Center
-    aspect_ratio: float32
     dirty: bool
-    mesh: Mesh
+    mesh*: Mesh
     # input handling
     onMouseDown*: proc(panel: var Panel, buttons: set[MouseButton])
     onMouseUp*: proc(panel: var Panel, buttons: set[MouseButton])
@@ -61,7 +58,7 @@ type
     hasMouse*: bool
 
 proc `$`*(panel: Panel): string =
-  &"Panel {panel.position} (size {panel.size})"
+  &"Panel {panel.mesh}"
 
 proc refresh*(panel: var Panel) =
   if not panel.dirty:
@@ -69,36 +66,23 @@ proc refresh*(panel: var Panel) =
 
   var
     offsetX = case panel.horizontalAlignment
-      of Left: panel.size.x / 2
+      of Left: 0.5
       of Center: 0
-      of Right: -panel.size.x / 2
+      of Right: -0.5
     offsetY = case panel.verticalAlignment
-      of Top: panel.size.y / 2
+      of Top: 0.5
       of Center: 0
-      of Bottom: -panel.size.y / 2
+      of Bottom: -0.5
 
-  panel.mesh[POSITION_ATTRIB, 0] = newVec3f(
-    panel.position.x - panel.size.x / 2 + offsetX,
-    (panel.position.y - panel.size.y / 2 + offsetY) * panel.aspect_ratio
-  )
-  panel.mesh[POSITION_ATTRIB, 1] = newVec3f(
-    panel.position.x + panel.size.x / 2 + offsetX,
-    (panel.position.y - panel.size.y / 2 + offsetY) * panel.aspect_ratio
-  )
-  panel.mesh[POSITION_ATTRIB, 2] = newVec3f(
-    panel.position.x + panel.size.x / 2 + offsetX,
-    (panel.position.y + panel.size.y / 2 + offsetY) * panel.aspect_ratio
-  )
-  panel.mesh[POSITION_ATTRIB, 3] = newVec3f(
-    panel.position.x - panel.size.x / 2 + offsetX,
-    (panel.position.y + panel.size.y / 2 + offsetY) * panel.aspect_ratio
-  )
+  panel.mesh[POSITION_ATTRIB, 0] = newVec3f(-0.5 + offsetX, -0.5 + offsetY)
+  panel.mesh[POSITION_ATTRIB, 1] = newVec3f(+0.5 + offsetX, -0.5 + offsetY)
+  panel.mesh[POSITION_ATTRIB, 2] = newVec3f(+0.5 + offsetX, +0.5 + offsetY)
+  panel.mesh[POSITION_ATTRIB, 3] = newVec3f(-0.5 + offsetX, +0.5 + offsetY)
 
   panel.dirty = false
 
 proc initPanel*(
-  position = newVec2f(),
-  size = newVec2f(),
+  transform = Unit4,
   color = newVec4f(1, 1, 1, 1),
   texture = EMPTY_TEXTURE,
   horizontalAlignment = HorizontalAlignment.Center,
@@ -111,26 +95,26 @@ proc initPanel*(
 ): Panel =
 
   result = Panel(
-    position: position,
-    size: size,
     texture: texture,
     horizontalAlignment: horizontalAlignment,
     verticalAlignment: verticalAlignment,
-    aspect_ratio: 1,
     onMouseDown: onMouseDown,
     onMouseUp: onMouseUp,
     onMouseEnter: onMouseEnter,
     onMouseMove: onMouseMove,
     onMouseLeave: onMouseLeave,
+    dirty: true,
   )
 
   result.mesh = newMesh(
+    name = &"panel-{instanceCounter}",
     positions = newSeq[Vec3f](4),
     indices = @[
       [uint16(0), uint16(1), uint16(2)],
       [uint16(2), uint16(3), uint16(0)],
     ],
-    uvs = @[newVec2f(0, 1), newVec2f(1, 1), newVec2f(1, 0), newVec2f(0, 0)], name = &"panel-{instanceCounter}"
+    uvs = @[newVec2f(0, 1), newVec2f(1, 1), newVec2f(1, 0), newVec2f(0, 0)],
+    transform = transform
   )
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
@@ -142,31 +126,11 @@ proc initPanel*(
   inc instanceCounter
   result.refresh()
 
-proc position*(panel: Panel): Vec2f =
-  panel.position
-proc `position=`*(panel: var Panel, value: Vec2f) =
-  if value != panel.position:
-    panel.position = value
-    panel.dirty = true
-
 proc color*(panel: Panel): Vec4f =
   panel.mesh.material["color", 0, Vec4f]
 proc `color=`*(panel: var Panel, value: Vec4f) =
   if value != panel.color:
     panel.mesh.material["color", 0] = value
-
-proc transform*(panel: Panel): Mat4 =
-  panel.mesh.transform
-proc `transform=`*(panel: var Panel, value: Mat4) =
-  if value != panel.transform:
-    panel.mesh.transform = value
-
-proc size*(panel: Panel): Vec2f =
-  panel.size
-proc `size=`*(panel: var Panel, value: Vec2f) =
-  if value != panel.size:
-    panel.size = value
-    panel.dirty = true
 
 proc horizontalAlignment*(panel: Panel): HorizontalAlignment =
   panel.horizontalAlignment
@@ -182,20 +146,13 @@ proc `verticalAlignment=`*(panel: var Panel, value: VerticalAlignment) =
     panel.verticalAlignment = value
     panel.dirty = true
 
-proc aspect_ratio*(panel: Panel): float32 =
-  panel.aspect_ratio
-proc `aspect_ratio=`*(panel: var Panel, value: float32) =
-  if value != panel.aspect_ratio:
-    panel.aspect_ratio = value
-    panel.dirty = true
-
-proc contains*(panel: Panel, p: Vec2f): bool =
-  let cursor = panel.mesh.transform * p.toVec3
-  let p1 = panel.mesh[POSITION_ATTRIB, 0, Vec3f]
-  let p2 = panel.mesh[POSITION_ATTRIB, 2, Vec3f]
+proc contains*(panel: Panel, p: Vec2f, aspectRatio: float32): bool =
   let
+    cursor = panel.mesh.transform.inversed * p.toVec3
+    p1 = panel.mesh[POSITION_ATTRIB, 0, Vec3f]
+    p2 = panel.mesh[POSITION_ATTRIB, 2, Vec3f]
     left = min(p1.x, p2.x)
     right = max(p1.x, p2.x)
-    top = min(p1.y, p2.y)
-    bottom = max(p1.y, p2.y)
+    top = min(p1.y * aspectRatio, p2.y * aspectRatio)
+    bottom = max(p1.y * aspectRatio, p2.y * aspectRatio)
   return left <= cursor.x and cursor.x <= right and top <= cursor.y and cursor.y <= bottom
