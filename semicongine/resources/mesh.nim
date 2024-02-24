@@ -360,7 +360,7 @@ proc readglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
   assert data.structuredContent["buffers"].len == 1
   assert not data.structuredContent["buffers"][0].hasKey("uri")
   let bufferLenDiff = int(chunkLength) - data.structuredContent["buffers"][0]["byteLength"].getInt()
-  assert 0 <= bufferLenDiff <= 3 # binary buffer may be aligned to 4 bytes
+  assert 0 <= bufferLenDiff and bufferLenDiff <= 3 # binary buffer may be aligned to 4 bytes
 
   debug "Loading mesh: ", data.structuredContent.pretty
 
