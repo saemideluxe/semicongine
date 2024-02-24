@@ -72,7 +72,7 @@ func inputs(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
             result.add input
             found[input.name] = input
 
-func materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, shaderPipeline: ShaderPipeline): (bool, string) =
+proc materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, shaderPipeline: ShaderPipeline): (bool, string) =
   for uniform in shaderPipeline.uniforms:
     if scene.shaderGlobals.contains(uniform.name):
       if scene.shaderGlobals[uniform.name].theType != uniform.theType:
@@ -90,7 +90,7 @@ func materialCompatibleWithPipeline(scene: Scene, materialType: MaterialType, sh
 
   return (false, "")
 
-func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, shaderPipeline: ShaderPipeline): (bool, string) =
+proc meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, shaderPipeline: ShaderPipeline): (bool, string) =
   for input in shaderPipeline.inputs:
     if input.name in [TRANSFORM_ATTRIB, MATERIALINDEX_ATTRIBUTE]: # will be populated automatically
       assert input.perInstance == true, &"Currently the {input.name} attribute must be a per instance attribute"
@@ -109,7 +109,7 @@ func meshCompatibleWithPipeline(scene: Scene, mesh: Mesh, shaderPipeline: Shader
     return (true, pipelineCompatability[1])
   return (false, "")
 
-func checkSceneIntegrity(renderer: Renderer, scene: Scene) =
+proc checkSceneIntegrity(renderer: Renderer, scene: Scene) =
   # TODO: this and the sub-functions can likely be simplified a ton
   if scene.meshes.len == 0:
     return

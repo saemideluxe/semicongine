@@ -34,10 +34,10 @@ const
       attr[uint16]("materialIndexOut", noInterpolation = true)
     ],
     outputs = [attr[Vec4f]("color")],
-    uniforms = [attr[Vec4f]("color", arrayCount = MAX_TEXT_MATERIALS)],
+    uniforms = [attr[Vec4f]("color", arrayCount = MAX_TEXT_MATERIALS), attr[float32](ASPECT_RATIO_ATTRIBUTE)],
     samplers = [attr[Texture]("fontAtlas", arrayCount = MAX_TEXT_MATERIALS)],
     vertexCode = &"""
-  gl_Position = vec4({POSITION_ATTRIB}, 1.0) * {TRANSFORM_ATTRIB};
+  gl_Position = vec4({POSITION_ATTRIB}.x, {POSITION_ATTRIB}.y * Uniforms.{ASPECT_RATIO_ATTRIBUTE}, {POSITION_ATTRIB}.z, 1.0) * {TRANSFORM_ATTRIB};
   uvFrag = {UV_ATTRIB};
   materialIndexOut = {MATERIALINDEX_ATTRIBUTE};
   """,
@@ -53,11 +53,8 @@ type
     maxWidth: float32 = 0
     # properties:
     text: seq[Rune]
-    position: Vec2f
     horizontalAlignment: HorizontalAlignment = Center
     verticalAlignment: VerticalAlignment = Center
-    scale: float32
-    aspect_ratio: float32
     # management/internal:
     dirty: bool                 # is true if any of the attributes changed
     processedText: seq[Rune]    # used to store processed (word-wrapper) text to preserve original
@@ -142,7 +139,6 @@ proc refresh*(text: var Text) =
       text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
       text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
       text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
-  text.mesh.transform = translate(text.position.x, text.position.y * text.aspect_ratio, 0) * scale(text.scale, text.scale * text.aspect_ratio)
   text.lastRenderedText = text.processedText
   text.dirty = false
 
@@ -215,7 +211,7 @@ proc `text=`*(text: var Text, newText: seq[Rune]) =
 
   text.processedText = text.text
   if text.maxWidth > 0:
-    text.processedText = text.processedText.wordWrapped(text.font, text.maxWidth / text.scale)
+    text.processedText = text.processedText.wordWrapped(text.font, text.maxWidth / text.mesh.transform.scaling.x)
 
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
@@ -247,21 +243,7 @@ proc `verticalAlignment=`*(text: var Text, value: VerticalAlignment) =
     text.verticalAlignment = value
     text.dirty = true
 
-proc scale*(text: Text): float32 =
-  text.scale
-proc `scale=`*(text: var Text, value: float32) =
-  if value != text.scale:
-    text.scale = value
-    text.dirty = true
-
-proc aspect_ratio*(text: Text): float32 =
-  text.aspect_ratio
-proc `aspect_ratio=`*(text: var Text, value: float32) =
-  if value != text.aspect_ratio:
-    text.aspect_ratio = value
-    text.dirty = true
-
-proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), scale = 1'f32, position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32): Text =
+proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -273,8 +255,7 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
       [uint16(offset + 2), uint16(offset + 3), uint16(offset + 0)],
     ]
 
-  result = Text(maxLen: maxLen, font: font, dirty: true, scale: scale, position: position, aspect_ratio: 1, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, maxWidth: maxWidth)
-  `text=`(result, text)
+  result = Text(maxLen: maxLen, font: font, dirty: true, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, maxWidth: maxWidth)
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"text-{instanceCounter}")
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
@@ -283,6 +264,8 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
     name = font.name & " text",
     attributes = {"fontAtlas": initDataList(@[font.fontAtlas]), "color": initDataList(@[color])},
   )
+  result.mesh.transform = transform
+  `text=`(result, text)
   inc instanceCounter
 
   result.refresh()

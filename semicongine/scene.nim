@@ -8,7 +8,7 @@ import ./mesh
 import ./material
 
 type
-  Scene* = object
+  Scene* = ref object
     name*: string
     shaderGlobals*: Table[string, DataList]
     meshes*: seq[Mesh]
@@ -43,37 +43,32 @@ proc add*[T](scene: var Scene, obj: T) =
       assert not value.isNil, &"Cannot add a mesh that is 'nil': " & name
       scene.meshes.add value
 
-proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
-  assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add shader values"
-  scene.shaderGlobals[name] = initDataList(thetype = getDataType[T]())
-  scene.shaderGlobals[name] = @[data]
-  scene.dirtyShaderGlobals.add name
-
 proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: openArray[T]) =
   assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add shader values"
   scene.shaderGlobals[name] = initDataList(data)
   scene.dirtyShaderGlobals.add name
 
-func getShaderGlobal*[T](scene: Scene, name: string): T =
-  scene.shaderGlobals[name][T, 0]
+proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
+  scene.addShaderGlobalArray(name, [data])
 
 func getShaderGlobalArray*[T](scene: Scene, name: string): ref seq[T] =
   scene.shaderGlobals[name][T]
 
-proc setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
-  scene.shaderGlobals[name] = @[value]
-  if not scene.dirtyShaderGlobals.contains(name):
-    scene.dirtyShaderGlobals.add name
+func getShaderGlobal*[T](scene: Scene, name: string): T =
+  scene.getShaderGlobalArray(name)[][0]
 
-proc setShaderGlobalArray*[T](scene: var Scene, name: string, value: seq[T]) =
+proc setShaderGlobalArray*[T](scene: var Scene, name: string, value: openArray[T]) =
   scene.shaderGlobals[name] = value
   if not scene.dirtyShaderGlobals.contains(name):
     scene.dirtyShaderGlobals.add name
 
+proc setShaderGlobal*[T](scene: var Scene, name: string, value: T) =
+  scene.setShaderGlobalArray(name, [value])
+
 func dirtyShaderGlobals*(scene: Scene): seq[string] =
   scene.dirtyShaderGlobals
 
-func clearDirtyShaderGlobals*(scene: var Scene) =
+proc clearDirtyShaderGlobals*(scene: var Scene) =
   scene.dirtyShaderGlobals.reset
 
 func hash*(scene: Scene): Hash =

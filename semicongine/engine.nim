@@ -1,3 +1,5 @@
+{.experimental: "codeReordering".}
+
 import std/options
 import std/logging
 import std/os
@@ -120,6 +122,7 @@ proc initRenderer*(engine: var Engine, clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8
 proc loadScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
   assert not scene.loaded
+  scene.addShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.getAspectRatio)
   engine.renderer.get.setupDrawableBuffers(scene)
   engine.renderer.get.updateMeshData(scene, forceAll = true)
   engine.renderer.get.updateUniformData(scene, forceAll = true)
@@ -130,6 +133,7 @@ proc unloadScene*(engine: var Engine, scene: Scene) =
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
   assert engine.renderer.isSome
+  scene.setShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.getAspectRatio)
   engine.renderer.get.updateMeshData(scene)
   engine.renderer.get.updateUniformData(scene)
   engine.renderer.get.render(scene)
@@ -208,7 +212,7 @@ func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
 func framesRendered*(engine: Engine): uint64 = (if engine.renderer.isSome: engine.renderer.get.framesRendered else: 0)
 func gpuDevice*(engine: Engine): Device = engine.device
 func getWindow*(engine: Engine): auto = engine.window
-func getAspectRatio*(engine: Engine): auto = engine.getWindow().size[0] / engine.getWindow().size[1]
+func getAspectRatio*(engine: Engine): float32 = engine.getWindow().size[0] / engine.getWindow().size[1]
 func windowWasResized*(engine: Engine): auto = engine.input.windowWasResized
 func showSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
 func hideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
@@ -221,14 +225,7 @@ proc `fullscreen=`*(engine: var Engine, enable: bool) =
 func limits*(engine: Engine): VkPhysicalDeviceLimits =
   engine.gpuDevice().physicalDevice.properties.limits
 
-proc processEventsFor*(engine: Engine, text: var Text) =
-  if engine.input.windowWasResized:
-    text.aspect_ratio = engine.getAspectRatio()
-  text.refresh()
-
 proc processEventsFor*(engine: Engine, panel: var Panel) =
-  if engine.input.windowWasResized:
-    panel.aspect_ratio = engine.getAspectRatio()
   panel.refresh()
 
   let hasMouseNow = panel.contains(engine.mousePositionNormalized())
