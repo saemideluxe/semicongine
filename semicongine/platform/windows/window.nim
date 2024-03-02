@@ -64,12 +64,12 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
 
 
 proc createWindow*(title: string): NativeWindow =
-  when DEBUG:
-    AllocConsole()
-    discard stdin.reopen("conIN$", fmRead)
-    discard stdout.reopen("conOUT$", fmWrite)
-    discard stderr.reopen("conOUT$", fmWrite)
-  
+  # when DEBUG:
+    # AllocConsole()
+    # discard stdin.reopen("conIN$", fmRead)
+    # discard stdout.reopen("conOUT$", fmWrite)
+    # discard stderr.reopen("conOUT$", fmWrite)
+
   result.hInstance = HINSTANCE(GetModuleHandle(nil))
   var
     windowClassName = T"EngineWindowClass"
@@ -81,7 +81,7 @@ proc createWindow*(title: string): NativeWindow =
       lpszClassName: windowClassName,
       hcursor: LoadCursor(HINSTANCE(0), IDC_ARROW),
     )
-  
+
   if(RegisterClassEx(addr(windowClass)) == 0):
     raise newException(Exception, "Unable to register window class")
 

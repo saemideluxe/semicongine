@@ -322,7 +322,7 @@ proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: Data
 proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, data: seq[T]) =
   updateAttributeData[T](mesh, attribute, data)
 proc `[]=`*[T: GPUType|int|uint|float](mesh: Mesh, attribute: string, data: seq[T]) =
-  updateAttributeData[t](mesh[], attribute, data)
+  updateAttributeData[T](mesh[], attribute, data)
 
 proc `[]=`*[T: GPUType|int|uint|float](mesh: var MeshObject, attribute: string, value: T) =
   updateAttributeData[T](mesh, attribute, newSeqWith(mesh.vertexCount, value))
