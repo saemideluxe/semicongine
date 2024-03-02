@@ -1,3 +1,5 @@
+{.experimental: "notnil".}
+
 import std/sugar
 import std/tables
 import std/math
@@ -28,11 +30,11 @@ type
     easeIn: Ease
     easeOut: Ease
   Animation*[T] = object
-    animationFunction: (t: AnimationTime) -> T
+    animationFunction: (state: AnimationState[T], dt: float32) -> T
     duration: float32
     direction: Direction
     iterations: int
-  AnimationPlayer*[T] = object
+  AnimationState*[T] = object
     animation*: Animation[T]
     currentTime*: float32
     playing*: bool
@@ -95,16 +97,16 @@ func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, dire
 
   let theKeyframes = keyframes.toSeq
 
-  proc animationFunc(t: AnimationTime): T =
+  proc animationFunc(state: AnimationState[T], dt: float32): T =
     var i = 0
     while i < theKeyframes.len - 1:
-      if theKeyframes[i].timestamp > t:
+      if theKeyframes[i].timestamp > state.t:
         break
       inc i
 
     let
       keyFrameDist = theKeyframes[i].timestamp - theKeyframes[i - 1].timestamp
-      timestampDist = t - theKeyframes[i - 1].timestamp
+      timestampDist = state.t - theKeyframes[i - 1].timestamp
       x = timestampDist / keyFrameDist
 
     let value = theKeyframes[i - 1].interpol(x)
@@ -117,7 +119,8 @@ func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, dire
     iterations: iterations
   )
 
-func newAnimation*[T](fun: (t: AnimationTime) -> T, duration: float32, direction = Forward, iterations = 1): Animation[T] =
+func newAnimation*[T](fun: (state: AnimationState[T], dt: float32) -> T, duration: float32, direction = Forward, iterations = 1): Animation[T] =
+  assert fun != nil, "Animation function cannot be nil"
   Animation[T](
     animationFunction: fun,
     duration: duration,
@@ -125,47 +128,48 @@ func newAnimation*[T](fun: (t: AnimationTime) -> T, duration: float32, direction
     iterations: iterations
   )
 
-proc reset*(player: var AnimationPlayer) =
-  player.currentValue = player.animation.animationFunction(0)
-  player.currentTime = 0
-  player.currentDirection = if player.animation.direction == Backward: -1 else: 1
-  player.currentIteration = player.animation.iterations
+proc resetState*[T](state: var AnimationState[T], initial: T) =
+  state.currentValue = initial
+  state.currentTime = 0
+  state.currentDirection = if state.animation.direction == Backward: -1 else: 1
+  state.currentIteration = state.animation.iterations
 
+proc t*(state: AnimationState): AnimationTime =
+  max(low(AnimationTime), min(state.currentTime / state.animation.duration, high(AnimationTime)))
 
-proc newAnimationPlayer*[T](animation: Animation[T]): AnimationPlayer[T] =
-  result = AnimationPlayer[T](animation: animation, playing: false)
-  result.reset()
+proc newAnimationState*[T](animation: Animation[T], initial = default(T)): AnimationState[T] =
+  result = AnimationState[T](animation: animation, playing: false)
+  result.resetState(initial)
 
-proc newAnimationPlayer*[T](value: T = default(T)): AnimationPlayer[T] =
-  newAnimationPlayer[T](newAnimation[T]((t: AnimationTime) => value, 0))
+proc newAnimationState*[T](value: T = default(T)): AnimationState[T] =
+  newAnimationState[T](newAnimation[T]((state: AnimationState[T], dt: float32) => value, 0), initial = value)
 
-func start*(player: var AnimationPlayer) =
-  player.playing = true
+func start*(state: var AnimationState) =
+  state.playing = true
 
-func stop*(player: var AnimationPlayer) =
-  player.playing = false
+func stop*(state: var AnimationState) =
+  state.playing = false
 
-proc advance*[T](player: var AnimationPlayer[T], dt: float32): T =
+proc advance*[T](state: var AnimationState[T], dt: float32): T =
   # TODO: check this function, not 100% correct I think
-  if player.playing:
-    player.currentTime += float32(player.currentDirection) * dt
-    if not (0 <= player.currentTime and player.currentTime < player.animation.duration):
-      dec player.currentIteration
+  if state.playing:
+    state.currentTime += float32(state.currentDirection) * dt
+    if not (0 <= state.currentTime and state.currentTime < state.animation.duration):
+      dec state.currentIteration
       # last iteration reached
-      if player.currentIteration <= 0 and player.animation.iterations != 0:
-        player.stop()
+      if state.currentIteration <= 0 and state.animation.iterations != 0:
+        state.stop()
       # more iterations
       else:
-        case player.animation.direction:
+        case state.animation.direction:
           of Forward:
-            player.currentTime = player.currentTime - player.animation.duration
+            state.currentTime = state.currentTime - state.animation.duration
           of Backward:
-            player.currentTime = player.currentTime + player.animation.duration
+            state.currentTime = state.currentTime + state.animation.duration
           of Alternate:
-            player.currentDirection = -player.currentDirection
-            player.currentTime += float32(player.currentDirection) * dt * 2'f32
+            state.currentDirection = -state.currentDirection
+            state.currentTime += float32(state.currentDirection) * dt * 2'f32
 
-    player.currentValue = player.animation.animationFunction(
-      max(low(AnimationTime), min(player.currentTime / player.animation.duration, high(AnimationTime)))
-    )
-  return player.currentValue
+    assert state.animation.animationFunction != nil, "Animation func cannot be nil"
+    state.currentValue = state.animation.animationFunction(state, dt)
+  return state.currentValue
