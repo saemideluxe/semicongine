@@ -30,7 +30,6 @@ type
     surfaceFormat: VkSurfaceFormatKHR
     queueFamily: QueueFamily
     imageCount: uint32
-    presentMode: VkPresentModeKHR
     inFlightFrames*: int
 
 
@@ -40,7 +39,6 @@ proc createSwapchain*(
   surfaceFormat: VkSurfaceFormatKHR,
   queueFamily: QueueFamily,
   desiredNumberOfImages = 3'u32,
-  preferedPresentMode: VkPresentModeKHR = VK_PRESENT_MODE_MAILBOX_KHR,
   inFlightFrames = 2,
   oldSwapchain = VkSwapchainKHR(0)
 ): Option[Swapchain] =
@@ -55,28 +53,10 @@ proc createSwapchain*(
 
   var imageCount = desiredNumberOfImages
 
-  const PRESENTMODES_BY_PREFERENCE = [
-    VK_PRESENT_MODE_MAILBOX_KHR,
-    VK_PRESENT_MODE_FIFO_RELAXED_KHR,
-    VK_PRESENT_MODE_FIFO_KHR,
-    VK_PRESENT_MODE_IMMEDIATE_KHR,
-    VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR,
-    VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR,
-  ]
-  var supportedModes = device.physicalDevice.getSurfacePresentModes()
-  var presentMode: VkPresentModeKHR
-  for mode in PRESENTMODES_BY_PREFERENCE:
-    if mode in supportedModes:
-      presentMode = mode
-      break
-
   # following is according to vulkan specs
-  if presentMode in [VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR, VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR]:
-    imageCount = 1
-  else:
-    imageCount = max(imageCount, capabilities.minImageCount)
-    if capabilities.maxImageCount != 0:
-      imageCount = min(imageCount, capabilities.maxImageCount)
+  imageCount = max(imageCount, capabilities.minImageCount)
+  if capabilities.maxImageCount != 0:
+    imageCount = min(imageCount, capabilities.maxImageCount)
   var createInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: device.physicalDevice.surface,
@@ -90,7 +70,7 @@ proc createSwapchain*(
     imageSharingMode: VK_SHARING_MODE_EXCLUSIVE,
     preTransform: capabilities.currentTransform,
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, # only used for blending with other windows, can be opaque
-    presentMode: presentMode,
+    presentMode: VK_PRESENT_MODE_FIFO_KHR,
     clipped: true,
     oldSwapchain: oldSwapchain,
   )
