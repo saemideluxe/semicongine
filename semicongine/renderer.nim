@@ -300,7 +300,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
         for descriptor in shaderPipeline.descriptorSetLayout.descriptors:
           if descriptor.thetype == ImageSampler:
             nTextures += descriptor.count
-        poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, nTextures * renderer.swapchain.inFlightFrames)
+        if nTextures > 0:
+          poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, nTextures * renderer.swapchain.inFlightFrames)
         scenedata.descriptorPools[shaderPipeline.vk] = renderer.device.createDescriptorSetPool(poolsizes)
 
         scenedata.descriptorSets[shaderPipeline.vk] = shaderPipeline.setupDescriptors(
@@ -450,8 +451,8 @@ func valid*(renderer: Renderer): bool =
   renderer.device.vk.valid
 
 proc destroy*(renderer: var Renderer, scene: Scene) =
+  checkVkResult renderer.device.vk.vkDeviceWaitIdle()
   var scenedata = renderer.scenedata[scene]
-
   for buffer in scenedata.vertexBuffers.mvalues:
     assert buffer.vk.valid
     buffer.destroy()
@@ -474,6 +475,7 @@ proc destroy*(renderer: var Renderer, scene: Scene) =
   renderer.scenedata.del(scene)
 
 proc destroy*(renderer: var Renderer) =
+  checkVkResult renderer.device.vk.vkDeviceWaitIdle()
   for scenedata in renderer.scenedata.mvalues:
     for buffer in scenedata.vertexBuffers.mvalues:
       assert buffer.vk.valid
