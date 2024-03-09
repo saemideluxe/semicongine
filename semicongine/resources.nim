@@ -1,4 +1,5 @@
 import std/streams
+import std/json
 import std/algorithm
 import std/strutils
 import std/sequtils
@@ -178,6 +179,9 @@ proc loadAudio*(path: string, package = DEFAULT_PACKAGE): Sound =
     loadResource_intern(path, package = package).readVorbis()
   else:
     raise newException(Exception, "Unsupported audio file type: " & path)
+
+proc loadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
+  path.loadResource_intern(package = package).readAll().parseJson()
 
 proc loadFont*(
   path: string,
