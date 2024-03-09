@@ -62,6 +62,15 @@ type
     noInterpolation: bool
     memoryPerformanceHint*: MemoryPerformanceHint
 
+proc `$`*(attr: ShaderAttribute): string =
+  result = attr.name
+  if attr.perInstance:
+    result &= "*"
+  result &= &"[{attr.theType}"
+  if attr.arrayCount > 0:
+    result &= &", {attr.arrayCount}"
+  result &= "]"
+
 func vertexInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
   for attr in attributes:
     if attr.perInstance == false:

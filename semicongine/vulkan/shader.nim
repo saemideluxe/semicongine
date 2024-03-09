@@ -32,6 +32,8 @@ type
     uniforms*: seq[ShaderAttribute]
     samplers*: seq[ShaderAttribute]
 
+proc `$`*(shader: ShaderConfiguration): string =
+  &"Inputs: {shader.inputs}, Uniforms: {shader.uniforms}, Samplers: {shader.samplers}"
 
 proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
   func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =

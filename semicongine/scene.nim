@@ -74,9 +74,6 @@ proc clearDirtyShaderGlobals*(scene: var Scene) =
 func hash*(scene: Scene): Hash =
   hash(scene.name)
 
-func `==`*(a, b: Scene): bool =
-  a.name == b.name
-
 func usesMaterial*(scene: Scene, materialType: MaterialType): bool =
   return scene.meshes.anyIt(it.material.theType == materialType)
 

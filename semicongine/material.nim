@@ -53,13 +53,13 @@ proc `$`*(materialType: MaterialType): string =
   var attributes: seq[string]
   for key, value in materialType.attributes.pairs:
     attributes.add &"{key}: {value}"
-  return &"""MaterialType '{materialType.name}' | Attributes: {attributes.join(", ")}"""
+  return &"""MaterialType '{materialType.name}' | Attributes: [{attributes.join(", ")}]"""
 
 proc `$`*(material: MaterialData): string =
   var attributes: seq[string]
   for key, value in material.attributes.pairs:
     attributes.add &"{key}: {value}"
-  return &"""Material '{material.name}' | Attributes: {attributes.join(", ")}"""
+  return &"""Material '{material.name}' | Attributes: [{attributes.join(", ")}]"""
 
 proc initMaterialData*(
   theType: MaterialType,
