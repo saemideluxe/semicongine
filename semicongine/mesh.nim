@@ -492,17 +492,17 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
   inc instanceCounter
 
   let
-    half_w = width / 2
-    half_h = height / 2
+    rX = width / 2
+    rY = height / 2
     c = toRGBA(color)
     step = (2'f32 * PI) / float32(nSegments)
   var
-    pos = @[newVec3f(0, 0), newVec3f(0, half_h)]
+    pos = @[newVec3f(0, 0), newVec3f(rX, 0)]
     col = @[c, c]
-  for i in 0 .. nSegments:
-    pos.add newVec3f(cos(float32(i) * step) * half_w, sin(float32(i) * step) * half_h)
+  for i in 1 .. nSegments:
+    pos.add newVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
     col.add c
-    result[].smallIndices.add [uint16(0), uint16(i + 1), uint16(i + 2)]
+    result[].smallIndices.add [uint16(0), uint16(i), uint16(i + 1)]
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
