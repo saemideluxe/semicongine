@@ -1,6 +1,7 @@
+import std/parsecfg
 import std/streams
-import std/json
 import std/algorithm
+import std/json
 import std/strutils
 import std/sequtils
 import std/strformat
@@ -182,6 +183,9 @@ proc loadAudio*(path: string, package = DEFAULT_PACKAGE): Sound =
 
 proc loadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
   path.loadResource_intern(package = package).readAll().parseJson()
+
+proc loadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
+  path.loadResource_intern(package = package).loadConfig(filename = path)
 
 proc loadFont*(
   path: string,
