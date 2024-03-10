@@ -40,7 +40,8 @@ proc createSwapchain*(
   queueFamily: QueueFamily,
   desiredNumberOfImages = 3'u32,
   inFlightFrames = 2,
-  oldSwapchain = VkSwapchainKHR(0)
+  oldSwapchain = VkSwapchainKHR(0),
+  vSync = false
 ): Option[Swapchain] =
   assert device.vk.valid
   assert device.physicalDevice.vk.valid
@@ -57,6 +58,7 @@ proc createSwapchain*(
   imageCount = max(imageCount, capabilities.minImageCount)
   if capabilities.maxImageCount != 0:
     imageCount = min(imageCount, capabilities.maxImageCount)
+  let hasTripleBuffering = VK_PRESENT_MODE_MAILBOX_KHR in device.physicalDevice.getSurfacePresentModes()
   var createInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: device.physicalDevice.surface,
@@ -70,7 +72,7 @@ proc createSwapchain*(
     imageSharingMode: VK_SHARING_MODE_EXCLUSIVE,
     preTransform: capabilities.currentTransform,
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, # only used for blending with other windows, can be opaque
-    presentMode: VK_PRESENT_MODE_FIFO_KHR,
+    presentMode: if (vSync or not hasTripleBuffering): VK_PRESENT_MODE_FIFO_KHR else: VK_PRESENT_MODE_MAILBOX_KHR,
     clipped: true,
     oldSwapchain: oldSwapchain,
   )
