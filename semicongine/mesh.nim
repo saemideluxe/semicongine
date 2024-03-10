@@ -161,7 +161,6 @@ proc newMesh*(
     vertexCount: positions.len,
     instanceTransforms: @instanceTransforms,
     transform: transform,
-    material: material
   )
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, positions.toSeq)
@@ -184,6 +183,7 @@ proc newMesh*(
   elif result[].indexType == Big:
     for i, tri in enumerate(indices):
       result[].bigIndices.add [uint32(tri[0]), uint32(tri[1]), uint32(tri[2])]
+  `material=`(result[], material)
 
 proc newMesh*(
   positions: openArray[Vec3f],
@@ -407,7 +407,6 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
     transform: mesh.transform,
     instanceTransforms: mesh.instanceTransforms,
     visible: mesh.visible,
-    material: mesh.material
   )
   for attribute, datalist in mesh.vertexData.pairs:
     result.initVertexAttribute(attribute, datalist.theType)
@@ -438,7 +437,7 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
       i += 3
   else:
     discard
-  return result
+  `material=`(result, mesh.material)
 
 
 # GENERATORS ============================================================================
@@ -450,7 +449,6 @@ proc rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_M
     indexType: Small,
     smallIndices: @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
     name: &"rect-{instanceCounter}",
-    material: material,
   )
   inc instanceCounter
 
@@ -463,13 +461,13 @@ proc rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_M
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", @[c, c, c, c])
   result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
+  `material=`(result[], material)
 
 proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 3,
     instanceTransforms: @[Unit4],
     name: &"tri-{instanceCounter}",
-    material: material,
   )
   inc instanceCounter
   let
@@ -479,6 +477,7 @@ proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MA
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, @[newVec3f(0, -half_h), newVec3f(half_w, half_h), newVec3f(-half_w, half_h)])
   result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
+  `material=`(result[], material)
 
 proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   assert nSegments >= 3
@@ -487,7 +486,6 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
     instanceTransforms: @[Unit4],
     indexType: Small,
     name: &"circle-{instanceCounter}",
-    material: material,
   )
   inc instanceCounter
 
@@ -506,6 +504,7 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
+  `material=`(result[], material)
 
 proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
 
@@ -514,7 +513,6 @@ proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", materi
     instanceTransforms: @[Unit4],
     indexType: Small,
     name: &"grid-{instanceCounter}",
-    material: material,
   )
   inc instanceCounter
 
@@ -537,6 +535,7 @@ proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", materi
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
+  `material=`(result[], material)
 
 
 # MESH TREES =============================================================================
