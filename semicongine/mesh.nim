@@ -497,13 +497,16 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
   var
     pos = @[newVec3f(0, 0), newVec3f(rX, 0)]
     col = @[c, c]
+    uv = @[newVec2f(0.5, 0.5), newVec2f(rX, height / 2)]
   for i in 1 .. nSegments:
     pos.add newVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
     col.add c
+    uv.add newVec2f(cos(float32(i) * step) * 0.5 + 0.5, sin(float32(i) * step) * 0.5 + 0.5)
     result[].smallIndices.add [uint16(0), uint16(i), uint16(i + 1)]
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", col)
+  result[].initVertexAttribute("uv", uv)
   `material=`(result[], material)
 
 proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
@@ -537,6 +540,30 @@ proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", materi
   result[].initVertexAttribute("color", col)
   `material=`(result[], material)
 
+proc mergeMeshData*(a: var Mesh, b: Mesh) =
+  let originalOffset = a.vertexCount
+  a.vertexCount = a.vertexCount + b.vertexCount
+  assert a.indexType == b.indexType
+  for key in a.vertexData.keys:
+    assert key in b.vertexData, &"Mesh {b} is missing vertex data for '{key}'"
+  for (key, value) in b.vertexData.pairs:
+    a.vertexData[key].appendValues(value)
+
+  case a.indexType:
+    of None:
+      discard
+    of Tiny:
+      let offset = uint8(originalOffset)
+      for i in b.tinyIndices:
+        a.tinyIndices.add [i[0] + offset, i[1] + offset, i[2] + offset]
+    of Small:
+      let offset = uint16(originalOffset)
+      for i in b.smallIndices:
+        a.smallIndices.add [i[0] + offset, i[1] + offset, i[2] + offset]
+    of Big:
+      let offset = uint32(originalOffset)
+      for i in b.bigIndices:
+        a.bigIndices.add [i[0] + offset, i[1] + offset, i[2] + offset]
 
 # MESH TREES =============================================================================
 
