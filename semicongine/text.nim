@@ -216,13 +216,6 @@ proc `text=`*(text: var Text, newText: seq[Rune]) =
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
 
-proc position*(text: Text): Vec2f =
-  text.position
-proc `position=`*(text: var Text, value: Vec2f) =
-  if value != text.position:
-    text.position = value
-    text.dirty = true
-
 proc color*(text: Text): Vec4f =
   text.mesh.material["color", 0, Vec4f]
 proc `color=`*(text: var Text, value: Vec4f) =
@@ -243,7 +236,7 @@ proc `verticalAlignment=`*(text: var Text, value: VerticalAlignment) =
     text.verticalAlignment = value
     text.dirty = true
 
-proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), position = newVec2f(), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
+proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
