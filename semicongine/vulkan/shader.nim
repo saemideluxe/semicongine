@@ -52,22 +52,24 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
   let
     stagename = stage2string(stage)
     shaderHash = hash(shaderSource)
-    # cross compilation for windows workaround, sorry computer
     shaderfile = getTempDir() / &"shader_{shaderHash}.{stagename}"
-    projectPath = querySetting(projectPath)
 
-  echo "shader of type ", stage, ", entrypoint ", entrypoint
-  for i, line in enumerate(shaderSource.splitlines()):
-    echo "  ", i + 1, " ", line
-  var glslExe = "glslangValidator"
-  when defined(windows):
-    glslExe = glslExe & "." & ExeExt
-  let command = &"{projectPath.joinPath(glslExe)} --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}"
-  echo "run: ", command
-  discard staticExecChecked(
-      command = command,
-      input = shaderSource
-  )
+
+  if not shaderfile.fileExists:
+    echo "shader of type ", stage, ", entrypoint ", entrypoint
+    for i, line in enumerate(shaderSource.splitlines()):
+      echo "  ", i + 1, " ", line
+    var glslExe = currentSourcePath.parentDir().parentDir() / "tools" / "glslangValidator"
+    when defined(windows):
+      glslExe = glslExe & "." & ExeExt
+    let command = &"{glslExe} --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}"
+    echo "run: ", command
+    discard staticExecChecked(
+        command = command,
+        input = shaderSource
+    )
+  else:
+    echo &"shaderfile {shaderfile} is up-to-date"
 
   when defined(mingw) and defined(linux): # required for crosscompilation, path separators get messed up
     let shaderbinary = staticRead shaderfile.replace("\\", "/")
