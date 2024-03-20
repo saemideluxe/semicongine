@@ -59,7 +59,7 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
     echo "shader of type ", stage, ", entrypoint ", entrypoint
     for i, line in enumerate(shaderSource.splitlines()):
       echo "  ", i + 1, " ", line
-    var glslExe = currentSourcePath.parentDir().parentDir() / "tools" / "glslangValidator"
+    var glslExe = currentSourcePath.parentDir.parentDir.parentDir / "tools" / "glslangValidator"
     when defined(windows):
       glslExe = glslExe & "." & ExeExt
     let command = &"{glslExe} --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}"
