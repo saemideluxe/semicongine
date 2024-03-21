@@ -1,0 +1,7 @@
+# nim directories
+nimcache/
+nimblecache/
+nimbledeps/
+
+# custom build and download directories
+build/
