@@ -1,3 +1,10 @@
+Note: If you are reading this on Github, please not that this is only a mirror
+repository and the most recent changes or on the ```hg``` branch.
+
+Also, some of the README is a bit out of date, as I am now focusing mostly on
+writing my first game. However, developement ist onging and the documentation
+will be overhauled once I start working on my next game.
+
 # Semicongine
 
 Hi there
@@ -5,15 +12,6 @@ Hi there
 This is a little game engine, mainly trying to wrap around vulkan and the
 operating system's windowing, input and audio system. I am using the last
 programming language you will ever need, [Nim](https://nim-lang.org/)
-
-## Building
-
-Requires Nim to be installed and `glslangValidator` to be downloaded to the
-directory of the main compilation file (e.g. into `examples/` in order to
-compile the examples). It can be downloaded at
-https://github.com/KhronosGroup/glslang/releases/.
-
-Run `nim help` to see a list of available build commands.
 
 ## Roadmap
 
