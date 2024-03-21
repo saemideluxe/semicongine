@@ -7,7 +7,7 @@ will be overhauled once I start working on my next game.
 
 # Semicongine
 
-Hi there
+Hi there :)
 
 This is a little game engine, mainly trying to wrap around vulkan and the
 operating system's windowing, input and audio system. I am using the last
