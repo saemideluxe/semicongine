@@ -9,4 +9,6 @@ build/
 # from windows build
 *.pdb
 
+# other
 notes
+github-push.sh
