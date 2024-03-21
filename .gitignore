@@ -3,5 +3,10 @@ nimcache/
 nimblecache/
 nimbledeps/
 
-# custom build and download directories
+# for builds in general
 build/
+
+# from windows build
+*.pdb
+
+notes
