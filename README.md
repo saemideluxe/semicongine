@@ -1,5 +1,5 @@
 Note: If you are reading this on Github, please not that this is only a mirror
-repository and the most recent changes or on the ```hg``` branch.
+repository and the default branch is ```hg```.
 
 Also, some of the README is a bit out of date, as I am now focusing mostly on
 writing my first game. However, developement ist onging and the documentation
