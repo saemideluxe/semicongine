@@ -7,7 +7,7 @@ import std/strutils
 import ./core/audiotypes
 import ./core/constants
 
-const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("scripts/blender_gltf_converter.py")
+const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("tools/blender_gltf_converter.py")
 
 proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
   var platformDir = "unkown"
