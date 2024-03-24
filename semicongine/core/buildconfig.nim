@@ -42,8 +42,8 @@ const CONFIGHOTRELOAD* {.booldefine.}: bool = DEBUG
 const CONFIGHOTRELOADINTERVAL* {.intdefine.}: int = 1000
 
 # log level
-const LOGLEVEL {.strdefine.}: string = (when DEBUG: "lvlWarn" else: "lvlWarn")
-const ENGINE_LOGLEVEL* = parseEnum[Level](LOGLEVEL)
+const LOGLEVEL {.strdefine.}: string = "lvlWarn"
+const ENGINE_LOGLEVEL* = parseEnum[Level]("lvl" & LOGLEVEL)
 
 # resource bundleing settings, need to be configured per project
 const PACKAGETYPE* {.strdefine.}: string = "" # dir, zip, exe
