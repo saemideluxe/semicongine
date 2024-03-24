@@ -132,7 +132,7 @@ elif thebundletype == Exe:
         let package = packageDir.splitPath.tail
         result[package] = Table[string, string]()
         for resourcefile in walkDirRec(packageDir, relative = true):
-          result[package][resourcefile] = staticRead(packageDir.joinPath(resourcefile))
+          result[package][resourcefile.normalizeDir] = staticRead(packageDir.joinPath(resourcefile))
   const bundledResources = loadResources()
 
   proc loadResource_intern(path: string, package: string): Stream =
