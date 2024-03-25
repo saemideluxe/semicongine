@@ -50,13 +50,8 @@ proc createDevice*(
     )
   var queueList = deviceQueues.values.toSeq
 
-  var uniformBufferLayoutFeature = VkPhysicalDeviceUniformBufferStandardLayoutFeatures(
-    stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES,
-    uniformBufferStandardLayout: true,
-  )
   var features2 = VkPhysicalDeviceFeatures2(
     stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-    pnext: addr uniformBufferLayoutFeature,
     features: result.enabledFeatures,
   )
   var createInfo = VkDeviceCreateInfo(
