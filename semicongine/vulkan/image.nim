@@ -79,7 +79,7 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
   )
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 
-proc transitionImageLayout*(image: VulkanImage, oldLayout, newLayout: VkImageLayout) =
+proc transitionImageLayout(image: VulkanImage, oldLayout, newLayout: VkImageLayout) =
   var barrier = VkImageMemoryBarrier(
     sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
     oldLayout: oldLayout,
@@ -150,7 +150,7 @@ proc copy*(src: Buffer, dst: VulkanImage) =
     )
 
 # currently only usable for texture access from shader
-proc createImage*(device: Device, width, height: int, depth: PixelDepth, data: pointer): VulkanImage =
+proc createImage(device: Device, width, height: int, depth: PixelDepth, data: pointer): VulkanImage =
   assert device.vk.valid
   assert width > 0
   assert height > 0

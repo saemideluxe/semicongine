@@ -102,7 +102,7 @@ proc simpleForwardRenderPass*(
     result.subpasses[0].shaderPipelines.add (materialtype, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling = backFaceCulling))
 
 
-proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer) =
+proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer, oneTimeSubmit: bool) =
   assert commandBuffer.valid
   assert renderpass.vk.valid
   assert framebuffer.vk.valid
@@ -117,6 +117,7 @@ proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass
     beginInfo = VkCommandBufferBeginInfo(
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
       pInheritanceInfo: nil,
+      flags: if oneTimeSubmit: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT) else: VkCommandBufferUsageFlags(0),
     )
     renderPassInfo = VkRenderPassBeginInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,

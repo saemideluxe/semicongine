@@ -415,7 +415,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
     return
 
   commandBuffer = commandBufferResult.get()
-  commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer())
+  commandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer(), oneTimeSubmit = true)
 
   debug "Scene buffers:"
   for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:

@@ -68,7 +68,9 @@ proc initEngine*(
   debug = DEBUG,
   exitHandler: proc(engine: var Engine) = nil,
   resizeHandler: proc(engine: var Engine) = nil,
-  eventHandler: proc(engine: var Engine, event: Event) = nil
+  eventHandler: proc(engine: var Engine, event: Event) = nil,
+  vulkanVersion = VK_MAKE_API_VERSION(0, 1, 3, 0),
+  vulkanLayers: openArray[string] = [],
 ): Engine =
   echo "Set log level to ", ENGINE_LOGLEVEL
   setLogFilter(ENGINE_LOGLEVEL)
@@ -80,21 +82,21 @@ proc initEngine*(
   result.window = createWindow(applicationName)
 
   var
+    layers = @vulkanLayers
     instanceExtensions: seq[string]
-    enabledLayers: seq[string]
 
   if debug:
     instanceExtensions.add "VK_EXT_debug_utils"
-    enabledLayers.add "VK_LAYER_KHRONOS_validation"
+    layers.add "VK_LAYER_KHRONOS_validation"
     # putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
-    putEnv("VK_LAYER_ENABLES", "")
+    putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_ALL,VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT")
 
   if defined(linux) and DEBUG:
-    enabledLayers.add "VK_LAYER_MESA_overlay"
+    layers.add "VK_LAYER_MESA_overlay"
   result.instance = result.window.createInstance(
-    vulkanVersion = VK_MAKE_API_VERSION(0, 1, 3, 0),
+    vulkanVersion = vulkanVersion,
     instanceExtensions = instanceExtensions,
-    layers = enabledLayers,
+    layers = layers,
   )
   if debug:
     result.debugger = result.instance.createDebugMessenger()
