@@ -225,7 +225,7 @@ proc createSampler*(device: Device, sampler: Sampler): VulkanSampler =
     mipmapMode: VK_SAMPLER_MIPMAP_MODE_LINEAR,
     mipLodBias: 0,
     minLod: 0,
-    maxLod: 0,
+    maxLod: VK_LOD_CLAMP_NONE,
   )
   result.device = device
   checkVkResult device.vk.vkCreateSampler(addr samplerInfo, nil, addr result.vk)
