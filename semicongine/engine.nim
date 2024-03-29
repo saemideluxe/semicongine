@@ -1,5 +1,3 @@
-{.experimental: "codeReordering".}
-
 import std/options
 import std/sequtils
 import std/logging
@@ -51,6 +49,8 @@ type
     eventHandler: proc(engine: var Engine, event: Event)
     fullscreen: bool
 
+# forward declarations
+func getAspectRatio*(engine: Engine): float32
 
 proc destroy*(engine: var Engine) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
@@ -88,6 +88,8 @@ proc initEngine*(
   if debug:
     instanceExtensions.add "VK_EXT_debug_utils"
     layers.add "VK_LAYER_KHRONOS_validation"
+    # This stuff might be usefull if we one day to smart GPU memory allocation,
+    # but right now it just clobbers up the console log
     # putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
     putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_AMD,VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_NVIDIA,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT")
 

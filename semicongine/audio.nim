@@ -269,7 +269,7 @@ proc startMixerThread*() =
   mixer[] = initMixer()
   audiothread.createThread(audioWorker)
   debug "Created audio thread"
-  when defined(window):
+  when defined(windows):
     SetThreadPriority(audiothread.handle(), THREAD_PRIORITY_TIME_CRITICAL)
   when defined(linux):
     discard pthread_setschedprio(Pthread(audiothread.handle()), cint(-20))
