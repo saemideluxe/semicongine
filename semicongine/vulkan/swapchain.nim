@@ -91,14 +91,14 @@ proc createSwapchain*(
       let image = VulkanImage(vk: vkimage, format: surfaceFormat.format, device: device)
       let imageview = image.createImageView()
       swapChain.imageviews.add imageview
-      swapChain.framebuffers.add swapchain.device.createFramebuffer(renderPass, [imageview], swapchain.dimension)
+      swapChain.framebuffers.add device.createFramebuffer(renderPass, [imageview], swapchain.dimension)
     for i in 0 ..< swapchain.inFlightFrames:
       swapchain.queueFinishedFence.add device.createFence()
       swapchain.imageAvailableSemaphore.add device.createSemaphore()
       swapchain.renderFinishedSemaphore.add device.createSemaphore()
     debug &"Created swapchain with: {nImages} framebuffers, {inFlightFrames} in-flight frames, {swapchain.dimension.x}x{swapchain.dimension.y}"
-    assert swapchain.device.firstPresentationQueue().isSome, "No present queue found"
-    swapchain.presentQueue = swapchain.device.firstPresentationQueue().get
+    assert device.firstPresentationQueue().isSome, "No present queue found"
+    swapchain.presentQueue = device.firstPresentationQueue().get
     result = some(swapchain)
   else:
     result = none(Swapchain)
@@ -132,7 +132,7 @@ proc nextFrame*(swapchain: var Swapchain): Option[int] =
 proc swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
-  assert queue.vk.isSome
+  assert queue.vk.valid
 
   var
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
