@@ -33,22 +33,25 @@ proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int
 
 proc pipelineBarrier*(
   commandBuffer: VkCommandBuffer,
-  memoryBarriers: openArray[VkMemoryBarrier2] = [],
-  bufferMemoryBarriers: openArray[VkBufferMemoryBarrier2] = [],
-  imageBarriers: openArray[VkImageMemoryBarrier2] = [],
+  srcStages: openArray[VkPipelineStageFlagBits],
+  dstStages: openArray[VkPipelineStageFlagBits],
+  memoryBarriers: openArray[VkMemoryBarrier] = [],
+  bufferMemoryBarriers: openArray[VkBufferMemoryBarrier] = [],
+  imageBarriers: openArray[VkImageMemoryBarrier] = [],
 ) =
-  let dependencies = VkDependencyInfo(
-    sType: VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-    dependencyFlags: VkDependencyFlags(0),
-    memoryBarrierCount: uint32(memoryBarriers.len),
-    pMemoryBarriers: memoryBarriers.toCPointer,
-    bufferMemoryBarrierCount: uint32(bufferMemoryBarriers.len),
-    pBufferMemoryBarriers: bufferMemoryBarriers.toCPointer,
-    imageMemoryBarrierCount: uint32(imageBarriers.len),
-    pImageMemoryBarriers: imageBarriers.toCPointer,
-  )
 
-  vkCmdPipelineBarrier2(commandBuffer, addr dependencies)
+  vkCmdPipelineBarrier(
+    commandBuffer,
+    srcStageMask = srcStages.toBits,
+    dstStageMask = dstStages.toBits,
+    dependencyFlags = VkDependencyFlags(0),
+    memoryBarrierCount = uint32(memoryBarriers.len),
+    pMemoryBarriers = memoryBarriers.toCPointer,
+    bufferMemoryBarrierCount = uint32(bufferMemoryBarriers.len),
+    pBufferMemoryBarriers = bufferMemoryBarriers.toCPointer,
+    imageMemoryBarrierCount = uint32(imageBarriers.len),
+    pImageMemoryBarriers = imageBarriers.toCPointer,
+  )
 
 
 template withSingleUseCommandBuffer*(device: Device, queue: Queue, needsTransfer: bool, commandBuffer, body: untyped): untyped =

@@ -108,14 +108,16 @@ proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0) =
 
   var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: VkDeviceSize(dstOffset))
   withSingleUseCommandBuffer(src.device, queue, true, commandBuffer):
-    let barrier = VkMemoryBarrier2(
-      sType: VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
-      srcStageMask: [VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT].toBits,
-      srcAccessMask: [VK_ACCESS_2_MEMORY_WRITE_BIT].toBits,
-      dstStageMask: [VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT].toBits,
-      dstAccessMask: [VK_ACCESS_2_MEMORY_READ_BIT].toBits,
+    let barrier = VkMemoryBarrier(
+      sType: VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+      srcAccessMask: [VK_ACCESS_MEMORY_WRITE_BIT].toBits,
+      dstAccessMask: [VK_ACCESS_MEMORY_READ_BIT].toBits,
     )
-    commandBuffer.pipelineBarrier(memoryBarriers = [barrier])
+    commandBuffer.pipelineBarrier(
+      [VK_PIPELINE_STAGE_TRANSFER_BIT],
+      [VK_PIPELINE_STAGE_VERTEX_INPUT_BIT],
+      memoryBarriers = [barrier]
+    )
     commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
 
 proc destroy*(buffer: var Buffer) =

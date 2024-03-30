@@ -80,8 +80,9 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 
 proc transitionImageLayout(image: VulkanImage, queue: Queue, oldLayout, newLayout: VkImageLayout) =
-  var barrier = VkImageMemoryBarrier2(
-      sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+  var
+    barrier = VkImageMemoryBarrier(
+      sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
       oldLayout: oldLayout,
       newLayout: newLayout,
       srcQueueFamilyIndex: VK_QUEUE_FAMILY_IGNORED,
@@ -93,23 +94,25 @@ proc transitionImageLayout(image: VulkanImage, queue: Queue, oldLayout, newLayou
         levelCount: 1,
         baseArrayLayer: 0,
         layerCount: 1,
-    ),
-  )
+      ),
+    )
+    srcStage: VkPipelineStageFlagBits
+    dstStage: VkPipelineStageFlagBits
   if oldLayout == VK_IMAGE_LAYOUT_UNDEFINED and newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-    barrier.srcStageMask = [VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT].toBits
-    barrier.srcAccessMask = VkAccessFlags2(0)
-    barrier.dstStageMask = [VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT].toBits
-    barrier.dstAccessMask = [VK_ACCESS_2_TRANSFER_WRITE_BIT].toBits
+    srcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
+    barrier.srcAccessMask = VkAccessFlags(0)
+    dstStage = VK_PIPELINE_STAGE_TRANSFER_BIT
+    barrier.dstAccessMask = [VK_ACCESS_TRANSFER_WRITE_BIT].toBits
   elif oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL and newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-    barrier.srcStageMask = [VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT].toBits
-    barrier.srcAccessMask = [VK_ACCESS_2_TRANSFER_WRITE_BIT].toBits
-    barrier.dstStageMask = [VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT].toBits
-    barrier.dstAccessMask = [VK_ACCESS_2_SHADER_READ_BIT].toBits
+    srcStage = VK_PIPELINE_STAGE_TRANSFER_BIT
+    barrier.srcAccessMask = [VK_ACCESS_TRANSFER_WRITE_BIT].toBits
+    dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+    barrier.dstAccessMask = [VK_ACCESS_SHADER_READ_BIT].toBits
   else:
     raise newException(Exception, "Unsupported layout transition!")
 
   withSingleUseCommandBuffer(image.device, queue, false, commandBuffer):
-    commandBuffer.pipelineBarrier(imageBarriers = [barrier])
+    commandBuffer.pipelineBarrier([srcStage], [dstStage], imageBarriers = [barrier])
 
 proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
   assert src.device.vk.valid
