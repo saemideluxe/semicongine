@@ -402,13 +402,13 @@ type
   VkShaderCorePropertiesFlagsAMD* = distinct VkFlags
   VkDeviceDiagnosticsConfigFlagsNV* = distinct VkFlags
   VkRefreshObjectFlagsKHR* = distinct VkFlags
-  VkAccessFlags2* = distinct VkFlags
-  VkPipelineStageFlags2* = distinct VkFlags
+  VkAccessFlags2* = distinct VkFlags64
+  VkPipelineStageFlags2* = distinct VkFlags64
   VkAccelerationStructureMotionInfoFlagsNV* = distinct VkFlags
   VkAccelerationStructureMotionInstanceFlagsNV* = distinct VkFlags
-  VkFormatFeatureFlags2* = distinct VkFlags
+  VkFormatFeatureFlags2* = distinct VkFlags64
   VkRenderingFlags* = distinct VkFlags
-  VkMemoryDecompressionMethodFlagsNV* = distinct VkFlags
+  VkMemoryDecompressionMethodFlagsNV* = distinct VkFlags64
   VkBuildMicromapFlagsEXT* = distinct VkFlags
   VkMicromapCreateFlagsEXT* = distinct VkFlags
   VkDirectDriverLoadingFlagsLUNARG* = distinct VkFlags

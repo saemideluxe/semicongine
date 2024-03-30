@@ -50,9 +50,14 @@ proc createDevice*(
     )
   var queueList = deviceQueues.values.toSeq
 
+  var features13 = VkPhysicalDeviceVulkan13Features(
+    stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+    synchronization2: true
+  )
   var features2 = VkPhysicalDeviceFeatures2(
     stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     features: result.enabledFeatures,
+    pNext: addr features13,
   )
   var createInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,

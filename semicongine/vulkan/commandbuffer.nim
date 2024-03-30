@@ -1,3 +1,5 @@
+import std/strformat
+
 import ../core
 import ./device
 import ./physicaldevice
@@ -18,7 +20,7 @@ proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int
   )
   result.family = family
   result.device = device
-  checkVkResult device.vk.vkCreateCommandPool(addr(createInfo), nil, addr(result.vk))
+  checkVkResult device.vk.vkCreateCommandPool(addr createInfo, nil, addr result.vk)
 
   var allocInfo = VkCommandBufferAllocateInfo(
     sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -27,20 +29,33 @@ proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int
     commandBufferCount: uint32(nBuffers),
   )
   result.buffers = newSeq[VkCommandBuffer](nBuffers)
-  checkVkResult device.vk.vkAllocateCommandBuffers(addr(allocInfo), result.buffers.toCPointer)
+  checkVkResult device.vk.vkAllocateCommandBuffers(addr allocInfo, result.buffers.toCPointer)
+
+proc pipelineBarrier*(
+  commandBuffer: VkCommandBuffer,
+  memoryBarriers: openArray[VkMemoryBarrier2] = [],
+  bufferMemoryBarriers: openArray[VkBufferMemoryBarrier2] = [],
+  imageBarriers: openArray[VkImageMemoryBarrier2] = [],
+) =
+  let dependencies = VkDependencyInfo(
+    sType: VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+    dependencyFlags: VkDependencyFlags(0),
+    memoryBarrierCount: uint32(memoryBarriers.len),
+    pMemoryBarriers: memoryBarriers.toCPointer,
+    bufferMemoryBarrierCount: uint32(bufferMemoryBarriers.len),
+    pBufferMemoryBarriers: bufferMemoryBarriers.toCPointer,
+    imageMemoryBarrierCount: uint32(imageBarriers.len),
+    pImageMemoryBarriers: imageBarriers.toCPointer,
+  )
+
+  vkCmdPipelineBarrier2(commandBuffer, addr dependencies)
 
 
-template withSingleUseCommandBuffer*(device: Device, needsTransfer: bool, commandBuffer, body: untyped): untyped =
+template withSingleUseCommandBuffer*(device: Device, queue: Queue, needsTransfer: bool, commandBuffer, body: untyped): untyped =
   assert device.vk.valid
+  assert queue.vk.valid
 
-  var queue: Queue
-  for q in device.queues.values:
-    if q.family.canDoTransfer or not needsTransfer:
-      queue = q
-      break
-  if not queue.vk.valid:
-    raise newException(Exception, "No queue that supports buffer transfer")
-
+  checkVkResult queue.vk.vkQueueWaitIdle()
   var
     commandBufferPool = createCommandBufferPool(device, queue.family, 1)
     commandBuffer = commandBufferPool.buffers[0]
@@ -48,7 +63,7 @@ template withSingleUseCommandBuffer*(device: Device, needsTransfer: bool, comman
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
       flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
     )
-  checkVkResult commandBuffer.vkBeginCommandBuffer(addr(beginInfo))
+  checkVkResult commandBuffer.vkBeginCommandBuffer(addr beginInfo)
 
   block:
     body
@@ -57,9 +72,9 @@ template withSingleUseCommandBuffer*(device: Device, needsTransfer: bool, comman
   var submitInfo = VkSubmitInfo(
     sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
     commandBufferCount: 1,
-    pCommandBuffers: addr(commandBuffer),
+    pCommandBuffers: addr commandBuffer,
   )
-  checkVkResult queue.vk.vkQueueSubmit(1, addr(submitInfo), VkFence(0))
+  checkVkResult queue.vk.vkQueueSubmit(1, addr submitInfo, VkFence(0))
   checkVkResult queue.vk.vkQueueWaitIdle()
   commandBufferPool.destroy()
 
@@ -68,3 +83,4 @@ proc destroy*(commandpool: var CommandBufferPool) =
   assert commandpool.vk.valid
   commandpool.device.vk.vkDestroyCommandPool(commandpool.vk, nil)
   commandpool.vk.reset
+

@@ -217,7 +217,6 @@ func mousePositionNormalized*(engine: Engine): Vec2f =
 func mouseMove*(engine: Engine): auto = engine.input.mouseMove
 func mouseWheel*(engine: Engine): auto = engine.input.mouseWheel
 func eventsProcessed*(engine: Engine): auto = engine.input.eventsProcessed
-func framesRendered*(engine: Engine): uint64 = (if engine.renderer.isSome: engine.renderer.get.framesRendered else: 0)
 func gpuDevice*(engine: Engine): Device = engine.device
 func getWindow*(engine: Engine): auto = engine.window
 func getAspectRatio*(engine: Engine): float32 = engine.getWindow().size[0] / engine.getWindow().size[1]

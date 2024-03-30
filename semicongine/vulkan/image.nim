@@ -79,48 +79,39 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
   )
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 
-proc transitionImageLayout(image: VulkanImage, oldLayout, newLayout: VkImageLayout) =
-  var barrier = VkImageMemoryBarrier(
-    sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-    oldLayout: oldLayout,
-    newLayout: newLayout,
-    srcQueueFamilyIndex: VK_QUEUE_FAMILY_IGNORED,
-    dstQueueFamilyIndex: VK_QUEUE_FAMILY_IGNORED,
-    image: image.vk,
-    subresourceRange: VkImageSubresourceRange(
-      aspectMask: toBits [VK_IMAGE_ASPECT_COLOR_BIT],
-      baseMipLevel: 0,
-      levelCount: 1,
-      baseArrayLayer: 0,
-      layerCount: 1,
+proc transitionImageLayout(image: VulkanImage, queue: Queue, oldLayout, newLayout: VkImageLayout) =
+  var barrier = VkImageMemoryBarrier2(
+      sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+      oldLayout: oldLayout,
+      newLayout: newLayout,
+      srcQueueFamilyIndex: VK_QUEUE_FAMILY_IGNORED,
+      dstQueueFamilyIndex: VK_QUEUE_FAMILY_IGNORED,
+      image: image.vk,
+      subresourceRange: VkImageSubresourceRange(
+        aspectMask: toBits [VK_IMAGE_ASPECT_COLOR_BIT],
+        baseMipLevel: 0,
+        levelCount: 1,
+        baseArrayLayer: 0,
+        layerCount: 1,
     ),
   )
-  var
-    sourceStage, destinationStage: VkPipelineStageFlagBits
   if oldLayout == VK_IMAGE_LAYOUT_UNDEFINED and newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-    barrier.srcAccessMask = VkAccessFlags(0)
-    barrier.dstAccessMask = toBits [VK_ACCESS_TRANSFER_WRITE_BIT]
-    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
-    destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT
+    barrier.srcStageMask = [VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT].toBits
+    barrier.srcAccessMask = VkAccessFlags2(0)
+    barrier.dstStageMask = [VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT].toBits
+    barrier.dstAccessMask = [VK_ACCESS_2_TRANSFER_WRITE_BIT].toBits
   elif oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL and newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-    barrier.srcAccessMask = toBits [VK_ACCESS_TRANSFER_WRITE_BIT]
-    barrier.dstAccessMask = toBits [VK_ACCESS_SHADER_READ_BIT]
-    sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT
-    destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+    barrier.srcStageMask = [VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT].toBits
+    barrier.srcAccessMask = [VK_ACCESS_2_TRANSFER_WRITE_BIT].toBits
+    barrier.dstStageMask = [VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT].toBits
+    barrier.dstAccessMask = [VK_ACCESS_2_SHADER_READ_BIT].toBits
   else:
     raise newException(Exception, "Unsupported layout transition!")
 
-  withSingleUseCommandBuffer(image.device, false, commandBuffer):
-    vkCmdPipelineBarrier(
-      commandBuffer,
-      toBits [sourceStage], toBits [destinationStage],
-      VkDependencyFlags(0),
-      0, nil,
-      0, nil,
-      1, addr barrier
-    )
+  withSingleUseCommandBuffer(image.device, queue, false, commandBuffer):
+    commandBuffer.pipelineBarrier(imageBarriers = [barrier])
 
-proc copy*(src: Buffer, dst: VulkanImage) =
+proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -140,7 +131,7 @@ proc copy*(src: Buffer, dst: VulkanImage) =
     imageOffset: VkOffset3D(x: 0, y: 0, z: 0),
     imageExtent: VkExtent3D(width: uint32(dst.width), height: uint32(dst.height), depth: 1)
   )
-  withSingleUseCommandBuffer(src.device, true, commandBuffer):
+  withSingleUseCommandBuffer(src.device, queue, true, commandBuffer):
     commandBuffer.vkCmdCopyBufferToImage(
       src.vk,
       dst.vk,
@@ -150,7 +141,7 @@ proc copy*(src: Buffer, dst: VulkanImage) =
     )
 
 # currently only usable for texture access from shader
-proc createImage(device: Device, width, height: int, depth: PixelDepth, data: pointer): VulkanImage =
+proc createImage(device: Device, queue: Queue, width, height: int, depth: PixelDepth, data: pointer): VulkanImage =
   assert device.vk.valid
   assert width > 0
   assert height > 0
@@ -180,12 +171,12 @@ proc createImage(device: Device, width, height: int, depth: PixelDepth, data: po
   )
   checkVkResult device.vk.vkCreateImage(addr imageInfo, nil, addr result.vk)
   result.allocateMemory(requireMappable = false, preferVRAM = true, preferAutoFlush = false)
-  result.transitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+  result.transitionImageLayout(queue, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
 
   var stagingBuffer = device.createBuffer(size = size, usage = [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
-  stagingBuffer.setData(src = data, size = size)
-  stagingBuffer.copy(result)
-  result.transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+  stagingBuffer.setData(queue, src = data, size = size)
+  stagingBuffer.copy(result, queue)
+  result.transitionImageLayout(queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
   stagingBuffer.destroy()
 
 proc destroy*(image: var VulkanImage) =
@@ -279,12 +270,12 @@ func `$`*(texture: VulkanTexture): string =
   &"VulkanTexture({texture.image.width}x{texture.image.height})"
 
 
-proc uploadTexture*(device: Device, texture: Texture): VulkanTexture =
+proc uploadTexture*(device: Device, queue: Queue, texture: Texture): VulkanTexture =
   assert device.vk.valid
   if texture.isGrayscale:
-    result.image = createImage(device = device, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, data = addr texture.grayImage.imagedata[0])
+    result.image = createImage(device = device, queue = queue, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, data = addr texture.grayImage.imagedata[0])
   else:
-    result.image = createImage(device = device, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, data = addr texture.colorImage.imagedata[0][0])
+    result.image = createImage(device = device, queue = queue, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, data = addr texture.colorImage.imagedata[0][0])
   result.imageView = result.image.createImageView()
   result.sampler = result.image.device.createSampler(texture.sampler)
 

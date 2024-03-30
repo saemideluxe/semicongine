@@ -7,7 +7,6 @@ import ./device
 import ./physicaldevice
 import ./image
 import ./framebuffer
-import ./commandbuffer
 import ./syncing
 
 type
@@ -20,15 +19,12 @@ type
     framebuffers*: seq[Framebuffer]
     currentInFlight*: int
     currentFramebufferIndex: uint32
-    framesRendered*: uint64
     queueFinishedFence*: seq[Fence]
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
-    commandBufferPool: CommandBufferPool
     # required for recreation:
     renderPass: VkRenderPass
     surfaceFormat: VkSurfaceFormatKHR
-    queueFamily: QueueFamily
     imageCount: uint32
     inFlightFrames*: int
 
@@ -37,7 +33,6 @@ proc createSwapchain*(
   device: Device,
   renderPass: VkRenderPass,
   surfaceFormat: VkSurfaceFormatKHR,
-  queueFamily: QueueFamily,
   desiredNumberOfImages = 3'u32,
   inFlightFrames = 2,
   oldSwapchain = VkSwapchainKHR(0),
@@ -82,7 +77,6 @@ proc createSwapchain*(
       surfaceFormat: surfaceFormat,
       dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]),
       inFlightFrames: inFlightFrames,
-      queueFamily: queueFamily,
       renderPass: renderPass
     )
 
@@ -101,7 +95,6 @@ proc createSwapchain*(
       swapchain.queueFinishedFence.add device.createFence()
       swapchain.imageAvailableSemaphore.add device.createSemaphore()
       swapchain.renderFinishedSemaphore.add device.createSemaphore()
-    swapchain.commandBufferPool = device.createCommandBufferPool(queueFamily, swapchain.inFlightFrames)
     debug &"Created swapchain with: {nImages} framebuffers, {inFlightFrames} in-flight frames, {swapchain.dimension.x}x{swapchain.dimension.y}"
     result = some(swapchain)
   else:
@@ -112,7 +105,7 @@ proc currentFramebuffer*(swapchain: Swapchain): Framebuffer =
   assert swapchain.vk.valid
   swapchain.framebuffers[swapchain.currentFramebufferIndex]
 
-proc nextFrame*(swapchain: var Swapchain): Option[VkCommandBuffer] =
+proc nextFrame*(swapchain: var Swapchain): Option[int] =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
 
@@ -129,18 +122,17 @@ proc nextFrame*(swapchain: var Swapchain): Option[VkCommandBuffer] =
 
   if nextImageResult == VK_SUCCESS:
     swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
-    result = some(swapchain.commandBufferPool.buffers[swapchain.currentInFlight])
+    result = some(swapchain.currentInFlight)
   else:
-    result = none(VkCommandBuffer)
+    result = none(int)
 
-proc swap*(swapchain: var Swapchain): bool =
+proc swap*(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
   assert swapchain.device.firstGraphicsQueue().isSome
   assert swapchain.device.firstPresentationQueue().isSome
 
   var
-    commandBuffer = swapchain.commandBufferPool.buffers[swapchain.currentInFlight]
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
     waitStages = [VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)]
     submitInfo = VkSubmitInfo(
@@ -173,13 +165,11 @@ proc swap*(swapchain: var Swapchain): bool =
   if presentResult != VK_SUCCESS:
     return false
 
-  inc swapchain.framesRendered
   return true
 
 
 proc destroy*(swapchain: var Swapchain) =
   assert swapchain.vk.valid
-  assert swapchain.commandBufferPool.vk.valid
 
   for imageview in swapchain.imageviews.mitems:
     assert imageview.vk.valid
@@ -187,7 +177,6 @@ proc destroy*(swapchain: var Swapchain) =
   for framebuffer in swapchain.framebuffers.mitems:
     assert framebuffer.vk.valid
     framebuffer.destroy()
-  swapchain.commandBufferPool.destroy()
   for i in 0 ..< swapchain.inFlightFrames:
     assert swapchain.queueFinishedFence[i].vk.valid
     assert swapchain.imageAvailableSemaphore[i].vk.valid
@@ -206,7 +195,6 @@ proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
     device = swapchain.device,
     renderPass = swapchain.renderPass,
     surfaceFormat = swapchain.surfaceFormat,
-    queueFamily = swapchain.queueFamily,
     desiredNumberOfImages = swapchain.imageCount,
     inFlightFrames = swapchain.inFlightFrames,
     oldSwapchain = swapchain.vk,

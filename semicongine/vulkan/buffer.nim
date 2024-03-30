@@ -98,7 +98,7 @@ proc createBuffer*(
   result.allocateMemory(requireMappable = requireMappable, preferVRAM = preferVRAM, preferAutoFlush = preferAutoFlush)
 
 
-proc copy*(src, dst: Buffer, dstOffset = 0) =
+proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -107,7 +107,15 @@ proc copy*(src, dst: Buffer, dstOffset = 0) =
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 
   var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: VkDeviceSize(dstOffset))
-  withSingleUseCommandBuffer(src.device, true, commandBuffer):
+  withSingleUseCommandBuffer(src.device, queue, true, commandBuffer):
+    let barrier = VkMemoryBarrier2(
+      sType: VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
+      srcStageMask: [VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT].toBits,
+      srcAccessMask: [VK_ACCESS_2_MEMORY_WRITE_BIT].toBits,
+      dstStageMask: [VK_PIPELINE_STAGE_2_VERTEX_ATTRIBUTE_INPUT_BIT].toBits,
+      dstAccessMask: [VK_ACCESS_2_MEMORY_READ_BIT].toBits,
+    )
+    commandBuffer.pipelineBarrier(memoryBarriers = [barrier])
     commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
 
 proc destroy*(buffer: var Buffer) =
@@ -126,7 +134,7 @@ proc destroy*(buffer: var Buffer) =
     )
   buffer.vk.reset
 
-proc setData*(dst: Buffer, src: pointer, size: int, bufferOffset = 0) =
+proc setData*(dst: Buffer, queue: Queue, src: pointer, size: int, bufferOffset = 0) =
   assert bufferOffset + size <= dst.size
   if dst.memory.canMap:
     copyMem(cast[pointer](cast[int](dst.memory.data) + bufferOffset), src, size)
@@ -134,13 +142,13 @@ proc setData*(dst: Buffer, src: pointer, size: int, bufferOffset = 0) =
       dst.memory.flush()
   else: # use staging buffer, slower but required if memory is not host visible
     var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
-    setData(stagingBuffer, src, size, 0)
-    stagingBuffer.copy(dst, bufferOffset)
+    setData(stagingBuffer, queue, src, size, 0)
+    stagingBuffer.copy(dst, queue, bufferOffset)
     stagingBuffer.destroy()
 
-proc setData*[T: seq](dst: Buffer, src: ptr T, offset = 0'u64) =
-  dst.setData(src, sizeof(get(genericParams(T), 0)) * src[].len, offset = offset)
+proc setData*[T: seq](dst: Buffer, queue: Queue, src: ptr T, offset = 0'u64) =
+  dst.setData(queue, src, sizeof(get(genericParams(T), 0)) * src[].len, offset = offset)
 
-proc setData*[T](dst: Buffer, src: ptr T, offset = 0'u64) =
-  dst.setData(src, sizeof(T), offset = offset)
+proc setData*[T](dst: Buffer, queue: Queue, src: ptr T, offset = 0'u64) =
+  dst.setData(queue, src, sizeof(T), offset = offset)
 
