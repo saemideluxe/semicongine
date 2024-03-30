@@ -1,5 +1,3 @@
-import std/options
-
 import ../core
 import ../material
 import ./device
@@ -9,8 +7,6 @@ import ./shader
 import ./framebuffer
 
 type
-  Subpass* = object
-    outputs: seq[VkAttachmentReference]
   RenderPass* = object
     vk*: VkRenderPass
     device*: Device
