@@ -27,6 +27,7 @@ type
     surfaceFormat: VkSurfaceFormatKHR
     imageCount: uint32
     inFlightFrames*: int
+    presentQueue: Queue
 
 
 proc createSwapchain*(
@@ -96,6 +97,8 @@ proc createSwapchain*(
       swapchain.imageAvailableSemaphore.add device.createSemaphore()
       swapchain.renderFinishedSemaphore.add device.createSemaphore()
     debug &"Created swapchain with: {nImages} framebuffers, {inFlightFrames} in-flight frames, {swapchain.dimension.x}x{swapchain.dimension.y}"
+    assert swapchain.device.firstPresentationQueue().isSome, "No present queue found"
+    swapchain.presentQueue = swapchain.device.firstPresentationQueue().get
     result = some(swapchain)
   else:
     result = none(Swapchain)
@@ -126,11 +129,10 @@ proc nextFrame*(swapchain: var Swapchain): Option[int] =
   else:
     result = none(int)
 
-proc swap*(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
+proc swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
-  assert swapchain.device.firstGraphicsQueue().isSome
-  assert swapchain.device.firstPresentationQueue().isSome
+  assert queue.vk.isSome
 
   var
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
@@ -145,8 +147,7 @@ proc swap*(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
       signalSemaphoreCount: 1,
       pSignalSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk),
     )
-  checkVkResult vkQueueSubmit(
-    swapchain.device.firstGraphicsQueue().get.vk,
+  checkVkResult queue.vk.vkQueueSubmit(
     1,
     addr(submitInfo),
     swapchain.queueFinishedFence[swapchain.currentInFlight].vk
@@ -161,7 +162,7 @@ proc swap*(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
     pImageIndices: addr(swapchain.currentFramebufferIndex),
     pResults: nil,
   )
-  let presentResult = vkQueuePresentKHR(swapchain.device.firstPresentationQueue().get().vk, addr(presentInfo))
+  let presentResult = vkQueuePresentKHR(swapchain.presentQueue.vk, addr(presentInfo))
   if presentResult != VK_SUCCESS:
     return false
 

@@ -433,7 +433,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
 
   renderer.currentCommandBuffer.endRenderCommands()
 
-  if not renderer.swapchain.swap(renderer.currentCommandBuffer):
+  if not renderer.swapchain.swap(renderer.queue, renderer.currentCommandBuffer):
     let res = renderer.swapchain.recreate()
     if res.isSome:
       var oldSwapchain = renderer.swapchain
