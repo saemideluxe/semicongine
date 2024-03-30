@@ -108,7 +108,7 @@ proc currentFramebuffer*(swapchain: Swapchain): Framebuffer =
   assert swapchain.vk.valid
   swapchain.framebuffers[swapchain.currentFramebufferIndex]
 
-proc nextFrame*(swapchain: var Swapchain): Option[int] =
+proc nextFrame*(swapchain: var Swapchain): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
 
@@ -125,9 +125,9 @@ proc nextFrame*(swapchain: var Swapchain): Option[int] =
 
   if nextImageResult == VK_SUCCESS:
     swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
-    result = some(swapchain.currentInFlight)
+    return true
   else:
-    result = none(int)
+    return false
 
 proc swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
   assert swapchain.device.vk.valid

@@ -45,7 +45,7 @@ type
     queue: Queue
     commandBufferPool: CommandBufferPool
 
-proc currentCommandBuffer(renderer: Renderer): VkCommandBuffer =
+proc currentFrameCommandBuffer(renderer: Renderer): VkCommandBuffer =
   renderer.commandBufferPool.buffers[renderer.swapchain.currentInFlight]
 
 proc initRenderer*(device: Device, shaders: openArray[(MaterialType, ShaderConfiguration)], clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling = true): Renderer =
@@ -405,9 +405,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
 proc render*(renderer: var Renderer, scene: Scene) =
   assert scene in renderer.scenedata
 
-  var currentInFlightFrameIndex = renderer.swapchain.nextFrame()
-
-  if not currentInFlightFrameIndex.isSome:
+  if not renderer.swapchain.nextFrame():
     let res = renderer.swapchain.recreate()
     if res.isSome:
       var oldSwapchain = renderer.swapchain
@@ -416,7 +414,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
       oldSwapchain.destroy()
     return
 
-  renderer.currentCommandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer(), oneTimeSubmit = true)
+  renderer.currentFrameCommandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer(), oneTimeSubmit = true)
 
   debug "Scene buffers:"
   for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
@@ -426,14 +424,14 @@ proc render*(renderer: var Renderer, scene: Scene) =
   for (materialType, shaderPipeline) in renderer.renderPass.shaderPipelines:
     if scene.usesMaterial(materialType):
       debug &"Start shaderPipeline for '{materialType}'"
-      renderer.currentCommandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, shaderPipeline.vk)
-      renderer.currentCommandBuffer.vkCmdBindDescriptorSets(VK_PIPELINE_BIND_POINT_GRAPHICS, shaderPipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[shaderPipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
+      renderer.currentFrameCommandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, shaderPipeline.vk)
+      renderer.currentFrameCommandBuffer.vkCmdBindDescriptorSets(VK_PIPELINE_BIND_POINT_GRAPHICS, shaderPipeline.layout, 0, 1, addr(renderer.scenedata[scene].descriptorSets[shaderPipeline.vk][renderer.swapchain.currentInFlight].vk), 0, nil)
       for (drawable, mesh) in renderer.scenedata[scene].drawables.filterIt(it[1].visible and it[1].material.theType == materialType):
-        drawable.draw(renderer.currentCommandBuffer, vertexBuffers = renderer.scenedata[scene].vertexBuffers, indexBuffer = renderer.scenedata[scene].indexBuffer, shaderPipeline.vk)
+        drawable.draw(renderer.currentFrameCommandBuffer, vertexBuffers = renderer.scenedata[scene].vertexBuffers, indexBuffer = renderer.scenedata[scene].indexBuffer, shaderPipeline.vk)
 
-  renderer.currentCommandBuffer.endRenderCommands()
+  renderer.currentFrameCommandBuffer.endRenderCommands()
 
-  if not renderer.swapchain.swap(renderer.queue, renderer.currentCommandBuffer):
+  if not renderer.swapchain.swap(renderer.queue, renderer.currentFrameCommandBuffer):
     let res = renderer.swapchain.recreate()
     if res.isSome:
       var oldSwapchain = renderer.swapchain
