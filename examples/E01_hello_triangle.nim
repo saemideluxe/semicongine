@@ -26,11 +26,10 @@ var
   )
   myengine = initEngine("Hello triangle", showFps = true)
 
-myengine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration}, vSync = false, inFlightFrames = 1)
+myengine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration})
 myengine.loadScene(scene)
 
 while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
-  echo ""
   transform[Vec3f](scene.meshes[0][], "position", scale(1.001, 1.001))
   myengine.renderScene(scene)
 
