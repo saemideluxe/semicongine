@@ -77,6 +77,9 @@ proc createWindow*(title: string): NativeWindow =
   checkXlibResult display.XFreePixmap(pixmap)
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
+proc setTitle*(window: NativeWindow, title: string) =
+  checkXlibResult XSetStandardProperties(window.display, window.window, title, "window", 0, nil, 0, nil)
+
 proc fullscreen*(window: var NativeWindow, enable: bool) =
   var
     wm_state = window.display.XInternAtom("_NET_WM_STATE", 0)
@@ -94,8 +97,8 @@ proc fullscreen*(window: var NativeWindow, enable: bool) =
         0,
         0,
         0
-      ]
-    )
+    ]
+  )
   )
   xev.theType = ClientMessage
 

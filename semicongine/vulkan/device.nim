@@ -24,7 +24,6 @@ proc `$`*(device: Device): string =
 proc createDevice*(
   instance: Instance,
   physicalDevice: PhysicalDevice,
-  enabledLayers: seq[string],
   enabledExtensions: seq[string],
   queueFamilies: seq[QueueFamily],
 ): Device =
@@ -37,7 +36,6 @@ proc createDevice*(
   for extension in allExtensions:
     instance.vk.loadExtension(extension)
   var
-    enabledLayersC = allocCStringArray(enabledLayers)
     enabledExtensionsC = allocCStringArray(allExtensions)
     priority = 1'f32
   var deviceQueues: Table[QueueFamily, VkDeviceQueueCreateInfo]
@@ -58,8 +56,8 @@ proc createDevice*(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     queueCreateInfoCount: uint32(queueList.len),
     pQueueCreateInfos: queueList.toCPointer,
-    enabledLayerCount: uint32(enabledLayers.len),
-    ppEnabledLayerNames: enabledLayersC,
+    enabledLayerCount: 0,
+    ppEnabledLayerNames: nil,
     enabledExtensionCount: uint32(allExtensions.len),
     ppEnabledExtensionNames: enabledExtensionsC,
     pEnabledFeatures: nil,
@@ -72,7 +70,6 @@ proc createDevice*(
     pAllocator = nil,
     pDevice = addr result.vk
   )
-  deallocCStringArray(enabledLayersC)
   deallocCStringArray(enabledExtensionsC)
   for family in deviceQueues.keys:
     var queue: VkQueue

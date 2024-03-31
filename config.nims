@@ -2,61 +2,26 @@ import std/strformat
 import std/strutils
 import std/os
 
-const BUILDBASE = "build"
-const DEBUG = "debug"
-const RELEASE = "release"
-const LINUX = "linux"
-const WINDOWS = "windows"
+import semicongine/build
 
-const PACKAGETYPE* {.strdefine.}: string = "dir" # dir, zip, exe
-const RESOURCEROOT* {.strdefine.}: string = "resources"
+# TODO: totally update this file!!
 
-switch("d", "nimPreviewHashRef")
-switch("experimental", "strictEffects")
-switch("experimental", "strictFuncs")
 switch("nimblePath", "nimbledeps/pkgs2")
 
-task build, "build":
-  switch("d", "PACKAGETYPE=" & PACKAGETYPE)
-  switch("d", "RESOURCEROOT=" & RESOURCEROOT)
-  var buildType = DEBUG
-  var platformDir = ""
-  if defined(linux):
-    switch("define", "VK_USE_PLATFORM_XLIB_KHR")
-    platformDir = LINUX
-  if defined(windows):
-    switch("define", "VK_USE_PLATFORM_WIN32_KHR")
-    platformDir = WINDOWS
-  if defined(release):
-    switch("app", "gui")
-    buildType = RELEASE
-  else:
-    switch("debugger", "native")
-
-  var outdir = getCurrentDir() / BUILDBASE / buildType / platformDir / projectName()
-  switch("outdir", outdir)
+task build_dev, "build dev":
+  semicongine_build_switches(buildname = "dev")
   setCommand "c"
-  rmDir(outdir)
-  mkDir(outdir)
-  let resourcedir = joinPath(projectDir(), RESOURCEROOT)
-  if dirExists(resourcedir):
-    let outdir_resources = joinPath(outdir, RESOURCEROOT)
-    if PACKAGETYPE == "dir":
-      cpDir(resourcedir, outdir_resources)
-    elif PACKAGETYPE == "zip":
-      mkDir(outdir_resources)
-      for resource in listDirs(resourcedir):
-        let
-          oldcwd = getCurrentDir()
-          outputfile = joinPath(outdir_resources, resource.splitPath().tail & ".zip")
-          inputfile = resource.splitPath().tail
-        cd(resource)
-        if defined(linux):
-          exec &"zip -r {outputfile} ."
-        elif defined(windows):
-          # TODO: test this
-          exec &"powershell Compress-Archive * {outputfile}"
-        cd(oldcwd)
+  let outdir = semicongine_builddir(buildname = "dev")
+  semicongine_pack(outdir, bundleType = "exe", resourceRoot = "resources")
+
+task build_release, "build release":
+  switch "define", "release"
+  switch "app", "gui"
+  semicongine_build_switches(buildname = "release")
+  setCommand "c"
+  let outdir = semicongine_builddir(buildname = "release")
+  semicongine_pack(outdir, bundleType = "exe", resourceRoot = "resources")
+
 
 task build_all_debug, "build all examples for debug":
   for file in listFiles("examples"):
@@ -76,9 +41,6 @@ task test_all, "Run all test programs":
   exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=dir --run tests/test_resources.nim")
   exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=zip --run tests/test_resources.nim")
   exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=exe --run tests/test_resources.nim")
-
-task clean, "remove all build files":
-  exec(&"rm -rf {BUILDBASE}")
 
 task publish, "publish all build":
   for file in listDirs("build/debug/linux"):

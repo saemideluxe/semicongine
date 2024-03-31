@@ -100,6 +100,9 @@ proc createWindow*(title: string): NativeWindow =
   result.g_wpPrev.length = UINT(sizeof(WINDOWPLACEMENT))
   discard result.hwnd.ShowWindow(SW_SHOW)
 
+proc setTitle*(window: NativeWindow, title: string)
+  window.hwnd.SetWindowText(T(title))
+
 # inspired by the one and only, Raymond Chen
 # https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
 proc fullscreen*(window: var NativeWindow, enable: bool) =

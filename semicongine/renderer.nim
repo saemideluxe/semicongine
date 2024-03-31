@@ -362,7 +362,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
 
   if forceAll:
     debug "Update uniforms because 'forceAll' was given"
-  else:
+  elif dirty.len > 0:
     debug &"Update uniforms because of dirty scene globals: {dirty}"
 
   # loop over all used shaders/pipelines
@@ -411,25 +411,31 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
         offset += uniform.size
   scene.clearDirtyShaderGlobals()
 
+proc startNewFrame(renderer: var Renderer) =
+  # this is kinda important as we will wait for the queue finished fence from the swapchain
+  if not renderer.swapchain.nextFrame():
+    let res = renderer.swapchain.recreate()
+    if not res.isSome:
+      raise newException(Exception, "Unable to recreate swapchain")
+    var oldSwapchain = renderer.swapchain
+    renderer.swapchain = res.get()
+    checkVkResult renderer.device.vk.vkDeviceWaitIdle()
+    oldSwapchain.destroy()
+
 proc render*(renderer: var Renderer, scene: Scene) =
   assert scene in renderer.scenedata
 
-  if not renderer.swapchain.nextFrame():
-    let res = renderer.swapchain.recreate()
-    if res.isSome:
-      var oldSwapchain = renderer.swapchain
-      renderer.swapchain = res.get()
-      checkVkResult renderer.device.vk.vkDeviceWaitIdle()
-      oldSwapchain.destroy()
-    return
-
+  # preparation
+  renderer.startNewFrame()
   renderer.currentFrameCommandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer(), oneTimeSubmit = true)
 
+  # debug output
   debug "Scene buffers:"
   for (location, buffer) in renderer.scenedata[scene].vertexBuffers.pairs:
     debug "  ", location, ": ", buffer
   debug "  Index buffer: ", renderer.scenedata[scene].indexBuffer
 
+  # draw all meshes
   for (materialType, shaderPipeline) in renderer.renderPass.shaderPipelines:
     if scene.usesMaterial(materialType):
       debug &"Start shaderPipeline for '{materialType}'"
@@ -438,8 +444,10 @@ proc render*(renderer: var Renderer, scene: Scene) =
       for (drawable, mesh) in renderer.scenedata[scene].drawables.filterIt(it[1].visible and it[1].material.theType == materialType):
         drawable.draw(renderer.currentFrameCommandBuffer, vertexBuffers = renderer.scenedata[scene].vertexBuffers, indexBuffer = renderer.scenedata[scene].indexBuffer, shaderPipeline.vk)
 
+  # done rendering
   renderer.currentFrameCommandBuffer.endRenderCommands()
 
+  # swap framebuffer
   if not renderer.swapchain.swap(renderer.queue, renderer.currentFrameCommandBuffer):
     let res = renderer.swapchain.recreate()
     if res.isSome:

@@ -99,6 +99,7 @@ proc createBuffer*(
 
 
 proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0) =
+  # TODO? This is super slow, because withSingleUseCommandBuffer uses vkQueueWaitIdle
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -108,14 +109,16 @@ proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0) =
 
   var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: VkDeviceSize(dstOffset))
   withSingleUseCommandBuffer(src.device, queue, true, commandBuffer):
+    # TODO: This barrier is somehow "reversed"
+    # I think we need to check for the queue-finished fence before we
+    # do any buffer updates, otherwise will append buffer updates after the draw calls
     let barrier = VkMemoryBarrier(
       sType: VK_STRUCTURE_TYPE_MEMORY_BARRIER,
-      srcAccessMask: [VK_ACCESS_MEMORY_WRITE_BIT].toBits,
-      dstAccessMask: [VK_ACCESS_MEMORY_READ_BIT].toBits,
+      dstAccessMask: [VK_ACCESS_MEMORY_WRITE_BIT].toBits,
     )
     commandBuffer.pipelineBarrier(
-      [VK_PIPELINE_STAGE_TRANSFER_BIT],
       [VK_PIPELINE_STAGE_VERTEX_INPUT_BIT],
+      [VK_PIPELINE_STAGE_TRANSFER_BIT],
       memoryBarriers = [barrier]
     )
     commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))

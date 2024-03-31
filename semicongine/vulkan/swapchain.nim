@@ -14,18 +14,17 @@ type
     device*: Device
     vk*: VkSwapchainKHR
     dimension*: TVec2[uint32]
-    nImages*: uint32
-    imageviews*: seq[ImageView]
-    framebuffers*: seq[Framebuffer]
+    nFramebuffers*: uint32
     currentInFlight*: int
     currentFramebufferIndex: uint32
+    framebufferViews*: seq[ImageView]
+    framebuffers*: seq[Framebuffer]
     queueFinishedFence*: seq[Fence]
     imageAvailableSemaphore*: seq[Semaphore]
     renderFinishedSemaphore*: seq[Semaphore]
     # required for recreation:
     renderPass: VkRenderPass
     surfaceFormat: VkSurfaceFormatKHR
-    imageCount: uint32
     inFlightFrames*: int
     presentQueue: Queue
     vSync: bool
@@ -36,7 +35,7 @@ proc createSwapchain*(
   renderPass: VkRenderPass,
   surfaceFormat: VkSurfaceFormatKHR,
   inFlightFrames: int,
-  desiredNumberOfImages = 3'u32,
+  desiredFramebufferCount = 3'u32,
   oldSwapchain = VkSwapchainKHR(0),
   vSync = false
 ): Option[Swapchain] =
@@ -49,17 +48,17 @@ proc createSwapchain*(
   if capabilities.currentExtent.width == 0 or capabilities.currentExtent.height == 0:
     return none(Swapchain)
 
-  var imageCount = desiredNumberOfImages
+  var minFramebufferCount = desiredFramebufferCount
 
   # following is according to vulkan specs
-  imageCount = max(imageCount, capabilities.minImageCount)
+  minFramebufferCount = max(minFramebufferCount, capabilities.minImageCount)
   if capabilities.maxImageCount != 0:
-    imageCount = min(imageCount, capabilities.maxImageCount)
+    minFramebufferCount = min(minFramebufferCount, capabilities.maxImageCount)
   let hasTripleBuffering = VK_PRESENT_MODE_MAILBOX_KHR in device.physicalDevice.getSurfacePresentModes()
   var createInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: device.physicalDevice.surface,
-    minImageCount: imageCount,
+    minImageCount: minFramebufferCount,
     imageFormat: surfaceFormat.format,
     imageColorSpace: surfaceFormat.colorSpace,
     imageExtent: capabilities.currentExtent,
@@ -83,22 +82,19 @@ proc createSwapchain*(
       vSync: vSync
     )
 
-  if device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk)) == VK_SUCCESS:
-    var nImages: uint32
-    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), nil)
-    swapchain.nImages = nImages
-    var images = newSeq[VkImage](nImages)
-    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapChain.vk, addr(nImages), images.toCPointer)
-    for vkimage in images:
-      let image = VulkanImage(vk: vkimage, format: surfaceFormat.format, device: device)
-      let imageview = image.createImageView()
-      swapChain.imageviews.add imageview
-      swapChain.framebuffers.add device.createFramebuffer(renderPass, [imageview], swapchain.dimension)
+  if device.vk.vkCreateSwapchainKHR(addr createInfo, nil, addr swapchain.vk) == VK_SUCCESS:
+    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, nil)
+    var framebuffers = newSeq[VkImage](swapchain.nFramebuffers)
+    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, framebuffers.toCPointer)
+    for framebuffer in framebuffers:
+      let framebufferView = VulkanImage(vk: framebuffer, format: surfaceFormat.format, device: device).createImageView()
+      swapchain.framebufferViews.add framebufferView
+      swapchain.framebuffers.add device.createFramebuffer(renderPass, [framebufferView], swapchain.dimension)
     for i in 0 ..< swapchain.inFlightFrames:
       swapchain.queueFinishedFence.add device.createFence()
       swapchain.imageAvailableSemaphore.add device.createSemaphore()
       swapchain.renderFinishedSemaphore.add device.createSemaphore()
-    debug &"Created swapchain with: {nImages} framebuffers, {inFlightFrames} in-flight frames, {swapchain.dimension.x}x{swapchain.dimension.y}"
+    debug &"Created swapchain with: {swapchain.nFramebuffers} framebuffers, {inFlightFrames} in-flight frames, {swapchain.dimension.x}x{swapchain.dimension.y}"
     assert device.firstPresentationQueue().isSome, "No present queue found"
     swapchain.presentQueue = device.firstPresentationQueue().get
     result = some(swapchain)
@@ -122,7 +118,7 @@ proc nextFrame*(swapchain: var Swapchain): bool =
     high(uint64),
     swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk,
     VkFence(0),
-    addr(swapchain.currentFramebufferIndex)
+    addr swapchain.currentFramebufferIndex,
   )
 
   if nextImageResult == VK_SUCCESS:
@@ -142,29 +138,29 @@ proc swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffe
     submitInfo = VkSubmitInfo(
       sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
       waitSemaphoreCount: 1,
-      pWaitSemaphores: addr(waitSemaphores[0]),
-      pWaitDstStageMask: addr(waitStages[0]),
+      pWaitSemaphores: waitSemaphores.toCPointer,
+      pWaitDstStageMask: waitStages.toCPointer,
       commandBufferCount: 1,
-      pCommandBuffers: addr(commandBuffer),
+      pCommandBuffers: addr commandBuffer,
       signalSemaphoreCount: 1,
-      pSignalSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk),
+      pSignalSemaphores: addr swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk,
     )
   checkVkResult queue.vk.vkQueueSubmit(
-    1,
-    addr(submitInfo),
-    swapchain.queueFinishedFence[swapchain.currentInFlight].vk
+    submitCount = 1,
+    pSubmits = addr submitInfo,
+    fence = swapchain.queueFinishedFence[swapchain.currentInFlight].vk
   )
 
   var presentInfo = VkPresentInfoKHR(
     sType: VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
     waitSemaphoreCount: 1,
-    pWaitSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk),
+    pWaitSemaphores: addr swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk,
     swapchainCount: 1,
-    pSwapchains: addr(swapchain.vk),
-    pImageIndices: addr(swapchain.currentFramebufferIndex),
+    pSwapchains: addr swapchain.vk,
+    pImageIndices: addr swapchain.currentFramebufferIndex,
     pResults: nil,
   )
-  let presentResult = vkQueuePresentKHR(swapchain.presentQueue.vk, addr(presentInfo))
+  let presentResult = vkQueuePresentKHR(swapchain.presentQueue.vk, addr presentInfo)
   if presentResult != VK_SUCCESS:
     return false
 
@@ -174,7 +170,7 @@ proc swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffe
 proc destroy*(swapchain: var Swapchain) =
   assert swapchain.vk.valid
 
-  for imageview in swapchain.imageviews.mitems:
+  for imageview in swapchain.framebufferViews.mitems:
     assert imageview.vk.valid
     imageview.destroy()
   for framebuffer in swapchain.framebuffers.mitems:
@@ -198,7 +194,7 @@ proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
     device = swapchain.device,
     renderPass = swapchain.renderPass,
     surfaceFormat = swapchain.surfaceFormat,
-    desiredNumberOfImages = swapchain.imageCount,
+    desiredFramebufferCount = swapchain.nFramebuffers,
     inFlightFrames = swapchain.inFlightFrames,
     oldSwapchain = swapchain.vk,
     vSync = swapchain.vSync

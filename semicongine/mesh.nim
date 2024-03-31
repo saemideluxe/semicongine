@@ -384,6 +384,7 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
       mesh.instanceData[attribute][i] = transform * mesh.vertexData[attribute][i, T]
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
+  mesh.dirtyAttributes.add attribute
 
 proc applyTransformToVertices*(mesh: var MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE) =
   for i in 0 ..< mesh.vertexData[positionAttribute].len:

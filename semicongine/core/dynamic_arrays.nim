@@ -473,6 +473,8 @@ template `[]`*(list: DataList, i: int, t: typedesc): untyped =
   getValue[t](list, i)
 
 # since we use this often with tables, add this for an easy assignment
+template `[]`*(table: Table[string, DataList], key: string, t: typedesc): ref seq[t] =
+  getValues[t](table[key])
 template `[]=`*[T](table: var Table[string, DataList], key: string, values: openArray[T]) =
   if table.contains(key):
     table[key].setValues(values)

@@ -58,6 +58,8 @@ func getShaderGlobal*[T](scene: Scene, name: string): T =
   scene.getShaderGlobalArray(name)[][0]
 
 proc setShaderGlobalArray*[T](scene: var Scene, name: string, value: openArray[T]) =
+  if scene.shaderGlobals[name, T][] == @value:
+    return
   scene.shaderGlobals[name] = value
   if not scene.dirtyShaderGlobals.contains(name):
     scene.dirtyShaderGlobals.add name

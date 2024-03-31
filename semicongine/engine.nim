@@ -1,4 +1,7 @@
+import std/algorithm
+import std/monotimes
 import std/options
+import std/strformat
 import std/sequtils
 import std/logging
 import std/os
@@ -19,6 +22,8 @@ import ./audio
 import ./text
 import ./panel
 
+const COUNT_N_RENDERTIMES = 99
+
 type
   EngineState* = enum
     Starting
@@ -37,6 +42,9 @@ type
     windowWasResized: bool
     mouseWheel: float32
   Engine* = object
+    applicationName: string
+    debug: bool
+    showFps: bool
     state*: EngineState
     device: Device
     debugger: Debugger
@@ -48,6 +56,8 @@ type
     resizeHandler: proc(engine: var Engine)
     eventHandler: proc(engine: var Engine, event: Event)
     fullscreen: bool
+    lastNRenderTimes: array[COUNT_N_RENDERTIMES, int64]
+    currentRenderTimeI: int = 0
 
 # forward declarations
 func getAspectRatio*(engine: Engine): float32
@@ -66,6 +76,7 @@ proc destroy*(engine: var Engine) =
 proc initEngine*(
   applicationName: string,
   debug = DEBUG,
+  showFps = DEBUG,
   exitHandler: proc(engine: var Engine) = nil,
   resizeHandler: proc(engine: var Engine) = nil,
   eventHandler: proc(engine: var Engine, event: Event) = nil,
@@ -79,34 +90,34 @@ proc initEngine*(
   result.exitHandler = exitHandler
   result.resizeHandler = resizeHandler
   result.eventHandler = eventHandler
-  result.window = createWindow(applicationName)
+  result.applicationName = applicationName
+  result.debug = debug
+  result.showFps = showFps
+  result.window = createWindow(result.applicationName)
 
   var
     layers = @vulkanLayers
     instanceExtensions: seq[string]
 
-  if debug:
+  if result.debug:
     instanceExtensions.add "VK_EXT_debug_utils"
     layers.add "VK_LAYER_KHRONOS_validation"
     # This stuff might be usefull if we one day to smart GPU memory allocation,
-    # but right now it just clobbers up the console log
+    # but right now it just clobbers up the console log:
     # putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
     putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_AMD,VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_NVIDIA,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT")
 
-  if defined(linux) and DEBUG:
-    layers.add "VK_LAYER_MESA_overlay"
   result.instance = result.window.createInstance(
     vulkanVersion = vulkanVersion,
     instanceExtensions = instanceExtensions,
-    layers = layers,
+    layers = layers.deduplicate(),
   )
-  if debug:
+  if result.debug:
     result.debugger = result.instance.createDebugMessenger()
   # create devices
   let selectedPhysicalDevice = result.instance.getPhysicalDevices().filterBestGraphics()
   result.device = result.instance.createDevice(
     selectedPhysicalDevice,
-    enabledLayers = @[],
     enabledExtensions = @[],
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
@@ -154,10 +165,25 @@ proc unloadScene*(engine: var Engine, scene: Scene) =
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
   assert engine.renderer.isSome
+  let t0 = getMonoTime()
   scene.setShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.getAspectRatio)
   engine.renderer.get.updateMeshData(scene)
   engine.renderer.get.updateUniformData(scene)
   engine.renderer.get.render(scene)
+
+  if engine.showFps:
+    let nanoSecs = getMonoTime().ticks - t0.ticks
+    engine.lastNRenderTimes[engine.currentRenderTimeI] = nanoSecs
+    inc engine.currentRenderTimeI
+    if engine.currentRenderTimeI >= engine.lastNRenderTimes.len:
+      engine.currentRenderTimeI = 0
+      engine.lastNRenderTimes.sort
+      let
+        min = float(engine.lastNRenderTimes[0]) / 1_000_000
+        median = float(engine.lastNRenderTimes[engine.lastNRenderTimes.len div 2]) / 1_000_000
+        max = float(engine.lastNRenderTimes[^1]) / 1_000_000
+      engine.window.setTitle(&"{engine.applicationName} ({min:.2}, {median:.2}, {max:.2})")
+
 
 proc updateInputs*(engine: var Engine): EngineState =
   assert engine.state in [Starting, Running]
