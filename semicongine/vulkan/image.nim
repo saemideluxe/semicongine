@@ -8,6 +8,7 @@ import ./physicaldevice
 import ./buffer
 import ./memory
 import ./commandbuffer
+import ./syncing
 
 type
   PixelDepth = 1 .. 4

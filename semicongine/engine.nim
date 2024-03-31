@@ -166,6 +166,8 @@ proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
   assert engine.renderer.isSome
   let t0 = getMonoTime()
+
+  engine.renderer.get.startNewFrame()
   scene.setShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.getAspectRatio)
   engine.renderer.get.updateMeshData(scene)
   engine.renderer.get.updateUniformData(scene)

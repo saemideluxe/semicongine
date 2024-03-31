@@ -1,8 +1,7 @@
-import std/strformat
-
 import ../core
 import ./device
 import ./physicaldevice
+import ./syncing
 
 type
   CommandBufferPool* = object
@@ -56,30 +55,33 @@ proc pipelineBarrier*(
 
 template withSingleUseCommandBuffer*(device: Device, queue: Queue, needsTransfer: bool, commandBuffer, body: untyped): untyped =
   # TODO? This is super slow, because we call vkQueueWaitIdle
-  assert device.vk.valid
-  assert queue.vk.valid
-
-  var
-    commandBufferPool = createCommandBufferPool(device, queue.family, 1)
-    commandBuffer = commandBufferPool.buffers[0]
-    beginInfo = VkCommandBufferBeginInfo(
-      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-      flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
-    )
-  checkVkResult commandBuffer.vkBeginCommandBuffer(addr beginInfo)
-
   block:
-    body
+    assert device.vk.valid
+    assert queue.vk.valid
 
-  checkVkResult commandBuffer.vkEndCommandBuffer()
-  var submitInfo = VkSubmitInfo(
-    sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
-    commandBufferCount: 1,
-    pCommandBuffers: addr commandBuffer,
-  )
-  checkVkResult queue.vk.vkQueueSubmit(1, addr submitInfo, VkFence(0))
-  checkVkResult queue.vk.vkQueueWaitIdle()
-  commandBufferPool.destroy()
+    var
+      commandBufferPool = createCommandBufferPool(device, queue.family, 1)
+      commandBuffer = commandBufferPool.buffers[0]
+      beginInfo = VkCommandBufferBeginInfo(
+        sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
+      )
+    checkVkResult commandBuffer.vkBeginCommandBuffer(addr beginInfo)
+
+    block:
+      body
+
+    checkVkResult commandBuffer.vkEndCommandBuffer()
+    var submitInfo = VkSubmitInfo(
+      sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
+      commandBufferCount: 1,
+      pCommandBuffers: addr commandBuffer,
+    )
+    checkVkResult queue.vk.vkQueueSubmit(1, addr submitInfo, VkFence(0))
+    checkVkResult queue.vk.vkQueueWaitIdle()
+    commandBufferPool.destroy()
+
+
 
 proc destroy*(commandpool: var CommandBufferPool) =
   assert commandpool.device.vk.valid

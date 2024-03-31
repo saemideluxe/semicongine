@@ -8,6 +8,7 @@ type
   Fence* = object
     vk*: VkFence
     device: Device
+    awaitAction: proc() = nil
 
 proc createSemaphore*(device: Device): Semaphore =
   assert device.vk.valid
@@ -15,26 +16,27 @@ proc createSemaphore*(device: Device): Semaphore =
   result.device = device
   checkVkResult device.vk.vkCreateSemaphore(addr(semaphoreInfo), nil, addr(result.vk))
 
-proc createFence*(device: Device): Fence =
+proc createFence*(device: Device, awaitAction: proc() = nil): Fence =
   assert device.vk.valid
   var fenceInfo = VkFenceCreateInfo(
     sType: VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
     flags: toBits [VK_FENCE_CREATE_SIGNALED_BIT]
   )
   result.device = device
+  result.awaitAction = awaitAction
   checkVkResult device.vk.vkCreateFence(addr(fenceInfo), nil, addr(result.vk))
 
-proc wait*(fence: Fence) =
+proc await*(fence: var Fence) =
   assert fence.device.vk.valid
   assert fence.vk.valid
-  var varFence = fence.vk
-  checkVkResult vkWaitForFences(fence.device.vk, 1, addr(varFence), false, high(uint64))
+  checkVkResult vkWaitForFences(fence.device.vk, 1, addr fence.vk, false, high(uint64))
+  if fence.awaitAction != nil:
+    fence.awaitAction()
 
-proc reset*(fence: Fence) =
+proc reset*(fence: var Fence) =
   assert fence.device.vk.valid
   assert fence.vk.valid
-  var varFence = fence.vk
-  checkVkResult vkResetFences(fence.device.vk, 1, addr(varFence))
+  checkVkResult fence.device.vk.vkResetFences(1, addr fence.vk)
 
 proc destroy*(semaphore: var Semaphore) =
   assert semaphore.device.vk.valid

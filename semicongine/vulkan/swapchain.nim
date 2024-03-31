@@ -106,12 +106,12 @@ proc currentFramebuffer*(swapchain: Swapchain): Framebuffer =
   assert swapchain.vk.valid
   swapchain.framebuffers[swapchain.currentFramebufferIndex]
 
-proc nextFrame*(swapchain: var Swapchain): bool =
+proc acquireNextFrame*(swapchain: var Swapchain): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
 
   swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.inFlightFrames
-  swapchain.queueFinishedFence[swapchain.currentInFlight].wait()
+  swapchain.queueFinishedFence[swapchain.currentInFlight].await()
 
   let nextImageResult = swapchain.device.vk.vkAcquireNextImageKHR(
     swapchain.vk,

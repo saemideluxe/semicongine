@@ -44,6 +44,7 @@ type
     emptyTexture: VulkanTexture
     queue: Queue
     commandBufferPool: CommandBufferPool
+    nextFrameReady: bool = false
 
 proc currentFrameCommandBuffer(renderer: Renderer): VkCommandBuffer =
   renderer.commandBufferPool.buffers[renderer.swapchain.currentInFlight]
@@ -411,9 +412,9 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
         offset += uniform.size
   scene.clearDirtyShaderGlobals()
 
-proc startNewFrame(renderer: var Renderer) =
+proc startNewFrame*(renderer: var Renderer) =
   # this is kinda important as we will wait for the queue finished fence from the swapchain
-  if not renderer.swapchain.nextFrame():
+  if not renderer.swapchain.acquireNextFrame():
     let res = renderer.swapchain.recreate()
     if not res.isSome:
       raise newException(Exception, "Unable to recreate swapchain")
@@ -421,12 +422,13 @@ proc startNewFrame(renderer: var Renderer) =
     renderer.swapchain = res.get()
     checkVkResult renderer.device.vk.vkDeviceWaitIdle()
     oldSwapchain.destroy()
+  renderer.nextFrameReady = true
 
 proc render*(renderer: var Renderer, scene: Scene) =
   assert scene in renderer.scenedata
+  assert renderer.nextFrameReady, "startNewFrame() must be called before calling render()"
 
   # preparation
-  renderer.startNewFrame()
   renderer.currentFrameCommandBuffer.beginRenderCommands(renderer.renderPass, renderer.swapchain.currentFramebuffer(), oneTimeSubmit = true)
 
   # debug output
@@ -455,6 +457,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
       renderer.swapchain = res.get()
       checkVkResult renderer.device.vk.vkDeviceWaitIdle()
       oldSwapchain.destroy()
+  renderer.nextFrameReady = false
 
 func valid*(renderer: Renderer): bool =
   renderer.device.vk.valid
