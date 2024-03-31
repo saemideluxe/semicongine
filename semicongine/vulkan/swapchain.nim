@@ -28,14 +28,15 @@ type
     imageCount: uint32
     inFlightFrames*: int
     presentQueue: Queue
+    vSync: bool
 
 
 proc createSwapchain*(
   device: Device,
   renderPass: VkRenderPass,
   surfaceFormat: VkSurfaceFormatKHR,
+  inFlightFrames: int,
   desiredNumberOfImages = 3'u32,
-  inFlightFrames = 2,
   oldSwapchain = VkSwapchainKHR(0),
   vSync = false
 ): Option[Swapchain] =
@@ -78,7 +79,8 @@ proc createSwapchain*(
       surfaceFormat: surfaceFormat,
       dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]),
       inFlightFrames: inFlightFrames,
-      renderPass: renderPass
+      renderPass: renderPass,
+      vSync: vSync
     )
 
   if device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(swapchain.vk)) == VK_SUCCESS:
@@ -199,4 +201,5 @@ proc recreate*(swapchain: var Swapchain): Option[Swapchain] =
     desiredNumberOfImages = swapchain.imageCount,
     inFlightFrames = swapchain.inFlightFrames,
     oldSwapchain = swapchain.vk,
+    vSync = swapchain.vSync
   )

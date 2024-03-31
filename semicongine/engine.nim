@@ -112,7 +112,14 @@ proc initEngine*(
   )
   startMixerThread()
 
-proc initRenderer*(engine: var Engine, shaders: openArray[(MaterialType, ShaderConfiguration)], clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling = true) =
+proc initRenderer*(
+  engine: var Engine,
+  shaders: openArray[(MaterialType, ShaderConfiguration)],
+  clearColor = newVec4f(0, 0, 0, 0),
+  backFaceCulling = true,
+  vSync = false,
+  inFlightFrames = 2,
+) =
 
   assert not engine.renderer.isSome
   var allShaders = @shaders
@@ -122,10 +129,16 @@ proc initRenderer*(engine: var Engine, shaders: openArray[(MaterialType, ShaderC
     allShaders.add (PANEL_MATERIAL_TYPE, PANEL_SHADER)
   if not shaders.mapIt(it[0]).contains(TEXT_MATERIAL_TYPE):
     allShaders.add (TEXT_MATERIAL_TYPE, TEXT_SHADER)
-  engine.renderer = some(engine.device.initRenderer(shaders = allShaders, clearColor = clearColor, backFaceCulling = backFaceCulling))
+  engine.renderer = some(engine.device.initRenderer(
+    shaders = allShaders,
+    clearColor = clearColor,
+    backFaceCulling = backFaceCulling,
+    vSync = vSync,
+    inFlightFrames = inFlightFrames,
+  ))
 
-proc initRenderer*(engine: var Engine, clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32])) =
-  engine.initRenderer(@[], clearColor)
+proc initRenderer*(engine: var Engine, clearColor = newVec4f(0, 0, 0, 0), vSync = false) =
+  engine.initRenderer(@[], clearColor, vSync = vSync)
 
 proc loadScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome

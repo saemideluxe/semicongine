@@ -48,7 +48,14 @@ type
 proc currentFrameCommandBuffer(renderer: Renderer): VkCommandBuffer =
   renderer.commandBufferPool.buffers[renderer.swapchain.currentInFlight]
 
-proc initRenderer*(device: Device, shaders: openArray[(MaterialType, ShaderConfiguration)], clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]), backFaceCulling = true): Renderer =
+proc initRenderer*(
+  device: Device,
+  shaders: openArray[(MaterialType, ShaderConfiguration)],
+  clearColor = newVec4f(0, 0, 0, 0),
+  backFaceCulling = true,
+  vSync = false,
+  inFlightFrames = 2,
+): Renderer =
   assert device.vk.valid
 
   result.device = device
@@ -56,6 +63,8 @@ proc initRenderer*(device: Device, shaders: openArray[(MaterialType, ShaderConfi
   let swapchain = device.createSwapchain(
     result.renderPass.vk,
     device.physicalDevice.getSurfaceFormats().filterSurfaceFormat(),
+    vSync = vSync,
+    inFlightFrames = inFlightFrames,
   )
   if not swapchain.isSome:
     raise newException(Exception, "Unable to create swapchain")
