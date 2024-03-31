@@ -82,7 +82,6 @@ template withSingleUseCommandBuffer*(device: Device, queue: Queue, needsTransfer
     commandBufferPool.destroy()
 
 
-
 proc destroy*(commandpool: var CommandBufferPool) =
   assert commandpool.device.vk.valid
   assert commandpool.vk.valid

@@ -413,8 +413,9 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
   scene.clearDirtyShaderGlobals()
 
 proc startNewFrame*(renderer: var Renderer) =
-  # this is kinda important as we will wait for the queue finished fence from the swapchain
-  if not renderer.swapchain.acquireNextFrame():
+  # TODO: chance for an infinity-loop
+  while not renderer.swapchain.acquireNextFrame():
+    checkVkResult renderer.device.vk.vkDeviceWaitIdle()
     let res = renderer.swapchain.recreate()
     if not res.isSome:
       raise newException(Exception, "Unable to recreate swapchain")
