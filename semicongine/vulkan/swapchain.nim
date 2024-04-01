@@ -110,7 +110,6 @@ proc acquireNextFrame*(swapchain: var Swapchain): bool =
   assert swapchain.device.vk.valid
   assert swapchain.vk.valid
 
-  swapchain.currentInFlight = (swapchain.currentInFlight + 1) mod swapchain.inFlightFrames
   swapchain.queueFinishedFence[swapchain.currentInFlight].await()
 
   let nextImageResult = swapchain.device.vk.vkAcquireNextImageKHR(

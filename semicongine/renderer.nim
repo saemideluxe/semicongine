@@ -330,30 +330,41 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   renderer.scenedata[scene] = scenedata
 
-proc refreshMeshAttributeData(renderer: Renderer, scene: var Scene, drawable: Drawable, mesh: Mesh, attribute: string) =
-  debug &"Refreshing data on mesh mesh for {attribute}"
-  # ignore attributes that are not used in this shader
-  if not (attribute in renderer.scenedata[scene].attributeLocation):
-    return
-
-  let memoryPerformanceHint = renderer.scenedata[scene].attributeLocation[attribute]
-  renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(
-    renderer.queue,
-    mesh[].getPointer(attribute),
-    mesh[].attributeSize(attribute),
-    renderer.scenedata[scene].vertexBufferOffsets[(mesh, attribute)]
-  )
-
 proc updateMeshData*(renderer: var Renderer, scene: var Scene, forceAll = false) =
   assert scene in renderer.scenedata
 
+  var addedBarrier = false;
   for (drawable, mesh) in renderer.scenedata[scene].drawables.mitems:
     if mesh[].attributes.contains(TRANSFORM_ATTRIB):
       mesh[].updateInstanceTransforms(TRANSFORM_ATTRIB)
     let attrs = (if forceAll: mesh[].attributes else: mesh[].dirtyAttributes)
     for attribute in attrs:
-      renderer.refreshMeshAttributeData(scene, drawable, mesh, attribute)
-      debug &"Update mesh attribute {attribute}"
+      # ignore attributes that are not used in this scene
+      if attribute in renderer.scenedata[scene].attributeLocation:
+        debug &"Update mesh attribute {attribute}"
+        let memoryPerformanceHint = renderer.scenedata[scene].attributeLocation[attribute]
+        # if we have to do a vkCmdCopyBuffer (not buffer.canMap), then we want to added a barrier to
+        # not infer with the current frame that is being renderer (relevant when we have multiple frames in flight)
+        # (remark: ...I think..., I am pretty new to this sync stuff)
+        if not renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].canMap and not addedBarrier:
+          withSingleUseCommandBuffer(renderer.device, renderer.queue, commandBuffer):
+            let barrier = VkMemoryBarrier(
+              sType: VK_STRUCTURE_TYPE_MEMORY_BARRIER,
+              srcAccessMask: [VK_ACCESS_MEMORY_READ_BIT].toBits,
+              dstAccessMask: [VK_ACCESS_MEMORY_WRITE_BIT].toBits,
+            )
+            commandBuffer.pipelineBarrier(
+              srcStages = [VK_PIPELINE_STAGE_VERTEX_INPUT_BIT],
+              dstStages = [VK_PIPELINE_STAGE_TRANSFER_BIT],
+              memoryBarriers = [barrier]
+            )
+            addedBarrier = true
+        renderer.scenedata[scene].vertexBuffers[memoryPerformanceHint].setData(
+          renderer.queue,
+          mesh[].getPointer(attribute),
+          mesh[].attributeSize(attribute),
+          renderer.scenedata[scene].vertexBufferOffsets[(mesh, attribute)]
+        )
     mesh[].clearDirtyAttributes()
 
 proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = false) =
@@ -413,7 +424,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
   scene.clearDirtyShaderGlobals()
 
 proc startNewFrame*(renderer: var Renderer) =
-  # TODO: chance for an infinity-loop
+  # TODO: chance for an infinity-loop?
   while not renderer.swapchain.acquireNextFrame():
     checkVkResult renderer.device.vk.vkDeviceWaitIdle()
     let res = renderer.swapchain.recreate()
@@ -458,6 +469,7 @@ proc render*(renderer: var Renderer, scene: Scene) =
       renderer.swapchain = res.get()
       checkVkResult renderer.device.vk.vkDeviceWaitIdle()
       oldSwapchain.destroy()
+  renderer.swapchain.currentInFlight = (renderer.swapchain.currentInFlight + 1) mod renderer.swapchain.inFlightFrames
   renderer.nextFrameReady = false
 
 func valid*(renderer: Renderer): bool =

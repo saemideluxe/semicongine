@@ -8,7 +8,6 @@ import ./physicaldevice
 import ./buffer
 import ./memory
 import ./commandbuffer
-import ./syncing
 
 type
   PixelDepth = 1 .. 4
@@ -112,7 +111,7 @@ proc transitionImageLayout(image: VulkanImage, queue: Queue, oldLayout, newLayou
   else:
     raise newException(Exception, "Unsupported layout transition!")
 
-  withSingleUseCommandBuffer(image.device, queue, false, commandBuffer):
+  withSingleUseCommandBuffer(image.device, queue, commandBuffer):
     commandBuffer.pipelineBarrier([srcStage], [dstStage], imageBarriers = [barrier])
 
 proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
@@ -135,7 +134,7 @@ proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
     imageOffset: VkOffset3D(x: 0, y: 0, z: 0),
     imageExtent: VkExtent3D(width: uint32(dst.width), height: uint32(dst.height), depth: 1)
   )
-  withSingleUseCommandBuffer(src.device, queue, true, commandBuffer):
+  withSingleUseCommandBuffer(src.device, queue, commandBuffer):
     commandBuffer.vkCmdCopyBufferToImage(
       src.vk,
       dst.vk,

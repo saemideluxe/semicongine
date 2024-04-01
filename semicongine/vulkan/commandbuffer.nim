@@ -53,7 +53,7 @@ proc pipelineBarrier*(
   )
 
 
-template withSingleUseCommandBuffer*(device: Device, queue: Queue, needsTransfer: bool, commandBuffer, body: untyped): untyped =
+template withSingleUseCommandBuffer*(device: Device, queue: Queue, commandBuffer, body: untyped): untyped =
   # TODO? This is super slow, because we call vkQueueWaitIdle
   block:
     assert device.vk.valid

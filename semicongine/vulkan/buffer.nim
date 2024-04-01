@@ -9,7 +9,6 @@ import ./device
 import ./memory
 import ./physicaldevice
 import ./commandbuffer
-import ./syncing
 
 type
   Buffer* = object
@@ -108,17 +107,7 @@ proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0) =
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 
   var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: VkDeviceSize(dstOffset))
-  withSingleUseCommandBuffer(src.device, queue, true, commandBuffer):
-    let barrier = VkMemoryBarrier(
-      sType: VK_STRUCTURE_TYPE_MEMORY_BARRIER,
-      srcAccessMask: [VK_ACCESS_MEMORY_WRITE_BIT].toBits,
-      dstAccessMask: [VK_ACCESS_MEMORY_READ_BIT].toBits,
-    )
-    commandBuffer.pipelineBarrier(
-      srcStages = [VK_PIPELINE_STAGE_TRANSFER_BIT],
-      dstStages = [VK_PIPELINE_STAGE_VERTEX_INPUT_BIT],
-      memoryBarriers = [barrier]
-    )
+  withSingleUseCommandBuffer(src.device, queue, commandBuffer):
     commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
 
 proc destroy*(buffer: var Buffer) =
@@ -137,9 +126,12 @@ proc destroy*(buffer: var Buffer) =
     )
   buffer.vk.reset
 
+template canMap*(buffer: Buffer): bool =
+  buffer.memory.canMap
+
 proc setData*(dst: Buffer, queue: Queue, src: pointer, size: int, bufferOffset = 0) =
   assert bufferOffset + size <= dst.size
-  if dst.memory.canMap:
+  if dst.canMap:
     copyMem(cast[pointer](cast[int](dst.memory.data) + bufferOffset), src, size)
     if dst.memory.needsFlushing:
       dst.memory.flush()

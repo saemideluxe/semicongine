@@ -22,7 +22,7 @@ import ./audio
 import ./text
 import ./panel
 
-const COUNT_N_RENDERTIMES = 99
+const COUNT_N_RENDERTIMES = 199
 
 type
   EngineState* = enum
@@ -149,18 +149,24 @@ proc initRenderer*(
   ))
 
 proc initRenderer*(engine: var Engine, clearColor = newVec4f(0, 0, 0, 0), vSync = false) =
+  checkVkResult engine.device.vk.vkDeviceWaitIdle()
   engine.initRenderer(@[], clearColor, vSync = vSync)
+  checkVkResult engine.device.vk.vkDeviceWaitIdle()
 
 proc loadScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
   assert not scene.loaded
+  checkVkResult engine.device.vk.vkDeviceWaitIdle()
   scene.addShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.getAspectRatio)
   engine.renderer.get.setupDrawableBuffers(scene)
   engine.renderer.get.updateMeshData(scene, forceAll = true)
   engine.renderer.get.updateUniformData(scene, forceAll = true)
+  checkVkResult engine.device.vk.vkDeviceWaitIdle()
 
 proc unloadScene*(engine: var Engine, scene: Scene) =
+  checkVkResult engine.device.vk.vkDeviceWaitIdle()
   engine.renderer.get.destroy(scene)
+  checkVkResult engine.device.vk.vkDeviceWaitIdle()
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
