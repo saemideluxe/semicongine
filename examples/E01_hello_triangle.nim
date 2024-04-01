@@ -26,7 +26,7 @@ var
   )
   myengine = initEngine("Hello triangle", showFps = true)
 
-myengine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration}, inFlightFrames = 1)
+myengine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration}, inFlightFrames = 2)
 myengine.loadScene(scene)
 
 while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
