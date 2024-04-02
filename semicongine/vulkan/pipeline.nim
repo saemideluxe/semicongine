@@ -34,7 +34,7 @@ proc setupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool,
   result = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
 
   for i in 0 ..< inFlightFrames:
-    var offset = 0
+    var offset = 0'u64
     # first descriptor is always uniform for globals, match should be better somehow
     for descriptor in result[i].layout.descriptors.mitems:
       if descriptor.thetype == Uniform and buffers.len > 0:

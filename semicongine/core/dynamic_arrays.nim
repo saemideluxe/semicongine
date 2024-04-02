@@ -56,8 +56,8 @@ type
     of Mat4F64: mat4f64: ref seq[TMat4[float64]]
     of TextureType: texture: ref seq[Texture]
 
-func size*(value: DataList): int =
-  value.theType.size * value.len
+func size*(value: DataList): uint64 =
+  value.theType.size * value.len.uint64
 
 func hash*(value: DataList): Hash =
   case value.theType

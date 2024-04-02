@@ -8,8 +8,8 @@ type
   GrayPixel* = uint8
   Pixel* = RGBAPixel or GrayPixel
   ImageObject*[T: Pixel] = object
-    width*: int
-    height*: int
+    width*: uint32
+    height*: uint32
     imagedata*: seq[T]
   Image*[T: Pixel] = ref ImageObject[T]
 
@@ -47,25 +47,25 @@ proc `$`*(texture: Texture): string =
   else:
     &"{texture.name} {texture.colorImage} (color)"
 
-proc `[]`*(image: Image, x, y: int): Pixel =
+proc `[]`*(image: Image, x, y: uint32): Pixel =
   assert x < image.width, &"{x} < {image.width} is not true"
   assert y < image.height, &"{y} < {image.height} is not true"
 
   image[].imagedata[y * image.width + x]
 
-proc `[]=`*(image: var Image, x, y: int, value: Pixel) =
+proc `[]=`*(image: var Image, x, y: uint32, value: Pixel) =
   assert x < image.width
   assert y < image.height
 
   image[].imagedata[y * image.width + x] = value
 
-proc newImage*[T: Pixel](width, height: int, imagedata: openArray[T] = []): Image[T] =
+proc newImage*[T: Pixel](width, height: uint32, imagedata: openArray[T] = []): Image[T] =
   assert width > 0 and height > 0
-  assert imagedata.len == width * height or imagedata.len == 0
+  assert imagedata.len.uint32 == width * height or imagedata.len == 0
 
   result = new Image[T]
   result.imagedata = (if imagedata.len == 0: newSeq[T](width * height) else: @imagedata)
-  assert width * height == result.imagedata.len
+  assert width * height == result.imagedata.len.uint32
 
   result.width = width
   result.height = height

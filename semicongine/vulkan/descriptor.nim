@@ -11,13 +11,13 @@ type
     Uniform, ImageSampler
   Descriptor* = object # "fields" of a DescriptorSetLayout
     name*: string
-    count*: int
+    count*: uint32
     stages*: seq[VkShaderStageFlagBits]
     case thetype*: DescriptorType
     of Uniform:
       buffer*: Buffer
-      offset*: int
-      size*: int
+      offset*: uint64
+      size*: uint64
     of ImageSampler:
       imageviews*: seq[ImageView]
       samplers*: seq[VulkanSampler]
@@ -28,11 +28,11 @@ type
     device: Device
     vk*: VkDescriptorSetLayout
     descriptors*: seq[Descriptor]
-  DescriptorPool* = object                # required for allocation of DescriptorSet
+  DescriptorPool* = object                   # required for allocation of DescriptorSet
     device: Device
     vk*: VkDescriptorPool
-    maxSets*: int                         # maximum number of allocatable descriptor sets
-    counts*: seq[(VkDescriptorType, int)] # maximum number for each descriptor type to allocate
+    maxSets*: int                            # maximum number of allocatable descriptor sets
+    counts*: seq[(VkDescriptorType, uint32)] # maximum number for each descriptor type to allocate
 
 const DESCRIPTOR_TYPE_MAP = {
   Uniform: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -53,7 +53,7 @@ proc createDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): D
     layoutbindings.add VkDescriptorSetLayoutBinding(
       binding: uint32(i),
       descriptorType: descriptor.vkType,
-      descriptorCount: uint32(descriptor.count),
+      descriptorCount: descriptor.count,
       stageFlags: toBits descriptor.stages,
       pImmutableSamplers: nil,
     )
@@ -71,7 +71,7 @@ proc destroy*(descriptorSetLayout: var DescriptorSetLayout) =
   descriptorSetLayout.vk.reset
 
 
-proc createDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, int)], maxSets = 1000): DescriptorPool =
+proc createDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uint32)], maxSets = 1000): DescriptorPool =
   assert device.vk.valid
 
   result.device = device
@@ -80,7 +80,7 @@ proc createDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, int
 
   var poolSizes: seq[VkDescriptorPoolSize]
   for (thetype, count) in result.counts:
-    poolSizes.add VkDescriptorPoolSize(thetype: thetype, descriptorCount: uint32(count))
+    poolSizes.add VkDescriptorPoolSize(thetype: thetype, descriptorCount: count)
   var poolInfo = VkDescriptorPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
     poolSizeCount: uint32(poolSizes.len),
@@ -139,8 +139,8 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
       assert descriptor.buffer.vk.valid
       bufferInfos.add VkDescriptorBufferInfo(
         buffer: descriptor.buffer.vk,
-        offset: uint64(descriptor.offset),
-        range: uint64(descriptor.size),
+        offset: descriptor.offset,
+        range: descriptor.size,
       )
       descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,

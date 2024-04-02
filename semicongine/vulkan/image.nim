@@ -14,8 +14,8 @@ type
   VulkanImage* = object
     device*: Device
     vk*: VkImage
-    width*: int  # pixel
-    height*: int # pixel
+    width*: uint32  # pixel
+    height*: uint32 # pixel
     depth*: PixelDepth
     format*: VkFormat
     usage*: seq[VkImageUsageFlagBits]
@@ -131,7 +131,7 @@ proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
       layerCount: 1,
     ),
     imageOffset: VkOffset3D(x: 0, y: 0, z: 0),
-    imageExtent: VkExtent3D(width: uint32(dst.width), height: uint32(dst.height), depth: 1)
+    imageExtent: VkExtent3D(width: dst.width, height: dst.height, depth: 1)
   )
   withSingleUseCommandBuffer(src.device, queue, commandBuffer):
     commandBuffer.vkCmdCopyBufferToImage(
@@ -143,14 +143,14 @@ proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
     )
 
 # currently only usable for texture access from shader
-proc createImage(device: Device, queue: Queue, width, height: int, depth: PixelDepth, data: pointer): VulkanImage =
+proc createImage(device: Device, queue: Queue, width, height: uint32, depth: PixelDepth, data: pointer): VulkanImage =
   assert device.vk.valid
   assert width > 0
   assert height > 0
   assert depth != 2
   assert data != nil
 
-  let size = width * height * depth
+  let size: uint64 = width * height * uint32(depth)
   result.device = device
   result.width = width
   result.height = height
@@ -170,9 +170,11 @@ proc createImage(device: Device, queue: Queue, width, height: int, depth: PixelD
     addr formatInfo,
     addr formatProperties,
   )
-  assert size <= int(formatProperties.imageFormatProperties.maxResourceSize)
-  assert width <= int(formatProperties.imageFormatProperties.maxExtent.width)
-  assert height <= int(formatProperties.imageFormatProperties.maxExtent.height)
+  assert size <= uint64(formatProperties.imageFormatProperties.maxResourceSize)
+  assert width <= uint64(formatProperties.imageFormatProperties.maxExtent.width)
+  assert height <= uint64(formatProperties.imageFormatProperties.maxExtent.height)
+
+  echo formatProperties
 
   var imageInfo = VkImageCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

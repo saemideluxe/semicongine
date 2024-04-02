@@ -123,7 +123,7 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8])
     # we don't support stride, have to convert stuff here... does this even work?
     for i in 0 ..< int(result.len):
       copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], int(result.thetype.size))
-      dstPointer = cast[pointer](cast[int](dstPointer) + result.thetype.size)
+      dstPointer = cast[pointer](cast[uint](dstPointer) + result.thetype.size)
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 

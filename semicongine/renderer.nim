@@ -32,7 +32,7 @@ type
     uniformBuffers*: Table[VkPipeline, seq[Buffer]]                 # one per frame-in-flight
     textures*: Table[VkPipeline, Table[string, seq[VulkanTexture]]] # per frame-in-flight
     attributeLocation*: Table[string, MemoryPerformanceHint]
-    vertexBufferOffsets*: Table[(Mesh, string), int]
+    vertexBufferOffsets*: Table[(Mesh, string), uint64]
     descriptorPools*: Table[VkPipeline, DescriptorPool]
     descriptorSets*: Table[VkPipeline, seq[DescriptorSet]]
     materials: Table[MaterialType, seq[MaterialData]]
@@ -170,14 +170,14 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
   renderer.checkSceneIntegrity(scene)
 
   # create index buffer if necessary
-  var indicesBufferSize = 0
+  var indicesBufferSize = 0'u64
   for mesh in scene.meshes:
     if mesh[].indexType != MeshIndexType.None:
       let indexAlignment = case mesh[].indexType
-        of MeshIndexType.None: 0
-        of Tiny: 1
-        of Small: 2
-        of Big: 4
+        of MeshIndexType.None: 0'u64
+        of Tiny: 1'u64
+        of Small: 2'u64
+        of Big: 4'u64
       # index value alignment required by Vulkan
       if indicesBufferSize mod indexAlignment != 0:
         indicesBufferSize += indexAlignment - (indicesBufferSize mod indexAlignment)
@@ -192,7 +192,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   # calculcate offsets for attributes in vertex buffers
   # trying to use one buffer per memory type
-  var perLocationSizes: Table[MemoryPerformanceHint, int]
+  var perLocationSizes: Table[MemoryPerformanceHint, uint64]
   for hint in MemoryPerformanceHint:
     perLocationSizes[hint] = 0
 
@@ -219,8 +219,8 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
       )
 
   # calculate offset of each attribute for all meshes
-  var perLocationOffsets: Table[MemoryPerformanceHint, int]
-  var indexBufferOffset = 0
+  var perLocationOffsets: Table[MemoryPerformanceHint, uint64]
+  var indexBufferOffset = 0'u64
   for hint in MemoryPerformanceHint:
     perLocationOffsets[hint] = 0
 
@@ -233,10 +233,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
           perLocationOffsets[attribute.memoryPerformanceHint] += VERTEX_ATTRIB_ALIGNMENT - (perLocationOffsets[attribute.memoryPerformanceHint] mod VERTEX_ATTRIB_ALIGNMENT)
 
     # fill offsets per shaderPipeline (as sequence corresponds to shader input binding)
-    var offsets: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]]
+    var offsets: Table[VkPipeline, seq[(string, MemoryPerformanceHint, uint64)]]
     for (materialType, shaderPipeline) in renderer.renderPass.shaderPipelines:
       if scene.usesMaterial(materialType):
-        offsets[shaderPipeline.vk] = newSeq[(string, MemoryPerformanceHint, int)]()
+        offsets[shaderPipeline.vk] = newSeq[(string, MemoryPerformanceHint, uint64)]()
         for attribute in shaderPipeline.inputs:
           offsets[shaderPipeline.vk].add (attribute.name, attribute.memoryPerformanceHint, scenedata.vertexBufferOffsets[(mesh, attribute.name)])
 
@@ -251,10 +251,10 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     )
     if indexed:
       let indexAlignment = case mesh.indexType
-        of MeshIndexType.None: 0
-        of Tiny: 1
-        of Small: 2
-        of Big: 4
+        of MeshIndexType.None: 0'u64
+        of Tiny: 1'u64
+        of Small: 2'u64
+        of Big: 4'u64
       # index value alignment required by Vulkan
       if indexBufferOffset mod indexAlignment != 0:
         indexBufferOffset += indexAlignment - (indexBufferOffset mod indexAlignment)
@@ -289,13 +289,13 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
                 uploadedTextures[value[0]] = renderer.device.uploadTexture(renderer.queue, value[0])
               scenedata.textures[shaderPipeline.vk][texture.name].add uploadedTextures[value[0]]
           assert foundTexture, &"No texture found in shaderGlobals or materials for '{texture.name}'"
-        let nTextures = scenedata.textures[shaderPipeline.vk][texture.name].len
+        let nTextures = scenedata.textures[shaderPipeline.vk][texture.name].len.uint32
         assert (texture.arrayCount == 0 and nTextures == 1) or texture.arrayCount >= nTextures, &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
         if texture.arrayCount < nTextures:
           warn &"Shader assigned to render '{materialType}' expected {texture.arrayCount} textures for '{texture.name}' but got {nTextures}"
 
       # gather uniform sizes
-      var uniformBufferSize = 0
+      var uniformBufferSize = 0'u64
       for uniform in shaderPipeline.uniforms:
         uniformBufferSize += uniform.size
       if uniformBufferSize > 0:
@@ -309,13 +309,13 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
           )
 
       # TODO: rework the whole descriptor/pool/layout stuff, a bit unclear
-      var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, renderer.swapchain.inFlightFrames)]
-      var nTextures = 0
+      var poolsizes = @[(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, renderer.swapchain.inFlightFrames.uint32)]
+      var nTextures = 0'u32
       for descriptor in shaderPipeline.descriptorSetLayout.descriptors:
         if descriptor.thetype == ImageSampler:
           nTextures += descriptor.count
       if nTextures > 0:
-        poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, nTextures * renderer.swapchain.inFlightFrames)
+        poolsizes.add (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, nTextures * renderer.swapchain.inFlightFrames.uint32)
       scenedata.descriptorPools[shaderPipeline.vk] = renderer.device.createDescriptorSetPool(poolsizes)
 
       scenedata.descriptorSets[shaderPipeline.vk] = shaderPipeline.setupDescriptors(
@@ -393,7 +393,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
         for buffer in renderer.scenedata[scene].uniformBuffers[shaderPipeline.vk]:
           assert buffer.vk.valid
 
-      var offset = 0
+      var offset = 0'u64
       # loop over all uniforms of the shader-shaderPipeline
       for uniform in shaderPipeline.uniforms:
         if dirty.contains(uniform.name) or dirtyMaterialAttribs.contains(uniform.name) or forceAll: # only update uniforms if necessary
@@ -408,8 +408,8 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
                 value.appendValues(material[uniform.name])
                 foundValue = true
             assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
-          assert (uniform.arrayCount == 0 and value.len == 1) or value.len <= uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
-          if value.len <= uniform.arrayCount:
+          assert (uniform.arrayCount == 0 and value.len == 1) or value.len.uint <= uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
+          if value.len.uint <= uniform.arrayCount:
             debug &"Uniform '{uniform.name}' found has short length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
           assert value.size <= uniform.size, &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
           if value.size < uniform.size:

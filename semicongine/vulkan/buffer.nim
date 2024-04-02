@@ -14,7 +14,7 @@ type
   Buffer* = object
     device*: Device
     vk*: VkBuffer
-    size*: int
+    size*: uint64
     usage*: seq[VkBufferUsageFlagBits]
     case memoryAllocated*: bool
       of false: discard
@@ -67,7 +67,7 @@ proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool,
 # (shardingMode = VK_SHARING_MODE_CONCURRENT not supported)
 proc createBuffer*(
   device: Device,
-  size: int,
+  size: uint64,
   usage: openArray[VkBufferUsageFlagBits],
   requireMappable: bool,
   preferVRAM: bool,
@@ -84,7 +84,7 @@ proc createBuffer*(
   var createInfo = VkBufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
     flags: VkBufferCreateFlags(0),
-    size: uint64(size),
+    size: size,
     usage: toBits(result.usage),
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
   )
@@ -98,11 +98,11 @@ proc createBuffer*(
   result.allocateMemory(requireMappable = requireMappable, preferVRAM = preferVRAM, preferAutoFlush = preferAutoFlush)
 
 
-proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0) =
+proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0'u64) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
-  assert src.size <= dst.size - dstOffset
+  assert src.size + dstOffset <= dst.size
   assert VK_BUFFER_USAGE_TRANSFER_SRC_BIT in src.usage
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 
@@ -129,10 +129,10 @@ proc destroy*(buffer: var Buffer) =
 template canMap*(buffer: Buffer): bool =
   buffer.memory.canMap
 
-proc setData*(dst: Buffer, queue: Queue, src: pointer, size: int, bufferOffset = 0) =
+proc setData*(dst: Buffer, queue: Queue, src: pointer, size: uint64, bufferOffset = 0'u64) =
   assert bufferOffset + size <= dst.size
   if dst.canMap:
-    copyMem(cast[pointer](cast[int](dst.memory.data) + bufferOffset), src, size)
+    copyMem(cast[pointer](cast[uint](dst.memory.data) + bufferOffset), src, size)
     if dst.memory.needsFlushing:
       dst.memory.flush()
   else: # use staging buffer, slower but required if memory is not host visible

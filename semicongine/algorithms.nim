@@ -4,30 +4,31 @@ import ./core
 
 type
   Rect = tuple
-    i, x, y, w, h: int
+    i: int
+    x, y, w, h: uint32
 
-func between(a1, a2, b: int): bool =
+func between(a1, a2, b: uint32): bool =
   a1 <= b and b <= a2
 
-func overlap(a1, a2, b1, b2: int): bool =
+func overlap(a1, a2, b1, b2: uint32): bool =
   return between(a1, a2, b1) or
          between(a1, a2, b2) or
          between(b1, b2, a1) or
          between(b1, b2, a2)
 
 # FYI: also serves as "overlaps"
-func advanceIfOverlap(fix, newRect: Rect): (bool, int) =
+func advanceIfOverlap(fix, newRect: Rect): (bool, uint32) =
   let overlapping = overlap(fix.x, fix.x + fix.w - 1, newRect.x, newRect.x + newRect.w - 1) and
                     overlap(fix.y, fix.y + fix.h - 1, newRect.y, newRect.y + newRect.h - 1)
   if overlapping: (true, fix.x + fix.w) # next free x coordinate to the right
   else: (false, newRect.x) # current position is fine
 
-proc find_insertion_position(alreadyPlaced: seq[Rect], area: tuple[i, w, h: int], maxDim: int): (bool, Rect) =
-  var newRect = (i: area.i, x: 0, y: 0, w: area.w, h: area.h)
+proc find_insertion_position(alreadyPlaced: seq[Rect], area: tuple[i: int, w, h: uint32], maxDim: uint32): (bool, Rect) =
+  var newRect = (i: area.i, x: 0'u32, y: 0'u32, w: area.w, h: area.h)
 
   while newRect.y + newRect.h <= maxDim:
     var hasOverlap = false
-    var advanceX: int
+    var advanceX: uint32
 
     for placed in alreadyPlaced:
       (hasOverlap, advanceX) = placed.advanceIfOverlap(newRect)
@@ -45,16 +46,16 @@ proc find_insertion_position(alreadyPlaced: seq[Rect], area: tuple[i, w, h: int]
   return (false, newRect)
 
 
-proc pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[tuple[x: int, y: int]]] =
-  const MAX_ATLAS_SIZE = 4096
-  var areas: seq[tuple[i, w, h: int]]
+proc pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[tuple[x: uint32, y: uint32]]] =
+  const MAX_ATLAS_SIZE = 4096'u32
+  var areas: seq[tuple[i: int, w, h: uint32]]
 
   for i in 0 ..< images.len:
     areas.add (i, images[i].width, images[i].height)
 
-  let areasBySize = areas.sortedByIt(-(it[1] * it[2]))
+  let areasBySize = areas.sortedByIt(-(it[1] * it[2]).int64)
   var assignedAreas: seq[Rect]
-  var maxDim = 128
+  var maxDim = 128'u32
 
   for area in areasBySize:
     var pos = find_insertion_position(assignedAreas, area, maxDim)

@@ -57,7 +57,7 @@ type
   ShaderAttribute* = object
     name*: string
     theType*: DataType
-    arrayCount*: int
+    arrayCount*: uint32
     perInstance*: bool
     noInterpolation: bool
     memoryPerformanceHint*: MemoryPerformanceHint
@@ -81,14 +81,14 @@ func instanceInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
     if attr.perInstance == false:
       result.add attr
 
-func numberOfVertexInputAttributeDescriptors*(theType: DataType): int =
+func numberOfVertexInputAttributeDescriptors*(theType: DataType): uint =
   case theType:
     of Mat2F32, Mat2F64, Mat23F32, Mat23F64: 2
     of Mat32F32, Mat32F64, Mat3F32, Mat3F64, Mat34F32, Mat34F64: 3
     of Mat43F32, Mat43F64, Mat4F32, Mat4F64: 4
     else: 1
 
-func size*(theType: DataType): int =
+func size*(theType: DataType): uint64 =
   case theType:
     of Float32: 4
     of Float64: 8
@@ -134,7 +134,7 @@ func size*(theType: DataType): int =
     of Mat4F64: 128
     of TextureType: 0
 
-func size*(attribute: ShaderAttribute, perDescriptor = false): int =
+func size*(attribute: ShaderAttribute, perDescriptor = false): uint64 =
   if perDescriptor:
     attribute.theType.size div attribute.theType.numberOfVertexInputAttributeDescriptors
   else:
@@ -143,7 +143,7 @@ func size*(attribute: ShaderAttribute, perDescriptor = false): int =
     else:
       attribute.theType.size * attribute.arrayCount
 
-func size*(theType: seq[ShaderAttribute]): int =
+func size*(theType: seq[ShaderAttribute]): uint64 =
   for attribute in theType:
     result += attribute.size
 
@@ -204,7 +204,7 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
 func attr*[T: GPUType](
   name: string,
   perInstance = false,
-  arrayCount = 0,
+  arrayCount = 0'u32,
   noInterpolation = false,
   memoryPerformanceHint = PreferFastRead,
 ): auto =
@@ -380,7 +380,7 @@ func glslUniforms*(group: openArray[ShaderAttribute], blockName = "Uniforms", bi
     return @[]
   # currently only a single uniform block supported, therefore binding = 0
   result.add(&"layout(std430, binding = {binding}) uniform T{blockName} {{")
-  var last_size = high(int)
+  var last_size = high(uint64)
   for attribute in group:
     assert attribute.size <= last_size, &"The attribute '{attribute.name}' is bigger than the attribute before, which is not allowed" # using smaller uniform-types first will lead to problems (I think due to alignment, there is also some stuff on the internet about this ;)
     var arrayDecl = ""

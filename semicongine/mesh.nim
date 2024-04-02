@@ -205,7 +205,7 @@ proc newMesh*(
     name = name,
   )
 
-func attributeSize*(mesh: MeshObject, attribute: string): int =
+func attributeSize*(mesh: MeshObject, attribute: string): uint64 =
   if mesh.vertexData.contains(attribute):
     mesh.vertexData[attribute].size
   elif mesh.instanceData.contains(attribute):
@@ -221,17 +221,20 @@ func attributeType*(mesh: MeshObject, attribute: string): DataType =
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
-func indexSize*(mesh: MeshObject): int =
+func indexSize*(mesh: MeshObject): uint64 =
   case mesh.indexType
-    of None: 0
-    of Tiny: mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0))
-    of Small: mesh.smallIndices.len * sizeof(get(genericParams(typeof(mesh.smallIndices)), 0))
-    of Big: mesh.bigIndices.len * sizeof(get(genericParams(typeof(mesh.bigIndices)), 0))
+    of None: 0'u64
+    of Tiny: uint64(mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0)))
+    of Small: uint64(mesh.smallIndices.len * sizeof(get(genericParams(typeof(mesh.smallIndices)), 0)))
+    of Big: uint64(mesh.bigIndices.len * sizeof(get(genericParams(typeof(mesh.bigIndices)), 0)))
 
-func rawData[T: seq](value: T): (pointer, int) =
-  (pointer(addr(value[0])), sizeof(get(genericParams(typeof(value)), 0)) * value.len)
+func rawData[T: seq](value: T): (pointer, uint64) =
+  (
+    pointer(addr(value[0])),
+    uint64(sizeof(get(genericParams(typeof(value)), 0)) * value.len)
+  )
 
-func getRawIndexData*(mesh: MeshObject): (pointer, int) =
+func getRawIndexData*(mesh: MeshObject): (pointer, uint64) =
   case mesh.indexType:
     of None: raise newException(Exception, "Trying to get index data for non-indexed mesh")
     of Tiny: rawData(mesh.tinyIndices)

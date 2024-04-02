@@ -5,7 +5,6 @@ import std/logging
 import std/hashes
 import std/strformat
 import std/strutils
-import std/compilesettings
 
 import ../core
 import ./device

@@ -8,13 +8,13 @@ import ./buffer
 type
   Drawable* = object
     name*: string
-    elementCount*: int                                                           # number of vertices or indices
-    bufferOffsets*: Table[VkPipeline, seq[(string, MemoryPerformanceHint, int)]] # list of buffers and list of offset for each attribute in that buffer
-    instanceCount*: int                                                          # number of instance
+    elementCount*: int                                                              # number of vertices or indices
+    bufferOffsets*: Table[VkPipeline, seq[(string, MemoryPerformanceHint, uint64)]] # list of buffers and list of offset for each attribute in that buffer
+    instanceCount*: int                                                             # number of instance
     case indexed*: bool
     of true:
       indexType*: VkIndexType
-      indexBufferOffset*: int
+      indexBufferOffset*: uint64
     of false:
       discard
 
