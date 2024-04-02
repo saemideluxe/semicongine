@@ -41,7 +41,6 @@ const DEPTH_FORMAT_MAP = {
   PixelDepth(4): VK_FORMAT_R8G8B8A8_SRGB,
 }.toTable
 
-
 proc requirements(image: VulkanImage): MemoryRequirements =
   assert image.vk.valid
   assert image.device.vk.valid
@@ -159,12 +158,28 @@ proc createImage(device: Device, queue: Queue, width, height: int, depth: PixelD
   result.format = DEPTH_FORMAT_MAP[depth]
   result.usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
 
+  var formatInfo = VkPhysicalDeviceImageFormatInfo2(
+    sType: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2,
+    format: result.format,
+    thetype: VK_IMAGE_TYPE_2D,
+    tiling: VK_IMAGE_TILING_OPTIMAL,
+    usage: toBits result.usage,
+  )
+  var formatProperties = VkImageFormatProperties2(sType: VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2)
+  checkVkResult device.physicalDevice.vk.vkGetPhysicalDeviceImageFormatProperties2(
+    addr formatInfo,
+    addr formatProperties,
+  )
+  assert size <= int(formatProperties.imageFormatProperties.maxResourceSize)
+  assert width <= int(formatProperties.imageFormatProperties.maxExtent.width)
+  assert height <= int(formatProperties.imageFormatProperties.maxExtent.height)
+
   var imageInfo = VkImageCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
     imageType: VK_IMAGE_TYPE_2D,
     extent: VkExtent3D(width: uint32(width), height: uint32(height), depth: 1),
-    mipLevels: 1,
-    arrayLayers: 1,
+    mipLevels: min(1'u32, formatProperties.imageFormatProperties.maxMipLevels),
+    arrayLayers: min(1'u32, formatProperties.imageFormatProperties.maxArrayLayers),
     format: result.format,
     tiling: VK_IMAGE_TILING_OPTIMAL,
     initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
