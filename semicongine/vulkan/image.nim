@@ -35,11 +35,19 @@ type
     sampler*: VulkanSampler
 
 const DEPTH_FORMAT_MAP = {
-  PixelDepth(1): VK_FORMAT_R8_SRGB,
-  PixelDepth(2): VK_FORMAT_R8G8_SRGB,
-  PixelDepth(3): VK_FORMAT_R8G8B8_SRGB,
-  PixelDepth(4): VK_FORMAT_R8G8B8A8_SRGB,
+  PixelDepth(1): [VK_FORMAT_R8_SRGB, VK_FORMAT_R8_UNORM],
+  PixelDepth(2): [VK_FORMAT_R8G8_SRGB, VK_FORMAT_R8G8_UNORM],
+  PixelDepth(3): [VK_FORMAT_R8G8B8_SRGB, VK_FORMAT_R8G8B8_UNORM],
+  PixelDepth(4): [VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_UNORM],
 }.toTable
+
+const LINEAR_FORMATS = [
+  VK_FORMAT_R8_UNORM,
+  VK_FORMAT_R8G8_UNORM,
+  VK_FORMAT_R8G8B8_UNORM,
+  VK_FORMAT_R8G8B8A8_UNORM,
+]
+
 
 proc requirements(image: VulkanImage): MemoryRequirements =
   assert image.vk.valid
@@ -143,36 +151,55 @@ proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
     )
 
 # currently only usable for texture access from shader
-proc createImage(device: Device, queue: Queue, width, height: uint32, depth: PixelDepth, data: pointer): VulkanImage =
+proc createImage[T](device: Device, queue: Queue, width, height: uint32, depth: PixelDepth, image: Image[T]): VulkanImage =
   assert device.vk.valid
   assert width > 0
   assert height > 0
   assert depth != 2
-  assert data != nil
 
-  let size: uint64 = width * height * uint32(depth)
   result.device = device
-  result.width = width
-  result.height = height
-  result.depth = depth
-  result.format = DEPTH_FORMAT_MAP[depth]
   result.usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
 
-  var formatInfo = VkPhysicalDeviceImageFormatInfo2(
-    sType: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2,
-    format: result.format,
-    thetype: VK_IMAGE_TYPE_2D,
-    tiling: VK_IMAGE_TILING_OPTIMAL,
-    usage: toBits result.usage,
-  )
+  let size: uint64 = width * height * uint32(depth)
+  let usageBits = toBits result.usage
+  var formatList = DEPTH_FORMAT_MAP[depth]
+  var selectedFormat: VkFormat
   var formatProperties = VkImageFormatProperties2(sType: VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2)
-  checkVkResult device.physicalDevice.vk.vkGetPhysicalDeviceImageFormatProperties2(
-    addr formatInfo,
-    addr formatProperties,
-  )
+
+  for format in formatList:
+    var formatInfo = VkPhysicalDeviceImageFormatInfo2(
+      sType: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2,
+      format: format,
+      thetype: VK_IMAGE_TYPE_2D,
+      tiling: VK_IMAGE_TILING_OPTIMAL,
+      usage: usageBits,
+    )
+    let formatCheck = device.physicalDevice.vk.vkGetPhysicalDeviceImageFormatProperties2(
+      addr formatInfo,
+      addr formatProperties,
+    )
+    if formatCheck == VK_SUCCESS: # found suitable format
+      selectedFormat = format
+      break
+    elif formatCheck == VK_ERROR_FORMAT_NOT_SUPPORTED: # nope, try to find other format
+      continue
+    else: # raise error
+      checkVkResult formatCheck
+
+  # assumption: images comes in sRGB color space
+  var data = addr image.imagedata[0]
+  if selectedFormat in LINEAR_FORMATS:
+    let linearImage = image.asLinear()
+    data = addr image.imagedata[0]
+
   assert size <= uint64(formatProperties.imageFormatProperties.maxResourceSize)
   assert width <= uint64(formatProperties.imageFormatProperties.maxExtent.width)
   assert height <= uint64(formatProperties.imageFormatProperties.maxExtent.height)
+
+  result.width = width
+  result.height = height
+  result.depth = depth
+  result.format = selectedFormat
 
   var imageInfo = VkImageCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -183,7 +210,7 @@ proc createImage(device: Device, queue: Queue, width, height: uint32, depth: Pix
     format: result.format,
     tiling: VK_IMAGE_TILING_OPTIMAL,
     initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
-    usage: toBits result.usage,
+    usage: usageBits,
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
     samples: VK_SAMPLE_COUNT_1_BIT,
   )
@@ -291,9 +318,9 @@ func `$`*(texture: VulkanTexture): string =
 proc uploadTexture*(device: Device, queue: Queue, texture: Texture): VulkanTexture =
   assert device.vk.valid
   if texture.isGrayscale:
-    result.image = createImage(device = device, queue = queue, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, data = addr texture.grayImage.imagedata[0])
+    result.image = createImage(device = device, queue = queue, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, image = texture.grayImage)
   else:
-    result.image = createImage(device = device, queue = queue, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, data = addr texture.colorImage.imagedata[0][0])
+    result.image = createImage(device = device, queue = queue, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, image = texture.colorImage)
   result.imageView = result.image.createImageView()
   result.sampler = result.image.device.createSampler(texture.sampler)
 

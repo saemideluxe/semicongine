@@ -1,3 +1,4 @@
+import std/math
 import std/strformat
 
 import ./vulkanapi
@@ -37,6 +38,41 @@ converter toRGBA*(p: RGBAPixel): Vec4f =
   newVec4f(float32(p[0]) / 255'f32, float32(p[1]) / 255'f32, float32(p[2]) / 255'f32, float32(p[3]) / 255'f32)
 converter toGrayscale*(p: GrayPixel): float32 =
   float32(p) / 255'f32
+
+# colorspace conversion functions
+
+func linear2srgb(value: float): float =
+  clamp(
+    if (value < 0.0031308): value * 12.92
+    else: pow(value, 1.0 / 2.4) * 1.055 - 0.055,
+    0,
+    1,
+  )
+func srgb2linear(value: float): float =
+  clamp(
+    if (value < 0.04045): value / 12.92
+    else: pow((value + 0.055) / 1.055, 2.4),
+    0,
+    1,
+  )
+func linear2srgb(value: uint8): uint8 = # also covers GrayPixel
+  uint8(round(linear2srgb(float(value) / 255.0) * 255))
+func linear2srgb(value: RGBAPixel): RGBAPixel =
+  [linear2srgb(value[0]), linear2srgb(value[1]), linear2srgb(value[2]), value[3]]
+func srgb2linear(value: uint8): uint8 = # also covers GrayPixel
+  uint8(round(srgb2linear(float(value) / 255.0) * 255))
+func srgb2linear(value: RGBAPixel): RGBAPixel =
+  [srgb2linear(value[0]), srgb2linear(value[1]), srgb2linear(value[2]), value[3]]
+
+proc asSRGB*[T](image: Image[T]): Image[T] =
+  result = Image[T](width: image.width, height: image.height, imagedata: newSeq[T](image.imagedata.len))
+  for i in 0 .. image.imagedata.len:
+    result.imagedata[i] = linear2srgb(image.imagedata[i])
+
+proc asLinear*[T](image: Image[T]): Image[T] =
+  result = Image[T](width: image.width, height: image.height, imagedata: newSeq[T](image.imagedata.len))
+  for i in 0 .. image.imagedata.len:
+    result.imagedata[i] = srgb2linear(image.imagedata[i])
 
 proc `$`*(image: Image): string =
   &"{image.width}x{image.height}"
