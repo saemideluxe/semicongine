@@ -174,8 +174,6 @@ proc createImage(device: Device, queue: Queue, width, height: uint32, depth: Pix
   assert width <= uint64(formatProperties.imageFormatProperties.maxExtent.width)
   assert height <= uint64(formatProperties.imageFormatProperties.maxExtent.height)
 
-  echo formatProperties
-
   var imageInfo = VkImageCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
     imageType: VK_IMAGE_TYPE_2D,

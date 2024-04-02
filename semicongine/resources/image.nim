@@ -140,9 +140,6 @@ proc toPNG*[T: Pixel](image: Image[T]): seq[uint8] =
   for y in 0 ..< image.height:
     for x in 0 ..< image.width:
       discard
-      # stdout.write image[x, y]
-      # stdout.write ' '
-    # echo ""
   let ret = lodepng_encode_memory(
     addr pngData,
     addr pngSize,
