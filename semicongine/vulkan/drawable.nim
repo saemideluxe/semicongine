@@ -25,16 +25,18 @@ func `$`*(drawable: Drawable): string =
     &"Drawable({drawable.name}, elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
 proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer, pipeline: VkPipeline) =
-  debug "Draw ", drawable
+  debug "Draw {drawable} with pipeline {pipeline}"
+  debug "Vertex buffers ", vertexBuffers
 
   var buffers: seq[VkBuffer]
   var offsets: seq[VkDeviceSize]
 
-
   for (name, performanceHint, offset) in drawable.bufferOffsets[pipeline]:
+    assert vertexBuffers[performanceHint].vk.valid
     buffers.add vertexBuffers[performanceHint].vk
     offsets.add VkDeviceSize(offset)
 
+  debug "Binding buffers: ", buffers
   commandBuffer.vkCmdBindVertexBuffers(
     firstBinding = 0'u32,
     bindingCount = uint32(buffers.len),
@@ -42,6 +44,7 @@ proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Ta
     pOffsets = offsets.toCPointer()
   )
   if drawable.indexed:
+    assert indexBuffer.vk.valid
     commandBuffer.vkCmdBindIndexBuffer(indexBuffer.vk, VkDeviceSize(drawable.indexBufferOffset), drawable.indexType)
     commandBuffer.vkCmdDrawIndexed(
       indexCount = uint32(drawable.elementCount),

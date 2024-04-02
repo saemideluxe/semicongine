@@ -154,6 +154,7 @@ proc initRenderer*(engine: var Engine, clearColor = newVec4f(0, 0, 0, 0), vSync 
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
 
 proc loadScene*(engine: var Engine, scene: var Scene) =
+  debug &"start loading scene '{scene.name}'"
   assert engine.renderer.isSome
   assert not scene.loaded
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
@@ -162,11 +163,11 @@ proc loadScene*(engine: var Engine, scene: var Scene) =
   engine.renderer.get.updateMeshData(scene, forceAll = true)
   engine.renderer.get.updateUniformData(scene, forceAll = true)
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
+  debug &"done loading scene '{scene.name}'"
 
 proc unloadScene*(engine: var Engine, scene: Scene) =
-  checkVkResult engine.device.vk.vkDeviceWaitIdle()
+  debug &"unload scene '{scene.name}'"
   engine.renderer.get.destroy(scene)
-  checkVkResult engine.device.vk.vkDeviceWaitIdle()
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
