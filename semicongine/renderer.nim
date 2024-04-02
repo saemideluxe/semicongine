@@ -73,7 +73,7 @@ proc initRenderer*(
   result.queue = device.firstGraphicsQueue().get()
   result.commandBufferPool = device.createCommandBufferPool(result.queue.family, swapchain.get().inFlightFrames)
   result.swapchain = swapchain.get()
-  result.emptyTexture = device.uploadTexture(result.queue, EMPTYTEXTURE)
+  result.emptyTexture = device.uploadTexture(result.queue, EMPTY_TEXTURE)
 
 func inputs(renderer: Renderer, scene: Scene): seq[ShaderAttribute] =
   var found: Table[string, ShaderAttribute]
