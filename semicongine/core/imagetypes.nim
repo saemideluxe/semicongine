@@ -71,7 +71,7 @@ proc asSRGB*[T](image: Image[T]): Image[T] =
 
 proc asLinear*[T](image: Image[T]): Image[T] =
   result = Image[T](width: image.width, height: image.height, imagedata: newSeq[T](image.imagedata.len))
-  for i in 0 .. image.imagedata.len:
+  for i in 0 ..< image.imagedata.len:
     result.imagedata[i] = srgb2linear(image.imagedata[i])
 
 proc `$`*(image: Image): string =
