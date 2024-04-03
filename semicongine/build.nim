@@ -111,3 +111,13 @@ proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)])
       echo &"{target} is up-to-date"
   import_meshes meshfiles
   import_audio audiofiles
+
+const STEAM_DIR_NAME = "steamcmd"
+
+proc semicongine_steam*() =
+  if not defined(linux):
+    echo "steam builds must be done on linux for now"
+    return
+
+  let steamdir = thisDir().joinPath(STEAM_DIR_NAME)
+  if not dirExists(steamdir):
