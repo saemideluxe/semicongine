@@ -96,8 +96,8 @@ proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)])
   var audiofiles: seq[(string, string)]
 
   for (target_rel, source_rel) in resourceMap:
-    let target = joinPath(thisDir(), target_rel)
-    let source = joinPath(thisDir(), source_rel)
+    let target = thisDir().joinPath(target_rel)
+    let source = thisDir().joinPath(source_rel)
     if not source.fileExists:
       raise newException(IOError, &"Not found: {source}")
     if not target.fileExists or source.fileNewerStatic(target):
@@ -120,7 +120,6 @@ proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
   if not defined(linux):
     echo "steam uploads must be done on linux for now"
     return
-
   let steamdir = thisDir().joinPath(STEAM_DIR_NAME)
   if not dirExists(steamdir):
     steamdir.mkDir
@@ -131,4 +130,7 @@ proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
       rmFile zipFilename
       exec "steamcmd/steamcmd.sh +quit" # self-update steamcmd
 
-  exec f"steamcmd/steamcmd.sh +login \"{steamaccount}\" \"{password}\" +run_app_build {buildscript} +quit"
+  let
+    steamcmd = STEAM_DIR_NAME.joinPath("steamcmd").joinPath("steamcmd.sh")
+    scriptPath = "..".joinPath("..").joinPath(buildscript)
+  exec &"./{steamcmd} +login \"{steamaccount}\" \"{password}\" +run_app_build {scriptPath} +quit"
