@@ -64,11 +64,11 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
 
 
 proc createWindow*(title: string): NativeWindow =
-  # when DEBUG:
-    # AllocConsole()
-    # discard stdin.reopen("conIN$", fmRead)
-    # discard stdout.reopen("conOUT$", fmWrite)
-    # discard stderr.reopen("conOUT$", fmWrite)
+  when DEBUG:
+    AllocConsole()
+    discard stdin.reopen("conIN$", fmRead)
+    discard stdout.reopen("conOUT$", fmWrite)
+    discard stderr.reopen("conOUT$", fmWrite)
 
   result.hInstance = HINSTANCE(GetModuleHandle(nil))
   var
@@ -100,7 +100,7 @@ proc createWindow*(title: string): NativeWindow =
   result.g_wpPrev.length = UINT(sizeof(WINDOWPLACEMENT))
   discard result.hwnd.ShowWindow(SW_SHOW)
 
-proc setTitle*(window: NativeWindow, title: string)
+proc setTitle*(window: NativeWindow, title: string) =
   window.hwnd.SetWindowText(T(title))
 
 # inspired by the one and only, Raymond Chen
