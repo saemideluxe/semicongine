@@ -8,6 +8,8 @@ import ./core/audiotypes
 import ./core/constants
 
 const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("tools/blender_gltf_converter.py")
+const STEAMCMD_ZIP = currentSourcePath().parentDir().parentDir().joinPath("tools/steamcmd.zip")
+const STEAM_DIR_NAME = "steam"
 
 proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
   var platformDir = "unkown"
@@ -32,15 +34,15 @@ proc semicongine_build_switches*(buildname: string, builddir = "./build") =
 proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string) =
   switch("define", "PACKAGETYPE=" & bundleType)
 
-  rmDir(outdir)
-  mkDir(outdir)
+  outdir.rmDir()
+  outdir.mkDir()
 
   echo "BUILD: Packing assets from '" & resourceRoot & "' into directory '" & outdir & "'"
   let outdir_resources = joinPath(outdir, RESOURCEROOT)
   if bundleType == "dir":
     cpDir(resourceRoot, outdir_resources)
   elif bundleType == "zip":
-    mkDir(outdir_resources)
+    outdir_resources.mkDir()
     for resource in listDirs(resourceRoot):
       let outputfile = joinPath(outdir_resources, resource.splitPath().tail & ".zip")
       withdir resource:
@@ -112,12 +114,21 @@ proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)])
   import_meshes meshfiles
   import_audio audiofiles
 
-const STEAM_DIR_NAME = "steamcmd"
 
-proc semicongine_steam*() =
+# for steam-buildscript docs see https://partner.steamgames.com/doc/sdk/uploading
+proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
   if not defined(linux):
-    echo "steam builds must be done on linux for now"
+    echo "steam uploads must be done on linux for now"
     return
 
   let steamdir = thisDir().joinPath(STEAM_DIR_NAME)
   if not dirExists(steamdir):
+    steamdir.mkDir
+    let zipFilename = STEAMCMD_ZIP.extractFilename
+    STEAMCMD_ZIP.cpFile(steamdir.joinPath(zipFilename))
+    withDir(steamdir):
+      exec &"unzip {zipFilename}"
+      rmFile zipFilename
+      exec "steamcmd/steamcmd.sh +quit" # self-update steamcmd
+
+  exec f"steamcmd/steamcmd.sh +login \"{steamaccount}\" \"{password}\" +run_app_build {buildscript} +quit"
