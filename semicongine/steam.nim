@@ -13,6 +13,7 @@ when defined(linux):
     echo dlerror()
 elif defined(windows):
   steam_api = "steam_api".loadLib()
+  # TODO: maybe should get some error reporting on windows too?
 
 
 # required to store reference, when calling certain APIs
@@ -20,7 +21,7 @@ type
   SteamUserStatsRef = ptr object
 var userStats: SteamUserStatsRef
 
-# load function points for steam API
+# load function pointers for steam API
 var
   Shutdown*: proc() {.stdcall.}
   Init: proc(msg: ptr array[1024, char]): cint {.stdcall.}
