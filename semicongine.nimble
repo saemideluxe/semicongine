@@ -9,6 +9,11 @@ backend = "c"
 installDirs = @["semicongine"]
 
 # Dependencies
+# On linux/debian also run the following to get everything working
+# sudo dpkg --add-architecture i386
+# sudo apt-get update
+# sudo apt-get install zip unzip libstdc++6:i386 libc6:i386
+
 
 requires "nim >= 2.0"
 requires "winim"

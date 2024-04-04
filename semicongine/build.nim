@@ -26,6 +26,8 @@ proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
     platformDir = "linux"
   elif defined(windows):
     platformDir = "windows"
+  else:
+    raise newException(Exception, "Unsupported platform")
 
   return builddir / buildname / platformDir / projectName()
 
@@ -33,10 +35,14 @@ proc semicongine_build_switches*(buildname: string, builddir = "./build") =
   switch("experimental", "strictEffects")
   switch("experimental", "strictFuncs")
   switch("define", "nimPreviewHashRef")
-  if defined(linux): switch("define", "VK_USE_PLATFORM_XLIB_KHR")
-  if defined(windows):
+  if defined(linux):
+    switch("define", "VK_USE_PLATFORM_XLIB_KHR")
+  elif defined(windows):
     switch("define", "VK_USE_PLATFORM_WIN32_KHR")
     switch("app", "gui")
+  else:
+    raise newException(Exception, "Unsupported platform")
+
   switch("outdir", semicongine_builddir(buildname, builddir = builddir))
   switch("passL", "-Wl,-rpath,'$ORIGIN'") # adds directory of executable to dynlib search path
 
@@ -59,6 +65,8 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
           exec &"zip -r {outputfile} ."
         elif defined(windows):
           exec &"powershell Compress-Archive * {outputfile}"
+        else:
+          raise newException(Exception, "Unsupported platform")
   elif bundleType == "exe":
     switch("define", "BUILD_RESOURCEROOT=" & joinPath(getCurrentDir(), resourceRoot)) # required for in-exe packing of resources, must be absolute
   if withSteam:
@@ -70,6 +78,8 @@ proc semicongine_zip*(dir: string) =
       exec &"zip -r {dir.lastPathPart} ."
     elif defined(windows):
       exec &"powershell Compress-Archive * {dir.lastPathPart}"
+    else:
+      raise newException(Exception, "Unsupported platform")
 
 
 # need this because fileNewer from std/os does not work in Nim VM
@@ -131,17 +141,30 @@ proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
   if not defined(linux):
     echo "steam uploads must be done on linux for now"
     return
+
   let steamdir = thisDir().joinPath(STEAMBUILD_DIR_NAME)
   if not dirExists(steamdir):
     steamdir.mkDir
     let zipFilename = STEAMCMD_ZIP.extractFilename
     STEAMCMD_ZIP.cpFile(steamdir.joinPath(zipFilename))
     withDir(steamdir):
-      exec &"unzip {zipFilename}"
-      rmFile zipFilename
-      exec "steamcmd/steamcmd.sh +quit" # self-update steamcmd
+      if defined(linux):
+        exec &"unzip {zipFilename}"
+        rmFile zipFilename
+        exec "steamcmd/steamcmd.sh +quit" # self-update steamcmd
+      elif defined(windows):
+        exec &"powershell Expand-Archive -LiteralPath {zipFilename} ."
+        rmFile zipFilename
+        exec "steamcmd/steamcmd.exe +quit" # self-update steamcmd
+      else:
+        raise newException(Exception, "Unsupported platform")
 
-  let
+  var steamcmd: string
+  if defined(linux):
     steamcmd = STEAMBUILD_DIR_NAME.joinPath("steamcmd").joinPath("steamcmd.sh")
-    scriptPath = "..".joinPath("..").joinPath(buildscript)
+  elif defined(windows):
+    steamcmd = STEAMBUILD_DIR_NAME.joinPath("steamcmd").joinPath("steamcmd.exe")
+  else:
+    raise newException(Exception, "Unsupported platform")
+  let scriptPath = "..".joinPath("..").joinPath(buildscript)
   exec &"./{steamcmd} +login \"{steamaccount}\" \"{password}\" +run_app_build {scriptPath} +quit"
