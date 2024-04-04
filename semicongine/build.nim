@@ -138,10 +138,6 @@ proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)])
 
 # for steam-buildscript docs see https://partner.steamgames.com/doc/sdk/uploading
 proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
-  if not defined(linux):
-    echo "steam uploads must be done on linux for now"
-    return
-
   let steamdir = thisDir().joinPath(STEAMBUILD_DIR_NAME)
   if not dirExists(steamdir):
     steamdir.mkDir
