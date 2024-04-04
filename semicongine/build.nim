@@ -9,7 +9,15 @@ import ./core/constants
 
 const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("tools/blender_gltf_converter.py")
 const STEAMCMD_ZIP = currentSourcePath().parentDir().parentDir().joinPath("tools/steamcmd.zip")
-const STEAM_DIR_NAME = "steam"
+const STEAMBUILD_DIR_NAME = "steam"
+
+var STEAMLIB: string
+if defined(linux):
+  STEAMLIB = currentSourcePath().parentDir().parentDir().joinPath("libs/libsteam_api.so")
+elif defined(windows):
+  STEAMLIB = currentSourcePath().parentDir().parentDir().joinPath("libs/steam_api.dll")
+else:
+  raise newException(Exception, "Unsupported platform")
 
 proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
   var platformDir = "unkown"
@@ -30,8 +38,9 @@ proc semicongine_build_switches*(buildname: string, builddir = "./build") =
     switch("define", "VK_USE_PLATFORM_WIN32_KHR")
     switch("app", "gui")
   switch("outdir", semicongine_builddir(buildname, builddir = builddir))
+  switch("passL", "-Wl,-rpath,'$ORIGIN'") # adds directory of executable to dynlib search path
 
-proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string) =
+proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string, withSteam: bool) =
   switch("define", "PACKAGETYPE=" & bundleType)
 
   outdir.rmDir()
@@ -52,6 +61,8 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string)
           exec &"powershell Compress-Archive * {outputfile}"
   elif bundleType == "exe":
     switch("define", "BUILD_RESOURCEROOT=" & joinPath(getCurrentDir(), resourceRoot)) # required for in-exe packing of resources, must be absolute
+  if withSteam:
+    STEAMLIB.cpFile(outdir.joinPath(STEAMLIB.extractFilename))
 
 proc semicongine_zip*(dir: string) =
   withdir dir.parentDir:
@@ -120,7 +131,7 @@ proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
   if not defined(linux):
     echo "steam uploads must be done on linux for now"
     return
-  let steamdir = thisDir().joinPath(STEAM_DIR_NAME)
+  let steamdir = thisDir().joinPath(STEAMBUILD_DIR_NAME)
   if not dirExists(steamdir):
     steamdir.mkDir
     let zipFilename = STEAMCMD_ZIP.extractFilename
@@ -131,6 +142,6 @@ proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
       exec "steamcmd/steamcmd.sh +quit" # self-update steamcmd
 
   let
-    steamcmd = STEAM_DIR_NAME.joinPath("steamcmd").joinPath("steamcmd.sh")
+    steamcmd = STEAMBUILD_DIR_NAME.joinPath("steamcmd").joinPath("steamcmd.sh")
     scriptPath = "..".joinPath("..").joinPath(buildscript)
   exec &"./{steamcmd} +login \"{steamaccount}\" \"{password}\" +run_app_build {scriptPath} +quit"

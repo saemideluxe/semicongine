@@ -22,6 +22,8 @@ import ./audio
 import ./text
 import ./panel
 
+import ./steam
+
 const COUNT_N_RENDERTIMES = 199
 
 type
@@ -71,6 +73,8 @@ proc destroy*(engine: var Engine) =
     engine.debugger.destroy()
   engine.window.destroy()
   engine.instance.destroy()
+  if SteamAvailable():
+    SteamShutdown()
 
 
 proc initEngine*(
@@ -85,6 +89,12 @@ proc initEngine*(
 ): Engine =
   echo "Set log level to ", ENGINE_LOGLEVEL
   setLogFilter(ENGINE_LOGLEVEL)
+
+  TrySteamInit()
+  if SteamAvailable():
+    echo "Starting with Steam enabled"
+  else:
+    echo "Starting without Steam enabled"
 
   result.state = Starting
   result.exitHandler = exitHandler
