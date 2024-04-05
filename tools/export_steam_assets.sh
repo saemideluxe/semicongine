@@ -1,4 +1,5 @@
 # krita --new-image RGBA,U8,200,200
+set -e
 
 # CAPSULES
 # header_capsule: 460x215, png
@@ -23,8 +24,13 @@
 # trailer: mp4, 1920x1080 60Hz, 5000+ Kbps
 # screenshots: 5 images, 1920x1080, png
 
-OUTPUT_DIR=$PWD/$1
-INPUT_DIR=$2
+if [ "$#" -ne 2 ]; then
+    echo Usage: $0 '<source-directory> <output-directory>'
+    exit 1
+fi
+
+INPUT_DIR=$1
+OUTPUT_DIR=$2
 
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
