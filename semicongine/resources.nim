@@ -119,7 +119,6 @@ elif thebundletype == Zip:
 
 elif thebundletype == Exe:
 
-  import std/compilesettings
   import std/tables
 
   const BUILD_RESOURCEROOT* {.strdefine.}: string = ""
