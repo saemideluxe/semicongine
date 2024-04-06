@@ -62,33 +62,33 @@ proc purge*(storageType: StorageType) =
   storageType.path().string.removeFile()
 
 type
-  LoadFuture*[T, U] = object
-    thread: Thread[U]
+  LoadFuture*[T] = object
+    thread: Thread[(StorageType, string, ptr Channel[T])]
     channel: ptr Channel[T]
     result: T
 
-proc cleanup*[T, U](p: var LoadFuture[T, U]) =
+proc cleanup*[T](p: var LoadFuture[T]) =
   if p.channel != nil:
     p.thread.joinThread()
     p.channel[].close()
     deallocShared(p.channel)
     p.channel = nil
 
-proc awaitResult*[T, U](p: var LoadFuture[T, U]): T =
+proc awaitResult*[T](p: var LoadFuture[T]): T =
   if p.channel == nil:
     return p.result
   result = p.channel[].recv()
   p.result = result
   p.cleanup()
 
-proc hasResult*[T, U](p: var LoadFuture[T, U]): bool =
+proc hasResult*[T](p: var LoadFuture[T]): bool =
   let ret = p.channel[].tryRecv()
   result = ret.dataAvailable
   if result:
     p.result = ret.msg
     p.cleanup()
 
-proc getResult*[T, U](p: LoadFuture[T, U]): T =
+proc getResult*[T](p: LoadFuture[T]): T =
   assert p.channel == nil, "Result is not available yet"
   return p.result
 
@@ -98,7 +98,7 @@ proc loadWorker[T](params: (StorageType, string, ptr Channel[T])) =
   let ret = loadFromDb[T](db, params[1])
   params[2][].send(ret)
 
-proc load*[T](storageType: StorageType, key: string): LoadFuture[T, (StorageType, string, ptr Channel[T])] =
+proc load*[T](storageType: StorageType, key: string): LoadFuture[T] =
   result.channel = cast[ptr Channel[T]](allocShared0(sizeof(Channel[T])))
   result.channel[].open()
   createThread(result.thread, loadWorker[T], (storageType, key, result.channel))
@@ -106,12 +106,12 @@ proc load*[T](storageType: StorageType, key: string): LoadFuture[T, (StorageType
 # STORING ######################################3333
 #
 type
-  StoreFuture*[T, U] = object
-    thread: Thread[U]
+  StoreFuture*[T] = object
+    thread: Thread[(StorageType, string, ptr Channel[T], ptr Channel[bool])]
     channel: ptr Channel[T]
     doneChannel: ptr Channel[bool]
 
-proc cleanup*[T, U](p: var StoreFuture[T, U]) =
+proc cleanup*[T](p: var StoreFuture[T]) =
   if p.channel != nil:
     p.thread.joinThread()
     p.channel[].close()
@@ -121,11 +121,11 @@ proc cleanup*[T, U](p: var StoreFuture[T, U]) =
     p.channel = nil
     p.doneChannel = nil
 
-proc awaitStored*[T, U](p: var StoreFuture[T, U]) =
+proc awaitStored*[T](p: var StoreFuture[T]) =
   discard p.doneChannel[].recv()
   p.cleanup()
 
-proc isStored*[T, U](p: var StoreFuture[T, U]): bool =
+proc isStored*[T](p: var StoreFuture[T]): bool =
   let ret = p.doneChannel[].tryRecv()
   result = ret.dataAvailable
   if ret.dataAvailable:
@@ -137,7 +137,7 @@ proc storeWorker[T](params: (StorageType, string, ptr Channel[T], ptr Channel[bo
   storeInDb(db, params[1], params[2][].recv())
   params[3][].send(true)
 
-proc store*[T](storageType: StorageType, key: string, value: T): StoreFuture[T, (StorageType, string, ptr Channel[T], ptr Channel[bool])] =
+proc store*[T](storageType: StorageType, key: string, value: T): StoreFuture[T] =
   result.channel = cast[ptr Channel[T]](allocShared0(sizeof(Channel[T])))
   result.channel[].open()
   result.doneChannel = cast[ptr Channel[bool]](allocShared0(sizeof(Channel[bool])))
