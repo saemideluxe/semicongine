@@ -32,7 +32,11 @@ proc createDevice*(
   assert queueFamilies.len > 0
 
   result.physicalDevice = physicalDevice
-  let hasUniformBufferStandardLayout = "VK_KHR_uniform_buffer_standard_layout" in physicalDevice.getExtensions()
+  # TODO: allowing support for physical devices without hasUniformBufferStandardLayout
+  # would require us to ship different shaders, so we don't support standard layout
+  # if that will be added, check the function vulkan/shaders.nim:glslUniforms and update accordingly
+  # let hasUniformBufferStandardLayout = "VK_KHR_uniform_buffer_standard_layout" in physicalDevice.getExtensions()
+  let hasUniformBufferStandardLayout = false
 
   var allExtensions = enabledExtensions & @["VK_KHR_swapchain"]
   if hasUniformBufferStandardLayout:

@@ -35,7 +35,7 @@ proc main() =
   var flag = rect()
   flag.material = material
   var scene = Scene(name: "main", meshes: @[flag])
-  scene.addShaderGlobalArray("test2", @[0'f32, 0'f32])
+  scene.addShaderGlobalArray("test2", @[newVec4f(), newVec4f()])
 
   var engine = initEngine("Test materials")
 
@@ -48,17 +48,17 @@ proc main() =
       intermediates = [
         attr[Vec2f]("uvout"),
       ],
-      uniforms = [attr[float32]("test2", arrayCount = 2)],
+      uniforms = [attr[Vec4f]("test2", arrayCount = 2)],
       samplers = @[
         attr[Texture]("tex1"),
         attr[Texture]("tex2"),
       ],
       outputs = [attr[Vec4f]("color")],
       vertexCode = """
-      gl_Position = vec4(position.x, position.y + sin(Uniforms.test2[1]) / Uniforms.test2[1] * 0.5, position.z, 1.0);
+      gl_Position = vec4(position.x, position.y + sin(Uniforms.test2[1].x) / Uniforms.test2[1].x * 0.5, position.z, 1.0);
       uvout = uv;""",
       fragmentCode = """
-      float d = sin(Uniforms.test2[0]) * 0.5 + 0.5;
+      float d = sin(Uniforms.test2[0].x) * 0.5 + 0.5;
       color = texture(tex1, uvout) * (1 - d) + texture(tex2, uvout) * d;
       """,
     )
@@ -69,7 +69,7 @@ proc main() =
   var t = cpuTime()
   while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
     var d = float32(cpuTime() - t)
-    setShaderGlobalArray(scene, "test2", @[d, d * 2])
+    setShaderGlobalArray(scene, "test2", @[newVec4f(d), newVec4f(d * 2)])
     engine.renderScene(scene)
   engine.destroy()
 

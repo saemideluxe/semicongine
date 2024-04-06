@@ -378,8 +378,14 @@ func glslInput*(group: openArray[ShaderAttribute]): seq[string] =
 func glslUniforms*(group: openArray[ShaderAttribute], blockName = "Uniforms", binding: int): seq[string] =
   if group.len == 0:
     return @[]
+  for uniform in group:
+    if uniform.arrayCount > 0:
+      assert uniform.theType.size mod 16 == 0, &"Uniform '{uniform.name}': Array elements in a uniform block must align to 16 but current size is {uniform.theType.size} (until we can two different shaders)"
+  # TODO: read the lines below, having at least std430 would be nice...
   # currently only a single uniform block supported, therefore binding = 0
-  result.add(&"layout(std430, binding = {binding}) uniform T{blockName} {{")
+  # Also, we might need to figure out how we can ship std430 on newer hardware and normal on older?
+  # result.add(&"layout(std430, binding = {binding}) uniform T{blockName} {{")
+  result.add(&"layout(binding = {binding}) uniform T{blockName} {{")
   var last_size = high(uint64)
   for attribute in group:
     assert attribute.size <= last_size, &"The attribute '{attribute.name}' is bigger than the attribute before, which is not allowed" # using smaller uniform-types first will lead to problems (I think due to alignment, there is also some stuff on the internet about this ;)
