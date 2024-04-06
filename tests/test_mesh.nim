@@ -1,3 +1,4 @@
+import std/strformat
 import semicongine
 
 proc main() =

@@ -49,6 +49,8 @@ proc semicongine_build_switches*(buildname: string, builddir = "./build") =
 proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string, withSteam: bool) =
   switch("define", "PACKAGETYPE=" & bundleType)
 
+  assert resourceRoot.dirExists, &"Resource root '{resourceRoot}' does not exists"
+
   outdir.rmDir()
   outdir.mkDir()
 
@@ -58,13 +60,15 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
     cpDir(resourceRoot, outdir_resources)
   elif bundleType == "zip":
     outdir_resources.mkDir()
-    for resource in listDirs(resourceRoot):
-      let outputfile = joinPath(outdir_resources, resource.splitPath().tail & ".zip")
-      withdir resource:
+    for resourceDir in resourceRoot.listDirs():
+      let outputfile = joinPath(outdir_resources, resourceDir.splitPath().tail & ".zip")
+      withdir resourceDir:
         if defined(linux):
-          exec &"zip -r {outputfile} ."
+          echo &"zip -r {relativePath(outputfile, resourceDir)} ."
+          exec &"zip -r {relativePath(outputfile, resourceDir)} ."
         elif defined(windows):
-          exec &"powershell Compress-Archive * {outputfile}"
+          echo &"powershell Compress-Archive * {relativePath(outputfile, resourceDir)}"
+          exec &"powershell Compress-Archive * {relativePath(outputfile, resourceDir)}"
         else:
           raise newException(Exception, "Unsupported platform")
   elif bundleType == "exe":

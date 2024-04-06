@@ -32,7 +32,7 @@ proc createDevice*(
   assert queueFamilies.len > 0
 
   result.physicalDevice = physicalDevice
-  var allExtensions = enabledExtensions & @["VK_KHR_swapchain"]
+  var allExtensions = enabledExtensions & @["VK_KHR_swapchain", "VK_KHR_uniform_buffer_standard_layout"]
   for extension in allExtensions:
     instance.vk.loadExtension(extension)
   var
@@ -48,9 +48,14 @@ proc createDevice*(
     )
   var queueList = deviceQueues.values.toSeq
 
+  var uniformBufferLayoutFeature = VkPhysicalDeviceUniformBufferStandardLayoutFeatures(
+    stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES,
+    uniformBufferStandardLayout: true,
+  )
   var features2 = VkPhysicalDeviceFeatures2(
     stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     features: result.enabledFeatures,
+    pnext: addr uniformBufferLayoutFeature,
   )
   var createInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,

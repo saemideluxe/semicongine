@@ -233,8 +233,6 @@ proc main() =
           engine.destroy()
           return
         engine.renderScene(scene)
-  echo "Rendered ", engine.framesRendered, " frames"
-  echo "Processed ", engine.eventsProcessed, " events"
 
   # cleanup
   echo "Start cleanup"

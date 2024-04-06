@@ -50,8 +50,8 @@ proc main() =
       ],
       uniforms = [attr[float32]("test2", arrayCount = 2)],
       samplers = @[
-        attr[Texture]("tex1", arrayCount = 1),
-        attr[Texture]("tex2", arrayCount = 1),
+        attr[Texture]("tex1"),
+        attr[Texture]("tex2"),
       ],
       outputs = [attr[Vec4f]("color")],
       vertexCode = """
@@ -59,7 +59,7 @@ proc main() =
       uvout = uv;""",
       fragmentCode = """
       float d = sin(Uniforms.test2[0]) * 0.5 + 0.5;
-      color = texture(tex1[0], uvout) * (1 - d) + texture(tex2[0], uvout) * d;
+      color = texture(tex1, uvout) * (1 - d) + texture(tex2, uvout) * d;
       """,
     )
   engine.initRenderer({

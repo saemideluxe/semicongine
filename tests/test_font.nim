@@ -12,7 +12,7 @@ proc main() =
   # build scene
   var scene = Scene(name: "main")
   var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
-  var origin = initPanel(size = newVec2f(0.01, 0.01))
+  var origin = initPanel(transform = scale(0.01, 0.01))
   var main_text = font.initText("".toRunes, maxLen = 255, color = newVec4f(1, 0.15, 0.15, 1), maxWidth = 1.0, transform = scale(0.0005, 0.0005))
   var help_text = font.initText("""Controls
 

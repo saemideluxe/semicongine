@@ -12,7 +12,19 @@ task build_dev, "build dev":
   semicongine_build_switches(buildname = "dev")
   setCommand "c"
   let outdir = semicongine_builddir(buildname = "dev")
-  semicongine_pack(outdir, bundleType = "exe", resourceRoot = "resources")
+  semicongine_pack(outdir, bundleType = "exe", resourceRoot = "tests/resources", withSteam = false)
+
+task build_dev_zip, "build dev zip":
+  semicongine_build_switches(buildname = "dev")
+  setCommand "c"
+  let outdir = semicongine_builddir(buildname = "dev")
+  semicongine_pack(outdir, bundleType = "zip", resourceRoot = "tests/resources", withSteam = false)
+
+task build_dev_dir, "build dev dir":
+  semicongine_build_switches(buildname = "dev")
+  setCommand "c"
+  let outdir = semicongine_builddir(buildname = "dev")
+  semicongine_pack(outdir, bundleType = "dir", resourceRoot = "tests/resources", withSteam = false)
 
 task build_release, "build release":
   switch "define", "release"
@@ -20,7 +32,7 @@ task build_release, "build release":
   semicongine_build_switches(buildname = "release")
   setCommand "c"
   let outdir = semicongine_builddir(buildname = "release")
-  semicongine_pack(outdir, bundleType = "exe", resourceRoot = "resources")
+  semicongine_pack(outdir, bundleType = "exe", resourceRoot = "tests/resources", withSteam = false)
 
 
 task build_all_debug, "build all examples for debug":
@@ -36,11 +48,11 @@ task build_all_release, "build all examples for release":
 task test_all, "Run all test programs":
   for file in listFiles("tests"):
     if file.endsWith(".nim") and not file.endsWith("test_resources.nim"):
-      exec(&"nim build --run {file}")
+      exec(&"nim build_dev --run {file}")
 
-  exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=dir --run tests/test_resources.nim")
-  exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=zip --run tests/test_resources.nim")
-  exec("nim build -d:BUILD_RESOURCEROOT=tests/resources -d:PACKAGETYPE=exe --run tests/test_resources.nim")
+  exec("nim build_dev --run tests/test_resources.nim")
+  exec("nim build_dev_zip --run tests/test_resources.nim")
+  exec("nim build_dev_dir --run tests/test_resources.nim")
 
 task publish, "publish all build":
   for file in listDirs("build/debug/linux"):
