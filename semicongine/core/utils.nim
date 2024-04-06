@@ -1,5 +1,7 @@
 import std/typetraits
 import std/strutils
+import std/paths
+import std/os
 import std/strformat
 
 type
@@ -28,6 +30,9 @@ proc staticExecChecked*(command: string, input = ""): string {.compileTime.} =
   if exitcode != 0:
     raise newException(Exception, &"Running '{command}' produced exit code: {exitcode}" & output)
   return output
+
+proc AppName*(): string =
+  return string(Path(getAppFilename()).splitFile.name)
 
 func size*[T: seq](list: T): uint64 =
   uint64(list.len * sizeof(get(genericParams(typeof(list)), 0)))

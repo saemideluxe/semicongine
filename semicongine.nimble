@@ -18,4 +18,5 @@ requires "nim >= 2.0"
 requires "winim"
 requires "x11" # also requires libx11-dev e.g. on debian systems
 requires "zippy"
+requires "db_connector"
 

@@ -18,6 +18,7 @@ import semicongine/renderer
 import semicongine/resources
 import semicongine/settings
 import semicongine/steam
+import semicongine/storage
 import semicongine/text
 import semicongine/platform/window
 import semicongine/vulkan
@@ -36,6 +37,7 @@ export renderer
 export resources
 export settings
 export steam
+export storage
 export text
 export window
 export vulkan
