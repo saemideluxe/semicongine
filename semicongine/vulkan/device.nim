@@ -32,9 +32,14 @@ proc createDevice*(
   assert queueFamilies.len > 0
 
   result.physicalDevice = physicalDevice
-  var allExtensions = enabledExtensions & @["VK_KHR_swapchain", "VK_KHR_uniform_buffer_standard_layout"]
+  let hasUniformBufferStandardLayout = "VK_KHR_uniform_buffer_standard_layout" in physicalDevice.getExtensions()
+
+  var allExtensions = enabledExtensions & @["VK_KHR_swapchain"]
+  if hasUniformBufferStandardLayout:
+    allExtensions.add "VK_KHR_uniform_buffer_standard_layout"
   for extension in allExtensions:
     instance.vk.loadExtension(extension)
+
   var
     enabledExtensionsC = allocCStringArray(allExtensions)
     priority = 1'f32
@@ -55,7 +60,7 @@ proc createDevice*(
   var features2 = VkPhysicalDeviceFeatures2(
     stype: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     features: result.enabledFeatures,
-    pnext: addr uniformBufferLayoutFeature,
+    pnext: if hasUniformBufferStandardLayout: addr uniformBufferLayoutFeature else: nil,
   )
   var createInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,

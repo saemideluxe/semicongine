@@ -121,7 +121,6 @@ elif thebundletype == Exe:
 
   import std/compilesettings
   import std/tables
-  import std/sequtils
 
   const BUILD_RESOURCEROOT* {.strdefine.}: string = ""
 

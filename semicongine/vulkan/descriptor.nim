@@ -70,7 +70,6 @@ proc destroy*(descriptorSetLayout: var DescriptorSetLayout) =
   descriptorSetLayout.device.vk.vkDestroyDescriptorSetLayout(descriptorSetLayout.vk, nil)
   descriptorSetLayout.vk.reset
 
-
 proc createDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uint32)], maxSets = 1000): DescriptorPool =
   assert device.vk.valid
 
