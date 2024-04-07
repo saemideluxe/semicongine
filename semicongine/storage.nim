@@ -43,7 +43,7 @@ proc store*[T](storageType: StorageType, key: string, value: T) =
   ON CONFLICT(key) DO UPDATE SET value=excluded.value
   """), key, $$value)
 
-proc load*[T](storageType: StorageType, key: string, default = default(T)): T =
+proc load*[T](storageType: StorageType, key: string, default: T): T =
   storageType.setup()
   const KEY_VALUE_TABLE_NAME = "shelf"
   let dbResult = db[storageType].getValue(sql(&"""SELECT value FROM {KEY_VALUE_TABLE_NAME} WHERE key = ? """), key)

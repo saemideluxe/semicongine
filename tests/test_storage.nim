@@ -8,17 +8,17 @@ proc testSimple(storage: StorageType) =
   const KEY = "test"
 
   # get default
-  assert load[int](storage, KEY) == default(type(TEST_VALUE))
+  assert storage.load(KEY, 0) == default(type(TEST_VALUE))
 
   # save and load custom
   store(storage, KEY, TEST_VALUE)
-  assert load[int](storage, KEY) == TEST_VALUE
+  assert storage.load(KEY, 0) == TEST_VALUE
 
 proc stressTest(storage: StorageType) =
   for i in 1 .. 10000:
     let key = &"key-{i}"
     store(storage, key, i)
-    assert load[int](storage, key) == i
+    assert storage.load(key, 0) == i
 
 proc main() =
   SystemStorage.purge()
