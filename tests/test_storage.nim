@@ -3,6 +3,7 @@ import std/strformat
 
 import semicongine
 
+#[
 proc testSimple(storage: StorageType) =
   const TEST_VALUE = 42
   const KEY = "test"
@@ -43,6 +44,7 @@ proc stressTest(storage: StorageType) =
     p.awaitStored()
     var p1 = load[int](storage, key)
     assert p1.awaitResult() == i
+]#
 
 proc concurrentStressTest(storage: StorageType) =
   var storeFutures: seq[StoreFuture[int]]
@@ -50,7 +52,8 @@ proc concurrentStressTest(storage: StorageType) =
   for i in 1 .. 10000:
     let key = &"key-{i}"
     echo key
-    storeFutures.add store(storage, key, i)
+    store()
+    # storeFutures.add store(storage, key, i)
 
   for i in 1 .. 10000:
     echo i
@@ -59,6 +62,7 @@ proc concurrentStressTest(storage: StorageType) =
     var p1 = load[int](storage, key)
     assert p1.awaitResult() == i
 
+#[
 proc main() =
   SystemStorage.purge()
   echo "SystemStorage: Testing simple store/load"
@@ -81,6 +85,9 @@ proc main() =
   # TODO: fails currently, but is likely not too important
   # echo "Stress test with 10'000 saves/loads and a little concurrency"
   # SystemStorage.concurrentStressTest()
+]#
 
 when isMainModule:
-  main()
+  echo "Stress test with 10'000 saves/loads and a little concurrency"
+  SystemStorage.concurrentStressTest()
+  # main()

@@ -1,4 +1,5 @@
 import std/marshal
+import std/tables
 import std/strformat
 import std/paths
 import std/os
@@ -8,21 +9,16 @@ import db_connector/db_sqlite
 import ./core
 
 const STORAGE_NAME = Path("storage.db")
+const KEY_VALUE_TABLE_NAME = "shelf"
 
 type
   StorageType* = enum
     SystemStorage
     UserStorage
     # ? level storage type ?
-  StorageOperation = enum
-    Read
-    Write
-    KillWorker
-  Storage*[T] = object
-    storageType: StorageType
-    keyChannel: ptr Channel[(StorageOperation, string)] # false is read, true is write
-    dataChannel: ptr Channel[T]
-    thread: Thread[tuple[storageType: StorageType, keyChannel: ptr Channel[(StorageOperation, string)], dataChannel: ptr Channel[T]]]
+
+var db: Table[StorageType, DbConn]
+
 
 proc path(storageType: StorageType): Path =
   case storageType:
@@ -32,10 +28,11 @@ proc path(storageType: StorageType): Path =
       string(Path(getDataDir()) / Path(AppName())).createDir()
       Path(getDataDir()) / Path(AppName()) / STORAGE_NAME
 
-proc openDb(storageType: StorageType): DbConn =
-  const KEY_VALUE_TABLE_NAME = "shelf"
-  result = open(string(storageType.path), "", "", "")
-  result.exec(sql(&"""CREATE TABLE IF NOT EXISTS {KEY_VALUE_TABLE_NAME} (
+proc setup(storageType: StorageType) =
+  if storageType in db:
+    return
+  db[storageType] = open(string(storageType.path), "", "", "")
+  db[storageType].exec(sql(&"""CREATE TABLE IF NOT EXISTS {KEY_VALUE_TABLE_NAME} (
     key TEXT NOT NULL UNIQUE,
     value TEXT NOT NULL
   )"""))
@@ -53,17 +50,17 @@ proc loadFromDb[T](db: DbConn, key: string, default = default(T)): T =
     return default
   return to[T](dbResult)
 
+proc purge*(storageType: StorageType) =
+  storageType.path().string.removeFile()
+
 # mini async API
 #
 # LOADING ######################################3333
 #
 #
-proc purge*(storageType: StorageType) =
-  storageType.path().string.removeFile()
-
 type
   LoadFuture*[T] = object
-    thread: Thread[(StorageType, string, ptr Channel[T])]
+    thread: Thread[(DbConn, string, ptr Channel[T])]
     channel: ptr Channel[T]
     result: T
 
@@ -92,22 +89,22 @@ proc getResult*[T](p: LoadFuture[T]): T =
   assert p.channel == nil, "Result is not available yet"
   return p.result
 
-proc loadWorker[T](params: (StorageType, string, ptr Channel[T])) =
-  var db = params[0].openDb()
-  defer: db.close()
-  let ret = loadFromDb[T](db, params[1])
+proc loadWorker[T](params: (DbConn, string, ptr Channel[T])) {.thread.} =
+  let ret = loadFromDb[T](params[0], params[1])
   params[2][].send(ret)
 
 proc load*[T](storageType: StorageType, key: string): LoadFuture[T] =
+  storageType.setup()
   result.channel = cast[ptr Channel[T]](allocShared0(sizeof(Channel[T])))
   result.channel[].open()
-  createThread(result.thread, loadWorker[T], (storageType, key, result.channel))
+  createThread(result.thread, loadWorker[T], (db[storageType], key, result.channel))
 
 # STORING ######################################3333
 #
 type
   StoreFuture*[T] = object
-    thread: Thread[(StorageType, string, ptr Channel[T], ptr Channel[bool])]
+    # thread: Thread[(DbConn, string, ptr Channel[T], ptr Channel[bool])]
+    thread: Thread[void]
     channel: ptr Channel[T]
     doneChannel: ptr Channel[bool]
 
@@ -131,16 +128,24 @@ proc isStored*[T](p: var StoreFuture[T]): bool =
   if ret.dataAvailable:
     p.cleanup()
 
-proc storeWorker[T](params: (StorageType, string, ptr Channel[T], ptr Channel[bool])) =
-  var db = params[0].openDb()
-  defer: db.close()
-  storeInDb(db, params[1], params[2][].recv())
-  params[3][].send(true)
+# proc storeWorker[T](params: (DbConn, string, ptr Channel[T], ptr Channel[bool])) {.thread.} =
+  # storeInDb(params[0], params[1], params[2][].recv())
+  # params[3][].send(true)
 
-proc store*[T](storageType: StorageType, key: string, value: T): StoreFuture[T] =
-  result.channel = cast[ptr Channel[T]](allocShared0(sizeof(Channel[T])))
-  result.channel[].open()
-  result.doneChannel = cast[ptr Channel[bool]](allocShared0(sizeof(Channel[bool])))
-  result.doneChannel[].open()
-  createThread(result.thread, storeWorker[T], (storageType, key, result.channel, result.doneChannel))
-  result.channel[].send(value)
+
+# proc store*[T](storageType: StorageType, key: string, value: T): StoreFuture[T] =
+  # storageType.setup()
+  # result.channel = cast[ptr Channel[T]](allocShared0(sizeof(Channel[T])))
+  # result.channel[].open()
+  # result.doneChannel = cast[ptr Channel[bool]](allocShared0(sizeof(Channel[bool])))
+  # result.doneChannel[].open()
+  # createThread(result.thread, storeWorker[T], (db[storageType], key, result.channel, result.doneChannel))
+  # createThread(result.thread, storeWorker)
+  # result.channel[].send(value)
+
+proc storeWorker() {.thread.} =
+  echo "storeWorker"
+
+proc store*() =
+  var thread: Thread[void]
+  createThread(thread, storeWorker)
