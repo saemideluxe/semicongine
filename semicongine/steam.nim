@@ -54,7 +54,7 @@ proc SteamClearAchievement*(name: string): bool =
 proc SteamSetAchievement*(name: string): bool =
   userStats.SetAchievement(name.cstring)
 
-proc SteamStoreStats*(name: string): bool =
+proc SteamStoreStats*(): bool =
   userStats.StoreStats()
 
 proc SteamShutdown*() =
