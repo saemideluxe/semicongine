@@ -92,9 +92,9 @@ proc initEngine*(
 
   TrySteamInit()
   if SteamAvailable():
-    echo "Starting with Steam enabled"
+    echo "Starting with Steam"
   else:
-    echo "Starting without Steam enabled"
+    echo "Starting without Steam"
 
   result.state = Starting
   result.exitHandler = exitHandler
