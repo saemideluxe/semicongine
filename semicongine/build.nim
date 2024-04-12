@@ -21,6 +21,7 @@ else:
 let SQLITELIB = currentSourcePath().parentDir().parentDir().joinPath("libs/sqlite3.dll")
 
 proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
+  assert projectName() != "", "Please specify project file as a commandline argument"
   var platformDir = "unkown"
 
   if defined(linux):
@@ -82,7 +83,7 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
 proc semicongine_zip*(dir: string) =
   withdir dir.parentDir:
     if defined(linux):
-      exec &"zip -r {dir.lastPathPart} ."
+      exec &"zip -r {dir.lastPathPart} {dir.lastPathPart}"
     elif defined(windows):
       exec &"powershell Compress-Archive * {dir.lastPathPart}"
     else:

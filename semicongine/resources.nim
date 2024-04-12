@@ -124,13 +124,16 @@ elif thebundletype == Exe:
   const BUILD_RESOURCEROOT* {.strdefine.}: string = ""
 
   proc loadResources(): Table[string, Table[string, string]] {.compileTime.} =
-    assert BUILD_RESOURCEROOT != "", "define BUILD_RESOURCEROOT to build for bundle type 'exe'"
-    for kind, packageDir in walkDir(BUILD_RESOURCEROOT):
-      if kind == pcDir:
-        let package = packageDir.splitPath.tail
-        result[package] = Table[string, string]()
-        for resourcefile in walkDirRec(packageDir, relative = true):
-          result[package][resourcefile.replace('\\', '/')] = staticRead(packageDir.joinPath(resourcefile))
+    when BUILD_RESOURCEROOT == "":
+      {.warning: "BUILD_RESOURCEROOT is empty, no resources will be packaged".}
+      return
+    else:
+      for kind, packageDir in walkDir(BUILD_RESOURCEROOT):
+        if kind == pcDir:
+          let package = packageDir.splitPath.tail
+          result[package] = Table[string, string]()
+          for resourcefile in walkDirRec(packageDir, relative = true):
+            result[package][resourcefile.replace('\\', '/')] = staticRead(packageDir.joinPath(resourcefile))
   const bundledResources = loadResources()
 
   proc loadResource_intern(path: string, package: string): Stream =
