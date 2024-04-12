@@ -1,3 +1,4 @@
+import std/compilesettings
 import std/algorithm
 import std/monotimes
 import std/options
@@ -78,7 +79,7 @@ proc destroy*(engine: var Engine) =
 
 
 proc initEngine*(
-  applicationName: string,
+  applicationName = querySetting(projectName),
   debug = DEBUG,
   showFps = DEBUG,
   exitHandler: proc(engine: var Engine) = nil,
