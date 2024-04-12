@@ -118,7 +118,7 @@ func toString[T](value: T): string =
     maxwidth = 0
 
   for n in value.data:
-    let strval = &"{n:.2}"
+    let strval = &"{n:.4f}"
     strvalues.add(strval)
     if strval.len > maxwidth:
       maxwidth = strval.len
@@ -131,7 +131,6 @@ func toString[T](value: T): string =
       if i mod T.columnCount == 0:
         result &= "  "
       result &= filler & strvalues[i] & "  "
-  result = $T & "\n" & result
 
 func `$`*(v: TMat2[SomeNumber]): string = toString[TMat2[SomeNumber]](v)
 func `$`*(v: TMat23[SomeNumber]): string = toString[TMat23[SomeNumber]](v)
@@ -456,8 +455,8 @@ func ortho*(left, right, top, bottom, zNear, zFar: float32): Mat4 =
   Mat4(data: [
     2 / (right - left), 0, 0, -(right + left) / (right - left),
     0, 2 / (bottom - top), 0, -(bottom + top) / (bottom - top),
-    0, 0, 1 / (zFar - zNear), -zNear / (zFar - zNear),
-    0, 0, 1, 1,
+    0, 0, 1 / (zFar - zNear), zNear / (zFar - zNear),
+    0, 0, 0, 1,
   ])
 
 # create an orthographic perspective that will map from -1 .. 1 on all axis and keep a 1:1 aspect ratio
