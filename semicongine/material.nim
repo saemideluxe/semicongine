@@ -56,8 +56,10 @@ proc assertCanRender*(shader: ShaderConfiguration, materialType: MaterialType) =
   for attr in shader.inputs:
     if attr.perInstance:
       assert materialType.instanceAttributes.contains(attr.name), &"MaterialType '{materialType}' requires instance attribute '{attr.name}' in order to be renderable with the assigned shader '{shader}'"
+      assert materialType.instanceAttributes[attr.name] == attr.theType, &"Instance attribute '{attr.name}' of MaterialType '{materialType}' is of type {materialType.instanceAttributes[attr.name]} but assigned shader '{shader}' declares type '{attr.theType}'"
     else:
       assert materialType.vertexAttributes.contains(attr.name), &"MaterialType '{materialType}' requires vertex attribute '{attr.name}' in order to be renderable with the assigned shader '{shader}'"
+      assert materialType.vertexAttributes[attr.name] == attr.theType, &"Vertex attribute '{attr.name}' of MaterialType '{materialType}' is of type {materialType.vertexAttributes[attr.name]} but assigned shader '{shader}' declares type '{attr.theType}'"
 
 proc `$`*(material: MaterialData): string =
   var attributes: seq[string]
