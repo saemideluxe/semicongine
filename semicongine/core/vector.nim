@@ -110,16 +110,11 @@ func `$`*(v: TVec3[SomeNumber]): string = toString[TVec3[SomeNumber]](v)
 func `$`*(v: TVec4[SomeNumber]): string = toString[TVec4[SomeNumber]](v)
 
 func length*(vec: TVec2[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1])
-func length*(vec: TVec2[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[
-    1] * vec[1]))
-func length*(vec: TVec3[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[
-    1] + vec[2] * vec[2])
-func length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[
-    1] * vec[1] + vec[2] * vec[2]))
-func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[
-    1] + vec[2] * vec[2] + vec[3] * vec[3])
-func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[
-    1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
+func length*(vec: TVec2[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1]))
+func length*(vec: TVec3[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2])
+func length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]))
+func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3])
+func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
 
 func normalized*[T: SomeFloat](vec: TVec2[T]): auto =
   let l = vec.length
