@@ -100,7 +100,6 @@ proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq
   mesh.vertexData[attribute] = initDataList(thetype = getDataType[T]())
   mesh.vertexData[attribute].setLen(mesh.vertexCount)
   mesh.vertexData[attribute] = value
-  # `=`(mesh.vertexData[attribute], value)
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initVertexAttribute(mesh, attribute, newSeqWith(mesh.vertexCount, value))
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =

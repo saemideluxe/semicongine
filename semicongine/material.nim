@@ -95,11 +95,6 @@ proc initMaterialData*(
   initMaterialData(theType = theType, name = theName, attributes = attributes.toTable)
 
 const
-  COLORED_MATERIAL* = MaterialType(
-    name: "single color material",
-    vertexAttributes: {"position": Vec3F32}.toTable,
-    attributes: {"color": Vec4F32}.toTable,
-  )
   VERTEX_COLORED_MATERIAL* = MaterialType(
     name: "vertex color material",
     vertexAttributes: {

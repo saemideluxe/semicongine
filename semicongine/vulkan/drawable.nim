@@ -25,8 +25,7 @@ func `$`*(drawable: Drawable): string =
     &"Drawable({drawable.name}, elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
 proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer, pipeline: VkPipeline) =
-  debug "Draw {drawable} with pipeline {pipeline}"
-  debug "Vertex buffers ", vertexBuffers
+  debug &"Draw {drawable} with pipeline {pipeline}"
 
   var buffers: seq[VkBuffer]
   var offsets: seq[VkDeviceSize]
@@ -37,6 +36,7 @@ proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Ta
     offsets.add VkDeviceSize(offset)
 
   debug "Binding buffers: ", buffers
+  debug "with offsets ", offsets
   commandBuffer.vkCmdBindVertexBuffers(
     firstBinding = 0'u32,
     bindingCount = uint32(buffers.len),
