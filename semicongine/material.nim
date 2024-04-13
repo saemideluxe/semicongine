@@ -50,10 +50,14 @@ proc clearDirtyAttributes*(material: var MaterialData) =
   material.dirtyAttributes.reset
 
 proc `$`*(materialType: MaterialType): string =
-  var attributes: seq[string]
-  for key, value in materialType.attributes.pairs:
-    attributes.add &"{key}: {value}"
-  return &"""MaterialType '{materialType.name}' | Attributes: [{attributes.join(", ")}]"""
+  return materialType.name
+
+proc assertCanRender*(shader: ShaderConfiguration, materialType: MaterialType) =
+  for attr in shader.inputs:
+    if attr.perInstance:
+      assert materialType.instanceAttributes.contains(attr.name), &"MaterialType '{materialType}' requires instance attribute {attr.name} in order to be renderable with the assigned shader '{shader}'"
+    else:
+      assert materialType.vertexAttributes.contains(attr.name), &"MaterialType '{materialType}' requires vertex attribute {attr.name} in order to be renderable with the assigned shader '{shader}'"
 
 proc `$`*(material: MaterialData): string =
   var attributes: seq[string]
@@ -129,6 +133,7 @@ const
     attributes: {"baseTexture": TextureType, "color": Vec4F32}.toTable
   )
   EMPTY_SHADER* = createShaderConfiguration(
+    name = "empty shader",
     inputs = [
       attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
       attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),

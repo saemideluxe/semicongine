@@ -21,6 +21,11 @@ proc createRenderPass*(
   inFlightFrames = 2,
 ): RenderPass =
   assert device.vk.valid
+
+  # some asserts
+  for (materialtype, shaderconfig) in shaders:
+    shaderconfig.assertCanRender(materialtype)
+
   var
     attachments = @[VkAttachmentDescription(
         format: device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format,

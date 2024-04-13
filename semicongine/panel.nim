@@ -19,6 +19,7 @@ const
     attributes: {"panelTexture": TextureType, "color": Vec4F32}.toTable,
   )
   PANEL_SHADER* = createShaderConfiguration(
+    name = "panel shader",
     inputs = [
       attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
       attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint = PreferFastWrite),

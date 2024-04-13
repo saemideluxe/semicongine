@@ -46,11 +46,14 @@ func material*(mesh: MeshObject): MaterialData =
 func `material=`*(mesh: var MeshObject, material: MaterialData) =
   for name, theType in material.theType.vertexAttributes:
     if mesh.vertexData.contains(name):
-      assert mesh.vertexData[name].theType == theType, &"{material.theType} expected mesh attribute '{name}' to be '{theType}' but it is {mesh.vertexData[name].theType}"
-    elif mesh.instanceData.contains(name):
-      assert mesh.instanceData[name].theType == theType, &"{material.theType} expected mesh attribute '{name}' to be '{theType}' but it is {mesh.instanceData[name].theType}"
+      assert mesh.vertexData[name].theType == theType, &"{material.theType} expected vertex attribute '{name}' to be '{theType}' but it is {mesh.vertexData[name].theType}"
     else:
-      assert false, &"Mesh '{mesh.name}' is missing required mesh attribute '{name}: {theType}' for {material.theType}"
+      assert false, &"Mesh '{mesh.name}' is missing required vertex attribute '{name}: {theType}' for {material.theType}"
+  for name, theType in material.theType.instanceAttributes:
+    if mesh.instanceData.contains(name):
+      assert mesh.instanceData[name].theType == theType, &"{material.theType} expected instance attribute '{name}' to be '{theType}' but it is {mesh.instanceData[name].theType}"
+    else:
+      assert false, &"Mesh '{mesh.name}' is missing required instance attribute '{name}: {theType}' for {material.theType}"
   mesh.material = material
 
 func instanceCount*(mesh: MeshObject): int =

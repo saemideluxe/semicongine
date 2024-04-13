@@ -22,6 +22,7 @@ type
     stage*: VkShaderStageFlagBits
     configuration*: ShaderConfiguration
   ShaderConfiguration* = object
+    name*: string
     vertexBinary: seq[uint32]
     fragmentBinary: seq[uint32]
     entrypoint: string
@@ -32,7 +33,8 @@ type
     samplers*: seq[ShaderAttribute]
 
 proc `$`*(shader: ShaderConfiguration): string =
-  &"Inputs: {shader.inputs}, Uniforms: {shader.uniforms}, Samplers: {shader.samplers}"
+  shader.name
+  # &"Inputs: {shader.inputs}, Uniforms: {shader.uniforms}, Samplers: {shader.samplers}"
 
 proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entrypoint: string): seq[uint32] {.compileTime.} =
   func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
@@ -107,6 +109,7 @@ proc compileGlslCode*(
   compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
 
 proc createShaderConfiguration*(
+  name: string,
   inputs: openArray[ShaderAttribute] = [],
   intermediates: openArray[ShaderAttribute] = [],
   outputs: openArray[ShaderAttribute] = [],
@@ -118,6 +121,7 @@ proc createShaderConfiguration*(
   fragmentCode: string,
 ): ShaderConfiguration {.compileTime.} =
   ShaderConfiguration(
+    name: name,
     vertexBinary: compileGlslCode(
       stage = VK_SHADER_STAGE_VERTEX_BIT,
       inputs = inputs,

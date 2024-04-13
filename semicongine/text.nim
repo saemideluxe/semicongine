@@ -23,6 +23,7 @@ const
     attributes: {"fontAtlas": TextureType, "color": Vec4F32}.toTable,
   )
   TEXT_SHADER* = createShaderConfiguration(
+    name = "font shader",
     inputs = [
       attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
       attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint = PreferFastWrite),
