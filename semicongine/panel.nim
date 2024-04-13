@@ -15,7 +15,8 @@ const
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
   PANEL_MATERIAL_TYPE* = MaterialType(
     name: "default-panel-material-type",
-    vertexAttributes: {TRANSFORM_ATTRIB: Mat4F32, POSITION_ATTRIB: Vec3F32, UV_ATTRIB: Vec2F32}.toTable,
+    vertexAttributes: {POSITION_ATTRIB: Vec3F32, UV_ATTRIB: Vec2F32}.toTable,
+    instanceAttributes: {TRANSFORM_ATTRIB: Mat4F32, MATERIALINDEX_ATTRIBUTE: UInt16}.toTable,
     attributes: {"panelTexture": TextureType, "color": Vec4F32}.toTable,
   )
   PANEL_SHADER* = createShaderConfiguration(
