@@ -515,6 +515,20 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
   result[].initVertexAttribute("uv", uv)
   `material=`(result[], material)
 
+proc circleMesh*(width = 1'f32, height = 1'f32, nSegments = 12): (seq[Vec3f], seq[array[3, uint16]]) =
+  assert nSegments >= 3
+  result[0] = newSeq[Vec3f](3 + nSegments)
+
+  let
+    rX = width / 2
+    rY = height / 2
+    step = (2'f32 * PI) / float32(nSegments)
+  result[0][0] = newVec3f(0, 0)
+  result[0][1] = newVec3f(rX, 0)
+  for i in 1 .. nSegments:
+    result[0][i + 1] = newVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
+    result[1].add [uint16(0), uint16(i), uint16(i + 1)]
+
 proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
 
   result = Mesh(
