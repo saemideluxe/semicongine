@@ -116,6 +116,9 @@ func length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1
 func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3])
 func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
 
+func normal*[T: SomeFloat](vec: TVec2[T]): auto =
+  TVec2[T]([vec[1], -vec[0]])
+
 func normalized*[T: SomeFloat](vec: TVec2[T]): auto =
   let l = vec.length
   if l == 0: vec
@@ -205,6 +208,34 @@ func `/`*[T: SomeInteger](a, b: TVec4[T]): auto = TVec4([a[0] div b[0], a[
     1] div b[1], a[2] div b[2], a[3] div b[3]])
 func `/`*[T: SomeFloat](a, b: TVec4[T]): auto = TVec4([a[0] / b[0], a[1] / b[1],
     a[2] / b[2], a[3] / b[3]])
+
+# assignment operations, scalar
+func `+=`*(a: var TVec2, b: SomeNumber) = a = a + b
+func `+=`*(a: var TVec3, b: SomeNumber) = a = a + b
+func `+=`*(a: var TVec4, b: SomeNumber) = a = a + b
+func `-=`*(a: var TVec2, b: SomeNumber) = a = a - b
+func `-=`*(a: var TVec3, b: SomeNumber) = a = a - b
+func `-=`*(a: var TVec4, b: SomeNumber) = a = a - b
+func `*=`*(a: var TVec2, b: SomeNumber) = a = a * b
+func `*=`*(a: var TVec3, b: SomeNumber) = a = a * b
+func `*=`*(a: var TVec4, b: SomeNumber) = a = a * b
+func `/=`*(a: var TVec2, b: SomeNumber) = a = a / b
+func `/=`*(a: var TVec3, b: SomeNumber) = a = a / b
+func `/=`*(a: var TVec4, b: SomeNumber) = a = a / b
+# assignment operations, vector
+func `+=`*(a: var TVec2, b: TVec2) = a = a + b
+func `+=`*(a: var TVec3, b: TVec3) = a = a + b
+func `+=`*(a: var TVec4, b: TVec4) = a = a + b
+func `-=`*(a: var TVec2, b: TVec2) = a = a - b
+func `-=`*(a: var TVec3, b: TVec3) = a = a - b
+func `-=`*(a: var TVec4, b: TVec4) = a = a - b
+func `*=`*(a: var TVec2, b: TVec2) = a = a * b
+func `*=`*(a: var TVec3, b: TVec3) = a = a * b
+func `*=`*(a: var TVec4, b: TVec4) = a = a * b
+func `/=`*(a: var TVec2, b: TVec2) = a = a / b
+func `/=`*(a: var TVec3, b: TVec3) = a = a / b
+func `/=`*(a: var TVec4, b: TVec4) = a = a / b
+
 
 # special operations
 func pow*(a: TVec2, b: SomeNumber): auto =
