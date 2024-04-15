@@ -49,6 +49,9 @@ type
 proc currentFrameCommandBuffer(renderer: Renderer): VkCommandBuffer =
   renderer.commandBufferPool.buffers[renderer.swapchain.currentInFlight]
 
+proc hasScene*(renderer: Renderer, scene: Scene): bool =
+  scene in renderer.scenedata
+
 proc initRenderer*(
   device: Device,
   shaders: openArray[(MaterialType, ShaderConfiguration)],

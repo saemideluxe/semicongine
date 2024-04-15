@@ -182,7 +182,8 @@ proc unloadScene*(engine: var Engine, scene: Scene) =
 
 proc renderScene*(engine: var Engine, scene: var Scene) =
   assert engine.state == Running
-  assert engine.renderer.isSome
+  assert engine.renderer.isSome, "Renderer has not yet been initialized, call 'engine.initRenderer' first"
+  assert engine.renderer.get.hasScene(scene), &"Scene '{scene.name}' has not been loaded yet"
   let t0 = getMonoTime()
 
   engine.renderer.get.startNewFrame()
