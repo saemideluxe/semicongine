@@ -102,7 +102,7 @@ func to*[T](v: TVec4): auto = TVec4([T(v[0]), T(v[1]), T(v[2]), T(v[3])])
 func toString[T](value: T): string =
   var items: seq[string]
   for item in value:
-    items.add(&"{item:.5f}")
+    items.add(&"{item.float:.5f}")
   & "(" & join(items, "  ") & ")"
 
 func `$`*(v: TVec2[SomeNumber]): string = toString[TVec2[SomeNumber]](v)
