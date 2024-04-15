@@ -50,6 +50,8 @@ func `material=`*(mesh: var MeshObject, material: MaterialData) =
     else:
       assert false, &"Mesh '{mesh.name}' is missing required vertex attribute '{name}: {theType}' for {material.theType}"
   for name, theType in material.theType.instanceAttributes:
+    if name in [TRANSFORM_ATTRIB, MATERIALINDEX_ATTRIBUTE]:
+      continue
     if mesh.instanceData.contains(name):
       assert mesh.instanceData[name].theType == theType, &"{material.theType} expected instance attribute '{name}' to be '{theType}' but it is {mesh.instanceData[name].theType}"
     else:

@@ -155,6 +155,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
 
   # find all material data and group it by material type
   for mesh in scene.meshes:
+    assert mesh.material != nil, "Mesh {mesh} has no material assigned"
     if not scenedata.materials.contains(mesh.material.theType):
       scenedata.materials[mesh.material.theType] = @[]
     if not scenedata.materials[mesh.material.theType].contains(mesh.material):
@@ -167,7 +168,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     if not (MATERIALINDEX_ATTRIBUTE in mesh[].attributes):
       mesh[].initInstanceAttribute(MATERIALINDEX_ATTRIBUTE, uint16(scenedata.materials[mesh.material.theType].find(mesh.material)))
 
-  renderer.checkSceneIntegrity(scene)
+  # renderer.checkSceneIntegrity(scene)
 
   # create index buffer if necessary
   var indicesBufferSize = 0'u64

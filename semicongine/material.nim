@@ -55,6 +55,8 @@ proc `$`*(materialType: MaterialType): string =
 proc assertCanRender*(shader: ShaderConfiguration, materialType: MaterialType) =
   for attr in shader.inputs:
     if attr.perInstance:
+      if attr.name in [TRANSFORM_ATTRIB, MATERIALINDEX_ATTRIBUTE]:
+        continue
       assert materialType.instanceAttributes.contains(attr.name), &"MaterialType '{materialType}' requires instance attribute '{attr.name}' in order to be renderable with the assigned shader '{shader}'"
       assert materialType.instanceAttributes[attr.name] == attr.theType, &"Instance attribute '{attr.name}' of MaterialType '{materialType}' is of type {materialType.instanceAttributes[attr.name]} but assigned shader '{shader}' declares type '{attr.theType}'"
     else:
