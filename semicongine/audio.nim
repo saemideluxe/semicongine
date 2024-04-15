@@ -5,7 +5,7 @@ import std/locks
 import std/logging except Level
 
 when defined(windows): # used for setting audio thread priority
-  import winim
+  import winim except Level
 when defined(linux):
   import std/posix
 
