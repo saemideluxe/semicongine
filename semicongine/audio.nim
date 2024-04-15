@@ -1,3 +1,5 @@
+import std/monotimes
+import std/times
 import std/tables
 import std/locks
 import std/logging except Level
@@ -27,6 +29,9 @@ type
   Track = object
     playing: Table[uint64, Playback]
     level: Level
+    targetLevel: Level
+    fadeTime: float
+    fadeStep: float
   Mixer* = object
     playbackCounter: uint64
     tracks: Table[string, Track]
@@ -36,6 +41,7 @@ type
     lock: Lock
     buffers: seq[SoundData]
     currentBuffer: int
+    lastUpdate: MonoTime
 
 proc initMixer*(): Mixer =
   result = Mixer(
@@ -159,6 +165,11 @@ proc unpause*(mixer: var Mixer) = mixer.pause(false)
 proc unpause*(mixer: var Mixer, track: string) = mixer.pause(track, false)
 proc unpause*(mixer: var Mixer, playbackId: uint64) = mixer.pause(playbackId, false)
 
+proc fadeTo*(mixer: var Mixer, track: string, level: Level, time: float) =
+  mixer.tracks[track].targetLevel = level
+  mixer.tracks[track].fadeTime = time
+  mixer.tracks[track].fadeStep = level.float - mixer.tracks[track].level.float / time
+
 proc isPlaying*(mixer: var Mixer): bool =
   mixer.lock.withLock():
     for track in mixer.tracks.mvalues:
@@ -189,6 +200,17 @@ func mix(a, b: Sample): Sample =
   ]
 
 proc updateSoundBuffer(mixer: var Mixer) =
+  let t = getMonoTime()
+  let dt = (t - mixer.lastUpdate).inNanoseconds.float64 / 1_000_000_000'f64
+  mixer.lastUpdate = t
+
+  # update fadings
+  for track in mixer.tracks.mvalues:
+    if track.fadeTime > 0:
+      track.fadeTime -= dt
+      track.level = (track.level.float64 + track.fadeStep.float64 * dt).clamp(Level.low, Level.high)
+      if track.fadeTime <= 0:
+        track.level = track.targetLevel
   # mix
   for i in 0 ..< mixer.buffers[mixer.currentBuffer].len:
     var mixedSample = [0'i16, 0'i16]
