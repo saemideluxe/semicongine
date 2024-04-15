@@ -1,3 +1,4 @@
+import std/math
 import std/parseutils
 import std/strformat
 
@@ -36,8 +37,40 @@ func toRGBA*(value: string): Vec4f =
   discard parseHex(hex[6 .. 7], a)
   return Vec4f([float32(r), float32(g), float32(b), float32(a)]) / 255'f
 
-func gamma*[T: Vec3f|Vec4f](color: T, gamma: float32): T =
-  return pow(color, gamma)
+
+func linear2srgb*(value: SomeFloat): SomeFloat =
+  clamp(
+    if (value < 0.0031308): value * 12.92
+    else: pow(value, 1.0 / 2.4) * 1.055 - 0.055,
+    0,
+    1,
+  )
+func srgb2linear*(value: SomeFloat): SomeFloat =
+  clamp(
+    if (value < 0.04045): value / 12.92
+    else: pow((value + 0.055) / 1.055, 2.4),
+    0,
+    1,
+  )
+func linear2srgb*(value: uint8): uint8 = # also covers GrayPixel
+  uint8(round(linear2srgb(float(value) / 255.0) * 255))
+func srgb2linear*(value: uint8): uint8 = # also covers GrayPixel
+  uint8(round(srgb2linear(float(value) / 255.0) * 255))
+
+func toSRGB*(value: Vec4f): Vec4f =
+  newVec4f(
+    linear2srgb(value.r),
+    linear2srgb(value.g),
+    linear2srgb(value.b),
+    value.a,
+  )
+func fromSRGB*(value: Vec4f): Vec4f =
+  newVec4f(
+    srgb2linear(value.r),
+    srgb2linear(value.g),
+    srgb2linear(value.b),
+    value.a,
+  )
 
 const
   Black* = toRGBA "#000000FF"

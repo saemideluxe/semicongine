@@ -3,6 +3,7 @@ import std/strformat
 
 import ./vulkanapi
 import ./vector
+import ./color
 
 type
   RGBAPixel* = array[4, uint8]
@@ -41,27 +42,9 @@ converter toGrayscale*(p: GrayPixel): float32 =
 
 # colorspace conversion functions
 
-func linear2srgb(value: float): float =
-  clamp(
-    if (value < 0.0031308): value * 12.92
-    else: pow(value, 1.0 / 2.4) * 1.055 - 0.055,
-    0,
-    1,
-  )
-func srgb2linear(value: float): float =
-  clamp(
-    if (value < 0.04045): value / 12.92
-    else: pow((value + 0.055) / 1.055, 2.4),
-    0,
-    1,
-  )
-func linear2srgb(value: uint8): uint8 = # also covers GrayPixel
-  uint8(round(linear2srgb(float(value) / 255.0) * 255))
-func linear2srgb(value: RGBAPixel): RGBAPixel =
+func linear2srgb*(value: RGBAPixel): RGBAPixel =
   [linear2srgb(value[0]), linear2srgb(value[1]), linear2srgb(value[2]), value[3]]
-func srgb2linear(value: uint8): uint8 = # also covers GrayPixel
-  uint8(round(srgb2linear(float(value) / 255.0) * 255))
-func srgb2linear(value: RGBAPixel): RGBAPixel =
+func srgb2linear*(value: RGBAPixel): RGBAPixel =
   [srgb2linear(value[0]), srgb2linear(value[1]), srgb2linear(value[2]), value[3]]
 
 proc asSRGB*[T](image: Image[T]): Image[T] =
