@@ -8,15 +8,14 @@ license = "MIT"
 backend = "c"
 
 if detectOS(Linux):
+  # required for packaging, on windows we use powershell
   foreignDep "zip"
   foreignDep "unzip"
   # required for builds using steam
   foreignDep "libstdc++6:i386"
   foreignDep "libc6:i386"
+  foreignDep "libx11-dev"
 
 requires "nim >= 2.0"
-requires "winim"
-requires "x11" # also requires libx11-dev e.g. on debian systems
 requires "zippy"
-requires "db_connector"
 

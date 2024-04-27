@@ -1,7 +1,7 @@
 import std/tables
 export tables
 
-import x11/x
+import ../../thirdparty/x11/x
 
 
 import ../../events

@@ -1,5 +1,6 @@
 import std/options
-import winim
+
+import ../../thirdparty/winim/winim
 
 import ../../core/vector
 import ../../core/buildconfig

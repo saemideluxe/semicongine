@@ -3,12 +3,11 @@ import std/tables
 import std/strformat
 import std/logging
 
-import
-  x11/xlib,
-  x11/xutil,
-  x11/keysym,
-  x11/x,
-  x11/xkblib
+import ../../thirdparty/x11/xlib
+import ../../thirdparty/x11/xutil
+import ../../thirdparty/x11/keysym
+import ../../thirdparty/x11/x
+import ../../thirdparty/x11/xkblib
 
 import ../../core
 import ../../events
