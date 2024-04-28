@@ -66,6 +66,8 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
     for resourceDir in resourceRoot.listDirs():
       let outputfile = joinPath(outdir_resources, resourceDir.splitPath().tail & ".zip")
       withdir resourceDir:
+        if outputfile.fileExists:
+          outputfile.rmFile()
         if defined(linux):
           echo &"zip -r {relativePath(outputfile, resourceDir)} ."
           exec &"zip -r {relativePath(outputfile, resourceDir)} ."
