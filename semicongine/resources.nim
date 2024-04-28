@@ -72,7 +72,7 @@ when thebundletype == Dir:
 
 elif thebundletype == Zip:
 
-  import zippy/ziparchives
+  import ./thirdparty/zippy/zippy/ziparchives
 
   proc resourceRoot(): string =
     absolutePath(getAppDir()).joinPath(RESOURCEROOT)

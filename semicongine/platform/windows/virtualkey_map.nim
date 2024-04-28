@@ -1,7 +1,7 @@
 import std/tables
 export tables
 
-import winim/core
+import ../../thirdparty/winim/winim/core
 
 import ../../events
 

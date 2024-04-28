@@ -4,7 +4,7 @@ import std/strformat
 import std/paths
 import std/os
 
-import db_connector/db_sqlite
+import ./thirdparty/db_connector/db_sqlite
 
 import ./core
 

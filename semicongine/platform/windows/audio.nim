@@ -1,7 +1,7 @@
 import std/os
 
-import winim
-import winim/extra
+import ../../thirdparty/winim/winim
+import ../../thirdparty/winim/winim/extra
 
 import ../../core/audiotypes
 
@@ -14,7 +14,7 @@ type
   NativeSoundDevice* = object
     handle: HWAVEOUT
     buffers: seq[WAVEHDR]
- 
+
 proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSoundDevice =
   var format = WAVEFORMATEX(
     wFormatTag: WAVE_FORMAT_PCM,
@@ -36,7 +36,7 @@ proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSo
   for i in 0 ..< result.buffers.len:
     checkWinMMResult waveOutPrepareHeader(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
     checkWinMMResult waveOutWrite(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
-  
+
 proc writeSoundData*(soundDevice: var NativeSoundDevice, buffer: int) =
   while (soundDevice.buffers[buffer].dwFlags and WHDR_DONE) == 0:
     sleep(1)
