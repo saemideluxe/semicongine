@@ -182,4 +182,4 @@ proc semicongine_sign_executable*(file: string) =
   const SIGNTOOL_EXE = "C:/Program Files (x86)/Windows Kits/10/App Certification Kit/signtool.exe"
   if not SIGNTOOL_EXE.fileExists:
     raise newException(Exception, &"signtool.exe not found at ({SIGNTOOL_EXE}), please install the Windows SDK")
-  exec $"{SIGNTOOL_EXE} sign /a /tr http://timestamp.globalsign.com/tsa/r6advanced1 /fd SHA256 /td SHA256 {file}"
+  exec &"\"{SIGNTOOL_EXE}\" sign /a /tr http://timestamp.globalsign.com/tsa/r6advanced1 /fd SHA256 /td SHA256 {file}"
