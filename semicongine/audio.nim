@@ -1,4 +1,5 @@
 import std/monotimes
+import std/strformat
 import std/times
 import std/tables
 import std/locks
@@ -77,7 +78,7 @@ proc addTrack*(mixer: var Mixer, name: string, level: Level = 1'f) =
     mixer.tracks[name] = Track(level: level)
 
 proc play*(mixer: var Mixer, soundName: string, track = "", stopOtherSounds = false, loop = false, levelLeft, levelRight: Level): uint64 =
-  assert track in mixer.tracks
+  assert track in mixer.tracks, &"Track '{track}' does not exists"
   assert soundName in mixer.sounds, soundName & " not loaded"
   mixer.lock.withLock():
     if stopOtherSounds:
