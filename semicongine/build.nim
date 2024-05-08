@@ -84,6 +84,9 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
 
 proc semicongine_zip*(dir: string) =
   withdir dir.parentDir:
+    let zipFile = dir.lastPathPart & ".zip"
+    if zipFile.fileExists:
+      zipFile.rmFile()
     if defined(linux):
       exec &"zip -r {dir.lastPathPart} {dir.lastPathPart}"
     elif defined(windows):
@@ -174,3 +177,9 @@ proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
     raise newException(Exception, "Unsupported platform")
   let scriptPath = "..".joinPath("..").joinPath(buildscript)
   exec &"./{steamcmd} +login \"{steamaccount}\" \"{password}\" +run_app_build {scriptPath} +quit"
+
+proc semicongine_sign_executable*(file: string) =
+  const SIGNTOOL_EXE = "C:/Program Files (x86)/Windows Kits/10/App Certification Kit/signtool.exe"
+  if not SIGNTOOL_EXE.fileExists:
+    raise newException(Exception, &"signtool.exe not found at ({SIGNTOOL_EXE}), please install the Windows SDK")
+  exec &"\"{SIGNTOOL_EXE}\" sign /a /tr http://timestamp.globalsign.com/tsa/r6advanced1 /fd SHA256 /td SHA256 {file}"
