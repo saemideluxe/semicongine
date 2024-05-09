@@ -64,23 +64,23 @@ Mouse:
   scene.add origin
   engine.loadScene(scene)
 
-  while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
-    if engine.keyWasPressed(F1):
+  while engine.updateInputs() and not keyIsDown(Escape):
+    if keyWasPressed(F1):
       button.horizontalAlignment = Left
       counterText.horizontalAlignment = Left
-    elif engine.keyWasPressed(F2):
+    elif keyWasPressed(F2):
       button.horizontalAlignment = Center
       counterText.horizontalAlignment = Center
-    elif engine.keyWasPressed(F3):
+    elif keyWasPressed(F3):
       button.horizontalAlignment = Right
       counterText.horizontalAlignment = Right
-    elif engine.keyWasPressed(F4):
+    elif keyWasPressed(F4):
       button.verticalAlignment = Top
       counterText.verticalAlignment = Top
-    elif engine.keyWasPressed(F5):
+    elif keyWasPressed(F5):
       button.verticalAlignment = Center
       counterText.verticalAlignment = Center
-    elif engine.keyWasPressed(F6):
+    elif keyWasPressed(F6):
       button.verticalAlignment = Bottom
       counterText.verticalAlignment = Bottom
 

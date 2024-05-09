@@ -41,6 +41,7 @@ proc main() =
 
   const
     shaderConfiguration1 = createShaderConfiguration(
+      name = "shader 1",
       inputs = [
         attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
         attr[Vec2f]("uv", memoryPerformanceHint = PreferFastRead),
@@ -67,7 +68,7 @@ proc main() =
   })
   engine.loadScene(scene)
   var t = cpuTime()
-  while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
+  while engine.updateInputs() and not keyIsDown(Escape):
     var d = float32(cpuTime() - t)
     setShaderGlobalArray(scene, "test2", @[newVec4f(d), newVec4f(d * 2)])
     engine.renderScene(scene)
