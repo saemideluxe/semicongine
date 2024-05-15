@@ -34,7 +34,6 @@ type
     Shutdown
   Engine* = object
     applicationName: string
-    debug: bool
     showFps: bool
     device: Device
     debugger: Debugger
@@ -46,7 +45,7 @@ type
     currentRenderTimeI: int = 0
 
 # forward declarations
-func getAspectRatio*(engine: Engine): float32
+func GetAspectRatio*(engine: Engine): float32
 
 proc destroy*(engine: var Engine) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
@@ -63,7 +62,6 @@ proc destroy*(engine: var Engine) =
 
 proc initEngine*(
   applicationName = querySetting(projectName),
-  debug = DEBUG,
   showFps = DEBUG,
   vulkanVersion = VK_MAKE_API_VERSION(0, 1, 3, 0),
   vulkanLayers: openArray[string] = [],
@@ -78,7 +76,6 @@ proc initEngine*(
     echo "Starting without Steam"
 
   result.applicationName = applicationName
-  result.debug = debug
   result.showFps = showFps
   result.window = createWindow(result.applicationName)
 
@@ -86,7 +83,7 @@ proc initEngine*(
     layers = @vulkanLayers
     instanceExtensions: seq[string]
 
-  if result.debug:
+  if DEBUG:
     instanceExtensions.add "VK_EXT_debug_utils"
     layers.add "VK_LAYER_KHRONOS_validation"
     # This stuff might be usefull if we one day to smart GPU memory allocation,
@@ -99,7 +96,7 @@ proc initEngine*(
     instanceExtensions = instanceExtensions,
     layers = layers.deduplicate(),
   )
-  if result.debug:
+  if DEBUG:
     result.debugger = result.instance.createDebugMessenger()
   # create devices
   let selectedPhysicalDevice = result.instance.getPhysicalDevices().filterBestGraphics()
@@ -145,7 +142,7 @@ proc loadScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
   assert not scene.loaded
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
-  scene.addShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.getAspectRatio)
+  scene.addShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
   engine.renderer.get.setupDrawableBuffers(scene)
   engine.renderer.get.updateMeshData(scene, forceAll = true)
   engine.renderer.get.updateUniformData(scene, forceAll = true)
@@ -162,7 +159,7 @@ proc renderScene*(engine: var Engine, scene: var Scene) =
   let t0 = getMonoTime()
 
   engine.renderer.get.startNewFrame()
-  scene.setShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.getAspectRatio)
+  scene.setShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
   engine.renderer.get.updateMeshData(scene)
   engine.renderer.get.updateUniformData(scene)
   engine.renderer.get.render(scene)
@@ -182,25 +179,25 @@ proc renderScene*(engine: var Engine, scene: var Scene) =
 
 
 # wrappers for internal things
-func gpuDevice*(engine: Engine): Device = engine.device
-func getWindow*(engine: Engine): auto = engine.window
-func getAspectRatio*(engine: Engine): float32 = engine.getWindow().size[0] / engine.getWindow().size[1]
-func showSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
-func hideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
-func fullscreen*(engine: Engine): bool = engine.fullscreen
-proc `fullscreen=`*(engine: var Engine, enable: bool) =
+func GpuDevice*(engine: Engine): Device = engine.device
+func GetWindow*(engine: Engine): auto = engine.window
+func GetAspectRatio*(engine: Engine): float32 = engine.GetWindow().size[0] / engine.GetWindow().size[1]
+func ShowSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
+func HideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
+func Fullscreen*(engine: Engine): bool = engine.fullscreen
+proc `Fullscreen=`*(engine: var Engine, enable: bool) =
   if enable != engine.fullscreen:
     engine.fullscreen = enable
     engine.window.fullscreen(engine.fullscreen)
 
-func limits*(engine: Engine): VkPhysicalDeviceLimits =
-  engine.gpuDevice().physicalDevice.properties.limits
+func Limits*(engine: Engine): VkPhysicalDeviceLimits =
+  engine.device.physicalDevice.properties.limits
 
-proc updateInputs*(engine: Engine): bool =
-  updateInputs(engine.window.pendingEvents())
+proc UpdateInputs*(engine: Engine): bool =
+  UpdateInputs(engine.window.pendingEvents())
 
-proc processEvents*(engine: Engine, panel: var Panel) =
-  let hasMouseNow = panel.contains(mousePositionNormalized(engine.window.size), engine.getAspectRatio)
+proc ProcessEvents*(engine: Engine, panel: var Panel) =
+  let hasMouseNow = panel.contains(MousePositionNormalized(engine.window.size), engine.GetAspectRatio)
 
   # enter/leave events
   if hasMouseNow:
@@ -214,9 +211,9 @@ proc processEvents*(engine: Engine, panel: var Panel) =
 
   # button events
   if hasMouseNow:
-    if input.mouseWasPressed():
-      if panel.onMouseDown != nil: panel.onMouseDown(panel, input.mousePressedButtons())
-    if input.mouseWasReleased():
-      if panel.onMouseUp != nil: panel.onMouseUp(panel, input.mouseReleasedButtons())
+    if MouseWasPressed():
+      if panel.onMouseDown != nil: panel.onMouseDown(panel, MousePressedButtons())
+    if MouseWasReleased():
+      if panel.onMouseUp != nil: panel.onMouseUp(panel, MouseReleasedButtons())
 
   panel.hasMouse = hasMouseNow
