@@ -105,7 +105,7 @@ proc initEngine*(
     enabledExtensions = @[],
     selectedPhysicalDevice.filterForGraphicsPresentationQueues()
   )
-  startMixerThread()
+  StartMixerThread()
 
 proc initRenderer*(
   engine: var Engine,
