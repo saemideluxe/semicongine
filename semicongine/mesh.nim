@@ -382,6 +382,11 @@ func dirtyAttributes*(mesh: MeshObject): seq[string] =
 proc clearDirtyAttributes*(mesh: var MeshObject) =
   mesh.dirtyAttributes.reset
 
+proc setShaderMaterialIndices*(mesh: var MeshObject, shadername: string, values: seq[uint16], attributeName = MATERIALINDEX_ATTRIBUTE) =
+  let indexAttribute = shadername & "_" & attributeName
+  assert values.len == mesh.instanceCount, &"Mesh {mesh}: While trying to set shader material indices for shader '{shadername}': indices have len {values.len}, but instance count is {mesh.instanceCount}"
+  mesh[indexAttribute] = values
+
 # MESH-TOOLS
 
 proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: Mat4) =
