@@ -382,6 +382,8 @@ func dirtyAttributes*(mesh: MeshObject): seq[string] =
 proc clearDirtyAttributes*(mesh: var MeshObject) =
   mesh.dirtyAttributes.reset
 
+# MESH-TOOLS
+
 proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: Mat4) =
   if mesh.vertexData.contains(attribute):
     for i in 0 ..< mesh.vertexData[attribute].len:
@@ -393,17 +395,12 @@ proc transform*[T: GPUType](mesh: var MeshObject, attribute: string, transform: 
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
   mesh.dirtyAttributes.add attribute
 
-proc applyTransformToVertices*(mesh: var MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE) =
-  for i in 0 ..< mesh.vertexData[positionAttribute].len:
-    mesh.vertexData[positionAttribute][i] = mesh.transform * mesh.vertexData[positionAttribute][i, Vec3f]
-  mesh.transform = Unit4
-
-func getCollisionPoints*(mesh: MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE): seq[Vec3f] =
+func getMeshPoints*(mesh: MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE): seq[Vec3f] =
   for p in mesh[positionAttribute, Vec3f][]:
     result.add mesh.transform * p
 
 func getCollider*(mesh: MeshObject, positionAttribute = DEFAULT_POSITION_ATTRIBUTE): Collider =
-  return mesh.getCollisionPoints(positionAttribute).calculateCollider(Points)
+  return mesh.getMeshPoints(positionAttribute).calculateCollider(Points)
 
 proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
   if mesh.indexType == None:
