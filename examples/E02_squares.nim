@@ -2,7 +2,7 @@ import std/sequtils
 import std/tables
 import std/random
 
-import ../src/semicongine
+import ../semicongine
 
 
 when isMainModule:
@@ -44,15 +44,16 @@ when isMainModule:
 
   const
     shaderConfiguration = createShaderConfiguration(
-      inputs=[
+      name = "default shader",
+      inputs = [
         attr[Vec3f]("position"),
-        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
+        attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
         attr[uint32]("index"),
       ],
-      intermediates=[attr[Vec4f]("outcolor")],
-      uniforms=[attr[float32]("time")],
-      outputs=[attr[Vec4f]("color")],
-      vertexCode="""
+      intermediates = [attr[Vec4f]("outcolor")],
+      uniforms = [attr[float32]("time")],
+      outputs = [attr[Vec4f]("color")],
+      vertexCode = """
 float pos_weight = index / 100.0; // add some gamma correction?
 float t = sin(Uniforms.time * 0.5) * 0.5 + 0.5;
 float v = min(1, max(0, pow(pos_weight - t, 2)));
@@ -60,23 +61,28 @@ v = pow(1 - v, 3000);
 outcolor = vec4(color.r, color.g, v * 0.5, 1);
 gl_Position = vec4(position, 1.0);
 """,
-      fragmentCode="color = outcolor;",
+      fragmentCode = "color = outcolor;",
     )
+  let matDef = MaterialType(name: "default", vertexAttributes: {
+    "position": Vec3F32,
+    "color": Vec4F32,
+    "index": UInt32,
+  }.toTable)
   var squaremesh = newMesh(
-    positions=vertices,
-    indices=indices,
-    colors=colors,
-    material=Material(name: "default")
+    positions = vertices,
+    indices = indices,
+    colors = colors,
   )
   squaremesh[].initVertexAttribute("index", iValues.toSeq)
+  squaremesh.material = matDef.initMaterialData(name = "default")
 
   var myengine = initEngine("Squares")
-  myengine.initRenderer({"default": shaderConfiguration}.toTable)
+  myengine.initRenderer({matDef: shaderConfiguration})
 
   var scene = Scene(name: "scene", meshes: @[squaremesh])
   scene.addShaderGlobal("time", 0.0'f32)
-  myengine.addScene(scene)
-  while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
+  myengine.loadScene(scene)
+  while myengine.UpdateInputs() and not KeyWasPressed(Escape):
     scene.setShaderGlobal("time", getShaderGlobal[float32](scene, "time") + 0.0005'f)
     myengine.renderScene(scene)
 
