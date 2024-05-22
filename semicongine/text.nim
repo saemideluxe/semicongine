@@ -13,7 +13,7 @@ const
   SPACE = Rune(' ')
 
   # font shader
-  MAX_TEXT_MATERIALS = 10
+  MAX_TEXT_MATERIALS = 100 # need for every different font AND color
   SHADER_ATTRIB_PREFIX = "semicon_text_"
   POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
@@ -254,8 +254,7 @@ proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = ne
   result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"text-{instanceCounter}")
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
   result.mesh[].renameAttribute("uv", UV_ATTRIB)
-  result.mesh.material = initMaterialData(
-    theType = TEXT_MATERIAL_TYPE,
+  result.mesh.material = TEXT_MATERIAL_TYPE.initMaterialData(
     name = font.name & " text",
     attributes = {"fontAtlas": initDataList(@[font.fontAtlas]), "color": initDataList(@[color])},
   )

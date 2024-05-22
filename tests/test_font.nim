@@ -31,10 +31,10 @@ Vertical alignment:
   mixer[].loadSound("key", "key.ogg")
   mixer[].setLevel(0.5)
 
-  while engine.updateInputs() == Running and not engine.keyIsDown(Escape):
+  while engine.updateInputs() and not keyIsDown(Escape):
     var t = cpuTime()
     main_text.color = newVec4f(sin(t) * 0.5 + 0.5, 0.15, 0.15, 1)
-    if engine.windowWasResized():
+    if windowWasResized():
       var winSize = engine.getWindow().size
 
     # add character
@@ -42,31 +42,31 @@ Vertical alignment:
       for c in [Key.A, Key.B, Key.C, Key.D, Key.E, Key.F, Key.G, Key.H, Key.I,
           Key.J, Key.K, Key.L, Key.M, Key.N, Key.O, Key.P, Key.Q, Key.R, Key.S,
           Key.T, Key.U, Key.V, Key.W, Key.X, Key.Y, Key.Z]:
-        if engine.keyWasPressed(c):
+        if keyWasPressed(c):
           discard mixer[].play("key")
-          if engine.keyIsDown(ShiftL) or engine.keyIsDown(ShiftR):
+          if keyIsDown(ShiftL) or keyIsDown(ShiftR):
             main_text.text = main_text.text & ($c).toRunes
           else:
             main_text.text = main_text.text & ($c).toRunes[0].toLower()
-      if engine.keyWasPressed(Enter):
+      if keyWasPressed(Enter):
         discard mixer[].play("key")
         main_text.text = main_text.text & Rune('\n')
-      if engine.keyWasPressed(Space):
+      if keyWasPressed(Space):
         discard mixer[].play("key")
         main_text.text = main_text.text & Rune(' ')
 
     # remove character
-    if engine.keyWasPressed(Backspace) and main_text.text.len > 0:
+    if keyWasPressed(Backspace) and main_text.text.len > 0:
       discard mixer[].play("key")
       main_text.text = main_text.text[0 ..< ^1]
 
     # alignemtn with F-keys
-    if engine.keyWasPressed(F1): main_text.horizontalAlignment = Left
-    elif engine.keyWasPressed(F2): main_text.horizontalAlignment = Center
-    elif engine.keyWasPressed(F3): main_text.horizontalAlignment = Right
-    elif engine.keyWasPressed(F4): main_text.verticalAlignment = Top
-    elif engine.keyWasPressed(F5): main_text.verticalAlignment = Center
-    elif engine.keyWasPressed(F6): main_text.verticalAlignment = Bottom
+    if keyWasPressed(F1): main_text.horizontalAlignment = Left
+    elif keyWasPressed(F2): main_text.horizontalAlignment = Center
+    elif keyWasPressed(F3): main_text.horizontalAlignment = Right
+    elif keyWasPressed(F4): main_text.verticalAlignment = Top
+    elif keyWasPressed(F5): main_text.verticalAlignment = Center
+    elif keyWasPressed(F6): main_text.verticalAlignment = Bottom
 
     origin.refresh()
     main_text.text = main_text.text & Rune('_')

@@ -1,17 +1,7 @@
-#
-#   TODO: Needs Depth-Buffer first!
-#
-#
-#
-#
-#
-#
-
-
 import std/tables
 import std/times
 
-import ../src/semicongine
+import ../semicongine
 
 const
   TopLeftFront = newVec3f(-0.5'f32, -0.5'f32, -0.5'f32)
@@ -24,11 +14,11 @@ const
   BottomLeftBack = newVec3f(0.5'f32, 0.5'f32, 0.5'f32)
 const
   cube_pos = @[
-    TopLeftFront, TopRightFront, BottomRightFront, BottomLeftFront, # front
-    TopLeftBack, TopRightBack, BottomRightBack, BottomLeftBack, # back
-    TopLeftBack, TopLeftFront, BottomLeftFront, BottomLeftBack, # left
-    TopRightBack, TopRightFront, BottomRightFront, BottomRightBack, # right
-    TopLeftBack, TopRightBack, TopRightFront, TopLeftFront, # top
+    TopLeftFront, TopRightFront, BottomRightFront, BottomLeftFront,     # front
+    TopLeftBack, TopRightBack, BottomRightBack, BottomLeftBack,         # back
+    TopLeftBack, TopLeftFront, BottomLeftFront, BottomLeftBack,         # left
+    TopRightBack, TopRightFront, BottomRightFront, BottomRightBack,     # right
+    TopLeftBack, TopRightBack, TopRightFront, TopLeftFront,             # top
     BottomLeftFront, BottomRightFront, BottomRightBack, BottomLeftBack, # bottom
   ]
   R = newVec4f(1, 0, 0, 1)
@@ -54,34 +44,36 @@ when isMainModule:
 
   const
     shaderConfiguration = createShaderConfiguration(
-      inputs=[
+      name = "default shader",
+      inputs = [
         attr[Vec3f]("position"),
-        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
+        attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
       ],
-      intermediates=[attr[Vec4f]("outcolor")],
-      uniforms=[
+      intermediates = [attr[Vec4f]("outcolor")],
+      uniforms = [
         attr[Mat4]("projection"),
         attr[Mat4]("view"),
         attr[Mat4]("model"),
       ],
-      outputs=[attr[Vec4f]("color")],
-      vertexCode="""outcolor = color; gl_Position = (Uniforms.projection * Uniforms.view * Uniforms.model) * vec4(position, 1);""",
-      fragmentCode="color = outcolor;",
+      outputs = [attr[Vec4f]("color")],
+      vertexCode = """outcolor = color; gl_Position = (Uniforms.projection * Uniforms.view * Uniforms.model) * vec4(position, 1);""",
+      fragmentCode = "color = outcolor;",
     )
-  myengine.initRenderer({"default": shaderConfiguration}.toTable)
-  var cube = Scene(name: "scene", meshes: @[newMesh(positions=cube_pos, indices=tris, colors=cube_color, material=Material(name: "default"))])
+  var matDef = MaterialType(name: "default material", vertexAttributes: {"position": Vec3F32, "color": Vec4F32}.toTable)
+  var cube = Scene(name: "scene", meshes: @[newMesh(positions = cube_pos, indices = tris, colors = cube_color, material = matDef.initMaterialData(name = "default"))])
   cube.addShaderGlobal("projection", Unit4f32)
   cube.addShaderGlobal("view", Unit4f32)
   cube.addShaderGlobal("model", Unit4f32)
-  myengine.addScene(cube)
+  myengine.initRenderer({matDef: shaderConfiguration})
+  myengine.loadScene(cube)
 
   var t: float32 = cpuTime()
-  while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
+  while myengine.UpdateInputs() and not KeyWasPressed(Escape):
     setShaderGlobal(cube, "model", translate(0'f32, 0'f32, 10'f32) * rotate(t, Yf32))
     setShaderGlobal(cube, "projection",
       perspective(
         float32(PI / 4),
-        float32(myengine.getWindow().size[0]) / float32(myengine.getWindow().size[0]),
+        float32(myengine.GetWindow().size[0]) / float32(myengine.GetWindow().size[1]),
         0.1'f32,
         100'f32
       )

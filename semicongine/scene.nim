@@ -51,11 +51,11 @@ proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: openArray[T]
 proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =
   scene.addShaderGlobalArray(name, [data])
 
-func getShaderGlobalArray*[T](scene: Scene, name: string): ref seq[T] =
+proc getShaderGlobalArray*[T](scene: Scene, name: string): ref seq[T] =
   scene.shaderGlobals[name][T]
 
-func getShaderGlobal*[T](scene: Scene, name: string): T =
-  scene.getShaderGlobalArray(name)[][0]
+proc getShaderGlobal*[T](scene: Scene, name: string): T =
+  getShaderGlobalArray[T](scene, name)[][0]
 
 proc setShaderGlobalArray*[T](scene: var Scene, name: string, value: openArray[T]) =
   if scene.shaderGlobals[name, T][] == @value:
