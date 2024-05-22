@@ -5,6 +5,7 @@ import ../semicongine
 # shader setup
 const
   shaderConfiguration = createShaderConfiguration(
+    name = "default shader",
     inputs = [
       attr[Vec3f]("position"),
       attr[Vec4f]("color"),
@@ -29,7 +30,7 @@ var
 myengine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration}, inFlightFrames = 2)
 myengine.loadScene(scene)
 
-while myengine.updateInputs() == Running and not myengine.keyWasPressed(Escape):
+while myengine.UpdateInputs() and not KeyWasPressed(Escape):
   transform[Vec3f](scene.meshes[0][], "position", scale(1.001, 1.001))
   myengine.renderScene(scene)
 

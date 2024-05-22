@@ -9,7 +9,7 @@ import ./thirdparty/db_connector/db_sqlite
 import ./core
 
 const STORAGE_NAME = Path("storage.db")
-const KEY_VALUE_TABLE_NAME = "shelf"
+const DEFAULT_KEY_VALUE_TABLE_NAME = "shelf"
 
 type
   StorageType* = enum
@@ -27,29 +27,35 @@ proc path(storageType: StorageType): Path =
       string(Path(getDataDir()) / Path(AppName())).createDir()
       Path(getDataDir()) / Path(AppName()) / STORAGE_NAME
 
-proc setup(storageType: StorageType) =
+proc ensureExists(storageType: StorageType) =
   if storageType in db:
     return
   db[storageType] = open(string(storageType.path), "", "", "")
-  db[storageType].exec(sql(&"""CREATE TABLE IF NOT EXISTS {KEY_VALUE_TABLE_NAME} (
+
+proc ensureExists(storageType: StorageType, table: string) =
+  storageType.ensureExists()
+  db[storageType].exec(sql(&"""CREATE TABLE IF NOT EXISTS {table} (
     key TEXT NOT NULL UNIQUE,
     value TEXT NOT NULL
   )"""))
 
-proc store*[T](storageType: StorageType, key: string, value: T) =
-  storageType.setup()
-  const KEY_VALUE_TABLE_NAME = "shelf"
-  db[storageType].exec(sql(&"""INSERT INTO {KEY_VALUE_TABLE_NAME} VALUES(?, ?)
+proc store*[T](storageType: StorageType, key: string, value: T, table = DEFAULT_KEY_VALUE_TABLE_NAME) =
+  storageType.ensureExists(table)
+  db[storageType].exec(sql(&"""INSERT INTO {table} VALUES(?, ?)
   ON CONFLICT(key) DO UPDATE SET value=excluded.value
   """), key, $$value)
 
-proc load*[T](storageType: StorageType, key: string, default: T): T =
-  storageType.setup()
-  const KEY_VALUE_TABLE_NAME = "shelf"
-  let dbResult = db[storageType].getValue(sql(&"""SELECT value FROM {KEY_VALUE_TABLE_NAME} WHERE key = ? """), key)
+proc load*[T](storageType: StorageType, key: string, default: T, table = DEFAULT_KEY_VALUE_TABLE_NAME): T =
+  storageType.ensureExists(table)
+  let dbResult = db[storageType].getValue(sql(&"""SELECT value FROM {table} WHERE key = ? """), key)
   if dbResult == "":
     return default
   return to[T](dbResult)
+
+proc list*[T](storageType: StorageType, table = DEFAULT_KEY_VALUE_TABLE_NAME): seq[string] =
+  storageType.ensureExists(table)
+  for row in db[storageType].fastRows(sql(&"""SELECT key FROM {table}""")):
+    result.add row[0]
 
 proc purge*(storageType: StorageType) =
   storageType.path().string.removeFile()

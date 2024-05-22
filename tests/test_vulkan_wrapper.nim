@@ -11,7 +11,16 @@ let
     wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
   )
   (R, W) = ([255'u8, 0'u8, 0'u8, 255'u8], [255'u8, 255'u8, 255'u8, 255'u8])
-  mat = SINGLE_TEXTURE_MATERIAL.initMaterialData(
+  Mat1Type = MaterialType(
+    name: "single texture material 1",
+    vertexAttributes: {
+      "color": Vec4F32,
+      "position": Vec3F32,
+      "uv": Vec2F32,
+    }.toTable,
+    attributes: {"baseTexture": TextureType}.toTable
+  )
+  mat = Mat1Type.initMaterialData(
     name = "mat",
     attributes = {
       "baseTexture": initDataList(@[Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 5, height: 5, imagedata: @[
@@ -26,6 +35,7 @@ let
   Mat2Type = MaterialType(
     name: "single texture material 2",
     vertexAttributes: {
+      "color": Vec4F32,
       "position": Vec3F32,
       "uv": Vec2F32,
     }.toTable,
@@ -178,6 +188,7 @@ proc main() =
   # INIT RENDERER:
   const
     shaderConfiguration1 = createShaderConfiguration(
+      name = "shader1",
       inputs = [
         attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
         attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
@@ -187,13 +198,12 @@ proc main() =
         attr[Vec4f]("outcolor"),
       ],
       outputs = [attr[Vec4f]("color")],
-      samplers = [
-        attr[Texture]("baseTexture")
-      ],
+      samplers = [attr[Texture]("baseTexture")],
       vertexCode = """gl_Position = vec4(position, 1.0) * transform; outcolor = color;""",
       fragmentCode = "color = texture(baseTexture, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
     shaderConfiguration2 = createShaderConfiguration(
+      name = "shader2",
       inputs = [
         attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
         attr[Mat4]("transform", perInstance = true),
@@ -205,8 +215,8 @@ proc main() =
       fragmentCode = "color = outcolor;",
     )
   engine.initRenderer({
-    SINGLE_TEXTURE_MATERIAL: shaderConfiguration1,
-    SINGLE_TEXTURE_MATERIAL: shaderConfiguration1,
+    Mat1Type: shaderConfiguration1,
+    Mat1Type: shaderConfiguration1,
     Mat2Type: shaderConfiguration1,
     SINGLE_COLOR_MATERIAL: shaderConfiguration2,
   })
@@ -229,7 +239,7 @@ proc main() =
     for scene in scenes.mitems:
       echo "rendering scene ", scene.name
       for i in 0 ..< 1000:
-        if engine.updateInputs() != Running or engine.keyIsDown(Escape):
+        if not engine.updateInputs() or keyIsDown(Escape):
           engine.destroy()
           return
         engine.renderScene(scene)

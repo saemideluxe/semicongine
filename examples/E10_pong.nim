@@ -1,16 +1,19 @@
 import std/times
 import std/tables
 
-import ../src/semicongine
+import ../semicongine
 
 let
-  barcolor = hexToColorAlpha("5A3F00").gamma(2.2).colorToHex()
+  barcolor = toRGBA("5A3F00").toSRGB().colorToHex()
   barSize = 0.1'f
   barWidth = 0.01'f
-  ballcolor = hexToColorAlpha("B17F08").gamma(2.2).colorToHex()
+  ballcolor = toRGBA("B17F08").toSRGB().colorToHex()
   ballSize = 0.01'f
   ballSpeed = 60'f
-  material = Material(name: "default")
+  matDef = MaterialType(name: "default", vertexAttributes: {
+    "position": Vec3F32,
+    "color": Vec4F32,
+  }.toTable)
 
 var
   level: Scene
@@ -19,59 +22,60 @@ var
 when isMainModule:
   var myengine = initEngine("Pong")
 
-  var player = rect(color=barcolor, width=barWidth, height=barSize)
-  player.material = material
-  var ball = circle(color=ballcolor)
-  ball.material = material
+  var player = rect(color = barcolor, width = barWidth, height = barSize)
+  player.material = matDef.initMaterialData(name = "player material")
+  var ball = circle(color = ballcolor)
+  ball.material = matDef.initMaterialData(name = "player material")
   level = Scene(name: "scene", meshes: @[ball, player])
 
   const
     shaderConfiguration = createShaderConfiguration(
-      inputs=[
+      name = "default shader",
+      inputs = [
         attr[Vec3f]("position"),
-        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
-        attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
+        attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
+        attr[Mat4]("transform", memoryPerformanceHint = PreferFastWrite, perInstance = true),
       ],
-      intermediates=[attr[Vec4f]("outcolor")],
-      uniforms=[attr[Mat4]("projection")],
-      outputs=[attr[Vec4f]("color")],
-      vertexCode="""outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);""",
-      fragmentCode="color = outcolor;",
+      intermediates = [attr[Vec4f]("outcolor")],
+      uniforms = [attr[Mat4]("projection")],
+      outputs = [attr[Vec4f]("color")],
+      vertexCode = """outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);""",
+      fragmentCode = "color = outcolor;",
     )
 
   # set up rendering
-  myengine.initRenderer({"default": shaderConfiguration}.toTable)
+  myengine.initRenderer({matDef: shaderConfiguration})
   level.addShaderGlobal("projection", Unit4f32)
-  myengine.addScene(level)
+  myengine.loadScene(level)
 
   var
-    winsize = myengine.getWindow().size
+    winsize = myengine.GetWindow().size
     height = float32(winsize[1]) / float32(winsize[0])
     width = 1'f
     currentTime = cpuTime()
     showSystemCursor = true
     fullscreen = false
-  while myengine.updateInputs() == Running and not myengine.keyIsDown(Escape):
-    if myengine.keyWasPressed(C):
+  while myengine.UpdateInputs() and not KeyIsDown(Escape):
+    if KeyWasPressed(C):
       if showSystemCursor:
-        myengine.hideSystemCursor()
+        myengine.HideSystemCursor()
       else:
-        myengine.showSystemCursor()
+        myengine.ShowSystemCursor()
       showSystemCursor = not showSystemCursor
-    if myengine.keyWasPressed(F):
+    if KeyWasPressed(F):
       fullscreen = not fullscreen
-      myengine.fullscreen(fullscreen)
+      myengine.Fullscreen = fullscreen
 
     let dt: float32 = cpuTime() - currentTime
     currentTime = cpuTime()
-    if myengine.windowWasResized():
-      winsize = myengine.getWindow().size
+    if WindowWasResized():
+      winsize = myengine.GetWindow().size
       height = float32(winsize[1]) / float32(winsize[0])
       width = 1'f
       setShaderGlobal(level, "projection", ortho(0, width, 0, height, 0, 1))
-    if myengine.keyIsDown(Down) and (player.transform.col(3).y + barSize/2) < height:
+    if KeyIsDown(Down) and (player.transform.col(3).y + barSize/2) < height:
       player.transform = player.transform * translate(0'f, 1'f * dt, 0'f)
-    if myengine.keyIsDown(Up) and (player.transform.col(3).y - barSize/2) > 0:
+    if KeyIsDown(Up) and (player.transform.col(3).y - barSize/2) > 0:
       player.transform = player.transform * translate(0'f, -1'f * dt, 0'f)
 
     # bounce level

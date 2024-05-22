@@ -3,7 +3,7 @@ import std/tables
 import std/typetraits
 import std/math
 
-import ../src/semicongine
+import ../semicongine
 
 const
   arrow = @[
@@ -108,33 +108,36 @@ when isMainModule:
 
   # define mesh objects
   var
-    material = Material(name: "default")
+    matDef = MaterialType(name: "default", vertexAttributes: {
+      "position": Vec3F32,
+      "color": Vec4F32,
+    }.toTable)
     cursormesh = newMesh(
-      positions=positions,
-      colors=arrow_colors,
-      material=material,
+      positions = positions,
+      colors = arrow_colors,
+      material = matDef.initMaterialData(),
     )
     keyboardmesh = newMesh(
-      positions=keyvertexpos,
-      colors=keyvertexcolor,
-      indices=keymeshindices,
-      material=material,
+      positions = keyvertexpos,
+      colors = keyvertexcolor,
+      indices = keymeshindices,
+      material = matDef.initMaterialData(),
     )
     backgroundmesh = newMesh(
-      positions= @[
+      positions = @[
         newVec3f(0'f32, 0'f32),
         newVec3f(1'f32, 0'f32),
         newVec3f(1'f32, 1'f32),
         newVec3f(0'f32, 1'f32),
       ],
-      colors= @[
+      colors = @[
         backgroundColor,
         backgroundColor,
         backgroundColor,
         backgroundColor,
       ],
-      indices= @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
-      material=material,
+      indices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
+      material = matDef.initMaterialData(),
     )
 
   # define mesh objects
@@ -148,51 +151,52 @@ when isMainModule:
   # shaders
   const
     shaderConfiguration = createShaderConfiguration(
-      inputs=[
+      name = "default shader",
+      inputs = [
         attr[Vec3f]("position"),
-        attr[Vec4f]("color", memoryPerformanceHint=PreferFastWrite),
-        attr[Mat4]("transform", memoryPerformanceHint=PreferFastWrite, perInstance=true),
+        attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
+        attr[Mat4]("transform", memoryPerformanceHint = PreferFastWrite, perInstance = true),
       ],
-      intermediates=[attr[Vec4f]("outcolor")],
-      uniforms=[attr[Mat4]("projection")],
-      outputs=[attr[Vec4f]("color")],
-      vertexCode="""outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);""",
-      fragmentCode="color = outcolor;",
+      intermediates = [attr[Vec4f]("outcolor")],
+      uniforms = [attr[Mat4]("projection")],
+      outputs = [attr[Vec4f]("color")],
+      vertexCode = """outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);""",
+      fragmentCode = "color = outcolor;",
     )
 
   # set up rendering
-  myengine.initRenderer({"default": shaderConfiguration}.toTable)
+  myengine.initRenderer({matDef: shaderConfiguration})
   scene.addShaderGlobal("projection", Unit4f32)
-  myengine.addScene(scene)
-  myengine.hideSystemCursor()
+  myengine.loadScene(scene)
+  myengine.HideSystemCursor()
 
   # mainloop
-  while myengine.updateInputs() == Running:
-    if myengine.windowWasResized():
+  while myengine.UpdateInputs():
+    if WindowWasResized():
       scene.setShaderGlobal("projection",
         ortho(
-          0, float32(myengine.getWindow().size[0]),
-          0, float32(myengine.getWindow().size[1]),
+          0, float32(myengine.GetWindow().size[0]),
+          0, float32(myengine.GetWindow().size[1]),
           0, 1,
         )
       )
       let
-        winsize = myengine.getWindow().size
+        winsize = myengine.GetWindow().size
         center = translate(float32(winsize[0]) / 2'f32, float32(winsize[1]) / 2'f32, 0.1'f32)
       keyboardmesh.transform = keyboard_center * center
       backgroundmesh.transform = scale(float32(winsize[0]), float32(winsize[1]), 1'f32)
 
-    let mousePos = translate(myengine.mousePosition().x + 20, myengine.mousePosition().y + 20, 0'f32)
+    let mousePos = translate(MousePosition().x + 20, MousePosition().y + 20, 0'f32)
     cursormesh.transform = mousePos
 
     for (index, key) in enumerate(keyIndices):
-      if myengine.keyWasPressed(key):
+      if KeyWasPressed(key):
         let baseIndex = index * 4
         keyboardmesh["color", baseIndex + 0] = activeColor
         keyboardmesh["color", baseIndex + 1] = activeColor
         keyboardmesh["color", baseIndex + 2] = activeColor
         keyboardmesh["color", baseIndex + 3] = activeColor
-      if myengine.keyWasReleased(key):
+      if KeyWasReleased(key):
         let baseIndex = index * 4
         keyboardmesh["color", baseIndex + 0] = baseColor
         keyboardmesh["color", baseIndex + 1] = baseColor

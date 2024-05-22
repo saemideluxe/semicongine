@@ -10,6 +10,7 @@ import semicongine/engine
 import semicongine/collision
 import semicongine/scene
 import semicongine/events
+import semicongine/input
 import semicongine/material
 import semicongine/mesh
 import semicongine/noise
@@ -29,6 +30,7 @@ export engine
 export collision
 export scene
 export events
+export input
 export material
 export mesh
 export noise
