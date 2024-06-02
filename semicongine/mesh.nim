@@ -489,6 +489,16 @@ proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MA
   result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
   `material=`(result[], material)
 
+proc CircleMesh*(nSegments: int): (seq[Vec3f], seq[array[3, uint16]]) =
+  let
+    rX = 0.5
+    rY = 0.5
+    step = (2'f32 * PI) / float32(nSegments)
+  result[0] = @[newVec3f(0, 0), newVec3f(rX, 0)]
+  for i in 1 .. nSegments:
+    result[0].add newVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
+    result[1].add [uint16(0), uint16(i), uint16(i + 1)]
+
 proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
   assert nSegments >= 3
   result = Mesh(
