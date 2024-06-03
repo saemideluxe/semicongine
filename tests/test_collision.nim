@@ -33,21 +33,21 @@ proc main() =
   engine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration})
   engine.loadScene(scene)
 
-  while engine.updateInputs() and not keyIsDown(Escape):
-    if windowWasResized():
-      var winSize = engine.getWindow().size
+  while engine.UpdateInputs() and not KeyIsDown(Escape):
+    if WindowWasResized():
+      var winSize = engine.GetWindow().size
       scene.setShaderGlobal("perspective", orthoWindowAspect(winSize[0] / winSize[1]))
-    if keyIsDown(A): scene.meshes[0].transform = scene.meshes[0].transform * translate(-0.001, 0, 0)
-    if keyIsDown(D): scene.meshes[0].transform = scene.meshes[0].transform * translate(0.001, 0, 0)
-    if keyIsDown(W): scene.meshes[0].transform = scene.meshes[0].transform * translate(0, -0.001, 0)
-    if keyIsDown(S): scene.meshes[0].transform = scene.meshes[0].transform * translate(0, 0.001, 0)
-    if keyIsDown(Q): scene.meshes[0].transform = scene.meshes[0].transform * rotate(-0.001, Z)
-    if keyIsDown(Key.E): scene.meshes[0].transform = scene.meshes[0].transform * rotate(0.001, Z)
+    if KeyIsDown(A): scene.meshes[0].transform = scene.meshes[0].transform * translate(-0.001, 0, 0)
+    if KeyIsDown(D): scene.meshes[0].transform = scene.meshes[0].transform * translate(0.001, 0, 0)
+    if KeyIsDown(W): scene.meshes[0].transform = scene.meshes[0].transform * translate(0, -0.001, 0)
+    if KeyIsDown(S): scene.meshes[0].transform = scene.meshes[0].transform * translate(0, 0.001, 0)
+    if KeyIsDown(Q): scene.meshes[0].transform = scene.meshes[0].transform * rotate(-0.001, Z)
+    if KeyIsDown(Key.E): scene.meshes[0].transform = scene.meshes[0].transform * rotate(0.001, Z)
 
-    if keyIsDown(Key.Z): scene.meshes[1].transform = scene.meshes[1].transform * rotate(-0.001, Z)
-    if keyIsDown(Key.X): scene.meshes[1].transform = scene.meshes[1].transform * rotate(0.001, Z)
-    if keyIsDown(Key.C): scene.meshes[1].transform = scene.meshes[1].transform * translate(0, -0.001, 0)
-    if keyIsDown(Key.V): scene.meshes[1].transform = scene.meshes[1].transform * translate(0, 0.001, 0)
+    if KeyIsDown(Key.Z): scene.meshes[1].transform = scene.meshes[1].transform * rotate(-0.001, Z)
+    if KeyIsDown(Key.X): scene.meshes[1].transform = scene.meshes[1].transform * rotate(0.001, Z)
+    if KeyIsDown(Key.C): scene.meshes[1].transform = scene.meshes[1].transform * translate(0, -0.001, 0)
+    if KeyIsDown(Key.V): scene.meshes[1].transform = scene.meshes[1].transform * translate(0, 0.001, 0)
     let hitbox = Collider(theType: Box, transform: scene.meshes[0].transform * translate(-0.5, -0.5))
     let hitsphere = Collider(theType: Sphere, transform: scene.meshes[2].transform, radius: 0.5)
     echo intersects(hitbox, hitsphere)

@@ -6,23 +6,23 @@ import semicongine
 
 
 proc test1() =
-  mixer[].addSound("test1", newSound(sineSoundData(1000, 2, 44100)))
-  mixer[].addSound("test2", newSound(sineSoundData(500, 2, 44100)))
+  mixer[].AddSound("test1", newSound(sineSoundData(1000, 2, 44100)))
+  mixer[].AddSound("test2", newSound(sineSoundData(500, 2, 44100)))
 
 
-  let s1 = mixer[].play("test1", loop = true)
-  let s2 = mixer[].play("test2", loop = true)
+  let s1 = mixer[].Play("test1", loop = true)
+  let s2 = mixer[].Play("test2", loop = true)
 
   let t0 = now()
-  mixer[].setLevel(0.5)
+  mixer[].SetLevel(0.5)
   while true:
     let runtime = (now() - t0).inMilliseconds()
     if runtime > 1500:
-      mixer[].setLevel(0.2)
+      mixer[].SetLevel(0.2)
     if runtime > 3000:
-      mixer[].stop(s2)
+      mixer[].Stop(s2)
     if runtime > 6000:
-      mixer[].stop("")
+      mixer[].Stop("")
     if runtime > 8000:
       break
 
@@ -55,34 +55,34 @@ proc test2() =
       f, c, f, f,
     )
 
-  mixer[].addSound("frerejaques", newSound(frerejaquesData))
-  discard mixer[].play("frerejaques")
+  mixer[].AddSound("frerejaques", newSound(frerejaquesData))
+  discard mixer[].Play("frerejaques")
 
-  while mixer[].isPlaying():
+  while mixer[].IsPlaying():
     sleep(1)
 
 proc test3() =
-  mixer[].addSound("toccata et fugue", loadAudio("toccata_et_fugue.ogg"))
-  mixer[].addSound("ping", newSound(sineSoundData(500, 0.05, 44100)))
-  mixer[].addTrack("effects")
-  discard mixer[].play("toccata et fugue")
+  mixer[].AddSound("toccata et fugue", loadAudio("toccata_et_fugue.ogg"))
+  mixer[].AddSound("ping", newSound(sineSoundData(500, 0.05, 44100)))
+  mixer[].AddTrack("effects")
+  discard mixer[].Play("toccata et fugue")
 
 
 when isMainModule:
-  startMixerThread()
+  StartMixerThread()
   test1()
-  mixer[].stop()
+  mixer[].Stop()
   test2()
-  mixer[].stop()
+  mixer[].Stop()
   test3()
 
-  while mixer[].isPlaying():
-    discard mixer[].play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
+  while mixer[].IsPlaying():
+    discard mixer[].Play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
     # on windows we re-open stdin and this will not work
     when defined(linux):
       echo "Press q and enter to exit"
       if stdin.readLine() == "q":
-        mixer[].stop()
+        mixer[].Stop()
     elif defined(windows):
       sleep(5)
-      mixer[].stop()
+      mixer[].Stop()

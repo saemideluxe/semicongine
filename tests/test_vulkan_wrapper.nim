@@ -239,7 +239,7 @@ proc main() =
     for scene in scenes.mitems:
       echo "rendering scene ", scene.name
       for i in 0 ..< 1000:
-        if not engine.updateInputs() or keyIsDown(Escape):
+        if not engine.UpdateInputs() or KeyIsDown(Escape):
           engine.destroy()
           return
         engine.renderScene(scene)

@@ -68,7 +68,7 @@ proc main() =
   })
   engine.loadScene(scene)
   var t = cpuTime()
-  while engine.updateInputs() and not keyIsDown(Escape):
+  while engine.UpdateInputs() and not KeyIsDown(Escape):
     var d = float32(cpuTime() - t)
     setShaderGlobalArray(scene, "test2", @[newVec4f(d), newVec4f(d * 2)])
     engine.renderScene(scene)

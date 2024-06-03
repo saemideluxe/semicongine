@@ -59,29 +59,29 @@ proc main() =
     azimut = 0'f32
     currentScene = 0
 
-  while engine.updateInputs() and not keyIsDown(Escape):
-    if keyWasPressed(`1`):
+  while engine.UpdateInputs() and not KeyIsDown(Escape):
+    if KeyWasPressed(`1`):
       currentScene = 0
-    elif keyWasPressed(`2`):
+    elif KeyWasPressed(`2`):
       currentScene = 1
-    elif keyWasPressed(`3`):
+    elif KeyWasPressed(`3`):
       currentScene = 2
-    elif keyWasPressed(`4`):
+    elif KeyWasPressed(`4`):
       currentScene = 3
-    elif keyWasPressed(`5`):
+    elif KeyWasPressed(`5`):
       currentScene = 4
-    elif keyWasPressed(`6`):
+    elif KeyWasPressed(`6`):
       currentScene = 5
 
-    if keyWasPressed(NumberRowExtra3):
+    if KeyWasPressed(NumberRowExtra3):
       size = 0.3'f32
       elevation = 0'f32
       azimut = 0'f32
 
-    let ratio = engine.getWindow().size[0] / engine.getWindow().size[1]
-    size *= 1'f32 + mouseWheel() * 0.05
-    azimut += mouseMove().x / 180'f32
-    elevation -= mouseMove().y / 180'f32
+    let ratio = engine.GetWindow().size[0] / engine.GetWindow().size[1]
+    size *= 1'f32 + MouseWheel() * 0.05
+    azimut += MouseMove().x / 180'f32
+    elevation -= MouseMove().y / 180'f32
     scenes[currentScene].setShaderGlobal("projection", perspective(PI / 2, ratio, -0.5, 1))
     scenes[currentScene].setShaderGlobal(
       "view",
