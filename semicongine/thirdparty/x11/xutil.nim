@@ -43,9 +43,6 @@ type
     base_width*, base_height*: cint
     win_gravity*: cint
 
-{.deprecated: [TCPoint: CPoint].}
-{.deprecated: [TXSizeHints: XSizeHints].}
-
 const
   USPosition* = 1 shl 0
   USSize* = 1 shl 1
@@ -71,8 +68,6 @@ type
     icon_x*, icon_y*: cint
     icon_mask*: Pixmap
     window_group*: XID
-
-{.deprecated: [TXWMHints: XWMHints].}
 
 
 const
@@ -101,8 +96,6 @@ type
     format*: cint
     nitems*: culong
 
-{.deprecated: [TXTextProperty: XTextProperty].}
-
 
 const
   XNoMemory* = - 1
@@ -127,17 +120,12 @@ type
     res_name*: cstring
     res_class*: cstring
 
-{.deprecated: [TXICCEncodingStyle: XICCEncodingStyle].}
-{.deprecated: [TXIconSize: XIconSize].}
-{.deprecated: [TXClassHint: XClassHint].}
 
 type
   PXComposeStatus* = ptr XComposeStatus
   XComposeStatus*{.final.} = object
     compose_ptr*: XPointer
     chars_matched*: cint
-
-{.deprecated: [TXComposeStatus: XComposeStatus].}
 
 
 type
@@ -146,9 +134,6 @@ type
 
   PRegion* = ptr Region
   Region* = PXRegion
-
-{.deprecated: [TXRegion: XRegion].}
-{.deprecated: [TRegion: Region].}
 
 const
   RectangleOut* = 0
@@ -168,8 +153,6 @@ type
     blue_mask*: culong
     colormap_size*: cint
     bits_per_rgb*: cint
-
-{.deprecated: [TXVisualInfo: XVisualInfo].}
 
 
 const
@@ -200,8 +183,6 @@ type
     visualid*: VisualID
     killid*: XID
 
-{.deprecated: [TXStandardColormap: XStandardColormap].}
-
 
 const
   BitmapSuccess* = 0
@@ -216,8 +197,6 @@ const
 type
   PXContext* = ptr XContext
   XContext* = cint
-
-{.deprecated: [TXContext: XContext].}
 
 proc XAllocClassHint*(): PXClassHint{.cdecl, dynlib: libX11, importc.}
 proc XAllocIconSize*(): PXIconSize{.cdecl, dynlib: libX11, importc.}

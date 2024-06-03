@@ -25,16 +25,11 @@ type
   XrmQuarkList* = PXrmQuark
   PXrmQuarkList* = ptr XrmQuarkList
 
-{.deprecated: [TXrmQuark: XrmQuark].}
-{.deprecated: [TXrmQuarkList: XrmQuarkList].}
-
 proc NULLQUARK*(): XrmQuark
 
 type
   PXrmString* = ptr XrmString
   XrmString* = ptr char
-
-{.deprecated: [TXrmString: XrmString].}
 
 proc NULLSTRING*(): XrmString
 proc XrmStringToQuark*(para1: cstring): XrmQuark{.cdecl, dynlib: libX11,
@@ -55,9 +50,6 @@ type
   XrmBindingList* = PXrmBinding
   PXrmBindingList* = ptr XrmBindingList
 
-{.deprecated: [TXrmBinding: XrmBinding].}
-{.deprecated: [TXrmBindingList: XrmBindingList].}
-
 proc XrmStringToQuarkList*(para1: cstring, para2: XrmQuarkList){.cdecl,
     dynlib: libX11, importc.}
 proc XrmStringToBindingQuarkList*(para1: cstring, para2: XrmBindingList,
@@ -71,9 +63,6 @@ type
   PXrmNameList* = ptr XrmNameList
   XrmNameList* = XrmQuarkList
 
-{.deprecated: [TXrmName: XrmName].}
-{.deprecated: [TXrmNameList: XrmNameList].}
-
 #when defined(MACROS):
 proc XrmNameToString*(name: int32): XrmString
 proc XrmStringToName*(str: cstring): int32
@@ -86,9 +75,6 @@ type
   PXrmClassList* = ptr XrmClassList
   XrmClassList* = XrmQuarkList
 
-{.deprecated: [TXrmClass: XrmClass].}
-{.deprecated: [TXrmClassList: XrmClassList].}
-
 #when defined(MACROS):
 proc XrmClassToString*(c_class: int32): XrmString
 proc XrmStringToClass*(c_class: cstring): int32
@@ -97,7 +83,6 @@ proc XrmStringToClassList*(str: cstring, c_class: PXrmQuark)
 type
   PXrmRepresentation* = ptr XrmRepresentation
   XrmRepresentation* = XrmQuark
-{.deprecated: [TXrmRepresentation: XrmRepresentation].}
 
 #when defined(MACROS):
 proc XrmStringToRepresentation*(str: cstring): int32
@@ -123,13 +108,6 @@ type
 
   PXrmDatabase* = ptr XrmDatabase
   XrmDatabase* = PXrmHashBucketRec
-
-{.deprecated: [TXrmValue: XrmValue].}
-{.deprecated: [TXrmValuePtr: XrmValuePtr].}
-{.deprecated: [TXrmHashBucketRec: XrmHashBucketRec].}
-{.deprecated: [TXrmHashBucket: XrmHashBucket].}
-{.deprecated: [TXrmHashTable: XrmHashTable].}
-{.deprecated: [TXrmDatabase: XrmDatabase].}
 
 proc XrmDestroyDatabase*(para1: XrmDatabase){.cdecl, dynlib: libX11, importc.}
 proc XrmQPutResource*(para1: PXrmDatabase, para2: XrmBindingList,
@@ -198,10 +176,6 @@ type
 
   XrmOptionDescList* = PXrmOptionDescRec
   PXrmOptionDescList* = ptr XrmOptionDescList
-
-{.deprecated: [TXrmOptionKind: XrmOptionKind].}
-{.deprecated: [TXrmOptionDescRec: XrmOptionDescRec].}
-{.deprecated: [TPXrmOptionDescList: PXrmOptionDescList].}
 
 proc XrmParseCommand*(para1: PXrmDatabase, para2: XrmOptionDescList,
                       para3: int32, para4: cstring, para5: ptr int32,

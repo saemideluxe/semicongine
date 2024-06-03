@@ -80,34 +80,25 @@ type
   PConnection* = ptr Connection
   Connection* = cushort
 
-{.deprecated: [TRotation: Rotation].}
-{.deprecated: [TSizeID: SizeID].}
-{.deprecated: [TSubpixelOrder: SubpixelOrder].}
-{.deprecated: [TRRCrtc: RRCrtc].}
-{.deprecated: [TRROutput: RROutput].}
-{.deprecated: [TRRMode: RRMode].}
-{.deprecated: [TXRRModeFlags: XRRModeFlags].}
-{.deprecated: [TConnection: Connection].}
-
 const
   RANDR_NAME* = "RANDR"
   RANDR_MAJOR* = 1
   RANDR_MINOR* = 1
   RRNumberErrors* = 0
   RRNumberEvents* = 1
-  constX_RRQueryVersion* = 0 # we skip 1 to make old clients fail pretty immediately
+  constX_RRQueryVersion* = 0          # we skip 1 to make old clients fail pretty immediately
   X_RROldGetScreenInfo* = 1
-  X_RR1_0SetScreenConfig* = 2 # V1.0 apps share the same set screen config request id
+  X_RR1_0SetScreenConfig* = 2         # V1.0 apps share the same set screen config request id
   constX_RRSetScreenConfig* = 2
   X_RROldScreenChangeSelectInput* = 3 # 3 used to be ScreenChangeSelectInput; deprecated
   constX_RRSelectInput* = 4
-  constX_RRGetScreenInfo* = 5      # used in XRRSelectInput
+  constX_RRGetScreenInfo* = 5         # used in XRRSelectInput
   RRScreenChangeNotifyMask* = 1 shl 0
-  RRScreenChangeNotify* = 0   # used in the rotation field; rotation and reflection in 0.1 proto.
+  RRScreenChangeNotify* = 0           # used in the rotation field; rotation and reflection in 0.1 proto.
   RR_Rotate_0* = 1
   RR_Rotate_90* = 2
   RR_Rotate_180* = 4
-  RR_Rotate_270* = 8          # new in 1.0 protocol, to allow reflection of screen
+  RR_Rotate_270* = 8                  # new in 1.0 protocol, to allow reflection of screen
   RR_Reflect_X* = 16
   RR_Reflect_Y* = 32
   RRSetConfigSuccess* = 0
@@ -120,21 +111,21 @@ const
 
 type
   PXRRScreenSize* = ptr XRRScreenSize
-  XRRScreenSize*{.final.} = object  #
-                                    #   Events.
-                                    #
+  XRRScreenSize*{.final.} = object #
+                                   #   Events.
+                                   #
     width*, height*: cint
     mwidth*, mheight*: cint
 
-  XRRScreenChangeNotifyEvent*{.final.} = object  # internal representation is private to the library
-    typ*: cint               # event base
-    serial*: culong          # # of last request processed by server
-    send_event*: XBool        # true if this came from a SendEvent request
-    display*: PDisplay       # Display the event was read from
-    window*: Window          # window which selected for this event
-    root*: Window            # Root window for changed screen
-    timestamp*: Time         # when the screen change occurred
-    config_timestamp*: Time  # when the last configuration change
+  XRRScreenChangeNotifyEvent*{.final.} = object # internal representation is private to the library
+    typ*: cint                                  # event base
+    serial*: culong                             # # of last request processed by server
+    send_event*: XBool                          # true if this came from a SendEvent request
+    display*: PDisplay                          # Display the event was read from
+    window*: Window                             # window which selected for this event
+    root*: Window                               # Root window for changed screen
+    timestamp*: Time                            # when the screen change occurred
+    config_timestamp*: Time                     # when the last configuration change
     size_index*: SizeID
     subpixel_order*: SubpixelOrder
     rotation*: Rotation
@@ -191,14 +182,6 @@ type
 
   RandrFormat* = enum
     randrFormat16bit = 16, randrFormat32bit = 32
-
-{.deprecated: [TXRRScreenSize: XRRScreenSize].}
-{.deprecated: [TXRRScreenChangeNotifyEvent: XRRScreenChangeNotifyEvent].}
-{.deprecated: [TXRRScreenConfiguration: XRRScreenConfiguration].}
-{.deprecated: [TXRRModeInfo: XRRModeInfo].}
-{.deprecated: [TXRRScreenResources: XRRScreenResources].}
-{.deprecated: [TXRROutputInfo: XRROutputInfo].}
-{.deprecated: [TXRRPropertyInfo: XRRPropertyInfo].}
 
 proc XRRQueryExtension*(dpy: PDisplay, event_basep, error_basep: Pcint): XBool{.
     cdecl, dynlib: libXrandr, importc.}

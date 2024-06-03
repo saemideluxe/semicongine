@@ -99,7 +99,6 @@ type
     compat_lookup_mods*: int8
     ptr_buttons*: int16
 
-{.deprecated: [TXkbStateRec: XkbStateRec].}
 
 
 proc XkbModLocks*(s: PXkbStatePtr): int8
@@ -111,11 +110,10 @@ proc XkbGrabStateFromRec*(s: PXkbStatePtr): int
 type
   PXkbModsPtr* = ptr XkbModsRec
   XkbModsRec*{.final.} = object
-    mask*: int8               # effective mods
+    mask*: int8 # effective mods
     real_mods*: int8
     vmods*: int16
 
-{.deprecated: [TXkbModsRec: XkbModsRec].}
 
 
 type
@@ -125,7 +123,6 @@ type
     level*: int8
     mods*: XkbModsRec
 
-{.deprecated: [TXkbKTMapEntryRec: XkbKTMapEntryRec].}
 
 
 type
@@ -139,7 +136,6 @@ type
     name*: Atom
     level_names*: Atom
 
-{.deprecated: [TXkbKeyTypeRec: XkbKeyTypeRec].}
 
 
 proc XkbNumGroups*(g: int16): int16
@@ -157,7 +153,6 @@ type
     theType*: int8
     data*: int8
 
-{.deprecated: [TXkbBehavior: XkbBehavior].}
 
 
 type
@@ -170,7 +165,6 @@ type
     vmods1*: int8
     vmods2*: int8
 
-{.deprecated: [TXkbModAction: XkbModAction].}
 
 
 proc XkbModActionVMods*(a: PXkbModAction): int16
@@ -182,7 +176,6 @@ type
     flags*: int8
     group_XXX*: int8
 
-{.deprecated: [TXkbGroupAction: XkbGroupAction].}
 
 
 proc XkbSAGroup*(a: PXkbGroupAction): int8
@@ -199,7 +192,6 @@ type
     vmods1*: int8
     vmods2*: int8
 
-{.deprecated: [TXkbISOAction: XkbISOAction].}
 
 
 type
@@ -212,7 +204,6 @@ type
     high_YYY*: int8
     low_YYY*: int8
 
-{.deprecated: [TXkbPtrAction: XkbPtrAction].}
 
 
 proc XkbPtrActionX*(a: PXkbPtrAction): int16
@@ -227,7 +218,6 @@ type
     count*: int8
     button*: int8
 
-{.deprecated: [TXkbPtrBtnAction: XkbPtrBtnAction].}
 
 
 type
@@ -238,7 +228,6 @@ type
     affect*: int8
     valueXXX*: int8
 
-{.deprecated: [TXkbPtrDfltAction: XkbPtrDfltAction].}
 
 
 proc XkbSAPtrDfltValue*(a: PXkbPtrDfltAction): int8
@@ -250,7 +239,6 @@ type
     flags*: int8
     screenXXX*: int8
 
-{.deprecated: [TXkbSwitchScreenAction: XkbSwitchScreenAction].}
 
 
 proc XkbSAScreen*(a: PXkbSwitchScreenAction): int8
@@ -265,7 +253,6 @@ type
     ctrls1*: int8
     ctrls0*: int8
 
-{.deprecated: [TXkbCtrlsAction: XkbCtrlsAction].}
 
 
 proc XkbActionSetCtrls*(a: PXkbCtrlsAction, c: int8)
@@ -277,7 +264,6 @@ type
     flags*: int8
     message*: array[0..5, char]
 
-{.deprecated: [TXkbMessageAction: XkbMessageAction].}
 
 
 type
@@ -292,7 +278,6 @@ type
     vmods0*: int8
     vmods1*: int8
 
-{.deprecated: [TXkbRedirectKeyAction: XkbRedirectKeyAction].}
 
 
 proc XkbSARedirectVMods*(a: PXkbRedirectKeyAction): int16
@@ -308,14 +293,13 @@ type
     button*: int8
     device*: int8
 
-{.deprecated: [TXkbDeviceBtnAction: XkbDeviceBtnAction].}
 
 
 type
   PXkbDeviceValuatorAction* = ptr XkbDeviceValuatorAction
-  XkbDeviceValuatorAction*{.final.} = object   #
-                                               #      Macros to classify key actions
-                                               #
+  XkbDeviceValuatorAction*{.final.} = object #
+                                             #      Macros to classify key actions
+                                             #
     theType*: int8
     device*: int8
     v1_what*: int8
@@ -325,7 +309,6 @@ type
     v2_ndx*: int8
     v2_value*: int8
 
-{.deprecated: [TXkbDeviceValuatorAction: XkbDeviceValuatorAction].}
 
 
 const
@@ -337,7 +320,6 @@ type
     theType*: int8
     data*: array[0..XkbAnyActionDataSize - 1, int8]
 
-{.deprecated: [TXkbAnyAction: XkbAnyAction].}
 
 
 proc XkbIsModAction*(a: PXkbAnyAction): bool
@@ -345,11 +327,11 @@ proc XkbIsGroupAction*(a: PXkbAnyAction): bool
 proc XkbIsPtrAction*(a: PXkbAnyAction): bool
 type
   PXkbAction* = ptr XkbAction
-  XkbAction*{.final.} = object   #
-                                 #      XKB request codes, used in:
-                                 #      -  xkbReqType field of all requests
-                                 #      -  requestMinor field of some events
-                                 #
+  XkbAction*{.final.} = object #
+                               #      XKB request codes, used in:
+                               #      -  xkbReqType field of all requests
+                               #      -  requestMinor field of some events
+                               #
     any*: XkbAnyAction
     mods*: XkbModAction
     group*: XkbGroupAction
@@ -365,7 +347,6 @@ type
     devval*: XkbDeviceValuatorAction
     theType*: int8
 
-{.deprecated: [TXkbAction: XkbAction].}
 
 
 const
@@ -877,12 +858,12 @@ const
 
 const
   XkbSA_XFree86Private* = 0x00000086
-#
-#      Specifies the key actions that clear latched groups or modifiers.
-#
+ #
+ #      Specifies the key actions that clear latched groups or modifiers.
+ #
 
-const  ##define        XkbSA_BreakLatch \
-       #        ((1<<XkbSA_NoAction)|(1<<XkbSA_PtrBtn)|(1<<XkbSA_LockPtrBtn)|\
+const                                                        ##define        XkbSA_BreakLatch \
+  #        ((1<<XkbSA_NoAction)|(1<<XkbSA_PtrBtn)|(1<<XkbSA_LockPtrBtn)|\
        #        (1<<XkbSA_Terminate)|(1<<XkbSA_SwitchScreen)|(1<<XkbSA_SetControls)|\
        #        (1<<XkbSA_LockControls)|(1<<XkbSA_ActionMessage)|\
        #        (1<<XkbSA_RedirectKey)|(1<<XkbSA_DeviceBtn)|(1<<XkbSA_LockDeviceBtn))
@@ -945,7 +926,6 @@ type
     axt_ctrls_values*: int16
     per_key_repeat*: array[0..XkbPerKeyBitArraySize - 1, int8]
 
-{.deprecated: [TXkbControlsRec: XkbControlsRec].}
 
 
 proc XkbAX_AnyFeedback*(c: PXkbControlsPtr): int16
@@ -983,7 +963,6 @@ type
     vmods*: array[0..XkbNumVirtualMods - 1, int8]
     vmodmap*: PWord
 
-{.deprecated: [TXkbServerMapRec: XkbServerMapRec].}
 
 
 proc XkbSMKeyActionsPtr*(m: PXkbServerMapPtr, k: int16): PXkbAction
@@ -998,7 +977,6 @@ type
     width*: int8
     offset*: int8
 
-{.deprecated: [TXkbSymMapRec: XkbSymMapRec].}
 
 
 type
@@ -1013,7 +991,6 @@ type
     key_sym_map*: ptr array[0..0xffff, XkbSymMapRec]
     modmap*: PByte
 
-{.deprecated: [TXkbClientMapRec: XkbClientMapRec].}
 
 
 proc XkbCMKeyGroupInfo*(m: PXkbClientMapPtr, k: int16): int8
@@ -1037,7 +1014,6 @@ type
     virtual_mod*: int8
     act*: XkbAnyAction
 
-{.deprecated: [TXkbSymInterpretRec: XkbSymInterpretRec].}
 
 
 type
@@ -1048,7 +1024,6 @@ type
     num_si*: int16
     size_si*: int16
 
-{.deprecated: [TXkbCompatMapRec: XkbCompatMapRec].}
 
 
 type
@@ -1061,7 +1036,6 @@ type
     mods*: XkbModsRec
     ctrls*: int16
 
-{.deprecated: [TXkbIndicatorMapRec: XkbIndicatorMapRec].}
 
 
 proc XkbIM_IsAuto*(i: PXkbIndicatorMapPtr): bool
@@ -1072,7 +1046,6 @@ type
     phys_indicators*: int32
     maps*: array[0..XkbNumIndicators - 1, XkbIndicatorMapRec]
 
-{.deprecated: [TXkbIndicatorRec: XkbIndicatorRec].}
 
 
 type
@@ -1080,25 +1053,23 @@ type
   XkbKeyNameRec*{.final.} = object
     name*: array[0..XkbKeyNameLength - 1, char]
 
-{.deprecated: [TXkbKeyNameRec: XkbKeyNameRec].}
 
 
 type
   PXkbKeyAliasPtr* = ptr XkbKeyAliasRec
-  XkbKeyAliasRec*{.final.} = object  #
-                                      #          Names for everything
-                                      #
+  XkbKeyAliasRec*{.final.} = object #
+                                    #          Names for everything
+                                    #
     float*: array[0..XkbKeyNameLength - 1, char]
     alias*: array[0..XkbKeyNameLength - 1, char]
 
-{.deprecated: [TXkbKeyAliasRec: XkbKeyAliasRec].}
 
 
 type
   PXkbNamesPtr* = ptr XkbNamesRec
-  XkbNamesRec*{.final.} = object  #
-                                   #      Key Type index and mask for the four standard key types.
-                                   #
+  XkbNamesRec*{.final.} = object #
+                                 #      Key Type index and mask for the four standard key types.
+                                 #
     keycodes*: Atom
     geometry*: Atom
     symbols*: Atom
@@ -1115,7 +1086,6 @@ type
     num_key_aliases*: int8
     num_rg*: int16
 
-{.deprecated: [TXkbNamesRec: XkbNamesRec].}
 
 
 const
@@ -1277,7 +1247,6 @@ type
     name*: cstring
     value*: cstring
 
-{.deprecated: [TXkbPropertyRec: XkbPropertyRec].}
 
 
 type
@@ -1286,7 +1255,6 @@ type
     pixel*: int16
     spec*: cstring
 
-{.deprecated: [TXkbColorRec: XkbColorRec].}
 
 
 type
@@ -1295,7 +1263,6 @@ type
     x*: int16
     y*: int16
 
-{.deprecated: [TXkbPointRec: XkbPointRec].}
 
 
 type
@@ -1306,7 +1273,6 @@ type
     x2*: int16
     y2*: int16
 
-{.deprecated: [TXkbBoundsRec: XkbBoundsRec].}
 
 
 proc XkbBoundsWidth*(b: PXkbBoundsPtr): int16
@@ -1319,7 +1285,6 @@ type
     corner_radius*: int16
     points*: PXkbPointPtr
 
-{.deprecated: [TXkbOutlineRec: XkbOutlineRec].}
 
 
 type
@@ -1333,7 +1298,6 @@ type
     primary*: ptr array[0..0xffff, XkbOutlineRec]
     bounds*: XkbBoundsRec
 
-{.deprecated: [TXkbShapeRec: XkbShapeRec].}
 
 
 proc XkbOutlineIndex*(s: PXkbShapePtr, o: PXkbOutlinePtr): int32
@@ -1349,7 +1313,6 @@ type
     color_ndx*: int16
     shape_ndx*: int16
 
-{.deprecated: [TXkbShapeDoodadRec: XkbShapeDoodadRec].}
 
 
 type
@@ -1367,7 +1330,6 @@ type
     text*: cstring
     font*: cstring
 
-{.deprecated: [TXkbTextDoodadRec: XkbTextDoodadRec].}
 
 
 type
@@ -1383,7 +1345,6 @@ type
     on_color_ndx*: int16
     off_color_ndx*: int16
 
-{.deprecated: [TXkbIndicatorDoodadRec: XkbIndicatorDoodadRec].}
 
 
 type
@@ -1399,7 +1360,6 @@ type
     shape_ndx*: int16
     logo_name*: cstring
 
-{.deprecated: [TXkbLogoDoodadRec: XkbLogoDoodadRec].}
 
 
 type
@@ -1412,7 +1372,6 @@ type
     left*: int16
     angle*: int16
 
-{.deprecated: [TXkbAnyDoodadRec: XkbAnyDoodadRec].}
 
 
 type
@@ -1424,7 +1383,6 @@ type
     indicator*: XkbIndicatorDoodadRec
     logo*: XkbLogoDoodadRec
 
-{.deprecated: [TXkbDoodadRec: XkbDoodadRec].}
 
 
 const
@@ -1443,7 +1401,6 @@ type
     shape_ndx*: int8
     color_ndx*: int8
 
-{.deprecated: [TXkbKeyRec: XkbKeyRec].}
 
 
 type
@@ -1457,14 +1414,13 @@ type
     Keys*: PXkbKeyPtr
     bounds*: XkbBoundsRec
 
-{.deprecated: [TXkbRowRec: XkbRowRec].}
 
 
 type
   PXkbOverlayPtr* = ptr XkbOverlayRec #forward for XkbSectionRec use.
                                        #Do not add more "type"
   PXkbSectionPtr* = ptr XkbSectionRec
-  XkbSectionRec*{.final.} = object  #Do not add more "type"
+  XkbSectionRec*{.final.} = object #Do not add more "type"
     name*: Atom
     priority*: int8
     top*: int16
@@ -1481,12 +1437,12 @@ type
     overlays*: PXkbOverlayPtr
 
   PXkbOverlayKeyPtr* = ptr XkbOverlayKeyRec
-  XkbOverlayKeyRec*{.final.} = object  #Do not add more "type"
+  XkbOverlayKeyRec*{.final.} = object #Do not add more "type"
     over*: XkbKeyNameRec
     under*: XkbKeyNameRec
 
   PXkbOverlayRowPtr* = ptr XkbOverlayRowRec
-  XkbOverlayRowRec*{.final.} = object  #Do not add more "type"
+  XkbOverlayRowRec*{.final.} = object #Do not add more "type"
     row_under*: int16
     num_keys*: int16
     sz_keys*: int16
@@ -1500,10 +1456,6 @@ type
     rows*: PXkbOverlayRowPtr
     bounds*: PXkbBoundsPtr
 
-{.deprecated: [TXkbSectionRec: XkbSectionRec].}
-{.deprecated: [TXkbOverlayKeyRec: XkbOverlayKeyRec].}
-{.deprecated: [TXkbOverlayRowRec: XkbOverlayRowRec].}
-{.deprecated: [TXkbOverlayRec: XkbOverlayRec].}
 
 type
   PXkbGeometryRec* = ptr XkbGeometryRec
@@ -1533,7 +1485,6 @@ type
     sections*: ptr array[0..0xffff, XkbSectionRec]
     key_aliases*: ptr array[0..0xffff, XkbKeyAliasRec]
 
-{.deprecated: [TXkbGeometryRec: XkbGeometryRec].}
 
 
 const
@@ -1547,9 +1498,9 @@ const
 
 type
   PXkbGeometrySizesPtr* = ptr XkbGeometrySizesRec
-  XkbGeometrySizesRec*{.final.} = object   #
-                                           #          Tie it all together into one big keyboard description
-                                           #
+  XkbGeometrySizesRec*{.final.} = object #
+                                         #          Tie it all together into one big keyboard description
+                                         #
     which*: int16
     num_properties*: int16
     num_colors*: int16
@@ -1558,7 +1509,6 @@ type
     num_doodads*: int16
     num_key_aliases*: int16
 
-{.deprecated: [TXkbGeometrySizesRec: XkbGeometrySizesRec].}
 
 
 type
@@ -1577,7 +1527,6 @@ type
     compat*: PXkbCompatMapPtr
     geom*: PXkbGeometryPtr
 
-{.deprecated: [TXkbDescRec: XkbDescRec].}
 
 
 proc XkbKeyKeyTypeIndex*(d: PXkbDescPtr, k: int16, g: int8): int8
@@ -1623,7 +1572,6 @@ type
     pad*: int8
     vmods*: int16
 
-{.deprecated: [TXkbMapChangesRec: XkbMapChangesRec].}
 
 
 type
@@ -1633,7 +1581,6 @@ type
     enabled_ctrls_changes*: int16
     num_groups_changed*: bool
 
-{.deprecated: [TXkbControlsChangesRec: XkbControlsChangesRec].}
 
 
 type
@@ -1642,7 +1589,6 @@ type
     state_changes*: int16
     map_changes*: int16
 
-{.deprecated: [TXkbIndicatorChangesRec: XkbIndicatorChangesRec].}
 
 
 type
@@ -1661,7 +1607,6 @@ type
     changed_indicators*: int32
     changed_groups*: int8
 
-{.deprecated: [TXkbNameChangesRec: XkbNameChangesRec].}
 
 
 type
@@ -1671,16 +1616,15 @@ type
     first_si*: int16
     num_si*: int16
 
-{.deprecated: [TXkbCompatChangesRec: XkbCompatChangesRec].}
 
 
 type
   PXkbChangesPtr* = ptr XkbChangesRec
-  XkbChangesRec*{.final.} = object   #
-                                     #          These data structures are used to construct a keymap from
-                                     #          a set of components or to list components in the server
-                                     #          database.
-                                     #
+  XkbChangesRec*{.final.} = object #
+                                   #          These data structures are used to construct a keymap from
+                                   #          a set of components or to list components in the server
+                                   #          database.
+                                   #
     device_spec*: int16
     state_changes*: int16
     map*: XkbMapChangesRec
@@ -1689,7 +1633,6 @@ type
     names*: XkbNameChangesRec
     compat*: XkbCompatChangesRec
 
-{.deprecated: [TXkbChangesRec: XkbChangesRec].}
 
 
 type
@@ -1702,7 +1645,6 @@ type
     symbols*: ptr int16
     geometry*: ptr int16
 
-{.deprecated: [TXkbComponentNamesRec: XkbComponentNamesRec].}
 
 
 type
@@ -1711,15 +1653,14 @@ type
     flags*: int16
     name*: cstring
 
-{.deprecated: [TXkbComponentNameRec: XkbComponentNameRec].}
 
 
 type
   PXkbComponentListPtr* = ptr XkbComponentListRec
-  XkbComponentListRec*{.final.} = object   #
-                                           #          The following data structures describe and track changes to a
-                                           #          non-keyboard extension device
-                                           #
+  XkbComponentListRec*{.final.} = object #
+                                         #          The following data structures describe and track changes to a
+                                         #          non-keyboard extension device
+                                         #
     num_keymaps*: int16
     num_keycodes*: int16
     num_types*: int16
@@ -1733,7 +1674,6 @@ type
     symbols*: PXkbComponentNamePtr
     geometry*: PXkbComponentNamePtr
 
-{.deprecated: [TXkbComponentListRec: XkbComponentListRec].}
 
 
 type
@@ -1748,7 +1688,6 @@ type
     names*: array[0..XkbNumIndicators - 1, Atom]
     maps*: array[0..XkbNumIndicators - 1, XkbIndicatorMapRec]
 
-{.deprecated: [TXkbDeviceLedInfoRec: XkbDeviceLedInfoRec].}
 
 
 type
@@ -1768,7 +1707,6 @@ type
     dflt_led_fb*: int16
     leds*: PXkbDeviceLedInfoPtr
 
-{.deprecated: [TXkbDeviceInfoRec: XkbDeviceInfoRec].}
 
 
 proc XkbXI_DevHasBtnActs*(d: PXkbDeviceInfoPtr): bool
@@ -1779,7 +1717,7 @@ type
   XkbDeviceLedChangesRec*{.final.} = object
     led_class*: int16
     led_id*: int16
-    defined*: int16           #names or maps changed
+    defined*: int16 #names or maps changed
     next*: PXkbDeviceLedChangesPtr
 
 
@@ -1791,7 +1729,6 @@ type
     num_btns*: int16
     leds*: XkbDeviceLedChangesRec
 
-{.deprecated: [TXkbDeviceChangesRec: XkbDeviceChangesRec].}
 
 
 proc XkbShapeDoodadColor*(g: PXkbGeometryPtr, d: PXkbShapeDoodadPtr): PXkbColorPtr
@@ -2020,7 +1957,7 @@ when defined(XKB_IN_SERVER):
       libx11c, importc: "XkbFreeGeometry".}
 # implementation
 
-import                        #************************************ xkb ************************************
+import #************************************ xkb ************************************
   xi
 
 proc XkbLegalXILedClass(c: int): bool =
@@ -2414,7 +2351,7 @@ proc XkbBoundsHeight(b: PXkbBoundsPtr): int16 =
 
 proc XkbOutlineIndex(s: PXkbShapePtr, o: PXkbOutlinePtr): int32 =
   ##define XkbOutlineIndex(s,o) ((int)((o)-&(s)->outlines[0]))
-  result = int32((cast[ByteAddress](o) - cast[ByteAddress](addr(s.outlines[0]))) div sizeof(PXkbOutlinePtr))
+  result = int32((cast[int](o) - cast[int](addr(s.outlines[0]))) div sizeof(PXkbOutlinePtr))
 
 proc XkbShapeDoodadColor(g: PXkbGeometryPtr, d: PXkbShapeDoodadPtr): PXkbColorPtr =
   ##define XkbShapeDoodadColor(g,d) (&(g)->colors[(d)->color_ndx])
@@ -2427,12 +2364,12 @@ proc XkbShapeDoodadShape(g: PXkbGeometryPtr, d: PXkbShapeDoodadPtr): PXkbShapePt
 proc XkbSetShapeDoodadColor(g: PXkbGeometryPtr, d: PXkbShapeDoodadPtr,
                             c: PXkbColorPtr) =
   ##define XkbSetShapeDoodadColor(g,d,c) ((d)->color_ndx= (c)-&(g)->colors[0])
-  d.color_ndx = int16((cast[ByteAddress](c) - cast[ByteAddress](addr(g.colors[0]))) div sizeof(XkbColorRec))
+  d.color_ndx = int16((cast[int](c) - cast[int](addr(g.colors[0]))) div sizeof(XkbColorRec))
 
 proc XkbSetShapeDoodadShape(g: PXkbGeometryPtr, d: PXkbShapeDoodadPtr,
                             s: PXkbShapePtr) =
   ##define XkbSetShapeDoodadShape(g,d,s) ((d)->shape_ndx= (s)-&(g)->shapes[0])
-  d.shape_ndx = int16((cast[ByteAddress](s) - cast[ByteAddress](addr(g.shapes[0]))) div sizeof(XkbShapeRec))
+  d.shape_ndx = int16((cast[int](s) - cast[int](addr(g.shapes[0]))) div sizeof(XkbShapeRec))
 
 proc XkbTextDoodadColor(g: PXkbGeometryPtr, d: PXkbTextDoodadPtr): PXkbColorPtr =
   ##define XkbTextDoodadColor(g,d) (&(g)->colors[(d)->color_ndx])
@@ -2441,7 +2378,7 @@ proc XkbTextDoodadColor(g: PXkbGeometryPtr, d: PXkbTextDoodadPtr): PXkbColorPtr 
 proc XkbSetTextDoodadColor(g: PXkbGeometryPtr, d: PXkbTextDoodadPtr,
                            c: PXkbColorPtr) =
   ##define XkbSetTextDoodadColor(g,d,c) ((d)->color_ndx= (c)-&(g)->colors[0])
-  d.color_ndx = int16((cast[ByteAddress](c) - cast[ByteAddress](addr(g.colors[0]))) div sizeof(XkbColorRec))
+  d.color_ndx = int16((cast[int](c) - cast[int](addr(g.colors[0]))) div sizeof(XkbColorRec))
 
 proc XkbIndicatorDoodadShape(g: PXkbGeometryPtr, d: PXkbIndicatorDoodadPtr): PXkbShapeDoodadPtr =
   ##define XkbIndicatorDoodadShape(g,d) (&(g)->shapes[(d)->shape_ndx])
@@ -2458,17 +2395,17 @@ proc XkbIndicatorDoodadOffColor(g: PXkbGeometryPtr, d: PXkbIndicatorDoodadPtr): 
 proc XkbSetIndicatorDoodadOnColor(g: PXkbGeometryPtr, d: PXkbIndicatorDoodadPtr,
                                   c: PXkbColorPtr) =
   ##define XkbSetIndicatorDoodadOnColor(g,d,c) ((d)->on_color_ndx= (c)-&(g)->colors[0])
-  d.on_color_ndx = int16((cast[ByteAddress](c) - cast[ByteAddress](addr(g.colors[0]))) div sizeof(XkbColorRec))
+  d.on_color_ndx = int16((cast[int](c) - cast[int](addr(g.colors[0]))) div sizeof(XkbColorRec))
 
 proc XkbSetIndicatorDoodadOffColor(g: PXkbGeometryPtr,
                                    d: PXkbIndicatorDoodadPtr, c: PXkbColorPtr) =
   ##define        XkbSetIndicatorDoodadOffColor(g,d,c) ((d)->off_color_ndx= (c)-&(g)->colors[0])
-  d.off_color_ndx = int16((cast[ByteAddress](c) - cast[ByteAddress](addr(g.colors[0]))) div sizeof(XkbColorRec))
+  d.off_color_ndx = int16((cast[int](c) - cast[int](addr(g.colors[0]))) div sizeof(XkbColorRec))
 
 proc XkbSetIndicatorDoodadShape(g: PXkbGeometryPtr, d: PXkbIndicatorDoodadPtr,
                                 s: PXkbShapeDoodadPtr) =
   ##define XkbSetIndicatorDoodadShape(g,d,s) ((d)->shape_ndx= (s)-&(g)->shapes[0])
-  d.shape_ndx = int16((cast[ByteAddress](s) - (cast[ByteAddress](addr(g.shapes[0])))) div sizeof(XkbShapeRec))
+  d.shape_ndx = int16((cast[int](s) - (cast[int](addr(g.shapes[0])))) div sizeof(XkbShapeRec))
 
 proc XkbLogoDoodadColor(g: PXkbGeometryPtr, d: PXkbLogoDoodadPtr): PXkbColorPtr =
   ##define XkbLogoDoodadColor(g,d) (&(g)->colors[(d)->color_ndx])
@@ -2481,12 +2418,12 @@ proc XkbLogoDoodadShape(g: PXkbGeometryPtr, d: PXkbLogoDoodadPtr): PXkbShapeDood
 proc XkbSetLogoDoodadColor(g: PXkbGeometryPtr, d: PXkbLogoDoodadPtr,
                            c: PXkbColorPtr) =
   ##define XkbSetLogoDoodadColor(g,d,c) ((d)->color_ndx= (c)-&(g)->colors[0])
-  d.color_ndx = int16((cast[ByteAddress](c) - cast[ByteAddress](addr(g.colors[0]))) div sizeof(XkbColorRec))
+  d.color_ndx = int16((cast[int](c) - cast[int](addr(g.colors[0]))) div sizeof(XkbColorRec))
 
 proc XkbSetLogoDoodadShape(g: PXkbGeometryPtr, d: PXkbLogoDoodadPtr,
                            s: PXkbShapeDoodadPtr) =
   ##define XkbSetLogoDoodadShape(g,d,s) ((d)->shape_ndx= (s)-&(g)->shapes[0])
-  d.shape_ndx = int16((cast[ByteAddress](s) - cast[ByteAddress](addr(g.shapes[0]))) div sizeof(XkbShapeRec))
+  d.shape_ndx = int16((cast[int](s) - cast[int](addr(g.shapes[0]))) div sizeof(XkbShapeRec))
 
 proc XkbKeyShape(g: PXkbGeometryPtr, k: PXkbKeyPtr): PXkbShapeDoodadPtr =
   ##define XkbKeyShape(g,k) (&(g)->shapes[(k)->shape_ndx])
@@ -2498,12 +2435,12 @@ proc XkbKeyColor(g: PXkbGeometryPtr, k: PXkbKeyPtr): PXkbColorPtr =
 
 proc XkbSetKeyShape(g: PXkbGeometryPtr, k: PXkbKeyPtr, s: PXkbShapeDoodadPtr) =
   ##define XkbSetKeyShape(g,k,s) ((k)->shape_ndx= (s)-&(g)->shapes[0])
-  k.shape_ndx = int8((cast[ByteAddress](s) - cast[ByteAddress](addr(g.shapes[0]))) div sizeof(XkbShapeRec))
+  k.shape_ndx = int8((cast[int](s) - cast[int](addr(g.shapes[0]))) div sizeof(XkbShapeRec))
 
 proc XkbSetKeyColor(g: PXkbGeometryPtr, k: PXkbKeyPtr, c: PXkbColorPtr) =
   ##define XkbSetKeyColor(g,k,c) ((k)->color_ndx= (c)-&(g)->colors[0])
-  k.color_ndx = int8((cast[ByteAddress](c) - cast[ByteAddress](addr(g.colors[0]))) div sizeof(XkbColorRec))
+  k.color_ndx = int8((cast[int](c) - cast[int](addr(g.colors[0]))) div sizeof(XkbColorRec))
 
 proc XkbGeomColorIndex(g: PXkbGeometryPtr, c: PXkbColorPtr): int32 =
   ##define XkbGeomColorIndex(g,c) ((int)((c)-&(g)->colors[0]))
-  result = int16((cast[ByteAddress](c) - (cast[ByteAddress](addr(g.colors[0])))) div sizeof(XkbColorRec))
+  result = int16((cast[int](c) - (cast[int](addr(g.colors[0])))) div sizeof(XkbColorRec))

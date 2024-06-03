@@ -129,23 +129,23 @@ type
     ##  support input class Keys.
     ##  The location of the X pointer is reported in the coordinate
     ##  fields of the x,y and x_root,y_root fields.
-    `type`*: cint              ##  of event
-    serial*: culong            ##  # of last request processed
-    send_event*: XBool          ##  true if from SendEvent request
-    display*: PDisplay       ##  Display the event was read from
-    window*: Window            ##  "event" window reported relative to
+    `type`*: cint ##  of event
+    serial*: culong ##  # of last request processed
+    send_event*: XBool ##  true if from SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window ##  "event" window reported relative to
     deviceid*: XID
-    root*: Window              ##  root window event occured on
-    subwindow*: Window         ##  child window
-    time*: Time                ##  milliseconds
+    root*: Window ##  root window event occured on
+    subwindow*: Window ##  child window
+    time*: Time ##  milliseconds
     x*: cint
-    y*: cint                   ##  x, y coordinates in event window
-    x_root*: cint              ##  coordinates relative to root
-    y_root*: cint              ##  coordinates relative to root
-    state*: cuint              ##  key or button mask
-    keycode*: cuint            ##  detail
-    same_screen*: XBool         ##  same screen flag
-    device_state*: cuint       ##  device key or button mask
+    y*: cint ##  x, y coordinates in event window
+    x_root*: cint ##  coordinates relative to root
+    y_root*: cint ##  coordinates relative to root
+    state*: cuint ##  key or button mask
+    keycode*: cuint ##  detail
+    same_screen*: XBool ##  same screen flag
+    device_state*: cuint ##  device key or button mask
     axes_count*: cuchar
     first_axis*: cuchar
     axis_data*: array[6, cint]
@@ -160,23 +160,23 @@ type
   XDeviceButtonEvent* {.final.} = object
     ##  DeviceButton events.  These events are sent by extension devices
     ##  that support input class Buttons.
-    `type`*: cint              ##  of event
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
-    window*: Window            ##  "event" window reported relative to
+    `type`*: cint ##  of event
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window ##  "event" window reported relative to
     deviceid*: XID
-    root*: Window              ##  root window that the event occured on
-    subwindow*: Window         ##  child window
-    time*: Time                ##  milliseconds
+    root*: Window ##  root window that the event occured on
+    subwindow*: Window ##  child window
+    time*: Time ##  milliseconds
     x*: cint
-    y*: cint                   ##  x, y coordinates in event window
-    x_root*: cint              ##  coordinates relative to root
-    y_root*: cint              ##  coordinates relative to root
-    state*: cuint              ##  key or button mask
-    button*: cuint             ##  detail
-    same_screen*: XBool         ##  same screen flag
-    device_state*: cuint       ##  device key or button mask
+    y*: cint ##  x, y coordinates in event window
+    x_root*: cint ##  coordinates relative to root
+    y_root*: cint ##  coordinates relative to root
+    state*: cuint ##  key or button mask
+    button*: cuint ##  detail
+    same_screen*: XBool ##  same screen flag
+    device_state*: cuint ##  device key or button mask
     axes_count*: cuchar
     first_axis*: cuchar
     axis_data*: array[6, cint]
@@ -191,23 +191,23 @@ type
   XDeviceMotionEvent* {.final.} = object
     ##  DeviceMotionNotify event.  These events are sent by extension devices
     ##  that support input class Valuators.
-    `type`*: cint              ##  of event
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
-    window*: Window            ##  "event" window reported relative to
+    `type`*: cint ##  of event
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window ##  "event" window reported relative to
     deviceid*: XID
-    root*: Window              ##  root window that the event occured on
-    subwindow*: Window         ##  child window
-    time*: Time                ##  milliseconds
+    root*: Window ##  root window that the event occured on
+    subwindow*: Window ##  child window
+    time*: Time ##  milliseconds
     x*: cint
-    y*: cint                   ##  x, y coordinates in event window
-    x_root*: cint              ##  coordinates relative to root
-    y_root*: cint              ##  coordinates relative to root
-    state*: cuint              ##  key or button mask
-    is_hint*: char             ##  detail
-    same_screen*: XBool         ##  same screen flag
-    device_state*: cuint       ##  device key or button mask
+    y*: cint ##  x, y coordinates in event window
+    x_root*: cint ##  coordinates relative to root
+    y_root*: cint ##  coordinates relative to root
+    state*: cuint ##  key or button mask
+    is_hint*: char ##  detail
+    same_screen*: XBool ##  same screen flag
+    device_state*: cuint ##  device key or button mask
     axes_count*: cuchar
     first_axis*: cuchar
     axis_data*: array[6, cint]
@@ -216,18 +216,18 @@ type
   XDeviceFocusChangeEvent* {.final.} = object
     ##  DeviceFocusChange events.  These events are sent when the focus
     ##  of an extension device that can be focused is changed.
-    `type`*: cint              ##  of event
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
-    window*: Window            ##  "event" window reported relative to
+    `type`*: cint ##  of event
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window ##  "event" window reported relative to
     deviceid*: XID
-    mode*: cint                ##  NotifyNormal, NotifyGrab, NotifyUngrab
+    mode*: cint ##  NotifyNormal, NotifyGrab, NotifyUngrab
     detail*: cint ##
-                ##  NotifyAncestor, NotifyVirtual, NotifyInferior,
-                ##  NotifyNonLinear,NotifyNonLinearVirtual, NotifyPointer,
-                ##  NotifyPointerRoot, NotifyDetailNone
-                ##
+                    ##  NotifyAncestor, NotifyVirtual, NotifyInferior,
+                    ##  NotifyNonLinear,NotifyNonLinearVirtual, NotifyPointer,
+                    ##  NotifyPointerRoot, NotifyDetailNone
+                    ##
     time*: Time
 
   PXDeviceFocusInEvent* = PXDeviceFocusChangeEvent
@@ -240,10 +240,10 @@ type
   XProximityNotifyEvent* {.final.} = object
     ##  ProximityNotify events.  These events are sent by those absolute
     ##  positioning devices that are capable of generating proximity information.
-    `type`*: cint              ##  ProximityIn or ProximityOut
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if this came from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
+    `type`*: cint ##  ProximityIn or ProximityOut
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if this came from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
     window*: Window
     deviceid*: XID
     root*: Window
@@ -255,7 +255,7 @@ type
     y_root*: cint
     state*: cuint
     same_screen*: XBool
-    device_state*: cuint       ##  device key or button mask
+    device_state*: cuint ##  device key or button mask
     axes_count*: cuchar
     first_axis*: cuchar
     axis_data*: array[6, cint]
@@ -276,9 +276,9 @@ type
     ##  DeviceStateNotify events are generated on EnterWindow and FocusIn
     ##  for those clients who have selected DeviceState.
     `type`*: cint
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if this came from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if this came from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
     window*: Window
     deviceid*: XID
     time*: Time
@@ -312,29 +312,29 @@ type
     ##  DeviceMappingNotify event.  This event is sent when the key mapping,
     ##  modifier mapping, or button mapping of an extension device is changed.
     `type`*: cint
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if this came from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
-    window*: Window            ##  unused
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if this came from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window ##  unused
     deviceid*: XID
     time*: Time
-    request*: cint             ##  one of MappingModifier, MappingKeyboard,
-                               ##  MappingPointer
-    first_keycode*: cint       ##  first keycode
-    count*: cint               ##  defines range of change w. first_keycode
+    request*: cint ##  one of MappingModifier, MappingKeyboard,
+                     ##  MappingPointer
+    first_keycode*: cint ##  first keycode
+    count*: cint ##  defines range of change w. first_keycode
 
   PXChangeDeviceNotifyEvent* = ptr XChangeDeviceNotifyEvent
   XChangeDeviceNotifyEvent* {.final.} = object
     ##  ChangeDeviceNotify event.  This event is sent when an
     ##  XChangeKeyboard or XChangePointer request is made.
     `type`*: cint
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if this came from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
-    window*: Window            ##  unused
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if this came from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window ##  unused
     deviceid*: XID
     time*: Time
-    request*: cint             ##  NewPointer or NewKeyboard
+    request*: cint ##  NewPointer or NewKeyboard
 
   PXDevicePresenceNotifyEvent* = ptr XDevicePresenceNotifyEvent
   XDevicePresenceNotifyEvent* {.final.} = object
@@ -348,10 +348,10 @@ type
     ##  XGetDeviceControl to examine the device.  If control is non-zero,
     ##  then that control has changed meaningfully.
     `type`*: cint
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if this came from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
-    window*: Window            ##  unused
+    serial*: culong ##  # of last request processed by server
+    send_event*: XBool ##  true if this came from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window ##  unused
     time*: Time
     devchange*: XBool
     deviceid*: XID
@@ -360,14 +360,14 @@ type
   PXDevicePropertyNotifyEvent* = ptr XDevicePropertyNotifyEvent
   XDevicePropertyNotifyEvent* {.final.} = object
     `type`*: cint
-    serial*: culong            ##  # of last request processed by server
-    send_event*: XBool          ##  true if this came from a SendEvent request
-    display*: PDisplay         ##  Display the event was read from
-    window*: Window            ##  unused
+    serial*: culong    ##  # of last request processed by server
+    send_event*: XBool ##  true if this came from a SendEvent request
+    display*: PDisplay ##  Display the event was read from
+    window*: Window    ##  unused
     time*: Time
-    deviceid*: XID             ##  id of the device that changed
-    atom*: Atom                ##  the property that changed
-    state*: cint               ##  PropertyNewValue or PropertyDeleted
+    deviceid*: XID     ##  id of the device that changed
+    atom*: Atom        ##  the property that changed
+    state*: cint       ##  PropertyNewValue or PropertyDeleted
 
   PXFeedbackState* = ptr XFeedbackState
   XFeedbackState* {.final.} = object
@@ -659,67 +659,6 @@ type
     num_buttons*: cshort
     buttons*: array[32, char]
 
-{.deprecated: [TXDeviceKeyEvent: XDeviceKeyEvent].}
-{.deprecated: [TXDeviceKeyPressedEvent: XDeviceKeyPressedEvent].}
-{.deprecated: [TXDeviceKeyReleasedEvent: XDeviceKeyReleasedEvent].}
-{.deprecated: [TXDeviceButtonEvent: XDeviceButtonEvent].}
-{.deprecated: [TXDeviceButtonPressedEvent: XDeviceButtonPressedEvent].}
-{.deprecated: [TXDeviceButtonReleasedEvent: XDeviceButtonReleasedEvent].}
-{.deprecated: [TXDeviceMotionEvent: XDeviceMotionEvent].}
-{.deprecated: [TXDeviceFocusChangeEvent: XDeviceFocusChangeEvent].}
-{.deprecated: [TXDeviceFocusInEvent: XDeviceFocusInEvent].}
-{.deprecated: [TXDeviceFocusOutEvent: XDeviceFocusOutEvent].}
-{.deprecated: [TXProximityNotifyEvent: XProximityNotifyEvent].}
-{.deprecated: [TXProximityInEvent: XProximityInEvent].}
-{.deprecated: [TXProximityOutEvent: XProximityOutEvent].}
-{.deprecated: [TXInputClass: XInputClass].}
-{.deprecated: [TXDeviceStateNotifyEvent: XDeviceStateNotifyEvent].}
-{.deprecated: [TXValuatorStatus: XValuatorStatus].}
-{.deprecated: [TXKeyStatus: XKeyStatus].}
-{.deprecated: [TXButtonStatus: XButtonStatus].}
-{.deprecated: [TXDeviceMappingEvent: XDeviceMappingEvent].}
-{.deprecated: [TXChangeDeviceNotifyEvent: XChangeDeviceNotifyEvent].}
-{.deprecated: [TXDevicePresenceNotifyEvent: XDevicePresenceNotifyEvent].}
-{.deprecated: [TXDevicePropertyNotifyEvent: XDevicePropertyNotifyEvent].}
-{.deprecated: [TXFeedbackState: XFeedbackState].}
-{.deprecated: [TXKbdFeedbackState: XKbdFeedbackState].}
-{.deprecated: [TXPtrFeedbackState: XPtrFeedbackState].}
-{.deprecated: [TXIntegerFeedbackState: XIntegerFeedbackState].}
-{.deprecated: [TXStringFeedbackState: XStringFeedbackState].}
-{.deprecated: [TXBellFeedbackState: XBellFeedbackState].}
-{.deprecated: [TXLedFeedbackState: XLedFeedbackState].}
-{.deprecated: [TXFeedbackControl: XFeedbackControl].}
-{.deprecated: [TXPtrFeedbackControl: XPtrFeedbackControl].}
-{.deprecated: [TXKbdFeedbackControl: XKbdFeedbackControl].}
-{.deprecated: [TXStringFeedbackControl: XStringFeedbackControl].}
-{.deprecated: [TXIntegerFeedbackControl: XIntegerFeedbackControl].}
-{.deprecated: [TXBellFeedbackControl: XBellFeedbackControl].}
-{.deprecated: [TXLedFeedbackControl: XLedFeedbackControl].}
-{.deprecated: [TXDeviceControl: XDeviceControl].}
-{.deprecated: [TXDeviceResolutionControl: XDeviceResolutionControl].}
-{.deprecated: [TXDeviceResolutionState: XDeviceResolutionState].}
-{.deprecated: [TXDeviceAbsCalibControl: XDeviceAbsCalibControl].}
-{.deprecated: [TXDeviceAbsCalibState: XDeviceAbsCalibState].}
-{.deprecated: [TXDeviceAbsAreaControl: XDeviceAbsAreaControl].}
-{.deprecated: [TXDeviceAbsAreaState: XDeviceAbsAreaState].}
-{.deprecated: [TXDeviceCoreControl: XDeviceCoreControl].}
-{.deprecated: [TXDeviceCoreState: XDeviceCoreState].}
-{.deprecated: [TXDeviceEnableControl: XDeviceEnableControl].}
-{.deprecated: [TXDeviceEnableState: XDeviceEnableState].}
-{.deprecated: [TXAnyClassInfo: XAnyClassInfo].}
-{.deprecated: [TXDeviceInfo: XDeviceInfo].}
-{.deprecated: [TXKeyInfo: XKeyInfo].}
-{.deprecated: [TXButtonInfo: XButtonInfo].}
-{.deprecated: [TXAxisInfo: XAxisInfo].}
-{.deprecated: [TXValuatorInfo: XValuatorInfo].}
-{.deprecated: [TXInputClassInfo: XInputClassInfo].}
-{.deprecated: [TXDevice: XDevice].}
-{.deprecated: [TXEventList: XEventList].}
-{.deprecated: [TXDeviceTimeCoord: XDeviceTimeCoord].}
-{.deprecated: [TXDeviceState: XDeviceState].}
-{.deprecated: [TXValuatorState: XValuatorState].}
-{.deprecated: [TXKeyState: XKeyState].}
-{.deprecated: [TXButtonState: XButtonState].}
 
 {.push cdecl, importc, dynlib: libXi.}
 

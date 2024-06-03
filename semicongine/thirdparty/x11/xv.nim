@@ -29,14 +29,11 @@ import
 const
   XvName* = "libXVideo.so"
   XvVersion* = 2
-  XvRevision* = 2             # Symbols
+  XvRevision* = 2 # Symbols
 
 type
   XvPortID* = XID
   XvEncodingID* = XID
-
-{.deprecated: [TXvPortID: XvPortID].}
-{.deprecated: [TXvEncodingID: XvEncodingID].}
 
 const
   XvNone* = 0
@@ -46,7 +43,7 @@ const
   XvOutputMask* = 1 shl XvOutput
   XvVideoMask* = 0x00000004
   XvStillMask* = 0x00000008
-  XvImageMask* = 0x00000010   # These two are not client viewable
+  XvImageMask* = 0x00000010 # These two are not client viewable
   XvPixmapMask* = 0x00010000
   XvWindowMask* = 0x00020000
   XvGettable* = 0x00000001
@@ -56,10 +53,10 @@ const
   XvPacked* = 0
   XvPlanar* = 1
   XvTopToBottom* = 0
-  XvBottomToTop* = 1          # Events
+  XvBottomToTop* = 1        # Events
   XvVideoNotify* = 0
   XvPortNotify* = 1
-  XvNumEvents* = 2            # Video Notify Reasons
+  XvNumEvents* = 2          # Video Notify Reasons
   XvStarted* = 0
   XvStopped* = 1
   XvBusy* = 2
@@ -73,11 +70,11 @@ const
   XvPreemptedMask* = 1 shl XvPreempted
   XvHardErrorMask* = 1 shl XvHardError
   XvAnyReasonMask* = (1 shl XvNumReasons) - 1
-  XvNoReasonMask* = 0         # Errors
+  XvNoReasonMask* = 0       # Errors
   XvBadPort* = 0
   XvBadEncoding* = 1
   XvBadControl* = 2
-  XvNumErrors* = 3            # Status
+  XvNumErrors* = 3          # Status
   XvBadExtension* = 1
   XvAlreadyGrabbed* = 2
   XvInvalidTime* = 3

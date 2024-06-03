@@ -64,7 +64,7 @@ type
 
   PXvAttribute* = ptr XvAttribute
   XvAttribute*{.final.} = object
-    flags*: cint              # XvGettable, XvSettable
+    flags*: cint # XvGettable, XvSettable
     min_value*: cint
     max_value*: cint
     name*: cstring
@@ -98,24 +98,24 @@ type
   PXvVideoNotifyEvent* = ptr XvVideoNotifyEvent
   XvVideoNotifyEvent*{.final.} = object
     theType*: cint
-    serial*: culong          # # of last request processed by server
-    send_event*: XBool        # true if this came from a SendEvent request
-    display*: PDisplay       # Display the event was read from
-    drawable*: Drawable      # drawable
-    reason*: culong          # what generated this event
-    port_id*: XvPortID       # what port
-    time*: Time              # milliseconds
+    serial*: culong     # # of last request processed by server
+    send_event*: XBool  # true if this came from a SendEvent request
+    display*: PDisplay  # Display the event was read from
+    drawable*: Drawable # drawable
+    reason*: culong     # what generated this event
+    port_id*: XvPortID  # what port
+    time*: Time         # milliseconds
 
   PXvPortNotifyEvent* = ptr XvPortNotifyEvent
   XvPortNotifyEvent*{.final.} = object
     theType*: cint
-    serial*: culong          # # of last request processed by server
-    send_event*: XBool        # true if this came from a SendEvent request
-    display*: PDisplay       # Display the event was read from
-    port_id*: XvPortID       # what port
-    time*: Time              # milliseconds
-    attribute*: Atom         # atom that identifies attribute
-    value*: clong            # value of attribute
+    serial*: culong    # # of last request processed by server
+    send_event*: XBool # true if this came from a SendEvent request
+    display*: PDisplay # Display the event was read from
+    port_id*: XvPortID # what port
+    time*: Time        # milliseconds
+    attribute*: Atom   # atom that identifies attribute
+    value*: clong      # value of attribute
 
   PXvEvent* = ptr XvEvent
   XvEvent*{.final.} = object
@@ -135,17 +135,17 @@ type
 
   PXvImageFormatValues* = ptr XvImageFormatValues
   XvImageFormatValues*{.final.} = object
-    id*: cint                 # Unique descriptor for the format
-    theType*: cint            # XvRGB, XvYUV
-    byte_order*: cint         # LSBFirst, MSBFirst
-    guid*: array[0..15, cchar] # Globally Unique IDentifier
+    id*: cint                            # Unique descriptor for the format
+    theType*: cint                       # XvRGB, XvYUV
+    byte_order*: cint                    # LSBFirst, MSBFirst
+    guid*: array[0..15, cchar]           # Globally Unique IDentifier
     bits_per_pixel*: cint
-    format*: cint             # XvPacked, XvPlanar
-    num_planes*: cint         # for RGB formats only
+    format*: cint                        # XvPacked, XvPlanar
+    num_planes*: cint                    # for RGB formats only
     depth*: cint
     red_mask*: cuint
     green_mask*: cuint
-    blue_mask*: cuint         # for YUV formats only
+    blue_mask*: cuint                    # for YUV formats only
     y_sample_bits*: cuint
     u_sample_bits*: cuint
     v_sample_bits*: cuint
@@ -156,29 +156,18 @@ type
     vert_u_period*: cuint
     vert_v_period*: cuint
     component_order*: array[0..31, char] # eg. UYVY
-    scanline_order*: cint     # XvTopToBottom, XvBottomToTop
+    scanline_order*: cint                # XvTopToBottom, XvBottomToTop
 
   PXvImage* = ptr XvImage
   XvImage*{.final.} = object
     id*: cint
     width*, height*: cint
-    data_size*: cint          # bytes
+    data_size*: cint # bytes
     num_planes*: cint
-    pitches*: cint           # bytes
-    offsets*: cint           # bytes
+    pitches*: cint   # bytes
+    offsets*: cint   # bytes
     data*: pointer
     obdata*: XPointer
-
-{.deprecated: [TXvRational: XvRational].}
-{.deprecated: [TXvAttribute: XvAttribute].}
-{.deprecated: [TXvEncodingInfo: XvEncodingInfo].}
-{.deprecated: [TXvFormat: XvFormat].}
-{.deprecated: [TXvAdaptorInfo: XvAdaptorInfo].}
-{.deprecated: [TXvVideoNotifyEvent: XvVideoNotifyEvent].}
-{.deprecated: [TXvPortNotifyEvent: XvPortNotifyEvent].}
-{.deprecated: [TXvEvent: XvEvent].}
-{.deprecated: [TXvImageFormatValues: XvImageFormatValues].}
-{.deprecated: [TXvImage: XvImage].}
 
 proc XvQueryExtension*(display: PDisplay, p_version, p_revision, p_requestBase,
     p_eventBase, p_errorBase: cuint): cint{.cdecl, dynlib: libXv, importc.}

@@ -137,28 +137,21 @@ type
 
   PXF86VidModeNotifyEvent* = ptr XF86VidModeNotifyEvent
   XF86VidModeNotifyEvent*{.final.} = object
-    theType*: cint            # of event
-    serial*: culong           # # of last request processed by server
-    send_event*: XBool        # true if this came from a SendEvent req
-    display*: PDisplay        # Display the event was read from
-    root*: Window            # root window of event screen
-    state*: cint              # What happened
-    kind*: cint               # What happened
-    forced*: XBool            # extents of new region
-    time*: Time              # event timestamp
+    theType*: cint     # of event
+    serial*: culong    # # of last request processed by server
+    send_event*: XBool # true if this came from a SendEvent req
+    display*: PDisplay # Display the event was read from
+    root*: Window      # root window of event screen
+    state*: cint       # What happened
+    kind*: cint        # What happened
+    forced*: XBool     # extents of new region
+    time*: Time        # event timestamp
 
   PXF86VidModeGamma* = ptr XF86VidModeGamma
   XF86VidModeGamma*{.final.} = object
-    red*: cfloat              # Red Gamma value
-    green*: cfloat            # Green Gamma value
-    blue*: cfloat             # Blue Gamma value
-
-{.deprecated: [TXF86VidModeModeLine: XF86VidModeModeLine].}
-{.deprecated: [TXF86VidModeModeInfo: XF86VidModeModeInfo].}
-{.deprecated: [TXF86VidModeSyncRange: XF86VidModeSyncRange].}
-{.deprecated: [TXF86VidModeMonitor: XF86VidModeMonitor].}
-{.deprecated: [TXF86VidModeNotifyEvent: XF86VidModeNotifyEvent].}
-{.deprecated: [TXF86VidModeGamma: XF86VidModeGamma].}
+    red*: cfloat   # Red Gamma value
+    green*: cfloat # Green Gamma value
+    blue*: cfloat  # Blue Gamma value
 
 when defined(MACROS):
   proc XF86VidModeSelectNextMode*(disp: PDisplay, scr: cint): XBool

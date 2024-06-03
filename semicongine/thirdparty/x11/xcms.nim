@@ -24,8 +24,6 @@ type
   PXcmsColorFormat* = ptr XcmsColorFormat
   XcmsColorFormat* = int32
 
-{.deprecated: [TXcmsColorFormat: XcmsColorFormat].}
-
 proc XcmsUndefinedFormat*(): XcmsColorFormat
 proc XcmsCIEXYZFormat*(): XcmsColorFormat
 proc XcmsCIEuvYFormat*(): XcmsColorFormat
@@ -99,18 +97,18 @@ type
     pad3*: XcmsFloat
 
   PXcmsColor* = ptr XcmsColor
-  XcmsColor*{.final.} = object   # spec : record
-                                 #            case longint of
-                                 #               0 : ( RGB : XcmsRGB );
-                                 #               1 : ( RGBi : XcmsRGBi );
-                                 #               2 : ( CIEXYZ : XcmsCIEXYZ );
-                                 #               3 : ( CIEuvY : XcmsCIEuvY );
-                                 #               4 : ( CIExyY : XcmsCIExyY );
-                                 #               5 : ( CIELab : XcmsCIELab );
-                                 #               6 : ( CIELuv : XcmsCIELuv );
-                                 #               7 : ( TekHVC : XcmsTekHVC );
-                                 #               8 : ( Pad : XcmsPad );
-                                 #            end;
+  XcmsColor*{.final.} = object # spec : record
+                               #            case longint of
+                               #               0 : ( RGB : XcmsRGB );
+                               #               1 : ( RGBi : XcmsRGBi );
+                               #               2 : ( CIEXYZ : XcmsCIEXYZ );
+                               #               3 : ( CIEuvY : XcmsCIEuvY );
+                               #               4 : ( CIExyY : XcmsCIExyY );
+                               #               5 : ( CIELab : XcmsCIELab );
+                               #               6 : ( CIELuv : XcmsCIELuv );
+                               #               7 : ( TekHVC : XcmsTekHVC );
+                               #               8 : ( Pad : XcmsPad );
+                               #            end;
     pad*: XcmsPad
     pixel*: int32
     format*: XcmsColorFormat
@@ -166,35 +164,12 @@ type
     inverse_flag*: int32
 
   PXcmsFunctionSet* = ptr XcmsFunctionSet
-  XcmsFunctionSet*{.final.} = object   # error
-                                       # extern Status XcmsAddColorSpace (
-                                       # in declaration at line 323
+  XcmsFunctionSet*{.final.} = object # error
+                                     # extern Status XcmsAddColorSpace (
+                                     # in declaration at line 323
     DDColorSpaces*: ptr PXcmsColorSpace
     screenInitProc*: XcmsScreenInitProc
     screenFreeProc*: XcmsScreenFreeProc
-
-{.deprecated: [TXcmsRGB: XcmsRGB].}
-{.deprecated: [TXcmsRGBi: XcmsRGBi].}
-{.deprecated: [TXcmsCIEXYZ: XcmsCIEXYZ].}
-{.deprecated: [TXcmsCIEuvY: XcmsCIEuvY].}
-{.deprecated: [TXcmsCIExyY: XcmsCIExyY].}
-{.deprecated: [TXcmsCIELab: XcmsCIELab].}
-{.deprecated: [TXcmsCIELuv: XcmsCIELuv].}
-{.deprecated: [TXcmsTekHVC: XcmsTekHVC].}
-{.deprecated: [TXcmsPad: XcmsPad].}
-{.deprecated: [TXcmsColor: XcmsColor].}
-{.deprecated: [TXcmsPerScrnInfo: XcmsPerScrnInfo].}
-{.deprecated: [TXcmsCompressionProc: XcmsCompressionProc].}
-{.deprecated: [TXcmsWhiteAdjustProc: XcmsWhiteAdjustProc].}
-{.deprecated: [TXcmsCCC: XcmsCCC].}
-{.deprecated: [TXcmsCCCRec: XcmsCCCRec].}
-{.deprecated: [TXcmsScreenInitProc: XcmsScreenInitProc].}
-{.deprecated: [TXcmsScreenFreeProc: XcmsScreenFreeProc].}
-{.deprecated: [TXcmsConversionProc: XcmsConversionProc].}
-{.deprecated: [TXcmsFuncListPtr: XcmsFuncListPtr].}
-{.deprecated: [TXcmsParseStringProc: XcmsParseStringProc].}
-{.deprecated: [TXcmsColorSpace: XcmsColorSpace].}
-{.deprecated: [TXcmsFunctionSet: XcmsFunctionSet].}
 
 proc XcmsAddFunctionSet*(para1: PXcmsFunctionSet): Status{.cdecl,
     dynlib: libX11, importc.}

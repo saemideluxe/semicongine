@@ -14,8 +14,6 @@ type
     width*: int16
     height*: int16
 
-{.deprecated: [TXineramaScreenInfo: XineramaScreenInfo].}
-
 proc XineramaQueryExtension*(dpy: PDisplay, event_base: Pcint, error_base: Pcint): XBool{.
     cdecl, dynlib: xineramaLib, importc.}
 proc XineramaQueryVersion*(dpy: PDisplay, major: Pcint, minor: Pcint): Status{.

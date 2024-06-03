@@ -78,8 +78,8 @@ proc XF86DGAQueryDirectVideo*(dpy: PDisplay, screen: cint, flags: Pcint): Status
 proc XF86DGAViewPortChanged*(dpy: PDisplay, screen: cint, n: cint): XBool{.
     cdecl, dynlib: libXxf86dga, importc.}
 const
-  X_XDGAQueryVersion* = 0     # 1 through 9 are in xf86dga1.pp
-                              # 10 and 11 are reserved to avoid conflicts with rogue DGA extensions
+  X_XDGAQueryVersion* = 0 # 1 through 9 are in xf86dga1.pp
+                          # 10 and 11 are reserved to avoid conflicts with rogue DGA extensions
   X_XDGAQueryModes* = 12
   X_XDGASetMode* = 13
   X_XDGASetViewport* = 14
@@ -118,16 +118,16 @@ const
 type
   PXDGAMode* = ptr XDGAMode
   XDGAMode*{.final.} = object
-    num*: cint                # A unique identifier for the mode (num > 0)
-    name*: cstring            # name of mode given in the XF86Config
+    num*: cint           # A unique identifier for the mode (num > 0)
+    name*: cstring       # name of mode given in the XF86Config
     verticalRefresh*: cfloat
-    flags*: cint              # DGA_CONCURRENT_ACCESS, etc...
-    imageWidth*: cint         # linear accessible portion (pixels)
+    flags*: cint         # DGA_CONCURRENT_ACCESS, etc...
+    imageWidth*: cint    # linear accessible portion (pixels)
     imageHeight*: cint
-    pixmapWidth*: cint        # Xlib accessible portion (pixels)
-    pixmapHeight*: cint       # both fields ignored if no concurrent access
+    pixmapWidth*: cint   # Xlib accessible portion (pixels)
+    pixmapHeight*: cint  # both fields ignored if no concurrent access
     bytesPerScanline*: cint
-    byteOrder*: cint          # MSBFirst, LSBFirst
+    byteOrder*: cint     # MSBFirst, LSBFirst
     depth*: cint
     bitsPerPixel*: cint
     redMask*: culong
@@ -136,11 +136,11 @@ type
     visualClass*: cshort
     viewportWidth*: cint
     viewportHeight*: cint
-    xViewportStep*: cint      # viewport position granularity
+    xViewportStep*: cint # viewport position granularity
     yViewportStep*: cint
-    maxViewportX*: cint       # max viewport origin
+    maxViewportX*: cint  # max viewport origin
     maxViewportY*: cint
-    viewportFlags*: cint      # types of page flipping possible
+    viewportFlags*: cint # types of page flipping possible
     reserved1*: cint
     reserved2*: cint
 
@@ -190,13 +190,6 @@ type
                               #      2 : (xkey : XDGAKeyEvent);
                               #      3 : (xmotion : XDGAMotionEvent);
                               #      4 : (pad : Array[0..23] Of clong);
-
-{.deprecated: [TXDGAMode: XDGAMode].}
-{.deprecated: [TXDGADevice: XDGADevice].}
-{.deprecated: [TXDGAButtonEvent: XDGAButtonEvent].}
-{.deprecated: [TXDGAKeyEvent: XDGAKeyEvent].}
-{.deprecated: [TXDGAMotionEvent: XDGAMotionEvent].}
-{.deprecated: [TXDGAEvent: XDGAEvent].}
 
 proc XDGAQueryExtension*(dpy: PDisplay, eventBase: Pcint, erroBase: Pcint): XBool{.
     cdecl, dynlib: libXxf86dga, importc.}

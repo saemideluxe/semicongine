@@ -53,15 +53,15 @@ type
 
   PXRecordRange* = ptr XRecordRange
   XRecordRange* {.final.} = object
-    core_requests*: XRecordRange8 ##  core X requests
-    core_replies*: XRecordRange8 ##  core X replies
-    ext_requests*: XRecordExtRange ##  extension requests
-    ext_replies*: XRecordExtRange ##  extension replies
+    core_requests*: XRecordRange8    ##  core X requests
+    core_replies*: XRecordRange8     ##  core X replies
+    ext_requests*: XRecordExtRange   ##  extension requests
+    ext_replies*: XRecordExtRange    ##  extension replies
     delivered_events*: XRecordRange8 ##  delivered core and ext events
-    device_events*: XRecordRange8 ##  all core and ext device events
-    errors*: XRecordRange8     ##  core X and ext errors
-    client_started*: XBool      ##  connection setup reply
-    client_died*: XBool         ##  notice of client disconnect
+    device_events*: XRecordRange8    ##  all core and ext device events
+    errors*: XRecordRange8           ##  core X and ext errors
+    client_started*: XBool           ##  connection setup reply
+    client_died*: XBool              ##  notice of client disconnect
 
   PXRecordClientInfo* = ptr XRecordClientInfo
   XRecordClientInfo* {.final.} = object
@@ -84,20 +84,9 @@ type
     category*: cint
     client_swapped*: XBool
     data*: cstring
-    data_len*: culong          ##  in 4-byte units
+    data_len*: culong ##  in 4-byte units
 
   XRecordInterceptProc* = proc (a1: XPointer, a2: PXRecordInterceptData)
-
-{.deprecated: [TXRecordClientSpec: XRecordClientSpec].}
-{.deprecated: [TXRecordContext: XRecordContext].}
-{.deprecated: [TXRecordRange8: XRecordRange8].}
-{.deprecated: [TXRecordRange16: XRecordRange16].}
-{.deprecated: [TXRecordExtRange: XRecordExtRange].}
-{.deprecated: [TXRecordRange: XRecordRange].}
-{.deprecated: [TXRecordClientInfo: XRecordClientInfo].}
-{.deprecated: [TXRecordState: XRecordState].}
-{.deprecated: [TXRecordInterceptData: XRecordInterceptData].}
-{.deprecated: [TXRecordInterceptProc: XRecordInterceptProc].}
 
 {.push cdecl, importc, dynlib: libXtst.}
 

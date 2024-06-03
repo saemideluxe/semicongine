@@ -1,5 +1,5 @@
 import
-  x, xlib
+ x, xlib
 
 const
  libXext* = "libXext.so(.6|)"
@@ -16,43 +16,39 @@ const
 #
 
 const
-  constX_ShmQueryVersion* = 0
-  constX_ShmAttach* = 1
-  constX_ShmDetach* = 2
-  constX_ShmPutImage* = 3
-  constX_ShmGetImage* = 4
-  constX_ShmCreatePixmap* = 5
-  ShmCompletion* = 0
-  ShmNumberEvents* = ShmCompletion + 1
-  BadShmSeg* = 0
-  ShmNumberErrors* = BadShmSeg + 1
+ constX_ShmQueryVersion* = 0
+ constX_ShmAttach* = 1
+ constX_ShmDetach* = 2
+ constX_ShmPutImage* = 3
+ constX_ShmGetImage* = 4
+ constX_ShmCreatePixmap* = 5
+ ShmCompletion* = 0
+ ShmNumberEvents* = ShmCompletion + 1
+ BadShmSeg* = 0
+ ShmNumberErrors* = BadShmSeg + 1
 
 type
-  PShmSeg* = ptr ShmSeg
-  ShmSeg* = culong
+ PShmSeg* = ptr ShmSeg
+ ShmSeg* = culong
 
-  PXShmCompletionEvent* = ptr XShmCompletionEvent
-  XShmCompletionEvent*{.final.} = object
-    theType*: cint
-    serial*: culong
-    send_event*: XBool
-    display*: PDisplay
-    drawable*: Drawable
-    major_code*: cint
-    minor_code*: cint
-    shmseg*: ShmSeg
-    offset*: culong
+ PXShmCompletionEvent* = ptr XShmCompletionEvent
+ XShmCompletionEvent*{.final.} = object
+  theType*: cint
+  serial*: culong
+  send_event*: XBool
+  display*: PDisplay
+  drawable*: Drawable
+  major_code*: cint
+  minor_code*: cint
+  shmseg*: ShmSeg
+  offset*: culong
 
-  PXShmSegmentInfo* = ptr XShmSegmentInfo
-  XShmSegmentInfo*{.final.} = object
-    shmseg*: ShmSeg
-    shmid*: cint
-    shmaddr*: cstring
-    readOnly*: XBool
-
-{.deprecated: [TShmSeg: ShmSeg].}
-{.deprecated: [TXShmCompletionEvent: XShmCompletionEvent].}
-{.deprecated: [TXShmSegmentInfo: XShmSegmentInfo].}
+ PXShmSegmentInfo* = ptr XShmSegmentInfo
+ XShmSegmentInfo*{.final.} = object
+  shmseg*: ShmSeg
+  shmid*: cint
+  shmaddr*: cstring
+  readOnly*: XBool
 
 proc XShmQueryExtension*(para1: PDisplay): XBool{.cdecl, dynlib: libXext, importc.}
 proc XShmGetEventBase*(para1: PDisplay): cint{.cdecl, dynlib: libXext, importc.}

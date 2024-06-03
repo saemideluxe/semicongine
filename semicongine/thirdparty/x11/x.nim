@@ -60,21 +60,6 @@ type
   PKeyCode* = ptr KeyCode
   KeyCode* = char
 
-{.deprecated: [TXID: XID].}
-{.deprecated: [TMask: Mask].}
-{.deprecated: [TAtom: Atom].}
-{.deprecated: [TVisualID: VisualID].}
-{.deprecated: [TTime: Time].}
-{.deprecated: [TWindow: Window].}
-{.deprecated: [TDrawable: Drawable].}
-{.deprecated: [TFont: Font].}
-{.deprecated: [TPixmap: Pixmap].}
-{.deprecated: [TCursor: Cursor].}
-{.deprecated: [TColormap: Colormap].}
-{.deprecated: [TGContext: GContext].}
-{.deprecated: [TKeySym: KeySym].}
-{.deprecated: [TKeyCode: KeyCode].}
-
 const
   None* = 0
   ParentRelative* = 1

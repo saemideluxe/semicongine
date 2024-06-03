@@ -59,53 +59,49 @@ include "x11pragma.nim"
 type
   PXkbAnyEvent* = ptr XkbAnyEvent
   XkbAnyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds;
-    xkb_type*: int16          # XKB event minor code
-    device*: int16            # device ID
-
-{.deprecated: [TXkbAnyEvent: XkbAnyEvent].}
+    theType*: int16    # XkbAnyEvent
+    serial*: int32     # # of last req processed by server
+    send_event*: bool  # is this `from` a SendEvent request?
+    display*: PDisplay # Display the event was read `from`
+    time*: Time        # milliseconds;
+    xkb_type*: int16   # XKB event minor code
+    device*: int16     # device ID
 
 
 type
   PXkbNewKeyboardNotifyEvent* = ptr XkbNewKeyboardNotifyEvent
   XkbNewKeyboardNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbNewKeyboardNotify
-    device*: int16            # device ID
-    old_device*: int16        # device ID of previous keyboard
-    min_key_code*: int16      # minimum key code
-    max_key_code*: int16      # maximum key code
-    old_min_key_code*: int16  # min key code of previous kbd
-    old_max_key_code*: int16  # max key code of previous kbd
-    changed*: int16           # changed aspects of the keyboard
-    req_major*: int8          # major and minor opcode of req
-    req_minor*: int8          # that caused change, if applicable
-
-{.deprecated: [TXkbNewKeyboardNotifyEvent: XkbNewKeyboardNotifyEvent].}
+    theType*: int16          # XkbAnyEvent
+    serial*: int32           # of last req processed by server
+    send_event*: bool        # is this `from` a SendEvent request?
+    display*: PDisplay       # Display the event was read `from`
+    time*: Time              # milliseconds
+    xkb_type*: int16         # XkbNewKeyboardNotify
+    device*: int16           # device ID
+    old_device*: int16       # device ID of previous keyboard
+    min_key_code*: int16     # minimum key code
+    max_key_code*: int16     # maximum key code
+    old_min_key_code*: int16 # min key code of previous kbd
+    old_max_key_code*: int16 # max key code of previous kbd
+    changed*: int16          # changed aspects of the keyboard
+    req_major*: int8         # major and minor opcode of req
+    req_minor*: int8         # that caused change, if applicable
 
 
 type
   PXkbMapNotifyEvent* = ptr XkbMapNotifyEvent
   XkbMapNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbMapNotify
-    device*: int16            # device ID
-    changed*: int16           # fields which have been changed
-    flags*: int16             # reserved
-    first_type*: int16        # first changed key type
-    num_types*: int16         # number of changed key types
+    theType*: int16    # XkbAnyEvent
+    serial*: int32     # of last req processed by server
+    send_event*: bool  # is this `from` a SendEvent request
+    display*: PDisplay # Display the event was read `from`
+    time*: Time        # milliseconds
+    xkb_type*: int16   # XkbMapNotify
+    device*: int16     # device ID
+    changed*: int16    # fields which have been changed
+    flags*: int16      # reserved
+    first_type*: int16 # first changed key type
+    num_types*: int16  # number of changed key types
     min_key_code*: KeyCode
     max_key_code*: KeyCode
     first_key_sym*: KeyCode
@@ -120,9 +116,7 @@ type
     num_key_explicit*: int16
     num_modmap_keys*: int16
     num_vmodmap_keys*: int16
-    vmods*: int16             # mask of changed virtual mods
-
-{.deprecated: [TXkbMapNotifyEvent: XkbMapNotifyEvent].}
+    vmods*: int16      # mask of changed virtual mods
 
 
 type
@@ -155,173 +149,155 @@ type
     req_major*: int8          # Major opcode of request
     req_minor*: int8          # Minor opcode of request
 
-{.deprecated: [TXkbStateNotifyEvent: XkbStateNotifyEvent].}
-
 
 type
   PXkbControlsNotifyEvent* = ptr XkbControlsNotifyEvent
   XkbControlsNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbControlsNotify
-    device*: int16            # device ID
-    changed_ctrls*: int16     # controls with changed sub-values
-    enabled_ctrls*: int16     # controls currently enabled
+    theType*: int16              # XkbAnyEvent
+    serial*: int32               # of last req processed by server
+    send_event*: bool            # is this `from` a SendEvent request?
+    display*: PDisplay           # Display the event was read `from`
+    time*: Time                  # milliseconds
+    xkb_type*: int16             # XkbControlsNotify
+    device*: int16               # device ID
+    changed_ctrls*: int16        # controls with changed sub-values
+    enabled_ctrls*: int16        # controls currently enabled
     enabled_ctrl_changes*: int16 # controls just {en,dis}abled
-    num_groups*: int16        # total groups on keyboard
-    keycode*: KeyCode         # key that caused change or 0
-    event_type*: int8         # type of event that caused change
-    req_major*: int8          # if keycode==0, major and minor
-    req_minor*: int8          # opcode of req that caused change
-
-{.deprecated: [TXkbControlsNotifyEvent: XkbControlsNotifyEvent].}
+    num_groups*: int16           # total groups on keyboard
+    keycode*: KeyCode            # key that caused change or 0
+    event_type*: int8            # type of event that caused change
+    req_major*: int8             # if keycode==0, major and minor
+    req_minor*: int8             # opcode of req that caused change
 
 
 type
   PXkbIndicatorNotifyEvent* = ptr XkbIndicatorNotifyEvent
   XkbIndicatorNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbIndicatorNotify
-    device*: int16            # device
-    changed*: int16           # indicators with new state or map
-    state*: int16             # current state of all indicators
-
-{.deprecated: [TXkbIndicatorNotifyEvent: XkbIndicatorNotifyEvent].}
+    theType*: int16    # XkbAnyEvent
+    serial*: int32     # of last req processed by server
+    send_event*: bool  # is this `from` a SendEvent request?
+    display*: PDisplay # Display the event was read `from`
+    time*: Time        # milliseconds
+    xkb_type*: int16   # XkbIndicatorNotify
+    device*: int16     # device
+    changed*: int16    # indicators with new state or map
+    state*: int16      # current state of all indicators
 
 
 type
   PXkbNamesNotifyEvent* = ptr XkbNamesNotifyEvent
   XkbNamesNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbNamesNotify
-    device*: int16            # device ID
-    changed*: int32           # names that have changed
-    first_type*: int16        # first key type with new name
-    num_types*: int16         # number of key types with new names
-    first_lvl*: int16         # first key type new new level names
-    num_lvls*: int16          # # of key types w/new level names
-    num_aliases*: int16       # total number of key aliases
-    num_radio_groups*: int16  # total number of radio groups
-    changed_vmods*: int16     # virtual modifiers with new names
-    changed_groups*: int16    # groups with new names
+    theType*: int16            # XkbAnyEvent
+    serial*: int32             # of last req processed by server
+    send_event*: bool          # is this `from` a SendEvent request?
+    display*: PDisplay         # Display the event was read `from`
+    time*: Time                # milliseconds
+    xkb_type*: int16           # XkbNamesNotify
+    device*: int16             # device ID
+    changed*: int32            # names that have changed
+    first_type*: int16         # first key type with new name
+    num_types*: int16          # number of key types with new names
+    first_lvl*: int16          # first key type new new level names
+    num_lvls*: int16           # # of key types w/new level names
+    num_aliases*: int16        # total number of key aliases
+    num_radio_groups*: int16   # total number of radio groups
+    changed_vmods*: int16      # virtual modifiers with new names
+    changed_groups*: int16     # groups with new names
     changed_indicators*: int16 # indicators with new names
-    first_key*: int16         # first key with new name
-    num_keys*: int16          # number of keys with new names
-
-{.deprecated: [TXkbNamesNotifyEvent: XkbNamesNotifyEvent].}
+    first_key*: int16          # first key with new name
+    num_keys*: int16           # number of keys with new names
 
 
 type
   PXkbCompatMapNotifyEvent* = ptr XkbCompatMapNotifyEvent
   XkbCompatMapNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbCompatMapNotify
-    device*: int16            # device ID
-    changed_groups*: int16    # groups with new compat maps
-    first_si*: int16          # first new symbol interp
-    num_si*: int16            # number of new symbol interps
-    num_total_si*: int16      # total # of symbol interps
-
-{.deprecated: [TXkbCompatMapNotifyEvent: XkbCompatMapNotifyEvent].}
+    theType*: int16        # XkbAnyEvent
+    serial*: int32         # of last req processed by server
+    send_event*: bool      # is this `from` a SendEvent request?
+    display*: PDisplay     # Display the event was read `from`
+    time*: Time            # milliseconds
+    xkb_type*: int16       # XkbCompatMapNotify
+    device*: int16         # device ID
+    changed_groups*: int16 # groups with new compat maps
+    first_si*: int16       # first new symbol interp
+    num_si*: int16         # number of new symbol interps
+    num_total_si*: int16   # total # of symbol interps
 
 
 type
   PXkbBellNotifyEvent* = ptr XkbBellNotifyEvent
   XkbBellNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbBellNotify
-    device*: int16            # device ID
-    percent*: int16           # requested volume as a % of maximum
-    pitch*: int16             # requested pitch in Hz
-    duration*: int16          # requested duration in useconds
-    bell_class*: int16        # (input extension) feedback class
-    bell_id*: int16           # (input extension) ID of feedback
-    name*: Atom               # "name" of requested bell
-    window*: Window           # window associated with event
-    event_only*: bool         # "event only" requested
-
-{.deprecated: [TXkbBellNotifyEvent: XkbBellNotifyEvent].}
+    theType*: int16    # XkbAnyEvent
+    serial*: int32     # of last req processed by server
+    send_event*: bool  # is this `from` a SendEvent request?
+    display*: PDisplay # Display the event was read `from`
+    time*: Time        # milliseconds
+    xkb_type*: int16   # XkbBellNotify
+    device*: int16     # device ID
+    percent*: int16    # requested volume as a % of maximum
+    pitch*: int16      # requested pitch in Hz
+    duration*: int16   # requested duration in useconds
+    bell_class*: int16 # (input extension) feedback class
+    bell_id*: int16    # (input extension) ID of feedback
+    name*: Atom        # "name" of requested bell
+    window*: Window    # window associated with event
+    event_only*: bool  # "event only" requested
 
 
 type
   PXkbActionMessageEvent* = ptr XkbActionMessageEvent
   XkbActionMessageEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbActionMessage
-    device*: int16            # device ID
-    keycode*: KeyCode         # key that generated the event
-    press*: bool              # true if act caused by key press
-    key_event_follows*: bool  # true if key event also generated
-    group*: int16             # effective group
-    mods*: int16              # effective mods
+    theType*: int16                                  # XkbAnyEvent
+    serial*: int32                                   # of last req processed by server
+    send_event*: bool                                # is this `from` a SendEvent request?
+    display*: PDisplay                               # Display the event was read `from`
+    time*: Time                                      # milliseconds
+    xkb_type*: int16                                 # XkbActionMessage
+    device*: int16                                   # device ID
+    keycode*: KeyCode                                # key that generated the event
+    press*: bool                                     # true if act caused by key press
+    key_event_follows*: bool                         # true if key event also generated
+    group*: int16                                    # effective group
+    mods*: int16                                     # effective mods
     message*: array[0..XkbActionMessageLength, char] # message -- leave space for NUL
-
-{.deprecated: [TXkbActionMessageEvent: XkbActionMessageEvent].}
 
 
 type
   PXkbAccessXNotifyEvent* = ptr XkbAccessXNotifyEvent
   XkbAccessXNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbAccessXNotify
-    device*: int16            # device ID
-    detail*: int16            # XkbAXN_*
-    keycode*: int16           # key of event
-    sk_delay*: int16          # current slow keys delay
-    debounce_delay*: int16    # current debounce delay
-
-{.deprecated: [TXkbAccessXNotifyEvent: XkbAccessXNotifyEvent].}
+    theType*: int16        # XkbAnyEvent
+    serial*: int32         # of last req processed by server
+    send_event*: bool      # is this `from` a SendEvent request?
+    display*: PDisplay     # Display the event was read `from`
+    time*: Time            # milliseconds
+    xkb_type*: int16       # XkbAccessXNotify
+    device*: int16         # device ID
+    detail*: int16         # XkbAXN_*
+    keycode*: int16        # key of event
+    sk_delay*: int16       # current slow keys delay
+    debounce_delay*: int16 # current debounce delay
 
 
 type
   PXkbExtensionDeviceNotifyEvent* = ptr XkbExtensionDeviceNotifyEvent
   XkbExtensionDeviceNotifyEvent*{.final.} = object
-    theType*: int16           # XkbAnyEvent
-    serial*: int32            # of last req processed by server
-    send_event*: bool         # is this `from` a SendEvent request?
-    display*: PDisplay        # Display the event was read `from`
-    time*: Time               # milliseconds
-    xkb_type*: int16          # XkbExtensionDeviceNotify
-    device*: int16            # device ID
-    reason*: int16            # reason for the event
-    supported*: int16         # mask of supported features
-    unsupported*: int16       # mask of unsupported features
-                              # that some app tried to use
-    first_btn*: int16         # first button that changed
-    num_btns*: int16          # range of buttons changed
-    leds_defined*: int16      # indicators with names or maps
-    led_state*: int16         # current state of the indicators
-    led_class*: int16         # feedback class for led changes
-    led_id*: int16            # feedback id for led changes
-
-{.deprecated: [TXkbExtensionDeviceNotifyEvent: XkbExtensionDeviceNotifyEvent].}
+    theType*: int16      # XkbAnyEvent
+    serial*: int32       # of last req processed by server
+    send_event*: bool    # is this `from` a SendEvent request?
+    display*: PDisplay   # Display the event was read `from`
+    time*: Time          # milliseconds
+    xkb_type*: int16     # XkbExtensionDeviceNotify
+    device*: int16       # device ID
+    reason*: int16       # reason for the event
+    supported*: int16    # mask of supported features
+    unsupported*: int16  # mask of unsupported features
+                         # that some app tried to use
+    first_btn*: int16    # first button that changed
+    num_btns*: int16     # range of buttons changed
+    leds_defined*: int16 # indicators with names or maps
+    led_state*: int16    # current state of the indicators
+    led_class*: int16    # feedback class for led changes
+    led_id*: int16       # feedback id for led changes
 
 
 type
@@ -342,14 +318,10 @@ type
     device*: XkbExtensionDeviceNotifyEvent
     core*: XEvent
 
-{.deprecated: [TXkbEvent: XkbEvent].}
-
 
 type
   PXkbKbdDpyStatePtr* = ptr XkbKbdDpyStateRec
-  XkbKbdDpyStateRec*{.final.} = object  # XkbOpenDisplay error codes
-
-{.deprecated: [TXkbKbdDpyStateRec: XkbKbdDpyStateRec].}
+  XkbKbdDpyStateRec*{.final.} = object # XkbOpenDisplay error codes
 
 const
   XkbOD_Success* = 0
@@ -605,21 +577,21 @@ proc XkbGetKeyboardByName*(dpy: PDisplay, deviceSpec: int16,
     importc: "XkbGetKeyboardByName".}
 
 proc XkbKeyTypesForCoreSymbols*(xkb: PXkbDescPtr,
-                                map_width: int16,  # keyboard device
-                                core_syms: PKeySym,  # always mapWidth symbols
-                                protected: int16,  # explicit key types
-                                types_inout: ptr int16,  # always four type indices
+                                map_width: int16, # keyboard device
+                                core_syms: PKeySym, # always mapWidth symbols
+                                protected: int16, # explicit key types
+                                types_inout: ptr int16, # always four type indices
                                 xkb_syms_rtrn: PKeySym): int16{.libx11c, importc: "XkbKeyTypesForCoreSymbols".}
   # must have enough space
 proc XkbApplyCompatMapToKey*(xkb: PXkbDescPtr,
-                             key: KeyCode,  # key to be updated
+                             key: KeyCode, # key to be updated
                              changes: PXkbChangesPtr): bool{.libx11c, importc: "XkbApplyCompatMapToKey".}
   # resulting changes to map
 proc XkbUpdateMapFromCore*(xkb: PXkbDescPtr,
-                           first_key: KeyCode,  # first changed key
+                           first_key: KeyCode, # first changed key
                            num_keys,
                            map_width: int16,
-                           core_keysyms: PKeySym,  # symbols `from` core keymap
+                           core_keysyms: PKeySym, # symbols `from` core keymap
                            changes: PXkbChangesPtr): bool{.libx11c, importc: "XkbUpdateMapFromCore".}
 
 proc XkbAddDeviceLedInfo*(devi: PXkbDeviceInfoPtr, ledClass, ledId: int16): PXkbDeviceLedInfoPtr{.
