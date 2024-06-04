@@ -465,12 +465,12 @@ proc rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_M
   let
     half_w = width / 2
     half_h = height / 2
-    pos = @[newVec3f(-half_w, -half_h), newVec3f(half_w, -half_h), newVec3f(half_w, half_h), newVec3f(-half_w, half_h)]
+    pos = @[NewVec3f(-half_w, -half_h), NewVec3f(half_w, -half_h), NewVec3f(half_w, half_h), NewVec3f(-half_w, half_h)]
     c = toRGBA(color)
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", @[c, c, c, c])
-  result[].initVertexAttribute("uv", @[newVec2f(0, 0), newVec2f(1, 0), newVec2f(1, 1), newVec2f(0, 1)])
+  result[].initVertexAttribute("uv", @[NewVec2f(0, 0), NewVec2f(1, 0), NewVec2f(1, 1), NewVec2f(0, 1)])
   `material=`(result[], material)
 
 proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
@@ -485,7 +485,7 @@ proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MA
     half_h = height / 2
     colorVec = toRGBA(color)
 
-  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, @[newVec3f(0, -half_h), newVec3f(half_w, half_h), newVec3f(-half_w, half_h)])
+  result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, @[NewVec3f(0, -half_h), NewVec3f(half_w, half_h), NewVec3f(-half_w, half_h)])
   result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
   `material=`(result[], material)
 
@@ -494,9 +494,9 @@ proc CircleMesh*(nSegments: int): (seq[Vec3f], seq[array[3, uint16]]) =
     rX = 0.5
     rY = 0.5
     step = (2'f32 * PI) / float32(nSegments)
-  result[0] = @[newVec3f(0, 0), newVec3f(rX, 0)]
+  result[0] = @[NewVec3f(0, 0), NewVec3f(rX, 0)]
   for i in 1 .. nSegments:
-    result[0].add newVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
+    result[0].add NewVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
     result[1].add [uint16(0), uint16(i), uint16(i + 1)]
 
 proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
@@ -515,13 +515,13 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
     c = toRGBA(color)
     step = (2'f32 * PI) / float32(nSegments)
   var
-    pos = @[newVec3f(0, 0), newVec3f(rX, 0)]
+    pos = @[NewVec3f(0, 0), NewVec3f(rX, 0)]
     col = @[c, c]
-    uv = @[newVec2f(0.5, 0.5), newVec2f(rX, height / 2)]
+    uv = @[NewVec2f(0.5, 0.5), NewVec2f(rX, height / 2)]
   for i in 1 .. nSegments:
-    pos.add newVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
+    pos.add NewVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
     col.add c
-    uv.add newVec2f(cos(float32(i) * step) * 0.5 + 0.5, sin(float32(i) * step) * 0.5 + 0.5)
+    uv.add NewVec2f(cos(float32(i) * step) * 0.5 + 0.5, sin(float32(i) * step) * 0.5 + 0.5)
     result[].smallIndices.add [uint16(0), uint16(i), uint16(i + 1)]
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
@@ -537,10 +537,10 @@ proc circleMesh*(width = 1'f32, height = 1'f32, nSegments = 12): (seq[Vec3f], se
     rX = width / 2
     rY = height / 2
     step = (2'f32 * PI) / float32(nSegments)
-  result[0][0] = newVec3f(0, 0)
-  result[0][1] = newVec3f(rX, 0)
+  result[0][0] = NewVec3f(0, 0)
+  result[0][1] = NewVec3f(rX, 0)
   for i in 1 .. nSegments:
-    result[0][i + 1] = newVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
+    result[0][i + 1] = NewVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
     result[1].add [uint16(0), uint16(i), uint16(i + 1)]
 
 proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
@@ -563,7 +563,7 @@ proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", materi
     i = 0'u16
   for h in 0'u16 .. rows:
     for w in 0'u16 .. columns:
-      pos.add newVec3f(center_offset_x + float32(w) * cellSize, center_offset_y + float32(h) * cellSize)
+      pos.add NewVec3f(center_offset_x + float32(w) * cellSize, center_offset_y + float32(h) * cellSize)
       col.add color
       if w > 0 and h > 0:
         result[].smallIndices.add [i, i - 1, i - rows - 2]

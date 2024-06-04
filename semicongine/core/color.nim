@@ -58,14 +58,14 @@ func srgb2linear*(value: uint8): uint8 = # also covers GrayPixel
   uint8(round(srgb2linear(float(value) / 255.0) * 255))
 
 func toSRGB*(value: Vec4f): Vec4f =
-  newVec4f(
+  NewVec4f(
     linear2srgb(value.r),
     linear2srgb(value.g),
     linear2srgb(value.b),
     value.a,
   )
 func fromSRGB*(value: Vec4f): Vec4f =
-  newVec4f(
+  NewVec4f(
     srgb2linear(value.r),
     srgb2linear(value.g),
     srgb2linear(value.b),

@@ -171,14 +171,14 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
   if defaultMaterial.attributes.contains("color"):
     attributes["color"] = initDataList(thetype = Vec4F32)
     if pbr.hasKey(GLTF_MATERIAL_MAPPING["color"]):
-      attributes["color"] = @[newVec4f(
+      attributes["color"] = @[NewVec4f(
         pbr[GLTF_MATERIAL_MAPPING["color"]][0].getFloat(),
         pbr[GLTF_MATERIAL_MAPPING["color"]][1].getFloat(),
         pbr[GLTF_MATERIAL_MAPPING["color"]][2].getFloat(),
         pbr[GLTF_MATERIAL_MAPPING["color"]][3].getFloat(),
       )]
     else:
-      attributes["color"] = @[newVec4f(1, 1, 1, 1)]
+      attributes["color"] = @[NewVec4f(1, 1, 1, 1)]
 
     # pbr material values
     for factor in ["metallic", "roughness"]:
@@ -213,13 +213,13 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
   if defaultMaterial.attributes.contains("emissiveColor"):
     attributes["emissiveColor"] = initDataList(thetype = Vec3F32)
     if materialNode.hasKey(GLTF_MATERIAL_MAPPING["emissiveColor"]):
-      attributes["emissiveColor"] = @[newVec3f(
+      attributes["emissiveColor"] = @[NewVec3f(
         materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][0].getFloat(),
         materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][1].getFloat(),
         materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][2].getFloat(),
       )]
     else:
-      attributes["emissiveColor"] = @[newVec3f(1'f32, 1'f32, 1'f32)]
+      attributes["emissiveColor"] = @[NewVec3f(1'f32, 1'f32, 1'f32)]
 
   result = initMaterialData(theType = defaultMaterial, name = materialNode["name"].getStr(), attributes = attributes)
 
@@ -279,7 +279,7 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, materia
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
   # TODO: getting from gltf to vulkan system is still messed up somehow, see other TODO
-  transform[Vec3f](result[], "position", scale(1, -1, 1))
+  transform[Vec3f](result[], "position", Scale(1, -1, 1))
 
 proc loadNode(root: JsonNode, node: JsonNode, materials: seq[MaterialData], mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
@@ -298,28 +298,28 @@ proc loadNode(root: JsonNode, node: JsonNode, materials: seq[MaterialData], main
   else:
     var (t, r, s) = (Unit4F32, Unit4F32, Unit4F32)
     if node.hasKey("translation"):
-      t = translate(
+      t = Translate(
         float32(node["translation"][0].getFloat()),
         float32(node["translation"][1].getFloat()),
         float32(node["translation"][2].getFloat())
       )
     if node.hasKey("rotation"):
-      t = rotate(
+      t = Rotate(
         float32(node["rotation"][3].getFloat()),
-        newVec3f(
+        NewVec3f(
           float32(node["rotation"][0].getFloat()),
           float32(node["rotation"][1].getFloat()),
           float32(node["rotation"][2].getFloat())
         )
       )
     if node.hasKey("scale"):
-      t = scale(
+      t = Scale(
         float32(node["scale"][0].getFloat()),
         float32(node["scale"][1].getFloat()),
         float32(node["scale"][2].getFloat())
       )
     result.transform = t * r * s
-  result.transform = scale(1, -1, 1) * result.transform
+  result.transform = Scale(1, -1, 1) * result.transform
 
   # children
   if node.hasKey("children"):
@@ -331,7 +331,7 @@ proc loadMeshTree(root: JsonNode, scenenode: JsonNode, materials: seq[MaterialDa
   for nodeId in scenenode["nodes"]:
     result.children.add loadNode(root, root["nodes"][nodeId.getInt()], materials, mainBuffer)
   # TODO: getting from gltf to vulkan system is still messed up somehow (i.e. not consistent for different files), see other TODO
-  # result.transform = scale(1, -1, 1)
+  # result.transform = Scale(1, -1, 1)
   result.updateTransforms()
 
 

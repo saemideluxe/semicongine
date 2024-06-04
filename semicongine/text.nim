@@ -106,10 +106,10 @@ proc refresh*(text: var Text) =
       if text.processedText[i] == Rune('\n'):
         offsetX = 0
         offsetY += text.font.lineAdvance
-        text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
-        text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
-        text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
-        text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
+        text.mesh[POSITION_ATTRIB, vertexOffset + 0] = NewVec3f()
+        text.mesh[POSITION_ATTRIB, vertexOffset + 1] = NewVec3f()
+        text.mesh[POSITION_ATTRIB, vertexOffset + 2] = NewVec3f()
+        text.mesh[POSITION_ATTRIB, vertexOffset + 3] = NewVec3f()
         inc lineIndex
         anchorX = case text.horizontalAlignment
           of Left: 0'f32
@@ -123,10 +123,10 @@ proc refresh*(text: var Text) =
           top = offsetY + glyph.topOffset
           bottom = offsetY + glyph.topOffset + glyph.dimension.y
 
-        text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f(left - anchorX, bottom - anchorY)
-        text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f(left - anchorX, top - anchorY)
-        text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f(right - anchorX, top - anchorY)
-        text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f(right - anchorX, bottom - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 0] = NewVec3f(left - anchorX, bottom - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 1] = NewVec3f(left - anchorX, top - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 2] = NewVec3f(right - anchorX, top - anchorY)
+        text.mesh[POSITION_ATTRIB, vertexOffset + 3] = NewVec3f(right - anchorX, bottom - anchorY)
 
         text.mesh[UV_ATTRIB, vertexOffset + 0] = glyph.uvs[0]
         text.mesh[UV_ATTRIB, vertexOffset + 1] = glyph.uvs[1]
@@ -137,10 +137,10 @@ proc refresh*(text: var Text) =
         if i < text.processedText.len - 1:
           offsetX += text.font.kerning[(text.processedText[i], text.processedText[i + 1])]
     else:
-      text.mesh[POSITION_ATTRIB, vertexOffset + 0] = newVec3f()
-      text.mesh[POSITION_ATTRIB, vertexOffset + 1] = newVec3f()
-      text.mesh[POSITION_ATTRIB, vertexOffset + 2] = newVec3f()
-      text.mesh[POSITION_ATTRIB, vertexOffset + 3] = newVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 0] = NewVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 1] = NewVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 2] = NewVec3f()
+      text.mesh[POSITION_ATTRIB, vertexOffset + 3] = NewVec3f()
   text.lastRenderedText = text.processedText
   text.dirty = false
 
@@ -213,7 +213,7 @@ proc `text=`*(text: var Text, newText: seq[Rune]) =
 
   text.processedText = text.text
   if text.maxWidth > 0:
-    text.processedText = text.processedText.wordWrapped(text.font, text.maxWidth / text.mesh.transform.scaling.x)
+    text.processedText = text.processedText.wordWrapped(text.font, text.maxWidth / text.mesh.transform.Scaling.x)
 
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
@@ -238,7 +238,7 @@ proc `verticalAlignment=`*(text: var Text, value: VerticalAlignment) =
     text.verticalAlignment = value
     text.dirty = true
 
-proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = newVec4f(0.07, 0.07, 0.07, 1), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
+proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = NewVec4f(0.07, 0.07, 0.07, 1), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]

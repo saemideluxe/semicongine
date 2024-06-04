@@ -32,7 +32,7 @@ proc UpdateInputs*(events: seq[Event]): bool =
   input.mouseWasPressed = {}
   input.mouseWasReleased = {}
   input.mouseWheel = 0
-  input.mouseMove = newVec2f()
+  input.mouseMove = NewVec2f()
   input.windowWasResized = false
 
   var killed = false
@@ -55,7 +55,7 @@ proc UpdateInputs*(events: seq[Event]): bool =
         input.mouseWasReleased.incl event.button
         input.mouseIsDown.excl event.button
       of MouseMoved:
-        let newPos = newVec2(float32(event.x), float32(event.y))
+        let newPos = NewVec2(float32(event.x), float32(event.y))
         input.mouseMove = newPos - input.mousePosition
         input.mousePosition = newPos
       of MouseWheel:

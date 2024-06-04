@@ -56,95 +56,95 @@ let
   mat3 = SINGLE_COLOR_MATERIAL.initMaterialData(
     name = "mat3",
     attributes = {
-      "color": initDataList(@[newVec4f(0, 1, 0, 1)])
+      "color": initDataList(@[NewVec4f(0, 1, 0, 1)])
     }.toTable
   )
 
 proc scene_different_mesh_types(): seq[Mesh] =
   @[
     newMesh(
-      positions = [newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
-      uvs = [newVec2f(0.0, -0.5), newVec2f(0.5, 0.5), newVec2f(-0.5, 0.5)],
-      colors = [newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      positions = [NewVec3f(0.0, -0.5), NewVec3f(0.5, 0.5), NewVec3f(-0.5, 0.5)],
+      uvs = [NewVec2f(0.0, -0.5), NewVec2f(0.5, 0.5), NewVec2f(-0.5, 0.5)],
+      colors = [NewVec4f(1.0, 0.0, 0.0, 1), NewVec4f(0.0, 1.0, 0.0, 1), NewVec4f(0.0, 0.0, 1.0, 1)],
       material = mat,
-      transform = translate(-0.7, -0.5),
+      transform = Translate(-0.7, -0.5),
     ),
     newMesh(
-      positions = [newVec3f(0.0, -0.4), newVec3f(0.4, 0.4), newVec3f(-0.4, 0.5)],
-      uvs = [newVec2f(0.0, -0.4), newVec2f(0.4, 0.4), newVec2f(-0.4, 0.5)],
-      colors = [newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      positions = [NewVec3f(0.0, -0.4), NewVec3f(0.4, 0.4), NewVec3f(-0.4, 0.5)],
+      uvs = [NewVec2f(0.0, -0.4), NewVec2f(0.4, 0.4), NewVec2f(-0.4, 0.5)],
+      colors = [NewVec4f(1.0, 0.0, 0.0, 1), NewVec4f(0.0, 1.0, 0.0, 1), NewVec4f(0.0, 0.0, 1.0, 1)],
       material = mat,
-      transform = translate(0, -0.5),
+      transform = Translate(0, -0.5),
     ),
     newMesh(
-      positions = [newVec3f(0.0, 0.5), newVec3f(0.5, -0.5), newVec3f(-0.5, -0.5)],
-      uvs = [newVec2f(0.0, 0.5), newVec2f(0.5, -0.5), newVec2f(-0.5, -0.5)],
-      colors = [newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      positions = [NewVec3f(0.0, 0.5), NewVec3f(0.5, -0.5), NewVec3f(-0.5, -0.5)],
+      uvs = [NewVec2f(0.0, 0.5), NewVec2f(0.5, -0.5), NewVec2f(-0.5, -0.5)],
+      colors = [NewVec4f(1.0, 0.0, 0.0, 1), NewVec4f(0.0, 1.0, 0.0, 1), NewVec4f(0.0, 0.0, 1.0, 1)],
       indices = [[0'u16, 2'u16, 1'u16]],
       material = mat2,
-      transform = translate(0.7, -0.5),
+      transform = Translate(0.7, -0.5),
     ),
     newMesh(
-      positions = [newVec3f(0.0, 0.4), newVec3f(0.4, -0.4), newVec3f(-0.4, -0.4)],
-      uvs = [newVec2f(0.0, 0.4), newVec2f(0.4, -0.4), newVec2f(-0.4, -0.4)],
-      colors = [newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
+      positions = [NewVec3f(0.0, 0.4), NewVec3f(0.4, -0.4), NewVec3f(-0.4, -0.4)],
+      uvs = [NewVec2f(0.0, 0.4), NewVec2f(0.4, -0.4), NewVec2f(-0.4, -0.4)],
+      colors = [NewVec4f(1.0, 0.0, 0.0, 1), NewVec4f(0.0, 1.0, 0.0, 1), NewVec4f(0.0, 0.0, 1.0, 1)],
       indices = [[0'u16, 2'u16, 1'u16]],
       material = mat2,
-      transform = translate(-0.7, 0.5),
+      transform = Translate(-0.7, 0.5),
     ),
     newMesh(
-      positions = [newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
-      uvs = [newVec2f(0.4, 0.5), newVec2f(0.9, -0.3), newVec2f(0.0, -0.3)],
-      colors = [newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
+      positions = [NewVec3f(0.4, 0.5), NewVec3f(0.9, -0.3), NewVec3f(0.0, -0.3)],
+      uvs = [NewVec2f(0.4, 0.5), NewVec2f(0.9, -0.3), NewVec2f(0.0, -0.3)],
+      colors = [NewVec4f(1.0, 1.0, 0.0, 1), NewVec4f(1.0, 1.0, 0.0, 1), NewVec4f(1.0, 1.0, 0.0, 1)],
       indices = [[0'u32, 2'u32, 1'u32]],
       autoResize = false,
       material = mat2,
-      transform = translate(0, 0.5),
+      transform = Translate(0, 0.5),
     ),
     newMesh(
-      positions = [newVec3f(0.4, 0.5), newVec3f(0.9, -0.3), newVec3f(0.0, -0.3)],
-      uvs = [newVec2f(0.4, 0.5), newVec2f(0.9, -0.3), newVec2f(0.0, -0.3)],
-      colors = [newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
+      positions = [NewVec3f(0.4, 0.5), NewVec3f(0.9, -0.3), NewVec3f(0.0, -0.3)],
+      uvs = [NewVec2f(0.4, 0.5), NewVec2f(0.9, -0.3), NewVec2f(0.0, -0.3)],
+      colors = [NewVec4f(1.0, 1.0, 0.0, 1), NewVec4f(1.0, 1.0, 0.0, 1), NewVec4f(1.0, 1.0, 0.0, 1)],
       indices = [[0'u32, 2'u32, 1'u32]],
       autoResize = false,
       material = mat2,
-      transform = translate(0.7, 0.5),
+      transform = Translate(0.7, 0.5),
     ),
   ]
 
 proc scene_simple(): seq[Mesh] =
   @[
     newMesh(
-      positions = [newVec3f(0.0, -0.3), newVec3f(0.3, 0.3), newVec3f(-0.3, 0.3)],
-      colors = [newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-      uvs = [newVec2f(0.0, -0.3), newVec2f(0.3, 0.3), newVec2f(-0.3, 0.3)],
+      positions = [NewVec3f(0.0, -0.3), NewVec3f(0.3, 0.3), NewVec3f(-0.3, 0.3)],
+      colors = [NewVec4f(1.0, 0.0, 0.0, 1), NewVec4f(0.0, 1.0, 0.0, 1), NewVec4f(0.0, 0.0, 1.0, 1)],
+      uvs = [NewVec2f(0.0, -0.3), NewVec2f(0.3, 0.3), NewVec2f(-0.3, 0.3)],
       material = mat,
-      transform = translate(0.4, 0.4),
+      transform = Translate(0.4, 0.4),
     ),
     newMesh(
-      positions = [newVec3f(0.0, -0.5), newVec3f(0.5, 0.5), newVec3f(-0.5, 0.5)],
-      colors = [newVec4f(1.0, 0.0, 0.0, 1), newVec4f(0.0, 1.0, 0.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-      uvs = [newVec2f(0.0, -0.5), newVec2f(0.5, 0.5), newVec2f(-0.5, 0.5)],
+      positions = [NewVec3f(0.0, -0.5), NewVec3f(0.5, 0.5), NewVec3f(-0.5, 0.5)],
+      colors = [NewVec4f(1.0, 0.0, 0.0, 1), NewVec4f(0.0, 1.0, 0.0, 1), NewVec4f(0.0, 0.0, 1.0, 1)],
+      uvs = [NewVec2f(0.0, -0.5), NewVec2f(0.5, 0.5), NewVec2f(-0.5, 0.5)],
       material = mat,
-      transform = translate(0.4, -0.4),
+      transform = Translate(0.4, -0.4),
     ),
     newMesh(
-      positions = [newVec3f(0.0, -0.6), newVec3f(0.6, 0.6), newVec3f(-0.6, 0.6)],
-      colors = [newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1), newVec4f(1.0, 1.0, 0.0, 1)],
-      uvs = [newVec2f(0.0, -0.6), newVec2f(0.6, 0.6), newVec2f(-0.6, 0.6)],
+      positions = [NewVec3f(0.0, -0.6), NewVec3f(0.6, 0.6), NewVec3f(-0.6, 0.6)],
+      colors = [NewVec4f(1.0, 1.0, 0.0, 1), NewVec4f(1.0, 1.0, 0.0, 1), NewVec4f(1.0, 1.0, 0.0, 1)],
+      uvs = [NewVec2f(0.0, -0.6), NewVec2f(0.6, 0.6), NewVec2f(-0.6, 0.6)],
       indices = [[0'u32, 1'u32, 2'u32]],
       autoResize = false,
       material = mat,
-      transform = translate(-0.4, 0.4),
+      transform = Translate(-0.4, 0.4),
     ),
     newMesh(
-      positions = [newVec3f(0.0, -0.8), newVec3f(0.8, 0.8), newVec3f(-0.8, 0.8)],
-      colors = [newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1), newVec4f(0.0, 0.0, 1.0, 1)],
-      uvs = [newVec2f(0.0, -0.8), newVec2f(0.8, 0.8), newVec2f(-0.8, 0.8)],
+      positions = [NewVec3f(0.0, -0.8), NewVec3f(0.8, 0.8), NewVec3f(-0.8, 0.8)],
+      colors = [NewVec4f(0.0, 0.0, 1.0, 1), NewVec4f(0.0, 0.0, 1.0, 1), NewVec4f(0.0, 0.0, 1.0, 1)],
+      uvs = [NewVec2f(0.0, -0.8), NewVec2f(0.8, 0.8), NewVec2f(-0.8, 0.8)],
       indices = [[0'u16, 1'u16, 2'u16]],
       instanceTransforms = [Unit4F32, Unit4F32],
       material = mat,
-      transform = translate(-0.4, -0.4),
+      transform = Translate(-0.4, -0.4),
     )
   ]
 
@@ -155,20 +155,20 @@ proc scene_primitives(): seq[Mesh] =
   r.material = mat
   t.material = mat
   c.material = mat
-  r.transform = translate(newVec3f(0.5, -0.3))
-  t.transform = translate(newVec3f(0.3, 0.3))
-  c.transform = translate(newVec3f(-0.3, 0.1))
+  r.transform = Translate(NewVec3f(0.5, -0.3))
+  t.transform = Translate(NewVec3f(0.3, 0.3))
+  c.transform = Translate(NewVec3f(-0.3, 0.1))
   result = @[r, c, t]
 
 proc scene_flag(): seq[Mesh] =
   @[
     newMesh(
-      positions = [newVec3f(-1.0, -1.0), newVec3f(1.0, -1.0), newVec3f(1.0, 1.0), newVec3f(-1.0, 1.0)],
-      uvs = [newVec2f(-1.0, -1.0), newVec2f(1.0, -1.0), newVec2f(1.0, 1.0), newVec2f(-1.0, 1.0)],
-      colors = [newVec4f(-1, -1, 1, 1), newVec4f(1, -1, 1, 1), newVec4f(1, 1, 1, 1), newVec4f(-1, 1, 1, 1)],
+      positions = [NewVec3f(-1.0, -1.0), NewVec3f(1.0, -1.0), NewVec3f(1.0, 1.0), NewVec3f(-1.0, 1.0)],
+      uvs = [NewVec2f(-1.0, -1.0), NewVec2f(1.0, -1.0), NewVec2f(1.0, 1.0), NewVec2f(-1.0, 1.0)],
+      colors = [NewVec4f(-1, -1, 1, 1), NewVec4f(1, -1, 1, 1), NewVec4f(1, 1, 1, 1), NewVec4f(-1, 1, 1, 1)],
       indices = [[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
       material = mat,
-      transform = scale(0.5, 0.5)
+      transform = Scale(0.5, 0.5)
     )
   ]
 
@@ -178,8 +178,8 @@ proc scene_multi_material(): seq[Mesh] =
     r2 = rect(color = "000000")
   r1.material = mat
   r2.material = mat3
-  r1.transform = translate(newVec3f(-0.5))
-  r2.transform = translate(newVec3f(+0.5))
+  r1.transform = Translate(NewVec3f(-0.5))
+  r2.transform = Translate(NewVec3f(+0.5))
   result = @[r1, r2]
 
 proc main() =

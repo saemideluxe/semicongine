@@ -23,14 +23,14 @@ type
   Vec3u* = TVec3[uint32]
   Vec4u* = TVec4[uint32]
 
-converter toVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
+converter ToVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
   TVec2[T]([orig[0], orig[1]])
-converter toVec3*[T: SomeNumber](orig: TVec4[T]): TVec3[T] =
+converter ToVec3*[T: SomeNumber](orig: TVec4[T]): TVec3[T] =
   TVec3[T]([orig[0], orig[1], orig[2]])
 
-func toVec4*[T: SomeNumber](orig: TVec3[T], value: T = default(T)): TVec4[T] =
+func ToVec4*[T: SomeNumber](orig: TVec3[T], value: T = default(T)): TVec4[T] =
   TVec4[T]([orig[0], orig[1], orig[2], value])
-func toVec3*[T: SomeNumber](orig: TVec2[T], value: T = default(T)): TVec3[T] =
+func ToVec3*[T: SomeNumber](orig: TVec2[T], value: T = default(T)): TVec3[T] =
   TVec3[T]([orig[0], orig[1], value])
 
 # define some often used constants
@@ -44,23 +44,23 @@ func ConstR[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(1), T(0), T(0)]
 func ConstG[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(1), T(0)])
 func ConstB[T: SomeNumber](): auto {.compiletime.} = TVec3[T]([T(0), T(0), T(1)])
 
-func newVec2f*(x = 0'f32, y = 0'f32): auto =
+func NewVec2f*(x = 0'f32, y = 0'f32): auto =
   Vec2f([x, y])
-func newVec3f*(x = 0'f32, y = 0'f32, z = 0'f32): auto =
+func NewVec3f*(x = 0'f32, y = 0'f32, z = 0'f32): auto =
   Vec3f([x, y, z])
-func newVec4f*(x = 0'f32, y = 0'f32, z = 0'f32, a = 0'f32): auto =
+func NewVec4f*(x = 0'f32, y = 0'f32, z = 0'f32, a = 0'f32): auto =
   Vec4f([x, y, z, a])
-func newVec2i*(x = 0'i32, y = 0'i32): auto =
+func NewVec2i*(x = 0'i32, y = 0'i32): auto =
   Vec2i([x, y])
-func newVec3i*(x = 0'i32, y = 0'i32, z = 0'i32): auto =
+func NewVec3i*(x = 0'i32, y = 0'i32, z = 0'i32): auto =
   Vec3i([x, y, z])
-func newVec4i*(x = 0'i32, y = 0'i32, z = 0'i32, a = 0'i32): auto =
+func NewVec4i*(x = 0'i32, y = 0'i32, z = 0'i32, a = 0'i32): auto =
   Vec4i([x, y, z, a])
-func newVec2u*(x = 0'u32, y = 0'u32): auto =
+func NewVec2u*(x = 0'u32, y = 0'u32): auto =
   Vec2u([x, y])
-func newVec3u*(x = 0'u32, y = 0'u32, z = 0'u32): auto =
+func NewVec3u*(x = 0'u32, y = 0'u32, z = 0'u32): auto =
   Vec3u([x, y, z])
-func newVec4u*(x = 0'u32, y = 0'u32, z = 0'u32, a = 0'u32): auto =
+func NewVec4u*(x = 0'u32, y = 0'u32, z = 0'u32, a = 0'u32): auto =
   Vec4u([x, y, z, a])
 
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
@@ -91,13 +91,13 @@ const One2* = ConstOne2[float32]()
 const One3* = ConstOne3[float32]()
 const One4* = ConstOne4[float32]()
 
-func newVec2*[T](x, y: T): auto = TVec2([x, y])
-func newVec3*[T](x, y, z: T): auto = TVec3([x, y, z])
-func newVec4*[T](x, y, z, w: T): auto = TVec4([x, y, z, w])
+func NewVec2*[T](x, y: T): auto = TVec2([x, y])
+func NewVec3*[T](x, y, z: T): auto = TVec3([x, y, z])
+func NewVec4*[T](x, y, z, w: T): auto = TVec4([x, y, z, w])
 
-func to*[T](v: TVec2): auto = TVec2([T(v[0]), T(v[1])])
-func to*[T](v: TVec3): auto = TVec3([T(v[0]), T(v[1]), T(v[2])])
-func to*[T](v: TVec4): auto = TVec4([T(v[0]), T(v[1]), T(v[2]), T(v[3])])
+func To*[T](v: TVec2): auto = TVec2([T(v[0]), T(v[1])])
+func To*[T](v: TVec3): auto = TVec3([T(v[0]), T(v[1]), T(v[2])])
+func To*[T](v: TVec4): auto = TVec4([T(v[0]), T(v[1]), T(v[2]), T(v[3])])
 
 func toString[T](value: T): string =
   var items: seq[string]
@@ -109,26 +109,26 @@ func `$`*(v: TVec2[SomeNumber]): string = toString[TVec2[SomeNumber]](v)
 func `$`*(v: TVec3[SomeNumber]): string = toString[TVec3[SomeNumber]](v)
 func `$`*(v: TVec4[SomeNumber]): string = toString[TVec4[SomeNumber]](v)
 
-func length*(vec: TVec2[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1])
-func length*(vec: TVec2[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1]))
-func length*(vec: TVec3[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2])
-func length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]))
-func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3])
-func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
+func Length*(vec: TVec2[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1])
+func Length*(vec: TVec2[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1]))
+func Length*(vec: TVec3[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2])
+func Length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]))
+func Length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3])
+func Length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
 
-func normal*[T: SomeFloat](vec: TVec2[T]): auto =
+func Normal*[T: SomeFloat](vec: TVec2[T]): auto =
   TVec2[T]([vec[1], -vec[0]])
 
-func normalized*[T: SomeFloat](vec: TVec2[T]): auto =
-  let l = vec.length
+func Normalized*[T: SomeFloat](vec: TVec2[T]): auto =
+  let l = vec.Length
   if l == 0: vec
   else: TVec2[T]([vec[0] / l, vec[1] / l])
-func normalized*[T: SomeFloat](vec: TVec3[T]): auto =
-  let l = vec.length
+func Normalized*[T: SomeFloat](vec: TVec3[T]): auto =
+  let l = vec.Length
   if l == 0: return vec
   else: TVec3[T]([vec[0] / l, vec[1] / l, vec[2] / l])
-func normalized*[T: SomeFloat](vec: TVec4[T]): auto =
-  let l = vec.length
+func Normalized*[T: SomeFloat](vec: TVec4[T]): auto =
+  let l = vec.Length
   if l == 0: return vec
   else: TVec4[T]([vec[0] / l, vec[1] / l, vec[2] / l, vec[3] / l])
 
@@ -238,16 +238,16 @@ func `/=`*(a: var TVec4, b: TVec4) = a = a / b
 
 
 # special operations
-func pow*(a: TVec2, b: SomeNumber): auto =
+func Pow*(a: TVec2, b: SomeNumber): auto =
   TVec2([pow(a[0], b), pow(a[1], b)])
-func pow*(a: TVec3, b: SomeNumber): auto =
+func Pow*(a: TVec3, b: SomeNumber): auto =
   TVec3([pow(a[0], b), pow(a[1], b), pow(a[2], b)])
-func pow*(a: TVec4, b: SomeNumber): auto =
+func Pow*(a: TVec4, b: SomeNumber): auto =
   TVec4([pow(a[0], b), pow(a[1], b), pow(a[2], b), pow(a[3], b)])
-func dot*(a, b: TVec2): auto = a[0] * b[0] + a[1] * b[1]
-func dot*(a, b: TVec3): auto = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-func dot*(a, b: TVec4): auto = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]
-func cross*(a, b: TVec3): auto = TVec3([
+func Dot*(a, b: TVec2): auto = a[0] * b[0] + a[1] * b[1]
+func Dot*(a, b: TVec3): auto = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+func Dot*(a, b: TVec4): auto = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]
+func Cross*(a, b: TVec3): auto = TVec3([
   a[1] * b[2] - a[2] * b[1],
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
@@ -335,10 +335,10 @@ createVectorAttribAccessorFuncs()
 
 # call e.g. Vec2[int]().randomized() to get a random matrix
 template makeRandomInit(mattype: typedesc) =
-  proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
+  proc Randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
     for i in 0 ..< result.len:
       result[i] = rand(low(typeof(m[0])) .. high(typeof(m[0])))
-  proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
+  proc Randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
     for i in 0 ..< result.len:
       result[i] = rand(1.0)
 
@@ -349,5 +349,5 @@ makeRandomInit(TVec4)
 converter Vec2VkExtent*(vec: TVec2[uint32]): VkExtent2D = VkExtent2D(width: vec[0], height: vec[1])
 converter Vec3VkExtent*(vec: TVec2[uint32]): VkExtent3D = VkExtent3D(width: vec[0], height: vec[1], depth: vec[2])
 
-func angleBetween*(a, b: Vec3f): float32 =
-  arccos(a.dot(b) / (a.length * b.length))
+func AngleBetween*(a, b: Vec3f): float32 =
+  arccos(a.Dot(b) / (a.Length * b.Length))

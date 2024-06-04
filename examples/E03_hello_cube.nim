@@ -4,14 +4,14 @@ import std/times
 import ../semicongine
 
 const
-  TopLeftFront = newVec3f(-0.5'f32, -0.5'f32, -0.5'f32)
-  TopRightFront = newVec3f(0.5'f32, -0.5'f32, -0.5'f32)
-  BottomRightFront = newVec3f(0.5'f32, 0.5'f32, -0.5'f32)
-  BottomLeftFront = newVec3f(-0.5'f32, 0.5'f32, -0.5'f32)
-  TopLeftBack = newVec3f(0.5'f32, -0.5'f32, 0.5'f32)
-  TopRightBack = newVec3f(-0.5'f32, -0.5'f32, 0.5'f32)
-  BottomRightBack = newVec3f(-0.5'f32, 0.5'f32, 0.5'f32)
-  BottomLeftBack = newVec3f(0.5'f32, 0.5'f32, 0.5'f32)
+  TopLeftFront = NewVec3f(-0.5'f32, -0.5'f32, -0.5'f32)
+  TopRightFront = NewVec3f(0.5'f32, -0.5'f32, -0.5'f32)
+  BottomRightFront = NewVec3f(0.5'f32, 0.5'f32, -0.5'f32)
+  BottomLeftFront = NewVec3f(-0.5'f32, 0.5'f32, -0.5'f32)
+  TopLeftBack = NewVec3f(0.5'f32, -0.5'f32, 0.5'f32)
+  TopRightBack = NewVec3f(-0.5'f32, -0.5'f32, 0.5'f32)
+  BottomRightBack = NewVec3f(-0.5'f32, 0.5'f32, 0.5'f32)
+  BottomLeftBack = NewVec3f(0.5'f32, 0.5'f32, 0.5'f32)
 const
   cube_pos = @[
     TopLeftFront, TopRightFront, BottomRightFront, BottomLeftFront,     # front
@@ -21,9 +21,9 @@ const
     TopLeftBack, TopRightBack, TopRightFront, TopLeftFront,             # top
     BottomLeftFront, BottomRightFront, BottomRightBack, BottomLeftBack, # bottom
   ]
-  R = newVec4f(1, 0, 0, 1)
-  G = newVec4f(0, 1, 0, 1)
-  B = newVec4f(0, 0, 1, 1)
+  R = NewVec4f(1, 0, 0, 1)
+  G = NewVec4f(0, 1, 0, 1)
+  B = NewVec4f(0, 0, 1, 1)
   cube_color = @[
     R, R, R, R,
     R * 0.5'f32, R * 0.5'f32, R * 0.5'f32, R * 0.5'f32,

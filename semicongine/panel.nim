@@ -76,16 +76,16 @@ proc refresh*(panel: var Panel) =
       of Center: 0
       of Bottom: -0.5
 
-  panel.mesh[POSITION_ATTRIB, 0] = newVec3f(-0.5 + offsetX, -0.5 + offsetY)
-  panel.mesh[POSITION_ATTRIB, 1] = newVec3f(+0.5 + offsetX, -0.5 + offsetY)
-  panel.mesh[POSITION_ATTRIB, 2] = newVec3f(+0.5 + offsetX, +0.5 + offsetY)
-  panel.mesh[POSITION_ATTRIB, 3] = newVec3f(-0.5 + offsetX, +0.5 + offsetY)
+  panel.mesh[POSITION_ATTRIB, 0] = NewVec3f(-0.5 + offsetX, -0.5 + offsetY)
+  panel.mesh[POSITION_ATTRIB, 1] = NewVec3f(+0.5 + offsetX, -0.5 + offsetY)
+  panel.mesh[POSITION_ATTRIB, 2] = NewVec3f(+0.5 + offsetX, +0.5 + offsetY)
+  panel.mesh[POSITION_ATTRIB, 3] = NewVec3f(-0.5 + offsetX, +0.5 + offsetY)
 
   panel.dirty = false
 
 proc initPanel*(
   transform = Unit4,
-  color = newVec4f(1, 1, 1, 1),
+  color = NewVec4f(1, 1, 1, 1),
   texture = EMPTY_TEXTURE,
   horizontalAlignment = HorizontalAlignment.Center,
   verticalAlignment = VerticalAlignment.Center,
@@ -115,7 +115,7 @@ proc initPanel*(
       [uint16(0), uint16(1), uint16(2)],
       [uint16(2), uint16(3), uint16(0)],
     ],
-    uvs = @[newVec2f(0, 1), newVec2f(1, 1), newVec2f(1, 0), newVec2f(0, 0)],
+    uvs = @[NewVec2f(0, 1), NewVec2f(1, 1), NewVec2f(1, 0), NewVec2f(0, 0)],
     transform = transform
   )
   result.mesh[].renameAttribute("position", POSITION_ATTRIB)
@@ -150,7 +150,7 @@ proc `verticalAlignment=`*(panel: var Panel, value: VerticalAlignment) =
 
 proc contains*(panel: Panel, p: Vec2f, aspectRatio: float32): bool =
   let
-    cursor = panel.mesh.transform.inversed * p.toVec3
+    cursor = panel.mesh.transform.Inversed * p.ToVec3
     p1 = panel.mesh[POSITION_ATTRIB, 0, Vec3f]
     p2 = panel.mesh[POSITION_ATTRIB, 2, Vec3f]
     left = min(p1.x, p2.x)

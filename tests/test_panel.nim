@@ -12,11 +12,11 @@ proc click(panel: var Panel, buttons: set[MouseButton]) =
     counter.dec
   counterText.text = $counter
 proc enter(panel: var Panel) =
-  panel.mesh.transform = panel.mesh.transform * scale(1.05, 1.05)
-  panel.color = newVec4f(1, 0, 0, 0.3)
+  panel.mesh.transform = panel.mesh.transform * Scale(1.05, 1.05)
+  panel.color = NewVec4f(1, 0, 0, 0.3)
 proc leave(panel: var Panel) =
-  panel.mesh.transform = panel.mesh.transform * scale(1 / 1.05, 1 / 1.05)
-  panel.color = newVec4f(1, 0, 0, 0.5)
+  panel.mesh.transform = panel.mesh.transform * Scale(1 / 1.05, 1 / 1.05)
+  panel.color = NewVec4f(1, 0, 0, 0.5)
 
 proc main() =
   # setup engine
@@ -31,13 +31,13 @@ proc main() =
     font = loadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
     scene = Scene(name: "main")
     origin = initPanel(
-      transform = scale(0.005, 0.005),
-      color = newVec4f(1, 1, 1, 1),
+      transform = Scale(0.005, 0.005),
+      color = NewVec4f(1, 1, 1, 1),
       texture = Texture(isGrayscale: false, colorImage: newImage[RGBAPixel](3, 3, [T, B, T, B, B, B, T, B, T]), sampler: NEAREST_SAMPLER),
     )
     button = initPanel(
-      transform = translate(0.2, 0.1) * scale(0.3, 0.1),
-      color = newVec4f(1, 0, 0, 0.5),
+      transform = Translate(0.2, 0.1) * Scale(0.3, 0.1),
+      color = NewVec4f(1, 0, 0, 0.5),
       onMouseDown = click,
       onMouseEnter = enter,
       onMouseLeave = leave
@@ -54,9 +54,9 @@ Vertical alignment:
   F6: Bottom
 Mouse:
   Left click: Increase counter
-  Right click: Decrease counter""".toRunes, horizontalAlignment = Left, verticalAlignment = Top, transform = translate(-0.9, -0.9) * scale(0.0002, 0.0002))
+  Right click: Decrease counter""".toRunes, horizontalAlignment = Left, verticalAlignment = Top, transform = Translate(-0.9, -0.9) * Scale(0.0002, 0.0002))
 
-  counterText = font.initText(($counter).toRunes, maxLen = 99, transform = translate(0.2, 0.1) * scale(0.0004, 0.0004))
+  counterText = font.initText(($counter).toRunes, maxLen = 99, transform = Translate(0.2, 0.1) * Scale(0.0004, 0.0004))
 
   scene.add counterText
   scene.add button

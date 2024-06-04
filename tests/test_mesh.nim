@@ -82,10 +82,10 @@ proc main() =
     size *= 1'f32 + MouseWheel() * 0.05
     azimut += MouseMove().x / 180'f32
     elevation -= MouseMove().y / 180'f32
-    scenes[currentScene].setShaderGlobal("projection", perspective(PI / 2, ratio, -0.5, 1))
+    scenes[currentScene].setShaderGlobal("projection", Perspective(PI / 2, ratio, -0.5, 1))
     scenes[currentScene].setShaderGlobal(
       "view",
-       scale(size, size, size) * rotate(elevation, newVec3f(1, 0, 0)) * rotate(azimut, Yf32)
+       Scale(size, size, size) * Rotate(elevation, NewVec3f(1, 0, 0)) * Rotate(azimut, Yf32)
     )
     engine.renderScene(scenes[currentScene])
   engine.destroy()

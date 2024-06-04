@@ -17,7 +17,7 @@ let
 
 var
   level: Scene
-  ballVelocity = newVec2f(1, 1).normalized * ballSpeed
+  ballVelocity = NewVec2f(1, 1).normalized * ballSpeed
 
 when isMainModule:
   var myengine = initEngine("Pong")
@@ -88,7 +88,7 @@ when isMainModule:
     # loose
     if ball.transform.col(3).x - ballSize/2 <= 0:
       ball.transform = scale(ballSize, ballSize, 1'f) * translate(30'f, 30'f, 0'f)
-      ballVelocity = newVec2f(1, 1).normalized * ballSpeed
+      ballVelocity = NewVec2f(1, 1).normalized * ballSpeed
 
     # bar
     if ball.transform.col(3).x - ballSize/2 <= barWidth:

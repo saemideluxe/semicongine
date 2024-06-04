@@ -23,13 +23,13 @@ when isMainModule:
       let
         y: float32 = (row * 2 / COLUMNS) - 1
         x: float32 = (col * 2 / ROWS) - 1
-        color = newVec4f((x + 1) / 2, (y + 1) / 2, 0, 1)
+        color = NewVec4f((x + 1) / 2, (y + 1) / 2, 0, 1)
         squareIndex = row * COLUMNS + col
         vertIndex = squareIndex * 4
-      vertices[vertIndex + 0] = newVec3f(x, y)
-      vertices[vertIndex + 1] = newVec3f(x + WIDTH, y)
-      vertices[vertIndex + 2] = newVec3f(x + WIDTH, y + HEIGHT)
-      vertices[vertIndex + 3] = newVec3f(x, y + HEIGHT)
+      vertices[vertIndex + 0] = NewVec3f(x, y)
+      vertices[vertIndex + 1] = NewVec3f(x + WIDTH, y)
+      vertices[vertIndex + 2] = NewVec3f(x + WIDTH, y + HEIGHT)
+      vertices[vertIndex + 3] = NewVec3f(x, y + HEIGHT)
       colors[vertIndex + 0] = color
       colors[vertIndex + 1] = color
       colors[vertIndex + 2] = color

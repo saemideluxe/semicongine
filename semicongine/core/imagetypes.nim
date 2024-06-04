@@ -35,7 +35,7 @@ proc `==`*(a, b: Texture): bool =
     return a.colorImage == b.colorImage
 
 converter toRGBA*(p: RGBAPixel): Vec4f =
-  newVec4f(float32(p[0]) / 255'f32, float32(p[1]) / 255'f32, float32(p[2]) / 255'f32, float32(p[3]) / 255'f32)
+  NewVec4f(float32(p[0]) / 255'f32, float32(p[1]) / 255'f32, float32(p[2]) / 255'f32, float32(p[3]) / 255'f32)
 converter toGrayscale*(p: GrayPixel): float32 =
   float32(p) / 255'f32
 

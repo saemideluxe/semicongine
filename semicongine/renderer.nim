@@ -58,7 +58,7 @@ proc hasScene*(renderer: Renderer, scene: Scene): bool =
 proc initRenderer*(
   device: Device,
   shaders: openArray[(MaterialType, ShaderConfiguration)],
-  clearColor = newVec4f(0, 0, 0, 0),
+  clearColor = NewVec4f(0, 0, 0, 0),
   backFaceCulling = true,
   vSync = false,
   inFlightFrames = 2,

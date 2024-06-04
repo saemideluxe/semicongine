@@ -7,12 +7,12 @@ import ../semicongine
 
 const
   arrow = @[
-    newVec3f(-1, -1),
-    newVec3f(1, -1),
-    newVec3f(-0.3, -0.3),
-    newVec3f(-0.3, -0.3),
-    newVec3f(-1, 1),
-    newVec3f(-1, -1),
+    NewVec3f(-1, -1),
+    NewVec3f(1, -1),
+    NewVec3f(-0.3, -0.3),
+    NewVec3f(-0.3, -0.3),
+    NewVec3f(-1, 1),
+    NewVec3f(-1, -1),
   ]
   # keyboard layout, specifying rows with key widths, negative numbers are empty spaces
   keyrows = (
@@ -25,9 +25,9 @@ const
   )
   keyDimension = 50'f32
   keyGap = 10'f32
-  backgroundColor = newVec4f(0.6705882352941176, 0.6078431372549019, 0.5882352941176471, 1)
-  baseColor = newVec4f(0.9411764705882353, 0.9058823529411765, 0.8470588235294118, 1)
-  activeColor = newVec4f(0.6509803921568628, 0.22745098039215686, 0.3137254901960784, 1)
+  backgroundColor = NewVec4f(0.6705882352941176, 0.6078431372549019, 0.5882352941176471, 1)
+  baseColor = NewVec4f(0.9411764705882353, 0.9058823529411765, 0.8470588235294118, 1)
+  activeColor = NewVec4f(0.6509803921568628, 0.22745098039215686, 0.3137254901960784, 1)
   arrow_colors = @[
     baseColor * 0.9'f32,
     baseColor * 0.9'f32,
@@ -61,7 +61,7 @@ var
   keyvertexpos: seq[Vec3f]
   keyvertexcolor: seq[Vec4f]
   keymeshindices: seq[array[3, uint16]]
-  rowpos = newVec2f(0, 0)
+  rowpos = NewVec2f(0, 0)
   i = 0'u16
   firstRow = true
   rowWidth = 0'f32
@@ -70,13 +70,13 @@ for row in keyrows.fields:
     let keySpace = float32(keyDimension * key)
     if key > 0:
       if keyIndices[i div 4] == Enter:
-        keyvertexpos.add newVec3f(rowpos[0], rowpos[1] - keyDimension - keyGap)
-        keyvertexpos.add newVec3f(rowpos[0] + keySpace, rowpos[1] - keyDimension - keyGap)
+        keyvertexpos.add NewVec3f(rowpos[0], rowpos[1] - keyDimension - keyGap)
+        keyvertexpos.add NewVec3f(rowpos[0] + keySpace, rowpos[1] - keyDimension - keyGap)
       else:
-        keyvertexpos.add newVec3f(rowpos[0], rowpos[1])
-        keyvertexpos.add newVec3f(rowpos[0] + keySpace, rowpos[1])
-      keyvertexpos.add newVec3f(rowpos[0] + keySpace, rowpos[1] + keyDimension)
-      keyvertexpos.add newVec3f(rowpos[0], rowpos[1] + keyDimension)
+        keyvertexpos.add NewVec3f(rowpos[0], rowpos[1])
+        keyvertexpos.add NewVec3f(rowpos[0] + keySpace, rowpos[1])
+      keyvertexpos.add NewVec3f(rowpos[0] + keySpace, rowpos[1] + keyDimension)
+      keyvertexpos.add NewVec3f(rowpos[0], rowpos[1] + keyDimension)
       keyvertexcolor.add [baseColor, baseColor, baseColor, baseColor]
       keymeshindices.add [i, i + 1, i + 2]
       keymeshindices.add [i + 2, i + 3, i]
@@ -104,7 +104,7 @@ when isMainModule:
   )
   var positions = arrow
   for i in 0 ..< positions.len:
-    positions[i] = cursorscale * newVec3f(positions[i].x, positions[i].y)
+    positions[i] = cursorscale * NewVec3f(positions[i].x, positions[i].y)
 
   # define mesh objects
   var
@@ -125,10 +125,10 @@ when isMainModule:
     )
     backgroundmesh = newMesh(
       positions = @[
-        newVec3f(0'f32, 0'f32),
-        newVec3f(1'f32, 0'f32),
-        newVec3f(1'f32, 1'f32),
-        newVec3f(0'f32, 1'f32),
+        NewVec3f(0'f32, 0'f32),
+        NewVec3f(1'f32, 0'f32),
+        NewVec3f(1'f32, 1'f32),
+        NewVec3f(0'f32, 1'f32),
       ],
       colors = @[
         backgroundColor,

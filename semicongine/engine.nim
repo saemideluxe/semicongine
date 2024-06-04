@@ -110,7 +110,7 @@ proc initEngine*(
 proc initRenderer*(
   engine: var Engine,
   shaders: openArray[(MaterialType, ShaderConfiguration)],
-  clearColor = newVec4f(0, 0, 0, 0),
+  clearColor = NewVec4f(0, 0, 0, 0),
   backFaceCulling = true,
   vSync = false,
   inFlightFrames = 2,
@@ -132,7 +132,7 @@ proc initRenderer*(
     inFlightFrames = inFlightFrames,
   ))
 
-proc initRenderer*(engine: var Engine, clearColor = newVec4f(0, 0, 0, 0), vSync = false) =
+proc initRenderer*(engine: var Engine, clearColor = NewVec4f(0, 0, 0, 0), vSync = false) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
   engine.initRenderer(@[], clearColor, vSync = vSync)
   checkVkResult engine.device.vk.vkDeviceWaitIdle()

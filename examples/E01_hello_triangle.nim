@@ -20,8 +20,8 @@ const
 var
   scene = Scene(name: "scene",
     meshes: @[newMesh(
-      positions = [newVec3f(-0.5, 0.5), newVec3f(0, -0.5), newVec3f(0.5, 0.5)],
-      colors = [newVec4f(1, 0, 0, 1), newVec4f(0, 1, 0, 1), newVec4f(0, 0, 1, 1)],
+      positions = [NewVec3f(-0.5, 0.5), NewVec3f(0, -0.5), NewVec3f(0.5, 0.5)],
+      colors = [NewVec4f(1, 0, 0, 1), NewVec4f(0, 1, 0, 1), NewVec4f(0, 0, 1, 1)],
       material = VERTEX_COLORED_MATERIAL.initMaterialData()
     )]
   )

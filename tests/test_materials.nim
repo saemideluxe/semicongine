@@ -35,7 +35,7 @@ proc main() =
   var flag = rect()
   flag.material = material
   var scene = Scene(name: "main", meshes: @[flag])
-  scene.addShaderGlobalArray("test2", @[newVec4f(), newVec4f()])
+  scene.addShaderGlobalArray("test2", @[NewVec4f(), NewVec4f()])
 
   var engine = initEngine("Test materials")
 
@@ -70,7 +70,7 @@ proc main() =
   var t = cpuTime()
   while engine.UpdateInputs() and not KeyIsDown(Escape):
     var d = float32(cpuTime() - t)
-    setShaderGlobalArray(scene, "test2", @[newVec4f(d), newVec4f(d * 2)])
+    setShaderGlobalArray(scene, "test2", @[NewVec4f(d), NewVec4f(d * 2)])
     engine.renderScene(scene)
   engine.destroy()
 
