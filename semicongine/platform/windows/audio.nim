@@ -5,7 +5,7 @@ import ../../thirdparty/winim/winim/extra
 
 import ../../core/audiotypes
 
-template checkWinMMResult*(call: untyped) =
+template CheckWinMMResult*(call: untyped) =
   let value = call
   if value < 0:
     raise newException(Exception, "Windows multimedia error: " & astToStr(call) &
@@ -15,7 +15,7 @@ type
     handle: HWAVEOUT
     buffers: seq[WAVEHDR]
 
-proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSoundDevice =
+proc OpenSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSoundDevice =
   var format = WAVEFORMATEX(
     wFormatTag: WAVE_FORMAT_PCM,
     nChannels: 2,
@@ -37,12 +37,12 @@ proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSo
     checkWinMMResult waveOutPrepareHeader(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
     checkWinMMResult waveOutWrite(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
 
-proc writeSoundData*(soundDevice: var NativeSoundDevice, buffer: int) =
+proc WriteSoundData*(soundDevice: var NativeSoundDevice, buffer: int) =
   while (soundDevice.buffers[buffer].dwFlags and WHDR_DONE) == 0:
     sleep(1)
   checkWinMMResult waveOutWrite(soundDevice.handle, addr soundDevice.buffers[buffer], UINT(sizeof(WAVEHDR)))
 
-proc closeSoundDevice*(soundDevice: var NativeSoundDevice) =
+proc CloseSoundDevice*(soundDevice: var NativeSoundDevice) =
   for i in 0 ..< soundDevice.buffers.len:
     discard waveOutUnprepareHeader(soundDevice.handle, addr soundDevice.buffers[i], UINT(sizeof(WAVEHDR)))
   waveOutClose(soundDevice.handle)

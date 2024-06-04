@@ -20,8 +20,8 @@ proc leave(panel: var Panel) =
 
 proc main() =
   # setup engine
-  var engine = initEngine("Test panels")
-  engine.initRenderer([])
+  var engine = InitEngine("Test panels")
+  engine.InitRenderer([])
 
   const B = [0'u8, 0'u8, 0'u8, 255'u8]
   const T = [0'u8, 0'u8, 0'u8, 0'u8]
@@ -62,7 +62,7 @@ Mouse:
   scene.add button
   scene.add help_text
   scene.add origin
-  engine.loadScene(scene)
+  engine.LoadScene(scene)
 
   while engine.UpdateInputs() and not KeyIsDown(Escape):
     if KeyWasPressed(F1):
@@ -91,8 +91,8 @@ Mouse:
     origin.refresh()
     help_text.refresh()
 
-    engine.renderScene(scene)
-  engine.destroy()
+    engine.RenderScene(scene)
+  engine.Destroy()
 
 
 when isMainModule:

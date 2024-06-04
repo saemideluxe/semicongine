@@ -18,20 +18,20 @@ type
     shaderModules*: (ShaderModule, ShaderModule)
     descriptorSetLayout*: DescriptorSetLayout
 
-func inputs*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
+func Inputs*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.inputs
 
-func uniforms*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
+func Uniforms*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.uniforms
 
-func samplers*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
+func Samplers*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.samplers
 
-proc setupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: var Table[string, seq[VulkanTexture]], inFlightFrames: int, emptyTexture: VulkanTexture): seq[DescriptorSet] =
+proc SetupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: var Table[string, seq[VulkanTexture]], inFlightFrames: int, emptyTexture: VulkanTexture): seq[DescriptorSet] =
   assert pipeline.vk.valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 
-  result = descriptorPool.allocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
+  result = descriptorPool.AllocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
 
   for i in 0 ..< inFlightFrames:
     var offset = 0'u64
@@ -55,12 +55,12 @@ proc setupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool,
             descriptor.imageviews.add emptyTexture.imageView
             descriptor.samplers.add emptyTexture.sampler
 
-proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling = true): ShaderPipeline =
+proc CreatePipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling = true): ShaderPipeline =
   assert renderPass.valid
   assert device.vk.valid
 
   result.device = device
-  result.shaderModules = device.createShaderModules(shaderConfiguration)
+  result.shaderModules = device.CreateShaderModules(shaderConfiguration)
   result.shaderConfiguration = shaderConfiguration
 
   var descriptors: seq[Descriptor]
@@ -79,7 +79,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
       count: (if sampler.arrayCount == 0: 1 else: sampler.arrayCount),
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
     )
-  result.descriptorSetLayout = device.createDescriptorSetLayout(descriptors)
+  result.descriptorSetLayout = device.CreateDescriptorSetLayout(descriptors)
 
   # TODO: Push constants
   # var pushConstant = VkPushConstantRange(
@@ -101,7 +101,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
   var
     bindings: seq[VkVertexInputBindingDescription]
     attributes: seq[VkVertexInputAttributeDescription]
-    vertexInputInfo = result.shaderConfiguration.getVertexInputInfo(bindings, attributes)
+    vertexInputInfo = result.shaderConfiguration.GetVertexInputInfo(bindings, attributes)
     inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
       topology: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -156,7 +156,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
       dynamicStateCount: uint32(dynamicStates.len),
       pDynamicStates: dynamicStates.ToCPointer,
     )
-    stages = @[result.shaderModules[0].getPipelineInfo(), result.shaderModules[1].getPipelineInfo()]
+    stages = @[result.shaderModules[0].GetPipelineInfo(), result.shaderModules[1].GetPipelineInfo()]
     createInfo = VkGraphicsPipelineCreateInfo(
       sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
       stageCount: uint32(stages.len),
@@ -184,18 +184,18 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
     addr(result.vk)
   )
 
-  discard result.uniforms # just for assertion
+  discard result.Uniforms # just for assertion
 
 
-proc destroy*(pipeline: var ShaderPipeline) =
+proc Destroy*(pipeline: var ShaderPipeline) =
   assert pipeline.device.vk.valid
   assert pipeline.vk.valid
   assert pipeline.layout.valid
   assert pipeline.descriptorSetLayout.vk.valid
 
-  pipeline.shaderModules[0].destroy()
-  pipeline.shaderModules[1].destroy()
-  pipeline.descriptorSetLayout.destroy()
+  pipeline.shaderModules[0].Destroy()
+  pipeline.shaderModules[1].Destroy()
+  pipeline.descriptorSetLayout.Destroy()
   pipeline.device.vk.vkDestroyPipelineLayout(pipeline.layout, nil)
   pipeline.device.vk.vkDestroyPipeline(pipeline.vk, nil)
   pipeline.descriptorSetLayout.reset()

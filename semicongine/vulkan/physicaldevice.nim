@@ -22,7 +22,7 @@ type
 func `$`*(device: PhysicalDevice): string =
   "Physical device: vk=" & $device.vk & ", name=" & $device.name & ", devicetype=" & $device.devicetype
 
-proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
+proc GetPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
   assert instance.vk.valid
   assert instance.surface.valid
   var nDevices: uint32
@@ -38,7 +38,7 @@ proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
     device.devicetype = device.properties.deviceType
     result.add device
 
-proc getExtensions*(device: PhysicalDevice): seq[string] =
+proc GetExtensions*(device: PhysicalDevice): seq[string] =
   assert device.vk.valid
   var extensionCount: uint32
   checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), nil)
@@ -48,12 +48,12 @@ proc getExtensions*(device: PhysicalDevice): seq[string] =
     for extension in extensions:
       result.add(CleanString(extension.extensionName))
 
-proc getSurfaceCapabilities*(device: PhysicalDevice): VkSurfaceCapabilitiesKHR =
+proc GetSurfaceCapabilities*(device: PhysicalDevice): VkSurfaceCapabilitiesKHR =
   assert device.vk.valid
   assert device.surface.valid
   checkVkResult device.vk.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device.surface, addr(result))
 
-proc getSurfaceFormats*(device: PhysicalDevice): seq[VkSurfaceFormatKHR] =
+proc GetSurfaceFormats*(device: PhysicalDevice): seq[VkSurfaceFormatKHR] =
   assert device.vk.valid
   assert device.surface.valid
   var n_formats: uint32
@@ -61,7 +61,7 @@ proc getSurfaceFormats*(device: PhysicalDevice): seq[VkSurfaceFormatKHR] =
   result = newSeq[VkSurfaceFormatKHR](n_formats)
   checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, device.surface, addr(n_formats), result.ToCPointer)
 
-func filterSurfaceFormat*(
+func FilterSurfaceFormat*(
   formats: seq[VkSurfaceFormatKHR],
   imageFormat = VK_FORMAT_B8G8R8A8_SRGB,
   colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
@@ -70,12 +70,12 @@ func filterSurfaceFormat*(
     if format.format == imageFormat and format.colorSpace == colorSpace:
       return format
 
-proc filterSurfaceFormat*(device: PhysicalDevice): VkSurfaceFormatKHR =
+proc FilterSurfaceFormat*(device: PhysicalDevice): VkSurfaceFormatKHR =
   assert device.vk.valid
   assert device.surface.valid
-  device.getSurfaceFormats().filterSurfaceFormat()
+  device.GetSurfaceFormats().FilterSurfaceFormat()
 
-proc getSurfacePresentModes*(device: PhysicalDevice): seq[VkPresentModeKHR] =
+proc GetSurfacePresentModes*(device: PhysicalDevice): seq[VkPresentModeKHR] =
   assert device.vk.valid
   assert device.surface.valid
   var n_modes: uint32
@@ -83,7 +83,7 @@ proc getSurfacePresentModes*(device: PhysicalDevice): seq[VkPresentModeKHR] =
   result = newSeq[VkPresentModeKHR](n_modes)
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, device.surface, addr(n_modes), result.ToCPointer)
 
-proc getQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
+proc GetQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
   assert device.vk.valid
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
@@ -97,27 +97,27 @@ proc getQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
       flags: queuFamilies[i].queueFlags.toEnums,
     )
 
-proc canDoGraphics*(family: QueueFamily): bool =
+proc CanDoGraphics*(family: QueueFamily): bool =
   VK_QUEUE_GRAPHICS_BIT in family.flags
 
-proc canDoPresentation*(family: QueueFamily, surface: VkSurfaceKHR): bool =
+proc CanDoPresentation*(family: QueueFamily, surface: VkSurfaceKHR): bool =
   assert surface.valid
   var presentation = VkBool32(false)
   checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(family.device.vk, family.index, surface, addr presentation)
   return bool(presentation)
 
-proc canDoTransfer*(family: QueueFamily): bool =
+proc CanDoTransfer*(family: QueueFamily): bool =
   VK_QUEUE_TRANSFER_BIT in family.flags
 
-proc filterForGraphicsPresentationQueues*(device: PhysicalDevice): seq[QueueFamily] =
+proc FilterForGraphicsPresentationQueues*(device: PhysicalDevice): seq[QueueFamily] =
   var canDoGraphics = false
   var canDoPresentation = false
   var queues: Table[uint32, QueueFamily]
-  for family in device.getQueueFamilies():
-    if family.canDoGraphics:
+  for family in device.GetQueueFamilies():
+    if family.CanDoGraphics:
       queues[family.index] = family
       canDoGraphics = true
-    if family.canDoPresentation(device.surface):
+    if family.CanDoPresentation(device.surface):
       queues[family.index] = family
       canDoPresentation = true
     if canDoGraphics and canDoPresentation:
@@ -125,21 +125,21 @@ proc filterForGraphicsPresentationQueues*(device: PhysicalDevice): seq[QueueFami
 
 proc filterGraphics(families: seq[QueueFamily]): seq[QueueFamily] =
   for family in families:
-    if family.canDoGraphics:
+    if family.CanDoGraphics:
       result.add family
 
 proc filterPresentation(families: seq[QueueFamily], surface: VkSurfaceKHR): seq[QueueFamily] =
   assert surface.valid
   for family in families:
-    if family.canDoPresentation(surface):
+    if family.CanDoPresentation(surface):
       result.add family
 
-proc rateGraphics*(device: PhysicalDevice): float =
+proc rateGraphics(device: PhysicalDevice): float =
   assert device.vk.valid
   assert device.surface.valid
-  if device.getQueueFamilies().filterGraphics().filterPresentation(device.surface).len == 0:
+  if device.GetQueueFamilies().filterGraphics().filterPresentation(device.surface).len == 0:
     return -1
-  if not ("VK_KHR_swapchain" in device.getExtensions()):
+  if not ("VK_KHR_swapchain" in device.GetExtensions()):
     return -1
   const deviceTypeMap = [
     VK_PHYSICAL_DEVICE_TYPE_OTHER,
@@ -152,7 +152,7 @@ proc rateGraphics*(device: PhysicalDevice): float =
     if device.devicetype == devicetype:
       result = float(i)
 
-proc filterBestGraphics*(devices: seq[PhysicalDevice]): PhysicalDevice =
+proc FilterBestGraphics*(devices: seq[PhysicalDevice]): PhysicalDevice =
   var bestVal = -1'f
   for device in devices:
     assert device.vk.valid

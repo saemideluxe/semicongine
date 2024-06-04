@@ -9,7 +9,7 @@ type
     vk*: VkFramebuffer
     dimension*: Vec2u
 
-proc createFramebuffer*(device: Device, renderpass: VkRenderPass, attachments: openArray[ImageView], dimension: Vec2u): Framebuffer =
+proc CreateFramebuffer*(device: Device, renderpass: VkRenderPass, attachments: openArray[ImageView], dimension: Vec2u): Framebuffer =
   assert device.vk.valid
   assert renderpass.valid
 
@@ -31,7 +31,7 @@ proc createFramebuffer*(device: Device, renderpass: VkRenderPass, attachments: o
   )
   checkVkResult device.vk.vkCreateFramebuffer(addr(framebufferInfo), nil, addr(result.vk))
 
-proc destroy*(framebuffer: var Framebuffer) =
+proc Destroy*(framebuffer: var Framebuffer) =
   assert framebuffer.device.vk.valid
   assert framebuffer.vk.valid
   framebuffer.device.vk.vkDestroyFramebuffer(framebuffer.vk, nil)

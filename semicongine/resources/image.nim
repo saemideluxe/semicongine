@@ -39,7 +39,7 @@ type
     gammaGreen: uint32                    # not used yet
     gammaBlue: uint32                     # not used yet
 
-proc readBMP*(stream: Stream): Image[RGBAPixel] =
+proc ReadBMP*(stream: Stream): Image[RGBAPixel] =
   var
     bitmapFileHeader: BitmapFileHeader
     dibHeader: DIBHeader
@@ -113,7 +113,7 @@ proc lodepng_encode_memory(out_data: ptr cstring, outsize: ptr csize_t, image: c
 
 proc free(p: pointer) {.importc.} # for some reason the lodepng pointer can only properly be freed with the native free
 
-proc readPNG*(stream: Stream): Image[RGBAPixel] =
+proc ReadPNG*(stream: Stream): Image[RGBAPixel] =
   let indata = stream.readAll()
   var w, h: cuint
   var data: cstring
@@ -129,7 +129,7 @@ proc readPNG*(stream: Stream): Image[RGBAPixel] =
 
   result = NewImage(width = w, height = h, imagedata = imagedata)
 
-proc toPNG*[T: Pixel](image: Image[T]): seq[uint8] =
+proc ToPNG*[T: Pixel](image: Image[T]): seq[uint8] =
   when T is GrayPixel:
     let pngType = 0 # hardcoded in lodepng.h
   else:
@@ -155,7 +155,7 @@ proc toPNG*[T: Pixel](image: Image[T]): seq[uint8] =
     result[i] = uint8(pngData[i])
   free(pngData)
 
-proc writePNG*[T: Pixel](image: Image[T], filename: string) =
+proc WritePNG*[T: Pixel](image: Image[T], filename: string) =
   let f = filename.open(mode = fmWrite)
   let data = image.toPNG()
   let written = f.writeBytes(data, 0, data.len)

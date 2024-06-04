@@ -183,7 +183,7 @@ proc scene_multi_material(): seq[Mesh] =
   result = @[r1, r2]
 
 proc main() =
-  var engine = initEngine("Test")
+  var engine = InitEngine("Test")
 
   # INIT RENDERER:
   const
@@ -214,7 +214,7 @@ proc main() =
       vertexCode = """gl_Position = vec4(position, 1.0) * transform; outcolor = Uniforms.color[0];""",
       fragmentCode = "color = outcolor;",
     )
-  engine.initRenderer({
+  engine.InitRenderer({
     Mat1Type: shaderConfiguration1,
     Mat1Type: shaderConfiguration1,
     Mat2Type: shaderConfiguration1,
@@ -231,7 +231,7 @@ proc main() =
   ]
 
   for scene in scenes.mitems:
-    engine.loadScene(scene)
+    engine.LoadScene(scene)
 
   # MAINLOOP
   echo "Setup successfull, start rendering"
@@ -240,13 +240,13 @@ proc main() =
       echo "rendering scene ", scene.name
       for i in 0 ..< 1000:
         if not engine.UpdateInputs() or KeyIsDown(Escape):
-          engine.destroy()
+          engine.Destroy()
           return
-        engine.renderScene(scene)
+        engine.RenderScene(scene)
 
   # cleanup
   echo "Start cleanup"
-  engine.destroy()
+  engine.Destroy()
 
 when isMainModule:
   main()

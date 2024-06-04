@@ -1,13 +1,13 @@
 import ../../core
 
 # alsa API
-type 
+type
   OpenMode*{.size: sizeof(culong).} = enum
     SND_PCM_BLOCK = 0x00000000 # added by semicongine, for clarity
     SND_PCM_NONBLOCK = 0x00000001
   StreamMode* {.size: sizeof(cint).} = enum
     SND_PCM_STREAM_PLAYBACK = 0
-  AccessMode*{.size: sizeof(cint).} = enum 
+  AccessMode*{.size: sizeof(cint).} = enum
     SND_PCM_ACCESS_RW_INTERLEAVED = 3
   PCMFormat*{.size: sizeof(cint).} = enum
     SND_PCM_FORMAT_S16_LE = 2
@@ -15,7 +15,7 @@ type
   snd_pcm_hw_params_p* = ptr object
   snd_pcm_uframes_t* = culong
   snd_pcm_sframes_t* = clong
-{.pragma: alsafunc, importc, cdecl, dynlib: "libasound.so.2" .}
+{.pragma: alsafunc, importc, cdecl, dynlib: "libasound.so.2".}
 proc snd_pcm_open*(pcm_ref: ptr snd_pcm_p, name: cstring, streamMode: StreamMode, openmode: OpenMode): cint {.alsafunc.}
 proc snd_pcm_close*(pcm: snd_pcm_p): cint {.alsafunc.}
 proc snd_pcm_hw_params_malloc*(hw_params_ptr: ptr snd_pcm_hw_params_p): cint {.alsafunc.}
@@ -30,7 +30,7 @@ proc snd_pcm_hw_params*(pcm: snd_pcm_p, params: snd_pcm_hw_params_p): cint {.als
 proc snd_pcm_writei*(pcm: snd_pcm_p, buffer: pointer, size: snd_pcm_uframes_t): snd_pcm_sframes_t {.alsafunc.}
 proc snd_pcm_recover*(pcm: snd_pcm_p, err: cint, silent: cint): cint {.alsafunc.}
 
-template checkAlsaResult*(call: untyped) =
+template checkAlsaResult(call: untyped) =
   let value = call
   if value < 0:
     raise newException(Exception, "Alsa error: " & astToStr(call) &
@@ -42,8 +42,8 @@ type
   NativeSoundDevice* = object
     handle: snd_pcm_p
     buffers: seq[ptr SoundData]
- 
-proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSoundDevice =
+
+proc OpenSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSoundDevice =
   var hw_params: snd_pcm_hw_params_p = nil
   checkAlsaResult snd_pcm_open(addr result.handle, "default", SND_PCM_STREAM_PLAYBACK, SND_PCM_BLOCK)
 
@@ -59,10 +59,10 @@ proc openSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSo
   snd_pcm_hw_params_free(hw_params)
   result.buffers = buffers
 
-proc writeSoundData*(soundDevice: NativeSoundDevice, buffer: int) =
+proc WriteSoundData*(soundDevice: NativeSoundDevice, buffer: int) =
   var ret = snd_pcm_writei(soundDevice.handle, addr soundDevice.buffers[buffer][][0], snd_pcm_uframes_t(soundDevice.buffers[buffer][].len))
   if ret < 0:
     checkAlsaResult snd_pcm_recover(soundDevice.handle, cint(ret), 0)
 
-proc closeSoundDevice*(soundDevice: NativeSoundDevice) =
+proc CloseSoundDevice*(soundDevice: NativeSoundDevice) =
   discard snd_pcm_close(soundDevice.handle)

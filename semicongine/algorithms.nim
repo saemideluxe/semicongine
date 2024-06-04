@@ -46,7 +46,7 @@ proc find_insertion_position(alreadyPlaced: seq[Rect], area: tuple[i: int, w, h:
   return (false, newRect)
 
 
-proc pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[tuple[x: uint32, y: uint32]]] =
+proc Pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[tuple[x: uint32, y: uint32]]] =
   const MAX_ATLAS_SIZE = 4096'u32
   var areas: seq[tuple[i: int, w, h: uint32]]
 

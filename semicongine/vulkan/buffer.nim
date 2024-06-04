@@ -35,7 +35,7 @@ proc requirements(buffer: Buffer): MemoryRequirements =
   buffer.device.vk.vkGetBufferMemoryRequirements(buffer.vk, addr req)
   result.size = req.size
   result.alignment = req.alignment
-  let memorytypes = buffer.device.physicaldevice.vk.getMemoryProperties().types
+  let memorytypes = buffer.device.physicaldevice.vk.GetMemoryProperties().types
   for i in 0 ..< sizeof(req.memoryTypeBits) * 8:
     if ((req.memoryTypeBits shr i) and 1) == 1:
       result.memoryTypes.add memorytypes[i]
@@ -45,7 +45,7 @@ proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool,
   assert buffer.memoryAllocated == false
 
   let requirements = buffer.requirements()
-  let memoryType = requirements.memoryTypes.selectBestMemoryType(
+  let memoryType = requirements.memoryTypes.SelectBestMemoryType(
     requireMappable = requireMappable,
     preferVRAM = preferVRAM,
     preferAutoFlush = preferAutoFlush
@@ -59,13 +59,13 @@ proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool,
     size: buffer.size,
     usage: buffer.usage,
     memoryAllocated: true,
-    memory: buffer.device.allocate(requirements.size, memoryType)
+    memory: buffer.device.Allocate(requirements.size, memoryType)
   )
   checkVkResult buffer.device.vk.vkBindBufferMemory(buffer.vk, buffer.memory.vk, VkDeviceSize(0))
 
 # currently no support for extended structure and concurrent/shared use
 # (shardingMode = VK_SHARING_MODE_CONCURRENT not supported)
-proc createBuffer*(
+proc CreateBuffer*(
   device: Device,
   size: uint64,
   usage: openArray[VkBufferUsageFlagBits],
@@ -98,7 +98,7 @@ proc createBuffer*(
   result.allocateMemory(requireMappable = requireMappable, preferVRAM = preferVRAM, preferAutoFlush = preferAutoFlush)
 
 
-proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0'u64) =
+proc Copy*(src, dst: Buffer, queue: Queue, dstOffset = 0'u64) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -107,16 +107,16 @@ proc copy*(src, dst: Buffer, queue: Queue, dstOffset = 0'u64) =
   assert VK_BUFFER_USAGE_TRANSFER_DST_BIT in dst.usage
 
   var copyRegion = VkBufferCopy(size: VkDeviceSize(src.size), dstOffset: VkDeviceSize(dstOffset))
-  withSingleUseCommandBuffer(src.device, queue, commandBuffer):
+  WithSingleUseCommandBuffer(src.device, queue, commandBuffer):
     commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
 
-proc destroy*(buffer: var Buffer) =
+proc Destroy*(buffer: var Buffer) =
   assert buffer.device.vk.valid
   assert buffer.vk.valid
   buffer.device.vk.vkDestroyBuffer(buffer.vk, nil)
   if buffer.memoryAllocated:
     assert buffer.memory.vk.valid
-    buffer.memory.free
+    buffer.memory.Free()
     buffer = Buffer(
       device: buffer.device,
       vk: buffer.vk,
@@ -126,24 +126,24 @@ proc destroy*(buffer: var Buffer) =
     )
   buffer.vk.reset
 
-template canMap*(buffer: Buffer): bool =
+template CanMap*(buffer: Buffer): bool =
   buffer.memory.canMap
 
-proc setData*(dst: Buffer, queue: Queue, src: pointer, size: uint64, bufferOffset = 0'u64) =
+proc SetData*(dst: Buffer, queue: Queue, src: pointer, size: uint64, bufferOffset = 0'u64) =
   assert bufferOffset + size <= dst.size
-  if dst.canMap:
+  if dst.CanMap:
     copyMem(cast[pointer](cast[uint](dst.memory.data) + bufferOffset), src, size)
     if dst.memory.needsFlushing:
-      dst.memory.flush()
+      dst.memory.Flush()
   else: # use staging buffer, slower but required if memory is not host visible
-    var stagingBuffer = dst.device.createBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
-    setData(stagingBuffer, queue, src, size, 0)
-    stagingBuffer.copy(dst, queue, bufferOffset)
-    stagingBuffer.destroy()
+    var stagingBuffer = dst.device.CreateBuffer(size, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
+    SetData(stagingBuffer, queue, src, size, 0)
+    stagingBuffer.Copy(dst, queue, bufferOffset)
+    stagingBuffer.Destroy()
 
-proc setData*[T: seq](dst: Buffer, queue: Queue, src: ptr T, offset = 0'u64) =
+proc SetData*[T: seq](dst: Buffer, queue: Queue, src: ptr T, offset = 0'u64) =
   dst.setData(queue, src, sizeof(get(genericParams(T), 0)) * src[].len, offset = offset)
 
-proc setData*[T](dst: Buffer, queue: Queue, src: ptr T, offset = 0'u64) =
+proc SetData*[T](dst: Buffer, queue: Queue, src: ptr T, offset = 0'u64) =
   dst.setData(queue, src, sizeof(T), offset = offset)
 

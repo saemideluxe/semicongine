@@ -66,7 +66,7 @@ type
 func `$`*(text: Text): string =
   "\"" & $text.text[0 ..< min(text.text.len, 16)] & "\""
 
-proc refresh*(text: var Text) =
+proc Refresh*(text: var Text) =
   if not text.dirty and text.processedText == text.lastRenderedText:
     return
 
@@ -205,7 +205,7 @@ func wordWrapped(text: seq[Rune], font: Font, maxWidth: float32): seq[Rune] =
   return result
 
 
-func text*(text: Text): seq[Rune] =
+func Text*(text: Text): seq[Rune] =
   text.text
 
 proc `text=`*(text: var Text, newText: seq[Rune]) =
@@ -218,27 +218,27 @@ proc `text=`*(text: var Text, newText: seq[Rune]) =
 proc `text=`*(text: var Text, newText: string) =
   `text=`(text, newText.toRunes)
 
-proc color*(text: Text): Vec4f =
+proc Color*(text: Text): Vec4f =
   text.mesh.material["color", 0, Vec4f]
 proc `color=`*(text: var Text, value: Vec4f) =
   if value != text.color:
     text.mesh.material["color", 0] = value
 
-proc horizontalAlignment*(text: Text): HorizontalAlignment =
+proc HorizontalAlignment*(text: Text): HorizontalAlignment =
   text.horizontalAlignment
 proc `horizontalAlignment=`*(text: var Text, value: HorizontalAlignment) =
   if value != text.horizontalAlignment:
     text.horizontalAlignment = value
     text.dirty = true
 
-proc verticalAlignment*(text: Text): VerticalAlignment =
+proc VerticalAlignment*(text: Text): VerticalAlignment =
   text.verticalAlignment
 proc `verticalAlignment=`*(text: var Text, value: VerticalAlignment) =
   if value != text.verticalAlignment:
     text.verticalAlignment = value
     text.dirty = true
 
-proc initText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = NewVec4f(0.07, 0.07, 0.07, 1), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
+proc InitText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = NewVec4f(0.07, 0.07, 0.07, 1), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]

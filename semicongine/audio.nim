@@ -58,7 +58,7 @@ proc setupDevice(mixer: var Mixer) =
     mixer.buffers.add newSeq[Sample](BUFFERSAMPLECOUNT)
   for i in 0 ..< mixer.buffers.len:
     bufferaddresses.add (addr mixer.buffers[i])
-  mixer.device = openSoundDevice(AUDIO_SAMPLE_RATE, bufferaddresses)
+  mixer.device = OpenSoundDevice(AUDIO_SAMPLE_RATE, bufferaddresses)
 
 proc LoadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
@@ -237,7 +237,7 @@ proc updateSoundBuffer(mixer: var Mixer) =
           track.playing.del(id)
       mixer.buffers[mixer.currentBuffer][i] = mixedSample
   # send data to sound device
-  mixer.device.writeSoundData(mixer.currentBuffer)
+  mixer.device.WriteSoundData(mixer.currentBuffer)
   mixer.currentBuffer = (mixer.currentBuffer + 1) mod mixer.buffers.len
 
 # DSP functions
@@ -279,7 +279,7 @@ proc lowPassFilter(data: var SoundData, cutoff: int) =
 
 proc destroy(mixer: var Mixer) =
   mixer.lock.deinitLock()
-  mixer.device.closeSoundDevice()
+  mixer.device.CloseSoundDevice()
 
 # Threaded implementation, usually used for audio
 

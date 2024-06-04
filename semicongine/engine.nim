@@ -47,7 +47,7 @@ type
 # forward declarations
 func GetAspectRatio*(engine: Engine): float32
 
-proc destroy*(engine: var Engine) =
+proc Destroy*(engine: var Engine) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
   if engine.renderer.isSome:
     engine.renderer.get.destroy()
@@ -60,7 +60,7 @@ proc destroy*(engine: var Engine) =
     SteamShutdown()
 
 
-proc initEngine*(
+proc InitEngine*(
   applicationName = querySetting(projectName),
   showFps = DEBUG,
   vulkanVersion = VK_MAKE_API_VERSION(0, 1, 3, 0),
@@ -107,7 +107,7 @@ proc initEngine*(
   )
   StartMixerThread()
 
-proc initRenderer*(
+proc InitRenderer*(
   engine: var Engine,
   shaders: openArray[(MaterialType, ShaderConfiguration)],
   clearColor = NewVec4f(0, 0, 0, 0),
@@ -124,7 +124,7 @@ proc initRenderer*(
     allShaders.add (PANEL_MATERIAL_TYPE, PANEL_SHADER)
   if not shaders.mapIt(it[0]).contains(TEXT_MATERIAL_TYPE):
     allShaders.add (TEXT_MATERIAL_TYPE, TEXT_SHADER)
-  engine.renderer = some(engine.device.initRenderer(
+  engine.renderer = some(engine.device.InitRenderer(
     shaders = allShaders,
     clearColor = clearColor,
     backFaceCulling = backFaceCulling,
@@ -132,12 +132,12 @@ proc initRenderer*(
     inFlightFrames = inFlightFrames,
   ))
 
-proc initRenderer*(engine: var Engine, clearColor = NewVec4f(0, 0, 0, 0), vSync = false) =
+proc InitRenderer*(engine: var Engine, clearColor = NewVec4f(0, 0, 0, 0), vSync = false) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
-  engine.initRenderer(@[], clearColor, vSync = vSync)
+  engine.InitRenderer(@[], clearColor, vSync = vSync)
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
 
-proc loadScene*(engine: var Engine, scene: var Scene) =
+proc LoadScene*(engine: var Engine, scene: var Scene) =
   debug &"start loading scene '{scene.name}'"
   assert engine.renderer.isSome
   assert not scene.loaded
@@ -149,12 +149,12 @@ proc loadScene*(engine: var Engine, scene: var Scene) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
   debug &"done loading scene '{scene.name}'"
 
-proc unloadScene*(engine: var Engine, scene: Scene) =
+proc UnLoadScene*(engine: var Engine, scene: Scene) =
   debug &"unload scene '{scene.name}'"
   engine.renderer.get.destroy(scene)
 
-proc renderScene*(engine: var Engine, scene: var Scene) =
-  assert engine.renderer.isSome, "Renderer has not yet been initialized, call 'engine.initRenderer' first"
+proc RenderScene*(engine: var Engine, scene: var Scene) =
+  assert engine.renderer.isSome, "Renderer has not yet been initialized, call 'engine.InitRenderer' first"
   assert engine.renderer.get.hasScene(scene), &"Scene '{scene.name}' has not been loaded yet"
   let t0 = getMonoTime()
 

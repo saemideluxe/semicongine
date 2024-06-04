@@ -59,7 +59,7 @@ type
 func Size*(value: DataList): uint64 =
   value.theType.Size * value.len.uint64
 
-func Hash*(value: DataList): Hash =
+func hash*(value: DataList): Hash =
   case value.theType
     of Float32: hash(value.float32)
     of Float64: hash(value.float64)

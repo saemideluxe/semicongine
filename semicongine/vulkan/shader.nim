@@ -87,7 +87,7 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
     )
     i += 4
 
-proc compileGlslCode*(
+proc compileGlslCode(
   stage: VkShaderStageFlagBits,
   inputs: openArray[ShaderAttribute] = [],
   uniforms: openArray[ShaderAttribute] = [],
@@ -108,7 +108,7 @@ proc compileGlslCode*(
     @[&"}}"]
   compileGlslToSPIRV(stage, code.join("\n"), entrypoint)
 
-proc createShaderConfiguration*(
+proc CreateShaderConfiguration*(
   name: string,
   inputs: openArray[ShaderAttribute] = [],
   intermediates: openArray[ShaderAttribute] = [],
@@ -147,7 +147,7 @@ proc createShaderConfiguration*(
   )
 
 
-proc createShaderModules*(
+proc CreateShaderModules*(
   device: Device,
   shaderConfiguration: ShaderConfiguration,
 ): (ShaderModule, ShaderModule) =
@@ -175,7 +175,7 @@ proc createShaderModules*(
   )
   checkVkResult vkCreateShaderModule(device.vk, addr(createInfoFragment), nil, addr(result[1].vk))
 
-proc getVertexInputInfo*(
+proc GetVertexInputInfo*(
   shaderConfiguration: ShaderConfiguration,
   bindings: var seq[VkVertexInputBindingDescription],
   attributes: var seq[VkVertexInputAttributeDescription],
@@ -210,7 +210,7 @@ proc getVertexInputInfo*(
   )
 
 
-proc getPipelineInfo*(shader: ShaderModule): VkPipelineShaderStageCreateInfo =
+proc GetPipelineInfo*(shader: ShaderModule): VkPipelineShaderStageCreateInfo =
   VkPipelineShaderStageCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
     stage: shader.stage,
@@ -218,7 +218,7 @@ proc getPipelineInfo*(shader: ShaderModule): VkPipelineShaderStageCreateInfo =
     pName: cstring(shader.configuration.entrypoint),
   )
 
-proc destroy*(shader: var ShaderModule) =
+proc Destroy*(shader: var ShaderModule) =
   assert shader.device.vk.valid
   assert shader.vk.valid
   shader.device.vk.vkDestroyShaderModule(shader.vk, nil)

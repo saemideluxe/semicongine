@@ -137,9 +137,9 @@ proc loadImage(root: JsonNode, imageIndex: int, mainBuffer: seq[uint8]): Image[R
   let imageType = root["images"][imageIndex]["mimeType"].getStr()
   case imageType
   of "image/bmp":
-    result = readBMP(imgData)
+    result = ReadBMP(imgData)
   of "image/png":
-    result = readPNG(imgData)
+    result = ReadPNG(imgData)
   else:
     raise newException(Exception, "Unsupported feature: Load image of type " & imageType)
 
@@ -249,7 +249,7 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, materia
     if result.vertexCount == 0:
       result.vertexCount = data.len
     assert data.len == result.vertexCount
-    result[].initVertexAttribute(attribute.toLowerAscii, data)
+    result[].InitVertexAttribute(attribute.toLowerAscii, data)
 
   if primitiveNode.hasKey("material"):
     let materialId = primitiveNode["material"].getInt()
@@ -267,19 +267,19 @@ proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, materia
           tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
-            result[].appendIndicesData(tri[0], tri[1], tri[2])
+            result[].AppendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
       of UInt32:
         for entry in data[uint32][]:
           tri.add int(entry)
           if tri.len == 3:
             # FYI gltf uses counter-clockwise indexing
-            result[].appendIndicesData(tri[0], tri[1], tri[2])
+            result[].AppendIndicesData(tri[0], tri[1], tri[2])
             tri.setLen(0)
       else:
         raise newException(Exception, &"Unsupported index data type: {data.thetype}")
   # TODO: getting from gltf to vulkan system is still messed up somehow, see other TODO
-  transform[Vec3f](result[], "position", Scale(1, -1, 1))
+  Transform[Vec3f](result[], "position", Scale(1, -1, 1))
 
 proc loadNode(root: JsonNode, node: JsonNode, materials: seq[MaterialData], mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
@@ -335,7 +335,7 @@ proc loadMeshTree(root: JsonNode, scenenode: JsonNode, materials: seq[MaterialDa
   result.updateTransforms()
 
 
-proc readglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
+proc ReadglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
   var
     header: glTFHeader
     data: glTFData

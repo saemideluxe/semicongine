@@ -17,10 +17,10 @@ type
     attributes: Table[string, DataList]
     dirtyAttributes: seq[string]
 
-proc hasMatchingAttribute*(materialType: MaterialType, attr: ShaderAttribute): bool =
+proc HasMatchingAttribute*(materialType: MaterialType, attr: ShaderAttribute): bool =
   return materialType.attributes.contains(attr.name) and materialType.attributes[attr.name] == attr.theType
 
-proc hasMatchingAttribute*(material: MaterialData, attr: ShaderAttribute): bool =
+proc HasMatchingAttribute*(material: MaterialData, attr: ShaderAttribute): bool =
   return material.attributes.contains(attr.name) and material.attributes[attr.name].theType == attr.theType
 
 template `[]`*(material: MaterialData, attributeName: string): DataList =
@@ -43,16 +43,16 @@ template `[]=`*[T](material: var MaterialData, attribute: string, i: int, newVal
   if not material.dirtyAttributes.contains(attribute):
     material.dirtyAttributes.add attribute
 
-func dirtyAttributes*(material: MaterialData): seq[string] =
+func DirtyAttributes*(material: MaterialData): seq[string] =
   material.dirtyAttributes
 
-proc clearDirtyAttributes*(material: var MaterialData) =
+proc ClearDirtyAttributes*(material: var MaterialData) =
   material.dirtyAttributes.reset
 
 proc `$`*(materialType: MaterialType): string =
   return materialType.name
 
-proc assertCanRender*(shader: ShaderConfiguration, materialType: MaterialType) =
+proc AssertCanRender*(shader: ShaderConfiguration, materialType: MaterialType) =
   for attr in shader.inputs:
     if attr.perInstance:
       if attr.name in [TRANSFORM_ATTRIB, MATERIALINDEX_ATTRIBUTE]:
@@ -132,7 +132,7 @@ const
     vertexAttributes: {"position": Vec3F32}.toTable,
     instanceAttributes: {TRANSFORM_ATTRIB: Mat4F32}.toTable,
   )
-  EMPTY_SHADER* = createShaderConfiguration(
+  EMPTY_SHADER* = CreateShaderConfiguration(
     name = "empty shader",
     inputs = [
       Attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),

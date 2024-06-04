@@ -40,7 +40,7 @@ proc loadAllConfig(): Table[string, Config] =
   for ns in walkConfigNamespaces():
     result[ns] = ns.getFile().loadConfig()
 
-proc reloadSettings*() =
+proc ReloadSettings*() =
   allsettings = loadAllConfig()
 
 proc configStr(key, section, namespace: string): string =
@@ -52,7 +52,7 @@ proc configStr(key, section, namespace: string): string =
     raise newException(Exception, &"Settings {namespace}.{section}.{key} was not found")
   allsettings[namespace].getSectionValue(section, key)
 
-proc setting*[T: int|float|string](key, section, namespace: string): T =
+proc Setting*[T: int|float|string](key, section, namespace: string): T =
   when T is int:
     let value = configStr(key, section, namespace)
     if parseInt(value, result) == 0:
@@ -64,7 +64,7 @@ proc setting*[T: int|float|string](key, section, namespace: string): T =
   else:
     result = configStr(key, section, namespace)
 
-proc setting*[T: int|float|string](identifier: string): T =
+proc Setting*[T: int|float|string](identifier: string): T =
   # identifier can be in the form:
   # {namespace}.{key}
   # {namespace}.{section}.{key}
@@ -74,7 +74,7 @@ proc setting*[T: int|float|string](identifier: string): T =
   if parts.len == 2: result = setting[T](parts[1], "", parts[0])
   else: result = setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]))
 
-proc hadConfigUpdate*(): bool =
+proc HadConfigUpdate*(): bool =
   when CONFIGHOTRELOAD == true:
     result = configUpdates.peek() > 0
 

@@ -24,7 +24,7 @@ func `$`*(drawable: Drawable): string =
   else:
     &"Drawable({drawable.name}, elementCount: {drawable.elementCount}, instanceCount: {drawable.instanceCount}, bufferOffsets: {drawable.bufferOffsets})"
 
-proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer, pipeline: VkPipeline) =
+proc Draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Table[MemoryPerformanceHint, Buffer], indexBuffer: Buffer, pipeline: VkPipeline) =
   debug &"Draw {drawable} with pipeline {pipeline}"
 
   var buffers: seq[VkBuffer]

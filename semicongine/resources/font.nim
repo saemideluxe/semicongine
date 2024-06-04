@@ -31,7 +31,7 @@ proc stbtt_GetFontVMetrics(info: ptr stbtt_fontinfo, ascent, descent, lineGap: p
 
 proc free(p: pointer) {.importc.}
 
-proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32): Font =
+proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32): Font =
   var
     indata = stream.readAll()
     fontinfo: stbtt_fontinfo
@@ -87,7 +87,7 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
 
     free(data)
 
-  let packed = pack(images)
+  let packed = Pack(images)
 
   result.fontAtlas = Texture(
     name: name & "_texture",

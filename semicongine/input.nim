@@ -121,15 +121,15 @@ proc UnmapAction*[T: enum](action: T) =
 
 proc SaveCurrentActionMapping*() =
   for name, keys in actionMap.keyActions.pairs:
-    SystemStorage.store(name, keys, table = "input_mapping_key")
+    SystemStorage.Store(name, keys, table = "input_mapping_key")
   for name, buttons in actionMap.mouseActions.pairs:
-    SystemStorage.store(name, buttons, table = "input_mapping_mouse")
+    SystemStorage.Store(name, buttons, table = "input_mapping_mouse")
 
 proc LoadActionMapping*[T]() =
   reset(actionMap)
-  for name in SystemStorage.list(table = "input_mapping_key"):
+  for name in SystemStorage.List(table = "input_mapping_key"):
     let action = parseEnum[T](name)
-    let keys = SystemStorage.load(name, set[Key](), table = "input_mapping_key")
+    let keys = SystemStorage.Load(name, set[Key](), table = "input_mapping_key")
     for key in keys:
       MapAction(action, key)
 

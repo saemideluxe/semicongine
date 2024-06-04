@@ -37,7 +37,7 @@ proc main() =
   var scene = Scene(name: "main", meshes: @[flag])
   scene.addShaderGlobalArray("test2", @[NewVec4f(), NewVec4f()])
 
-  var engine = initEngine("Test materials")
+  var engine = InitEngine("Test materials")
 
   const
     shaderConfiguration1 = createShaderConfiguration(
@@ -63,16 +63,16 @@ proc main() =
       color = texture(tex1, uvout) * (1 - d) + texture(tex2, uvout) * d;
       """,
     )
-  engine.initRenderer({
+  engine.InitRenderer({
     doubleTextureMaterial: shaderConfiguration1,
   })
-  engine.loadScene(scene)
+  engine.LoadScene(scene)
   var t = cpuTime()
   while engine.UpdateInputs() and not KeyIsDown(Escape):
     var d = float32(cpuTime() - t)
     setShaderGlobalArray(scene, "test2", @[NewVec4f(d), NewVec4f(d * 2)])
-    engine.renderScene(scene)
-  engine.destroy()
+    engine.RenderScene(scene)
+  engine.Destroy()
 
 
 when isMainModule:

@@ -83,10 +83,10 @@ func interpol(keyframe: Keyframe, t: float32): float32 =
   else:
     return combine(EASEFUNC_MAP[keyframe.easeIn], makeEaseOut(EASEFUNC_MAP[keyframe.easeOut]))(t)
 
-func keyframe*[T](timestamp: AnimationTime, value: T, easeIn = Linear, easeOut = None): Keyframe[T] =
+func InitKeyframe*[T](timestamp: AnimationTime, value: T, easeIn = Linear, easeOut = None): Keyframe[T] =
   Keyframe[T](timestamp: timestamp, value: value, easeIn: easeIn, easeOut: easeOut)
 
-func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, direction = Forward, iterations = 1): Animation[T] =
+func NewAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, direction = Forward, iterations = 1): Animation[T] =
   assert keyframes.len >= 2, "An animation needs at least 2 keyframes"
   assert keyframes[0].timestamp == 0, "An animation's first keyframe needs to have timestamp=0"
   assert keyframes[^1].timestamp == 1, "An animation's last keyframe needs to have timestamp=1"
@@ -119,7 +119,7 @@ func newAnimation*[T](keyframes: openArray[Keyframe[T]], duration: float32, dire
     iterations: iterations
   )
 
-func newAnimation*[T](fun: (state: AnimationState[T], dt: float32) -> T, duration: float32, direction = Forward, iterations = 1): Animation[T] =
+func NewAnimation*[T](fun: (state: AnimationState[T], dt: float32) -> T, duration: float32, direction = Forward, iterations = 1): Animation[T] =
   assert fun != nil, "Animation function cannot be nil"
   Animation[T](
     animationFunction: fun,
@@ -128,7 +128,7 @@ func newAnimation*[T](fun: (state: AnimationState[T], dt: float32) -> T, duratio
     iterations: iterations
   )
 
-proc resetState*[T](state: var AnimationState[T], initial: T) =
+proc ResetState*[T](state: var AnimationState[T], initial: T) =
   state.currentValue = initial
   state.currentTime = 0
   state.currentDirection = if state.animation.direction == Backward: -1 else: 1
@@ -137,20 +137,20 @@ proc resetState*[T](state: var AnimationState[T], initial: T) =
 proc t*(state: AnimationState): AnimationTime =
   max(low(AnimationTime), min(state.currentTime / state.animation.duration, high(AnimationTime)))
 
-proc newAnimationState*[T](animation: Animation[T], initial = default(T)): AnimationState[T] =
+proc NewAnimationState*[T](animation: Animation[T], initial = default(T)): AnimationState[T] =
   result = AnimationState[T](animation: animation, playing: false)
   result.resetState(initial)
 
-proc newAnimationState*[T](value: T = default(T)): AnimationState[T] =
-  newAnimationState[T](newAnimation[T]((state: AnimationState[T], dt: float32) => value, 0), initial = value)
+proc NewAnimationState*[T](value: T = default(T)): AnimationState[T] =
+  NewAnimationState[T](NewAnimation[T]((state: AnimationState[T], dt: float32) => value, 0), initial = value)
 
-func start*(state: var AnimationState) =
+func Start*(state: var AnimationState) =
   state.playing = true
 
-func stop*(state: var AnimationState) =
+func Stop*(state: var AnimationState) =
   state.playing = false
 
-proc advance*[T](state: var AnimationState[T], dt: float32): T =
+proc Advance*[T](state: var AnimationState[T], dt: float32): T =
   # TODO: check this function, not 100% correct I think
   if state.playing:
     state.currentTime += float32(state.currentDirection) * dt

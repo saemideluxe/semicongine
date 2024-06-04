@@ -21,7 +21,7 @@ type
 proc `$`*(device: Device): string =
   "Device: vk=" & $device.vk
 
-proc createDevice*(
+proc CreateDevice*(
   instance: Instance,
   physicalDevice: PhysicalDevice,
   enabledExtensions: seq[string],
@@ -88,21 +88,21 @@ proc createDevice*(
   for family in deviceQueues.keys:
     var queue: VkQueue
     vkGetDeviceQueue(result.vk, family.index, 0, addr queue)
-    result.queues[family] = Queue(vk: queue, family: family, presentation: family.canDoPresentation(physicalDevice.surface), graphics: family.canDoGraphics())
+    result.queues[family] = Queue(vk: queue, family: family, presentation: family.CanDoPresentation(physicalDevice.surface), graphics: family.CanDoGraphics())
 
-func firstGraphicsQueue*(device: Device): Option[Queue] =
+func FirstGraphicsQueue*(device: Device): Option[Queue] =
   assert device.vk.valid
   for family, queue in device.queues:
     if queue.graphics:
       return some(queue)
 
-proc firstPresentationQueue*(device: Device): Option[Queue] =
+proc FirstPresentationQueue*(device: Device): Option[Queue] =
   assert device.vk.valid
   for family, queue in device.queues:
     if queue.presentation:
       return some(queue)
 
-proc destroy*(device: var Device) =
+proc Destroy*(device: var Device) =
   assert device.vk.valid
   device.vk.vkDestroyDevice(nil)
   device.vk.reset()

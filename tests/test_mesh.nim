@@ -16,7 +16,7 @@ proc main() =
     Scene(name: "Donut", meshes: loadMeshes("donut.glb", MeshMaterial)[0].toSeq),
   ]
 
-  var engine = initEngine("Test meshes")
+  var engine = InitEngine("Test meshes")
   const
     shaderConfiguration = createShaderConfiguration(
       name = "default shader",
@@ -46,12 +46,12 @@ proc main() =
   """,
       fragmentCode = "color = texture(baseTexture[materialIndexOut], colorTexCoord) * vertexColor;"
     )
-  engine.initRenderer({MeshMaterial: shaderConfiguration})
+  engine.InitRenderer({MeshMaterial: shaderConfiguration})
 
   for scene in scenes.mitems:
     scene.addShaderGlobal("projection", Unit4F32)
     scene.addShaderGlobal("view", Unit4F32)
-    engine.loadScene(scene)
+    engine.LoadScene(scene)
 
   var
     size = 1'f32
@@ -87,8 +87,8 @@ proc main() =
       "view",
        Scale(size, size, size) * Rotate(elevation, NewVec3f(1, 0, 0)) * Rotate(azimut, Yf32)
     )
-    engine.renderScene(scenes[currentScene])
-  engine.destroy()
+    engine.RenderScene(scenes[currentScene])
+  engine.Destroy()
 
 when isMainModule:
   main()

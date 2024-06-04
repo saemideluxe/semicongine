@@ -56,7 +56,7 @@ proc requirements(image: VulkanImage): MemoryRequirements =
   image.device.vk.vkGetImageMemoryRequirements(image.vk, addr req)
   result.size = req.size
   result.alignment = req.alignment
-  let memorytypes = image.device.physicaldevice.vk.getMemoryProperties().types
+  let memorytypes = image.device.physicaldevice.vk.GetMemoryProperties().types
   for i in 0 ..< sizeof(req.memoryTypeBits) * 8:
     if ((req.memoryTypeBits shr i) and 1) == 1:
       result.memoryTypes.add memorytypes[i]
@@ -66,7 +66,7 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
   assert image.memoryAllocated == false
 
   let requirements = image.requirements()
-  let memoryType = requirements.memoryTypes.selectBestMemoryType(
+  let memoryType = requirements.memoryTypes.SelectBestMemoryType(
     requireMappable = requireMappable,
     preferVRAM = preferVRAM,
     preferAutoFlush = preferAutoFlush
@@ -82,7 +82,7 @@ proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: b
     format: image.format,
     usage: image.usage,
     memoryAllocated: true,
-    memory: image.device.allocate(requirements.size, memoryType),
+    memory: image.device.Allocate(requirements.size, memoryType),
   )
   checkVkResult image.device.vk.vkBindImageMemory(image.vk, image.memory.vk, VkDeviceSize(0))
 
@@ -118,10 +118,10 @@ proc transitionImageLayout(image: VulkanImage, queue: Queue, oldLayout, newLayou
   else:
     raise newException(Exception, "Unsupported layout transition!")
 
-  withSingleUseCommandBuffer(image.device, queue, commandBuffer):
-    commandBuffer.pipelineBarrier([srcStage], [dstStage], imageBarriers = [barrier])
+  WithSingleUseCommandBuffer(image.device, queue, commandBuffer):
+    commandBuffer.PipelineBarrier([srcStage], [dstStage], imageBarriers = [barrier])
 
-proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
+proc Copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
   assert src.device.vk.valid
   assert dst.device.vk.valid
   assert src.device == dst.device
@@ -141,7 +141,7 @@ proc copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
     imageOffset: VkOffset3D(x: 0, y: 0, z: 0),
     imageExtent: VkExtent3D(width: dst.width, height: dst.height, depth: 1)
   )
-  withSingleUseCommandBuffer(src.device, queue, commandBuffer):
+  WithSingleUseCommandBuffer(src.device, queue, commandBuffer):
     commandBuffer.vkCmdCopyBufferToImage(
       src.vk,
       dst.vk,
@@ -219,19 +219,19 @@ proc createImage[T](device: Device, queue: Queue, width, height: uint32, depth: 
   result.allocateMemory(requireMappable = false, preferVRAM = true, preferAutoFlush = false)
   result.transitionImageLayout(queue, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
 
-  var stagingBuffer = device.createBuffer(size = size, usage = [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
-  stagingBuffer.setData(queue, src = data, size = size)
-  stagingBuffer.copy(result, queue)
+  var stagingBuffer = device.CreateBuffer(size = size, usage = [VK_BUFFER_USAGE_TRANSFER_SRC_BIT], requireMappable = true, preferVRAM = false, preferAutoFlush = true)
+  stagingBuffer.SetData(queue, src = data, size = size)
+  stagingBuffer.Copy(result, queue)
   result.transitionImageLayout(queue, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-  stagingBuffer.destroy()
+  stagingBuffer.Destroy()
 
-proc destroy*(image: var VulkanImage) =
+proc Destroy*(image: var VulkanImage) =
   assert image.device.vk.valid
   assert image.vk.valid
   image.device.vk.vkDestroyImage(image.vk, nil)
   if image.memoryAllocated:
     assert image.memory.vk.valid
-    image.memory.free
+    image.memory.Free()
     image = VulkanImage(
       device: image.device,
       vk: image.vk,
@@ -244,7 +244,7 @@ proc destroy*(image: var VulkanImage) =
     )
   image.vk.reset
 
-proc createSampler*(device: Device, sampler: Sampler): VulkanSampler =
+proc CreateSampler*(device: Device, sampler: Sampler): VulkanSampler =
   assert device.vk.valid
   var samplerInfo = VkSamplerCreateInfo(
     sType: VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -267,13 +267,13 @@ proc createSampler*(device: Device, sampler: Sampler): VulkanSampler =
   result.device = device
   checkVkResult device.vk.vkCreateSampler(addr samplerInfo, nil, addr result.vk)
 
-proc destroy*(sampler: var VulkanSampler) =
+proc Destroy*(sampler: var VulkanSampler) =
   assert sampler.device.vk.valid
   assert sampler.vk.valid
   sampler.device.vk.vkDestroySampler(sampler.vk, nil)
   sampler.vk.reset
 
-proc createImageView*(
+proc CreateImageView*(
   image: VulkanImage,
   imageviewtype = VK_IMAGE_VIEW_TYPE_2D,
   baseMipLevel = 0'u32,
@@ -306,7 +306,7 @@ proc createImageView*(
   result.image = image
   checkVkResult image.device.vk.vkCreateImageView(addr(createInfo), nil, addr(result.vk))
 
-proc destroy*(imageview: var ImageView) =
+proc Destroy*(imageview: var ImageView) =
   assert imageview.image.device.vk.valid
   assert imageview.vk.valid
   imageview.image.device.vk.vkDestroyImageView(imageview.vk, nil)
@@ -316,16 +316,16 @@ func `$`*(texture: VulkanTexture): string =
   &"VulkanTexture({texture.image.width}x{texture.image.height})"
 
 
-proc uploadTexture*(device: Device, queue: Queue, texture: Texture): VulkanTexture =
+proc UploadTexture*(device: Device, queue: Queue, texture: Texture): VulkanTexture =
   assert device.vk.valid
   if texture.isGrayscale:
     result.image = createImage(device = device, queue = queue, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, image = texture.grayImage)
   else:
     result.image = createImage(device = device, queue = queue, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, image = texture.colorImage)
-  result.imageView = result.image.createImageView()
-  result.sampler = result.image.device.createSampler(texture.sampler)
+  result.imageView = result.image.CreateImageView()
+  result.sampler = result.image.device.CreateSampler(texture.sampler)
 
-proc destroy*(texture: var VulkanTexture) =
-  texture.image.destroy()
-  texture.imageView.destroy()
-  texture.sampler.destroy()
+proc Destroy*(texture: var VulkanTexture) =
+  texture.image.Destroy()
+  texture.imageView.Destroy()
+  texture.sampler.Destroy()

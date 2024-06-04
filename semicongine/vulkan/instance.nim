@@ -24,7 +24,7 @@ type
     userData: pointer
   ): VkBool32 {.cdecl.}
 
-proc getInstanceExtensions*(): seq[string] =
+proc GetInstanceExtensions*(): seq[string] =
   var extensionCount: uint32
   checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), nil)
   if extensionCount > 0:
@@ -33,7 +33,7 @@ proc getInstanceExtensions*(): seq[string] =
     for extension in extensions:
       result.add(CleanString(extension.extensionName))
 
-proc getLayers*(): seq[string] =
+proc GetLayers*(): seq[string] =
   var n_layers: uint32
   checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), nil)
   if n_layers > 0:
@@ -42,7 +42,7 @@ proc getLayers*(): seq[string] =
     for layer in layers:
       result.add(CleanString(layer.layerName))
 
-proc createInstance*(
+proc CreateInstance*(
   window: NativeWindow,
   vulkanVersion: uint32,
   instanceExtensions: seq[string],
@@ -53,10 +53,10 @@ proc createInstance*(
 
   let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface"] & instanceExtensions
   for i in requiredExtensions:
-    assert i in getInstanceExtensions(), $i
+    assert i in GetInstanceExtensions(), $i
   var availableLayers: seq[string]
   for i in layers:
-    if i in getLayers():
+    if i in GetLayers():
       availableLayers.add i
   debug "Enabled layers: " & $availableLayers
   var
@@ -82,9 +82,9 @@ proc createInstance*(
   deallocCStringArray(instanceExtensionsC)
   for extension in requiredExtensions:
     result.vk.loadExtension($extension)
-  result.surface = result.vk.createNativeSurface(window)
+  result.surface = result.vk.CreateNativeSurface(window)
 
-proc destroy*(instance: var Instance) =
+proc Destroy*(instance: var Instance) =
   assert instance.vk.valid
   assert instance.surface.valid
   # needs to happen after window is trashed as the driver might have a hook registered for the window destruction
@@ -113,7 +113,7 @@ proc defaultDebugCallback(
     raise newException(Exception, errorMsg)
   return false
 
-proc createDebugMessenger*(
+proc CreateDebugMessenger*(
   instance: Instance,
   severityLevels: openArray[VkDebugUtilsMessageSeverityFlagBitsEXT] = @[],
   types: openArray[VkDebugUtilsMessageTypeFlagBitsEXT] = @[],
@@ -136,7 +136,7 @@ proc createDebugMessenger*(
   )
   checkVkResult instance.vk.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result.messenger))
 
-proc destroy*(debugger: var Debugger) =
+proc Destroy*(debugger: var Debugger) =
   assert debugger.messenger.valid
   assert debugger.instance.vk.valid
   debugger.instance.vk.vkDestroyDebugUtilsMessengerEXT(debugger.messenger, nil)

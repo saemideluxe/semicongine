@@ -1,7 +1,7 @@
 import ../../core
 import ../../platform/window
 
-proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
+proc CreateNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   assert instance.valid
   var surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,

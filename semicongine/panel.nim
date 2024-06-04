@@ -62,7 +62,7 @@ type
 proc `$`*(panel: Panel): string =
   &"Panel {panel.mesh}"
 
-proc refresh*(panel: var Panel) =
+proc Refresh*(panel: var Panel) =
   if not panel.dirty:
     return
 
@@ -83,7 +83,7 @@ proc refresh*(panel: var Panel) =
 
   panel.dirty = false
 
-proc initPanel*(
+proc InitPanel*(
   transform = Unit4,
   color = NewVec4f(1, 1, 1, 1),
   texture = EMPTY_TEXTURE,
@@ -128,27 +128,27 @@ proc initPanel*(
   inc instanceCounter
   result.refresh()
 
-proc color*(panel: Panel): Vec4f =
+proc Color*(panel: Panel): Vec4f =
   panel.mesh.material["color", 0, Vec4f]
 proc `color=`*(panel: var Panel, value: Vec4f) =
   if value != panel.color:
     panel.mesh.material["color", 0] = value
 
-proc horizontalAlignment*(panel: Panel): HorizontalAlignment =
+proc HorizontalAlignment*(panel: Panel): HorizontalAlignment =
   panel.horizontalAlignment
 proc `horizontalAlignment=`*(panel: var Panel, value: HorizontalAlignment) =
   if value != panel.horizontalAlignment:
     panel.horizontalAlignment = value
     panel.dirty = true
 
-proc verticalAlignment*(panel: Panel): VerticalAlignment =
+proc VerticalAlignment*(panel: Panel): VerticalAlignment =
   panel.verticalAlignment
 proc `verticalAlignment=`*(panel: var Panel, value: VerticalAlignment) =
   if value != panel.verticalAlignment:
     panel.verticalAlignment = value
     panel.dirty = true
 
-proc contains*(panel: Panel, p: Vec2f, aspectRatio: float32): bool =
+proc Contains*(panel: Panel, p: Vec2f, aspectRatio: float32): bool =
   let
     cursor = panel.mesh.transform.Inversed * p.ToVec3
     p1 = panel.mesh[POSITION_ATTRIB, 0, Vec3f]

@@ -176,9 +176,9 @@ proc loadImage*[T](path: string, package = DEFAULT_PACKAGE): Image[RGBAPixel] =
 
 proc loadAudio*(path: string, package = DEFAULT_PACKAGE): Sound =
   if path.splitFile().ext.toLowerAscii == ".au":
-    loadResource_intern(path, package = package).readAU()
+    loadResource_intern(path, package = package).ReadAU()
   elif path.splitFile().ext.toLowerAscii == ".ogg":
-    loadResource_intern(path, package = package).readVorbis()
+    loadResource_intern(path, package = package).ReadVorbis()
   else:
     raise newException(Exception, "Unsupported audio file type: " & path)
 
@@ -199,13 +199,13 @@ proc loadFont*(
   var thename = name
   if thename == "":
     thename = path.splitFile().name
-  loadResource_intern(path, package = package).readTrueType(name, charset & additional_codepoints.toSeq, lineHeightPixels)
+  loadResource_intern(path, package = package).ReadTrueType(name, charset & additional_codepoints.toSeq, lineHeightPixels)
 
 proc loadMeshes*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): seq[MeshTree] =
-  loadResource_intern(path, package = package).readglTF(defaultMaterial)
+  loadResource_intern(path, package = package).ReadglTF(defaultMaterial)
 
 proc loadFirstMesh*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): Mesh =
-  loadResource_intern(path, package = package).readglTF(defaultMaterial)[0].toSeq[0]
+  loadResource_intern(path, package = package).ReadglTF(defaultMaterial)[0].toSeq[0]
 
 proc packages*(): seq[string] =
   modList_intern()

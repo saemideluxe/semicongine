@@ -32,7 +32,7 @@ type
 func `$`*(memoryType: MemoryType): string =
   &"Memorytype {memoryType.flags} (heap size: {memoryType.heap.size}, heap flags: {memoryType.heap.flags})"
 
-proc selectBestMemoryType*(types: seq[MemoryType], requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool): MemoryType =
+proc SelectBestMemoryType*(types: seq[MemoryType], requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool): MemoryType =
   # todo: we assume there is always at least one memory type that is mappable
   assert types.len > 0
   var highestRating = 0'f
@@ -49,7 +49,7 @@ proc selectBestMemoryType*(types: seq[MemoryType], requireMappable: bool, prefer
       highestRating = rating
       result = t
 
-proc getMemoryProperties*(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemoryProperties =
+proc GetMemoryProperties*(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemoryProperties =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(physicalDevice, addr physicalProperties)
   for i in 0 ..< physicalProperties.memoryHeapCount:
@@ -65,7 +65,7 @@ proc getMemoryProperties*(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemor
       index: i,
     )
 
-proc allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemory =
+proc Allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemory =
   assert device.vk.valid
   assert size > 0
   result = DeviceMemory(
@@ -99,7 +99,7 @@ proc allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemo
     )
 
 # flush host -> device
-proc flush*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
+proc Flush*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
   assert memory.device.vk.valid
   assert memory.vk.valid
   assert memory.needsFlushing
@@ -116,7 +116,7 @@ proc flush*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
   checkVkResult memory.device.vk.vkFlushMappedMemoryRanges(memoryRangeCount = 1, pMemoryRanges = addr(flushrange))
 
 # flush device -> host
-proc invalidate*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
+proc Invalidate*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
   assert memory.device.vk.valid
   assert memory.vk.valid
   assert memory.needsFlushing
@@ -132,7 +132,7 @@ proc invalidate*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
   )
   checkVkResult memory.device.vk.vkInvalidateMappedMemoryRanges(memoryRangeCount = 1, pMemoryRanges = addr(flushrange))
 
-proc free*(memory: var DeviceMemory) =
+proc Free*(memory: var DeviceMemory) =
   assert memory.device.vk.valid
   assert memory.vk.valid
 

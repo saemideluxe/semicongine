@@ -35,7 +35,7 @@ proc readSample(stream: Stream, encoding: Encoding, channels: int): Sample =
     result[1] = result[0]
 
 # https://en.wikipedia.org/wiki/Au_file_format
-proc readAU*(stream: Stream): Sound =
+proc ReadAU*(stream: Stream): Sound =
   var header: AuHeader
 
   for name, value in fieldPairs(header):
@@ -64,7 +64,7 @@ proc readAU*(stream: Stream): Sound =
 proc stb_vorbis_decode_memory(mem: pointer, len: cint, channels: ptr cint, sample_rate: ptr cint, output: ptr ptr cshort): cint {.importc.}
 proc free(p: pointer) {.importc.}
 
-proc readVorbis*(stream: Stream): Sound =
+proc ReadVorbis*(stream: Stream): Sound =
   var
     data = stream.readAll()
     channels: cint

@@ -24,7 +24,7 @@ type
     window*: x.Window
     emptyCursor: Cursor
 
-template checkXlibResult*(call: untyped) =
+template checkXlibResult(call: untyped) =
   let value = call
   if value == 0:
     raise newException(Exception, "Xlib error: " & astToStr(call) &
@@ -33,7 +33,7 @@ template checkXlibResult*(call: untyped) =
 proc XErrorLogger(display: PDisplay, event: PXErrorEvent): cint {.cdecl.} =
   error &"Xlib: {event[]}"
 
-proc createWindow*(title: string): NativeWindow =
+proc CreateWindow*(title: string): NativeWindow =
   checkXlibResult XInitThreads()
   let display = XOpenDisplay(nil)
   if display == nil:
@@ -76,10 +76,10 @@ proc createWindow*(title: string): NativeWindow =
   checkXlibResult display.XFreePixmap(pixmap)
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
-proc setTitle*(window: NativeWindow, title: string) =
+proc SetTitle*(window: NativeWindow, title: string) =
   checkXlibResult XSetStandardProperties(window.display, window.window, title, "window", 0, nil, 0, nil)
 
-proc fullscreen*(window: var NativeWindow, enable: bool) =
+proc Fullscreen*(window: var NativeWindow, enable: bool) =
   var
     wm_state = window.display.XInternAtom("_NET_WM_STATE", 0)
     wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 0)
@@ -109,25 +109,25 @@ proc fullscreen*(window: var NativeWindow, enable: bool) =
   )
   checkXlibResult window.display.XFlush()
 
-proc hideSystemCursor*(window: NativeWindow) =
+proc HideSystemCursor*(window: NativeWindow) =
   checkXlibResult XDefineCursor(window.display, window.window, window.emptyCursor)
   checkXlibResult window.display.XFlush()
 
-proc showSystemCursor*(window: NativeWindow) =
+proc ShowSystemCursor*(window: NativeWindow) =
   checkXlibResult XUndefineCursor(window.display, window.window)
   checkXlibResult window.display.XFlush()
 
-proc destroy*(window: NativeWindow) =
+proc Destroy*(window: NativeWindow) =
   checkXlibResult window.display.XFreeCursor(window.emptyCursor)
   checkXlibResult window.display.XDestroyWindow(window.window)
   discard window.display.XCloseDisplay() # always returns 0
 
-proc size*(window: NativeWindow): (int, int) =
+proc Size*(window: NativeWindow): (int, int) =
   var attribs: XWindowAttributes
   checkXlibResult XGetWindowAttributes(window.display, window.window, addr(attribs))
   return (int(attribs.width), int(attribs.height))
 
-proc pendingEvents*(window: NativeWindow): seq[Event] =
+proc PendingEvents*(window: NativeWindow): seq[Event] =
   var event: XEvent
   while window.display.XPending() > 0:
     discard window.display.XNextEvent(addr(event))
@@ -163,7 +163,7 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
       discard
 
 
-proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
+proc GetMousePosition*(window: NativeWindow): Option[Vec2f] =
   var
     root: x.Window
     win: x.Window

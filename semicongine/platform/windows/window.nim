@@ -17,7 +17,7 @@ type
 # sorry, have to use module-global variable to capture windows events
 var currentEvents: seq[Event]
 
-template checkWin32Result*(call: untyped) =
+template CheckWin32Result*(call: untyped) =
   let value = call
   if value == 0:
     raise newException(Exception, "Win32 error: " & astToStr(call) & " returned " & $value)
@@ -64,7 +64,7 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 
 
-proc createWindow*(title: string): NativeWindow =
+proc CreateWindow*(title: string): NativeWindow =
   when DEBUG:
     AllocConsole()
     discard stdin.reopen("conIN$", fmRead)
@@ -101,12 +101,12 @@ proc createWindow*(title: string): NativeWindow =
   result.g_wpPrev.length = UINT(sizeof(WINDOWPLACEMENT))
   discard result.hwnd.ShowWindow(SW_SHOW)
 
-proc setTitle*(window: NativeWindow, title: string) =
+proc SetTitle*(window: NativeWindow, title: string) =
   window.hwnd.SetWindowText(T(title))
 
 # inspired by the one and only, Raymond Chen
 # https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
-proc fullscreen*(window: var NativeWindow, enable: bool) =
+proc Fullscreen*(window: var NativeWindow, enable: bool) =
   let dwStyle: DWORD = GetWindowLong(window.hwnd, GWL_STYLE)
   if enable:
     var mi = MONITORINFO(cbSize: DWORD(sizeof(MONITORINFO)))
@@ -118,21 +118,21 @@ proc fullscreen*(window: var NativeWindow, enable: bool) =
     SetWindowPlacement(window.hwnd, addr window.g_wpPrev)
     SetWindowPos(window.hwnd, HWND(0), 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
 
-proc hideSystemCursor*(window: NativeWindow) =
+proc HideSystemCursor*(window: NativeWindow) =
   discard ShowCursor(false)
 
-proc showSystemCursor*(window: NativeWindow) =
+proc ShowSystemCursor*(window: NativeWindow) =
   discard ShowCursor(true)
 
-proc destroy*(window: NativeWindow) =
+proc Destroy*(window: NativeWindow) =
   discard
 
-proc size*(window: NativeWindow): (int, int) =
+proc Size*(window: NativeWindow): (int, int) =
   var rect: RECT
   checkWin32Result GetWindowRect(window.hwnd, addr(rect))
   (int(rect.right - rect.left), int(rect.bottom - rect.top))
 
-proc pendingEvents*(window: NativeWindow): seq[Event] =
+proc PendingEvents*(window: NativeWindow): seq[Event] =
   # empty queue
   currentEvents = newSeq[Event]()
   var msg: MSG
@@ -142,7 +142,7 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     DispatchMessage(addr(msg))
   return currentEvents
 
-proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
+proc GetMousePosition*(window: NativeWindow): Option[Vec2f] =
   var p: POINT
   let res = GetCursorPos(addr(p))
   if res:

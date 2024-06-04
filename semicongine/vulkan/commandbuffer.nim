@@ -10,7 +10,7 @@ type
     family*: QueueFamily
     buffers*: seq[VkCommandBuffer]
 
-proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int): CommandBufferPool =
+proc CreateCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int): CommandBufferPool =
   assert device.vk.valid
   var createInfo = VkCommandPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -30,7 +30,7 @@ proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int
   result.buffers = newSeq[VkCommandBuffer](nBuffers)
   checkVkResult device.vk.vkAllocateCommandBuffers(addr allocInfo, result.buffers.ToCPointer)
 
-proc pipelineBarrier*(
+proc PipelineBarrier*(
   commandBuffer: VkCommandBuffer,
   srcStages: openArray[VkPipelineStageFlagBits],
   dstStages: openArray[VkPipelineStageFlagBits],
@@ -53,14 +53,14 @@ proc pipelineBarrier*(
   )
 
 
-template withSingleUseCommandBuffer*(device: Device, queue: Queue, commandBuffer, body: untyped): untyped =
+template WithSingleUseCommandBuffer*(device: Device, queue: Queue, commandBuffer, body: untyped): untyped =
   # TODO? This is super slow, because we call vkQueueWaitIdle
   block:
     assert device.vk.valid
     assert queue.vk.valid
 
     var
-      commandBufferPool = createCommandBufferPool(device, queue.family, 1)
+      commandBufferPool = CreateCommandBufferPool(device, queue.family, 1)
       commandBuffer = commandBufferPool.buffers[0]
       beginInfo = VkCommandBufferBeginInfo(
         sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -79,10 +79,10 @@ template withSingleUseCommandBuffer*(device: Device, queue: Queue, commandBuffer
     )
     checkVkResult queue.vk.vkQueueSubmit(1, addr submitInfo, VkFence(0))
     checkVkResult queue.vk.vkQueueWaitIdle()
-    commandBufferPool.destroy()
+    commandBufferPool.Destroy()
 
 
-proc destroy*(commandpool: var CommandBufferPool) =
+proc Destroy*(commandpool: var CommandBufferPool) =
   assert commandpool.device.vk.valid
   assert commandpool.vk.valid
   commandpool.device.vk.vkDestroyCommandPool(commandpool.vk, nil)

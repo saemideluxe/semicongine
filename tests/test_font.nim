@@ -6,8 +6,8 @@ import semicongine
 
 proc main() =
   # setup engine
-  var engine = initEngine("Test fonts")
-  engine.initRenderer([])
+  var engine = InitEngine("Test fonts")
+  engine.InitRenderer([])
 
   # build scene
   var scene = Scene(name: "main")
@@ -27,7 +27,7 @@ Vertical alignment:
   scene.add origin
   scene.add main_text
   scene.add help_text
-  engine.loadScene(scene)
+  engine.LoadScene(scene)
   mixer[].LoadSound("key", "key.ogg")
   mixer[].SetLevel(0.5)
 
@@ -71,8 +71,8 @@ Vertical alignment:
     main_text.refresh()
     main_text.text = main_text.text[0 ..< ^1]
     help_text.refresh()
-    engine.renderScene(scene)
-  engine.destroy()
+    engine.RenderScene(scene)
+  engine.Destroy()
 
 
 when isMainModule:

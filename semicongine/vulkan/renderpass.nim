@@ -13,7 +13,7 @@ type
     shaderPipelines*: seq[(MaterialType, ShaderPipeline)]
     clearColor*: Vec4f
 
-proc createRenderPass*(
+proc CreateRenderPass*(
   device: Device,
   shaders: openArray[(MaterialType, ShaderConfiguration)],
   clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]),
@@ -24,11 +24,11 @@ proc createRenderPass*(
 
   # some asserts
   for (materialtype, shaderconfig) in shaders:
-    shaderconfig.assertCanRender(materialtype)
+    shaderconfig.AssertCanRender(materialtype)
 
   var
     attachments = @[VkAttachmentDescription(
-        format: device.physicalDevice.getSurfaceFormats().filterSurfaceFormat().format,
+        format: device.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat().format,
         samples: VK_SAMPLE_COUNT_1_BIT,
         loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
         storeOp: VK_ATTACHMENT_STORE_OP_STORE,
@@ -84,9 +84,9 @@ proc createRenderPass*(
   for (_, shaderconfig) in shaders:
     assert shaderconfig.outputs.len == 1
   for (materialtype, shaderconfig) in shaders:
-    result.shaderPipelines.add (materialtype, device.createPipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling = backFaceCulling))
+    result.shaderPipelines.add (materialtype, device.CreatePipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling = backFaceCulling))
 
-proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer, oneTimeSubmit: bool) =
+proc BeginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer, oneTimeSubmit: bool) =
   assert commandBuffer.valid
   assert renderpass.vk.valid
   assert framebuffer.vk.valid
@@ -130,15 +130,15 @@ proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass
   commandBuffer.vkCmdSetViewport(firstViewport = 0, viewportCount = 1, addr(viewport))
   commandBuffer.vkCmdSetScissor(firstScissor = 0, scissorCount = 1, addr(scissor))
 
-proc endRenderCommands*(commandBuffer: VkCommandBuffer) =
+proc EndRenderCommands*(commandBuffer: VkCommandBuffer) =
   commandBuffer.vkCmdEndRenderPass()
   checkVkResult commandBuffer.vkEndCommandBuffer()
 
 
-proc destroy*(renderPass: var RenderPass) =
+proc Destroy*(renderPass: var RenderPass) =
   assert renderPass.device.vk.valid
   assert renderPass.vk.valid
   renderPass.device.vk.vkDestroyRenderPass(renderPass.vk, nil)
   renderPass.vk.reset
   for _, pipeline in renderPass.shaderPipelines.mitems:
-    pipeline.destroy()
+    pipeline.Destroy()

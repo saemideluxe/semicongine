@@ -28,10 +28,10 @@ proc main() =
       fragmentCode = """fragcolor = colorout;""",
     )
 
-  var engine = initEngine("Test collisions")
+  var engine = InitEngine("Test collisions")
 
-  engine.initRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration})
-  engine.loadScene(scene)
+  engine.InitRenderer({VERTEX_COLORED_MATERIAL: shaderConfiguration})
+  engine.LoadScene(scene)
 
   while engine.UpdateInputs() and not KeyIsDown(Escape):
     if WindowWasResized():
@@ -51,8 +51,8 @@ proc main() =
     let hitbox = Collider(theType: Box, transform: scene.meshes[0].transform * Translate(-0.5, -0.5))
     let hitsphere = Collider(theType: Sphere, transform: scene.meshes[2].transform, radius: 0.5)
     echo intersects(hitbox, hitsphere)
-    engine.renderScene(scene)
-  engine.destroy()
+    engine.RenderScene(scene)
+  engine.Destroy()
 
 
 when isMainModule:

@@ -42,7 +42,7 @@ const DESCRIPTOR_TYPE_MAP = {
 func vkType(descriptor: Descriptor): VkDescriptorType =
   DESCRIPTOR_TYPE_MAP[descriptor.thetype]
 
-proc createDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): DescriptorSetLayout =
+proc CreateDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): DescriptorSetLayout =
   assert device.vk.valid
 
   result.device = device
@@ -64,13 +64,13 @@ proc createDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): D
   )
   checkVkResult vkCreateDescriptorSetLayout(device.vk, addr(layoutCreateInfo), nil, addr(result.vk))
 
-proc destroy*(descriptorSetLayout: var DescriptorSetLayout) =
+proc Destroy*(descriptorSetLayout: var DescriptorSetLayout) =
   assert descriptorSetLayout.device.vk.valid
   assert descriptorSetLayout.vk.valid
   descriptorSetLayout.device.vk.vkDestroyDescriptorSetLayout(descriptorSetLayout.vk, nil)
   descriptorSetLayout.vk.reset
 
-proc createDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uint32)], maxSets = 1000): DescriptorPool =
+proc CreateDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uint32)], maxSets = 1000): DescriptorPool =
   assert device.vk.valid
 
   result.device = device
@@ -88,18 +88,18 @@ proc createDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uin
   )
   checkVkResult vkCreateDescriptorPool(result.device.vk, addr(poolInfo), nil, addr(result.vk))
 
-proc reset*(pool: DescriptorPool) =
+proc Reset*(pool: DescriptorPool) =
   assert pool.device.vk.valid
   assert pool.vk.valid
   checkVkResult vkResetDescriptorPool(pool.device.vk, pool.vk, VkDescriptorPoolResetFlags(0))
 
-proc destroy*(pool: var DescriptorPool) =
+proc Destroy*(pool: var DescriptorPool) =
   assert pool.device.vk.valid
   assert pool.vk.valid
   pool.device.vk.vkDestroyDescriptorPool(pool.vk, nil)
   pool.vk.reset
 
-proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, nframes: int): seq[DescriptorSet] =
+proc AllocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, nframes: int): seq[DescriptorSet] =
   assert pool.device.vk.valid
   assert pool.vk.valid
   assert layout.device.vk.valid
@@ -120,7 +120,7 @@ proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
   for descriptorSet in descriptorSets:
     result.add DescriptorSet(vk: descriptorSet, layout: layout)
 
-proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
+proc WriteDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
   # assumes descriptors of the descriptorSet are arranged interleaved in buffer
   assert descriptorSet.layout.device.vk.valid
   assert descriptorSet.layout.vk.valid
