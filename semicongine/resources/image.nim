@@ -104,7 +104,7 @@ proc readBMP*(stream: Stream): Image[RGBAPixel] =
       data[row_mult * dibHeader.width + col] = pixel
     stream.setPosition(stream.getPosition() + padding)
 
-  result = newImage(width = dibHeader.width.uint32, height = abs(dibHeader.height).uint32, imagedata = data)
+  result = NewImage(width = dibHeader.width.uint32, height = abs(dibHeader.height).uint32, imagedata = data)
 
 {.compile: currentSourcePath.parentDir() & "/lodepng.c".}
 
@@ -127,7 +127,7 @@ proc readPNG*(stream: Stream): Image[RGBAPixel] =
 
   free(data)
 
-  result = newImage(width = w, height = h, imagedata = imagedata)
+  result = NewImage(width = w, height = h, imagedata = imagedata)
 
 proc toPNG*[T: Pixel](image: Image[T]): seq[uint8] =
   when T is GrayPixel:
@@ -143,7 +143,7 @@ proc toPNG*[T: Pixel](image: Image[T]): seq[uint8] =
   let ret = lodepng_encode_memory(
     addr pngData,
     addr pngSize,
-    cast[cstring](image.imagedata.toCPointer),
+    cast[cstring](image.imagedata.ToCPointer),
     cuint(image.width),
     cuint(image.height),
     cint(pngType),

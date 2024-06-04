@@ -69,7 +69,7 @@ proc createDevice*(
   var createInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     queueCreateInfoCount: uint32(queueList.len),
-    pQueueCreateInfos: queueList.toCPointer,
+    pQueueCreateInfos: queueList.ToCPointer,
     enabledLayerCount: 0,
     ppEnabledLayerNames: nil,
     enabledExtensionCount: uint32(allExtensions.len),

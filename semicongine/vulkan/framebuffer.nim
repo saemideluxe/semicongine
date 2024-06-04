@@ -24,7 +24,7 @@ proc createFramebuffer*(device: Device, renderpass: VkRenderPass, attachments: o
     sType: VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
     renderPass: renderpass,
     attachmentCount: uint32(theattachments.len),
-    pAttachments: theattachments.toCPointer,
+    pAttachments: theattachments.ToCPointer,
     width: dimension[0],
     height: dimension[1],
     layers: 1,

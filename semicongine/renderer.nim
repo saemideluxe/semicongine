@@ -248,7 +248,7 @@ proc setupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     # gather uniform sizes
     var uniformBufferSize = 0'u64
     for uniform in shaderPipeline.uniforms:
-      uniformBufferSize += uniform.size
+      uniformBufferSize += uniform.Size
     if uniformBufferSize > 0:
       for frame_i in 0 ..< renderer.swapchain.inFlightFrames:
         scenedata.shaderData[shaderPipeline.vk].uniformBuffers.add renderer.device.createBuffer(
@@ -343,7 +343,7 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
       # loop over all uniforms of the shader-shaderPipeline
       for uniform in shaderPipeline.uniforms:
         if dirty.contains(uniform.name) or dirtyMaterialAttribs.contains(uniform.name) or forceAll: # only update uniforms if necessary
-          var value = initDataList(uniform.theType)
+          var value = InitDataList(uniform.theType)
           if scene.shaderGlobals.hasKey(uniform.name):
             assert scene.shaderGlobals[uniform.name].thetype == uniform.thetype
             value = scene.shaderGlobals[uniform.name]
@@ -351,22 +351,22 @@ proc updateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
             var foundValue = false
             for material in renderer.scenedata[scene].materials[materialType]:
               if material.hasMatchingAttribute(uniform):
-                value.appendValues(material[uniform.name])
+                value.AppendValues(material[uniform.name])
                 foundValue = true
             assert foundValue, &"Uniform '{uniform.name}' not found in scene shaderGlobals or materials"
           assert (uniform.arrayCount == 0 and value.len == 1) or value.len.uint <= uniform.arrayCount, &"Uniform '{uniform.name}' found has wrong length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
           if value.len.uint <= uniform.arrayCount:
             debug &"Uniform '{uniform.name}' found has short length (shader declares {uniform.arrayCount} but shaderGlobals and materials provide {value.len})"
-          assert value.size <= uniform.size, &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
-          if value.size < uniform.size:
-            debug &"During uniform update: gathered value has size {value.size} but uniform expects size {uniform.size}"
+          assert value.Size <= uniform.Size, &"During uniform update: gathered value has size {value.Size} but uniform expects size {uniform.Size}"
+          if value.Size < uniform.Size:
+            debug &"During uniform update: gathered value has size {value.Size} but uniform expects size {uniform.Size}"
           debug &"  update uniform '{uniform.name}' with value: {value}"
           # TODO: technically we would only need to update the uniform buffer of the current
           # frameInFlight (I think), but we don't track for which frame the shaderglobals are no longer dirty
           # therefore we have to update the uniform values in all buffers, of all inFlightframes (usually 2)
           for buffer in renderer.scenedata[scene].shaderData[shaderPipeline.vk].uniformBuffers:
-            buffer.setData(renderer.queue, value.getPointer(), value.size, offset)
-        offset += uniform.size
+            buffer.setData(renderer.queue, value.GetPointer(), value.Size, offset)
+        offset += uniform.Size
   scene.clearDirtyShaderGlobals()
 
 proc startNewFrame*(renderer: var Renderer) =

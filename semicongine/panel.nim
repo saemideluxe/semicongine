@@ -22,18 +22,18 @@ const
   PANEL_SHADER* = createShaderConfiguration(
     name = "panel shader",
     inputs = [
-      attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
-      attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint = PreferFastWrite),
-      attr[Vec2f](UV_ATTRIB, memoryPerformanceHint = PreferFastWrite),
-      attr[uint16](MATERIALINDEX_ATTRIBUTE, memoryPerformanceHint = PreferFastRead, perInstance = true),
+      Attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
+      Attr[Vec3f](POSITION_ATTRIB, memoryPerformanceHint = PreferFastWrite),
+      Attr[Vec2f](UV_ATTRIB, memoryPerformanceHint = PreferFastWrite),
+      Attr[uint16](MATERIALINDEX_ATTRIBUTE, memoryPerformanceHint = PreferFastRead, perInstance = true),
     ],
     intermediates = [
-      attr[Vec2f]("uvFrag"),
-      attr[uint16]("materialIndexOut", noInterpolation = true)
+      Attr[Vec2f]("uvFrag"),
+      Attr[uint16]("materialIndexOut", noInterpolation = true)
     ],
-    outputs = [attr[Vec4f]("color")],
-    uniforms = [attr[Vec4f]("color", arrayCount = MAX_PANEL_MATERIALS), attr[float32](ASPECT_RATIO_ATTRIBUTE)],
-    samplers = [attr[Texture]("panelTexture", arrayCount = MAX_PANEL_MATERIALS)],
+    outputs = [Attr[Vec4f]("color")],
+    uniforms = [Attr[Vec4f]("color", arrayCount = MAX_PANEL_MATERIALS), Attr[float32](ASPECT_RATIO_ATTRIBUTE)],
+    samplers = [Attr[Texture]("panelTexture", arrayCount = MAX_PANEL_MATERIALS)],
     vertexCode = &"""
   gl_Position = vec4({POSITION_ATTRIB}.x, {POSITION_ATTRIB}.y * Uniforms.{ASPECT_RATIO_ATTRIBUTE}, {POSITION_ATTRIB}.z, 1.0) * {TRANSFORM_ATTRIB};
   uvFrag = {UV_ATTRIB};
@@ -123,7 +123,7 @@ proc initPanel*(
   result.mesh.material = initMaterialData(
     theType = PANEL_MATERIAL_TYPE,
     name = "Panel material",
-    attributes = {"panelTexture": initDataList(@[texture]), "color": initDataList(@[color])},
+    attributes = {"panelTexture": InitDataList(@[texture]), "color": InitDataList(@[color])},
   )
   inc instanceCounter
   result.refresh()

@@ -55,7 +55,7 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
   var
     topOffsets: Table[Rune, int]
     images: seq[Image[GrayPixel]]
-  let empty_image = newImage[GrayPixel](1, 1, [0'u8])
+  let empty_image = NewImage[GrayPixel](1, 1, [0'u8])
 
   for codePoint in codePoints:
     var
@@ -81,7 +81,7 @@ proc readTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
       var bitmap = newSeq[GrayPixel](width * height)
       for i in 0 ..< width * height:
         bitmap[i] = GrayPixel(data[i])
-      images.add newImage[GrayPixel](width.uint32, height.uint32, bitmap)
+      images.add NewImage[GrayPixel](width.uint32, height.uint32, bitmap)
     else:
       images.add empty_image
 

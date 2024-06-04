@@ -99,8 +99,8 @@ converter toVulkan*(indexType: MeshIndexType): VkIndexType =
 
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.vertexData[attribute] = initDataList(thetype = getDataType[T]())
-  mesh.vertexData[attribute].setLen(mesh.vertexCount)
+  mesh.vertexData[attribute] = InitDataList(thetype = GetDataType[T]())
+  mesh.vertexData[attribute].SetLen(mesh.vertexCount)
   mesh.vertexData[attribute] = value
 proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initVertexAttribute(mesh, attribute, newSeqWith(mesh.vertexCount, value))
@@ -108,8 +108,8 @@ proc initVertexAttribute*[T](mesh: var MeshObject, attribute: string) =
   initVertexAttribute(mesh = mesh, attribute = attribute, value = default(T))
 proc initVertexAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.vertexData[attribute] = initDataList(thetype = datatype)
-  mesh.vertexData[attribute].setLen(mesh.vertexCount)
+  mesh.vertexData[attribute] = InitDataList(thetype = datatype)
+  mesh.vertexData[attribute].SetLen(mesh.vertexCount)
 proc initVertexAttribute*(mesh: var MeshObject, attribute: string, data: DataList) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.vertexData[attribute] = data
@@ -117,8 +117,8 @@ proc initVertexAttribute*(mesh: var MeshObject, attribute: string, data: DataLis
 
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: seq[T]) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.instanceData[attribute] = initDataList(thetype = getDataType[T]())
-  mesh.instanceData[attribute].setLen(mesh.instanceCount)
+  mesh.instanceData[attribute] = InitDataList(thetype = GetDataType[T]())
+  mesh.instanceData[attribute].SetLen(mesh.instanceCount)
   mesh.instanceData[attribute] = value
 proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string, value: T) =
   initInstanceAttribute(mesh, attribute, newSeqWith(mesh.instanceCount, value))
@@ -126,8 +126,8 @@ proc initInstanceAttribute*[T](mesh: var MeshObject, attribute: string) =
   initInstanceAttribute(mesh = mesh, attribute = attribute, value = default(T))
 proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, datatype: DataType) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
-  mesh.instanceData[attribute] = initDataList(thetype = datatype)
-  mesh.instanceData[attribute].setLen(mesh.instanceCount)
+  mesh.instanceData[attribute] = InitDataList(thetype = datatype)
+  mesh.instanceData[attribute].SetLen(mesh.instanceCount)
 proc initInstanceAttribute*(mesh: var MeshObject, attribute: string, data: DataList) =
   assert not mesh.vertexData.contains(attribute) and not mesh.instanceData.contains(attribute)
   mesh.instanceData[attribute] = data
@@ -211,9 +211,9 @@ proc newMesh*(
 
 func attributeSize*(mesh: MeshObject, attribute: string): uint64 =
   if mesh.vertexData.contains(attribute):
-    mesh.vertexData[attribute].size
+    mesh.vertexData[attribute].Size
   elif mesh.instanceData.contains(attribute):
-    mesh.instanceData[attribute].size
+    mesh.instanceData[attribute].Size
   else:
     0
 
@@ -247,9 +247,9 @@ func getRawIndexData*(mesh: MeshObject): (pointer, uint64) =
 
 func getPointer*(mesh: var MeshObject, attribute: string): pointer =
   if mesh.vertexData.contains(attribute):
-    mesh.vertexData[attribute].getPointer()
+    mesh.vertexData[attribute].GetPointer()
   elif mesh.instanceData.contains(attribute):
-    mesh.instanceData[attribute].getPointer()
+    mesh.instanceData[attribute].GetPointer()
   else:
     raise newException(Exception, &"Attribute {attribute} is not defined for mesh {mesh}")
 
@@ -421,29 +421,29 @@ proc asNonIndexedMesh*(mesh: MeshObject): MeshObject =
   for attribute, datalist in mesh.vertexData.pairs:
     result.initVertexAttribute(attribute, datalist.theType)
   for attribute, datalist in mesh.instanceData.pairs:
-    result.instanceData[attribute] = datalist.copy()
+    result.instanceData[attribute] = datalist.Copy()
   var i = 0
   case mesh.indexType
   of Tiny:
     for indices in mesh.tinyIndices:
       for attribute, value in mesh.vertexData.pairs:
-        result.vertexData[attribute].appendFrom(i, mesh.vertexData[attribute], int(indices[0]))
-        result.vertexData[attribute].appendFrom(i + 1, mesh.vertexData[attribute], int(indices[1]))
-        result.vertexData[attribute].appendFrom(i + 2, mesh.vertexData[attribute], int(indices[2]))
+        result.vertexData[attribute].AppendFrom(i, mesh.vertexData[attribute], int(indices[0]))
+        result.vertexData[attribute].AppendFrom(i + 1, mesh.vertexData[attribute], int(indices[1]))
+        result.vertexData[attribute].AppendFrom(i + 2, mesh.vertexData[attribute], int(indices[2]))
       i += 3
   of Small:
     for indices in mesh.smallIndices:
       for attribute, value in mesh.vertexData.pairs:
-        result.vertexData[attribute].appendFrom(i, value, int(indices[0]))
-        result.vertexData[attribute].appendFrom(i + 1, value, int(indices[1]))
-        result.vertexData[attribute].appendFrom(i + 2, value, int(indices[2]))
+        result.vertexData[attribute].AppendFrom(i, value, int(indices[0]))
+        result.vertexData[attribute].AppendFrom(i + 1, value, int(indices[1]))
+        result.vertexData[attribute].AppendFrom(i + 2, value, int(indices[2]))
       i += 3
   of Big:
     for indices in mesh.bigIndices:
       for attribute, value in mesh.vertexData.pairs:
-        result.vertexData[attribute].appendFrom(i, mesh.vertexData[attribute], int(indices[0]))
-        result.vertexData[attribute].appendFrom(i + 1, mesh.vertexData[attribute], int(indices[1]))
-        result.vertexData[attribute].appendFrom(i + 2, mesh.vertexData[attribute], int(indices[2]))
+        result.vertexData[attribute].AppendFrom(i, mesh.vertexData[attribute], int(indices[0]))
+        result.vertexData[attribute].AppendFrom(i + 1, mesh.vertexData[attribute], int(indices[1]))
+        result.vertexData[attribute].AppendFrom(i + 2, mesh.vertexData[attribute], int(indices[2]))
       i += 3
   else:
     discard
@@ -466,7 +466,7 @@ proc rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_M
     half_w = width / 2
     half_h = height / 2
     pos = @[NewVec3f(-half_w, -half_h), NewVec3f(half_w, -half_h), NewVec3f(half_w, half_h), NewVec3f(-half_w, half_h)]
-    c = toRGBA(color)
+    c = ToRGBA(color)
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, pos)
   result[].initVertexAttribute("color", @[c, c, c, c])
@@ -483,7 +483,7 @@ proc tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MA
   let
     half_w = width / 2
     half_h = height / 2
-    colorVec = toRGBA(color)
+    colorVec = ToRGBA(color)
 
   result[].initVertexAttribute(DEFAULT_POSITION_ATTRIBUTE, @[NewVec3f(0, -half_h), NewVec3f(half_w, half_h), NewVec3f(-half_w, half_h)])
   result[].initVertexAttribute("color", @[colorVec, colorVec, colorVec])
@@ -512,7 +512,7 @@ proc circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", 
   let
     rX = width / 2
     rY = height / 2
-    c = toRGBA(color)
+    c = ToRGBA(color)
     step = (2'f32 * PI) / float32(nSegments)
   var
     pos = @[NewVec3f(0, 0), NewVec3f(rX, 0)]
@@ -554,7 +554,7 @@ proc grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", materi
   inc instanceCounter
 
   let
-    color = toRGBA(color)
+    color = ToRGBA(color)
     center_offset_x = -(float32(columns) * cellSize) / 2'f32
     center_offset_y = -(float32(rows) * cellSize) / 2'f32
   var
@@ -581,7 +581,7 @@ proc mergeMeshData*(a: var Mesh, b: Mesh) =
   for key in a.vertexData.keys:
     assert key in b.vertexData, &"Mesh {b} is missing vertex data for '{key}'"
   for (key, value) in b.vertexData.pairs:
-    a.vertexData[key].appendValues(value)
+    a.vertexData[key].AppendValues(value)
 
   case a.indexType:
     of None:

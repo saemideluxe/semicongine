@@ -60,7 +60,7 @@ proc createDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): D
   var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
     bindingCount: uint32(layoutbindings.len),
-    pBindings: layoutbindings.toCPointer
+    pBindings: layoutbindings.ToCPointer
   )
   checkVkResult vkCreateDescriptorSetLayout(device.vk, addr(layoutCreateInfo), nil, addr(result.vk))
 
@@ -83,7 +83,7 @@ proc createDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uin
   var poolInfo = VkDescriptorPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
     poolSizeCount: uint32(poolSizes.len),
-    pPoolSizes: poolSizes.toCPointer,
+    pPoolSizes: poolSizes.ToCPointer,
     maxSets: uint32(result.maxSets),
   )
   checkVkResult vkCreateDescriptorPool(result.device.vk, addr(poolInfo), nil, addr(result.vk))
@@ -113,10 +113,10 @@ proc allocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
     descriptorPool: pool.vk,
     descriptorSetCount: uint32(layouts.len),
-    pSetLayouts: layouts.toCPointer,
+    pSetLayouts: layouts.ToCPointer,
   )
 
-  checkVkResult vkAllocateDescriptorSets(pool.device.vk, addr(allocInfo), descriptorSets.toCPointer)
+  checkVkResult vkAllocateDescriptorSets(pool.device.vk, addr(allocInfo), descriptorSets.ToCPointer)
   for descriptorSet in descriptorSets:
     result.add DescriptorSet(vk: descriptorSet, layout: layout)
 
@@ -168,7 +168,7 @@ proc writeDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
           dstArrayElement: 0,
           descriptorType: descriptor.vkType,
           descriptorCount: uint32(descriptor.count),
-          pImageInfo: imgInfos[^1].toCPointer,
+          pImageInfo: imgInfos[^1].ToCPointer,
         )
     inc i
-  descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.toCPointer, 0, nil)
+  descriptorSet.layout.device.vk.vkUpdateDescriptorSets(uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)

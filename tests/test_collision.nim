@@ -17,13 +17,13 @@ proc main() =
     shaderConfiguration = createShaderConfiguration(
       name = "default shader",
       inputs = [
-        attr[Mat4]("transform", memoryPerformanceHint = PreferFastRead, perInstance = true),
-        attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
-        attr[Vec4f]("color", memoryPerformanceHint = PreferFastRead),
+        Attr[Mat4]("transform", memoryPerformanceHint = PreferFastRead, perInstance = true),
+        Attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
+        Attr[Vec4f]("color", memoryPerformanceHint = PreferFastRead),
       ],
-      intermediates = [attr[Vec4f]("colorout")],
-      uniforms = [attr[Mat4]("perspective")],
-      outputs = [attr[Vec4f]("fragcolor")],
+      intermediates = [Attr[Vec4f]("colorout")],
+      uniforms = [Attr[Mat4]("perspective")],
+      outputs = [Attr[Vec4f]("fragcolor")],
       vertexCode = """gl_Position = vec4(position, 1.0) * (transform * Uniforms.perspective); colorout = color;""",
       fragmentCode = """fragcolor = colorout;""",
     )

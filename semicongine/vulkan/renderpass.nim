@@ -60,7 +60,7 @@ proc createRenderPass*(
       inputAttachmentCount: 0,
       pInputAttachments: nil,
       colorAttachmentCount: uint32(outputs.len),
-      pColorAttachments: outputs.toCPointer,
+      pColorAttachments: outputs.ToCPointer,
       pResolveAttachments: nil,
       pDepthStencilAttachment: nil,
       preserveAttachmentCount: 0,
@@ -71,11 +71,11 @@ proc createRenderPass*(
   var createInfo = VkRenderPassCreateInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
       attachmentCount: uint32(attachments.len),
-      pAttachments: attachments.toCPointer,
+      pAttachments: attachments.ToCPointer,
       subpassCount: uint32(subpassesList.len),
-      pSubpasses: subpassesList.toCPointer,
+      pSubpasses: subpassesList.ToCPointer,
       dependencyCount: uint32(dependencies.len),
-      pDependencies: dependencies.toCPointer,
+      pDependencies: dependencies.ToCPointer,
     )
   result.device = device
   result.clearColor = clearColor
@@ -110,7 +110,7 @@ proc beginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass
         extent: VkExtent2D(width: w, height: h),
       ),
       clearValueCount: uint32(clearColors.len),
-      pClearValues: clearColors.toCPointer(),
+      pClearValues: clearColors.ToCPointer(),
     )
     viewport = VkViewport(
       x: 0.0,

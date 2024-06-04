@@ -34,8 +34,6 @@ Vertical alignment:
   while engine.UpdateInputs() and not KeyIsDown(Escape):
     var t = cpuTime()
     main_text.color = NewVec4f(sin(t) * 0.5 + 0.5, 0.15, 0.15, 1)
-    if WindowWasResized():
-      var winSize = engine.GetWindow().size
 
     # add character
     if main_text.text.len < main_text.maxLen - 1:

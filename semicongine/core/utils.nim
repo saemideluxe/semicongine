@@ -14,16 +14,16 @@ type
     Center
     Bottom
 
-func cleanString*(str: openArray[char]): string =
+func CleanString*(str: openArray[char]): string =
   for i in 0 ..< len(str):
     if str[i] == char(0):
       result = join(str[0 ..< i])
       break
 
-func toCPointer*[T](list: openArray[T]): ptr T =
+func ToCPointer*[T](list: openArray[T]): ptr T =
   if list.len > 0: addr(list[0]) else: nil
 
-proc staticExecChecked*(command: string, input = ""): string {.compileTime.} =
+proc StaticExecChecked*(command: string, input = ""): string {.compileTime.} =
   let (output, exitcode) = gorgeEx(
       command = command,
       input = input)
@@ -34,5 +34,5 @@ proc staticExecChecked*(command: string, input = ""): string {.compileTime.} =
 proc AppName*(): string =
   return string(Path(getAppFilename()).splitFile.name)
 
-func size*[T: seq](list: T): uint64 =
+func Size*[T: seq](list: T): uint64 =
   uint64(list.len * sizeof(get(genericParams(typeof(list)), 0)))

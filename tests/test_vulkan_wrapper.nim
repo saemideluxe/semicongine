@@ -23,7 +23,7 @@ let
   mat = Mat1Type.initMaterialData(
     name = "mat",
     attributes = {
-      "baseTexture": initDataList(@[Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 5, height: 5, imagedata: @[
+      "baseTexture": InitDataList(@[Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 5, height: 5, imagedata: @[
       R, R, R, R, R,
       R, R, W, R, R,
       R, W, W, W, R,
@@ -44,7 +44,7 @@ let
   mat2 = Mat2Type.initMaterialData(
     name = "mat2",
     attributes = {
-      "baseTexture": initDataList(@[Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 5, height: 5, imagedata: @[
+      "baseTexture": InitDataList(@[Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 5, height: 5, imagedata: @[
       R, W, R, W, R,
       W, R, W, R, W,
       R, W, R, W, R,
@@ -56,7 +56,7 @@ let
   mat3 = SINGLE_COLOR_MATERIAL.initMaterialData(
     name = "mat3",
     attributes = {
-      "color": initDataList(@[NewVec4f(0, 1, 0, 1)])
+      "color": InitDataList(@[NewVec4f(0, 1, 0, 1)])
     }.toTable
   )
 
@@ -190,27 +190,27 @@ proc main() =
     shaderConfiguration1 = createShaderConfiguration(
       name = "shader1",
       inputs = [
-        attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
-        attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
-        attr[Mat4]("transform", perInstance = true),
+        Attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
+        Attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
+        Attr[Mat4]("transform", perInstance = true),
       ],
       intermediates = [
-        attr[Vec4f]("outcolor"),
+        Attr[Vec4f]("outcolor"),
       ],
-      outputs = [attr[Vec4f]("color")],
-      samplers = [attr[Texture]("baseTexture")],
+      outputs = [Attr[Vec4f]("color")],
+      samplers = [Attr[Texture]("baseTexture")],
       vertexCode = """gl_Position = vec4(position, 1.0) * transform; outcolor = color;""",
       fragmentCode = "color = texture(baseTexture, outcolor.xy) * 0.5 + outcolor * 0.5;",
     )
     shaderConfiguration2 = createShaderConfiguration(
       name = "shader2",
       inputs = [
-        attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
-        attr[Mat4]("transform", perInstance = true),
+        Attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
+        Attr[Mat4]("transform", perInstance = true),
       ],
-      intermediates = [attr[Vec4f]("outcolor")],
-      outputs = [attr[Vec4f]("color")],
-      uniforms = [attr[Vec4f]("color", arrayCount = 1)],
+      intermediates = [Attr[Vec4f]("outcolor")],
+      outputs = [Attr[Vec4f]("color")],
+      uniforms = [Attr[Vec4f]("color", arrayCount = 1)],
       vertexCode = """gl_Position = vec4(position, 1.0) * transform; outcolor = Uniforms.color[0];""",
       fragmentCode = "color = outcolor;",
     )

@@ -45,7 +45,7 @@ proc add*[T](scene: var Scene, obj: T) =
 
 proc addShaderGlobalArray*[T](scene: var Scene, name: string, data: openArray[T]) =
   assert not scene.loaded, &"Scene {scene.name} has already been loaded, cannot add shader values"
-  scene.shaderGlobals[name] = initDataList(data)
+  scene.shaderGlobals[name] = InitDataList(data)
   scene.dirtyShaderGlobals.add name
 
 proc addShaderGlobal*[T](scene: var Scene, name: string, data: T) =

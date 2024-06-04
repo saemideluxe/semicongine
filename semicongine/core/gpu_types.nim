@@ -71,24 +71,24 @@ proc `$`*(attr: ShaderAttribute): string =
     result &= &", {attr.arrayCount}"
   result &= "]"
 
-func vertexInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
+func VertexInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
   for attr in attributes:
     if attr.perInstance == false:
       result.add attr
 
-func instanceInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
+func InstanceInputs*(attributes: seq[ShaderAttribute]): seq[ShaderAttribute] =
   for attr in attributes:
     if attr.perInstance == false:
       result.add attr
 
-func numberOfVertexInputAttributeDescriptors*(theType: DataType): uint =
+func NumberOfVertexInputAttributeDescriptors*(theType: DataType): uint =
   case theType:
     of Mat2F32, Mat2F64, Mat23F32, Mat23F64: 2
     of Mat32F32, Mat32F64, Mat3F32, Mat3F64, Mat34F32, Mat34F64: 3
     of Mat43F32, Mat43F64, Mat4F32, Mat4F64: 4
     else: 1
 
-func size*(theType: DataType): uint64 =
+func Size*(theType: DataType): uint64 =
   case theType:
     of Float32: 4
     of Float64: 8
@@ -134,20 +134,20 @@ func size*(theType: DataType): uint64 =
     of Mat4F64: 128
     of TextureType: 0
 
-func size*(attribute: ShaderAttribute, perDescriptor = false): uint64 =
+func Size*(attribute: ShaderAttribute, perDescriptor = false): uint64 =
   if perDescriptor:
-    attribute.theType.size div attribute.theType.numberOfVertexInputAttributeDescriptors
+    attribute.theType.Size div attribute.theType.NumberOfVertexInputAttributeDescriptors
   else:
     if attribute.arrayCount == 0:
-      attribute.theType.size
+      attribute.theType.Size
     else:
-      attribute.theType.size * attribute.arrayCount
+      attribute.theType.Size * attribute.arrayCount
 
-func size*(theType: seq[ShaderAttribute]): uint64 =
+func Size*(theType: seq[ShaderAttribute]): uint64 =
   for attribute in theType:
-    result += attribute.size
+    result += attribute.Size
 
-func getDataType*[T: GPUType|int|uint|float](): DataType =
+func GetDataType*[T: GPUType|int|uint|float](): DataType =
   when T is float32: Float32
   elif T is float64: Float64
   elif T is int8: Int8
@@ -201,7 +201,7 @@ func getDataType*[T: GPUType|int|uint|float](): DataType =
     static:
       raise newException(Exception, &"Unsupported data type for GPU data: {name(T)}")
 
-func attr*[T: GPUType](
+func Attr*[T: GPUType](
   name: string,
   perInstance = false,
   arrayCount = 0'u32,
@@ -210,7 +210,7 @@ func attr*[T: GPUType](
 ): auto =
   ShaderAttribute(
     name: name,
-    theType: getDataType[T](),
+    theType: GetDataType[T](),
     perInstance: perInstance,
     arrayCount: arrayCount,
     noInterpolation: noInterpolation,
@@ -262,11 +262,11 @@ const TYPEMAP = {
     Mat4F64: VK_FORMAT_R64G64B64A64_SFLOAT,
 }.toTable
 
-func getVkFormat*(theType: DataType): VkFormat =
+func GetVkFormat*(theType: DataType): VkFormat =
   TYPEMAP[theType]
 
 # from https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap15.html
-func nLocationSlots*(theType: DataType): int =
+func NLocationSlots*(theType: DataType): int =
   #[
   single location:
     16-bit scalar and vector types, and
@@ -320,7 +320,7 @@ func nLocationSlots*(theType: DataType): int =
     of Mat4F64: 2
     of TextureType: 1
 
-func glslType*(theType: DataType): string =
+func GlslType*(theType: DataType): string =
   # todo: likely not correct as we would need to enable some
   # extensions somewhere (Vulkan/GLSL compiler?) to have
   # everything work as intended. Or maybe the GPU driver does
@@ -364,23 +364,23 @@ func glslType*(theType: DataType): string =
     of Mat4F64: "dmat4"
     of TextureType: "sampler2D"
 
-func glslInput*(group: openArray[ShaderAttribute]): seq[string] =
+func GlslInput*(group: openArray[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
   var i = 0
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for shader vertex attributes"
     let flat = if attribute.noInterpolation: "flat " else: ""
-    result.add &"layout(location = {i}) {flat}in {attribute.theType.glslType} {attribute.name};"
-    for j in 0 ..< attribute.theType.numberOfVertexInputAttributeDescriptors:
-      i += attribute.theType.nLocationSlots
+    result.add &"layout(location = {i}) {flat}in {attribute.theType.GlslType} {attribute.name};"
+    for j in 0 ..< attribute.theType.NumberOfVertexInputAttributeDescriptors:
+      i += attribute.theType.NLocationSlots
 
-func glslUniforms*(group: openArray[ShaderAttribute], blockName = "Uniforms", binding: int): seq[string] =
+func GlslUniforms*(group: openArray[ShaderAttribute], blockName = "Uniforms", binding: int): seq[string] =
   if group.len == 0:
     return @[]
   for uniform in group:
     if uniform.arrayCount > 0:
-      assert uniform.theType.size mod 16 == 0, &"Uniform '{uniform.name}': Array elements in a uniform block must align to 16 but current size is {uniform.theType.size} (until we can two different shaders)"
+      assert uniform.theType.Size mod 16 == 0, &"Uniform '{uniform.name}': Array elements in a uniform block must align to 16 but current size is {uniform.theType.Size} (until we can two different shaders)"
   # TODO: read the lines below, having at least std430 would be nice...
   # currently only a single uniform block supported, therefore binding = 0
   # Also, we might need to figure out how we can ship std430 on newer hardware and normal on older?
@@ -388,15 +388,15 @@ func glslUniforms*(group: openArray[ShaderAttribute], blockName = "Uniforms", bi
   result.add(&"layout(binding = {binding}) uniform T{blockName} {{")
   var last_size = high(uint64)
   for attribute in group:
-    assert attribute.size <= last_size, &"The attribute '{attribute.name}' is bigger than the attribute before, which is not allowed" # using smaller uniform-types first will lead to problems (I think due to alignment, there is also some stuff on the internet about this ;)
+    assert attribute.Size <= last_size, &"The attribute '{attribute.name}' is bigger than the attribute before, which is not allowed" # using smaller uniform-types first will lead to problems (I think due to alignment, there is also some stuff on the internet about this ;)
     var arrayDecl = ""
     if attribute.arrayCount > 0:
       arrayDecl = &"[{attribute.arrayCount}]"
-    result.add(&"    {attribute.theType.glslType} {attribute.name}{arrayDecl};")
-    last_size = attribute.size
+    result.add(&"    {attribute.theType.GlslType} {attribute.name}{arrayDecl};")
+    last_size = attribute.Size
   result.add(&"}} {blockName};")
 
-func glslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[string] =
+func GlslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[string] =
   if group.len == 0:
     return @[]
   var thebinding = basebinding
@@ -404,15 +404,15 @@ func glslSamplers*(group: openArray[ShaderAttribute], basebinding: int): seq[str
     var arrayDecl = ""
     if attribute.arrayCount > 0:
       arrayDecl = &"[{attribute.arrayCount}]"
-    result.add(&"layout(binding = {thebinding}) uniform {attribute.theType.glslType} {attribute.name}{arrayDecl};")
+    result.add(&"layout(binding = {thebinding}) uniform {attribute.theType.GlslType} {attribute.name}{arrayDecl};")
     inc thebinding
 
-func glslOutput*(group: openArray[ShaderAttribute]): seq[string] =
+func GlslOutput*(group: openArray[ShaderAttribute]): seq[string] =
   if group.len == 0:
     return @[]
   var i = 0
   for attribute in group:
     assert attribute.arrayCount == 0, "arrays not supported for outputs"
     let flat = if attribute.noInterpolation: "flat " else: ""
-    result.add &"layout(location = {i}) {flat}out {attribute.theType.glslType} {attribute.name};"
+    result.add &"layout(location = {i}) {flat}out {attribute.theType.GlslType} {attribute.name};"
     i += 1

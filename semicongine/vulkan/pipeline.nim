@@ -70,7 +70,7 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
       thetype: Uniform,
       count: 1,
       stages: @[VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT],
-      size: result.shaderConfiguration.uniforms.size(),
+      size: result.shaderConfiguration.uniforms.Size(),
     )
   for sampler in result.shaderConfiguration.samplers:
     descriptors.add Descriptor(
@@ -92,9 +92,9 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
   var pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
       setLayoutCount: uint32(descriptorSetLayouts.len),
-      pSetLayouts: descriptorSetLayouts.toCPointer,
+      pSetLayouts: descriptorSetLayouts.ToCPointer,
       # pushConstantRangeCount: uint32(pushConstants.len),
-        # pPushConstantRanges: pushConstants.toCPointer,
+        # pPushConstantRanges: pushConstants.ToCPointer,
     )
   checkVkResult vkCreatePipelineLayout(device.vk, addr(pipelineLayoutInfo), nil, addr(result.layout))
 
@@ -154,13 +154,13 @@ proc createPipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
     dynamicState = VkPipelineDynamicStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
       dynamicStateCount: uint32(dynamicStates.len),
-      pDynamicStates: dynamicStates.toCPointer,
+      pDynamicStates: dynamicStates.ToCPointer,
     )
     stages = @[result.shaderModules[0].getPipelineInfo(), result.shaderModules[1].getPipelineInfo()]
     createInfo = VkGraphicsPipelineCreateInfo(
       sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
       stageCount: uint32(stages.len),
-      pStages: stages.toCPointer,
+      pStages: stages.ToCPointer,
       pVertexInputState: addr(vertexInputInfo),
       pInputAssemblyState: addr(inputAssembly),
       pViewportState: addr(viewportState),

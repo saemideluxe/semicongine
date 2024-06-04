@@ -85,7 +85,7 @@ proc createSwapchain*(
   if device.vk.vkCreateSwapchainKHR(addr createInfo, nil, addr swapchain.vk) == VK_SUCCESS:
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, nil)
     var framebuffers = newSeq[VkImage](swapchain.nFramebuffers)
-    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, framebuffers.toCPointer)
+    checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, framebuffers.ToCPointer)
     for framebuffer in framebuffers:
       let framebufferView = VulkanImage(vk: framebuffer, format: surfaceFormat.format, device: device).createImageView()
       swapchain.framebufferViews.add framebufferView
@@ -137,8 +137,8 @@ proc swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffe
     submitInfo = VkSubmitInfo(
       sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
       waitSemaphoreCount: 1,
-      pWaitSemaphores: waitSemaphores.toCPointer,
-      pWaitDstStageMask: waitStages.toCPointer,
+      pWaitSemaphores: waitSemaphores.ToCPointer,
+      pWaitDstStageMask: waitStages.ToCPointer,
       commandBufferCount: 1,
       pCommandBuffers: addr commandBuffer,
       signalSemaphoreCount: 1,

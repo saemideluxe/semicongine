@@ -6,8 +6,8 @@ import semicongine
 
 
 proc test1() =
-  mixer[].AddSound("test1", newSound(sineSoundData(1000, 2, 44100)))
-  mixer[].AddSound("test2", newSound(sineSoundData(500, 2, 44100)))
+  mixer[].AddSound("test1", NewSound(SineSoundData(1000, 2, 44100)))
+  mixer[].AddSound("test2", NewSound(SineSoundData(500, 2, 44100)))
 
 
   let s1 = mixer[].Play("test1", loop = true)
@@ -29,19 +29,19 @@ proc test1() =
 proc test2() =
   let
     # notes
-    c = sineSoundData(261.6256, 0.5, 44100)
-    d = sineSoundData(293.6648, 0.5, 44100)
-    e = sineSoundData(329.6276, 0.5, 44100)
-    f = sineSoundData(349.2282, 0.5, 44100)
-    g = sineSoundData(391.9954, 0.5, 44100)
-    a = sineSoundData(440.0000, 0.5, 44100)
-    b = sineSoundData(493.8833, 0.5, 44100)
-    bb = sineSoundData(466.1638, 0.5, 44100)
-    c2 = sineSoundData(523.2511, 0.5, 44100)
-    d2 = sineSoundData(587.3295, 0.5, 44100)
-    bbShort = sineSoundData(466.1638, 0.25, 44100)
-    c2Short = sineSoundData(523.2511, 0.25, 44100)
-    d2Short = sineSoundData(587.3295, 0.25, 44100)
+    c = SineSoundData(261.6256, 0.5, 44100)
+    d = SineSoundData(293.6648, 0.5, 44100)
+    e = SineSoundData(329.6276, 0.5, 44100)
+    f = SineSoundData(349.2282, 0.5, 44100)
+    g = SineSoundData(391.9954, 0.5, 44100)
+    a = SineSoundData(440.0000, 0.5, 44100)
+    b = SineSoundData(493.8833, 0.5, 44100)
+    bb = SineSoundData(466.1638, 0.5, 44100)
+    c2 = SineSoundData(523.2511, 0.5, 44100)
+    d2 = SineSoundData(587.3295, 0.5, 44100)
+    bbShort = SineSoundData(466.1638, 0.25, 44100)
+    c2Short = SineSoundData(523.2511, 0.25, 44100)
+    d2Short = SineSoundData(587.3295, 0.25, 44100)
 
     # song
     frerejaquesData = concat(
@@ -55,7 +55,7 @@ proc test2() =
       f, c, f, f,
     )
 
-  mixer[].AddSound("frerejaques", newSound(frerejaquesData))
+  mixer[].AddSound("frerejaques", NewSound(frerejaquesData))
   discard mixer[].Play("frerejaques")
 
   while mixer[].IsPlaying():
@@ -63,7 +63,7 @@ proc test2() =
 
 proc test3() =
   mixer[].AddSound("toccata et fugue", loadAudio("toccata_et_fugue.ogg"))
-  mixer[].AddSound("ping", newSound(sineSoundData(500, 0.05, 44100)))
+  mixer[].AddSound("ping", NewSound(SineSoundData(500, 0.05, 44100)))
   mixer[].AddTrack("effects")
   discard mixer[].Play("toccata et fugue")
 

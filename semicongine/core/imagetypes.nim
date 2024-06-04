@@ -34,27 +34,27 @@ proc `==`*(a, b: Texture): bool =
   else:
     return a.colorImage == b.colorImage
 
-converter toRGBA*(p: RGBAPixel): Vec4f =
+converter ToRGBA*(p: RGBAPixel): Vec4f =
   NewVec4f(float32(p[0]) / 255'f32, float32(p[1]) / 255'f32, float32(p[2]) / 255'f32, float32(p[3]) / 255'f32)
-converter toGrayscale*(p: GrayPixel): float32 =
+converter ToGrayscale*(p: GrayPixel): float32 =
   float32(p) / 255'f32
 
 # colorspace conversion functions
 
-func linear2srgb*(value: RGBAPixel): RGBAPixel =
-  [linear2srgb(value[0]), linear2srgb(value[1]), linear2srgb(value[2]), value[3]]
-func srgb2linear*(value: RGBAPixel): RGBAPixel =
-  [srgb2linear(value[0]), srgb2linear(value[1]), srgb2linear(value[2]), value[3]]
+func Linear2srgb*(value: RGBAPixel): RGBAPixel =
+  [Linear2srgb(value[0]), Linear2srgb(value[1]), Linear2srgb(value[2]), value[3]]
+func Srgb2linear*(value: RGBAPixel): RGBAPixel =
+  [Srgb2linear(value[0]), Srgb2linear(value[1]), Srgb2linear(value[2]), value[3]]
 
-proc asSRGB*[T](image: Image[T]): Image[T] =
+proc AsSRGB*[T](image: Image[T]): Image[T] =
   result = Image[T](width: image.width, height: image.height, imagedata: newSeq[T](image.imagedata.len))
   for i in 0 .. image.imagedata.len:
-    result.imagedata[i] = linear2srgb(image.imagedata[i])
+    result.imagedata[i] = Linear2srgb(image.imagedata[i])
 
-proc asLinear*[T](image: Image[T]): Image[T] =
+proc AsLinear*[T](image: Image[T]): Image[T] =
   result = Image[T](width: image.width, height: image.height, imagedata: newSeq[T](image.imagedata.len))
   for i in 0 ..< image.imagedata.len:
-    result.imagedata[i] = srgb2linear(image.imagedata[i])
+    result.imagedata[i] = Srgb2linear(image.imagedata[i])
 
 proc `$`*(image: Image): string =
   &"{image.width}x{image.height}"
@@ -77,7 +77,7 @@ proc `[]=`*(image: var Image, x, y: uint32, value: Pixel) =
 
   image[].imagedata[y * image.width + x] = value
 
-proc newImage*[T: Pixel](width, height: uint32, imagedata: openArray[T] = []): Image[T] =
+proc NewImage*[T: Pixel](width, height: uint32, imagedata: openArray[T] = []): Image[T] =
   assert width > 0 and height > 0
   assert imagedata.len.uint32 == width * height or imagedata.len == 0
 
@@ -102,5 +102,5 @@ const
     wrapModeT: VK_SAMPLER_ADDRESS_MODE_REPEAT,
   )
 let
-  INVALID_TEXTURE* = Texture(name: "Invalid texture", isGrayscale: false, colorImage: newImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: NEAREST_SAMPLER)
-  EMPTY_TEXTURE* = Texture(name: "Empty texture", isGrayscale: false, colorImage: newImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: NEAREST_SAMPLER)
+  INVALID_TEXTURE* = Texture(name: "Invalid texture", isGrayscale: false, colorImage: NewImage(1, 1, @[[255'u8, 0'u8, 255'u8, 255'u8]]), sampler: NEAREST_SAMPLER)
+  EMPTY_TEXTURE* = Texture(name: "Empty texture", isGrayscale: false, colorImage: NewImage(1, 1, @[[255'u8, 255'u8, 255'u8, 255'u8]]), sampler: NEAREST_SAMPLER)

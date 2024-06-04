@@ -29,18 +29,18 @@ proc getInstanceExtensions*(): seq[string] =
   checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), nil)
   if extensionCount > 0:
     var extensions = newSeq[VkExtensionProperties](extensionCount)
-    checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), extensions.toCPointer)
+    checkVkResult vkEnumerateInstanceExtensionProperties(nil, addr(extensionCount), extensions.ToCPointer)
     for extension in extensions:
-      result.add(cleanString(extension.extensionName))
+      result.add(CleanString(extension.extensionName))
 
 proc getLayers*(): seq[string] =
   var n_layers: uint32
   checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), nil)
   if n_layers > 0:
     var layers = newSeq[VkLayerProperties](n_layers)
-    checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), layers.toCPointer)
+    checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), layers.ToCPointer)
     for layer in layers:
-      result.add(cleanString(layer.layerName))
+      result.add(CleanString(layer.layerName))
 
 proc createInstance*(
   window: NativeWindow,

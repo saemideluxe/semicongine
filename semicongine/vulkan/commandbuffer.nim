@@ -28,7 +28,7 @@ proc createCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int
     commandBufferCount: uint32(nBuffers),
   )
   result.buffers = newSeq[VkCommandBuffer](nBuffers)
-  checkVkResult device.vk.vkAllocateCommandBuffers(addr allocInfo, result.buffers.toCPointer)
+  checkVkResult device.vk.vkAllocateCommandBuffers(addr allocInfo, result.buffers.ToCPointer)
 
 proc pipelineBarrier*(
   commandBuffer: VkCommandBuffer,
@@ -45,11 +45,11 @@ proc pipelineBarrier*(
     dstStageMask = dstStages.toBits,
     dependencyFlags = VkDependencyFlags(0),
     memoryBarrierCount = uint32(memoryBarriers.len),
-    pMemoryBarriers = memoryBarriers.toCPointer,
+    pMemoryBarriers = memoryBarriers.ToCPointer,
     bufferMemoryBarrierCount = uint32(bufferMemoryBarriers.len),
-    pBufferMemoryBarriers = bufferMemoryBarriers.toCPointer,
+    pBufferMemoryBarriers = bufferMemoryBarriers.ToCPointer,
     imageMemoryBarrierCount = uint32(imageBarriers.len),
-    pImageMemoryBarriers = imageBarriers.toCPointer,
+    pImageMemoryBarriers = imageBarriers.ToCPointer,
   )
 
 

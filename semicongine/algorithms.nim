@@ -71,7 +71,7 @@ proc pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[
     for j in i + 1 ..< assignedAreas.len:
       assert not assignedAreas[i].advanceIfOverlap(assignedAreas[j])[0], &"{assignedAreas[i]} and {assignedAreas[j]} overlap!"
 
-  result.atlas = newImage[T](maxDim, maxDim)
+  result.atlas = NewImage[T](maxDim, maxDim)
   result.coords.setLen(images.len)
   for rect in assignedAreas:
     for y in 0 ..< rect.h:

@@ -28,13 +28,13 @@ proc getPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
   var nDevices: uint32
   checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), nil)
   var devices = newSeq[VkPhysicalDevice](nDevices)
-  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), devices.toCPointer)
+  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), devices.ToCPointer)
   for i in 0 ..< nDevices:
     var device = PhysicalDevice(vk: devices[i], surface: instance.surface)
     device.vk.vkGetPhysicalDeviceProperties(addr device.properties)
     device.features.stype = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2
     device.vk.vkGetPhysicalDeviceFeatures2(addr device.features)
-    device.name = device.properties.deviceName.cleanString()
+    device.name = device.properties.deviceName.CleanString()
     device.devicetype = device.properties.deviceType
     result.add device
 
@@ -44,9 +44,9 @@ proc getExtensions*(device: PhysicalDevice): seq[string] =
   checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), nil)
   if extensionCount > 0:
     var extensions = newSeq[VkExtensionProperties](extensionCount)
-    checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), extensions.toCPointer)
+    checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), extensions.ToCPointer)
     for extension in extensions:
-      result.add(cleanString(extension.extensionName))
+      result.add(CleanString(extension.extensionName))
 
 proc getSurfaceCapabilities*(device: PhysicalDevice): VkSurfaceCapabilitiesKHR =
   assert device.vk.valid
@@ -59,7 +59,7 @@ proc getSurfaceFormats*(device: PhysicalDevice): seq[VkSurfaceFormatKHR] =
   var n_formats: uint32
   checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, device.surface, addr(n_formats), nil)
   result = newSeq[VkSurfaceFormatKHR](n_formats)
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, device.surface, addr(n_formats), result.toCPointer)
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, device.surface, addr(n_formats), result.ToCPointer)
 
 func filterSurfaceFormat*(
   formats: seq[VkSurfaceFormatKHR],
@@ -81,14 +81,14 @@ proc getSurfacePresentModes*(device: PhysicalDevice): seq[VkPresentModeKHR] =
   var n_modes: uint32
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, device.surface, addr(n_modes), nil)
   result = newSeq[VkPresentModeKHR](n_modes)
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, device.surface, addr(n_modes), result.toCPointer)
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, device.surface, addr(n_modes), result.ToCPointer)
 
 proc getQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
   assert device.vk.valid
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, queuFamilies.toCPointer)
+  vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, queuFamilies.ToCPointer)
   for i in 0 ..< nQueuefamilies:
     result.add QueueFamily(
       device: device,

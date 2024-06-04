@@ -65,7 +65,7 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string, entr
       glslExe = glslExe & "." & ExeExt
     let command = &"{glslExe} --entry-point {entrypoint} -V --stdin -S {stagename} -o {shaderfile}"
     echo "run: ", command
-    discard staticExecChecked(
+    discard StaticExecChecked(
         command = command,
         input = shaderSource
     )
@@ -99,10 +99,10 @@ proc compileGlslCode*(
 ): seq[uint32] {.compileTime.} =
 
   let code = @[&"#version {version}", "#extension GL_EXT_scalar_block_layout : require", ""] &
-    (if inputs.len > 0: inputs.glslInput() & @[""] else: @[]) &
-    (if uniforms.len > 0: uniforms.glslUniforms(binding = 0) & @[""] else: @[]) &
-    (if samplers.len > 0: samplers.glslSamplers(basebinding = if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
-    (if outputs.len > 0: outputs.glslOutput() & @[""] else: @[]) &
+    (if inputs.len > 0: inputs.GlslInput() & @[""] else: @[]) &
+    (if uniforms.len > 0: uniforms.GlslUniforms(binding = 0) & @[""] else: @[]) &
+    (if samplers.len > 0: samplers.GlslSamplers(basebinding = if uniforms.len > 0: 1 else: 0) & @[""] else: @[]) &
+    (if outputs.len > 0: outputs.GlslOutput() & @[""] else: @[]) &
     @[&"void {entrypoint}(){{"] &
     main &
     @[&"}}"]
@@ -187,26 +187,26 @@ proc getVertexInputInfo*(
   for attribute in shaderConfiguration.inputs:
     bindings.add VkVertexInputBindingDescription(
       binding: binding,
-      stride: uint32(attribute.size),
+      stride: uint32(attribute.Size),
       inputRate: if attribute.perInstance: VK_VERTEX_INPUT_RATE_INSTANCE else: VK_VERTEX_INPUT_RATE_VERTEX,
     )
     # allows to submit larger data structures like Mat44, for most other types will be 1
-    for i in 0 ..< attribute.thetype.numberOfVertexInputAttributeDescriptors:
+    for i in 0 ..< attribute.thetype.NumberOfVertexInputAttributeDescriptors:
       attributes.add VkVertexInputAttributeDescription(
         binding: binding,
         location: location,
-        format: attribute.thetype.getVkFormat,
-        offset: uint32(i * attribute.size(perDescriptor = true)),
+        format: attribute.thetype.GetVkFormat,
+        offset: uint32(i * attribute.Size(perDescriptor = true)),
       )
-      location += uint32(attribute.thetype.nLocationSlots)
+      location += uint32(attribute.thetype.NLocationSlots)
     inc binding
 
   return VkPipelineVertexInputStateCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
     vertexBindingDescriptionCount: uint32(bindings.len),
-    pVertexBindingDescriptions: bindings.toCPointer,
+    pVertexBindingDescriptions: bindings.ToCPointer,
     vertexAttributeDescriptionCount: uint32(attributes.len),
-    pVertexAttributeDescriptions: attributes.toCPointer,
+    pVertexAttributeDescriptions: attributes.ToCPointer,
   )
 
 

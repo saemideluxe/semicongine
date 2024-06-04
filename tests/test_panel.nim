@@ -33,7 +33,7 @@ proc main() =
     origin = initPanel(
       transform = Scale(0.005, 0.005),
       color = NewVec4f(1, 1, 1, 1),
-      texture = Texture(isGrayscale: false, colorImage: newImage[RGBAPixel](3, 3, [T, B, T, B, B, B, T, B, T]), sampler: NEAREST_SAMPLER),
+      texture = Texture(isGrayscale: false, colorImage: NewImage[RGBAPixel](3, 3, [T, B, T, B, B, B, T, B, T]), sampler: NEAREST_SAMPLER),
     )
     button = initPanel(
       transform = Translate(0.2, 0.1) * Scale(0.3, 0.1),

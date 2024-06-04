@@ -56,10 +56,10 @@ type
     of Mat4F64: mat4f64: ref seq[TMat4[float64]]
     of TextureType: texture: ref seq[Texture]
 
-func size*(value: DataList): uint64 =
-  value.theType.size * value.len.uint64
+func Size*(value: DataList): uint64 =
+  value.theType.Size * value.len.uint64
 
-func hash*(value: DataList): Hash =
+func Hash*(value: DataList): Hash =
   case value.theType
     of Float32: hash(value.float32)
     of Float64: hash(value.float64)
@@ -153,7 +153,7 @@ func `==`*(a, b: DataList): bool =
     of Mat4F64: return a.mat4f64 == b.mat4f64
     of TextureType: a.texture == b.texture
 
-proc setLen*(value: var DataList, len: int) =
+proc SetLen*(value: var DataList, len: int) =
   value.len = len
   case value.theType
     of Float32: value.float32[].setLen(len)
@@ -202,7 +202,7 @@ proc setLen*(value: var DataList, len: int) =
 
 
 proc setValues[T: GPUType|int|uint|float](value: var DataList, data: openArray[T]) =
-  value.setLen(data.len)
+  value.SetLen(data.len)
   when T is float32: value.float32[] = @data
   elif T is float64: value.float64[] = @data
   elif T is int8: value.int8[] = @data
@@ -307,7 +307,7 @@ proc setValue[T: GPUType|int|uint|float](value: var DataList, i: int, data: T) =
   elif T is Texture: value.texture[i] = data
   else: {.error: "Virtual datatype has no values".}
 
-proc initDataList*(theType: DataType, len = 0): DataList =
+proc InitDataList*(theType: DataType, len = 0): DataList =
   result = DataList(theType: theType)
   case result.theType
     of Float32: result.float32 = new seq[float32]
@@ -353,14 +353,14 @@ proc initDataList*(theType: DataType, len = 0): DataList =
     of Mat4F32: result.mat4f32 = new seq[TMat4[float32]]
     of Mat4F64: result.mat4f64 = new seq[TMat4[float64]]
     of TextureType: result.texture = new seq[Texture]
-  result.setLen(len)
+  result.SetLen(len)
 
-proc initDataList*[T: GPUType](len = 1): DataList =
-  result = initDataList(getDataType[T]())
-  result.setLen(len)
+proc InitDataList*[T: GPUType](len = 1): DataList =
+  result = InitDataList(GetDataType[T]())
+  result.SetLen(len)
 
-proc initDataList*[T: GPUType](data: openArray[T]): DataList =
-  result = initDataList(getDataType[T]())
+proc InitDataList*[T: GPUType](data: openArray[T]): DataList =
+  result = InitDataList(GetDataType[T]())
   result.setValues(@data)
 
 func getValues[T: GPUType|int|uint|float](value: DataList): ref seq[T] =
@@ -479,62 +479,62 @@ template `[]=`*[T](table: var Table[string, DataList], key: string, values: open
   if table.contains(key):
     table[key].setValues(values)
   else:
-    table[key] = initDataList(values)
+    table[key] = InitDataList(values)
 
 template `[]=`*[T](list: var DataList, values: openArray[T]) =
   list.setValues(values)
 template `[]=`*[T](list: var DataList, i: int, value: T) =
   list.setValue(i, value)
 
-func getPointer*(value: var DataList): pointer =
+func GetPointer*(value: var DataList): pointer =
   if value.len == 0:
     result = nil
   case value.theType
-    of Float32: result = value.float32[].toCPointer
-    of Float64: result = value.float64[].toCPointer
-    of Int8: result = value.int8[].toCPointer
-    of Int16: result = value.int16[].toCPointer
-    of Int32: result = value.int32[].toCPointer
-    of Int64: result = value.int64[].toCPointer
-    of UInt8: result = value.uint8[].toCPointer
-    of UInt16: result = value.uint16[].toCPointer
-    of UInt32: result = value.uint32[].toCPointer
-    of UInt64: result = value.uint64[].toCPointer
-    of Vec2I32: result = value.vec2i32[].toCPointer
-    of Vec2I64: result = value.vec2i64[].toCPointer
-    of Vec3I32: result = value.vec3i32[].toCPointer
-    of Vec3I64: result = value.vec3i64[].toCPointer
-    of Vec4I32: result = value.vec4i32[].toCPointer
-    of Vec4I64: result = value.vec4i64[].toCPointer
-    of Vec2U32: result = value.vec2u32[].toCPointer
-    of Vec2U64: result = value.vec2u64[].toCPointer
-    of Vec3U32: result = value.vec3u32[].toCPointer
-    of Vec3U64: result = value.vec3u64[].toCPointer
-    of Vec4U32: result = value.vec4u32[].toCPointer
-    of Vec4U64: result = value.vec4u64[].toCPointer
-    of Vec2F32: result = value.vec2f32[].toCPointer
-    of Vec2F64: result = value.vec2f64[].toCPointer
-    of Vec3F32: result = value.vec3f32[].toCPointer
-    of Vec3F64: result = value.vec3f64[].toCPointer
-    of Vec4F32: result = value.vec4f32[].toCPointer
-    of Vec4F64: result = value.vec4f64[].toCPointer
-    of Mat2F32: result = value.mat2f32[].toCPointer
-    of Mat2F64: result = value.mat2f64[].toCPointer
-    of Mat23F32: result = value.mat23f32[].toCPointer
-    of Mat23F64: result = value.mat23f64[].toCPointer
-    of Mat32F32: result = value.mat32f32[].toCPointer
-    of Mat32F64: result = value.mat32f64[].toCPointer
-    of Mat3F32: result = value.mat3f32[].toCPointer
-    of Mat3F64: result = value.mat3f64[].toCPointer
-    of Mat34F32: result = value.mat34f32[].toCPointer
-    of Mat34F64: result = value.mat34f64[].toCPointer
-    of Mat43F32: result = value.mat43f32[].toCPointer
-    of Mat43F64: result = value.mat43f64[].toCPointer
-    of Mat4F32: result = value.mat4f32[].toCPointer
-    of Mat4F64: result = value.mat4f64[].toCPointer
+    of Float32: result = value.float32[].ToCPointer
+    of Float64: result = value.float64[].ToCPointer
+    of Int8: result = value.int8[].ToCPointer
+    of Int16: result = value.int16[].ToCPointer
+    of Int32: result = value.int32[].ToCPointer
+    of Int64: result = value.int64[].ToCPointer
+    of UInt8: result = value.uint8[].ToCPointer
+    of UInt16: result = value.uint16[].ToCPointer
+    of UInt32: result = value.uint32[].ToCPointer
+    of UInt64: result = value.uint64[].ToCPointer
+    of Vec2I32: result = value.vec2i32[].ToCPointer
+    of Vec2I64: result = value.vec2i64[].ToCPointer
+    of Vec3I32: result = value.vec3i32[].ToCPointer
+    of Vec3I64: result = value.vec3i64[].ToCPointer
+    of Vec4I32: result = value.vec4i32[].ToCPointer
+    of Vec4I64: result = value.vec4i64[].ToCPointer
+    of Vec2U32: result = value.vec2u32[].ToCPointer
+    of Vec2U64: result = value.vec2u64[].ToCPointer
+    of Vec3U32: result = value.vec3u32[].ToCPointer
+    of Vec3U64: result = value.vec3u64[].ToCPointer
+    of Vec4U32: result = value.vec4u32[].ToCPointer
+    of Vec4U64: result = value.vec4u64[].ToCPointer
+    of Vec2F32: result = value.vec2f32[].ToCPointer
+    of Vec2F64: result = value.vec2f64[].ToCPointer
+    of Vec3F32: result = value.vec3f32[].ToCPointer
+    of Vec3F64: result = value.vec3f64[].ToCPointer
+    of Vec4F32: result = value.vec4f32[].ToCPointer
+    of Vec4F64: result = value.vec4f64[].ToCPointer
+    of Mat2F32: result = value.mat2f32[].ToCPointer
+    of Mat2F64: result = value.mat2f64[].ToCPointer
+    of Mat23F32: result = value.mat23f32[].ToCPointer
+    of Mat23F64: result = value.mat23f64[].ToCPointer
+    of Mat32F32: result = value.mat32f32[].ToCPointer
+    of Mat32F64: result = value.mat32f64[].ToCPointer
+    of Mat3F32: result = value.mat3f32[].ToCPointer
+    of Mat3F64: result = value.mat3f64[].ToCPointer
+    of Mat34F32: result = value.mat34f32[].ToCPointer
+    of Mat34F64: result = value.mat34f64[].ToCPointer
+    of Mat43F32: result = value.mat43f32[].ToCPointer
+    of Mat43F64: result = value.mat43f64[].ToCPointer
+    of Mat4F32: result = value.mat4f32[].ToCPointer
+    of Mat4F64: result = value.mat4f64[].ToCPointer
     of TextureType: nil
 
-proc appendValues*[T: GPUType|int|uint|float](value: var DataList, data: openArray[T]) =
+proc AppendValues*[T: GPUType|int|uint|float](value: var DataList, data: openArray[T]) =
   value.len += data.len
   when T is float32: value.float32[].add @data
   elif T is float64: value.float64[].add @data
@@ -587,7 +587,7 @@ proc appendValues*[T: GPUType|int|uint|float](value: var DataList, data: openArr
   elif T is Texture: value.texture[].add @data
   else: {.error: "Virtual datatype has no values".}
 
-proc appendValues*(value: var DataList, data: DataList) =
+proc AppendValues*(value: var DataList, data: DataList) =
   assert value.theType == data.theType, &"Expected datalist of type {value.theType} but got {data.theType}"
   value.len += data.len
   case value.theType:
@@ -635,7 +635,7 @@ proc appendValues*(value: var DataList, data: DataList) =
   of Mat4F64: value.mat4f64[].add data.mat4f64[]
   of TextureType: value.texture[].add data.texture[]
 
-proc appendFrom*(a: var DataList, i: int, b: DataList, j: int) =
+proc AppendFrom*(a: var DataList, i: int, b: DataList, j: int) =
   assert a.theType == b.theType
   case a.theType
     of Float32: a.float32[i] = b.float32[j]
@@ -682,9 +682,9 @@ proc appendFrom*(a: var DataList, i: int, b: DataList, j: int) =
     of Mat4F64: a.mat4f64[i] = b.mat4f64[j]
     of TextureType: a.texture[i] = b.texture[j]
 
-proc copy*(datalist: DataList): DataList =
-  result = initDataList(datalist.theType)
-  result.appendValues(datalist)
+proc Copy*(datalist: DataList): DataList =
+  result = InitDataList(datalist.theType)
+  result.AppendValues(datalist)
 
 func `$`*(list: DataList): string =
   case list.theType

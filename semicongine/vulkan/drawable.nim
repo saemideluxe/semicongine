@@ -40,8 +40,8 @@ proc draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Ta
   commandBuffer.vkCmdBindVertexBuffers(
     firstBinding = 0'u32,
     bindingCount = uint32(buffers.len),
-    pBuffers = buffers.toCPointer(),
-    pOffsets = offsets.toCPointer()
+    pBuffers = buffers.ToCPointer(),
+    pOffsets = offsets.ToCPointer()
   )
   if drawable.indexed:
     assert indexBuffer.vk.valid

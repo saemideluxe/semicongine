@@ -190,7 +190,7 @@ proc createImage[T](device: Device, queue: Queue, width, height: uint32, depth: 
   # convert to linear space if there is not support for sRGB
   var data = addr image.imagedata[0]
   if selectedFormat in LINEAR_FORMATS:
-    let linearImage = image.asLinear()
+    let linearImage = image.AsLinear()
     data = addr linearImage.imagedata[0]
 
   assert size <= uint64(formatProperties.imageFormatProperties.maxResourceSize)

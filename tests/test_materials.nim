@@ -5,7 +5,7 @@ import semicongine
 
 let
   sampler = Sampler(magnification: VK_FILTER_NEAREST, minification: VK_FILTER_NEAREST)
-  (RT, WT, PT) = (toRGBA("A51931").asPixel, toRGBA("F4F5F8").asPixel, toRGBA("2D2A4A").asPixel)
+  (RT, WT, PT) = (ToRGBA("A51931").AsPixel, ToRGBA("F4F5F8").AsPixel, ToRGBA("2D2A4A").AsPixel)
   thai = Image[RGBAPixel](width: 7, height: 5, imagedata: @[
     RT, RT, RT, RT, RT, RT, RT,
     WT, WT, WT, WT, WT, WT, WT,
@@ -26,8 +26,8 @@ let
     theType = doubleTextureMaterial,
     name = "swiss-thai",
     attributes = {
-      "tex1": initDataList(@[Texture(colorImage: thai, sampler: sampler, isGrayscale: false)]),
-      "tex2": initDataList(@[Texture(colorImage: swiss, sampler: sampler, isGrayscale: false)]),
+      "tex1": InitDataList(@[Texture(colorImage: thai, sampler: sampler, isGrayscale: false)]),
+      "tex2": InitDataList(@[Texture(colorImage: swiss, sampler: sampler, isGrayscale: false)]),
     }
   )
 
@@ -43,18 +43,18 @@ proc main() =
     shaderConfiguration1 = createShaderConfiguration(
       name = "shader 1",
       inputs = [
-        attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
-        attr[Vec2f]("uv", memoryPerformanceHint = PreferFastRead),
+        Attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
+        Attr[Vec2f]("uv", memoryPerformanceHint = PreferFastRead),
       ],
       intermediates = [
-        attr[Vec2f]("uvout"),
+        Attr[Vec2f]("uvout"),
       ],
-      uniforms = [attr[Vec4f]("test2", arrayCount = 2)],
+      uniforms = [Attr[Vec4f]("test2", arrayCount = 2)],
       samplers = @[
-        attr[Texture]("tex1"),
-        attr[Texture]("tex2"),
+        Attr[Texture]("tex1"),
+        Attr[Texture]("tex2"),
       ],
-      outputs = [attr[Vec4f]("color")],
+      outputs = [Attr[Vec4f]("color")],
       vertexCode = """
       gl_Position = vec4(position.x, position.y + sin(Uniforms.test2[1].x) / Uniforms.test2[1].x * 0.5, position.z, 1.0);
       uvout = uv;""",

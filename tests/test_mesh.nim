@@ -21,23 +21,23 @@ proc main() =
     shaderConfiguration = createShaderConfiguration(
       name = "default shader",
       inputs = [
-        attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
-        attr[uint16](MATERIALINDEX_ATTRIBUTE, memoryPerformanceHint = PreferFastRead, perInstance = true),
-        attr[Vec2f]("texcoord_0", memoryPerformanceHint = PreferFastRead),
-        attr[Mat4]("transform", memoryPerformanceHint = PreferFastWrite, perInstance = true),
+        Attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
+        Attr[uint16](MATERIALINDEX_ATTRIBUTE, memoryPerformanceHint = PreferFastRead, perInstance = true),
+        Attr[Vec2f]("texcoord_0", memoryPerformanceHint = PreferFastRead),
+        Attr[Mat4]("transform", memoryPerformanceHint = PreferFastWrite, perInstance = true),
       ],
       intermediates = [
-        attr[Vec4f]("vertexColor"),
-        attr[Vec2f]("colorTexCoord"),
-        attr[uint16]("materialIndexOut", noInterpolation = true)
+        Attr[Vec4f]("vertexColor"),
+        Attr[Vec2f]("colorTexCoord"),
+        Attr[uint16]("materialIndexOut", noInterpolation = true)
       ],
-      outputs = [attr[Vec4f]("color")],
+      outputs = [Attr[Vec4f]("color")],
       uniforms = [
-        attr[Mat4]("projection"),
-        attr[Mat4]("view"),
-        attr[Vec4f]("color", arrayCount = 4),
+        Attr[Mat4]("projection"),
+        Attr[Mat4]("view"),
+        Attr[Vec4f]("color", arrayCount = 4),
       ],
-      samplers = [attr[Texture]("baseTexture", arrayCount = 4)],
+      samplers = [Attr[Texture]("baseTexture", arrayCount = 4)],
       vertexCode = &"""
   gl_Position =  vec4(position, 1.0) * (transform * (Uniforms.view * Uniforms.projection));
   vertexColor = Uniforms.color[{MATERIALINDEX_ATTRIBUTE}];

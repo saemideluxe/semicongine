@@ -104,8 +104,8 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
   copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
 proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
-  result = initDataList(thetype = accessor.getGPUType("??"))
-  result.setLen(accessor["count"].getInt())
+  result = InitDataList(thetype = accessor.getGPUType("??"))
+  result.SetLen(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
@@ -116,14 +116,14 @@ proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8])
   let accessorOffset = if accessor.hasKey("byteOffset"): accessor["byteOffset"].getInt() else: 0
   let length = bufferView["byteLength"].getInt()
   let bufferOffset = bufferView["byteOffset"].getInt() + accessorOffset
-  var dstPointer = result.getPointer()
+  var dstPointer = result.GetPointer()
 
   if bufferView.hasKey("byteStride"):
     warn "Congratulations, you try to test a feature (loading buffer data with stride attributes) that we have no idea where it is used and how it can be tested (need a coresponding *.glb file)."
     # we don't support stride, have to convert stuff here... does this even work?
     for i in 0 ..< int(result.len):
-      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], int(result.thetype.size))
-      dstPointer = cast[pointer](cast[uint](dstPointer) + result.thetype.size)
+      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], int(result.thetype.Size))
+      dstPointer = cast[pointer](cast[uint](dstPointer) + result.thetype.Size)
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
@@ -169,7 +169,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
 
   # color
   if defaultMaterial.attributes.contains("color"):
-    attributes["color"] = initDataList(thetype = Vec4F32)
+    attributes["color"] = InitDataList(thetype = Vec4F32)
     if pbr.hasKey(GLTF_MATERIAL_MAPPING["color"]):
       attributes["color"] = @[NewVec4f(
         pbr[GLTF_MATERIAL_MAPPING["color"]][0].getFloat(),
@@ -183,7 +183,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
     # pbr material values
     for factor in ["metallic", "roughness"]:
       if defaultMaterial.attributes.contains(factor):
-        attributes[factor] = initDataList(thetype = Float32)
+        attributes[factor] = InitDataList(thetype = Float32)
         if pbr.hasKey(GLTF_MATERIAL_MAPPING[factor]):
           attributes[factor] = @[float32(pbr[GLTF_MATERIAL_MAPPING[factor]].getFloat())]
         else:
@@ -192,8 +192,8 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
   # pbr material textures
   for texture in ["baseTexture", "metallicRoughnessTexture"]:
     if defaultMaterial.attributes.contains(texture):
-      attributes[texture] = initDataList(thetype = TextureType)
-      # attributes[texture & "Index"] = initDataList(thetype=UInt8)
+      attributes[texture] = InitDataList(thetype = TextureType)
+      # attributes[texture & "Index"] = InitDataList(thetype=UInt8)
       if pbr.hasKey(GLTF_MATERIAL_MAPPING[texture]):
         attributes[texture] = @[loadTexture(root, pbr[GLTF_MATERIAL_MAPPING[texture]]["index"].getInt(), mainBuffer)]
       else:
@@ -202,8 +202,8 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
   # generic material textures
   for texture in ["normalTexture", "occlusionTexture", "emissiveTexture"]:
     if defaultMaterial.attributes.contains(texture):
-      attributes[texture] = initDataList(thetype = TextureType)
-      # attributes[texture & "Index"] = initDataList(thetype=UInt8)
+      attributes[texture] = InitDataList(thetype = TextureType)
+      # attributes[texture & "Index"] = InitDataList(thetype=UInt8)
       if materialNode.hasKey(GLTF_MATERIAL_MAPPING[texture]):
         attributes[texture] = @[loadTexture(root, materialNode[texture]["index"].getInt(), mainBuffer)]
       else:
@@ -211,7 +211,7 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
 
   # emissiv color
   if defaultMaterial.attributes.contains("emissiveColor"):
-    attributes["emissiveColor"] = initDataList(thetype = Vec3F32)
+    attributes["emissiveColor"] = InitDataList(thetype = Vec3F32)
     if materialNode.hasKey(GLTF_MATERIAL_MAPPING["emissiveColor"]):
       attributes["emissiveColor"] = @[NewVec3f(
         materialNode[GLTF_MATERIAL_MAPPING["emissiveColor"]][0].getFloat(),
