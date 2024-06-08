@@ -139,7 +139,7 @@ proc t*(state: AnimationState): AnimationTime =
 
 proc NewAnimationState*[T](animation: Animation[T], initial = default(T)): AnimationState[T] =
   result = AnimationState[T](animation: animation, playing: false)
-  result.resetState(initial)
+  result.ResetState(initial)
 
 proc NewAnimationState*[T](value: T = default(T)): AnimationState[T] =
   NewAnimationState[T](NewAnimation[T]((state: AnimationState[T], dt: float32) => value, 0), initial = value)
@@ -158,7 +158,7 @@ proc Advance*[T](state: var AnimationState[T], dt: float32): T =
       dec state.currentIteration
       # last iteration reached
       if state.currentIteration <= 0 and state.animation.iterations != 0:
-        state.stop()
+        state.Stop()
       # more iterations
       else:
         case state.animation.direction:

@@ -149,7 +149,7 @@ proc LoadScene*(engine: var Engine, scene: var Scene) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
   debug &"done loading scene '{scene.name}'"
 
-proc UnLoadScene*(engine: var Engine, scene: Scene) =
+proc UnloadScene*(engine: var Engine, scene: Scene) =
   debug &"unload scene '{scene.name}'"
   engine.renderer.get.Destroy(scene)
 
@@ -184,7 +184,7 @@ func GetWindow*(engine: Engine): auto = engine.window
 func GetAspectRatio*(engine: Engine): float32 = engine.GetWindow().Size[0] / engine.GetWindow().Size[1]
 func ShowSystemCursor*(engine: Engine) = engine.window.ShowSystemCursor()
 func HideSystemCursor*(engine: Engine) = engine.window.HideSystemCursor()
-func Fullscreen*(engine: Engine): bool = engine.Fullscreen
+func Fullscreen*(engine: Engine): bool = engine.fullscreen
 proc `Fullscreen=`*(engine: var Engine, enable: bool) =
   if enable != engine.fullscreen:
     engine.fullscreen = enable
