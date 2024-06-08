@@ -56,7 +56,11 @@ when isMainModule:
         Attr[Mat4]("model"),
       ],
       outputs = [Attr[Vec4f]("color")],
-      vertexCode = """outcolor = color; gl_Position = (Uniforms.projection * Uniforms.view * Uniforms.model) * vec4(position, 1);""",
+      vertexCode = """
+      outcolor = color;
+      // gl_Position = vec4(position, 1) * (Uniforms.model * Uniforms.projection * Uniforms.view);
+      gl_Position = vec4(position, 1) * (Uniforms.model * Uniforms.projection * Uniforms.view);
+      """,
       fragmentCode = "color = outcolor;",
     )
   var matDef = MaterialType(name: "default material", vertexAttributes: {"position": Vec3F32, "color": Vec4F32}.toTable)
