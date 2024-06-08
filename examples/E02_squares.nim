@@ -43,16 +43,16 @@ when isMainModule:
 
 
   const
-    shaderConfiguration = createShaderConfiguration(
+    shaderConfiguration = CreateShaderConfiguration(
       name = "default shader",
       inputs = [
-        attr[Vec3f]("position"),
-        attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
-        attr[uint32]("index"),
+        Attr[Vec3f]("position"),
+        Attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
+        Attr[uint32]("index"),
       ],
-      intermediates = [attr[Vec4f]("outcolor")],
-      uniforms = [attr[float32]("time")],
-      outputs = [attr[Vec4f]("color")],
+      intermediates = [Attr[Vec4f]("outcolor")],
+      uniforms = [Attr[float32]("time")],
+      outputs = [Attr[Vec4f]("color")],
       vertexCode = """
 float pos_weight = index / 100.0; // add some gamma correction?
 float t = sin(Uniforms.time * 0.5) * 0.5 + 0.5;
@@ -68,22 +68,22 @@ gl_Position = vec4(position, 1.0);
     "color": Vec4F32,
     "index": UInt32,
   }.toTable)
-  var squaremesh = newMesh(
+  var squaremesh = NewMesh(
     positions = vertices,
     indices = indices,
     colors = colors,
   )
-  squaremesh[].initVertexAttribute("index", iValues.toSeq)
+  squaremesh[].InitVertexAttribute("index", iValues.toSeq)
   squaremesh.material = matDef.InitMaterialData(name = "default")
 
-  var myengine = initEngine("Squares")
-  myengine.initRenderer({matDef: shaderConfiguration})
+  var myengine = InitEngine("Squares")
+  myengine.InitRenderer({matDef: shaderConfiguration})
 
   var scene = Scene(name: "scene", meshes: @[squaremesh])
-  scene.addShaderGlobal("time", 0.0'f32)
-  myengine.loadScene(scene)
+  scene.AddShaderGlobal("time", 0.0'f32)
+  myengine.LoadScene(scene)
   while myengine.UpdateInputs() and not KeyWasPressed(Escape):
-    scene.setShaderGlobal("time", getShaderGlobal[float32](scene, "time") + 0.0005'f)
-    myengine.renderScene(scene)
+    scene.SetShaderGlobal("time", GetShaderGlobal[float32](scene, "time") + 0.0005'f)
+    myengine.RenderScene(scene)
 
-  myengine.destroy()
+  myengine.Destroy()

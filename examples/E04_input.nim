@@ -92,15 +92,15 @@ for row in keyrows.fields:
 
 
 when isMainModule:
-  var myengine = initEngine("Input")
+  var myengine = InitEngine("Input")
 
   # transform the cursor a bit to make it look nice
   let cursorscale = (
-    scale2d(20'f32, 20'f32) *
-    translate2d(1'f32, 1'f32) *
-    rotate2d(-float32(PI) / 4'f32) *
-    scale2d(0.5'f32, 1'f32) *
-    rotate2d(float32(PI) / 4'f32)
+    Scale2d(20'f32, 20'f32) *
+    Translate2d(1'f32, 1'f32) *
+    Rotate2d(-float32(PI) / 4'f32) *
+    Scale2d(0.5'f32, 1'f32) *
+    Rotate2d(float32(PI) / 4'f32)
   )
   var positions = arrow
   for i in 0 ..< positions.len:
@@ -112,18 +112,18 @@ when isMainModule:
       "position": Vec3F32,
       "color": Vec4F32,
     }.toTable)
-    cursormesh = newMesh(
+    cursormesh = NewMesh(
       positions = positions,
       colors = arrow_colors,
       material = matDef.InitMaterialData(),
     )
-    keyboardmesh = newMesh(
+    keyboardmesh = NewMesh(
       positions = keyvertexpos,
       colors = keyvertexcolor,
       indices = keymeshindices,
       material = matDef.InitMaterialData(),
     )
-    backgroundmesh = newMesh(
+    backgroundmesh = NewMesh(
       positions = @[
         NewVec3f(0'f32, 0'f32),
         NewVec3f(1'f32, 0'f32),
@@ -141,7 +141,7 @@ when isMainModule:
     )
 
   # define mesh objects
-  var keyboard_center = translate(
+  var keyboard_center = Translate(
     -float32(rowWidth) / 2'f32,
     -float32(tupleLen(keyRows) * (keyDimension + keyGap) - keyGap) / 2'f32,
     0'f32
@@ -150,43 +150,43 @@ when isMainModule:
 
   # shaders
   const
-    shaderConfiguration = createShaderConfiguration(
+    shaderConfiguration = CreateShaderConfiguration(
       name = "default shader",
       inputs = [
-        attr[Vec3f]("position"),
-        attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
-        attr[Mat4]("transform", memoryPerformanceHint = PreferFastWrite, perInstance = true),
+        Attr[Vec3f]("position"),
+        Attr[Vec4f]("color", memoryPerformanceHint = PreferFastWrite),
+        Attr[Mat4]("transform", memoryPerformanceHint = PreferFastWrite, perInstance = true),
       ],
-      intermediates = [attr[Vec4f]("outcolor")],
-      uniforms = [attr[Mat4]("projection")],
-      outputs = [attr[Vec4f]("color")],
+      intermediates = [Attr[Vec4f]("outcolor")],
+      uniforms = [Attr[Mat4]("projection")],
+      outputs = [Attr[Vec4f]("color")],
       vertexCode = """outcolor = color; gl_Position = vec4(position, 1) * (transform * Uniforms.projection);""",
       fragmentCode = "color = outcolor;",
     )
 
   # set up rendering
-  myengine.initRenderer({matDef: shaderConfiguration})
-  scene.addShaderGlobal("projection", Unit4f32)
-  myengine.loadScene(scene)
+  myengine.InitRenderer({matDef: shaderConfiguration})
+  scene.AddShaderGlobal("projection", Unit4f32)
+  myengine.LoadScene(scene)
   myengine.HideSystemCursor()
 
   # mainloop
   while myengine.UpdateInputs():
     if WindowWasResized():
-      scene.setShaderGlobal("projection",
-        ortho(
-          0, float32(myengine.GetWindow().size[0]),
-          0, float32(myengine.GetWindow().size[1]),
+      scene.SetShaderGlobal("projection",
+        Ortho(
+          0, float32(myengine.GetWindow().Size[0]),
+          0, float32(myengine.GetWindow().Size[1]),
           0, 1,
         )
       )
       let
-        winsize = myengine.GetWindow().size
-        center = translate(float32(winsize[0]) / 2'f32, float32(winsize[1]) / 2'f32, 0.1'f32)
+        winsize = myengine.GetWindow().Size
+        center = Translate(float32(winsize[0]) / 2'f32, float32(winsize[1]) / 2'f32, 0.1'f32)
       keyboardmesh.transform = keyboard_center * center
-      backgroundmesh.transform = scale(float32(winsize[0]), float32(winsize[1]), 1'f32)
+      backgroundmesh.transform = Scale(float32(winsize[0]), float32(winsize[1]), 1'f32)
 
-    let mousePos = translate(MousePosition().x + 20, MousePosition().y + 20, 0'f32)
+    let mousePos = Translate(MousePosition().x + 20, MousePosition().y + 20, 0'f32)
     cursormesh.transform = mousePos
 
     for (index, key) in enumerate(keyIndices):
@@ -203,6 +203,6 @@ when isMainModule:
         keyboardmesh["color", baseIndex + 2] = baseColor
         keyboardmesh["color", baseIndex + 3] = baseColor
 
-    myengine.renderScene(scene)
+    myengine.RenderScene(scene)
 
-  myengine.destroy()
+  myengine.Destroy()

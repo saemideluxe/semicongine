@@ -54,6 +54,11 @@ task test_all, "Run all test programs":
   exec("nim build_dev_zip --run tests/test_resources.nim")
   exec("nim build_dev_dir --run tests/test_resources.nim")
 
+task example_all, "Run all example programs":
+  for file in listFiles("examples"):
+    if file.endsWith(".nim"):
+      exec(&"nim build_dev --run {file}")
+
 task publish, "publish all build":
   for file in listDirs("build/debug/linux"):
     exec(&"scp -r {file} sam@mail.basx.dev:/var/www/public.basx.dev/semicongine/debug/linux/")
