@@ -20,7 +20,7 @@ proc CreateRenderPass*(
   backFaceCulling = true,
   inFlightFrames = 2,
 ): RenderPass =
-  assert device.vk.valid
+  assert device.vk.Valid
 
   # some asserts
   for (materialtype, shaderconfig) in shaders:
@@ -87,9 +87,9 @@ proc CreateRenderPass*(
     result.shaderPipelines.add (materialtype, device.CreatePipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling = backFaceCulling))
 
 proc BeginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer, oneTimeSubmit: bool) =
-  assert commandBuffer.valid
-  assert renderpass.vk.valid
-  assert framebuffer.vk.valid
+  assert commandBuffer.Valid
+  assert renderpass.vk.Valid
+  assert framebuffer.vk.Valid
   let
     w = framebuffer.dimension.x
     h = framebuffer.dimension.y
@@ -136,9 +136,9 @@ proc EndRenderCommands*(commandBuffer: VkCommandBuffer) =
 
 
 proc Destroy*(renderPass: var RenderPass) =
-  assert renderPass.device.vk.valid
-  assert renderPass.vk.valid
+  assert renderPass.device.vk.Valid
+  assert renderPass.vk.Valid
   renderPass.device.vk.vkDestroyRenderPass(renderPass.vk, nil)
-  renderPass.vk.reset
+  renderPass.vk.Reset
   for _, pipeline in renderPass.shaderPipelines.mitems:
     pipeline.Destroy()

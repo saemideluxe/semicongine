@@ -23,9 +23,9 @@ when isMainModule:
   var myengine = initEngine("Pong")
 
   var player = rect(color = barcolor, width = barWidth, height = barSize)
-  player.material = matDef.initMaterialData(name = "player material")
+  player.material = matDef.InitMaterialData(name = "player material")
   var ball = circle(color = ballcolor)
-  ball.material = matDef.initMaterialData(name = "player material")
+  ball.material = matDef.InitMaterialData(name = "player material")
   level = Scene(name: "scene", meshes: @[ball, player])
 
   const

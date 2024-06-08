@@ -13,12 +13,12 @@ const
 
 proc main() =
   var scenes = [
-    Scene(name: "Donut", meshes: loadMeshes("donut.glb", MeshMaterial)[0].toSeq),
+    Scene(name: "Donut", meshes: LoadMeshes("donut.glb", MeshMaterial)[0].toSeq),
   ]
 
   var engine = InitEngine("Test meshes")
   const
-    shaderConfiguration = createShaderConfiguration(
+    shaderConfiguration = CreateShaderConfiguration(
       name = "default shader",
       inputs = [
         Attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
@@ -49,8 +49,8 @@ proc main() =
   engine.InitRenderer({MeshMaterial: shaderConfiguration})
 
   for scene in scenes.mitems:
-    scene.addShaderGlobal("projection", Unit4F32)
-    scene.addShaderGlobal("view", Unit4F32)
+    scene.AddShaderGlobal("projection", Unit4F32)
+    scene.AddShaderGlobal("view", Unit4F32)
     engine.LoadScene(scene)
 
   var
@@ -78,12 +78,12 @@ proc main() =
       elevation = 0'f32
       azimut = 0'f32
 
-    let ratio = engine.GetWindow().size[0] / engine.GetWindow().size[1]
+    let ratio = engine.GetWindow().Size[0] / engine.GetWindow().Size[1]
     size *= 1'f32 + MouseWheel() * 0.05
     azimut += MouseMove().x / 180'f32
     elevation -= MouseMove().y / 180'f32
-    scenes[currentScene].setShaderGlobal("projection", Perspective(PI / 2, ratio, -0.5, 1))
-    scenes[currentScene].setShaderGlobal(
+    scenes[currentScene].SetShaderGlobal("projection", Perspective(PI / 2, ratio, -0.5, 1))
+    scenes[currentScene].SetShaderGlobal(
       "view",
        Scale(size, size, size) * Rotate(elevation, NewVec3f(1, 0, 0)) * Rotate(azimut, Yf32)
     )

@@ -115,13 +115,13 @@ when isMainModule:
     cursormesh = newMesh(
       positions = positions,
       colors = arrow_colors,
-      material = matDef.initMaterialData(),
+      material = matDef.InitMaterialData(),
     )
     keyboardmesh = newMesh(
       positions = keyvertexpos,
       colors = keyvertexcolor,
       indices = keymeshindices,
-      material = matDef.initMaterialData(),
+      material = matDef.InitMaterialData(),
     )
     backgroundmesh = newMesh(
       positions = @[
@@ -137,7 +137,7 @@ when isMainModule:
         backgroundColor,
       ],
       indices = @[[0'u16, 1'u16, 2'u16], [2'u16, 3'u16, 0'u16]],
-      material = matDef.initMaterialData(),
+      material = matDef.InitMaterialData(),
     )
 
   # define mesh objects

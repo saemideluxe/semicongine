@@ -74,7 +74,7 @@ gl_Position = vec4(position, 1.0);
     colors = colors,
   )
   squaremesh[].initVertexAttribute("index", iValues.toSeq)
-  squaremesh.material = matDef.initMaterialData(name = "default")
+  squaremesh.material = matDef.InitMaterialData(name = "default")
 
   var myengine = initEngine("Squares")
   myengine.initRenderer({matDef: shaderConfiguration})

@@ -27,8 +27,8 @@ proc CreateDevice*(
   enabledExtensions: seq[string],
   queueFamilies: seq[QueueFamily],
 ): Device =
-  assert instance.vk.valid
-  assert physicalDevice.vk.valid
+  assert instance.vk.Valid
+  assert physicalDevice.vk.Valid
   assert queueFamilies.len > 0
 
   result.physicalDevice = physicalDevice
@@ -91,18 +91,18 @@ proc CreateDevice*(
     result.queues[family] = Queue(vk: queue, family: family, presentation: family.CanDoPresentation(physicalDevice.surface), graphics: family.CanDoGraphics())
 
 func FirstGraphicsQueue*(device: Device): Option[Queue] =
-  assert device.vk.valid
+  assert device.vk.Valid
   for family, queue in device.queues:
     if queue.graphics:
       return some(queue)
 
 proc FirstPresentationQueue*(device: Device): Option[Queue] =
-  assert device.vk.valid
+  assert device.vk.Valid
   for family, queue in device.queues:
     if queue.presentation:
       return some(queue)
 
 proc Destroy*(device: var Device) =
-  assert device.vk.valid
+  assert device.vk.Valid
   device.vk.vkDestroyDevice(nil)
-  device.vk.reset()
+  device.vk.Reset()

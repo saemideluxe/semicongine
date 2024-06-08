@@ -19,7 +19,7 @@ const
     instanceAttributes: {TRANSFORM_ATTRIB: Mat4F32, MATERIALINDEX_ATTRIBUTE: UInt16}.toTable,
     attributes: {"panelTexture": TextureType, "color": Vec4F32}.toTable,
   )
-  PANEL_SHADER* = createShaderConfiguration(
+  PANEL_SHADER* = CreateShaderConfiguration(
     name = "panel shader",
     inputs = [
       Attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
@@ -108,7 +108,7 @@ proc InitPanel*(
     dirty: true,
   )
 
-  result.mesh = newMesh(
+  result.mesh = NewMesh(
     name = &"panel-{instanceCounter}",
     positions = newSeq[Vec3f](4),
     indices = @[
@@ -118,20 +118,20 @@ proc InitPanel*(
     uvs = @[NewVec2f(0, 1), NewVec2f(1, 1), NewVec2f(1, 0), NewVec2f(0, 0)],
     transform = transform
   )
-  result.mesh[].renameAttribute("position", POSITION_ATTRIB)
-  result.mesh[].renameAttribute("uv", UV_ATTRIB)
-  result.mesh.material = initMaterialData(
+  result.mesh[].RenameAttribute("position", POSITION_ATTRIB)
+  result.mesh[].RenameAttribute("uv", UV_ATTRIB)
+  result.mesh.material = InitMaterialData(
     theType = PANEL_MATERIAL_TYPE,
     name = "Panel material",
     attributes = {"panelTexture": InitDataList(@[texture]), "color": InitDataList(@[color])},
   )
   inc instanceCounter
-  result.refresh()
+  result.Refresh()
 
 proc Color*(panel: Panel): Vec4f =
   panel.mesh.material["color", 0, Vec4f]
 proc `color=`*(panel: var Panel, value: Vec4f) =
-  if value != panel.color:
+  if value != panel.mesh.material["color", 0, Vec4f]:
     panel.mesh.material["color", 0] = value
 
 proc HorizontalAlignment*(panel: Panel): HorizontalAlignment =

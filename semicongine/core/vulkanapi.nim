@@ -135,196 +135,196 @@ type
   VkSemaphoreSciSyncPoolNV* = distinct VkNonDispatchableHandle
   VkRemoteAddressNV* = pointer
 proc `$`*(handle: VkInstance): string = "VkInstance(" & $(uint(handle)) & ")"
-proc valid*(handle: VkInstance): bool = uint(handle) != 0
-proc reset*(handle: var VkInstance) = handle = VkInstance(0)
+proc Valid*(handle: VkInstance): bool = uint(handle) != 0
+proc Reset*(handle: var VkInstance) = handle = VkInstance(0)
 proc `==`*(a, b: VkInstance): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPhysicalDevice): string = "VkPhysicalDevice(" & $(uint(handle)) & ")"
-proc valid*(handle: VkPhysicalDevice): bool = uint(handle) != 0
-proc reset*(handle: var VkPhysicalDevice) = handle = VkPhysicalDevice(0)
+proc Valid*(handle: VkPhysicalDevice): bool = uint(handle) != 0
+proc Reset*(handle: var VkPhysicalDevice) = handle = VkPhysicalDevice(0)
 proc `==`*(a, b: VkPhysicalDevice): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDevice): string = "VkDevice(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDevice): bool = uint(handle) != 0
-proc reset*(handle: var VkDevice) = handle = VkDevice(0)
+proc Valid*(handle: VkDevice): bool = uint(handle) != 0
+proc Reset*(handle: var VkDevice) = handle = VkDevice(0)
 proc `==`*(a, b: VkDevice): bool = uint(a) == uint(b)
 proc `$`*(handle: VkQueue): string = "VkQueue(" & $(uint(handle)) & ")"
-proc valid*(handle: VkQueue): bool = uint(handle) != 0
-proc reset*(handle: var VkQueue) = handle = VkQueue(0)
+proc Valid*(handle: VkQueue): bool = uint(handle) != 0
+proc Reset*(handle: var VkQueue) = handle = VkQueue(0)
 proc `==`*(a, b: VkQueue): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCommandBuffer): string = "VkCommandBuffer(" & $(uint(handle)) & ")"
-proc valid*(handle: VkCommandBuffer): bool = uint(handle) != 0
-proc reset*(handle: var VkCommandBuffer) = handle = VkCommandBuffer(0)
+proc Valid*(handle: VkCommandBuffer): bool = uint(handle) != 0
+proc Reset*(handle: var VkCommandBuffer) = handle = VkCommandBuffer(0)
 proc `==`*(a, b: VkCommandBuffer): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDeviceMemory): string = "VkDeviceMemory(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDeviceMemory): bool = uint(handle) != 0
-proc reset*(handle: var VkDeviceMemory) = handle = VkDeviceMemory(0)
+proc Valid*(handle: VkDeviceMemory): bool = uint(handle) != 0
+proc Reset*(handle: var VkDeviceMemory) = handle = VkDeviceMemory(0)
 proc `==`*(a, b: VkDeviceMemory): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCommandPool): string = "VkCommandPool(" & $(uint(handle)) & ")"
-proc valid*(handle: VkCommandPool): bool = uint(handle) != 0
-proc reset*(handle: var VkCommandPool) = handle = VkCommandPool(0)
+proc Valid*(handle: VkCommandPool): bool = uint(handle) != 0
+proc Reset*(handle: var VkCommandPool) = handle = VkCommandPool(0)
 proc `==`*(a, b: VkCommandPool): bool = uint(a) == uint(b)
 proc `$`*(handle: VkBuffer): string = "VkBuffer(" & $(uint(handle)) & ")"
-proc valid*(handle: VkBuffer): bool = uint(handle) != 0
-proc reset*(handle: var VkBuffer) = handle = VkBuffer(0)
+proc Valid*(handle: VkBuffer): bool = uint(handle) != 0
+proc Reset*(handle: var VkBuffer) = handle = VkBuffer(0)
 proc `==`*(a, b: VkBuffer): bool = uint(a) == uint(b)
 proc `$`*(handle: VkBufferView): string = "VkBufferView(" & $(uint(handle)) & ")"
-proc valid*(handle: VkBufferView): bool = uint(handle) != 0
-proc reset*(handle: var VkBufferView) = handle = VkBufferView(0)
+proc Valid*(handle: VkBufferView): bool = uint(handle) != 0
+proc Reset*(handle: var VkBufferView) = handle = VkBufferView(0)
 proc `==`*(a, b: VkBufferView): bool = uint(a) == uint(b)
 proc `$`*(handle: VkImage): string = "VkImage(" & $(uint(handle)) & ")"
-proc valid*(handle: VkImage): bool = uint(handle) != 0
-proc reset*(handle: var VkImage) = handle = VkImage(0)
+proc Valid*(handle: VkImage): bool = uint(handle) != 0
+proc Reset*(handle: var VkImage) = handle = VkImage(0)
 proc `==`*(a, b: VkImage): bool = uint(a) == uint(b)
 proc `$`*(handle: VkImageView): string = "VkImageView(" & $(uint(handle)) & ")"
-proc valid*(handle: VkImageView): bool = uint(handle) != 0
-proc reset*(handle: var VkImageView) = handle = VkImageView(0)
+proc Valid*(handle: VkImageView): bool = uint(handle) != 0
+proc Reset*(handle: var VkImageView) = handle = VkImageView(0)
 proc `==`*(a, b: VkImageView): bool = uint(a) == uint(b)
 proc `$`*(handle: VkShaderModule): string = "VkShaderModule(" & $(uint(handle)) & ")"
-proc valid*(handle: VkShaderModule): bool = uint(handle) != 0
-proc reset*(handle: var VkShaderModule) = handle = VkShaderModule(0)
+proc Valid*(handle: VkShaderModule): bool = uint(handle) != 0
+proc Reset*(handle: var VkShaderModule) = handle = VkShaderModule(0)
 proc `==`*(a, b: VkShaderModule): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPipeline): string = "VkPipeline(" & $(uint(handle)) & ")"
-proc valid*(handle: VkPipeline): bool = uint(handle) != 0
-proc reset*(handle: var VkPipeline) = handle = VkPipeline(0)
+proc Valid*(handle: VkPipeline): bool = uint(handle) != 0
+proc Reset*(handle: var VkPipeline) = handle = VkPipeline(0)
 proc `==`*(a, b: VkPipeline): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPipelineLayout): string = "VkPipelineLayout(" & $(uint(handle)) & ")"
-proc valid*(handle: VkPipelineLayout): bool = uint(handle) != 0
-proc reset*(handle: var VkPipelineLayout) = handle = VkPipelineLayout(0)
+proc Valid*(handle: VkPipelineLayout): bool = uint(handle) != 0
+proc Reset*(handle: var VkPipelineLayout) = handle = VkPipelineLayout(0)
 proc `==`*(a, b: VkPipelineLayout): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSampler): string = "VkSampler(" & $(uint(handle)) & ")"
-proc valid*(handle: VkSampler): bool = uint(handle) != 0
-proc reset*(handle: var VkSampler) = handle = VkSampler(0)
+proc Valid*(handle: VkSampler): bool = uint(handle) != 0
+proc Reset*(handle: var VkSampler) = handle = VkSampler(0)
 proc `==`*(a, b: VkSampler): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorSet): string = "VkDescriptorSet(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDescriptorSet): bool = uint(handle) != 0
-proc reset*(handle: var VkDescriptorSet) = handle = VkDescriptorSet(0)
+proc Valid*(handle: VkDescriptorSet): bool = uint(handle) != 0
+proc Reset*(handle: var VkDescriptorSet) = handle = VkDescriptorSet(0)
 proc `==`*(a, b: VkDescriptorSet): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorSetLayout): string = "VkDescriptorSetLayout(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDescriptorSetLayout): bool = uint(handle) != 0
-proc reset*(handle: var VkDescriptorSetLayout) = handle = VkDescriptorSetLayout(0)
+proc Valid*(handle: VkDescriptorSetLayout): bool = uint(handle) != 0
+proc Reset*(handle: var VkDescriptorSetLayout) = handle = VkDescriptorSetLayout(0)
 proc `==`*(a, b: VkDescriptorSetLayout): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorPool): string = "VkDescriptorPool(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDescriptorPool): bool = uint(handle) != 0
-proc reset*(handle: var VkDescriptorPool) = handle = VkDescriptorPool(0)
+proc Valid*(handle: VkDescriptorPool): bool = uint(handle) != 0
+proc Reset*(handle: var VkDescriptorPool) = handle = VkDescriptorPool(0)
 proc `==`*(a, b: VkDescriptorPool): bool = uint(a) == uint(b)
 proc `$`*(handle: VkFence): string = "VkFence(" & $(uint(handle)) & ")"
-proc valid*(handle: VkFence): bool = uint(handle) != 0
-proc reset*(handle: var VkFence) = handle = VkFence(0)
+proc Valid*(handle: VkFence): bool = uint(handle) != 0
+proc Reset*(handle: var VkFence) = handle = VkFence(0)
 proc `==`*(a, b: VkFence): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSemaphore): string = "VkSemaphore(" & $(uint(handle)) & ")"
-proc valid*(handle: VkSemaphore): bool = uint(handle) != 0
-proc reset*(handle: var VkSemaphore) = handle = VkSemaphore(0)
+proc Valid*(handle: VkSemaphore): bool = uint(handle) != 0
+proc Reset*(handle: var VkSemaphore) = handle = VkSemaphore(0)
 proc `==`*(a, b: VkSemaphore): bool = uint(a) == uint(b)
 proc `$`*(handle: VkEvent): string = "VkEvent(" & $(uint(handle)) & ")"
-proc valid*(handle: VkEvent): bool = uint(handle) != 0
-proc reset*(handle: var VkEvent) = handle = VkEvent(0)
+proc Valid*(handle: VkEvent): bool = uint(handle) != 0
+proc Reset*(handle: var VkEvent) = handle = VkEvent(0)
 proc `==`*(a, b: VkEvent): bool = uint(a) == uint(b)
 proc `$`*(handle: VkQueryPool): string = "VkQueryPool(" & $(uint(handle)) & ")"
-proc valid*(handle: VkQueryPool): bool = uint(handle) != 0
-proc reset*(handle: var VkQueryPool) = handle = VkQueryPool(0)
+proc Valid*(handle: VkQueryPool): bool = uint(handle) != 0
+proc Reset*(handle: var VkQueryPool) = handle = VkQueryPool(0)
 proc `==`*(a, b: VkQueryPool): bool = uint(a) == uint(b)
 proc `$`*(handle: VkFramebuffer): string = "VkFramebuffer(" & $(uint(handle)) & ")"
-proc valid*(handle: VkFramebuffer): bool = uint(handle) != 0
-proc reset*(handle: var VkFramebuffer) = handle = VkFramebuffer(0)
+proc Valid*(handle: VkFramebuffer): bool = uint(handle) != 0
+proc Reset*(handle: var VkFramebuffer) = handle = VkFramebuffer(0)
 proc `==`*(a, b: VkFramebuffer): bool = uint(a) == uint(b)
 proc `$`*(handle: VkRenderPass): string = "VkRenderPass(" & $(uint(handle)) & ")"
-proc valid*(handle: VkRenderPass): bool = uint(handle) != 0
-proc reset*(handle: var VkRenderPass) = handle = VkRenderPass(0)
+proc Valid*(handle: VkRenderPass): bool = uint(handle) != 0
+proc Reset*(handle: var VkRenderPass) = handle = VkRenderPass(0)
 proc `==`*(a, b: VkRenderPass): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPipelineCache): string = "VkPipelineCache(" & $(uint(handle)) & ")"
-proc valid*(handle: VkPipelineCache): bool = uint(handle) != 0
-proc reset*(handle: var VkPipelineCache) = handle = VkPipelineCache(0)
+proc Valid*(handle: VkPipelineCache): bool = uint(handle) != 0
+proc Reset*(handle: var VkPipelineCache) = handle = VkPipelineCache(0)
 proc `==`*(a, b: VkPipelineCache): bool = uint(a) == uint(b)
 proc `$`*(handle: VkIndirectCommandsLayoutNV): string = "VkIndirectCommandsLayoutNV(" & $(uint(handle)) & ")"
-proc valid*(handle: VkIndirectCommandsLayoutNV): bool = uint(handle) != 0
-proc reset*(handle: var VkIndirectCommandsLayoutNV) = handle = VkIndirectCommandsLayoutNV(0)
+proc Valid*(handle: VkIndirectCommandsLayoutNV): bool = uint(handle) != 0
+proc Reset*(handle: var VkIndirectCommandsLayoutNV) = handle = VkIndirectCommandsLayoutNV(0)
 proc `==`*(a, b: VkIndirectCommandsLayoutNV): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDescriptorUpdateTemplate): string = "VkDescriptorUpdateTemplate(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDescriptorUpdateTemplate): bool = uint(handle) != 0
-proc reset*(handle: var VkDescriptorUpdateTemplate) = handle = VkDescriptorUpdateTemplate(0)
+proc Valid*(handle: VkDescriptorUpdateTemplate): bool = uint(handle) != 0
+proc Reset*(handle: var VkDescriptorUpdateTemplate) = handle = VkDescriptorUpdateTemplate(0)
 proc `==`*(a, b: VkDescriptorUpdateTemplate): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSamplerYcbcrConversion): string = "VkSamplerYcbcrConversion(" & $(uint(handle)) & ")"
-proc valid*(handle: VkSamplerYcbcrConversion): bool = uint(handle) != 0
-proc reset*(handle: var VkSamplerYcbcrConversion) = handle = VkSamplerYcbcrConversion(0)
+proc Valid*(handle: VkSamplerYcbcrConversion): bool = uint(handle) != 0
+proc Reset*(handle: var VkSamplerYcbcrConversion) = handle = VkSamplerYcbcrConversion(0)
 proc `==`*(a, b: VkSamplerYcbcrConversion): bool = uint(a) == uint(b)
 proc `$`*(handle: VkValidationCacheEXT): string = "VkValidationCacheEXT(" & $(uint(handle)) & ")"
-proc valid*(handle: VkValidationCacheEXT): bool = uint(handle) != 0
-proc reset*(handle: var VkValidationCacheEXT) = handle = VkValidationCacheEXT(0)
+proc Valid*(handle: VkValidationCacheEXT): bool = uint(handle) != 0
+proc Reset*(handle: var VkValidationCacheEXT) = handle = VkValidationCacheEXT(0)
 proc `==`*(a, b: VkValidationCacheEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkAccelerationStructureKHR): string = "VkAccelerationStructureKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkAccelerationStructureKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkAccelerationStructureKHR) = handle = VkAccelerationStructureKHR(0)
+proc Valid*(handle: VkAccelerationStructureKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkAccelerationStructureKHR) = handle = VkAccelerationStructureKHR(0)
 proc `==`*(a, b: VkAccelerationStructureKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkAccelerationStructureNV): string = "VkAccelerationStructureNV(" & $(uint(handle)) & ")"
-proc valid*(handle: VkAccelerationStructureNV): bool = uint(handle) != 0
-proc reset*(handle: var VkAccelerationStructureNV) = handle = VkAccelerationStructureNV(0)
+proc Valid*(handle: VkAccelerationStructureNV): bool = uint(handle) != 0
+proc Reset*(handle: var VkAccelerationStructureNV) = handle = VkAccelerationStructureNV(0)
 proc `==`*(a, b: VkAccelerationStructureNV): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPerformanceConfigurationINTEL): string = "VkPerformanceConfigurationINTEL(" & $(uint(handle)) & ")"
-proc valid*(handle: VkPerformanceConfigurationINTEL): bool = uint(handle) != 0
-proc reset*(handle: var VkPerformanceConfigurationINTEL) = handle = VkPerformanceConfigurationINTEL(0)
+proc Valid*(handle: VkPerformanceConfigurationINTEL): bool = uint(handle) != 0
+proc Reset*(handle: var VkPerformanceConfigurationINTEL) = handle = VkPerformanceConfigurationINTEL(0)
 proc `==`*(a, b: VkPerformanceConfigurationINTEL): bool = uint(a) == uint(b)
 proc `$`*(handle: VkBufferCollectionFUCHSIA): string = "VkBufferCollectionFUCHSIA(" & $(uint(handle)) & ")"
-proc valid*(handle: VkBufferCollectionFUCHSIA): bool = uint(handle) != 0
-proc reset*(handle: var VkBufferCollectionFUCHSIA) = handle = VkBufferCollectionFUCHSIA(0)
+proc Valid*(handle: VkBufferCollectionFUCHSIA): bool = uint(handle) != 0
+proc Reset*(handle: var VkBufferCollectionFUCHSIA) = handle = VkBufferCollectionFUCHSIA(0)
 proc `==`*(a, b: VkBufferCollectionFUCHSIA): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDeferredOperationKHR): string = "VkDeferredOperationKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDeferredOperationKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkDeferredOperationKHR) = handle = VkDeferredOperationKHR(0)
+proc Valid*(handle: VkDeferredOperationKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkDeferredOperationKHR) = handle = VkDeferredOperationKHR(0)
 proc `==`*(a, b: VkDeferredOperationKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkPrivateDataSlot): string = "VkPrivateDataSlot(" & $(uint(handle)) & ")"
-proc valid*(handle: VkPrivateDataSlot): bool = uint(handle) != 0
-proc reset*(handle: var VkPrivateDataSlot) = handle = VkPrivateDataSlot(0)
+proc Valid*(handle: VkPrivateDataSlot): bool = uint(handle) != 0
+proc Reset*(handle: var VkPrivateDataSlot) = handle = VkPrivateDataSlot(0)
 proc `==`*(a, b: VkPrivateDataSlot): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCuModuleNVX): string = "VkCuModuleNVX(" & $(uint(handle)) & ")"
-proc valid*(handle: VkCuModuleNVX): bool = uint(handle) != 0
-proc reset*(handle: var VkCuModuleNVX) = handle = VkCuModuleNVX(0)
+proc Valid*(handle: VkCuModuleNVX): bool = uint(handle) != 0
+proc Reset*(handle: var VkCuModuleNVX) = handle = VkCuModuleNVX(0)
 proc `==`*(a, b: VkCuModuleNVX): bool = uint(a) == uint(b)
 proc `$`*(handle: VkCuFunctionNVX): string = "VkCuFunctionNVX(" & $(uint(handle)) & ")"
-proc valid*(handle: VkCuFunctionNVX): bool = uint(handle) != 0
-proc reset*(handle: var VkCuFunctionNVX) = handle = VkCuFunctionNVX(0)
+proc Valid*(handle: VkCuFunctionNVX): bool = uint(handle) != 0
+proc Reset*(handle: var VkCuFunctionNVX) = handle = VkCuFunctionNVX(0)
 proc `==`*(a, b: VkCuFunctionNVX): bool = uint(a) == uint(b)
 proc `$`*(handle: VkOpticalFlowSessionNV): string = "VkOpticalFlowSessionNV(" & $(uint(handle)) & ")"
-proc valid*(handle: VkOpticalFlowSessionNV): bool = uint(handle) != 0
-proc reset*(handle: var VkOpticalFlowSessionNV) = handle = VkOpticalFlowSessionNV(0)
+proc Valid*(handle: VkOpticalFlowSessionNV): bool = uint(handle) != 0
+proc Reset*(handle: var VkOpticalFlowSessionNV) = handle = VkOpticalFlowSessionNV(0)
 proc `==`*(a, b: VkOpticalFlowSessionNV): bool = uint(a) == uint(b)
 proc `$`*(handle: VkMicromapEXT): string = "VkMicromapEXT(" & $(uint(handle)) & ")"
-proc valid*(handle: VkMicromapEXT): bool = uint(handle) != 0
-proc reset*(handle: var VkMicromapEXT) = handle = VkMicromapEXT(0)
+proc Valid*(handle: VkMicromapEXT): bool = uint(handle) != 0
+proc Reset*(handle: var VkMicromapEXT) = handle = VkMicromapEXT(0)
 proc `==`*(a, b: VkMicromapEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDisplayKHR): string = "VkDisplayKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDisplayKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkDisplayKHR) = handle = VkDisplayKHR(0)
+proc Valid*(handle: VkDisplayKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkDisplayKHR) = handle = VkDisplayKHR(0)
 proc `==`*(a, b: VkDisplayKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDisplayModeKHR): string = "VkDisplayModeKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDisplayModeKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkDisplayModeKHR) = handle = VkDisplayModeKHR(0)
+proc Valid*(handle: VkDisplayModeKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkDisplayModeKHR) = handle = VkDisplayModeKHR(0)
 proc `==`*(a, b: VkDisplayModeKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSurfaceKHR): string = "VkSurfaceKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkSurfaceKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkSurfaceKHR) = handle = VkSurfaceKHR(0)
+proc Valid*(handle: VkSurfaceKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkSurfaceKHR) = handle = VkSurfaceKHR(0)
 proc `==`*(a, b: VkSurfaceKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSwapchainKHR): string = "VkSwapchainKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkSwapchainKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkSwapchainKHR) = handle = VkSwapchainKHR(0)
+proc Valid*(handle: VkSwapchainKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkSwapchainKHR) = handle = VkSwapchainKHR(0)
 proc `==`*(a, b: VkSwapchainKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDebugReportCallbackEXT): string = "VkDebugReportCallbackEXT(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDebugReportCallbackEXT): bool = uint(handle) != 0
-proc reset*(handle: var VkDebugReportCallbackEXT) = handle = VkDebugReportCallbackEXT(0)
+proc Valid*(handle: VkDebugReportCallbackEXT): bool = uint(handle) != 0
+proc Reset*(handle: var VkDebugReportCallbackEXT) = handle = VkDebugReportCallbackEXT(0)
 proc `==`*(a, b: VkDebugReportCallbackEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkDebugUtilsMessengerEXT): string = "VkDebugUtilsMessengerEXT(" & $(uint(handle)) & ")"
-proc valid*(handle: VkDebugUtilsMessengerEXT): bool = uint(handle) != 0
-proc reset*(handle: var VkDebugUtilsMessengerEXT) = handle = VkDebugUtilsMessengerEXT(0)
+proc Valid*(handle: VkDebugUtilsMessengerEXT): bool = uint(handle) != 0
+proc Reset*(handle: var VkDebugUtilsMessengerEXT) = handle = VkDebugUtilsMessengerEXT(0)
 proc `==`*(a, b: VkDebugUtilsMessengerEXT): bool = uint(a) == uint(b)
 proc `$`*(handle: VkVideoSessionKHR): string = "VkVideoSessionKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkVideoSessionKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkVideoSessionKHR) = handle = VkVideoSessionKHR(0)
+proc Valid*(handle: VkVideoSessionKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkVideoSessionKHR) = handle = VkVideoSessionKHR(0)
 proc `==`*(a, b: VkVideoSessionKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkVideoSessionParametersKHR): string = "VkVideoSessionParametersKHR(" & $(uint(handle)) & ")"
-proc valid*(handle: VkVideoSessionParametersKHR): bool = uint(handle) != 0
-proc reset*(handle: var VkVideoSessionParametersKHR) = handle = VkVideoSessionParametersKHR(0)
+proc Valid*(handle: VkVideoSessionParametersKHR): bool = uint(handle) != 0
+proc Reset*(handle: var VkVideoSessionParametersKHR) = handle = VkVideoSessionParametersKHR(0)
 proc `==`*(a, b: VkVideoSessionParametersKHR): bool = uint(a) == uint(b)
 proc `$`*(handle: VkSemaphoreSciSyncPoolNV): string = "VkSemaphoreSciSyncPoolNV(" & $(uint(handle)) & ")"
-proc valid*(handle: VkSemaphoreSciSyncPoolNV): bool = uint(handle) != 0
-proc reset*(handle: var VkSemaphoreSciSyncPoolNV) = handle = VkSemaphoreSciSyncPoolNV(0)
+proc Valid*(handle: VkSemaphoreSciSyncPoolNV): bool = uint(handle) != 0
+proc Reset*(handle: var VkSemaphoreSciSyncPoolNV) = handle = VkSemaphoreSciSyncPoolNV(0)
 proc `==`*(a, b: VkSemaphoreSciSyncPoolNV): bool = uint(a) == uint(b)
 type
   VkFramebufferCreateFlags* = distinct VkFlags

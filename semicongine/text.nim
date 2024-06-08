@@ -23,7 +23,7 @@ const
     instanceAttributes: {TRANSFORM_ATTRIB: Mat4F32, MATERIALINDEX_ATTRIBUTE: UInt16}.toTable,
     attributes: {"fontAtlas": TextureType, "color": Vec4F32}.toTable,
   )
-  TEXT_SHADER* = createShaderConfiguration(
+  TEXT_SHADER* = CreateShaderConfiguration(
     name = "font shader",
     inputs = [
       Attr[Mat4](TRANSFORM_ATTRIB, memoryPerformanceHint = PreferFastWrite, perInstance = true),
@@ -205,7 +205,7 @@ func wordWrapped(text: seq[Rune], font: Font, maxWidth: float32): seq[Rune] =
   return result
 
 
-func Text*(text: Text): seq[Rune] =
+func text*(text: Text): seq[Rune] =
   text.text
 
 proc `text=`*(text: var Text, newText: seq[Rune]) =
@@ -220,8 +220,8 @@ proc `text=`*(text: var Text, newText: string) =
 
 proc Color*(text: Text): Vec4f =
   text.mesh.material["color", 0, Vec4f]
-proc `color=`*(text: var Text, value: Vec4f) =
-  if value != text.color:
+proc `Color=`*(text: var Text, value: Vec4f) =
+  if value != text.mesh.material["color", 0, Vec4f]:
     text.mesh.material["color", 0] = value
 
 proc HorizontalAlignment*(text: Text): HorizontalAlignment =
@@ -238,7 +238,7 @@ proc `verticalAlignment=`*(text: var Text, value: VerticalAlignment) =
     text.verticalAlignment = value
     text.dirty = true
 
-proc InitText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = NewVec4f(0.07, 0.07, 0.07, 1), verticalAlignment = VerticalAlignment.Center, horizontalAlignment = HorizontalAlignment.Center, maxWidth = 0'f32, transform = Unit4): Text =
+proc InitText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = NewVec4f(0.07, 0.07, 0.07, 1), verticalAlignment: VerticalAlignment = Center, horizontalAlignment: HorizontalAlignment = Center, maxWidth = 0'f32, transform = Unit4): Text =
   var
     positions = newSeq[Vec3f](int(maxLen * 4))
     indices: seq[array[3, uint16]]
@@ -251,10 +251,10 @@ proc InitText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = Ne
     ]
 
   result = Text(maxLen: maxLen, font: font, dirty: true, horizontalAlignment: horizontalAlignment, verticalAlignment: verticalAlignment, maxWidth: maxWidth)
-  result.mesh = newMesh(positions = positions, indices = indices, uvs = uvs, name = &"text-{instanceCounter}")
-  result.mesh[].renameAttribute("position", POSITION_ATTRIB)
-  result.mesh[].renameAttribute("uv", UV_ATTRIB)
-  result.mesh.material = TEXT_MATERIAL_TYPE.initMaterialData(
+  result.mesh = NewMesh(positions = positions, indices = indices, uvs = uvs, name = &"text-{instanceCounter}")
+  result.mesh[].RenameAttribute("position", POSITION_ATTRIB)
+  result.mesh[].RenameAttribute("uv", UV_ATTRIB)
+  result.mesh.material = TEXT_MATERIAL_TYPE.InitMaterialData(
     name = font.name & " text",
     attributes = {"fontAtlas": InitDataList(@[font.fontAtlas]), "color": InitDataList(@[color])},
   )
@@ -262,4 +262,4 @@ proc InitText*(font: Font, text = "".toRunes, maxLen: int = text.len, color = Ne
   `text=`(result, text)
   inc instanceCounter
 
-  result.refresh()
+  result.Refresh()

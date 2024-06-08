@@ -13,7 +13,7 @@ let
     WT, WT, WT, WT, WT, WT, WT,
     RT, RT, RT, RT, RT, RT, RT,
   ])
-  swiss = loadImage[RGBAPixel]("flag.png")
+  swiss = LoadImage[RGBAPixel]("flag.png")
   doubleTextureMaterial = MaterialType(
     name: "Double texture",
     vertexAttributes: {
@@ -22,7 +22,7 @@ let
     }.toTable,
     attributes: {"tex1": TextureType, "tex2": TextureType}.toTable
   )
-  material = initMaterialData(
+  material = InitMaterialData(
     theType = doubleTextureMaterial,
     name = "swiss-thai",
     attributes = {
@@ -32,15 +32,15 @@ let
   )
 
 proc main() =
-  var flag = rect()
+  var flag = Rect()
   flag.material = material
   var scene = Scene(name: "main", meshes: @[flag])
-  scene.addShaderGlobalArray("test2", @[NewVec4f(), NewVec4f()])
+  scene.AddShaderGlobalArray("test2", @[NewVec4f(), NewVec4f()])
 
   var engine = InitEngine("Test materials")
 
   const
-    shaderConfiguration1 = createShaderConfiguration(
+    shaderConfiguration1 = CreateShaderConfiguration(
       name = "shader 1",
       inputs = [
         Attr[Vec3f]("position", memoryPerformanceHint = PreferFastRead),
@@ -70,7 +70,7 @@ proc main() =
   var t = cpuTime()
   while engine.UpdateInputs() and not KeyIsDown(Escape):
     var d = float32(cpuTime() - t)
-    setShaderGlobalArray(scene, "test2", @[NewVec4f(d), NewVec4f(d * 2)])
+    SetShaderGlobalArray(scene, "test2", @[NewVec4f(d), NewVec4f(d * 2)])
     engine.RenderScene(scene)
   engine.Destroy()
 

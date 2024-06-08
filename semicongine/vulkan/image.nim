@@ -50,8 +50,8 @@ const LINEAR_FORMATS = [
 
 
 proc requirements(image: VulkanImage): MemoryRequirements =
-  assert image.vk.valid
-  assert image.device.vk.valid
+  assert image.vk.Valid
+  assert image.device.vk.Valid
   var req: VkMemoryRequirements
   image.device.vk.vkGetImageMemoryRequirements(image.vk, addr req)
   result.size = req.size
@@ -62,7 +62,7 @@ proc requirements(image: VulkanImage): MemoryRequirements =
       result.memoryTypes.add memorytypes[i]
 
 proc allocateMemory(image: var VulkanImage, requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool) =
-  assert image.device.vk.valid
+  assert image.device.vk.Valid
   assert image.memoryAllocated == false
 
   let requirements = image.requirements()
@@ -122,8 +122,8 @@ proc transitionImageLayout(image: VulkanImage, queue: Queue, oldLayout, newLayou
     commandBuffer.PipelineBarrier([srcStage], [dstStage], imageBarriers = [barrier])
 
 proc Copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
-  assert src.device.vk.valid
-  assert dst.device.vk.valid
+  assert src.device.vk.Valid
+  assert dst.device.vk.Valid
   assert src.device == dst.device
   assert VK_BUFFER_USAGE_TRANSFER_SRC_BIT in src.usage
   assert VK_IMAGE_USAGE_TRANSFER_DST_BIT in dst.usage
@@ -152,7 +152,7 @@ proc Copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
 
 # currently only usable for texture access from shader
 proc createImage[T](device: Device, queue: Queue, width, height: uint32, depth: PixelDepth, image: Image[T]): VulkanImage =
-  assert device.vk.valid
+  assert device.vk.Valid
   assert width > 0
   assert height > 0
   assert depth != 2
@@ -226,11 +226,11 @@ proc createImage[T](device: Device, queue: Queue, width, height: uint32, depth: 
   stagingBuffer.Destroy()
 
 proc Destroy*(image: var VulkanImage) =
-  assert image.device.vk.valid
-  assert image.vk.valid
+  assert image.device.vk.Valid
+  assert image.vk.Valid
   image.device.vk.vkDestroyImage(image.vk, nil)
   if image.memoryAllocated:
-    assert image.memory.vk.valid
+    assert image.memory.vk.Valid
     image.memory.Free()
     image = VulkanImage(
       device: image.device,
@@ -242,10 +242,10 @@ proc Destroy*(image: var VulkanImage) =
       usage: image.usage,
       memoryAllocated: false,
     )
-  image.vk.reset
+  image.vk.Reset
 
 proc CreateSampler*(device: Device, sampler: Sampler): VulkanSampler =
-  assert device.vk.valid
+  assert device.vk.Valid
   var samplerInfo = VkSamplerCreateInfo(
     sType: VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
     magFilter: sampler.magnification,
@@ -268,10 +268,10 @@ proc CreateSampler*(device: Device, sampler: Sampler): VulkanSampler =
   checkVkResult device.vk.vkCreateSampler(addr samplerInfo, nil, addr result.vk)
 
 proc Destroy*(sampler: var VulkanSampler) =
-  assert sampler.device.vk.valid
-  assert sampler.vk.valid
+  assert sampler.device.vk.Valid
+  assert sampler.vk.Valid
   sampler.device.vk.vkDestroySampler(sampler.vk, nil)
-  sampler.vk.reset
+  sampler.vk.Reset
 
 proc CreateImageView*(
   image: VulkanImage,
@@ -281,8 +281,8 @@ proc CreateImageView*(
   baseArrayLayer = 0'u32,
   layerCount = 1'u32
 ): ImageView =
-  assert image.device.vk.valid
-  assert image.vk.valid
+  assert image.device.vk.Valid
+  assert image.vk.Valid
 
   var createInfo = VkImageViewCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -307,17 +307,17 @@ proc CreateImageView*(
   checkVkResult image.device.vk.vkCreateImageView(addr(createInfo), nil, addr(result.vk))
 
 proc Destroy*(imageview: var ImageView) =
-  assert imageview.image.device.vk.valid
-  assert imageview.vk.valid
+  assert imageview.image.device.vk.Valid
+  assert imageview.vk.Valid
   imageview.image.device.vk.vkDestroyImageView(imageview.vk, nil)
-  imageview.vk.reset()
+  imageview.vk.Reset()
 
 func `$`*(texture: VulkanTexture): string =
   &"VulkanTexture({texture.image.width}x{texture.image.height})"
 
 
 proc UploadTexture*(device: Device, queue: Queue, texture: Texture): VulkanTexture =
-  assert device.vk.valid
+  assert device.vk.Valid
   if texture.isGrayscale:
     result.image = createImage(device = device, queue = queue, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, image = texture.grayImage)
   else:

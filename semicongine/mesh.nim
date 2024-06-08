@@ -139,7 +139,7 @@ proc NewMesh*(
   uvs: openArray[Vec2f] = [],
   transform: Mat4 = Unit4,
   instanceTransforms: openArray[Mat4] = [Unit4],
-  material = EMPTY_MATERIAL.initMaterialData(),
+  material = EMPTY_MATERIAL.InitMaterialData(),
   autoResize = true,
   name: string = ""
 ): Mesh =
@@ -195,7 +195,7 @@ proc NewMesh*(
   uvs: openArray[Vec2f] = [],
   transform: Mat4 = Unit4,
   instanceTransforms: openArray[Mat4] = [Unit4],
-  material = EMPTY_MATERIAL.initMaterialData(),
+  material = EMPTY_MATERIAL.InitMaterialData(),
   name: string = "",
 ): Mesh =
   NewMesh(
@@ -452,7 +452,7 @@ proc AsNonIndexedMesh*(mesh: MeshObject): MeshObject =
 
 # GENERATORS ============================================================================
 
-proc Rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc Rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.InitMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 4,
     instanceTransforms: @[Unit4],
@@ -473,7 +473,7 @@ proc Rect*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_M
   result[].InitVertexAttribute("uv", @[NewVec2f(0, 0), NewVec2f(1, 0), NewVec2f(1, 1), NewVec2f(0, 1)])
   `material=`(result[], material)
 
-proc Tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc Tri*(width = 1'f32, height = 1'f32, color = "ffffffff", material = EMPTY_MATERIAL.InitMaterialData()): Mesh =
   result = Mesh(
     vertexCount: 3,
     instanceTransforms: @[Unit4],
@@ -499,7 +499,7 @@ proc CircleMesh*(nSegments: int): (seq[Vec3f], seq[array[3, uint16]]) =
     result[0].add NewVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
     result[1].add [uint16(0), uint16(i), uint16(i + 1)]
 
-proc Circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc Circle*(width = 1'f32, height = 1'f32, nSegments = 12, color = "ffffffff", material = EMPTY_MATERIAL.InitMaterialData()): Mesh =
   assert nSegments >= 3
   result = Mesh(
     vertexCount: 3 + nSegments,
@@ -543,7 +543,7 @@ proc CircleMesh*(width = 1'f32, height = 1'f32, nSegments = 12): (seq[Vec3f], se
     result[0][i + 1] = NewVec3f(cos(float32(i) * step) * rX, sin(float32(i) * step) * rY)
     result[1].add [uint16(0), uint16(i), uint16(i + 1)]
 
-proc Grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", material = EMPTY_MATERIAL.initMaterialData()): Mesh =
+proc Grid*(columns, rows: uint16, cellSize = 1.0'f32, color = "ffffffff", material = EMPTY_MATERIAL.InitMaterialData()): Mesh =
 
   result = Mesh(
     vertexCount: int((rows + 1) * (columns + 1)),

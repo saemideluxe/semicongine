@@ -71,8 +71,8 @@ proc Setting*[T: int|float|string](identifier: string): T =
   let parts = identifier.rsplit(".")
   if parts.len == 1:
     raise newException(Exception, &"Setting with name {identifier} has no namespace")
-  if parts.len == 2: result = setting[T](parts[1], "", parts[0])
-  else: result = setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]))
+  if parts.len == 2: result = Setting[T](parts[1], "", parts[0])
+  else: result = Setting[T](parts[^1], parts[^2], joinPath(parts[0 .. ^3]))
 
 proc HadConfigUpdate*(): bool =
   when CONFIGHOTRELOAD == true:

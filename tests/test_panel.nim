@@ -28,21 +28,21 @@ proc main() =
   # build scene
   #
   var
-    font = loadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
+    font = LoadFont("DejaVuSans.ttf", lineHeightPixels = 210'f32)
     scene = Scene(name: "main")
-    origin = initPanel(
+    origin = InitPanel(
       transform = Scale(0.005, 0.005),
       color = NewVec4f(1, 1, 1, 1),
       texture = Texture(isGrayscale: false, colorImage: NewImage[RGBAPixel](3, 3, [T, B, T, B, B, B, T, B, T]), sampler: NEAREST_SAMPLER),
     )
-    button = initPanel(
+    button = InitPanel(
       transform = Translate(0.2, 0.1) * Scale(0.3, 0.1),
       color = NewVec4f(1, 0, 0, 0.5),
       onMouseDown = click,
       onMouseEnter = enter,
       onMouseLeave = leave
     )
-    help_text = font.initText("""Controls
+    help_text = font.InitText("""Controls
 
 Horizontal alignment:
   F1: Left
@@ -56,12 +56,12 @@ Mouse:
   Left click: Increase counter
   Right click: Decrease counter""".toRunes, horizontalAlignment = Left, verticalAlignment = Top, transform = Translate(-0.9, -0.9) * Scale(0.0002, 0.0002))
 
-  counterText = font.initText(($counter).toRunes, maxLen = 99, transform = Translate(0.2, 0.1) * Scale(0.0004, 0.0004))
+  counterText = font.InitText(($counter).toRunes, maxLen = 99, transform = Translate(0.2, 0.1) * Scale(0.0004, 0.0004))
 
-  scene.add counterText
-  scene.add button
-  scene.add help_text
-  scene.add origin
+  scene.Add counterText
+  scene.Add button
+  scene.Add help_text
+  scene.Add origin
   engine.LoadScene(scene)
 
   while engine.UpdateInputs() and not KeyIsDown(Escape):
@@ -86,10 +86,10 @@ Mouse:
 
     engine.ProcessEvents(button)
 
-    button.refresh()
-    counterText.refresh()
-    origin.refresh()
-    help_text.refresh()
+    button.Refresh()
+    counterText.Refresh()
+    origin.Refresh()
+    help_text.Refresh()
 
     engine.RenderScene(scene)
   engine.Destroy()

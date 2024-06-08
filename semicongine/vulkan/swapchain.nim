@@ -39,9 +39,9 @@ proc CreateSwapchain*(
   oldSwapchain = VkSwapchainKHR(0),
   vSync = false
 ): Option[Swapchain] =
-  assert device.vk.valid
-  assert device.physicalDevice.vk.valid
-  assert renderPass.valid
+  assert device.vk.Valid
+  assert device.physicalDevice.vk.Valid
+  assert renderPass.Valid
   assert inFlightFrames > 0
 
   var capabilities = device.physicalDevice.GetSurfaceCapabilities()
@@ -102,13 +102,13 @@ proc CreateSwapchain*(
     result = none(Swapchain)
 
 proc CurrentFramebuffer*(swapchain: Swapchain): Framebuffer =
-  assert swapchain.device.vk.valid
-  assert swapchain.vk.valid
+  assert swapchain.device.vk.Valid
+  assert swapchain.vk.Valid
   swapchain.framebuffers[swapchain.currentFramebufferIndex]
 
 proc AcquireNextFrame*(swapchain: var Swapchain): bool =
-  assert swapchain.device.vk.valid
-  assert swapchain.vk.valid
+  assert swapchain.device.vk.Valid
+  assert swapchain.vk.Valid
 
   swapchain.queueFinishedFence[swapchain.currentInFlight].Await()
 
@@ -121,15 +121,15 @@ proc AcquireNextFrame*(swapchain: var Swapchain): bool =
   )
 
   if nextImageResult == VK_SUCCESS:
-    swapchain.queueFinishedFence[swapchain.currentInFlight].reset()
+    swapchain.queueFinishedFence[swapchain.currentInFlight].Reset()
     return true
   else:
     return false
 
 proc Swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
-  assert swapchain.device.vk.valid
-  assert swapchain.vk.valid
-  assert queue.vk.valid
+  assert swapchain.device.vk.Valid
+  assert swapchain.vk.Valid
+  assert queue.vk.Valid
 
   var
     waitSemaphores = [swapchain.imageAvailableSemaphore[swapchain.currentInFlight].vk]
@@ -167,28 +167,28 @@ proc Swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffe
 
 
 proc Destroy*(swapchain: var Swapchain) =
-  assert swapchain.vk.valid
+  assert swapchain.vk.Valid
 
   for imageview in swapchain.framebufferViews.mitems:
-    assert imageview.vk.valid
+    assert imageview.vk.Valid
     imageview.Destroy()
   for framebuffer in swapchain.framebuffers.mitems:
-    assert framebuffer.vk.valid
+    assert framebuffer.vk.Valid
     framebuffer.Destroy()
   for i in 0 ..< swapchain.inFlightFrames:
-    assert swapchain.queueFinishedFence[i].vk.valid
-    assert swapchain.imageAvailableSemaphore[i].vk.valid
-    assert swapchain.renderFinishedSemaphore[i].vk.valid
+    assert swapchain.queueFinishedFence[i].vk.Valid
+    assert swapchain.imageAvailableSemaphore[i].vk.Valid
+    assert swapchain.renderFinishedSemaphore[i].vk.Valid
     swapchain.queueFinishedFence[i].Destroy()
     swapchain.imageAvailableSemaphore[i].Destroy()
     swapchain.renderFinishedSemaphore[i].Destroy()
 
   swapchain.device.vk.vkDestroySwapchainKHR(swapchain.vk, nil)
-  swapchain.vk.reset()
+  swapchain.vk.Reset()
 
 proc Recreate*(swapchain: var Swapchain): Option[Swapchain] =
-  assert swapchain.vk.valid
-  assert swapchain.device.vk.valid
+  assert swapchain.vk.Valid
+  assert swapchain.device.vk.Valid
   result = CreateSwapchain(
     device = swapchain.device,
     renderPass = swapchain.renderPass,

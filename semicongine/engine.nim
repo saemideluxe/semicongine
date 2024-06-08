@@ -50,12 +50,12 @@ func GetAspectRatio*(engine: Engine): float32
 proc Destroy*(engine: var Engine) =
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
   if engine.renderer.isSome:
-    engine.renderer.get.destroy()
-  engine.device.destroy()
-  if engine.debugger.messenger.valid:
-    engine.debugger.destroy()
-  engine.window.destroy()
-  engine.instance.destroy()
+    engine.renderer.get.Destroy()
+  engine.device.Destroy()
+  if engine.debugger.messenger.Valid:
+    engine.debugger.Destroy()
+  engine.window.Destroy()
+  engine.instance.Destroy()
   if SteamAvailable():
     SteamShutdown()
 
@@ -77,7 +77,7 @@ proc InitEngine*(
 
   result.applicationName = applicationName
   result.showFps = showFps
-  result.window = createWindow(result.applicationName)
+  result.window = CreateWindow(result.applicationName)
 
   var
     layers = @vulkanLayers
@@ -91,19 +91,19 @@ proc InitEngine*(
     # putEnv("VK_LAYER_ENABLES", "VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT")
     putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_AMD,VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_NVIDIA,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT")
 
-  result.instance = result.window.createInstance(
+  result.instance = result.window.CreateInstance(
     vulkanVersion = vulkanVersion,
     instanceExtensions = instanceExtensions,
     layers = layers.deduplicate(),
   )
   if DEBUG:
-    result.debugger = result.instance.createDebugMessenger()
+    result.debugger = result.instance.CreateDebugMessenger()
   # create devices
-  let selectedPhysicalDevice = result.instance.getPhysicalDevices().filterBestGraphics()
-  result.device = result.instance.createDevice(
+  let selectedPhysicalDevice = result.instance.GetPhysicalDevices().FilterBestGraphics()
+  result.device = result.instance.CreateDevice(
     selectedPhysicalDevice,
     enabledExtensions = @[],
-    selectedPhysicalDevice.filterForGraphicsPresentationQueues()
+    selectedPhysicalDevice.FilterForGraphicsPresentationQueues()
   )
   StartMixerThread()
 
@@ -142,27 +142,27 @@ proc LoadScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome
   assert not scene.loaded
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
-  scene.addShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
-  engine.renderer.get.setupDrawableBuffers(scene)
-  engine.renderer.get.updateMeshData(scene, forceAll = true)
-  engine.renderer.get.updateUniformData(scene, forceAll = true)
+  scene.AddShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
+  engine.renderer.get.SetupDrawableBuffers(scene)
+  engine.renderer.get.UpdateMeshData(scene, forceAll = true)
+  engine.renderer.get.UpdateUniformData(scene, forceAll = true)
   checkVkResult engine.device.vk.vkDeviceWaitIdle()
   debug &"done loading scene '{scene.name}'"
 
 proc UnLoadScene*(engine: var Engine, scene: Scene) =
   debug &"unload scene '{scene.name}'"
-  engine.renderer.get.destroy(scene)
+  engine.renderer.get.Destroy(scene)
 
 proc RenderScene*(engine: var Engine, scene: var Scene) =
   assert engine.renderer.isSome, "Renderer has not yet been initialized, call 'engine.InitRenderer' first"
-  assert engine.renderer.get.hasScene(scene), &"Scene '{scene.name}' has not been loaded yet"
+  assert engine.renderer.get.HasScene(scene), &"Scene '{scene.name}' has not been loaded yet"
   let t0 = getMonoTime()
 
-  engine.renderer.get.startNewFrame()
-  scene.setShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
-  engine.renderer.get.updateMeshData(scene)
-  engine.renderer.get.updateUniformData(scene)
-  engine.renderer.get.render(scene)
+  engine.renderer.get.StartNewFrame()
+  scene.SetShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
+  engine.renderer.get.UpdateMeshData(scene)
+  engine.renderer.get.UpdateUniformData(scene)
+  engine.renderer.get.Render(scene)
 
   if engine.showFps:
     let nanoSecs = getMonoTime().ticks - t0.ticks
@@ -175,29 +175,29 @@ proc RenderScene*(engine: var Engine, scene: var Scene) =
         min = float(engine.lastNRenderTimes[0]) / 1_000_000
         median = float(engine.lastNRenderTimes[engine.lastNRenderTimes.len div 2]) / 1_000_000
         max = float(engine.lastNRenderTimes[^1]) / 1_000_000
-      engine.window.setTitle(&"{engine.applicationName} ({min:.2}, {median:.2}, {max:.2})")
+      engine.window.SetTitle(&"{engine.applicationName} ({min:.2}, {median:.2}, {max:.2})")
 
 
 # wrappers for internal things
 func GpuDevice*(engine: Engine): Device = engine.device
 func GetWindow*(engine: Engine): auto = engine.window
-func GetAspectRatio*(engine: Engine): float32 = engine.GetWindow().size[0] / engine.GetWindow().size[1]
-func ShowSystemCursor*(engine: Engine) = engine.window.showSystemCursor()
-func HideSystemCursor*(engine: Engine) = engine.window.hideSystemCursor()
-func Fullscreen*(engine: Engine): bool = engine.fullscreen
+func GetAspectRatio*(engine: Engine): float32 = engine.GetWindow().Size[0] / engine.GetWindow().Size[1]
+func ShowSystemCursor*(engine: Engine) = engine.window.ShowSystemCursor()
+func HideSystemCursor*(engine: Engine) = engine.window.HideSystemCursor()
+func Fullscreen*(engine: Engine): bool = engine.Fullscreen
 proc `Fullscreen=`*(engine: var Engine, enable: bool) =
   if enable != engine.fullscreen:
     engine.fullscreen = enable
-    engine.window.fullscreen(engine.fullscreen)
+    engine.window.Fullscreen(engine.fullscreen)
 
 func Limits*(engine: Engine): VkPhysicalDeviceLimits =
   engine.device.physicalDevice.properties.limits
 
 proc UpdateInputs*(engine: Engine): bool =
-  UpdateInputs(engine.window.pendingEvents())
+  UpdateInputs(engine.window.PendingEvents())
 
 proc ProcessEvents*(engine: Engine, panel: var Panel) =
-  let hasMouseNow = panel.contains(MousePositionNormalized(engine.window.size), engine.GetAspectRatio)
+  let hasMouseNow = panel.Contains(MousePositionNormalized(engine.window.Size), engine.GetAspectRatio)
 
   # enter/leave events
   if hasMouseNow:

@@ -85,13 +85,13 @@ proc CreateInstance*(
   result.surface = result.vk.CreateNativeSurface(window)
 
 proc Destroy*(instance: var Instance) =
-  assert instance.vk.valid
-  assert instance.surface.valid
+  assert instance.vk.Valid
+  assert instance.surface.Valid
   # needs to happen after window is trashed as the driver might have a hook registered for the window destruction
   instance.vk.vkDestroySurfaceKHR(instance.surface, nil)
-  instance.surface.reset()
+  instance.surface.Reset()
   instance.vk.vkDestroyInstance(nil)
-  instance.vk.reset()
+  instance.vk.Reset()
 
 const LEVEL_MAPPING = {
     VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: lvlDebug,
@@ -119,7 +119,7 @@ proc CreateDebugMessenger*(
   types: openArray[VkDebugUtilsMessageTypeFlagBitsEXT] = @[],
   callback: DebugCallback = defaultDebugCallback
 ): Debugger =
-  assert instance.vk.valid
+  assert instance.vk.Valid
   result.instance = instance
   var severityLevelBits = VkDebugUtilsMessageSeverityFlagBitsEXT.items.toSeq.toBits
   var typeBits = VkDebugUtilsMessageTypeFlagBitsEXT.items.toSeq.toBits
@@ -137,7 +137,7 @@ proc CreateDebugMessenger*(
   checkVkResult instance.vk.vkCreateDebugUtilsMessengerEXT(addr(createInfo), nil, addr(result.messenger))
 
 proc Destroy*(debugger: var Debugger) =
-  assert debugger.messenger.valid
-  assert debugger.instance.vk.valid
+  assert debugger.messenger.Valid
+  assert debugger.instance.vk.Valid
   debugger.instance.vk.vkDestroyDebugUtilsMessengerEXT(debugger.messenger, nil)
-  debugger.messenger.reset()
+  debugger.messenger.Reset()

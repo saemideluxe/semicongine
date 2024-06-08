@@ -151,7 +151,7 @@ proc CreateShaderModules*(
   device: Device,
   shaderConfiguration: ShaderConfiguration,
 ): (ShaderModule, ShaderModule) =
-  assert device.vk.valid
+  assert device.vk.Valid
   assert len(shaderConfiguration.vertexBinary) > 0
   assert len(shaderConfiguration.fragmentBinary) > 0
 
@@ -219,7 +219,7 @@ proc GetPipelineInfo*(shader: ShaderModule): VkPipelineShaderStageCreateInfo =
   )
 
 proc Destroy*(shader: var ShaderModule) =
-  assert shader.device.vk.valid
-  assert shader.vk.valid
+  assert shader.device.vk.Valid
+  assert shader.vk.Valid
   shader.device.vk.vkDestroyShaderModule(shader.vk, nil)
-  shader.vk.reset
+  shader.vk.Reset

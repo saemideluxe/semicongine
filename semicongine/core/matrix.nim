@@ -118,7 +118,7 @@ func toString[T](value: T): string =
     maxwidth = 0
 
   for n in value.data:
-    let strval = &"{n:.4f}"
+    let strval = &"{float(n):.4f}"
     strvalues.add(strval)
     if strval.len > maxwidth:
       maxwidth = strval.len

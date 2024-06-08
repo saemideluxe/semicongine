@@ -66,7 +66,7 @@ proc GetMemoryProperties*(physicalDevice: VkPhysicalDevice): PhyscialDeviceMemor
     )
 
 proc Allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemory =
-  assert device.vk.valid
+  assert device.vk.Valid
   assert size > 0
   result = DeviceMemory(
     device: device,
@@ -100,8 +100,8 @@ proc Allocate*(device: Device, size: uint64, memoryType: MemoryType): DeviceMemo
 
 # flush host -> device
 proc Flush*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
-  assert memory.device.vk.valid
-  assert memory.vk.valid
+  assert memory.device.vk.Valid
+  assert memory.vk.Valid
   assert memory.needsFlushing
 
   var actualSize = size
@@ -117,8 +117,8 @@ proc Flush*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
 
 # flush device -> host
 proc Invalidate*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
-  assert memory.device.vk.valid
-  assert memory.vk.valid
+  assert memory.device.vk.Valid
+  assert memory.vk.Valid
   assert memory.needsFlushing
 
   var actualSize = size
@@ -133,8 +133,8 @@ proc Invalidate*(memory: DeviceMemory, offset = 0'u64, size = 0'u64) =
   checkVkResult memory.device.vk.vkInvalidateMappedMemoryRanges(memoryRangeCount = 1, pMemoryRanges = addr(flushrange))
 
 proc Free*(memory: var DeviceMemory) =
-  assert memory.device.vk.valid
-  assert memory.vk.valid
+  assert memory.device.vk.Valid
+  assert memory.vk.Valid
 
   memory.device.vk.vkFreeMemory(memory.vk, nil)
-  memory.vk.reset
+  memory.vk.Reset

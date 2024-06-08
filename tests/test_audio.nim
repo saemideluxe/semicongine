@@ -62,7 +62,7 @@ proc test2() =
     sleep(1)
 
 proc test3() =
-  mixer[].AddSound("toccata et fugue", loadAudio("toccata_et_fugue.ogg"))
+  mixer[].AddSound("toccata et fugue", LoadAudio("toccata_et_fugue.ogg"))
   mixer[].AddSound("ping", NewSound(SineSoundData(500, 0.05, 44100)))
   mixer[].AddTrack("effects")
   discard mixer[].Play("toccata et fugue")

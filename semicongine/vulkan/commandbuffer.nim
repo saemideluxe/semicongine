@@ -11,7 +11,7 @@ type
     buffers*: seq[VkCommandBuffer]
 
 proc CreateCommandBufferPool*(device: Device, family: QueueFamily, nBuffers: int): CommandBufferPool =
-  assert device.vk.valid
+  assert device.vk.Valid
   var createInfo = VkCommandPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
@@ -56,8 +56,8 @@ proc PipelineBarrier*(
 template WithSingleUseCommandBuffer*(device: Device, queue: Queue, commandBuffer, body: untyped): untyped =
   # TODO? This is super slow, because we call vkQueueWaitIdle
   block:
-    assert device.vk.valid
-    assert queue.vk.valid
+    assert device.vk.Valid
+    assert queue.vk.Valid
 
     var
       commandBufferPool = CreateCommandBufferPool(device, queue.family, 1)
@@ -83,8 +83,8 @@ template WithSingleUseCommandBuffer*(device: Device, queue: Queue, commandBuffer
 
 
 proc Destroy*(commandpool: var CommandBufferPool) =
-  assert commandpool.device.vk.valid
-  assert commandpool.vk.valid
+  assert commandpool.device.vk.Valid
+  assert commandpool.vk.Valid
   commandpool.device.vk.vkDestroyCommandPool(commandpool.vk, nil)
-  commandpool.vk.reset
+  commandpool.vk.Reset
 

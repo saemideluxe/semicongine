@@ -163,18 +163,18 @@ elif thebundletype == Exe:
             yield (kind: pcDir, path: components[0])
         yielded.incl components[0]
 
-proc loadResource*(path: string, package = DEFAULT_PACKAGE): Stream =
+proc LoadResource*(path: string, package = DEFAULT_PACKAGE): Stream =
   loadResource_intern(path, package = package)
 
-proc loadImage*[T](path: string, package = DEFAULT_PACKAGE): Image[RGBAPixel] =
+proc LoadImage*[T](path: string, package = DEFAULT_PACKAGE): Image[RGBAPixel] =
   if path.splitFile().ext.toLowerAscii == ".bmp":
-    loadResource_intern(path, package = package).readBMP()
+    loadResource_intern(path, package = package).ReadBMP()
   elif path.splitFile().ext.toLowerAscii == ".png":
-    loadResource_intern(path, package = package).readPNG()
+    loadResource_intern(path, package = package).ReadPNG()
   else:
     raise newException(Exception, "Unsupported image file type: " & path)
 
-proc loadAudio*(path: string, package = DEFAULT_PACKAGE): Sound =
+proc LoadAudio*(path: string, package = DEFAULT_PACKAGE): Sound =
   if path.splitFile().ext.toLowerAscii == ".au":
     loadResource_intern(path, package = package).ReadAU()
   elif path.splitFile().ext.toLowerAscii == ".ogg":
@@ -182,13 +182,13 @@ proc loadAudio*(path: string, package = DEFAULT_PACKAGE): Sound =
   else:
     raise newException(Exception, "Unsupported audio file type: " & path)
 
-proc loadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
+proc LoadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
   path.loadResource_intern(package = package).readAll().parseJson()
 
-proc loadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
+proc LoadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
   path.loadResource_intern(package = package).loadConfig(filename = path)
 
-proc loadFont*(
+proc LoadFont*(
   path: string,
   name = "",
   lineHeightPixels = 80'f32,
@@ -201,22 +201,22 @@ proc loadFont*(
     thename = path.splitFile().name
   loadResource_intern(path, package = package).ReadTrueType(name, charset & additional_codepoints.toSeq, lineHeightPixels)
 
-proc loadMeshes*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): seq[MeshTree] =
+proc LoadMeshes*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): seq[MeshTree] =
   loadResource_intern(path, package = package).ReadglTF(defaultMaterial)
 
-proc loadFirstMesh*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): Mesh =
+proc LoadFirstMesh*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): Mesh =
   loadResource_intern(path, package = package).ReadglTF(defaultMaterial)[0].toSeq[0]
 
-proc packages*(): seq[string] =
+proc Packages*(): seq[string] =
   modList_intern()
 
-proc walkResources*(dir = "", package = DEFAULT_PACKAGE): seq[string] =
+proc WalkResources*(dir = "", package = DEFAULT_PACKAGE): seq[string] =
   for i in walkResources_intern(dir, package = package):
     if i.startsWith(dir):
       result.add i
   result.sort()
 
-proc ls*(dir: string, package = DEFAULT_PACKAGE): seq[tuple[kind: PathComponent, path: string]] =
+proc List*(dir: string, package = DEFAULT_PACKAGE): seq[tuple[kind: PathComponent, path: string]] =
   for i in ls_intern(dir = dir, package = package):
     result.add i
   result.sort()

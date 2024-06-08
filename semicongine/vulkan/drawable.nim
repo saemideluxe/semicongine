@@ -31,7 +31,7 @@ proc Draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Ta
   var offsets: seq[VkDeviceSize]
 
   for (name, performanceHint, offset) in drawable.bufferOffsets[pipeline]:
-    assert vertexBuffers[performanceHint].vk.valid
+    assert vertexBuffers[performanceHint].vk.Valid
     buffers.add vertexBuffers[performanceHint].vk
     offsets.add VkDeviceSize(offset)
 
@@ -44,7 +44,7 @@ proc Draw*(drawable: Drawable, commandBuffer: VkCommandBuffer, vertexBuffers: Ta
     pOffsets = offsets.ToCPointer()
   )
   if drawable.indexed:
-    assert indexBuffer.vk.valid
+    assert indexBuffer.vk.Valid
     commandBuffer.vkCmdBindIndexBuffer(indexBuffer.vk, VkDeviceSize(drawable.indexBufferOffset), drawable.indexType)
     commandBuffer.vkCmdDrawIndexed(
       indexCount = uint32(drawable.elementCount),

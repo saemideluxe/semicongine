@@ -69,7 +69,7 @@ proc `$`*(material: MaterialData): string =
     attributes.add &"{key}: {value}"
   return &"""{material.name}: [{attributes.join(", ")}]"""
 
-proc initMaterialData*(
+proc InitMaterialData*(
   theType: MaterialType,
   name: string,
   attributes: Table[string, DataList],
@@ -86,7 +86,7 @@ proc initMaterialData*(
     attributes: attributes,
   )
 
-proc initMaterialData*(
+proc InitMaterialData*(
   theType: MaterialType,
   name: string = "",
   attributes: openArray[(string, DataList)] = @[],
@@ -94,7 +94,7 @@ proc initMaterialData*(
   var theName = name
   if theName == "":
     theName = &"material instance of '{theType}'"
-  initMaterialData(theType = theType, name = theName, attributes = attributes.toTable)
+  InitMaterialData(theType = theType, name = theName, attributes = attributes.toTable)
 
 const
   VERTEX_COLORED_MATERIAL* = MaterialType(

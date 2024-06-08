@@ -60,7 +60,7 @@ when isMainModule:
       fragmentCode = "color = outcolor;",
     )
   var matDef = MaterialType(name: "default material", vertexAttributes: {"position": Vec3F32, "color": Vec4F32}.toTable)
-  var cube = Scene(name: "scene", meshes: @[newMesh(positions = cube_pos, indices = tris, colors = cube_color, material = matDef.initMaterialData(name = "default"))])
+  var cube = Scene(name: "scene", meshes: @[newMesh(positions = cube_pos, indices = tris, colors = cube_color, material = matDef.InitMaterialData(name = "default"))])
   cube.addShaderGlobal("projection", Unit4f32)
   cube.addShaderGlobal("view", Unit4f32)
   cube.addShaderGlobal("model", Unit4f32)

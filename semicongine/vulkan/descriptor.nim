@@ -43,7 +43,7 @@ func vkType(descriptor: Descriptor): VkDescriptorType =
   DESCRIPTOR_TYPE_MAP[descriptor.thetype]
 
 proc CreateDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): DescriptorSetLayout =
-  assert device.vk.valid
+  assert device.vk.Valid
 
   result.device = device
   result.descriptors = descriptors
@@ -65,13 +65,13 @@ proc CreateDescriptorSetLayout*(device: Device, descriptors: seq[Descriptor]): D
   checkVkResult vkCreateDescriptorSetLayout(device.vk, addr(layoutCreateInfo), nil, addr(result.vk))
 
 proc Destroy*(descriptorSetLayout: var DescriptorSetLayout) =
-  assert descriptorSetLayout.device.vk.valid
-  assert descriptorSetLayout.vk.valid
+  assert descriptorSetLayout.device.vk.Valid
+  assert descriptorSetLayout.vk.Valid
   descriptorSetLayout.device.vk.vkDestroyDescriptorSetLayout(descriptorSetLayout.vk, nil)
-  descriptorSetLayout.vk.reset
+  descriptorSetLayout.vk.Reset
 
 proc CreateDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uint32)], maxSets = 1000): DescriptorPool =
-  assert device.vk.valid
+  assert device.vk.Valid
 
   result.device = device
   result.maxSets = maxSets
@@ -89,21 +89,21 @@ proc CreateDescriptorSetPool*(device: Device, counts: seq[(VkDescriptorType, uin
   checkVkResult vkCreateDescriptorPool(result.device.vk, addr(poolInfo), nil, addr(result.vk))
 
 proc Reset*(pool: DescriptorPool) =
-  assert pool.device.vk.valid
-  assert pool.vk.valid
+  assert pool.device.vk.Valid
+  assert pool.vk.Valid
   checkVkResult vkResetDescriptorPool(pool.device.vk, pool.vk, VkDescriptorPoolResetFlags(0))
 
 proc Destroy*(pool: var DescriptorPool) =
-  assert pool.device.vk.valid
-  assert pool.vk.valid
+  assert pool.device.vk.Valid
+  assert pool.vk.Valid
   pool.device.vk.vkDestroyDescriptorPool(pool.vk, nil)
-  pool.vk.reset
+  pool.vk.Reset
 
 proc AllocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, nframes: int): seq[DescriptorSet] =
-  assert pool.device.vk.valid
-  assert pool.vk.valid
-  assert layout.device.vk.valid
-  assert layout.vk.valid
+  assert pool.device.vk.Valid
+  assert pool.vk.Valid
+  assert layout.device.vk.Valid
+  assert layout.vk.Valid
 
   var layouts: seq[VkDescriptorSetLayout]
   var descriptorSets = newSeq[VkDescriptorSet](nframes)
@@ -122,9 +122,9 @@ proc AllocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
 
 proc WriteDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
   # assumes descriptors of the descriptorSet are arranged interleaved in buffer
-  assert descriptorSet.layout.device.vk.valid
-  assert descriptorSet.layout.vk.valid
-  assert descriptorSet.vk.valid
+  assert descriptorSet.layout.device.vk.Valid
+  assert descriptorSet.layout.vk.Valid
+  assert descriptorSet.vk.Valid
 
   var descriptorSetWrites: seq[VkWriteDescriptorSet]
   var bufferInfos: seq[VkDescriptorBufferInfo]
@@ -135,7 +135,7 @@ proc WriteDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
   var imgInfos: seq[seq[VkDescriptorImageInfo]]
   for descriptor in descriptorSet.layout.descriptors:
     if descriptor.thetype == Uniform:
-      assert descriptor.buffer.vk.valid
+      assert descriptor.buffer.vk.Valid
       bufferInfos.add VkDescriptorBufferInfo(
         buffer: descriptor.buffer.vk,
         offset: descriptor.offset,
@@ -153,8 +153,8 @@ proc WriteDescriptorSet*(descriptorSet: DescriptorSet, bindingBase = 0'u32) =
     elif descriptor.thetype == ImageSampler:
       var imgInfo: seq[VkDescriptorImageInfo]
       for img_i in 0 ..< descriptor.count:
-        assert descriptor.imageviews[img_i].vk.valid
-        assert descriptor.samplers[img_i].vk.valid
+        assert descriptor.imageviews[img_i].vk.Valid
+        assert descriptor.samplers[img_i].vk.Valid
         imgInfo.add VkDescriptorImageInfo(
           imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
           imageView: descriptor.imageviews[img_i].vk,

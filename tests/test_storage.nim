@@ -7,32 +7,32 @@ proc testSimple(storage: StorageType) =
   const KEY = "test"
 
   # get default
-  assert storage.load(KEY, 0) == default(type(TEST_VALUE))
+  assert storage.Load(KEY, 0) == default(type(TEST_VALUE))
 
   # save and load custom
-  store(storage, KEY, TEST_VALUE)
-  assert storage.load(KEY, 0) == TEST_VALUE
+  Store(storage, KEY, TEST_VALUE)
+  assert storage.Load(KEY, 0) == TEST_VALUE
 
 proc stressTest(storage: StorageType) =
   for i in 1 .. 10000:
     let key = &"key-{i}"
-    store(storage, key, i)
-    assert storage.load(key, 0) == i
+    Store(storage, key, i)
+    assert storage.Load(key, 0) == i
 
 proc main() =
-  SystemStorage.purge()
+  SystemStorage.Purge()
   echo "SystemStorage: Testing simple store/load"
   SystemStorage.testSimple()
 
-  UserStorage.purge()
+  UserStorage.Purge()
   echo "UserStorage: Testing simple store/load"
   UserStorage.testSimple()
 
   echo "Stress test with 10'000 saves/loads"
   SystemStorage.stressTest()
 
-  SystemStorage.purge()
-  UserStorage.purge()
+  SystemStorage.Purge()
+  UserStorage.Purge()
 
 
 when isMainModule:

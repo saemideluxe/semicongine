@@ -63,7 +63,7 @@ proc InitRenderer*(
   vSync = false,
   inFlightFrames = 2,
 ): Renderer =
-  assert device.vk.valid
+  assert device.vk.Valid
 
   result.device = device
   result.renderPass = device.CreateRenderPass(shaders, clearColor = clearColor, backFaceCulling = backFaceCulling)
@@ -334,10 +334,10 @@ proc UpdateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
       for material in renderer.scenedata[scene].materials[materialType].mitems:
         dirtyMaterialAttribs.add material.DirtyAttributes
         material.ClearDirtyAttributes()
-      assert renderer.scenedata[scene].shaderData[shaderPipeline.vk].uniformBuffers[renderer.swapchain.currentInFlight].vk.valid
+      assert renderer.scenedata[scene].shaderData[shaderPipeline.vk].uniformBuffers[renderer.swapchain.currentInFlight].vk.Valid
       if forceAll:
         for buffer in renderer.scenedata[scene].shaderData[shaderPipeline.vk].uniformBuffers:
-          assert buffer.vk.valid
+          assert buffer.vk.Valid
 
       var offset = 0'u64
       # loop over all uniforms of the shader-shaderPipeline
@@ -374,12 +374,11 @@ proc StartNewFrame*(renderer: var Renderer) =
   while not renderer.swapchain.AcquireNextFrame():
     checkVkResult renderer.device.vk.vkDeviceWaitIdle()
     let res = renderer.swapchain.Recreate()
-    if not res.isSome:
-      raise newException(Exception, "Unable to recreate swapchain")
-    var oldSwapchain = renderer.swapchain
-    renderer.swapchain = res.get()
-    checkVkResult renderer.device.vk.vkDeviceWaitIdle()
-    oldSwapchain.Destroy()
+    if res.isSome:
+      var oldSwapchain = renderer.swapchain
+      renderer.swapchain = res.get()
+      checkVkResult renderer.device.vk.vkDeviceWaitIdle()
+      oldSwapchain.Destroy()
   renderer.nextFrameReady = true
 
 proc Render*(renderer: var Renderer, scene: Scene) =
@@ -427,18 +426,18 @@ proc Render*(renderer: var Renderer, scene: Scene) =
   renderer.nextFrameReady = false
 
 func Valid*(renderer: Renderer): bool =
-  renderer.device.vk.valid
+  renderer.device.vk.Valid
 
 proc Destroy*(renderer: var Renderer, scene: Scene) =
   checkVkResult renderer.device.vk.vkDeviceWaitIdle()
   var scenedata = renderer.scenedata[scene]
 
   for buffer in scenedata.vertexBuffers.mvalues:
-    assert buffer.vk.valid
+    assert buffer.vk.Valid
     buffer.Destroy()
 
-  if scenedata.indexBuffer.vk.valid:
-    assert scenedata.indexBuffer.vk.valid
+  if scenedata.indexBuffer.vk.Valid:
+    assert scenedata.indexBuffer.vk.Valid
     scenedata.indexBuffer.Destroy()
 
   var destroyedTextures: seq[VkImage]
@@ -446,7 +445,7 @@ proc Destroy*(renderer: var Renderer, scene: Scene) =
   for (vkPipeline, shaderData) in scenedata.shaderData.mpairs:
 
     for buffer in shaderData.uniformBuffers.mitems:
-      assert buffer.vk.valid
+      assert buffer.vk.Valid
       buffer.Destroy()
 
     for textures in shaderData.textures.mvalues:

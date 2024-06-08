@@ -23,8 +23,8 @@ func `$`*(device: PhysicalDevice): string =
   "Physical device: vk=" & $device.vk & ", name=" & $device.name & ", devicetype=" & $device.devicetype
 
 proc GetPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
-  assert instance.vk.valid
-  assert instance.surface.valid
+  assert instance.vk.Valid
+  assert instance.surface.Valid
   var nDevices: uint32
   checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), nil)
   var devices = newSeq[VkPhysicalDevice](nDevices)
@@ -39,7 +39,7 @@ proc GetPhysicalDevices*(instance: Instance): seq[PhysicalDevice] =
     result.add device
 
 proc GetExtensions*(device: PhysicalDevice): seq[string] =
-  assert device.vk.valid
+  assert device.vk.Valid
   var extensionCount: uint32
   checkVkResult vkEnumerateDeviceExtensionProperties(device.vk, nil, addr(extensionCount), nil)
   if extensionCount > 0:
@@ -49,13 +49,13 @@ proc GetExtensions*(device: PhysicalDevice): seq[string] =
       result.add(CleanString(extension.extensionName))
 
 proc GetSurfaceCapabilities*(device: PhysicalDevice): VkSurfaceCapabilitiesKHR =
-  assert device.vk.valid
-  assert device.surface.valid
+  assert device.vk.Valid
+  assert device.surface.Valid
   checkVkResult device.vk.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device.surface, addr(result))
 
 proc GetSurfaceFormats*(device: PhysicalDevice): seq[VkSurfaceFormatKHR] =
-  assert device.vk.valid
-  assert device.surface.valid
+  assert device.vk.Valid
+  assert device.surface.Valid
   var n_formats: uint32
   checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, device.surface, addr(n_formats), nil)
   result = newSeq[VkSurfaceFormatKHR](n_formats)
@@ -71,20 +71,20 @@ func FilterSurfaceFormat*(
       return format
 
 proc FilterSurfaceFormat*(device: PhysicalDevice): VkSurfaceFormatKHR =
-  assert device.vk.valid
-  assert device.surface.valid
+  assert device.vk.Valid
+  assert device.surface.Valid
   device.GetSurfaceFormats().FilterSurfaceFormat()
 
 proc GetSurfacePresentModes*(device: PhysicalDevice): seq[VkPresentModeKHR] =
-  assert device.vk.valid
-  assert device.surface.valid
+  assert device.vk.Valid
+  assert device.surface.Valid
   var n_modes: uint32
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, device.surface, addr(n_modes), nil)
   result = newSeq[VkPresentModeKHR](n_modes)
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(device.vk, device.surface, addr(n_modes), result.ToCPointer)
 
 proc GetQueueFamilies*(device: PhysicalDevice): seq[QueueFamily] =
-  assert device.vk.valid
+  assert device.vk.Valid
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
@@ -101,7 +101,7 @@ proc CanDoGraphics*(family: QueueFamily): bool =
   VK_QUEUE_GRAPHICS_BIT in family.flags
 
 proc CanDoPresentation*(family: QueueFamily, surface: VkSurfaceKHR): bool =
-  assert surface.valid
+  assert surface.Valid
   var presentation = VkBool32(false)
   checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(family.device.vk, family.index, surface, addr presentation)
   return bool(presentation)
@@ -129,14 +129,14 @@ proc filterGraphics(families: seq[QueueFamily]): seq[QueueFamily] =
       result.add family
 
 proc filterPresentation(families: seq[QueueFamily], surface: VkSurfaceKHR): seq[QueueFamily] =
-  assert surface.valid
+  assert surface.Valid
   for family in families:
     if family.CanDoPresentation(surface):
       result.add family
 
 proc rateGraphics(device: PhysicalDevice): float =
-  assert device.vk.valid
-  assert device.surface.valid
+  assert device.vk.Valid
+  assert device.surface.Valid
   if device.GetQueueFamilies().filterGraphics().filterPresentation(device.surface).len == 0:
     return -1
   if not ("VK_KHR_swapchain" in device.GetExtensions()):
@@ -155,8 +155,8 @@ proc rateGraphics(device: PhysicalDevice): float =
 proc FilterBestGraphics*(devices: seq[PhysicalDevice]): PhysicalDevice =
   var bestVal = -1'f
   for device in devices:
-    assert device.vk.valid
-    assert device.surface.valid
+    assert device.vk.Valid
+    assert device.surface.Valid
     let rating = device.rateGraphics()
     if rating > bestVal:
       bestVal = rating

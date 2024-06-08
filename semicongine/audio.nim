@@ -62,7 +62,7 @@ proc setupDevice(mixer: var Mixer) =
 
 proc LoadSound*(mixer: var Mixer, name: string, resource: string) =
   assert not (name in mixer.sounds)
-  mixer.sounds[name] = loadAudio(resource)
+  mixer.sounds[name] = LoadAudio(resource)
 
 proc AddSound*(mixer: var Mixer, name: string, sound: Sound) =
   assert not (name in mixer.sounds)

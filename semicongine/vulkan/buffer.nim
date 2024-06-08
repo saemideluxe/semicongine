@@ -29,8 +29,8 @@ func `$`*(buffer: Buffer): string =
   &"Buffer(vk: {buffer.vk}, size: {buffer.size}, usage: {buffer.usage})"
 
 proc requirements(buffer: Buffer): MemoryRequirements =
-  assert buffer.vk.valid
-  assert buffer.device.vk.valid
+  assert buffer.vk.Valid
+  assert buffer.device.vk.Valid
   var req: VkMemoryRequirements
   buffer.device.vk.vkGetBufferMemoryRequirements(buffer.vk, addr req)
   result.size = req.size
@@ -41,7 +41,7 @@ proc requirements(buffer: Buffer): MemoryRequirements =
       result.memoryTypes.add memorytypes[i]
 
 proc allocateMemory(buffer: var Buffer, requireMappable: bool, preferVRAM: bool, preferAutoFlush: bool) =
-  assert buffer.device.vk.valid
+  assert buffer.device.vk.Valid
   assert buffer.memoryAllocated == false
 
   let requirements = buffer.requirements()
@@ -73,7 +73,7 @@ proc CreateBuffer*(
   preferVRAM: bool,
   preferAutoFlush = true,
 ): Buffer =
-  assert device.vk.valid
+  assert device.vk.Valid
   assert size > 0
 
   result.device = device
@@ -99,8 +99,8 @@ proc CreateBuffer*(
 
 
 proc Copy*(src, dst: Buffer, queue: Queue, dstOffset = 0'u64) =
-  assert src.device.vk.valid
-  assert dst.device.vk.valid
+  assert src.device.vk.Valid
+  assert dst.device.vk.Valid
   assert src.device == dst.device
   assert src.size + dstOffset <= dst.size
   assert VK_BUFFER_USAGE_TRANSFER_SRC_BIT in src.usage
@@ -111,11 +111,11 @@ proc Copy*(src, dst: Buffer, queue: Queue, dstOffset = 0'u64) =
     commandBuffer.vkCmdCopyBuffer(src.vk, dst.vk, 1, addr(copyRegion))
 
 proc Destroy*(buffer: var Buffer) =
-  assert buffer.device.vk.valid
-  assert buffer.vk.valid
+  assert buffer.device.vk.Valid
+  assert buffer.vk.Valid
   buffer.device.vk.vkDestroyBuffer(buffer.vk, nil)
   if buffer.memoryAllocated:
-    assert buffer.memory.vk.valid
+    assert buffer.memory.vk.Valid
     buffer.memory.Free()
     buffer = Buffer(
       device: buffer.device,
@@ -124,7 +124,7 @@ proc Destroy*(buffer: var Buffer) =
       usage: buffer.usage,
       memoryAllocated: false,
     )
-  buffer.vk.reset
+  buffer.vk.Reset
 
 template CanMap*(buffer: Buffer): bool =
   buffer.memory.canMap

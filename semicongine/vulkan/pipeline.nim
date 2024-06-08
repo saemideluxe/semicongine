@@ -28,7 +28,7 @@ func Samplers*(pipeline: ShaderPipeline): seq[ShaderAttribute] =
   pipeline.shaderConfiguration.samplers
 
 proc SetupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool, buffers: seq[Buffer], textures: var Table[string, seq[VulkanTexture]], inFlightFrames: int, emptyTexture: VulkanTexture): seq[DescriptorSet] =
-  assert pipeline.vk.valid
+  assert pipeline.vk.Valid
   assert buffers.len == 0 or buffers.len == inFlightFrames # need to guard against this in case we have no uniforms, then we also create no buffers
 
   result = descriptorPool.AllocateDescriptorSet(pipeline.descriptorSetLayout, inFlightFrames)
@@ -56,8 +56,8 @@ proc SetupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool,
             descriptor.samplers.add emptyTexture.sampler
 
 proc CreatePipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling = true): ShaderPipeline =
-  assert renderPass.valid
-  assert device.vk.valid
+  assert renderPass.Valid
+  assert device.vk.Valid
 
   result.device = device
   result.shaderModules = device.CreateShaderModules(shaderConfiguration)
@@ -188,16 +188,16 @@ proc CreatePipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
 
 
 proc Destroy*(pipeline: var ShaderPipeline) =
-  assert pipeline.device.vk.valid
-  assert pipeline.vk.valid
-  assert pipeline.layout.valid
-  assert pipeline.descriptorSetLayout.vk.valid
+  assert pipeline.device.vk.Valid
+  assert pipeline.vk.Valid
+  assert pipeline.layout.Valid
+  assert pipeline.descriptorSetLayout.vk.Valid
 
   pipeline.shaderModules[0].Destroy()
   pipeline.shaderModules[1].Destroy()
   pipeline.descriptorSetLayout.Destroy()
   pipeline.device.vk.vkDestroyPipelineLayout(pipeline.layout, nil)
   pipeline.device.vk.vkDestroyPipeline(pipeline.vk, nil)
-  pipeline.descriptorSetLayout.reset()
-  pipeline.layout.reset()
-  pipeline.vk.reset()
+  pipeline.descriptorSetLayout.vk.Reset()
+  pipeline.layout.Reset()
+  pipeline.vk.Reset()
