@@ -25,7 +25,7 @@ proc OpenSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSo
     wBitsPerSample: 16,
     cbSize: 0,
   )
-  checkWinMMResult waveOutOpen(addr result.handle, WAVE_MAPPER, addr format, DWORD_PTR(0), DWORD_PTR(0), CALLBACK_NULL)
+  CheckWinMMResult waveOutOpen(addr result.handle, WAVE_MAPPER, addr format, DWORD_PTR(0), DWORD_PTR(0), CALLBACK_NULL)
 
   for i in 0 ..< buffers.len:
     result.buffers.add WAVEHDR(
@@ -34,13 +34,13 @@ proc OpenSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSo
       dwLoops: 1,
     )
   for i in 0 ..< result.buffers.len:
-    checkWinMMResult waveOutPrepareHeader(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
-    checkWinMMResult waveOutWrite(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
+    CheckWinMMResult waveOutPrepareHeader(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
+    CheckWinMMResult waveOutWrite(result.handle, addr result.buffers[i], UINT(sizeof(WAVEHDR)))
 
 proc WriteSoundData*(soundDevice: var NativeSoundDevice, buffer: int) =
   while (soundDevice.buffers[buffer].dwFlags and WHDR_DONE) == 0:
     sleep(1)
-  checkWinMMResult waveOutWrite(soundDevice.handle, addr soundDevice.buffers[buffer], UINT(sizeof(WAVEHDR)))
+  CheckWinMMResult waveOutWrite(soundDevice.handle, addr soundDevice.buffers[buffer], UINT(sizeof(WAVEHDR)))
 
 proc CloseSoundDevice*(soundDevice: var NativeSoundDevice) =
   for i in 0 ..< soundDevice.buffers.len:
