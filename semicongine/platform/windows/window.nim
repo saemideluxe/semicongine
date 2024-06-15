@@ -22,6 +22,9 @@ template CheckWin32Result*(call: untyped) =
   if value == 0:
     raise newException(Exception, "Win32 error: " & astToStr(call) & " returned " & $value)
 
+let andCursorMask = [0xff]
+let xorCursorMask = [0x00]
+let invisibleCursor = CreateCursor(0, 0, 1, 1, addr andCursorMask, addr xorCursorMask)
 
 proc MapLeftRightKeys(key: INT, lparam: LPARAM): INT =
   case key
@@ -62,9 +65,8 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
     currentEvents.add(Event(eventType: events.MouseWheel, amount: float32(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA))
   of WM_SETCURSOR:
     if LOWORD(lParam) == HTCLIENT:
-      ShowCursor(false)
-    else:
-      ShowCursor(true)
+      SetCursor(invisibleCursor)
+      return 0
   else:
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 
@@ -85,7 +87,8 @@ proc CreateWindow*(title: string): NativeWindow =
       lpfnWndProc: WindowHandler,
       hInstance: result.hInstance,
       lpszClassName: windowClassName,
-      hcursor: LoadCursor(HINSTANCE(0), IDC_ARROW),
+      # hcursor: LoadCursor(HINSTANCE(0), IDC_ARROW),
+      hcursor: invisibleCursor,
     )
 
   if(RegisterClassEx(addr(windowClass)) == 0):
@@ -124,10 +127,12 @@ proc Fullscreen*(window: var NativeWindow, enable: bool) =
     SetWindowPos(window.hwnd, HWND(0), 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
 
 proc HideSystemCursor*(window: NativeWindow) =
-  discard ShowCursor(false)
+  discard
+  # discard ShowCursor(false)
 
 proc ShowSystemCursor*(window: NativeWindow) =
-  discard ShowCursor(true)
+  discard
+  # discard ShowCursor(true)
 
 proc Destroy*(window: NativeWindow) =
   discard
