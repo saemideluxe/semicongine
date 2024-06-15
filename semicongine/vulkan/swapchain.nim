@@ -120,11 +120,9 @@ proc AcquireNextFrame*(swapchain: var Swapchain): bool =
     addr swapchain.currentFramebufferIndex,
   )
 
-  if nextImageResult == VK_SUCCESS:
-    swapchain.queueFinishedFence[swapchain.currentInFlight].Reset()
-    return true
-  else:
-    return false
+  swapchain.queueFinishedFence[swapchain.currentInFlight].Reset()
+
+  return nextImageResult == VK_SUCCESS
 
 proc Swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
   assert swapchain.device.vk.Valid

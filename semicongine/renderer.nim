@@ -370,15 +370,29 @@ proc UpdateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
   scene.ClearDirtyShaderGlobals()
 
 proc StartNewFrame*(renderer: var Renderer): bool =
+  # first, we need to await the next free frame from the swapchain
   if not renderer.swapchain.AcquireNextFrame():
+    # so, there was a problem while acquiring the frame
+    # lets first take a break (not sure if this helps anything)
     checkVkResult renderer.device.vk.vkDeviceWaitIdle()
+    # now, first thing is, we recreate the swapchain, because a invalid swapchain
+    # is a common reason for the inability to acquire the next frame
     let res = renderer.swapchain.Recreate()
     if res.isSome:
+      # okay, swapchain recreation worked
+      # Now we can swap old and new swapchain
+      # the vkDeviceWaitIdle makes the resizing of windows not super smooth,
+      # but things seem to be more stable this way
       var oldSwapchain = renderer.swapchain
       renderer.swapchain = res.get()
       checkVkResult renderer.device.vk.vkDeviceWaitIdle()
       oldSwapchain.Destroy()
+      # NOW, we still have to acquire that next frame with the NEW swapchain
+      # if that fails, I don't know what to smart to do...
+      if not renderer.swapchain.AcquireNextFrame():
+        return false
     else:
+      # dang, swapchain could not be recreated. Some bigger issues is at hand...
       return false
   renderer.nextFrameReady = true
   return true
