@@ -66,6 +66,13 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
     currentEvents.add(Event(eventType: events.MouseMoved, x: GET_X_LPARAM(lParam), y: GET_Y_LPARAM(lParam)))
   of WM_MOUSEWHEEL:
     currentEvents.add(Event(eventType: events.MouseWheel, amount: float32(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA))
+  of WM_SIZING:
+    currentEvents.add(Event(eventType: ResizedWindow))
+  of WM_SIZE:
+    if wParam == SIZE_MINIMIZED:
+      currentEvents.add(Event(eventType: MinimizedWindow))
+    elif wParam == SIZE_RESTORED:
+      currentEvents.add(Event(eventType: RestoredWindow))
   of WM_SETCURSOR:
     if LOWORD(lParam) == HTCLIENT:
       SetCursor(currentCursor)

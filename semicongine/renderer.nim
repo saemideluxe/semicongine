@@ -369,9 +369,8 @@ proc UpdateUniformData*(renderer: var Renderer, scene: var Scene, forceAll = fal
         offset += uniform.Size
   scene.ClearDirtyShaderGlobals()
 
-proc StartNewFrame*(renderer: var Renderer) =
-  # TODO: chance for an infinity-loop?
-  while not renderer.swapchain.AcquireNextFrame():
+proc StartNewFrame*(renderer: var Renderer): bool =
+  if not renderer.swapchain.AcquireNextFrame():
     checkVkResult renderer.device.vk.vkDeviceWaitIdle()
     let res = renderer.swapchain.Recreate()
     if res.isSome:
@@ -379,7 +378,10 @@ proc StartNewFrame*(renderer: var Renderer) =
       renderer.swapchain = res.get()
       checkVkResult renderer.device.vk.vkDeviceWaitIdle()
       oldSwapchain.Destroy()
+    else:
+      return false
   renderer.nextFrameReady = true
+  return true
 
 proc Render*(renderer: var Renderer, scene: Scene) =
   assert scene in renderer.scenedata

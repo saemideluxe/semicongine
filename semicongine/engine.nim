@@ -154,15 +154,17 @@ proc UnloadScene*(engine: var Engine, scene: Scene) =
   engine.renderer.get.Destroy(scene)
 
 proc RenderScene*(engine: var Engine, scene: var Scene) =
+  if WindowIsMinimized():
+    return
   assert engine.renderer.isSome, "Renderer has not yet been initialized, call 'engine.InitRenderer' first"
   assert engine.renderer.get.HasScene(scene), &"Scene '{scene.name}' has not been loaded yet"
   let t0 = getMonoTime()
 
-  engine.renderer.get.StartNewFrame()
-  scene.SetShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
-  engine.renderer.get.UpdateMeshData(scene)
-  engine.renderer.get.UpdateUniformData(scene)
-  engine.renderer.get.Render(scene)
+  if engine.renderer.get.StartNewFrame():
+    scene.SetShaderGlobal(ASPECT_RATIO_ATTRIBUTE, engine.GetAspectRatio)
+    engine.renderer.get.UpdateMeshData(scene)
+    engine.renderer.get.UpdateUniformData(scene)
+    engine.renderer.get.Render(scene)
 
   if engine.showFps:
     let nanoSecs = getMonoTime().ticks - t0.ticks

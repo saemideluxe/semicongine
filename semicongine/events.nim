@@ -1,7 +1,7 @@
 type
   EventType* = enum
     Quit
-    ResizedWindow
+    ResizedWindow, MinimizedWindow, RestoredWindow
     KeyPressed, KeyReleased
     MousePressed, MouseReleased, MouseMoved,
     MouseWheel

@@ -21,6 +21,7 @@ type
     mouseMove: Vec2f
     mouseWheel: float32
     windowWasResized: bool = true
+    windowIsMinimized: bool = false
 
 # warning, shit is not thread safe
 var input: Input
@@ -60,6 +61,11 @@ proc UpdateInputs*(events: seq[Event]): bool =
         input.mousePosition = newPos
       of MouseWheel:
         input.mouseWheel = event.amount
+      of MinimizedWindow:
+        input.windowIsMinimized = true
+      of RestoredWindow:
+        input.windowIsMinimized = false
+
   return not killed
 
 proc KeyIsDown*(key: Key): bool = key in input.keyIsDown
@@ -80,6 +86,7 @@ proc MousePositionNormalized*(size: (int, int)): Vec2f =
 proc MouseMove*(): auto = input.mouseMove
 proc MouseWheel*(): auto = input.mouseWheel
 proc WindowWasResized*(): auto = input.windowWasResized
+proc WindowIsMinimized*(): auto = input.windowIsMinimized
 
 # actions as a slight abstraction over raw input
 
