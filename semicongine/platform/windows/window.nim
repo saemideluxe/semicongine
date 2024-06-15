@@ -65,7 +65,6 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
       ShowCursor(false)
     else:
       ShowCursor(true)
-    return true
   else:
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 
