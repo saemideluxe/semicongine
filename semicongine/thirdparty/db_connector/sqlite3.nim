@@ -24,11 +24,8 @@ else:
   const
     Lib = "libsqlite3.so(|.0)"
 
-when defined(staticSqlite):
-  {.pragma: mylib.}
-  {.compile("sqlite3.c", "-O3").}
-else:
-  {.pragma: mylib, dynlib: Lib.}
+{.pragma: mylib.}
+{.compile("sqlite3.c", "-O3").}
 
 const
   SQLITE_INTEGER* = 1
@@ -38,38 +35,38 @@ const
   SQLITE_TEXT* = 3
   SQLITE_UTF8* = 1
   SQLITE_UTF16LE* = 2
-  SQLITE_UTF16BE* = 3         # Use native byte order
-  SQLITE_UTF16* = 4           # sqlite3_create_function only
-  SQLITE_ANY* = 5             #sqlite_exec return values
+  SQLITE_UTF16BE* = 3     # Use native byte order
+  SQLITE_UTF16* = 4       # sqlite3_create_function only
+  SQLITE_ANY* = 5         #sqlite_exec return values
   SQLITE_OK* = 0
-  SQLITE_ERROR* = 1           # SQL error or missing database
-  SQLITE_INTERNAL* = 2        # An internal logic error in SQLite
-  SQLITE_PERM* = 3            # Access permission denied
-  SQLITE_ABORT* = 4           # Callback routine requested an abort
-  SQLITE_BUSY* = 5            # The database file is locked
-  SQLITE_LOCKED* = 6          # A table in the database is locked
-  SQLITE_NOMEM* = 7           # A malloc() failed
-  SQLITE_READONLY* = 8        # Attempt to write a readonly database
-  SQLITE_INTERRUPT* = 9       # Operation terminated by sqlite3_interrupt()
-  SQLITE_IOERR* = 10          # Some kind of disk I/O error occurred
-  SQLITE_CORRUPT* = 11        # The database disk image is malformed
-  SQLITE_NOTFOUND* = 12       # (Internal Only) Table or record not found
-  SQLITE_FULL* = 13           # Insertion failed because database is full
-  SQLITE_CANTOPEN* = 14       # Unable to open the database file
-  SQLITE_PROTOCOL* = 15       # Database lock protocol error
-  SQLITE_EMPTY* = 16          # Database is empty
-  SQLITE_SCHEMA* = 17         # The database schema changed
-  SQLITE_TOOBIG* = 18         # Too much data for one row of a table
-  SQLITE_CONSTRAINT* = 19     # Abort due to constraint violation
-  SQLITE_MISMATCH* = 20       # Data type mismatch
-  SQLITE_MISUSE* = 21         # Library used incorrectly
-  SQLITE_NOLFS* = 22          # Uses OS features not supported on host
-  SQLITE_AUTH* = 23           # Authorization denied
-  SQLITE_FORMAT* = 24         # Auxiliary database format error
-  SQLITE_RANGE* = 25          # 2nd parameter to sqlite3_bind out of range
-  SQLITE_NOTADB* = 26         # File opened that is not a database file
-  SQLITE_ROW* = 100           # sqlite3_step() has another row ready
-  SQLITE_DONE* = 101          # sqlite3_step() has finished executing
+  SQLITE_ERROR* = 1       # SQL error or missing database
+  SQLITE_INTERNAL* = 2    # An internal logic error in SQLite
+  SQLITE_PERM* = 3        # Access permission denied
+  SQLITE_ABORT* = 4       # Callback routine requested an abort
+  SQLITE_BUSY* = 5        # The database file is locked
+  SQLITE_LOCKED* = 6      # A table in the database is locked
+  SQLITE_NOMEM* = 7       # A malloc() failed
+  SQLITE_READONLY* = 8    # Attempt to write a readonly database
+  SQLITE_INTERRUPT* = 9   # Operation terminated by sqlite3_interrupt()
+  SQLITE_IOERR* = 10      # Some kind of disk I/O error occurred
+  SQLITE_CORRUPT* = 11    # The database disk image is malformed
+  SQLITE_NOTFOUND* = 12   # (Internal Only) Table or record not found
+  SQLITE_FULL* = 13       # Insertion failed because database is full
+  SQLITE_CANTOPEN* = 14   # Unable to open the database file
+  SQLITE_PROTOCOL* = 15   # Database lock protocol error
+  SQLITE_EMPTY* = 16      # Database is empty
+  SQLITE_SCHEMA* = 17     # The database schema changed
+  SQLITE_TOOBIG* = 18     # Too much data for one row of a table
+  SQLITE_CONSTRAINT* = 19 # Abort due to constraint violation
+  SQLITE_MISMATCH* = 20   # Data type mismatch
+  SQLITE_MISUSE* = 21     # Library used incorrectly
+  SQLITE_NOLFS* = 22      # Uses OS features not supported on host
+  SQLITE_AUTH* = 23       # Authorization denied
+  SQLITE_FORMAT* = 24     # Auxiliary database format error
+  SQLITE_RANGE* = 25      # 2nd parameter to sqlite3_bind out of range
+  SQLITE_NOTADB* = 26     # File opened that is not a database file
+  SQLITE_ROW* = 100       # sqlite3_step() has another row ready
+  SQLITE_DONE* = 101      # sqlite3_step() has finished executing
   SQLITE_COPY* = 0
   SQLITE_CREATE_INDEX* = 1
   SQLITE_CREATE_TABLE* = 2
@@ -99,9 +96,9 @@ const
   SQLITE_ALTER_TABLE* = 26
   SQLITE_REINDEX* = 27
   SQLITE_DENY* = 1
-  SQLITE_IGNORE* = 2          # Original from sqlite3.h:
-                              #define SQLITE_STATIC      ((void(*)(void *))0)
-                              #define SQLITE_TRANSIENT   ((void(*)(void *))-1)
+  SQLITE_IGNORE* = 2      # Original from sqlite3.h:
+                          #define SQLITE_STATIC      ((void(*)(void *))0)
+                          #define SQLITE_TRANSIENT   ((void(*)(void *))-1)
   SQLITE_DETERMINISTIC* = 0x800
 
 type
