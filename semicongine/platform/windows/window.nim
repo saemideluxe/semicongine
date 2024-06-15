@@ -66,7 +66,9 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
   of WM_SETCURSOR:
     if LOWORD(lParam) == HTCLIENT:
       SetCursor(invisibleCursor)
-      return 0
+      return 1
+    else:
+      return DefWindowProc(hwnd, uMsg, wParam, lParam)
   else:
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 
