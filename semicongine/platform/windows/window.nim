@@ -129,7 +129,7 @@ proc Destroy*(window: NativeWindow) =
 
 proc Size*(window: NativeWindow): (int, int) =
   var rect: RECT
-  checkWin32Result GetWindowRect(window.hwnd, addr(rect))
+  CheckWin32Result GetWindowRect(window.hwnd, addr(rect))
   (int(rect.right - rect.left), int(rect.bottom - rect.top))
 
 proc PendingEvents*(window: NativeWindow): seq[Event] =
