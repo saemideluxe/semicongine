@@ -24,7 +24,7 @@ template CheckWin32Result*(call: untyped) =
 
 let andCursorMask = [0xff]
 let xorCursorMask = [0x00]
-let invisibleCursor = CreateCursor(0, 0, 1, 1, addr andCursorMask, addr xorCursorMask)
+let invisibleCursor = CreateCursor(0, 0, 1, 1, pointer(addr andCursorMask), pointer(addr xorCursorMask))
 
 proc MapLeftRightKeys(key: INT, lparam: LPARAM): INT =
   case key
