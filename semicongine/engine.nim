@@ -182,8 +182,8 @@ proc RenderScene*(engine: var Engine, scene: var Scene) =
 func GpuDevice*(engine: Engine): Device = engine.device
 func GetWindow*(engine: Engine): auto = engine.window
 func GetAspectRatio*(engine: Engine): float32 = engine.GetWindow().Size[0] / engine.GetWindow().Size[1]
-func ShowSystemCursor*(engine: Engine) = engine.window.ShowSystemCursor()
-func HideSystemCursor*(engine: Engine) = engine.window.HideSystemCursor()
+proc ShowSystemCursor*(engine: Engine) = engine.window.ShowSystemCursor()
+proc HideSystemCursor*(engine: Engine) = engine.window.HideSystemCursor()
 func Fullscreen*(engine: Engine): bool = engine.fullscreen
 proc `Fullscreen=`*(engine: var Engine, enable: bool) =
   if enable != engine.fullscreen:
