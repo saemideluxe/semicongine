@@ -18,7 +18,7 @@ elif defined(windows):
   STEAMLIB = currentSourcePath().parentDir().parentDir().joinPath("libs/steam_api.dll")
 else:
   raise newException(Exception, "Unsupported platform")
-let SQLITELIB_32 = currentSourcePath().parentDir().parentDir().joinPath("libs/sqlite3_32.dll")
+# let SQLITELIB_32 = currentSourcePath().parentDir().parentDir().joinPath("libs/sqlite3_32.dll")
 let SQLITELIB_64 = currentSourcePath().parentDir().parentDir().joinPath("libs/sqlite3_64.dll")
 
 proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
@@ -77,7 +77,7 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
   elif bundleType == "exe":
     switch("define", "BUILD_RESOURCEROOT=" & joinPath(getCurrentDir(), resourceRoot)) # required for in-exe packing of resources, must be absolute
   if defined(windows):
-    SQLITELIB_32.cpFile(outdir.joinPath(SQLITELIB_32.extractFilename))
+    # SQLITELIB_32.cpFile(outdir.joinPath(SQLITELIB_32.extractFilename))
     SQLITELIB_64.cpFile(outdir.joinPath(SQLITELIB_64.extractFilename))
   if withSteam:
     STEAMLIB.cpFile(outdir.joinPath(STEAMLIB.extractFilename))

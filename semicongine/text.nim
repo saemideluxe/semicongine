@@ -13,7 +13,7 @@ const
   SPACE = Rune(' ')
 
   # font shader
-  MAX_TEXT_MATERIALS = 100 # need for every different font AND color
+  MAX_TEXT_MATERIALS = 64 # need for every different font AND color
   SHADER_ATTRIB_PREFIX = "semicon_text_"
   POSITION_ATTRIB = SHADER_ATTRIB_PREFIX & "position"
   UV_ATTRIB = SHADER_ATTRIB_PREFIX & "uv"
