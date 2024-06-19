@@ -106,18 +106,18 @@ func NLocationSlots[T: SupportedGPUType](value: T): uint32 =
   else:
     return 1
 
-
 type
-  Renderable[IndexType: static VkIndexType] = object
+  Renderable = object
     buffers: seq[VkBuffer]
     offsets: seq[VkDeviceSize]
     instanceCount: uint32
-    when IndexType == VK_INDEX_TYPE_NONE_KHR:
-      vertexCount: uint32
-    else:
-      indexBuffer: VkBuffer
-      indexCount: uint32
-      indexBufferOffset: VkDeviceSize
+    case indexType: VkIndexType
+      of VK_INDEX_TYPE_NONE_KHR:
+        vertexCount: uint32
+      of VK_INDEX_TYPE_UINT8_EXT, VK_INDEX_TYPE_UINT16, VK_INDEX_TYPE_UINT32:
+        indexBuffer: VkBuffer
+        indexCount: uint32
+        indexBufferOffset: VkDeviceSize
   Pipeline = object
     pipeline: VkPipeline
     layout: VkPipelineLayout
@@ -271,7 +271,7 @@ proc CreatePipeline*[ShaderInputType, ShaderDescriptorType](
   )
 
 
-proc Render*[IndexType: static VkIndexType](renderable: Renderable[IndexType], commandBuffer: VkCommandBuffer, pipeline: Pipeline, frameInFlight: int) =
+proc Render*(renderable: Renderable, commandBuffer: VkCommandBuffer, pipeline: Pipeline, frameInFlight: int) =
   assert 0 <= frameInFlight and frameInFlight < 2
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
   commandBuffer.vkCmdBindDescriptorSets(
@@ -289,7 +289,7 @@ proc Render*[IndexType: static VkIndexType](renderable: Renderable[IndexType], c
     pBuffers = renderable.buffers.ToCPointer(),
     pOffsets = renderable.offsets.ToCPointer()
   )
-  when IndexType != VK_INDEX_TYPE_NONE_KHR:
+  if renderable.indexType != VK_INDEX_TYPE_NONE_KHR:
     commandBuffer.vkCmdBindIndexBuffer(
       renderable.indexBuffer,
       renderable.indexBufferOffset,
