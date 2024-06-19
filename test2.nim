@@ -15,12 +15,12 @@ type
     positions: seq[Vec3f]
     colors: seq[Vec3f]
     transparency: float32
-  ArrayData = object
+  InstanceDataA = object
     transforms: seq[Vec3f]
 
   Enemy = object
     mesh: MeshA
-    enemies: ArrayData
+    enemies: InstanceDataA
 
 let e = Enemy()
 echo e

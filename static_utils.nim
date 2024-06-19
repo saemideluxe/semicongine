@@ -1,12 +1,18 @@
 import std/macros
+import std/strformat
 import std/typetraits
 
+import semicongine/core/utils
+import semicongine/core/imagetypes
 import semicongine/core/vector
 import semicongine/core/matrix
 import semicongine/core/vulkanapi
+import semicongine/vulkan/buffer
 
 template VertexAttribute* {.pragma.}
 template InstanceAttribute* {.pragma.}
+template DescriptorAttribute* {.pragma.}
+
 
 type
   SupportedGPUType* = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
@@ -61,15 +67,9 @@ template getElementType(field: typed): untyped =
     {.error: "getElementType can only be used with seq or array".}
   genericParams(typeof(field)).get(0)
 
-proc isVertexAttribute[T](value: T): bool {.compileTime.} =
-  hasCustomPragma(T, VertexAttribute)
-
-proc isInstanceAttribute[T](value: T): bool {.compileTime.} =
-  hasCustomPragma(T, InstanceAttribute)
-
-template ForAttributeFields*(inputData: typed, fieldname, valuename, isinstancename, body: untyped): untyped =
+template ForVertexDataFields*(inputData: typed, fieldname, valuename, isinstancename, body: untyped): untyped =
   for theFieldname, value in fieldPairs(inputData):
-    when isVertexAttribute(value) or isInstanceAttribute(value):
+    when hasCustomPragma(value, VertexAttribute) or hasCustomPragma(value, InstanceAttribute):
       when not typeof(value) is seq:
         {.error: "field '" & theFieldname & "' needs to be a seq".}
       when not typeof(value) is SupportedGPUType:
@@ -78,6 +78,29 @@ template ForAttributeFields*(inputData: typed, fieldname, valuename, isinstancen
         let `fieldname` {.inject.} = theFieldname
         let `valuename` {.inject.} = default(getElementType(value))
         let `isinstancename` {.inject.} = value.isInstanceAttribute()
+        body
+
+template ForDescriptorFields*(inputData: typed, fieldname, valuename, typename, countname, body: untyped): untyped =
+  for theFieldname, value in fieldPairs(inputData):
+    when hasCustomPragma(value, DescriptorAttribute):
+      when not (
+          typeof(value) is SupportedGPUType
+          or (typeof(value) is array and elementType(value) is SupportedGPUType)
+          or typeof(value) is Texture
+      ):
+        {.error: "field '" & theFieldname & "' needs to be a SupportedGPUType or an array of SupportedGPUType".}
+      block:
+        let `fieldname` {.inject.} = theFieldname
+        let `valuename` {.inject.} = default(getElementType(value))
+
+        # TODO
+        let `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+        let `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+
+        when typeof(value) is array:
+          let `countname` {.inject.} = genericParams(typeof(value)).get(0)
+        else:
+          let `countname` {.inject.} = 1
         body
 
 func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType](value: T): uint32 =
@@ -107,42 +130,83 @@ func NLocationSlots[T: SupportedGPUType](value: T): uint32 =
     return 1
 
 type
-  Renderable = object
-    buffers: seq[VkBuffer]
-    offsets: seq[VkDeviceSize]
+  IndexType = enum
+    None, UInt8, UInt16, UInt32
+  RenderBuffers = object
+    deviceBuffers: seq[Buffer]      # for fast reads
+    hostVisibleBuffers: seq[Buffer] # for fast writes
+  Renderable[TMesh, TInstance] = object
+    vertexBuffers: seq[VkBuffer]
+    bufferOffsets: seq[VkDeviceSize]
     instanceCount: uint32
-    case indexType: VkIndexType
-      of VK_INDEX_TYPE_NONE_KHR:
+    case indexType: IndexType
+      of None:
         vertexCount: uint32
-      of VK_INDEX_TYPE_UINT8_EXT, VK_INDEX_TYPE_UINT16, VK_INDEX_TYPE_UINT32:
+      else:
         indexBuffer: VkBuffer
         indexCount: uint32
         indexBufferOffset: VkDeviceSize
-  Pipeline = object
+  Pipeline[TShaderInputs] = object
     pipeline: VkPipeline
     layout: VkPipelineLayout
     descriptorSets: array[2, seq[VkDescriptorSet]]
-  ShaderSet[ShaderInputType, ShaderDescriptorType] = object
+  ShaderSet[TShaderInputs] = object
     vertexShader: VkShaderModule
     fragmentShader: VkShaderModule
-    # TODO: I think this needs more fields?
+converter toVkIndexType(indexType: IndexType): VkIndexType =
+  case indexType:
+    of None: VK_INDEX_TYPE_NONE_KHR
+    of UInt8: VK_INDEX_TYPE_UINT8_EXT
+    of UInt16: VK_INDEX_TYPE_UINT16
+    of UInt32: VK_INDEX_TYPE_UINT32
 
-proc CreatePipeline*[ShaderInputType, ShaderDescriptorType](
+
+proc CreatePipeline*[TShaderInputs](
   device: VkDevice,
   renderPass: VkRenderPass,
-  shaderSet: ShaderSet[ShaderInputType, ShaderDescriptorType],
+  shaderSet: ShaderSet[TShaderInputs],
   topology: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
   cullMode: VkCullModeFlagBits = VK_CULL_MODE_BACK_BIT,
   frontFace: VkFrontFace = VK_FRONT_FACE_CLOCKWISE,
-): Pipeline =
+): Pipeline[TShaderInputs] =
   # assumptions/limitations:
   # - we are only using vertex and fragment shaders (2 stages)
   # - we only support one subpass
 
   # CONTINUE HERE, WITH PIPELINE LAYOUT!!!!
-  # Rely on ShaderDescriptorType
-  checkVkResult vkCreatePipelineLayout(device.vk, addr(pipelineLayoutInfo), nil, addr(result.layout))
+  # Rely on TShaderInputs
+
+  var layoutbindings: seq[VkDescriptorSetLayoutBinding]
+  let descriptors = [
+    (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1), # more than 1 for arrays
+    (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1),
+  ]
+  var descriptorBindingNumber = 0'u32
+  ForDescriptorFields(default(TShaderInputs), fieldname, value, descriptorCount):
+    layoutbindings.add VkDescriptorSetLayoutBinding(
+      binding: descriptorBindingNumber,
+      descriptorType: descriptorType,
+      descriptorCount: descriptorCount,
+      stageFlags: VK_SHADER_STAGE_ALL_GRAPHICS,
+      pImmutableSamplers: nil,
+    )
+    inc descriptorBindingNumber
+  var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
+    sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+    bindingCount: uint32(layoutbindings.len),
+    pBindings: layoutbindings.ToCPointer
+  )
+  var descriptorSetLayout: VkDescriptorSetLayout
+  checkVkResult vkCreateDescriptorSetLayout(device.vk, addr(layoutCreateInfo), nil, addr(descriptorSetLayout))
+  let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
+    sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+    setLayoutCount: 1,
+    pSetLayouts: addr(descriptorSetLayout),
+    # pushConstantRangeCount: uint32(pushConstants.len),
+      # pPushConstantRanges: pushConstants.ToCPointer,
+  )
+  checkVkResult vkCreatePipelineLayout(device, addr(pipelineLayoutInfo), nil, addr(result.layout))
 
   let stages = [
     VkPipelineShaderStageCreateInfo(
@@ -163,7 +227,7 @@ proc CreatePipeline*[ShaderInputType, ShaderDescriptorType](
     attributes: var seq[VkVertexInputAttributeDescription]
   var inputBindingNumber = 0'u32
   var inputLocationNumber = 0'u32
-  ForAttributeFields(default(ShaderInputType), fieldname, value, isInstanceAttr):
+  ForVertexDataFields(default(TShaderInputs), fieldname, value, isInstanceAttr):
     bindings.add VkVertexInputBindingDescription(
       binding: inputBindingNumber,
       stride: sizeof(value).uint32,
@@ -270,42 +334,118 @@ proc CreatePipeline*[ShaderInputType, ShaderDescriptorType](
     addr(result.pipeline)
   )
 
+proc CreateRenderable[TMesh, TInstance](
+  mesh: TMesh,
+  instance: TInstance,
+  buffers: RenderBuffers,
+): Renderable[TMesh, TInstance] =
+  result.indexType = None
 
-proc Render*(renderable: Renderable, commandBuffer: VkCommandBuffer, pipeline: Pipeline, frameInFlight: int) =
-  assert 0 <= frameInFlight and frameInFlight < 2
+proc Bind(pipeline: Pipeline, commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
   commandBuffer.vkCmdBindDescriptorSets(
     VK_PIPELINE_BIND_POINT_GRAPHICS,
     pipeline.layout,
     0,
-    pipeline.descriptorSets[frameInFlight].len,
-    pipeline.descriptorSets[frameInFlight],
+    pipeline.descriptorSets[currentFrameInFlight].len,
+    pipeline.descriptorSets[currentFrameInFlight],
     0,
     nil,
   )
+
+proc AssertCompatible(TShaderInputs, TMesh, TInstance, TGlobals: typedesc) =
+  # assert seq-fields of TMesh|TInstance == seq-fields of TShaderInputs
+  # assert normal fields of TMesh|Globals == normal fields of TShaderDescriptors
+  for inputName, inputValue in default(TShaderInputs).fieldPairs:
+    echo "checking shader input '" & inputName & "'"
+    var foundField = false
+    when hasCustomPragma(inputValue, VertexAttribute):
+      echo "  is vertex attribute"
+      for meshName, meshValue in default(TMesh).fieldPairs:
+        when meshName == inputName:
+          assert foundField == false, "Shader input '" & TShaderInputs.name & "." & inputName & "' has been found more than once"
+          assert getElementType(meshValue) is typeof(inputValue), "Shader input " & TShaderInputs.name & "." & inputName & " is of type '" & typeof(inputValue).name & "' but mesh attribute is of type '" & getElementType(meshValue).name & "'"
+          foundField = true
+      assert foundField, "Shader input '" & TShaderInputs.name & "." & inputName & ": " & typeof(inputValue).name & "' not found in '" & TMesh.name & "'"
+    elif hasCustomPragma(inputValue, InstanceAttribute):
+      echo "  is instance attribute"
+      for instanceName, instanceValue in default(TInstance).fieldPairs:
+        when instanceName == inputName:
+          assert foundField == false, "Shader input '" & TShaderInputs.name & "." & inputName & "' has been found more than once"
+          assert getElementType(instanceValue) is typeof(inputValue), "Shader input " & TShaderInputs.name & "." & inputName & " is of type '" & typeof(inputValue).name & "' but instance attribute is of type '" & getElementType(instanceValue).name & "'"
+          foundField = true
+      assert foundField, "Shader input '" & TShaderInputs.name & "." & inputName & ": " & typeof(inputValue).name & "' not found in '" & TInstance.name & "'"
+    elif hasCustomPragma(inputValue, DescriptorAttribute):
+      echo "  is descriptor attribute"
+      for meshName, meshValue in default(TMesh).fieldPairs:
+        when meshName == inputName:
+          assert foundField == false, "Shader input '" & TShaderInputs.name & "." & inputName & "' has been found more than once"
+          assert typeof(meshValue) is typeof(inputValue), "Shader input " & TShaderInputs.name & "." & inputName & " is of type '" & typeof(inputValue).name & "' but mesh attribute is of type '" & getElementType(meshValue).name & "'"
+          foundField = true
+      for globalName, globalValue in default(TGlobals).fieldPairs:
+        when globalName == inputName:
+          assert foundField == false, "Shader input '" & TShaderInputs.name & "." & inputName & "' has been found more than once"
+          assert typeof(globalValue) is typeof(inputValue), "Shader input " & TShaderInputs.name & "." & inputName & " is of type '" & typeof(inputValue).name & "' but global attribute is of type '" & typeof(globalValue).name & "'"
+          foundField = true
+      assert foundField, "Shader input '" & TShaderInputs.name & "." & inputName & ": " & typeof(inputValue).name & "' not found in '" & TMesh.name & "|" & TGlobals.name & "'"
+    echo "  found"
+
+
+proc Render[TShaderInputs, TMesh, TInstance, TGlobals](
+  pipeline: Pipeline[TShaderInputs],
+  renderable: Renderable[TMesh, TInstance],
+  globals: TGlobals,
+  commandBuffer: VkCommandBuffer,
+) =
+  static:
+    AssertCompatible(TShaderInputs, TMesh, TInstance, TGlobals)
   commandBuffer.vkCmdBindVertexBuffers(
     firstBinding = 0'u32,
-    bindingCount = uint32(renderable.buffers.len),
-    pBuffers = renderable.buffers.ToCPointer(),
-    pOffsets = renderable.offsets.ToCPointer()
+    bindingCount = uint32(renderable.vertexBuffers.len),
+    pBuffers = renderable.vertexBuffers.ToCPointer(),
+    pOffsets = renderable.bufferOffsets.ToCPointer()
   )
-  if renderable.indexType != VK_INDEX_TYPE_NONE_KHR:
+  if renderable.indexType != None:
     commandBuffer.vkCmdBindIndexBuffer(
       renderable.indexBuffer,
       renderable.indexBufferOffset,
-      IndexType,
+      renderable.indexType,
     )
     commandBuffer.vkCmdDrawIndexed(
-      indexCount = drawable.indexCount,
-      instanceCount = drawable.instanceCount,
+      indexCount = renderable.indexCount,
+      instanceCount = renderable.instanceCount,
       firstIndex = 0,
       vertexOffset = 0,
       firstInstance = 0
     )
   else:
     commandBuffer.vkCmdDraw(
-      vertexCount = drawable.vertexCount,
-      instanceCount = drawable.instanceCount,
+      vertexCount = renderable.vertexCount,
+      instanceCount = renderable.instanceCount,
       firstVertex = 0,
       firstInstance = 0
     )
+
+when isMainModule:
+  type
+    MeshA = object
+      position: seq[Vec3f]
+      transparency: float
+    InstanceA = object
+      transform: seq[Mat4]
+      position: seq[Vec3f]
+    Globals = object
+      color: Vec4f
+
+    ShaderInputsA = object
+      position {.VertexAttribute.}: Vec3f
+      transform {.InstanceAttribute.}: Mat4
+      color {.DescriptorAttribute.}: Vec4f
+
+  var p: Pipeline[ShaderInputsA]
+  var r: Renderable[MeshA, InstanceA]
+  var g: Globals
+  var s: ShaderSet[ShaderInputsA]
+
+  var p1 = CreatePipeline(device = VkDevice(0), renderPass = VkRenderPass(0), shaderSet = s)
+  Render(p, r, g, VkCommandBuffer(0))
