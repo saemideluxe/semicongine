@@ -1,34 +1,14 @@
 import ../core
-import ../material
-import ./device
-import ./physicaldevice
-import ./pipeline
-import ./shader
 import ./framebuffer
 
-type
-  RenderPass* = object
-    vk*: VkRenderPass
-    device*: Device
-    shaderPipelines*: seq[(MaterialType, ShaderPipeline)]
-    clearColor*: Vec4f
-
 proc CreateRenderPass*(
-  device: Device,
-  shaders: openArray[(MaterialType, ShaderConfiguration)],
-  clearColor = Vec4f([0.8'f32, 0.8'f32, 0.8'f32, 1'f32]),
-  backFaceCulling = true,
-  inFlightFrames = 2,
-): RenderPass =
-  assert device.vk.Valid
-
-  # some asserts
-  for (materialtype, shaderconfig) in shaders:
-    shaderconfig.AssertCanRender(materialtype)
+  device: VkDevice,
+  format: VkFormat,
+): VkRenderPass =
 
   var
     attachments = @[VkAttachmentDescription(
-        format: device.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat().format,
+        format: format,
         samples: VK_SAMPLE_COUNT_1_BIT,
         loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
         storeOp: VK_ATTACHMENT_STORE_OP_STORE,
@@ -77,24 +57,16 @@ proc CreateRenderPass*(
       dependencyCount: uint32(dependencies.len),
       pDependencies: dependencies.ToCPointer,
     )
-  result.device = device
-  result.clearColor = clearColor
-  checkVkResult device.vk.vkCreateRenderPass(addr(createInfo), nil, addr(result.vk))
+  checkVkResult device.vkCreateRenderPass(addr(createInfo), nil, addr(result))
 
-  for (_, shaderconfig) in shaders:
-    assert shaderconfig.outputs.len == 1
-  for (materialtype, shaderconfig) in shaders:
-    result.shaderPipelines.add (materialtype, device.CreatePipeline(result.vk, shaderconfig, inFlightFrames, 0, backFaceCulling = backFaceCulling))
-
-proc BeginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass, framebuffer: Framebuffer, oneTimeSubmit: bool) =
+proc BeginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: VkRenderPass, framebuffer: Framebuffer, oneTimeSubmit: bool, clearColor: Vec4f) =
   assert commandBuffer.Valid
-  assert renderpass.vk.Valid
   assert framebuffer.vk.Valid
   let
     w = framebuffer.dimension.x
     h = framebuffer.dimension.y
 
-  var clearColors = [VkClearValue(color: VkClearColorValue(float32: renderpass.clearColor))]
+  var clearColors = [VkClearValue(color: VkClearColorValue(float32: clearColor))]
   var
     beginInfo = VkCommandBufferBeginInfo(
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -103,7 +75,7 @@ proc BeginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass
     )
     renderPassInfo = VkRenderPassBeginInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-      renderPass: renderPass.vk,
+      renderPass: renderpass,
       framebuffer: framebuffer.vk,
       renderArea: VkRect2D(
         offset: VkOffset2D(x: 0, y: 0),
@@ -133,12 +105,3 @@ proc BeginRenderCommands*(commandBuffer: VkCommandBuffer, renderpass: RenderPass
 proc EndRenderCommands*(commandBuffer: VkCommandBuffer) =
   commandBuffer.vkCmdEndRenderPass()
   checkVkResult commandBuffer.vkEndCommandBuffer()
-
-
-proc Destroy*(renderPass: var RenderPass) =
-  assert renderPass.device.vk.Valid
-  assert renderPass.vk.Valid
-  renderPass.device.vk.vkDestroyRenderPass(renderPass.vk, nil)
-  renderPass.vk.Reset
-  for _, pipeline in renderPass.shaderPipelines.mitems:
-    pipeline.Destroy()
