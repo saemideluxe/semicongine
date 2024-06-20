@@ -8,11 +8,12 @@ type
   RGBAPixel* = array[4, uint8]
   GrayPixel* = uint8
   Pixel* = RGBAPixel or GrayPixel
-  ImageObject*[T: Pixel] = object
+  # ImageObject*[T: Pixel] = object
+  Image*[T: Pixel] = object
     width*: uint32
     height*: uint32
     imagedata*: seq[T]
-  Image*[T: Pixel] = ref ImageObject[T]
+  # Image*[T: Pixel] = ref ImageObject[T]
 
   Sampler* = object
     magnification*: VkFilter = VK_FILTER_LINEAR
@@ -81,7 +82,6 @@ proc NewImage*[T: Pixel](width, height: uint32, imagedata: openArray[T] = []): I
   assert width > 0 and height > 0
   assert imagedata.len.uint32 == width * height or imagedata.len == 0
 
-  result = new Image[T]
   result.imagedata = (if imagedata.len == 0: newSeq[T](width * height) else: @imagedata)
   assert width * height == result.imagedata.len.uint32
 
