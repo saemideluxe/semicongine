@@ -4,6 +4,7 @@ import std/hashes
 import std/macros
 import std/strformat
 import std/strutils
+import std/sequtils
 import std/typetraits as tt
 
 import semicongine/core/utils
@@ -206,7 +207,7 @@ type
   Pipeline[TShader] = object
     pipeline: VkPipeline
     layout: VkPipelineLayout
-    descriptorSets: array[INFLIGHTFRAMES, seq[VkDescriptorSet]]
+    descriptorSets: array[INFLIGHTFRAMES, VkDescriptorSet]
 
 converter toVkIndexType(indexType: IndexType): VkIndexType =
   case indexType:
@@ -368,6 +369,7 @@ proc CreatePipeline*[TShader](
   # - we only support one subpass
   # = we only support one Uniform-Block
 
+  # create pipeline
   var layoutbindings: seq[VkDescriptorSetLayoutBinding]
   var descriptorBindingNumber = 0'u32
   ForDescriptorFields(default(TShader), descriptorType, descriptorCount):
@@ -521,6 +523,34 @@ proc CreatePipeline*[TShader](
     addr(result.pipeline)
   )
 
+  # create descriptors, one per frame-in-flight
+  let nSamplers = 0'u32
+  let nUniformBuffers = 0'u32
+
+  if nSamplers + nUniformBuffers > 0:
+    var poolSizes: seq[VkDescriptorPoolSize]
+    if nUniformBuffers > 0:
+      poolSizes.add VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, descriptorCount: nSamplers * INFLIGHTFRAMES.uint32)
+    if nSamplers > 0:
+      poolSizes.add VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorCount: nUniformBuffers * INFLIGHTFRAMES.uint32)
+    var poolInfo = VkDescriptorPoolCreateInfo(
+      sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+      poolSizeCount: uint32(poolSizes.len),
+      pPoolSizes: poolSizes.ToCPointer,
+      maxSets: (nUniformBuffers + nSamplers) * INFLIGHTFRAMES.uint32 * 2, # good formula? no idea...
+    )
+    var pool: VkDescriptorPool
+    checkVkResult vkCreateDescriptorPool(device, addr(poolInfo), nil, addr(pool))
+
+    var layouts = newSeqWith(result.descriptorSets.len, descriptorSetLayout)
+    var allocInfo = VkDescriptorSetAllocateInfo(
+      sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+      descriptorPool: pool,
+      descriptorSetCount: uint32(layouts.len),
+      pSetLayouts: layouts.ToCPointer,
+    )
+    checkVkResult vkAllocateDescriptorSets(device, addr(allocInfo), result.descriptorSets.ToCPointer)
+
 proc CreateRenderable[TMesh, TInstance](
   mesh: TMesh,
   instance: TInstance,
@@ -530,15 +560,16 @@ proc CreateRenderable[TMesh, TInstance](
 
 proc Bind(pipeline: Pipeline, commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
-  commandBuffer.vkCmdBindDescriptorSets(
-    VK_PIPELINE_BIND_POINT_GRAPHICS,
-    pipeline.layout,
-    0,
-    pipeline.descriptorSets[currentFrameInFlight].len.uint32,
-    pipeline.descriptorSets[currentFrameInFlight].ToCPointer,
-    0,
-    nil,
-  )
+  if pipeline.descriptorSets[currentFrameInFlight] != VkDescriptorSet(0):
+    commandBuffer.vkCmdBindDescriptorSets(
+      VK_PIPELINE_BIND_POINT_GRAPHICS,
+      pipeline.layout,
+      0,
+      1,
+      addr pipeline.descriptorSets[currentFrameInFlight],
+      0,
+      nil,
+    )
 
 proc AssertCompatible(TShader, TMesh, TInstance, TGlobals: typedesc) =
   # assert seq-fields of TMesh|TInstance == seq-fields of TShader
@@ -594,14 +625,14 @@ proc Render[TShader, TMesh, TInstance, TGlobals](
   globals: TGlobals,
   commandBuffer: VkCommandBuffer,
 ) =
-  static:
-    AssertCompatible(TShader, TMesh, TInstance, TGlobals)
-  commandBuffer.vkCmdBindVertexBuffers(
-    firstBinding = 0'u32,
-    bindingCount = uint32(renderable.vertexBuffers.len),
-    pBuffers = renderable.vertexBuffers.ToCPointer(),
-    pOffsets = renderable.bufferOffsets.ToCPointer()
-  )
+  static: AssertCompatible(TShader, TMesh, TInstance, TGlobals)
+  if renderable.vertexBuffers.len > 0:
+    commandBuffer.vkCmdBindVertexBuffers(
+      firstBinding = 0'u32,
+      bindingCount = uint32(renderable.vertexBuffers.len),
+      pBuffers = renderable.vertexBuffers.ToCPointer(),
+      pOffsets = renderable.bufferOffsets.ToCPointer()
+    )
   if renderable.indexType != None:
     commandBuffer.vkCmdBindIndexBuffer(
       renderable.indexBuffer,

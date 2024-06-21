@@ -106,7 +106,6 @@ proc AllocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
   assert layout.vk.Valid
 
   var layouts: seq[VkDescriptorSetLayout]
-  var descriptorSets = newSeq[VkDescriptorSet](nframes)
   for i in 0 ..< nframes:
     layouts.add layout.vk
   var allocInfo = VkDescriptorSetAllocateInfo(
@@ -116,6 +115,7 @@ proc AllocateDescriptorSet*(pool: DescriptorPool, layout: DescriptorSetLayout, n
     pSetLayouts: layouts.ToCPointer,
   )
 
+  var descriptorSets = newSeq[VkDescriptorSet](nframes)
   checkVkResult vkAllocateDescriptorSets(pool.device.vk, addr(allocInfo), descriptorSets.ToCPointer)
   for descriptorSet in descriptorSets:
     result.add DescriptorSet(vk: descriptorSet, layout: layout)
