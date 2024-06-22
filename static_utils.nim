@@ -20,7 +20,7 @@ template Pass* {.pragma.}
 template PassFlat* {.pragma.}
 template ShaderOutput* {.pragma.}
 
-const INFLIGHTFRAMES = 2
+const INFLIGHTFRAMES = 2'u32
 type
   SupportedGPUType* = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
   ShaderObject*[TShader] = object
@@ -530,14 +530,14 @@ proc CreatePipeline*[TShader](
   if nSamplers + nUniformBuffers > 0:
     var poolSizes: seq[VkDescriptorPoolSize]
     if nUniformBuffers > 0:
-      poolSizes.add VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, descriptorCount: nSamplers * INFLIGHTFRAMES.uint32)
+      poolSizes.add VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, descriptorCount: nSamplers * INFLIGHTFRAMES)
     if nSamplers > 0:
-      poolSizes.add VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorCount: nUniformBuffers * INFLIGHTFRAMES.uint32)
+      poolSizes.add VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorCount: nUniformBuffers * INFLIGHTFRAMES)
     var poolInfo = VkDescriptorPoolCreateInfo(
       sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
       poolSizeCount: uint32(poolSizes.len),
       pPoolSizes: poolSizes.ToCPointer,
-      maxSets: (nUniformBuffers + nSamplers) * INFLIGHTFRAMES.uint32 * 2, # good formula? no idea...
+      maxSets: (nUniformBuffers + nSamplers) * INFLIGHTFRAMES * 2, # good formula? no idea...
     )
     var pool: VkDescriptorPool
     checkVkResult vkCreateDescriptorPool(device, addr(poolInfo), nil, addr(pool))
@@ -550,6 +550,28 @@ proc CreatePipeline*[TShader](
       pSetLayouts: layouts.ToCPointer,
     )
     checkVkResult vkAllocateDescriptorSets(device, addr(allocInfo), result.descriptorSets.ToCPointer)
+
+  # write descriptor sets
+  # TODO
+  var descriptorSetWrites: seq[VkWriteDescriptorSet]
+  for XY in descriptors?:
+
+      bufferInfos.add VkDescriptorBufferInfo(
+        buffer: descriptor.buffer.vk,
+        offset: descriptor.offset,
+        range: descriptor.size,
+      )
+      descriptorSetWrites.add VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: descriptorSet.vk,
+          dstBinding: i,
+          dstArrayElement: 0,
+          descriptorType: descriptor.vkType,
+          descriptorCount: uint32(descriptor.count),
+          pBufferInfo: addr bufferInfos[^1],
+        )
+
+  vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
 
 proc CreateRenderable[TMesh, TInstance](
   mesh: TMesh,
@@ -625,6 +647,7 @@ proc Render[TShader, TMesh, TInstance, TGlobals](
   globals: TGlobals,
   commandBuffer: VkCommandBuffer,
 ) =
+  {.error: "Need to write descriptor sets".}
   static: AssertCompatible(TShader, TMesh, TInstance, TGlobals)
   if renderable.vertexBuffers.len > 0:
     commandBuffer.vkCmdBindVertexBuffers(
