@@ -114,6 +114,7 @@ proc InitRenderer*(
   backFaceCulling = true,
   vSync = false,
   inFlightFrames = 2,
+  samples = VK_SAMPLE_COUNT_1_BIT,
 ) =
 
   assert not engine.renderer.isSome
@@ -130,6 +131,7 @@ proc InitRenderer*(
     backFaceCulling = backFaceCulling,
     vSync = vSync,
     inFlightFrames = inFlightFrames,
+    samples = samples,
   ))
 
 proc InitRenderer*(engine: var Engine, clearColor = NewVec4f(0, 0, 0, 0), vSync = false) =

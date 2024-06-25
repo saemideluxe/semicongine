@@ -17,6 +17,9 @@ type
     nFramebuffers*: uint32
     currentInFlight*: int
     currentFramebufferIndex: uint32
+    samples: VkSampleCountFlagBits
+    colorImage: VulkanImage
+    colorImageView: ImageView
     framebufferViews*: seq[ImageView]
     framebuffers*: seq[Framebuffer]
     queueFinishedFence*: seq[Fence]
@@ -35,9 +38,10 @@ proc CreateSwapchain*(
   renderPass: VkRenderPass,
   surfaceFormat: VkSurfaceFormatKHR,
   inFlightFrames: int,
+  samples: VkSampleCountFlagBits,
   desiredFramebufferCount = 3'u32,
   oldSwapchain = VkSwapchainKHR(0),
-  vSync = false
+  vSync = false,
 ): Option[Swapchain] =
   assert device.vk.Valid
   assert device.physicalDevice.vk.Valid
@@ -79,8 +83,20 @@ proc CreateSwapchain*(
       dimension: TVec2[uint32]([capabilities.currentExtent.width, capabilities.currentExtent.height]),
       inFlightFrames: inFlightFrames,
       renderPass: renderPass,
-      vSync: vSync
+      vSync: vSync,
+      samples: samples,
     )
+
+  if samples != VK_SAMPLE_COUNT_1_BIT:
+    swapchain.colorImage = device.CreateImage(
+      width = capabilities.currentExtent.width,
+      height = capabilities.currentExtent.height,
+      depth = 4,
+      samples = samples,
+      format = surfaceFormat.format,
+      usage = [VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
+    )
+    swapchain.colorImageView = swapchain.colorImage.CreateImageView()
 
   if device.vk.vkCreateSwapchainKHR(addr createInfo, nil, addr swapchain.vk) == VK_SUCCESS:
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, nil)
@@ -89,7 +105,10 @@ proc CreateSwapchain*(
     for framebuffer in framebuffers:
       let framebufferView = VulkanImage(vk: framebuffer, format: surfaceFormat.format, device: device).CreateImageView()
       swapchain.framebufferViews.add framebufferView
-      swapchain.framebuffers.add device.CreateFramebuffer(renderPass, [framebufferView], swapchain.dimension)
+      if samples == VK_SAMPLE_COUNT_1_BIT:
+        swapchain.framebuffers.add device.CreateFramebuffer(renderPass, [framebufferView], swapchain.dimension)
+      else:
+        swapchain.framebuffers.add device.CreateFramebuffer(renderPass, [swapchain.colorImageView, framebufferView], swapchain.dimension)
     for i in 0 ..< swapchain.inFlightFrames:
       swapchain.queueFinishedFence.add device.CreateFence()
       swapchain.imageAvailableSemaphore.add device.CreateSemaphore()
@@ -97,6 +116,7 @@ proc CreateSwapchain*(
     debug &"Created swapchain with: {swapchain.nFramebuffers} framebuffers, {inFlightFrames} in-flight frames, {swapchain.dimension.x}x{swapchain.dimension.y}"
     assert device.FirstPresentationQueue().isSome, "No present queue found"
     swapchain.presentQueue = device.FirstPresentationQueue().get
+
     result = some(swapchain)
   else:
     result = none(Swapchain)
@@ -173,6 +193,10 @@ proc Destroy*(swapchain: var Swapchain) =
   for framebuffer in swapchain.framebuffers.mitems:
     assert framebuffer.vk.Valid
     framebuffer.Destroy()
+  if swapchain.colorImage.vk.Valid:
+    swapchain.colorImage.Destroy()
+  if swapchain.colorImageView.vk.Valid:
+    swapchain.colorImageView.Destroy()
   for i in 0 ..< swapchain.inFlightFrames:
     assert swapchain.queueFinishedFence[i].vk.Valid
     assert swapchain.imageAvailableSemaphore[i].vk.Valid
@@ -194,5 +218,6 @@ proc Recreate*(swapchain: var Swapchain): Option[Swapchain] =
     desiredFramebufferCount = swapchain.nFramebuffers,
     inFlightFrames = swapchain.inFlightFrames,
     oldSwapchain = swapchain.vk,
-    vSync = swapchain.vSync
+    vSync = swapchain.vSync,
+    samples = swapchain.samples,
   )

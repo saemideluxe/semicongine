@@ -62,16 +62,23 @@ proc InitRenderer*(
   backFaceCulling = true,
   vSync = false,
   inFlightFrames = 2,
+  samples = VK_SAMPLE_COUNT_1_BIT,
 ): Renderer =
   assert device.vk.Valid
 
   result.device = device
-  result.renderPass = device.CreateRenderPass(shaders, clearColor = clearColor, backFaceCulling = backFaceCulling)
+  result.renderPass = device.CreateRenderPass(
+    shaders,
+    clearColor = clearColor,
+    backFaceCulling = backFaceCulling,
+    samples = samples
+  )
   let swapchain = device.CreateSwapchain(
     result.renderPass.vk,
     device.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat(),
     vSync = vSync,
     inFlightFrames = inFlightFrames,
+    samples = samples,
   )
   if not swapchain.isSome:
     raise newException(Exception, "Unable to create swapchain")
