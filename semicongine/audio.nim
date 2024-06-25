@@ -16,7 +16,7 @@ import ./resources
 
 export audiotypes
 
-const NBUFFERS = 4
+const NBUFFERS = 32
 const BUFFERSAMPLECOUNT = 256
 
 type
