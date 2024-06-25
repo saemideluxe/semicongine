@@ -197,6 +197,12 @@ proc `Fullscreen=`*(engine: var Engine, enable: bool) =
 func Limits*(engine: Engine): VkPhysicalDeviceLimits =
   engine.device.physicalDevice.properties.limits
 
+func MaxFramebufferSampleCount*(engine: Engine, maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCountFlagBits =
+  let available = VkSampleCountFlags(
+    engine.Limits.framebufferColorSampleCounts.uint32 and engine.Limits.framebufferDepthSampleCounts.uint32
+  ).toEnums
+  return min(max(available), maxSamples)
+
 proc UpdateInputs*(engine: Engine): bool =
   UpdateInputs(engine.window.PendingEvents())
 
