@@ -150,8 +150,38 @@ proc Copy*(src: Buffer, dst: VulkanImage, queue: Queue) =
       addr region
     )
 
+proc CreateImage*(device: Device, width, height, depth: uint32, format: VkFormat, samples: VkSampleCountFlagBits, usage: openArray[VkImageUsageFlagBits]): VulkanImage =
+  assert device.vk.Valid
+  assert width > 0
+  assert height > 0
+
+  result.device = device
+  result.usage = @usage
+
+
+  result.width = width
+  result.height = height
+  result.depth = depth
+  result.format = format
+
+  var imageInfo = VkImageCreateInfo(
+    sType: VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+    imageType: VK_IMAGE_TYPE_2D,
+    extent: VkExtent3D(width: uint32(width), height: uint32(height), depth: 1),
+    mipLevels: 1,
+    arrayLayers: 1,
+    format: result.format,
+    tiling: VK_IMAGE_TILING_OPTIMAL,
+    initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+    usage: toBits result.usage,
+    sharingMode: VK_SHARING_MODE_EXCLUSIVE,
+    samples: samples,
+  )
+  checkVkResult device.vk.vkCreateImage(addr imageInfo, nil, addr result.vk)
+  result.allocateMemory(requireMappable = false, preferVRAM = true, preferAutoFlush = false)
+
 # currently only usable for texture access from shader
-proc createImage[T](device: Device, queue: Queue, width, height: uint32, depth: PixelDepth, image: Image[T]): VulkanImage =
+proc createTextureImage[T](device: Device, queue: Queue, width, height: uint32, depth: PixelDepth, image: Image[T]): VulkanImage =
   assert device.vk.Valid
   assert width > 0
   assert height > 0
@@ -319,9 +349,9 @@ func `$`*(texture: VulkanTexture): string =
 proc UploadTexture*(device: Device, queue: Queue, texture: Texture): VulkanTexture =
   assert device.vk.Valid
   if texture.isGrayscale:
-    result.image = createImage(device = device, queue = queue, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, image = texture.grayImage)
+    result.image = createTextureImage(device = device, queue = queue, width = texture.grayImage.width, height = texture.grayImage.height, depth = 1, image = texture.grayImage)
   else:
-    result.image = createImage(device = device, queue = queue, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, image = texture.colorImage)
+    result.image = createTextureImage(device = device, queue = queue, width = texture.colorImage.width, height = texture.colorImage.height, depth = 4, image = texture.colorImage)
   result.imageView = result.image.CreateImageView()
   result.sampler = result.image.device.CreateSampler(texture.sampler)
 

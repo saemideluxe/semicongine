@@ -55,7 +55,7 @@ proc SetupDescriptors*(pipeline: ShaderPipeline, descriptorPool: DescriptorPool,
             descriptor.imageviews.add emptyTexture.imageView
             descriptor.samplers.add emptyTexture.sampler
 
-proc CreatePipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling = true): ShaderPipeline =
+proc CreatePipeline*(device: Device, renderPass: VkRenderPass, shaderConfiguration: ShaderConfiguration, inFlightFrames: int, subpass = 0'u32, backFaceCulling = true, samples = VK_SAMPLE_COUNT_1_BIT): ShaderPipeline =
   assert renderPass.Valid
   assert device.vk.Valid
 
@@ -128,7 +128,7 @@ proc CreatePipeline*(device: Device, renderPass: VkRenderPass, shaderConfigurati
     multisampling = VkPipelineMultisampleStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
       sampleShadingEnable: VK_FALSE,
-      rasterizationSamples: VK_SAMPLE_COUNT_1_BIT,
+      rasterizationSamples: samples,
       minSampleShading: 1.0,
       pSampleMask: nil,
       alphaToCoverageEnable: VK_FALSE,

@@ -114,6 +114,7 @@ proc InitRenderer*(
   backFaceCulling = true,
   vSync = false,
   inFlightFrames = 2,
+  samples = VK_SAMPLE_COUNT_1_BIT,
 ) =
 
   assert not engine.renderer.isSome
@@ -130,6 +131,7 @@ proc InitRenderer*(
     backFaceCulling = backFaceCulling,
     vSync = vSync,
     inFlightFrames = inFlightFrames,
+    samples = samples,
   ))
 
 proc InitRenderer*(engine: var Engine, clearColor = NewVec4f(0, 0, 0, 0), vSync = false) =
@@ -194,6 +196,12 @@ proc `Fullscreen=`*(engine: var Engine, enable: bool) =
 
 func Limits*(engine: Engine): VkPhysicalDeviceLimits =
   engine.device.physicalDevice.properties.limits
+
+func MaxFramebufferSampleCount*(engine: Engine, maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCountFlagBits =
+  let available = VkSampleCountFlags(
+    engine.Limits.framebufferColorSampleCounts.uint32 and engine.Limits.framebufferDepthSampleCounts.uint32
+  ).toEnums
+  return min(max(available), maxSamples)
 
 proc UpdateInputs*(engine: Engine): bool =
   UpdateInputs(engine.window.PendingEvents())

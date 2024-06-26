@@ -16,8 +16,8 @@ import ./resources
 
 export audiotypes
 
-const NBUFFERS = 4
-const BUFFERSAMPLECOUNT = 2048
+const NBUFFERS = 32
+const BUFFERSAMPLECOUNT = 256
 
 type
   Playback = object
@@ -202,6 +202,11 @@ func mix(a, b: Sample): Sample =
 
 proc updateSoundBuffer(mixer: var Mixer) =
   let t = getMonoTime()
+
+  let tDebug = getTime()
+  # echo ""
+  # echo tDebug
+
   let dt = (t - mixer.lastUpdate).inNanoseconds.float64 / 1_000_000_000'f64
   mixer.lastUpdate = t
 
@@ -237,7 +242,9 @@ proc updateSoundBuffer(mixer: var Mixer) =
           track.playing.del(id)
       mixer.buffers[mixer.currentBuffer][i] = mixedSample
   # send data to sound device
+  # echo getTime() - tDebug
   mixer.device.WriteSoundData(mixer.currentBuffer)
+  # echo getTime() - tDebug
   mixer.currentBuffer = (mixer.currentBuffer + 1) mod mixer.buffers.len
 
 # DSP functions
