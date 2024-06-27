@@ -7,6 +7,7 @@ import semicongine/build
 # TODO: totally update this file!!
 
 switch("nimblePath", "nimbledeps/pkgs2")
+switch("define", "nimPreviewHashRef")
 
 task build_dev, "build dev":
   semicongine_build_switches(buildname = "dev")

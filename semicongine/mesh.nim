@@ -18,6 +18,7 @@ var instanceCounter* = 0
 type
   MeshIndexType* = enum
     None
+    Tiny  # up to 2^8 vertices # TODO: need to check and enable support for this
     Small # up to 2^16 vertices
     Big   # up to 2^32 vertices
   MeshObject* = object
@@ -25,6 +26,7 @@ type
     vertexCount*: int
     case indexType*: MeshIndexType
       of None: discard
+      of Tiny: tinyIndices*: seq[array[3, uint8]]
       of Small: smallIndices*: seq[array[3, uint16]]
       of Big: bigIndices*: seq[array[3, uint32]]
     material*: MaterialData
@@ -63,6 +65,7 @@ func IndicesCount*(mesh: MeshObject): int =
   (
     case mesh.indexType
     of None: 0
+    of Tiny: mesh.tinyIndices.len
     of Small: mesh.smallIndices.len
     of Big: mesh.bigIndices.len
   ) * 3
@@ -90,6 +93,7 @@ func hash*(mesh: Mesh): Hash =
 converter ToVulkan*(indexType: MeshIndexType): VkIndexType =
   case indexType:
     of None: VK_INDEX_TYPE_NONE_KHR
+    of Tiny: VK_INDEX_TYPE_UINT8_EXT
     of Small: VK_INDEX_TYPE_UINT16
     of Big: VK_INDEX_TYPE_UINT32
 
@@ -150,7 +154,9 @@ proc NewMesh*(
   var indexType = None
   if indices.len > 0:
     indexType = Big
-    if autoResize and uint32(positions.len) < uint32(high(uint16)):
+    if autoResize and uint32(positions.len) < uint32(high(uint8)) and false: # TODO: check feature support
+      indexType = Tiny
+    elif autoResize and uint32(positions.len) < uint32(high(uint16)):
       indexType = Small
 
   result = Mesh(
@@ -172,7 +178,10 @@ proc NewMesh*(
     assert int(i[2]) < result[].vertexCount
 
   # cast index values to appropiate type
-  if result[].indexType == Small and uint32(positions.len) < uint32(high(uint16)):
+  if result[].indexType == Tiny and uint32(positions.len) < uint32(high(uint8)) and false: # TODO: check feature support
+    for i, tri in enumerate(indices):
+      result[].tinyIndices.add [uint8(tri[0]), uint8(tri[1]), uint8(tri[2])]
+  elif result[].indexType == Small and uint32(positions.len) < uint32(high(uint16)):
     for i, tri in enumerate(indices):
       result[].smallIndices.add [uint16(tri[0]), uint16(tri[1]), uint16(tri[2])]
   elif result[].indexType == Big:
@@ -219,6 +228,7 @@ func AttributeType*(mesh: MeshObject, attribute: string): DataType =
 func IndexSize*(mesh: MeshObject): uint64 =
   case mesh.indexType
     of None: 0'u64
+    of Tiny: uint64(mesh.tinyIndices.len * sizeof(get(genericParams(typeof(mesh.tinyIndices)), 0)))
     of Small: uint64(mesh.smallIndices.len * sizeof(get(genericParams(typeof(mesh.smallIndices)), 0)))
     of Big: uint64(mesh.bigIndices.len * sizeof(get(genericParams(typeof(mesh.bigIndices)), 0)))
 
@@ -231,6 +241,7 @@ func rawData[T: seq](value: T): (pointer, uint64) =
 func GetRawIndexData*(mesh: MeshObject): (pointer, uint64) =
   case mesh.indexType:
     of None: raise newException(Exception, "Trying to get index data for non-indexed mesh")
+    of Tiny: rawData(mesh.tinyIndices)
     of Small: rawData(mesh.smallIndices)
     of Big: rawData(mesh.bigIndices)
 
@@ -341,6 +352,7 @@ proc RemoveAttribute*(mesh: var MeshObject, attribute: string) =
 proc AppendIndicesData*(mesh: var MeshObject, v1, v2, v3: int) =
   case mesh.indexType
   of None: raise newException(Exception, "Mesh does not support indexed data")
+  of Tiny: mesh.tinyIndices.add([uint8(v1), uint8(v2), uint8(v3)])
   of Small: mesh.smallIndices.add([uint16(v1), uint16(v2), uint16(v3)])
   of Big: mesh.bigIndices.add([uint32(v1), uint32(v2), uint32(v3)])
 
@@ -412,6 +424,13 @@ proc AsNonIndexedMesh*(mesh: MeshObject): MeshObject =
     result.instanceData[attribute] = datalist.Copy()
   var i = 0
   case mesh.indexType
+  of Tiny:
+    for indices in mesh.tinyIndices:
+      for attribute, value in mesh.vertexData.pairs:
+        result.vertexData[attribute].AppendFrom(i, mesh.vertexData[attribute], int(indices[0]))
+        result.vertexData[attribute].AppendFrom(i + 1, mesh.vertexData[attribute], int(indices[1]))
+        result.vertexData[attribute].AppendFrom(i + 2, mesh.vertexData[attribute], int(indices[2]))
+      i += 3
   of Small:
     for indices in mesh.smallIndices:
       for attribute, value in mesh.vertexData.pairs:
@@ -567,6 +586,10 @@ proc MergeMeshData*(a: var Mesh, b: Mesh) =
   case a.indexType:
     of None:
       discard
+    of Tiny:
+      let offset = uint8(originalOffset)
+      for i in b.tinyIndices:
+        a.tinyIndices.add [i[0] + offset, i[1] + offset, i[2] + offset]
     of Small:
       let offset = uint16(originalOffset)
       for i in b.smallIndices:

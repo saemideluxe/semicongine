@@ -216,6 +216,63 @@ converter toVkIndexType(indexType: IndexType): VkIndexType =
     of UInt16: VK_INDEX_TYPE_UINT16
     of UInt32: VK_INDEX_TYPE_UINT32
 
+proc CreateRenderPass*(
+  device: VkDevice,
+  format: VkFormat,
+): VkRenderPass =
+
+  var
+    attachments = @[VkAttachmentDescription(
+        format: format,
+        samples: VK_SAMPLE_COUNT_1_BIT,
+        loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
+        storeOp: VK_ATTACHMENT_STORE_OP_STORE,
+        stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+        finalLayout: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    )]
+    dependencies = @[VkSubpassDependency(
+      srcSubpass: VK_SUBPASS_EXTERNAL,
+      dstSubpass: 0,
+      srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT],
+      srcAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
+      dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT],
+      dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
+    )]
+    outputs = @[
+      VkAttachmentReference(
+        attachment: 0,
+        layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      )
+    ]
+
+  var subpassesList = [
+    VkSubpassDescription(
+      flags: VkSubpassDescriptionFlags(0),
+      pipelineBindPoint: VK_PIPELINE_BIND_POINT_GRAPHICS,
+      inputAttachmentCount: 0,
+      pInputAttachments: nil,
+      colorAttachmentCount: uint32(outputs.len),
+      pColorAttachments: outputs.ToCPointer,
+      pResolveAttachments: nil,
+      pDepthStencilAttachment: nil,
+      preserveAttachmentCount: 0,
+      pPreserveAttachments: nil,
+    )
+  ]
+
+  var createInfo = VkRenderPassCreateInfo(
+      sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+      attachmentCount: uint32(attachments.len),
+      pAttachments: attachments.ToCPointer,
+      subpassCount: uint32(subpassesList.len),
+      pSubpasses: subpassesList.ToCPointer,
+      dependencyCount: uint32(dependencies.len),
+      pDependencies: dependencies.ToCPointer,
+    )
+  checkVkResult device.vkCreateRenderPass(addr(createInfo), nil, addr(result))
+
 proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string): seq[uint32] {.compileTime.} =
   func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
     case stage
@@ -553,25 +610,27 @@ proc CreatePipeline*[TShader](
 
   # write descriptor sets
   # TODO
+  #[
   var descriptorSetWrites: seq[VkWriteDescriptorSet]
   for XY in descriptors?:
 
-      bufferInfos.add VkDescriptorBufferInfo(
-        buffer: descriptor.buffer.vk,
-        offset: descriptor.offset,
-        range: descriptor.size,
-      )
-      descriptorSetWrites.add VkWriteDescriptorSet(
-          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-          dstSet: descriptorSet.vk,
-          dstBinding: i,
-          dstArrayElement: 0,
-          descriptorType: descriptor.vkType,
-          descriptorCount: uint32(descriptor.count),
-          pBufferInfo: addr bufferInfos[^1],
-        )
+    bufferInfos.add VkDescriptorBufferInfo(
+      buffer: descriptor.buffer.vk,
+      offset: descriptor.offset,
+      range: descriptor.size,
+    )
+    descriptorSetWrites.add VkWriteDescriptorSet(
+      sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+      dstSet: descriptorSet.vk,
+      dstBinding: i,
+      dstArrayElement: 0,
+      descriptorType: descriptor.vkType,
+      descriptorCount: uint32(descriptor.count),
+      pBufferInfo: addr bufferInfos[^1],
+    )
+    vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
+  ]#
 
-  vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
 
 proc CreateRenderable[TMesh, TInstance](
   mesh: TMesh,
@@ -580,9 +639,11 @@ proc CreateRenderable[TMesh, TInstance](
 ): Renderable[TMesh, TInstance] =
   result.indexType = None
 
-proc Bind(pipeline: Pipeline, commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
+proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
+  let a = pipeline.descriptorSets
+  echo a[^currentFrameInFlight]
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
-  if pipeline.descriptorSets[currentFrameInFlight] != VkDescriptorSet(0):
+  if a[currentFrameInFlight] != VkDescriptorSet(0):
     commandBuffer.vkCmdBindDescriptorSets(
       VK_PIPELINE_BIND_POINT_GRAPHICS,
       pipeline.layout,
@@ -682,7 +743,7 @@ when isMainModule:
   import semicongine/vulkan/instance
   import semicongine/vulkan/device
   import semicongine/vulkan/physicaldevice
-  import semicongine/vulkan/renderpass
+  # import semicongine/vulkan/renderpass
   import semicongine/vulkan/commandbuffer
   import std/options
 
@@ -747,7 +808,7 @@ when isMainModule:
   let rp = d.vk.CreateRenderPass(d.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat().format)
   var p = CreatePipeline(d.vk, renderPass = rp, shaderObject)
 
-  let commandBufferPool = d.CreateCommandBufferPool(d.FirstGraphicsQueue().get().family, INFLIGHTFRAMES)
+  let commandBufferPool = d.CreateCommandBufferPool(d.FirstGraphicsQueue().get().family, INFLIGHTFRAMES.int)
   let cmd = commandBufferPool.buffers[0]
 
   checkVkResult cmd.vkResetCommandBuffer(VkCommandBufferResetFlags(0))
@@ -756,7 +817,7 @@ when isMainModule:
     flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
   )
   checkVkResult cmd.vkBeginCommandBuffer(addr(beginInfo))
-  p.Bind(cmd, currentFrameInFlight = 0)
-  p.Render(r, g, cmd)
+  Bind(p, cmd, currentFrameInFlight = 0)
+  Render(p, r, g, cmd)
 
   checkVkResult cmd.vkEndCommandBuffer()

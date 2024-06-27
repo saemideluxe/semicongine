@@ -46,6 +46,6 @@ const LOGLEVEL {.strdefine.}: string = "Warn"
 const ENGINE_LOGLEVEL* = parseEnum[Level]("lvl" & LOGLEVEL)
 
 # resource bundleing settings, need to be configured per project
-const PACKAGETYPE* {.strdefine.}: string = "" # dir, zip, exe
+const PACKAGETYPE* {.strdefine.}: string = "exe" # dir, zip, exe
 static:
   assert PACKAGETYPE in ["dir", "zip", "exe"], ENGINENAME & " requires one of -d:PACKAGETYPE=dir -d:PACKAGETYPE=zip -d:PACKAGETYPE=exe"

@@ -132,6 +132,7 @@ proc SetupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     if mesh[].indexType != MeshIndexType.None:
       let indexAlignment = case mesh[].indexType
         of MeshIndexType.None: 0'u64
+        of Tiny: 1'u64
         of Small: 2'u64
         of Big: 4'u64
       # index value alignment required by Vulkan
@@ -211,6 +212,7 @@ proc SetupDrawableBuffers*(renderer: var Renderer, scene: var Scene) =
     if indexed:
       let indexAlignment = case mesh.indexType
         of MeshIndexType.None: 0'u64
+        of Tiny: 1'u64
         of Small: 2'u64
         of Big: 4'u64
       # index value alignment required by Vulkan
