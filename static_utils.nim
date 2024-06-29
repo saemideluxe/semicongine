@@ -125,29 +125,34 @@ template ForVertexDataFields*(inputData: typed, fieldname, valuename, isinstance
         let `isinstancename` {.inject.} = hasCustomPragma(value, InstanceAttribute)
         body
 
-template ForDescriptorFields*(inputData: typed, typename, countname, body: untyped): untyped =
+template ForDescriptorFields*(inputData: typed, typename, countname, bindingNumber, body: untyped): untyped =
+  var `bindingNumber` {.inject.} = 1'u32
   for theFieldname, value in fieldPairs(inputData):
     when typeof(value) is Texture:
       block:
         let `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         let `countname` {.inject.} = 1'u32
         body
+        `bindingNumber`.inc
     elif typeof(value) is object:
       block:
         let `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
         let `countname` {.inject.} = 1'u32
         body
+        `bindingNumber`.inc
     elif typeof(value) is array:
       when elementType(value) is Texture:
         block:
           let `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
           let `countname` {.inject.} = uint32(typeof(value).len)
           body
+          `bindingNumber`.inc
       elif elementType(value) is object:
         block:
           let `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
           let `countname` {.inject.} = uint32(typeof(value).len)
           body
+          `bindingNumber`.inc
 
 func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Texture](value: T): uint32 =
   when T is TMat2[float32] or T is TMat2[float64] or T is TMat23[float32] or T is TMat23[float64]:
@@ -207,7 +212,7 @@ type
   Pipeline[TShader] = object
     pipeline: VkPipeline
     layout: VkPipelineLayout
-    descriptorSets: array[INFLIGHTFRAMES, VkDescriptorSet]
+    descriptorSets: array[INFLIGHTFRAMES.int, VkDescriptorSet]
 
 converter toVkIndexType(indexType: IndexType): VkIndexType =
   case indexType:
@@ -391,7 +396,6 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
     fsOutput &
     @[shader.fragmentCode]).join("\n")
 
-# proc CompileShader[TShader](shader: static TShader): (seq[uint32], seq[uint32]) {.compileTime.}=
 proc CompileShader[TShader](device: VkDevice, shader: static TShader): ShaderObject[TShader] =
   const (vertexShaderSource, fragmentShaderSource) = generateShaderSource(shader)
 
@@ -428,8 +432,7 @@ proc CreatePipeline*[TShader](
 
   # create pipeline
   var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-  var descriptorBindingNumber = 0'u32
-  ForDescriptorFields(default(TShader), descriptorType, descriptorCount):
+  ForDescriptorFields(default(TShader), descriptorType, descriptorCount, descriptorBindingNumber):
     layoutbindings.add VkDescriptorSetLayoutBinding(
       binding: descriptorBindingNumber,
       descriptorType: descriptorType,
@@ -437,7 +440,6 @@ proc CreatePipeline*[TShader](
       stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
       pImmutableSamplers: nil,
     )
-    inc descriptorBindingNumber
   var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
     bindingCount: uint32(layoutbindings.len),
@@ -608,29 +610,45 @@ proc CreatePipeline*[TShader](
     )
     checkVkResult vkAllocateDescriptorSets(device, addr(allocInfo), result.descriptorSets.ToCPointer)
 
-  # write descriptor sets
-  # TODO
-  #[
+proc WriteDescriptors[TShader](device: VkDevice, pipeline: Pipeline[TShader]) =
   var descriptorSetWrites: seq[VkWriteDescriptorSet]
-  for XY in descriptors?:
-
-    bufferInfos.add VkDescriptorBufferInfo(
-      buffer: descriptor.buffer.vk,
-      offset: descriptor.offset,
-      range: descriptor.size,
-    )
-    descriptorSetWrites.add VkWriteDescriptorSet(
-      sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-      dstSet: descriptorSet.vk,
-      dstBinding: i,
-      dstArrayElement: 0,
-      descriptorType: descriptor.vkType,
-      descriptorCount: uint32(descriptor.count),
-      pBufferInfo: addr bufferInfos[^1],
-    )
-    vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
-  ]#
-
+  ForDescriptorFields(default(TShader), descriptorType, descriptorCount, descriptorBindingNumber):
+    for frameInFlight in 0 ..< pipeline.descriptorSets.len:
+      if descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+        # TODO
+        let bufferInfo = VkDescriptorBufferInfo(
+          buffer: VkBuffer(0),
+          offset: 0,
+          range: 1,
+        )
+        descriptorSetWrites.add VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: pipeline.descriptorSets[frameInFlight],
+          dstBinding: descriptorBindingNumber,
+          dstArrayElement: uint32(0),
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          pImageInfo: nil,
+          pBufferInfo: addr(bufferInfo),
+        )
+      elif descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+        # TODO
+        let imageInfo = VkDescriptorImageInfo(
+          sampler: VkSampler(0),
+          imageView: VkImageView(0),
+          imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        )
+        descriptorSetWrites.add VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: pipeline.descriptorSets[frameInFlight],
+          dstBinding: descriptorBindingNumber,
+          dstArrayElement: uint32(0),
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          pImageInfo: addr(imageInfo),
+          pBufferInfo: nil,
+        )
+  vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
 
 proc CreateRenderable[TMesh, TInstance](
   mesh: TMesh,
@@ -641,7 +659,6 @@ proc CreateRenderable[TMesh, TInstance](
 
 proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
   let a = pipeline.descriptorSets
-  echo a[^currentFrameInFlight]
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
   if a[currentFrameInFlight] != VkDescriptorSet(0):
     commandBuffer.vkCmdBindDescriptorSets(
@@ -708,7 +725,6 @@ proc Render[TShader, TMesh, TInstance, TGlobals](
   globals: TGlobals,
   commandBuffer: VkCommandBuffer,
 ) =
-  {.error: "Need to write descriptor sets".}
   static: AssertCompatible(TShader, TMesh, TInstance, TGlobals)
   if renderable.vertexBuffers.len > 0:
     commandBuffer.vkCmdBindVertexBuffers(
@@ -743,8 +759,6 @@ when isMainModule:
   import semicongine/vulkan/instance
   import semicongine/vulkan/device
   import semicongine/vulkan/physicaldevice
-  # import semicongine/vulkan/renderpass
-  import semicongine/vulkan/commandbuffer
   import std/options
 
   type
@@ -794,30 +808,103 @@ when isMainModule:
 
 
   let selectedPhysicalDevice = i.GetPhysicalDevices().FilterBestGraphics()
-  let d = i.CreateDevice(
+  let dev = i.CreateDevice(
     selectedPhysicalDevice,
     enabledExtensions = @[],
     selectedPhysicalDevice.FilterForGraphicsPresentationQueues()
   )
+  let frameWidth = 100'u32
+  let frameHeight = 100'u32
 
-  var r: Renderable[MeshA, InstanceA]
-  var g: Globals
+  var myRenderable: Renderable[MeshA, InstanceA]
+  var myGlobals: Globals
 
+  # setup for rendering (TODO: swapchain & framebuffers)
+
+  # renderpass
+  let renderpass = dev.vk.CreateRenderPass(dev.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat().format)
+
+  # shaders
   const shader = ShaderA()
-  let shaderObject = d.vk.CompileShader(shader)
-  let rp = d.vk.CreateRenderPass(d.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat().format)
-  var p = CreatePipeline(d.vk, renderPass = rp, shaderObject)
+  let shaderObject = dev.vk.CompileShader(shader)
+  var pipeline1 = CreatePipeline(dev.vk, renderPass = renderpass, shaderObject)
 
-  let commandBufferPool = d.CreateCommandBufferPool(d.FirstGraphicsQueue().get().family, INFLIGHTFRAMES.int)
-  let cmd = commandBufferPool.buffers[0]
+  # TODO: probably here: allocate renderables, uniform buffers & textures
 
-  checkVkResult cmd.vkResetCommandBuffer(VkCommandBufferResetFlags(0))
-  let beginInfo = VkCommandBufferBeginInfo(
-    sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-    flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
+  # descriptors
+  WriteDescriptors(dev.vk, pipeline1)
+
+  # command buffer
+  var
+    commandBufferPool: VkCommandPool
+    cmdBuffers: array[INFLIGHTFRAMES.int, VkCommandBuffer]
+    createInfo = VkCommandPoolCreateInfo(
+      sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+      flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
+      queueFamilyIndex: dev.FirstGraphicsQueue().get().family.index,
+    )
+  checkVkResult vkCreateCommandPool(dev.vk, addr createInfo, nil, addr commandBufferPool)
+  var allocInfo = VkCommandBufferAllocateInfo(
+    sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+    commandPool: commandBufferPool,
+    level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+    commandBufferCount: INFLIGHTFRAMES,
   )
-  checkVkResult cmd.vkBeginCommandBuffer(addr(beginInfo))
-  Bind(p, cmd, currentFrameInFlight = 0)
-  Render(p, r, g, cmd)
+  checkVkResult vkAllocateCommandBuffers(dev.vk, addr allocInfo, cmdBuffers.ToCPointer)
 
-  checkVkResult cmd.vkEndCommandBuffer()
+  # start command buffer
+  block:
+    let
+      currentFramebuffer = VkFramebuffer(0) # TODO
+      currentFrameInFlight = 1
+      cmd = cmdBuffers[currentFrameInFlight]
+      beginInfo = VkCommandBufferBeginInfo(
+        sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
+      )
+    checkVkResult cmd.vkResetCommandBuffer(VkCommandBufferResetFlags(0))
+    checkVkResult cmd.vkBeginCommandBuffer(addr(beginInfo))
+
+    # start renderpass
+    block:
+      var
+        clearColors = [VkClearValue(color: VkClearColorValue(float32: [0, 0, 0, 0]))]
+        renderPassInfo = VkRenderPassBeginInfo(
+          sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+          renderPass: renderpass,
+          framebuffer: currentFramebuffer,
+          renderArea: VkRect2D(
+            offset: VkOffset2D(x: 0, y: 0),
+            extent: VkExtent2D(width: frameWidth, height: frameHeight),
+          ),
+          clearValueCount: uint32(clearColors.len),
+          pClearValues: clearColors.ToCPointer(),
+        )
+        viewport = VkViewport(
+          x: 0.0,
+          y: 0.0,
+          width: frameWidth.float32,
+          height: frameHeight.float32,
+          minDepth: 0.0,
+          maxDepth: 1.0,
+        )
+        scissor = VkRect2D(
+          offset: VkOffset2D(x: 0, y: 0),
+          extent: VkExtent2D(width: frameWidth, height: frameHeight)
+        )
+      vkCmdBeginRenderPass(cmd, addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
+
+      # setup viewport
+      vkCmdSetViewport(cmd, firstViewport = 0, viewportCount = 1, addr(viewport))
+      vkCmdSetScissor(cmd, firstScissor = 0, scissorCount = 1, addr(scissor))
+
+      # bind pipeline, will be loop
+      block:
+        Bind(pipeline1, cmd, currentFrameInFlight = currentFrameInFlight)
+
+        # render object, will be loop
+        block:
+          Render(pipeline1, myRenderable, myGlobals, cmd)
+
+      vkCmdEndRenderPass(cmd)
+    checkVkResult cmd.vkEndCommandBuffer()
