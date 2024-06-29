@@ -19,8 +19,11 @@ template InstanceAttribute* {.pragma.}
 template Pass* {.pragma.}
 template PassFlat* {.pragma.}
 template ShaderOutput* {.pragma.}
+template VertexIndices*{.pragma.}
 
 const INFLIGHTFRAMES = 2'u32
+const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
+const BUFFERALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
 
 type
   SupportedGPUType* = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
@@ -201,15 +204,16 @@ type
   IndirectGPUMemory = object
     vk: VkDeviceMemory
     size: uint64
+    needsTransfer: bool # usually true
   DirectGPUMemory = object
     vk: VkDeviceMemory
     size: uint64
     data: pointer
+    needsFlush: bool # usually true
   GPUMemory = IndirectGPUMemory | DirectGPUMemory
 
   Buffer[TMemory: GPUMemory] = object
     vk: VkBuffer
-    memory*: TMemory
     offset: uint64
     size: uint64
 
@@ -240,12 +244,16 @@ type
     descriptorSetLayout: VkDescriptorSetLayout
   RenderData = object
     descriptorPool: VkDescriptorPool
-    indirectMemory: seq[IndirectGPUMemory]
-    nextFreeIndirectMemoryOffset: seq[uint64]
+    # tuple is memory and offset to next free allocation in that memory
+    indirectMemory: seq[tuple[memory: IndirectGPUMemory, nextFree: uint64]]
+    directMemory: seq[tuple[memory: DirectGPUMemory, nextFree: uint64]]
     indirectBuffers: seq[Buffer[IndirectGPUMemory]]
-    directMemory: seq[DirectGPUMemory]
-    nextFreeDirectMemoryOffset: seq[uint64]
     directBuffers: seq[Buffer[DirectGPUMemory]]
+
+template IsDirectMemory(gpuArray: GPUArray): untyped =
+  get(genericParams(typeof(gpuArray)), 1) is DirectGPUMemory
+template IsDirectMemory(gpuValue: GPUValue): untyped =
+  get(genericParams(typeof(gpuValue)), 1) is DirectGPUMemory
 
 converter toVkIndexType(indexType: IndexType): VkIndexType =
   case indexType:
@@ -474,7 +482,6 @@ proc CreatePipeline*[TShader](
     bindingCount: uint32(layoutbindings.len),
     pBindings: layoutbindings.ToCPointer
   )
-  result.descriptorSetLayout: VkDescriptorSetLayout
   checkVkResult vkCreateDescriptorSetLayout(device, addr(layoutCreateInfo), nil, addr(result.descriptorSetLayout))
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -611,36 +618,38 @@ proc CreatePipeline*[TShader](
     addr(result.pipeline)
   )
 
-proc AllocateIndirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, allocationSize: uint64): IndirectGPUMemory =
+proc AllocateIndirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, size: uint64): IndirectGPUMemory =
   # chooses biggest memory type that has NOT VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-  result.size = allocationSize
+  result.size = size
+  result.needsTransfer = true
 
   # find a good memory type
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(pDevice, addr physicalProperties)
 
-  var biggestHeap: uint64 = -1
-  var memoryTypeIndex = -1
+  var biggestHeap: uint64 = 0
+  var memoryTypeIndex = high(uint32)
   # try to find non-host-visible type
-  for i in 0 ..< physicalProperties.memoryTypeCount:
-    if VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT not in toEnums(physicalProperties.memoryTypes[i].propertyFlags)
+  for i in 0'u32 ..< physicalProperties.memoryTypeCount:
+    if not (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in toEnums(physicalProperties.memoryTypes[i].propertyFlags)):
       let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
       if size > biggestHeap:
-        biggest = size
+        biggestHeap = size
         memoryTypeIndex = i
 
   # If we did not found a device-only memory type, let's just take the biggest overall
-  if memoryTypeIndex < 0:
-    for i in 0 ..< physicalProperties.memoryTypeCount:
-        let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
-        if size > biggestHeap:
-          biggest = size
-          memoryTypeIndex = i
+  if memoryTypeIndex == high(uint32):
+    result.needsTransfer = false
+    for i in 0'u32 ..< physicalProperties.memoryTypeCount:
+      let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
+      if size > biggestHeap:
+        biggestHeap = size
+        memoryTypeIndex = i
 
-  assert memoryTypeIndex >= 0, "Unable to find indirect memory type"
+  assert memoryTypeIndex != high(uint32), "Unable to find indirect memory type"
   var allocationInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-    allocationSize: initialAllocationSize,
+    allocationSize: result.size,
     memoryTypeIndex: memoryTypeIndex,
   )
   checkVkResult vkAllocateMemory(
@@ -650,27 +659,30 @@ proc AllocateIndirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, allocat
     addr result.vk
   )
 
-proc AllocateDirectMemory(device: VkDevice, allocationSize: uint64): DirectGPUMemory =
-  result.size = allocationSize
+proc AllocateDirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, size: uint64): DirectGPUMemory =
+  result.size = size
+  result.needsFlush = true
 
   # find a good memory type
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(pDevice, addr physicalProperties)
 
-  var biggestHeap: uint64 = -1
-  var memoryTypeIndex = -1
+  var biggestHeap: uint64 = 0
+  var memoryTypeIndex = high(uint32)
   # try to find host-visible type
   for i in 0 ..< physicalProperties.memoryTypeCount:
-    if VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in toEnums(physicalProperties.memoryTypes[i].propertyFlags)
+    let flags = toEnums(physicalProperties.memoryTypes[i].propertyFlags)
+    if VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags:
       let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
       if size > biggestHeap:
-        biggest = size
+        biggestHeap = size
         memoryTypeIndex = i
+        result.needsFlush = not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in flags)
 
-  assert memoryTypeIndex >= 0, "Unable to find direct (aka host-visible) memory type"
+  assert memoryTypeIndex != high(uint32), "Unable to find indirect memory type"
   var allocationInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-    allocationSize: initialAllocationSize,
+    allocationSize: result.size,
     memoryTypeIndex: memoryTypeIndex,
   )
   checkVkResult vkAllocateMemory(
@@ -679,7 +691,8 @@ proc AllocateDirectMemory(device: VkDevice, allocationSize: uint64): DirectGPUMe
     nil,
     addr result.vk
   )
-  checkVkResult result.device.vk.vkMapMemory(
+  checkVkResult vkMapMemory(
+    device = device,
     memory = result.vk,
     offset = 0'u64,
     size = result.size,
@@ -687,11 +700,75 @@ proc AllocateDirectMemory(device: VkDevice, allocationSize: uint64): DirectGPUMe
     ppData = addr(result.data)
   )
 
-proc InitRenderData(device: VkDevice, descriptorPoolLimit = 1024): RenderData =
+proc AllocateIndirectBuffer(device: VkDevice, renderData: var RenderData, size: uint64, usage: openArray[VkBufferUsageFlagBits]) =
+  assert size > 0, "Buffer sizes must be larger than 0"
+  var buffer = Buffer[IndirectGPUMemory](size: size)
+
+  # iterate through memory areas to find big enough free space
+  for (memory, offset) in renderData.indirectMemory.mitems:
+    if memory.size - offset >= size:
+      buffer.offset = offset
+      # create buffer
+      var createInfo = VkBufferCreateInfo(
+        sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        flags: VkBufferCreateFlags(0),
+        size: buffer.size,
+        usage: toBits(@usage & @[VK_BUFFER_USAGE_TRANSFER_DST_BIT]), # ensure we can transfer to this buffer
+        sharingMode: VK_SHARING_MODE_EXCLUSIVE,
+      )
+      checkVkResult vkCreateBuffer(
+        device = device,
+        pCreateInfo = addr createInfo,
+        pAllocator = nil,
+        pBuffer = addr(buffer.vk)
+      )
+      checkVkResult vkBindBufferMemory(device, buffer.vk, memory.vk, buffer.offset)
+      renderData.indirectBuffers.add buffer
+      # update memory area offset
+      offset = offset + size
+      if offset mod MEMORY_ALIGNMENT != 0:
+        offset = offset + MEMORY_ALIGNMENT - (offset mod MEMORY_ALIGNMENT)
+      return
+
+  assert false, "Did not find allocated memory region with enough space"
+
+proc AllocateDirectBuffer(device: VkDevice, renderData: var RenderData, size: uint64, usage: openArray[VkBufferUsageFlagBits]) =
+  assert size > 0, "Buffer sizes must be larger than 0"
+  var buffer = Buffer[DirectGPUMemory](size: size)
+
+  # iterate through memory areas to find big enough free space
+  for (memory, offset) in renderData.directMemory.mitems:
+    if memory.size - offset >= size:
+      buffer.offset = offset
+      # create buffer
+      var createInfo = VkBufferCreateInfo(
+        sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        flags: VkBufferCreateFlags(0),
+        size: buffer.size,
+        usage: toBits(usage),
+        sharingMode: VK_SHARING_MODE_EXCLUSIVE,
+      )
+      checkVkResult vkCreateBuffer(
+        device = device,
+        pCreateInfo = addr createInfo,
+        pAllocator = nil,
+        pBuffer = addr(buffer.vk)
+      )
+      checkVkResult vkBindBufferMemory(device, buffer.vk, memory.vk, buffer.offset)
+      renderData.directBuffers.add buffer
+      # update memory area offset
+      offset = offset + size
+      if offset mod MEMORY_ALIGNMENT != 0:
+        offset = offset + MEMORY_ALIGNMENT - (offset mod MEMORY_ALIGNMENT)
+      return
+
+  assert false, "Did not find allocated memory region with enough space"
+
+proc InitRenderData(device: VkDevice, pDevice: VkPhysicalDevice, descriptorPoolLimit = 1024'u32): RenderData =
   # allocate descriptor pools
   var poolSizes = [
-    VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, descriptorCount: descriptorPoolLimit)
-    VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorCount: descriptorPoolLimit)
+    VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, descriptorCount: descriptorPoolLimit),
+    VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorCount: descriptorPoolLimit),
   ]
   var poolInfo = VkDescriptorPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
@@ -702,19 +779,57 @@ proc InitRenderData(device: VkDevice, descriptorPoolLimit = 1024): RenderData =
   checkVkResult vkCreateDescriptorPool(device, addr(poolInfo), nil, addr(result.descriptorPool))
 
   # allocate some memory
-  var initialAllocationSize: 1_000_000_000 # TODO: make this more dynamic or something
-  result.indirectMemory = @[AllocateIndirectMemory(device, size=initialAllocationSize)]
-  result.nextFreeIndirectMemoryOffset = @[0'u64]
-  result.directMemory = @[AllocateDirectMemory(device, size=initialAllocationSize)]
-  result.nextFreeDirectMemoryOffset = @[0'u64]
+  var initialAllocationSize = 1_000_000_000'u64 # TODO: make this more dynamic or something
+  result.indirectMemory = @[(AllocateIndirectMemory(device, pDevice, size = initialAllocationSize), 0'u64)]
+  result.directMemory = @[(AllocateDirectMemory(device, pDevice, size = initialAllocationSize), 0'u64)]
 
-proc WriteDescriptors[TShader](device: VkDevice, pipeline: Pipeline[TShader]) =
+proc GetIndirectBufferSizes[T](data: T): uint64 =
+  # return buffer sizes for direct and indirect buffers
+  # BUFFER_ALIGNMENT is just added for a rough estimate, to ensure we have enough space to align when binding
+  for name, value in fieldPairs(data):
+    when not hasCustomPragma(value, VertexIndices)
+      when typeof(value) is GPUArray:
+        if not IsDirectMemory(value):
+          result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
+      when typeof(value) is GPUValue:
+        if not IsDirectMemory(value):
+          result += sizeof(value.data).uint64 + BUFFER_ALIGNMENT
+proc GetDirectBufferSizes[T](data: T): uint64 =
+  # return buffer sizes for direct and indirect buffers
+  # BUFFER_ALIGNMENT is just added for a rough estimate, to ensure we have enough space to align when binding
+  for name, value in fieldPairs(data):
+    when not hasCustomPragma(value, VertexIndices)
+      when typeof(value) is GPUArray:
+        if IsDirectMemory(value):
+          result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
+      when typeof(value) is GPUValue:
+        if IsDirectMemory(value):
+          result += sizeof(value.data).uint64 + BUFFER_ALIGNMENT
+
+proc GetIndirectIndexBufferSizes[T](data: T): uint64 =
+  for name, value in fieldPairs(data):
+    when hasCustomPragma(value, VertexIndices):
+      static: assert typeof(value) is GPUArray, "Index buffers must be of type GPUArray"
+      static: assert elementType(value.data) is uint8 or elementType(value.data) is uint16 or elementType(value.data) is uint32
+      if not IsDirectMemory(value):
+        result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
+
+proc GetDirectIndexBufferSizes[T](data: T): uint64 =
+  for name, value in fieldPairs(data):
+    when hasCustomPragma(value, VertexIndices):
+      static: assert typeof(value) is GPUArray, "Index buffers must be of type GPUArray"
+      static: assert elementType(value.data) is uint8 or elementType(value.data) is uint16 or elementType(value.data) is uint32
+      if IsDirectMemory(value):
+        result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
+
+
+proc WriteDescriptors[TShader](device: VkDevice, descriptorSets: array[INFLIGHTFRAMES.int, VkDescriptorSet]) =
   var descriptorSetWrites: seq[VkWriteDescriptorSet]
   # map (buffer + offset + range) to descriptor
   # map (texture) to descriptor
   ForDescriptorFields(default(TShader), fieldName, descriptorType, descriptorCount, descriptorBindingNumber):
-    for frameInFlight in 0 ..< pipeline.descriptorSets.len:
-      if descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+    for frameInFlight in 0 ..< descriptorSets.len:
+      when descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
         # TODO
         let bufferInfo = VkDescriptorBufferInfo(
           buffer: VkBuffer(0),
@@ -723,7 +838,7 @@ proc WriteDescriptors[TShader](device: VkDevice, pipeline: Pipeline[TShader]) =
         )
         descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-          dstSet: pipeline.descriptorSets[frameInFlight],
+          dstSet: descriptorSets[frameInFlight],
           dstBinding: descriptorBindingNumber,
           dstArrayElement: uint32(0),
           descriptorType: descriptorType,
@@ -740,7 +855,7 @@ proc WriteDescriptors[TShader](device: VkDevice, pipeline: Pipeline[TShader]) =
         )
         descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-          dstSet: pipeline.descriptorSets[frameInFlight],
+          dstSet: descriptorSets[frameInFlight],
           dstBinding: descriptorBindingNumber,
           dstArrayElement: uint32(0),
           descriptorType: descriptorType,
@@ -750,27 +865,21 @@ proc WriteDescriptors[TShader](device: VkDevice, pipeline: Pipeline[TShader]) =
         )
   vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
 
-proc CreateRenderable[TMesh, TInstance](
-  mesh: TMesh,
-  instance: TInstance,
-): Renderable[TMesh, TInstance] =
-  result.indexType = None
-
 proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
-  let a = pipeline.descriptorSets
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
-  if a[currentFrameInFlight] != VkDescriptorSet(0):
-    commandBuffer.vkCmdBindDescriptorSets(
-      VK_PIPELINE_BIND_POINT_GRAPHICS,
-      pipeline.layout,
-      0,
-      1,
-      addr pipeline.descriptorSets[currentFrameInFlight],
-      0,
-      nil,
-    )
+  #[
+  commandBuffer.vkCmdBindDescriptorSets(
+    VK_PIPELINE_BIND_POINT_GRAPHICS,
+    pipeline.layout,
+    0,
+    1,
+    addr pipeline.descriptorSets[currentFrameInFlight],
+    0,
+    nil,
+  )
+  ]#
 
-proc AssertCompatible(TShader, TMesh, TInstance, TGlobals: typedesc) =
+proc AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals: typedesc) =
   # assert seq-fields of TMesh|TInstance == seq-fields of TShader
   # assert normal fields of TMesh|Globals == normal fields of TShaderDescriptors
   for inputName, inputValue in default(TShader).fieldPairs:
@@ -800,10 +909,10 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals: typedesc) =
 
     # Texture
     elif typeof(inputValue) is Texture:
-      for meshName, meshValue in default(TMesh).fieldPairs:
-        when meshName == inputName:
+      for uniformName, uniformValue in default(TUniforms).fieldPairs:
+        when uniformName == inputName:
           assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert typeof(meshValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but mesh attribute is of type '" & tt.name(elementType(meshValue)) & "'"
+          assert typeof(uniformValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue)) & "'"
           foundField = true
       for globalName, globalValue in default(TGlobals).fieldPairs:
         when globalName == inputName:
@@ -814,11 +923,11 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals: typedesc) =
 
     # Uniform block
     elif typeof(inputValue) is object:
-      for meshName, meshValue in default(TMesh).fieldPairs:
-        when meshName == inputName:
-          assert meshValue is GPUValue, "Mesh attribute '" & meshName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(meshValue))
+      for uniformName, uniformValue in default(TUniforms).fieldPairs:
+        when uniformName == inputName:
+          assert uniformValue is GPUValue, "global attribute '" & uniformName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(uniformValue))
           assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert typeof(meshValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but mesh attribute is of type '" & tt.name(elementType(meshValue.data)) & "'"
+          assert typeof(uniformValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue.data)) & "'"
           foundField = true
       for globalName, globalValue in default(TGlobals).fieldPairs:
         when globalName == inputName:
@@ -833,10 +942,10 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals: typedesc) =
 
       # texture-array
       when elementType(inputValue) is Texture:
-        for meshName, meshValue in default(TMesh).fieldPairs:
-          when meshName == inputName:
+        for uniformName, uniformValue in default(TUniforms).fieldPairs:
+          when uniformName == inputName:
             assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-            assert typeof(meshValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but mesh attribute is of type '" & tt.name(elementType(meshValue)) & "'"
+            assert typeof(uniformValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue)) & "'"
             foundField = true
         for globalName, globalValue in default(TGlobals).fieldPairs:
           when globalName == inputName:
@@ -847,11 +956,11 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals: typedesc) =
 
       # uniform-block array
       elif elementType(inputValue) is object:
-        for meshName, meshValue in default(TMesh).fieldPairs:
-          when meshName == inputName:
-            assert meshValue is GPUValue, "Mesh attribute '" & meshName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(meshValue))
+        for uniformName, uniformValue in default(TUniforms).fieldPairs:
+          when uniformName == inputName:
+            assert uniformValue is GPUValue, "global attribute '" & uniformName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(uniformValue))
             assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-            assert typeof(meshValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but mesh attribute is of type '" & tt.name(elementType(meshValue.data)) & "'"
+            assert typeof(uniformValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue.data)) & "'"
             foundField = true
         for globalName, globalValue in default(TGlobals).fieldPairs:
           when globalName == inputName:
@@ -862,13 +971,14 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals: typedesc) =
         assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "|" & tt.name(TGlobals) & "'"
 
 
-proc Render[TShader, TMesh, TInstance, TGlobals](
+proc Render[TShader, TMesh, TInstance, TUniforms, TGlobals](
   pipeline: Pipeline[TShader],
   renderable: Renderable[TMesh, TInstance],
+  uniforms: TUniforms,
   globals: TGlobals,
   commandBuffer: VkCommandBuffer,
 ) =
-  static: AssertCompatible(TShader, TMesh, TInstance, TGlobals)
+  static: AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals)
   if renderable.vertexBuffers.len > 0:
     commandBuffer.vkCmdBindVertexBuffers(
       firstBinding = 0'u32,
@@ -905,19 +1015,20 @@ when isMainModule:
   import std/options
 
   type
-    MaterialA = object
-      reflection: float32
-      baseColor: Vec3f
-    ShaderSettings = object
-      brightness: float32
     MeshA = object
       position: GPUArray[Vec3f, IndirectGPUMemory]
+      indices {.VertexIndices.}: GPUArray[uint16, IndirectGPUMemory]
     InstanceA = object
       rotation: GPUArray[Vec4f, IndirectGPUMemory]
       objPosition: GPUArray[Vec3f, IndirectGPUMemory]
+    MaterialA = object
+      reflection: float32
+      baseColor: Vec3f
     UniformsA = object
       materials: GPUValue[array[3, MaterialA], IndirectGPUMemory]
       materialTextures: array[3, Texture]
+    ShaderSettings = object
+      brightness: float32
     GlobalsA = object
       fontAtlas: Texture
       settings: GPUValue[ShaderSettings, IndirectGPUMemory]
@@ -990,9 +1101,10 @@ when isMainModule:
   let shaderObject = dev.vk.CompileShader(shader)
   var pipeline1 = CreatePipeline(dev.vk, renderPass = renderpass, shaderObject)
 
-  var renderdata = InitRenderData(dev.vk)
+  var renderdata = InitRenderData(dev.vk, dev.physicalDevice.vk)
 
   # create descriptor sets
+  #[
   var descriptorSets: array[INFLIGHTFRAMES.int, VkDescriptorSet]
   var layouts = newSeqWith(descriptorSets.len, pipeline.descriptorSetLayout)
   var allocInfo = VkDescriptorSetAllocateInfo(
@@ -1002,21 +1114,60 @@ when isMainModule:
     pSetLayouts: layouts.ToCPointer,
   )
   checkVkResult vkAllocateDescriptorSets(device, addr(allocInfo), descriptorSets.ToCPointer)
-
+  ]#
 
   #[
-  # TODO: probably here: allocate renderables, uniform buffers & textures
-  let meshBuffers: seq[(bool, uint64)] = GetBufferSizes[MeshA](item = myMesh1)
-  let instanceBuffers: seq[(bool, uint64)] = GetBufferSizes[InstanceA](item = instances1)
-  let globalBuffers: seq[(bool, uint64)] = GetBufferSizes[Globals](item = myGlobals)
-  var myRenderable = CreateRenderable()
-  UploadTextures[MeshA]()
-  UploadTextures[Globals]()
+  # TODO:
+  #
+  # assign indirect buffers to vertex data, can happen through the GPUArray/GPUValue-wrappers, they know buffers
+  # assign direct buffers to vertex data
+  # assign indirect buffers to uniform data
+  # assign direct buffers to uniform data
+  #
+  # upload all textures
+  # write descriptors for textures and uniform buffers
+  #
   ]#
   var myRenderable: Renderable[MeshA, InstanceA]
 
+  var
+    indirectVertexSizes = 0'u64
+    directVertexSizes = 0'u64
+    indirectIndexSizes = 0'u64
+    directIndexSizes = 0'u64
+    indirectUniformSizes = 0'u64
+    directUniformSizes = 0'u64
+
+  indirectVertexSizes += GetIndirectBufferSizes(myMesh1)
+  indirectVertexSizes += GetIndirectBufferSizes(instances1)
+  if indirectVertexSizes > 0:
+    AllocateIndirectBuffer(dev.vk, renderdata, indirectVertexSizes, [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT])
+
+  directVertexSizes += GetDirectBufferSizes(myMesh1)
+  directVertexSizes += GetDirectBufferSizes(instances1)
+  if directVertexSizes > 0:
+    AllocateDirectBuffer(dev.vk, renderdata, directVertexSizes, [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT])
+
+  indirectIndexSizes += GetIndirectIndexBufferSizes(myMesh1)
+  if indirectIndexSizes > 0:
+    AllocateIndirectBuffer(dev.vk, renderdata, indirectIndexSizes, [VK_BUFFER_USAGE_INDEX_BUFFER_BIT])
+
+  directIndexSizes += GetDirectIndexBufferSizes(myMesh1)
+  if directIndexSizes > 0:
+    AllocateIndirectBuffer(dev.vk, renderdata, directIndexSizes, [VK_BUFFER_USAGE_INDEX_BUFFER_BIT])
+
+  indirectUniformSizes += GetIndirectBufferSizes(uniforms1)
+  indirectUniformSizes += GetIndirectBufferSizes(myGlobals)
+  if indirectUniformSizes > 0:
+    AllocateIndirectBuffer(dev.vk, renderdata, indirectUniformSizes, [VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT])
+
+  directUniformSizes += GetDirectBufferSizes(uniforms1)
+  directUniformSizes += GetDirectBufferSizes(myGlobals)
+  if directUniformSizes > 0:
+    AllocateDirectBuffer(dev.vk, renderdata, directUniformSizes, [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT])
+
   # descriptors
-  WriteDescriptors(dev.vk, pipeline1)
+  # WriteDescriptors(dev.vk, pipeline1)
 
   # command buffer
   var
@@ -1088,7 +1239,7 @@ when isMainModule:
 
         # render object, will be loop
         block:
-          Render(pipeline1, myRenderable, myGlobals, cmd)
+          Render(pipeline1, myRenderable, uniforms1, myGlobals, cmd)
 
       vkCmdEndRenderPass(cmd)
     checkVkResult cmd.vkEndCommandBuffer()
