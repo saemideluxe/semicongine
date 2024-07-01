@@ -23,13 +23,20 @@ template VertexIndices*{.pragma.}
 
 const INFLIGHTFRAMES = 2'u32
 const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
-const BUFFERALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
+const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
 
 type
   SupportedGPUType* = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
   ShaderObject*[TShader] = object
     vertexShader: VkShaderModule
     fragmentShader: VkShaderModule
+
+func alignedTo[T: SomeInteger](value: T, alignment: T) =
+  let remainder = value mod alignment
+  if remainder == 0:
+    return value
+  else:
+    return value + alignment - remainder
 
 func VkType[T: SupportedGPUType](value: T): VkFormat =
   when T is float32: VK_FORMAT_R32_SFLOAT
@@ -213,6 +220,7 @@ type
   GPUMemory = IndirectGPUMemory | DirectGPUMemory
 
   Buffer[TMemory: GPUMemory] = object
+    memory: TMemory
     vk: VkBuffer
     offset: uint64
     size: uint64
@@ -225,35 +233,195 @@ type
     data: T
     buffer: Buffer[TMemory]
     offset: uint64
-
-  Renderable[TMesh, TInstance] = object
-    vertexBuffers: seq[VkBuffer]
-    bufferOffsets: seq[VkDeviceSize]
-    instanceCount: uint32
-    case indexType: IndexType
-      of None:
-        vertexCount: uint32
-      else:
-        indexBuffer: VkBuffer
-        indexCount: uint32
-        indexBufferOffset: VkDeviceSize
+  GPUData = GPUArray | GPUValue
 
   Pipeline[TShader] = object
     pipeline: VkPipeline
     layout: VkPipelineLayout
     descriptorSetLayout: VkDescriptorSetLayout
+  BufferType = enum
+    VertexBuffer, IndexBuffer, UniformBuffer
   RenderData = object
     descriptorPool: VkDescriptorPool
     # tuple is memory and offset to next free allocation in that memory
     indirectMemory: seq[tuple[memory: IndirectGPUMemory, nextFree: uint64]]
     directMemory: seq[tuple[memory: DirectGPUMemory, nextFree: uint64]]
-    indirectBuffers: seq[Buffer[IndirectGPUMemory]]
-    directBuffers: seq[Buffer[DirectGPUMemory]]
+    indirectBuffers: seq[tuple[buffer: Buffer[IndirectGPUMemory], btype: BufferType, nextFree: uint64]]
+    directBuffers: seq[tuple[buffer: Buffer[DirectGPUMemory], btype: BufferType, nextFree: uint64]]
 
-template IsDirectMemory(gpuArray: GPUArray): untyped =
-  get(genericParams(typeof(gpuArray)), 1) is DirectGPUMemory
-template IsDirectMemory(gpuValue: GPUValue): untyped =
-  get(genericParams(typeof(gpuValue)), 1) is DirectGPUMemory
+template UsesIndirectMemory(gpuData: GPUData): untyped =
+  get(genericParams(typeof(gpuData)), 1) is IndirectGPUMemory
+template UsesDirectMemory(gpuData: GPUData): untyped =
+  get(genericParams(typeof(gpuData)), 1) is DirectGPUMemory
+
+template size(gpuArray: GPUArray): uint64 =
+  result += (gpuArray.data.len * sizeof(elementType(gpuArray.data))).uint64
+template size(gpuValue: GPUValue): uint64 =
+  result += sizeof(gpuValue.data).uint64
+
+proc GetPhysicalDevice(): VkPhysicalDevice =
+  var nDevices: uint32
+  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), nil)
+  var devices = newSeq[VkPhysicalDevice](nDevices)
+  checkVkResult vkEnumeratePhysicalDevices(instance.vk, addr(nDevices), devices.ToCPointer)
+
+  var score = 0
+  for pDevice in devices:
+    var props: VkPhysicalDeviceProperties
+    vkGetPhysicalDeviceProperties(pDevice, addr(props))
+    if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU and props.maxImageDimension2D > score:
+      score = props.maxImageDimension2D
+      result = pDevice
+
+  if score == 0
+    for pDevice in devices:
+      var props: VkPhysicalDeviceProperties
+      vkGetPhysicalDeviceProperties(pDevice, addr(props))
+      if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU and props.maxImageDimension2D > score:
+        score = props.maxImageDimension2D
+        result = pDevice
+
+  assert score > 0, "Unable to find integrated or discrete GPU"
+
+
+proc GetDirectMemoryTypeIndex()
+  var physicalProperties: VkPhysicalDeviceMemoryProperties
+  checkVkResult vkGetPhysicalDeviceMemoryProperties(GetPhysicalDevice(), addr physicalProperties)
+
+  var biggestHeap: uint64 = 0
+  result = high(uint32)
+  # try to find host-visible type
+  for i in 0 ..< physicalProperties.memoryTypeCount:
+    let flags = toEnums(physicalProperties.memoryTypes[i].propertyFlags)
+    if VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags:
+      let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
+      if size > biggestHeap:
+        biggestHeap = size
+        result = i
+  assert result != high(uint32), "There is not host visible memory. This is likely a driver bug."
+
+proc GetQueueFamily(device: VkDevice, qType = VK_QUEUE_GRAPHICS_BIT): VkQueue =
+  assert device.vk.Valid
+  var nQueuefamilies: uint32
+  checkVkResult vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, nil)
+  var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
+  checkVkResult vkGetPhysicalDeviceQueueFamilyProperties(device.vk, addr nQueuefamilies, queuFamilies.ToCPointer)
+  for i in 0 ..< nQueuefamilies:
+    if qType in toEnums(queuFamilies[i].queueFlags):
+      return i
+  assert false, &"Queue of type {qType} not found"
+
+proc GetQueue(device: VkDevice, qType = VK_QUEUE_GRAPHICS_BIT): VkQueue =
+  checkVkResult vkGetDeviceQueue(
+    device,
+    GetQueueFamily(device, qType),
+    0,
+    addr(result),
+  )
+
+#[
+TODO: Finish this, allow fore easy access to main format 
+proc GetSurfaceFormat*(device: PhysicalDevice): VkFormat =
+  var n_formats: uint32
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, device.surface, addr(n_formats), nil)
+  result = newSeq[VkSurfaceFormatKHR](n_formats)
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(device.vk, device.surface, addr(n_formats), result.ToCPointer)
+]#
+
+template WithSingleUseCommandBuffer*(device: VkDevice, cmd, body: untyped): untyped =
+  # TODO? This is super slow, because we call vkQueueWaitIdle
+  block:
+    var commandBufferPool: VkCommandPool
+        createInfo = VkCommandPoolCreateInfo(
+        sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
+        queueFamilyIndex: GetQueueFamily(device),
+      )
+    checkVkResult vkCreateCommandPool(device, addr createInfo, nil, addr(commandBufferPool))
+    var
+      `cmd` {.inject.}: VkCommandBuffer
+      allocInfo = VkCommandBufferAllocateInfo(
+        sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        commandPool: commandBufferPool,
+        level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        commandBufferCount: 1,
+      )
+    checkVkResult device.vk.vkAllocateCommandBuffers(addr allocInfo, addr(`cmd`))
+    beginInfo = VkCommandBufferBeginInfo(
+      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+      flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
+    )
+    checkVkResult `cmd`.vkBeginCommandBuffer(addr beginInfo)
+
+    body
+
+    checkVkResult `cmd`.vkEndCommandBuffer()
+    var submitInfo = VkSubmitInfo(
+      sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
+      commandBufferCount: 1,
+      pCommandBuffers: addr(`cmd`),
+    )
+    checkVkResult vkQueueSubmit(GetQueue(), 1, addr submitInfo, VkFence(0))
+    checkVkResult vkQueueWaitIdle(GetQueue()) # because we want to destroy the commandbuffer pool
+    vkDestroyCommandPool(device, commandBufferPool, nil)
+
+
+proc UpdateGPUBuffer*(device: VkDevice, gpuData: GPUArray) =
+  when UsesDirectMemory(gpuData):
+    copyMem(cast[pointer](cast[uint64](gpuData.buffer.memory.data) + gpuData.buffer.offset + gpuData.offset), addr(gpuData.data[0]), gpuData.size)
+  else:
+    var
+      stagingBuffer: VkBuffer
+      createInfo = VkBufferCreateInfo(
+        sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        flags: VkBufferCreateFlags(0),
+        size: gpuData.size,
+        usage: toBits([VK_BUFFER_USAGE_TRANSFER_SRC_BIT]),
+        sharingMode: VK_SHARING_MODE_EXCLUSIVE,
+      )
+    checkVkResult vkCreateBuffer(
+      device = device,
+      pCreateInfo = addr(createInfo),
+      pAllocator = nil,
+      pBuffer = addr(stagingBuffer),
+    )
+    var
+      stagingMemory: VkDeviceMemory
+      stagingPtr: pointer
+      memoryAllocationInfo = VkMemoryAllocateInfo(
+        sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        allocationSize: gpuData.size,
+        memoryTypeIndex: GetDirectMemoryTypeIndex(),
+      )
+    checkVkResult vkAllocateMemory(
+      device,
+      addr(memoryAllocationInfo),
+      nil,
+      addr(stagingMemory),
+    )
+    checkVkResult vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0)
+    checkVkResult vkMapMemory(
+      device = device,
+      memory = stagingMemory,
+      offset = 0'u64,
+      size = VK_WHOLE_SIZE,
+      flags = VkMemoryMapFlags(0),
+      ppData = stagingPtr
+    )
+    copyMem(stagingPtr, addr(gpuData.data[0]), gpuData.size)
+    var stagingRange = VkMappedMemoryRange(
+      sType: VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+      memory: stagingMemory,
+      size: VK_WHOLE_SIZE,
+    )
+    checkVkResult vkFlushMappedMemoryRanges(device, 1, addr(stagingRange))
+
+    WithSingleUseCommandBuffer(device, commandBuffer):
+      var copyRegion = VkBufferCopy(size: gpuData.size)
+      vkCmdCopyBuffer(commandBuffer, stagingBuffer, gpuData.buffer.vk, 1, addr(copyRegion))
+
+    checkVkResult vkDestroyBuffer(device, stagingBuffer, nil)
+    checkVkResult vkFreeMemory(device, stagingMemory, nil)
 
 converter toVkIndexType(indexType: IndexType): VkIndexType =
   case indexType:
@@ -625,7 +793,7 @@ proc AllocateIndirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, size: u
 
   # find a good memory type
   var physicalProperties: VkPhysicalDeviceMemoryProperties
-  vkGetPhysicalDeviceMemoryProperties(pDevice, addr physicalProperties)
+  checkVkResult vkGetPhysicalDeviceMemoryProperties(pDevice, addr physicalProperties)
 
   var biggestHeap: uint64 = 0
   var memoryTypeIndex = high(uint32)
@@ -665,7 +833,7 @@ proc AllocateDirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, size: uin
 
   # find a good memory type
   var physicalProperties: VkPhysicalDeviceMemoryProperties
-  vkGetPhysicalDeviceMemoryProperties(pDevice, addr physicalProperties)
+  checkVkResult vkGetPhysicalDeviceMemoryProperties(pDevice, addr physicalProperties)
 
   var biggestHeap: uint64 = 0
   var memoryTypeIndex = high(uint32)
@@ -683,7 +851,7 @@ proc AllocateDirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, size: uin
   var allocationInfo = VkMemoryAllocateInfo(
     sType: VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     allocationSize: result.size,
-    memoryTypeIndex: memoryTypeIndex,
+    memoryTypeIndex: FindDirectMemoryTypeIndex(pDevice),
   )
   checkVkResult vkAllocateMemory(
     device,
@@ -700,9 +868,14 @@ proc AllocateDirectMemory(device: VkDevice, pDevice: VkPhysicalDevice, size: uin
     ppData = addr(result.data)
   )
 
-proc AllocateIndirectBuffer(device: VkDevice, renderData: var RenderData, size: uint64, usage: openArray[VkBufferUsageFlagBits]) =
+proc AllocateIndirectBuffer(device: VkDevice, renderData: var RenderData, size: uint64, btype: BufferType) =
   assert size > 0, "Buffer sizes must be larger than 0"
   var buffer = Buffer[IndirectGPUMemory](size: size)
+
+  let usageFlags = case btype:
+    of VertexBuffer: [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of IndexBuffer: [VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of UniformBuffer: [VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
 
   # iterate through memory areas to find big enough free space
   for (memory, offset) in renderData.indirectMemory.mitems:
@@ -713,7 +886,7 @@ proc AllocateIndirectBuffer(device: VkDevice, renderData: var RenderData, size: 
         sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         flags: VkBufferCreateFlags(0),
         size: buffer.size,
-        usage: toBits(@usage & @[VK_BUFFER_USAGE_TRANSFER_DST_BIT]), # ensure we can transfer to this buffer
+        usage: toBits(usageFlags),
         sharingMode: VK_SHARING_MODE_EXCLUSIVE,
       )
       checkVkResult vkCreateBuffer(
@@ -723,18 +896,21 @@ proc AllocateIndirectBuffer(device: VkDevice, renderData: var RenderData, size: 
         pBuffer = addr(buffer.vk)
       )
       checkVkResult vkBindBufferMemory(device, buffer.vk, memory.vk, buffer.offset)
-      renderData.indirectBuffers.add buffer
+      renderData.indirectBuffers.add (buffer, btype, 0'u64)
       # update memory area offset
-      offset = offset + size
-      if offset mod MEMORY_ALIGNMENT != 0:
-        offset = offset + MEMORY_ALIGNMENT - (offset mod MEMORY_ALIGNMENT)
+      offset = alignedTo(offset + size, MEMORY_ALIGNMENT)
       return
 
   assert false, "Did not find allocated memory region with enough space"
 
-proc AllocateDirectBuffer(device: VkDevice, renderData: var RenderData, size: uint64, usage: openArray[VkBufferUsageFlagBits]) =
+proc AllocateDirectBuffer(device: VkDevice, renderData: var RenderData, size: uint64, btype: BufferType) =
   assert size > 0, "Buffer sizes must be larger than 0"
   var buffer = Buffer[DirectGPUMemory](size: size)
+
+  let usageFlags = case btype:
+    of VertexBuffer: [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of IndexBuffer: [VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of UniformBuffer: [VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
 
   # iterate through memory areas to find big enough free space
   for (memory, offset) in renderData.directMemory.mitems:
@@ -745,7 +921,7 @@ proc AllocateDirectBuffer(device: VkDevice, renderData: var RenderData, size: ui
         sType: VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         flags: VkBufferCreateFlags(0),
         size: buffer.size,
-        usage: toBits(usage),
+        usage: toBits(usageFlags),
         sharingMode: VK_SHARING_MODE_EXCLUSIVE,
       )
       checkVkResult vkCreateBuffer(
@@ -755,11 +931,9 @@ proc AllocateDirectBuffer(device: VkDevice, renderData: var RenderData, size: ui
         pBuffer = addr(buffer.vk)
       )
       checkVkResult vkBindBufferMemory(device, buffer.vk, memory.vk, buffer.offset)
-      renderData.directBuffers.add buffer
+      renderData.directBuffers.add (buffer, btype, 0'u64)
       # update memory area offset
-      offset = offset + size
-      if offset mod MEMORY_ALIGNMENT != 0:
-        offset = offset + MEMORY_ALIGNMENT - (offset mod MEMORY_ALIGNMENT)
+      offset = alignedTo(offset + size, MEMORY_ALIGNMENT)
       return
 
   assert false, "Did not find allocated memory region with enough space"
@@ -783,45 +957,67 @@ proc InitRenderData(device: VkDevice, pDevice: VkPhysicalDevice, descriptorPoolL
   result.indirectMemory = @[(AllocateIndirectMemory(device, pDevice, size = initialAllocationSize), 0'u64)]
   result.directMemory = @[(AllocateDirectMemory(device, pDevice, size = initialAllocationSize), 0'u64)]
 
+# For the Get*BufferSize:
+# BUFFER_ALIGNMENT is just added for a rough estimate, to ensure we have enough space to align when binding
 proc GetIndirectBufferSizes[T](data: T): uint64 =
-  # return buffer sizes for direct and indirect buffers
-  # BUFFER_ALIGNMENT is just added for a rough estimate, to ensure we have enough space to align when binding
   for name, value in fieldPairs(data):
-    when not hasCustomPragma(value, VertexIndices)
-      when typeof(value) is GPUArray:
-        if not IsDirectMemory(value):
-          result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
-      when typeof(value) is GPUValue:
-        if not IsDirectMemory(value):
-          result += sizeof(value.data).uint64 + BUFFER_ALIGNMENT
+    when not hasCustomPragma(value, VertexIndices):
+      when typeof(value) is GPUData:
+        when UsesIndirectMemory(value):
+          result += value.size + BUFFER_ALIGNMENT
 proc GetDirectBufferSizes[T](data: T): uint64 =
-  # return buffer sizes for direct and indirect buffers
-  # BUFFER_ALIGNMENT is just added for a rough estimate, to ensure we have enough space to align when binding
   for name, value in fieldPairs(data):
-    when not hasCustomPragma(value, VertexIndices)
-      when typeof(value) is GPUArray:
-        if IsDirectMemory(value):
-          result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
-      when typeof(value) is GPUValue:
-        if IsDirectMemory(value):
-          result += sizeof(value.data).uint64 + BUFFER_ALIGNMENT
-
+    when not hasCustomPragma(value, VertexIndices):
+      when typeof(value) is GPUData:
+        when UsesDirectMemory(value):
+          result += value.size + BUFFER_ALIGNMENT
 proc GetIndirectIndexBufferSizes[T](data: T): uint64 =
   for name, value in fieldPairs(data):
     when hasCustomPragma(value, VertexIndices):
       static: assert typeof(value) is GPUArray, "Index buffers must be of type GPUArray"
       static: assert elementType(value.data) is uint8 or elementType(value.data) is uint16 or elementType(value.data) is uint32
-      if not IsDirectMemory(value):
-        result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
-
+      when UsesIndirectMemory(value):
+        result += value.size + BUFFER_ALIGNMENT
 proc GetDirectIndexBufferSizes[T](data: T): uint64 =
   for name, value in fieldPairs(data):
     when hasCustomPragma(value, VertexIndices):
       static: assert typeof(value) is GPUArray, "Index buffers must be of type GPUArray"
       static: assert elementType(value.data) is uint8 or elementType(value.data) is uint16 or elementType(value.data) is uint32
-      if IsDirectMemory(value):
-        result += (value.data.len * sizeof(elementType(value.data))).uint64 + BUFFER_ALIGNMENT
+      when UsesDirectMemory(value):
+        result += value.size + BUFFER_ALIGNMENT
 
+proc AssignIndirectBuffers[T](data: T, renderdata: var RenderData, btype: BufferType) =
+  for name, value in fieldPairs(data):
+    when typeof(value) is GPUData:
+      when UsesIndirectMemory(value):
+        # find next buffer of correct type with enough free space
+        var foundBuffer = false
+        for (buffer, bt, offset) in renderData.indirectBuffers.mitems:
+          if bt == btype and buffer.size - offset >= size:
+            assert not value.buffer.vk.Valid, "GPUData-Buffer has already been assigned"
+            assert buffer.vk.Valid, "RenderData-Buffer has not yet been created"
+            value.buffer = buffer
+            value.offset = offset
+            offset = alignedTo(offset + value.size, BUFFER_ALIGNMENT)
+            foundBuffer = true
+            break
+        assert foundBuffer, &"Unable to find large enough '{btype}' for '{data}'"
+proc AssignDirectBuffers[T](data: T, renderdata: var RenderData, btype: BufferType) =
+  for name, value in fieldPairs(data):
+    when typeof(value) is GPUData:
+      when UsesDirectMemory(value):
+        # find next buffer of correct type with enough free space
+        var foundBuffer = false
+        for (buffer, bt, offset) in renderData.directBuffers.mitems:
+          if bt == btype and buffer.size - offset >= size:
+            assert not value.buffer.vk.Valid, "GPUData-Buffer has already been assigned"
+            assert buffer.vk.Valid, "RenderData-Buffer has not yet been created"
+            value.buffer = buffer
+            value.offset = offset
+            offset = alignedTo(offset + value.size, BUFFER_ALIGNMENT)
+            foundBuffer = true
+            break
+        assert foundBuffer, &"Unable to find large enough '{btype}' for '{data}'"
 
 proc WriteDescriptors[TShader](device: VkDevice, descriptorSets: array[INFLIGHTFRAMES.int, VkDescriptorSet]) =
   var descriptorSetWrites: seq[VkWriteDescriptorSet]
@@ -863,7 +1059,7 @@ proc WriteDescriptors[TShader](device: VkDevice, descriptorSets: array[INFLIGHTF
           pImageInfo: addr(imageInfo),
           pBufferInfo: nil,
         )
-  vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
+  checkVkResult vkUpdateDescriptorSets(device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
 
 proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
   commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
@@ -971,14 +1167,16 @@ proc AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals: typedesc) 
         assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "|" & tt.name(TGlobals) & "'"
 
 
-proc Render[TShader, TMesh, TInstance, TUniforms, TGlobals](
+proc Render[TShader, TUniforms, TGlobals, TMesh, TInstance](
+  commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
-  renderable: Renderable[TMesh, TInstance],
   uniforms: TUniforms,
   globals: TGlobals,
-  commandBuffer: VkCommandBuffer,
+  mesh: TMesh,
+  instances: TInstance,
 ) =
   static: AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals)
+  #[
   if renderable.vertexBuffers.len > 0:
     commandBuffer.vkCmdBindVertexBuffers(
       firstBinding = 0'u32,
@@ -1006,6 +1204,7 @@ proc Render[TShader, TMesh, TInstance, TUniforms, TGlobals](
       firstVertex = 0,
       firstInstance = 0
     )
+    ]#
 
 when isMainModule:
   import semicongine/platform/window
@@ -1055,17 +1254,16 @@ when isMainModule:
 
   let w = CreateWindow("test2")
   putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_AMD,VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_NVIDIA,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT")
-  let i = w.CreateInstance(
+  let vulkan = w.CreateInstance(
     vulkanVersion = VK_MAKE_API_VERSION(0, 1, 3, 0),
     instanceExtensions = @[],
     layers = @["VK_LAYER_KHRONOS_validation"],
   )
 
-  let selectedPhysicalDevice = i.GetPhysicalDevices().FilterBestGraphics()
-  let dev = i.CreateDevice(
-    selectedPhysicalDevice,
+  let dev = vulkan.CreateDevice(
+    GetPhysicalDevice(),
     enabledExtensions = @[],
-    selectedPhysicalDevice.FilterForGraphicsPresentationQueues()
+    [GetQueueFamily()],
   )
   let frameWidth = 100'u32
   let frameHeight = 100'u32
@@ -1094,12 +1292,12 @@ when isMainModule:
   # setup for rendering (TODO: swapchain & framebuffers)
 
   # renderpass
-  let renderpass = dev.vk.CreateRenderPass(dev.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat().format)
+  let renderpass = CreateRenderPass(dev.vk, dev.physicalDevice.GetSurfaceFormats().FilterSurfaceFormat().format)
 
   # shaders
   const shader = ShaderA()
   let shaderObject = dev.vk.CompileShader(shader)
-  var pipeline1 = CreatePipeline(dev.vk, renderPass = renderpass, shaderObject)
+  var pipeline1 = CreatePipeline(device = dev.vk, renderPass = renderpass, shader = shaderObject)
 
   var renderdata = InitRenderData(dev.vk, dev.physicalDevice.vk)
 
@@ -1128,8 +1326,8 @@ when isMainModule:
   # write descriptors for textures and uniform buffers
   #
   ]#
-  var myRenderable: Renderable[MeshA, InstanceA]
 
+  # buffer allocation
   var
     indirectVertexSizes = 0'u64
     directVertexSizes = 0'u64
@@ -1141,30 +1339,47 @@ when isMainModule:
   indirectVertexSizes += GetIndirectBufferSizes(myMesh1)
   indirectVertexSizes += GetIndirectBufferSizes(instances1)
   if indirectVertexSizes > 0:
-    AllocateIndirectBuffer(dev.vk, renderdata, indirectVertexSizes, [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT])
+    AllocateIndirectBuffer(dev.vk, renderdata, indirectVertexSizes, VertexBuffer)
 
   directVertexSizes += GetDirectBufferSizes(myMesh1)
   directVertexSizes += GetDirectBufferSizes(instances1)
   if directVertexSizes > 0:
-    AllocateDirectBuffer(dev.vk, renderdata, directVertexSizes, [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT])
+    AllocateDirectBuffer(dev.vk, renderdata, directVertexSizes, VertexBuffer)
 
   indirectIndexSizes += GetIndirectIndexBufferSizes(myMesh1)
   if indirectIndexSizes > 0:
-    AllocateIndirectBuffer(dev.vk, renderdata, indirectIndexSizes, [VK_BUFFER_USAGE_INDEX_BUFFER_BIT])
+    AllocateIndirectBuffer(dev.vk, renderdata, indirectIndexSizes, IndexBuffer)
 
   directIndexSizes += GetDirectIndexBufferSizes(myMesh1)
   if directIndexSizes > 0:
-    AllocateIndirectBuffer(dev.vk, renderdata, directIndexSizes, [VK_BUFFER_USAGE_INDEX_BUFFER_BIT])
+    AllocateDirectBuffer(dev.vk, renderdata, directIndexSizes, IndexBuffer)
 
   indirectUniformSizes += GetIndirectBufferSizes(uniforms1)
   indirectUniformSizes += GetIndirectBufferSizes(myGlobals)
   if indirectUniformSizes > 0:
-    AllocateIndirectBuffer(dev.vk, renderdata, indirectUniformSizes, [VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT])
+    AllocateIndirectBuffer(dev.vk, renderdata, indirectUniformSizes, UniformBuffer)
 
   directUniformSizes += GetDirectBufferSizes(uniforms1)
   directUniformSizes += GetDirectBufferSizes(myGlobals)
   if directUniformSizes > 0:
-    AllocateDirectBuffer(dev.vk, renderdata, directUniformSizes, [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT])
+    AllocateDirectBuffer(dev.vk, renderdata, directUniformSizes, UniformBuffer)
+
+  # buffer assignment
+
+  AssignIndirectBuffers(data = myMesh1, renderdata = RenderData, btype = VertexBuffer)
+  AssignDirectBuffers(data = myMesh1, renderdata = RenderData, btype = VertexBuffer)
+  AssignIndirectBuffers(data = myMesh1, renderdata = RenderData, btype = IndexBuffer)
+  AssignDirectBuffers(data = myMesh1, renderdata = RenderData, btype = IndexBuffer)
+
+  AssignIndirectBuffers(data = instances1, renderdata = RenderData, btype = VertexBuffer)
+  AssignDirectBuffers(data = instances1, renderdata = RenderData, btype = VertexBuffer)
+
+  AssignIndirectBuffers(data = uniforms1, renderdata = RenderData, btype = UniformBuffer)
+  AssignDirectBuffers(data = uniforms1, renderdata = RenderData, btype = UniformBuffer)
+  AssignIndirectBuffers(data = myGlobals, renderdata = RenderData, btype = UniformBuffer)
+  AssignDirectBuffers(data = myGlobals, renderdata = RenderData, btype = UniformBuffer)
+ 
+  UpdateGPUBuffer()
 
   # descriptors
   # WriteDescriptors(dev.vk, pipeline1)
@@ -1172,19 +1387,20 @@ when isMainModule:
   # command buffer
   var
     commandBufferPool: VkCommandPool
-    cmdBuffers: array[INFLIGHTFRAMES.int, VkCommandBuffer]
     createInfo = VkCommandPoolCreateInfo(
       sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
       flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
-      queueFamilyIndex: dev.FirstGraphicsQueue().get().family.index,
+      queueFamilyIndex: GetQueueFamily(dev.vk),
     )
   checkVkResult vkCreateCommandPool(dev.vk, addr createInfo, nil, addr commandBufferPool)
-  var allocInfo = VkCommandBufferAllocateInfo(
-    sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-    commandPool: commandBufferPool,
-    level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-    commandBufferCount: INFLIGHTFRAMES,
-  )
+  var
+    cmdBuffers: array[INFLIGHTFRAMES.int, VkCommandBuffer]
+    allocInfo = VkCommandBufferAllocateInfo(
+      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+      commandPool: commandBufferPool,
+      level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+      commandBufferCount: INFLIGHTFRAMES,
+    )
   checkVkResult vkAllocateCommandBuffers(dev.vk, addr allocInfo, cmdBuffers.ToCPointer)
 
   # start command buffer
@@ -1207,7 +1423,7 @@ when isMainModule:
         renderPassInfo = VkRenderPassBeginInfo(
           sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
           renderPass: renderpass,
-          framebuffer: currentFramebuffer,
+          framebuffer: currentFramebuffer, # TODO
           renderArea: VkRect2D(
             offset: VkOffset2D(x: 0, y: 0),
             extent: VkExtent2D(width: frameWidth, height: frameHeight),
@@ -1227,7 +1443,7 @@ when isMainModule:
           offset: VkOffset2D(x: 0, y: 0),
           extent: VkExtent2D(width: frameWidth, height: frameHeight)
         )
-      vkCmdBeginRenderPass(cmd, addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
+      checkVkResult vkCmdBeginRenderPass(cmd, addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
 
       # setup viewport
       vkCmdSetViewport(cmd, firstViewport = 0, viewportCount = 1, addr(viewport))
@@ -1239,7 +1455,7 @@ when isMainModule:
 
         # render object, will be loop
         block:
-          Render(pipeline1, myRenderable, uniforms1, myGlobals, cmd)
+          Render(cmd, pipeline1, uniforms1, myGlobals, myMesh1, instances1)
 
       vkCmdEndRenderPass(cmd)
     checkVkResult cmd.vkEndCommandBuffer()
