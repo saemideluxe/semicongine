@@ -19,13 +19,19 @@ template Pass {.pragma.}
 template PassFlat {.pragma.}
 template ShaderOutput {.pragma.}
 template VertexIndices {.pragma.}
-template DescriptorSet {.pragma.}
+
+const INFLIGHTFRAMES = 2'u32
+const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
+const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
 
 # some globals that will (likely?) never change during the life time of the engine
 type
-  DescriptorSetType = enum
-    GlobalSet
-    MaterialSet
+  SupportedGPUType = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
+
+  ShaderObject[TShader] = object
+    vertexShader: VkShaderModule
+    fragmentShader: VkShaderModule
+
   VulkanGlobals = object
     instance: VkInstance
     device: VkDevice
@@ -33,18 +39,58 @@ type
     queueFamilyIndex: uint32
     queue: VkQueue
 
-const INFLIGHTFRAMES = 2'u32
-const MAX_DESCRIPTORSETS = tt.enumLen(DescriptorSetType)
-const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
-const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
+  IndexType = enum
+    None, UInt8, UInt16, UInt32
+
+  IndirectGPUMemory = object
+    vk: VkDeviceMemory
+    size: uint64
+    needsTransfer: bool # usually true
+  DirectGPUMemory = object
+    vk: VkDeviceMemory
+    size: uint64
+    data: pointer
+    needsFlush: bool # usually true
+  GPUMemory = IndirectGPUMemory | DirectGPUMemory
+
+  Buffer[TMemory: GPUMemory] = object
+    memory: TMemory
+    vk: VkBuffer
+    offset: uint64
+    size: uint64
+
+  GPUArray[T: SupportedGPUType, TMemory: GPUMemory] = object
+    data: seq[T]
+    buffer: Buffer[TMemory]
+    offset: uint64
+  GPUValue[T: object|array, TMemory: GPUMemory] = object
+    data: T
+    buffer: Buffer[TMemory]
+    offset: uint64
+  GPUData = GPUArray | GPUValue
+
+  DescriptorSetType = enum
+    GlobalSet
+    MaterialSet
+  DescriptorSet[T: object, sType: static DescriptorSetType] = object
+    data: T
+    vk: array[INFLIGHTFRAMES, VkDescriptorSet]
+
+  Pipeline[TShader] = object
+    vk: VkPipeline
+    layout: VkPipelineLayout
+    descriptorSetLayouts: array[DescriptorSetType, VkDescriptorSetLayout]
+  BufferType = enum
+    VertexBuffer, IndexBuffer, UniformBuffer
+  RenderData = object
+    descriptorPool: VkDescriptorPool
+    # tuple is memory and offset to next free allocation in that memory
+    indirectMemory: seq[tuple[memory: IndirectGPUMemory, usedOffset: uint64]]
+    directMemory: seq[tuple[memory: DirectGPUMemory, usedOffset: uint64]]
+    indirectBuffers: seq[tuple[buffer: Buffer[IndirectGPUMemory], btype: BufferType, usedOffset: uint64]]
+    directBuffers: seq[tuple[buffer: Buffer[DirectGPUMemory], btype: BufferType, usedOffset: uint64]]
 
 var vulkan: VulkanGlobals
-
-type
-  SupportedGPUType = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
-  ShaderObject[TShader] = object
-    vertexShader: VkShaderModule
-    fragmentShader: VkShaderModule
 
 func alignedTo[T: SomeInteger](value: T, alignment: T): T =
   let remainder = value mod alignment
@@ -151,17 +197,6 @@ template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename
         const `isinstancename` {.inject.} = hasCustomPragma(value, InstanceAttribute)
         body
 
-template ForDescriptorSets(shader: typed, setNumber, descriptorSet, body: untyped): untyped =
-  var n = DescriptorSetType.low
-  for theFieldname, value in fieldPairs(shader):
-    when value.hasCustomPragma(DescriptorSet):
-      block:
-        let `setNumber` {.inject.} = n
-        let `descriptorSet` {.inject.} = value
-        body
-        if n < DescriptorSetType.high:
-          n.inc
-
 template ForDescriptorFields(shader: typed, fieldname, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 1'u32
   for theFieldname, value in fieldPairs(shader):
@@ -233,50 +268,8 @@ func NLocationSlots[T: SupportedGPUType|Texture](value: T): uint32 =
   else:
     return 1
 
-type
-  IndexType = enum
-    None, UInt8, UInt16, UInt32
-
-  IndirectGPUMemory = object
-    vk: VkDeviceMemory
-    size: uint64
-    needsTransfer: bool # usually true
-  DirectGPUMemory = object
-    vk: VkDeviceMemory
-    size: uint64
-    data: pointer
-    needsFlush: bool # usually true
-  GPUMemory = IndirectGPUMemory | DirectGPUMemory
-
-  Buffer[TMemory: GPUMemory] = object
-    memory: TMemory
-    vk: VkBuffer
-    offset: uint64
-    size: uint64
-
-  GPUArray[T: SupportedGPUType, TMemory: GPUMemory] = object
-    data: seq[T]
-    buffer: Buffer[TMemory]
-    offset: uint64
-  GPUValue[T: object|array, TMemory: GPUMemory] = object
-    data: T
-    buffer: Buffer[TMemory]
-    offset: uint64
-  GPUData = GPUArray | GPUValue
-
-  Pipeline[TShader] = object
-    pipeline: VkPipeline
-    layout: VkPipelineLayout
-    descriptorSetLayouts: array[MAX_DESCRIPTORSETS, VkDescriptorSetLayout]
-  BufferType = enum
-    VertexBuffer, IndexBuffer, UniformBuffer
-  RenderData = object
-    descriptorPool: VkDescriptorPool
-    # tuple is memory and offset to next free allocation in that memory
-    indirectMemory: seq[tuple[memory: IndirectGPUMemory, usedOffset: uint64]]
-    directMemory: seq[tuple[memory: DirectGPUMemory, usedOffset: uint64]]
-    indirectBuffers: seq[tuple[buffer: Buffer[IndirectGPUMemory], btype: BufferType, usedOffset: uint64]]
-    directBuffers: seq[tuple[buffer: Buffer[DirectGPUMemory], btype: BufferType, usedOffset: uint64]]
+template sType(descriptorSet: DescriptorSet): untyped =
+  get(genericParams(typeof(gpuData)), 1)
 
 template UsesIndirectMemory(gpuData: GPUData): untyped =
   get(genericParams(typeof(gpuData)), 1) is IndirectGPUMemory
@@ -471,28 +464,100 @@ proc UpdateAllGPUBuffers[T](value: T) =
     when typeof(fieldvalue) is GPUData:
       UpdateGPUBuffer(fieldvalue)
 
-proc AssertCompatible(TShader, TDescriptorSet: typedesc, descriptorSetType: static DescriptorSetType) =
-  ForDescriptorSets(default(TShader), setNumber, descriptorSet):
-    if setNumber == descriptorSetType:
-      assert typeof(descriptorSet) is TDescriptorSet
-
-proc CreateDescriptorSet[T, TShader](
+proc InitDescriptorSet(
   renderData: RenderData,
-  pipeline: Pipeline[TShader],
-  value: T,
-  descriptorSetType: static DescriptorSetType
-): array[INFLIGHTFRAMES.int, VkDescriptorSet] =
+  layout: VkDescriptorSetLayout,
+  descriptorSet: var DescriptorSet,
+) =
+  for name, value in descriptorSet.data.fieldPairs:
+    when typeof(value) is GPUValue:
+      assert value.buffer.vk.valid
+    # TODO:
+    # when typeof(value) is Texture:
+    # assert value.texture.vk.valid
 
-  static: AssertCompatible(TShader, T, descriptorSetType)
-
-  var layouts = newSeqWith(result.len, pipeline.descriptorSetLayouts[descriptorSetType.int])
+  # allocate
+  var layouts = newSeqWith(descriptorSet.vk.len, layout)
   var allocInfo = VkDescriptorSetAllocateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
     descriptorPool: renderData.descriptorPool,
     descriptorSetCount: uint32(layouts.len),
     pSetLayouts: layouts.ToCPointer,
   )
-  checkVkResult vkAllocateDescriptorSets(vulkan.device, addr(allocInfo), result.ToCPointer)
+  checkVkResult vkAllocateDescriptorSets(vulkan.device, addr(allocInfo), descriptorSet.vk.ToCPointer)
+
+  # write
+  var descriptorSetWrites: newSeq[VkWriteDescriptorSet](descriptorSet.vk.len)
+  for i in 0 ..< descriptorSet.vk.len:
+    descriptorSetWrites.add
+
+
+  vkUpdateDescriptorSets(vulkan.device, descriptorSetWrites.len.uint32, descriptorSetWrites.ToCPointer, 0, nil)
+
+#[
+proc WriteDescriptors[TShader, TUniforms, TGlobals](renderData: RenderData, uniforms: TUniforms, globals: TGlobals) =
+  var descriptorSetWrites: seq[VkWriteDescriptorSet]
+  ForDescriptorFields(default(TShader), fieldName, descriptorType, descriptorCount, descriptorBindingNumber):
+    for frameInFlight in 0 ..< renderData.descriptorSets.len:
+      when descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+        when HasGPUValueField[TUniforms](fieldName):
+          WithGPUValueField(uniforms, fieldName, gpuValue):
+            let bufferInfo = VkDescriptorBufferInfo(
+              buffer: gpuValue.buffer.vk,
+              offset: gpuValue.buffer.offset,
+              range: gpuValue.buffer.size,
+            )
+            descriptorSetWrites.add VkWriteDescriptorSet(
+              sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+              dstSet: renderData.descriptorSets[frameInFlight],
+              dstBinding: descriptorBindingNumber,
+              dstArrayElement: uint32(0),
+              descriptorType: descriptorType,
+              descriptorCount: descriptorCount,
+              pImageInfo: nil,
+              pBufferInfo: addr(bufferInfo),
+            )
+        elif HasGPUValueField[TGlobals](fieldName):
+          WithGPUValueField(globals, fieldName, theValue):
+            let bufferInfo = VkDescriptorBufferInfo(
+              buffer: theValue.buffer.vk,
+              offset: theValue.buffer.offset,
+              range: theValue.buffer.size,
+            )
+            descriptorSetWrites.add VkWriteDescriptorSet(
+              sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+              dstSet: renderData.descriptorSets[frameInFlight],
+              dstBinding: descriptorBindingNumber,
+              dstArrayElement: uint32(0),
+              descriptorType: descriptorType,
+              descriptorCount: descriptorCount,
+              pImageInfo: nil,
+              pBufferInfo: addr(bufferInfo),
+            )
+        else:
+          {.error: "Unable to find field '" & fieldName & "' in uniforms or globals".}
+      elif descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+        # TODO
+        let imageInfo = VkDescriptorImageInfo(
+          sampler: VkSampler(0),
+          imageView: VkImageView(0),
+          imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        )
+        descriptorSetWrites.add VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: renderData.descriptorSets[frameInFlight],
+          dstBinding: descriptorBindingNumber,
+          dstArrayElement: 0'u32,
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          pImageInfo: addr(imageInfo),
+          pBufferInfo: nil,
+        )
+      else:
+        assert false, "Unsupported descriptor type"
+  vkUpdateDescriptorSets(vulkan.device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
+]#
+
 
 converter toVkIndexType(indexType: IndexType): VkIndexType =
   case indexType:
@@ -640,11 +705,11 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
     # descriptor sets
     # need to consider 4 cases: uniform block, texture, uniform block array, texture array
-    elif hasCustomPragma(value, DescriptorSet):
-      assert descriptorSetCount < MAX_DESCRIPTORSETS, &"{tt.name(TShader)}: maximum {MAX_DESCRIPTORSETS} allowed"
+    elif typeof(value) is DescriptorSet:
+      assert descriptorSetCount <= DescriptorSetType.high.int, &"{tt.name(TShader)}: maximum {DescriptorSetType.high} allowed"
 
       var descriptorBinding = 0
-      for descriptorName, descriptorValue in fieldPairs(value):
+      for descriptorName, descriptorValue in fieldPairs(value.data):
 
         when typeof(descriptorValue) is Texture:
           samplers.add "layout(set=" & $descriptorSetCount & ", binding = " & $descriptorBinding & ") uniform " & GlslType(descriptorValue) & " " & descriptorName & ";"
@@ -721,27 +786,28 @@ proc CreatePipeline[TShader](
 ): Pipeline[TShader] =
   # create pipeline
 
-  ForDescriptorSets(default(TShader), setNumber, descriptorSet):
-    var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-    ForDescriptorFields(descriptorSet, fieldName, descriptorType, descriptorCount, descriptorBindingNumber):
-      layoutbindings.add VkDescriptorSetLayoutBinding(
-        binding: descriptorBindingNumber,
-        descriptorType: descriptorType,
-        descriptorCount: descriptorCount,
-        stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
-        pImmutableSamplers: nil,
+  for theFieldname, value in fieldPairs(default(TShader)):
+    when typeof(value) is DescriptorSet:
+      var layoutbindings: seq[VkDescriptorSetLayoutBinding]
+      ForDescriptorFields(value.data, fieldName, descriptorType, descriptorCount, descriptorBindingNumber):
+        layoutbindings.add VkDescriptorSetLayoutBinding(
+          binding: descriptorBindingNumber,
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
+          pImmutableSamplers: nil,
+        )
+      var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
+        sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        bindingCount: layoutbindings.len.uint32,
+        pBindings: layoutbindings.ToCPointer
       )
-    var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
-      sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-      bindingCount: layoutbindings.len.uint32,
-      pBindings: layoutbindings.ToCPointer
-    )
-    checkVkResult vkCreateDescriptorSetLayout(
-      vulkan.device,
-      addr(layoutCreateInfo),
-      nil,
-      addr(result.descriptorSetLayouts[setNumber.int])
-    )
+      checkVkResult vkCreateDescriptorSetLayout(
+        vulkan.device,
+        addr(layoutCreateInfo),
+        nil,
+        addr(result.descriptorSetLayouts[value.sType])
+      )
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
     setLayoutCount: result.descriptorSetLayouts.len.uint32,
@@ -874,7 +940,7 @@ proc CreatePipeline[TShader](
     1,
     addr(createInfo),
     nil,
-    addr(result.pipeline)
+    addr(result.vk)
   )
 
 proc AllocateIndirectMemory(size: uint64): IndirectGPUMemory =
@@ -1073,12 +1139,16 @@ proc GetIndirectBufferSizes[T](data: T): uint64 =
       when typeof(value) is GPUData:
         when UsesIndirectMemory(value):
           result += value.size + BUFFER_ALIGNMENT
+proc GetIndirectBufferSizes(data: DescriptorSet): uint64 =
+  GetIndirectBufferSizes(data.data)
 proc GetDirectBufferSizes[T](data: T): uint64 =
   for name, value in fieldPairs(data):
     when not hasCustomPragma(value, VertexIndices):
       when typeof(value) is GPUData:
         when UsesDirectMemory(value):
           result += value.size + BUFFER_ALIGNMENT
+proc GetDirectBufferSizes(data: DescriptorSet): uint64 =
+  GetDirectBufferSizes(data.data)
 proc GetIndirectIndexBufferSizes[T](data: T): uint64 =
   for name, value in fieldPairs(data):
     when hasCustomPragma(value, VertexIndices):
@@ -1111,6 +1181,8 @@ proc AssignIndirectBuffers[T](renderdata: var RenderData, btype: BufferType, dat
               foundBuffer = true
               break
           assert foundBuffer, &"Unable to find large enough '{btype}' for '{data}'"
+proc AssignIndirectBuffers(renderdata: var RenderData, btype: BufferType, data: var DescriptorSet) =
+  AssignIndirectBuffers(renderdata, btype, data.data)
 proc AssignDirectBuffers[T](renderdata: var RenderData, btype: BufferType, data: var T) =
   for name, value in fieldPairs(data):
     when typeof(value) is GPUData:
@@ -1128,6 +1200,8 @@ proc AssignDirectBuffers[T](renderdata: var RenderData, btype: BufferType, data:
               foundBuffer = true
               break
           assert foundBuffer, &"Unable to find large enough '{btype}' for '{data}'"
+proc AssignDirectBuffers(renderdata: var RenderData, btype: BufferType, data: var DescriptorSet) =
+  AssignDirectBuffers(renderdata, btype, data.data)
 
 proc HasGPUValueField[T](name: static string): bool {.compileTime.} =
   for fieldname, value in default(T).fieldPairs():
@@ -1142,71 +1216,8 @@ template WithGPUValueField(obj: object, name: static string, fieldvalue, body: u
         let `fieldvalue` {.inject.} = value
         body
 
-proc WriteDescriptors[TShader, TUniforms, TGlobals](renderData: RenderData, uniforms: TUniforms, globals: TGlobals) =
-  var descriptorSetWrites: seq[VkWriteDescriptorSet]
-  ForDescriptorFields(default(TShader), fieldName, descriptorType, descriptorCount, descriptorBindingNumber):
-    for frameInFlight in 0 ..< renderData.descriptorSets.len:
-      when descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-        when HasGPUValueField[TUniforms](fieldName):
-          WithGPUValueField(uniforms, fieldName, gpuValue):
-            let bufferInfo = VkDescriptorBufferInfo(
-              buffer: gpuValue.buffer.vk,
-              offset: gpuValue.buffer.offset,
-              range: gpuValue.buffer.size,
-            )
-            descriptorSetWrites.add VkWriteDescriptorSet(
-              sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-              dstSet: renderData.descriptorSets[frameInFlight],
-              dstBinding: descriptorBindingNumber,
-              dstArrayElement: uint32(0),
-              descriptorType: descriptorType,
-              descriptorCount: descriptorCount,
-              pImageInfo: nil,
-              pBufferInfo: addr(bufferInfo),
-            )
-        elif HasGPUValueField[TGlobals](fieldName):
-          WithGPUValueField(globals, fieldName, theValue):
-            let bufferInfo = VkDescriptorBufferInfo(
-              buffer: theValue.buffer.vk,
-              offset: theValue.buffer.offset,
-              range: theValue.buffer.size,
-            )
-            descriptorSetWrites.add VkWriteDescriptorSet(
-              sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-              dstSet: renderData.descriptorSets[frameInFlight],
-              dstBinding: descriptorBindingNumber,
-              dstArrayElement: uint32(0),
-              descriptorType: descriptorType,
-              descriptorCount: descriptorCount,
-              pImageInfo: nil,
-              pBufferInfo: addr(bufferInfo),
-            )
-        else:
-          {.error: "Unable to find field '" & fieldName & "' in uniforms or globals".}
-      elif descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-        # TODO
-        let imageInfo = VkDescriptorImageInfo(
-          sampler: VkSampler(0),
-          imageView: VkImageView(0),
-          imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        )
-        descriptorSetWrites.add VkWriteDescriptorSet(
-          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-          dstSet: renderData.descriptorSets[frameInFlight],
-          dstBinding: descriptorBindingNumber,
-          dstArrayElement: 0'u32,
-          descriptorType: descriptorType,
-          descriptorCount: descriptorCount,
-          pImageInfo: addr(imageInfo),
-          pBufferInfo: nil,
-        )
-      else:
-        assert false, "Unsupported descriptor type"
-  echo descriptorSetWrites
-  vkUpdateDescriptorSets(vulkan.device, uint32(descriptorSetWrites.len), descriptorSetWrites.ToCPointer, 0, nil)
-
 proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
-  commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline)
+  commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
   #[
   commandBuffer.vkCmdBindDescriptorSets(
     VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -1219,125 +1230,57 @@ proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrame
   )
   ]#
 
-proc AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals: typedesc) =
+proc AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial: typedesc) =
   var descriptorSetCount = 0
 
-  for inputName, inputValue in default(TShader).fieldPairs:
+  for shaderAttributeName, shaderAttribute in default(TShader).fieldPairs:
     var foundField = false
 
     # Vertex input data
-    when hasCustomPragma(inputValue, VertexAttribute):
-      assert typeof(inputValue) is SupportedGPUType
+    when hasCustomPragma(shaderAttribute, VertexAttribute):
+      assert typeof(shaderAttribute) is SupportedGPUType
       for meshName, meshValue in default(TMesh).fieldPairs:
-        when meshName == inputName:
+        when meshName == shaderAttributeName:
           assert meshValue is GPUArray, "Mesh attribute '" & meshName & "' must be of type 'GPUArray' but is of type " & tt.name(typeof(meshValue))
-          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert elementType(meshValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but mesh attribute is of type '" & tt.name(elementType(meshValue.data)) & "'"
+          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & shaderAttributeName & "' has been found more than once"
+          assert elementType(meshValue.data) is typeof(shaderAttribute), "Shader input " & tt.name(TShader) & "." & shaderAttributeName & " is of type '" & tt.name(typeof(shaderAttribute)) & "' but mesh attribute is of type '" & tt.name(elementType(meshValue.data)) & "'"
           foundField = true
-      assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "'"
+      assert foundField, "Shader input '" & tt.name(TShader) & "." & shaderAttributeName & ": " & tt.name(typeof(shaderAttribute)) & "' not found in '" & tt.name(TMesh) & "'"
 
     # Instance input data
-    elif hasCustomPragma(inputValue, InstanceAttribute):
-      assert typeof(inputValue) is SupportedGPUType
+    elif hasCustomPragma(shaderAttribute, InstanceAttribute):
+      assert typeof(shaderAttribute) is SupportedGPUType
       for instanceName, instanceValue in default(TInstance).fieldPairs:
-        when instanceName == inputName:
+        when instanceName == shaderAttributeName:
           assert instanceValue is GPUArray, "Instance attribute '" & instanceName & "' must be of type 'GPUArray' but is of type " & tt.name(typeof(instanceName))
-          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert elementType(instanceValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but instance attribute is of type '" & tt.name(elementType(instanceValue.data)) & "'"
+          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & shaderAttributeName & "' has been found more than once"
+          assert elementType(instanceValue.data) is typeof(shaderAttribute), "Shader input " & tt.name(TShader) & "." & shaderAttributeName & " is of type '" & tt.name(typeof(shaderAttribute)) & "' but instance attribute is of type '" & tt.name(elementType(instanceValue.data)) & "'"
           foundField = true
-      assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TInstance) & "'"
+      assert foundField, "Shader input '" & tt.name(TShader) & "." & shaderAttributeName & ": " & tt.name(typeof(shaderAttribute)) & "' not found in '" & tt.name(TInstance) & "'"
 
-
-    elif hasCustomPragma(inputValue, DescriptorSet):
-      assert descriptorSetCount < MAX_DESCRIPTORSETS, &"{tt.name(TShader)}: maximum {MAX_DESCRIPTORSETS} allowed"
+    # descriptors
+    elif typeof(shaderAttribute) is DescriptorSet:
+      assert descriptorSetCount <= DescriptorSetType.high.int, &"{tt.name(TShader)}: maximum {DescriptorSetType.high} allowed"
       descriptorSetCount.inc
-      echo "DescriptorSet: ", inputName
-
-      for descriptorName, descriptorValue in inputValue.fieldPairs():
-        when typeof(descriptorValue) is Texture:
-          echo "  Texture: ", descriptorName
-        elif typeof(descriptorValue) is GPUValue:
-          echo "  Uniform block: ", descriptorName
-
-    #[
-    # Texture
-    elif typeof(inputValue) is Texture:
-      for uniformName, uniformValue in default(TUniforms).fieldPairs:
-        when uniformName == inputName:
-          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert typeof(uniformValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue)) & "'"
-          foundField = true
-      for globalName, globalValue in default(TGlobals).fieldPairs:
-        when globalName == inputName:
-          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert typeof(globalValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but global attribute is of type '" & tt.name(typeof(globalValue)) & "'"
-          foundField = true
-      assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "|" & tt.name(TGlobals) & "'"
-
-    # Uniform block
-    elif typeof(inputValue) is object:
-      for uniformName, uniformValue in default(TUniforms).fieldPairs:
-        when uniformName == inputName:
-          assert uniformValue is GPUValue, "global attribute '" & uniformName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(uniformValue))
-          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert typeof(uniformValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue.data)) & "'"
-          foundField = true
-      for globalName, globalValue in default(TGlobals).fieldPairs:
-        when globalName == inputName:
-          assert globalValue is GPUValue, "global attribute '" & globalName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(globalValue))
-          assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-          assert typeof(globalValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but global attribute is of type '" & tt.name(typeof(globalValue.data)) & "'"
-          foundField = true
-      assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "|" & tt.name(TGlobals) & "'"
-
-    # array
-    elif typeof(inputValue) is array:
-
-      # texture-array
-      when elementType(inputValue) is Texture:
-        for uniformName, uniformValue in default(TUniforms).fieldPairs:
-          when uniformName == inputName:
-            assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-            assert typeof(uniformValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue)) & "'"
-            foundField = true
-        for globalName, globalValue in default(TGlobals).fieldPairs:
-          when globalName == inputName:
-            assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-            assert typeof(globalValue) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but global attribute is of type '" & tt.name(typeof(globalValue)) & "'"
-            foundField = true
-        assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "|" & tt.name(TGlobals) & "'"
-
-      # uniform-block array
-      elif elementType(inputValue) is object:
-        for uniformName, uniformValue in default(TUniforms).fieldPairs:
-          when uniformName == inputName:
-            assert uniformValue is GPUValue, "global attribute '" & uniformName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(uniformValue))
-            assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-            assert typeof(uniformValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but uniform attribute is of type '" & tt.name(typeof(uniformValue.data)) & "'"
-            foundField = true
-        for globalName, globalValue in default(TGlobals).fieldPairs:
-          when globalName == inputName:
-            assert globalValue is GPUValue, "global attribute '" & globalName & "' must be of type 'GPUValue' but is of type " & tt.name(typeof(globalValue))
-            assert foundField == false, "Shader input '" & tt.name(TShader) & "." & inputName & "' has been found more than once"
-            assert typeof(globalValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but global attribute is of type '" & tt.name(typeof(globalValue.data)) & "'"
-            foundField = true
-        assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "|" & tt.name(TGlobals) & "'"
-    ]#
 
 
+      when shaderAttribute.sType == GlobalSet:
+        assert shaderAttribute.sType == default(TGlobals).sType, "Shader has global descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TGlobals).sType & "'"
+        assert typeof(shaderAttribute) is TGlobals, "Shader has global descriptor set type '" & tt.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & tt.name(TGlobals)
+      elif shaderAttribute.sType == MaterialSet:
+        assert shaderAttribute.sType == default(TMaterial).sType, "Shader has material descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TMaterial).sType & "'"
+        assert typeof(shaderAttribute) is TMaterial, "Shader has materialdescriptor type '" & tt.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & tt.name(TMaterial)
 
 
-
-
-proc Render[TShader, TUniforms, TGlobals, TMesh, TInstance](
+proc Render[TShader, TGlobals, TMaterial, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
-  uniforms: TUniforms,
-  globals: TGlobals,
+  globalSet: TGlobals,
+  materialSet: TMaterial,
   mesh: TMesh,
   instances: TInstance,
 ) =
-  static: AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals)
+  static: AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial)
   #[
   if renderable.vertexBuffers.len > 0:
     commandBuffer.vkCmdBindVertexBuffers(
@@ -1407,8 +1350,8 @@ when isMainModule:
       # output
       color {.ShaderOutput.}: Vec4f
       # descriptor sets
-      globals {.DescriptorSet.}: GlobalsA
-      uniforms {.DescriptorSet.}: UniformsA
+      globals: DescriptorSet[GlobalsA, GlobalSet]
+      uniforms: DescriptorSet[UniformsA, MaterialSet]
       # code
       vertexCode: string = "void main() {}"
       fragmentCode: string = "void main() {}"
@@ -1445,11 +1388,12 @@ when isMainModule:
   var myMesh1 = MeshA(
     position: GPUArray[Vec3f, IndirectGPUMemory](data: @[NewVec3f(0, 0, ), NewVec3f(0, 0, ), NewVec3f(0, 0, )]),
   )
-  var uniforms1 = UniformsA(
-    materials: GPUValue[array[3, MaterialA], IndirectGPUMemory](data: [
-      MaterialA(reflection: 0, baseColor: NewVec3f(1, 0, 0)),
-      MaterialA(reflection: 0.1, baseColor: NewVec3f(0, 1, 0)),
-      MaterialA(reflection: 0.5, baseColor: NewVec3f(0, 0, 1)),
+  var uniforms1 = DescriptorSet[UniformsA, MaterialSet](
+    data: UniformsA(
+      materials: GPUValue[array[3, MaterialA], IndirectGPUMemory](data: [
+        MaterialA(reflection: 0, baseColor: NewVec3f(1, 0, 0)),
+        MaterialA(reflection: 0.1, baseColor: NewVec3f(0, 1, 0)),
+        MaterialA(reflection: 0.5, baseColor: NewVec3f(0, 0, 1)),
     ]),
     materialTextures: [
       Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 1, height: 1, imagedata: @[[255'u8, 0'u8, 0'u8, 255'u8]])),
@@ -1457,11 +1401,12 @@ when isMainModule:
       Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 1, height: 1, imagedata: @[[0'u8, 0'u8, 255'u8, 255'u8]])),
     ]
   )
+  )
   var instances1 = InstanceA(
     rotation: GPUArray[Vec4f, IndirectGPUMemory](data: @[NewVec4f(1, 0, 0, 0.1), NewVec4f(0, 1, 0, 0.1)]),
     objPosition: GPUArray[Vec3f, IndirectGPUMemory](data: @[NewVec3f(0, 0, 0), NewVec3f(1, 1, 1)]),
   )
-  var myGlobals: GlobalsA
+  var myGlobals = DescriptorSet[GlobalsA, GlobalSet]()
 
   # setup for rendering (TODO: swapchain & framebuffers)
   let renderpass = CreateRenderPass(GetSurfaceFormat())
@@ -1545,10 +1490,9 @@ when isMainModule:
 
   # descriptors
   # TODO: I think we can write and assign descriptors directly after creation
-  var s1 = CreateDescriptorSet(renderdata, pipeline1, myGlobals, GlobalSet)
-  var s2 = CreateDescriptorSet(renderdata, pipeline1, uniforms1, MaterialSet)
+  InitDescriptorSet(renderdata, pipeline1.descriptorSetLayouts[GlobalSet], myGlobals)
+  InitDescriptorSet(renderdata, pipeline1.descriptorSetLayouts[MaterialSet], uniforms1)
   # WriteDescriptors[ShaderA, UniformsA, GlobalsA](renderdata, uniforms1, myGlobals)
-
 
 
   # command buffer
@@ -1622,7 +1566,7 @@ when isMainModule:
 
         # render object, will be loop
         block:
-          Render(cmd, pipeline1, uniforms1, myGlobals, myMesh1, instances1)
+          Render(cmd, pipeline1, myGlobals, uniforms1, myMesh1, instances1)
 
       vkCmdEndRenderPass(cmd)
     checkVkResult cmd.vkEndCommandBuffer()
