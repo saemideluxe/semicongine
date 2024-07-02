@@ -21,19 +21,23 @@ template ShaderOutput {.pragma.}
 template VertexIndices {.pragma.}
 template DescriptorSet {.pragma.}
 
-const INFLIGHTFRAMES = 2'u32
-const MAX_DESCRIPTORSETS = 2
-const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
-const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
-
 # some globals that will (likely?) never change during the life time of the engine
 type
+  DescriptorSetType = enum
+    GlobalSet
+    MaterialSet
   VulkanGlobals = object
     instance: VkInstance
     device: VkDevice
     physicalDevice: VkPhysicalDevice
     queueFamilyIndex: uint32
     queue: VkQueue
+
+const INFLIGHTFRAMES = 2'u32
+const MAX_DESCRIPTORSETS = tt.enumLen(DescriptorSetType)
+const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
+const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
+
 var vulkan: VulkanGlobals
 
 type
@@ -148,14 +152,15 @@ template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename
         body
 
 template ForDescriptorSets(shader: typed, setNumber, descriptorSet, body: untyped): untyped =
-  var n = 0
+  var n = DescriptorSetType.low
   for theFieldname, value in fieldPairs(shader):
     when value.hasCustomPragma(DescriptorSet):
       block:
         let `setNumber` {.inject.} = n
         let `descriptorSet` {.inject.} = value
         body
-        n.inc
+        if n < DescriptorSetType.high:
+          n.inc
 
 template ForDescriptorFields(shader: typed, fieldname, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 1'u32
@@ -466,21 +471,21 @@ proc UpdateAllGPUBuffers[T](value: T) =
     when typeof(fieldvalue) is GPUData:
       UpdateGPUBuffer(fieldvalue)
 
-proc AssertCompatible(TShader, TDescriptorSet: typedesc, DescriptorSetIndex: static int) =
+proc AssertCompatible(TShader, TDescriptorSet: typedesc, descriptorSetType: static DescriptorSetType) =
   ForDescriptorSets(default(TShader), setNumber, descriptorSet):
-    if setNumber == DescriptorSetIndex:
+    if setNumber == descriptorSetType:
       assert typeof(descriptorSet) is TDescriptorSet
 
 proc CreateDescriptorSet[T, TShader](
   renderData: RenderData,
   pipeline: Pipeline[TShader],
   value: T,
-  setNumber: static int
+  descriptorSetType: static DescriptorSetType
 ): array[INFLIGHTFRAMES.int, VkDescriptorSet] =
 
-  static: AssertCompatible(TShader, T, setNumber)
+  static: AssertCompatible(TShader, T, descriptorSetType)
 
-  var layouts = newSeqWith(result.len, pipeline.descriptorSetLayouts[setNumber])
+  var layouts = newSeqWith(result.len, pipeline.descriptorSetLayouts[descriptorSetType.int])
   var allocInfo = VkDescriptorSetAllocateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
     descriptorPool: renderData.descriptorPool,
@@ -735,7 +740,7 @@ proc CreatePipeline[TShader](
       vulkan.device,
       addr(layoutCreateInfo),
       nil,
-      addr(result.descriptorSetLayouts[setNumber])
+      addr(result.descriptorSetLayouts[setNumber.int])
     )
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -1044,7 +1049,7 @@ proc InitRenderData(descriptorPoolLimit = 1024'u32): RenderData =
   checkVkResult vkCreateDescriptorPool(vulkan.device, addr(poolInfo), nil, addr(result.descriptorPool))
 
   # allocate some memory
-  var initialAllocationSize = 1_000_000_000'u64 # TODO: make this more dynamic or something
+  var initialAllocationSize = 1_000_000_000'u64 # TODO: make this more dynamic or something?
   result.indirectMemory = @[(memory: AllocateIndirectMemory(size = initialAllocationSize), usedOffset: 0'u64)]
   result.directMemory = @[(memory: AllocateDirectMemory(size = initialAllocationSize), usedOffset: 0'u64)]
 
@@ -1215,7 +1220,8 @@ proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrame
   ]#
 
 proc AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals: typedesc) =
-  # TODO: overhaul this
+  var descriptorSetCount = 0
+
   for inputName, inputValue in default(TShader).fieldPairs:
     var foundField = false
 
@@ -1241,6 +1247,19 @@ proc AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals: typedesc) 
           foundField = true
       assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TInstance) & "'"
 
+
+    elif hasCustomPragma(inputValue, DescriptorSet):
+      assert descriptorSetCount < MAX_DESCRIPTORSETS, &"{tt.name(TShader)}: maximum {MAX_DESCRIPTORSETS} allowed"
+      descriptorSetCount.inc
+      echo "DescriptorSet: ", inputName
+
+      for descriptorName, descriptorValue in inputValue.fieldPairs():
+        when typeof(descriptorValue) is Texture:
+          echo "  Texture: ", descriptorName
+        elif typeof(descriptorValue) is GPUValue:
+          echo "  Uniform block: ", descriptorName
+
+    #[
     # Texture
     elif typeof(inputValue) is Texture:
       for uniformName, uniformValue in default(TUniforms).fieldPairs:
@@ -1303,6 +1322,11 @@ proc AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals: typedesc) 
             assert typeof(globalValue.data) is typeof(inputValue), "Shader input " & tt.name(TShader) & "." & inputName & " is of type '" & tt.name(typeof(inputValue)) & "' but global attribute is of type '" & tt.name(typeof(globalValue.data)) & "'"
             foundField = true
         assert foundField, "Shader input '" & tt.name(TShader) & "." & inputName & ": " & tt.name(typeof(inputValue)) & "' not found in '" & tt.name(TMesh) & "|" & tt.name(TGlobals) & "'"
+    ]#
+
+
+
+
 
 
 proc Render[TShader, TUniforms, TGlobals, TMesh, TInstance](
@@ -1313,8 +1337,7 @@ proc Render[TShader, TUniforms, TGlobals, TMesh, TInstance](
   mesh: TMesh,
   instances: TInstance,
 ) =
-  discard
-  # static: AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals)
+  static: AssertCompatible(TShader, TMesh, TInstance, TUniforms, TGlobals)
   #[
   if renderable.vertexBuffers.len > 0:
     commandBuffer.vkCmdBindVertexBuffers(
@@ -1519,24 +1542,12 @@ when isMainModule:
   UpdateAllGPUBuffers(myGlobals)
   renderdata.FlushDirectMemory()
 
-  var s1 = CreateDescriptorSet(renderdata, pipeline1, myGlobals, 0)
-  var s2 = CreateDescriptorSet(renderdata, pipeline1, uniforms1, 1)
 
   # descriptors
+  # TODO: I think we can write and assign descriptors directly after creation
+  var s1 = CreateDescriptorSet(renderdata, pipeline1, myGlobals, GlobalSet)
+  var s2 = CreateDescriptorSet(renderdata, pipeline1, uniforms1, MaterialSet)
   # WriteDescriptors[ShaderA, UniformsA, GlobalsA](renderdata, uniforms1, myGlobals)
-
-  # create descriptor sets
-  #[
-  var descriptorSets: array[INFLIGHTFRAMES.int, VkDescriptorSet]
-  var layouts = newSeqWith(descriptorSets.len, pipeline.descriptorSetLayouts)
-  var allocInfo = VkDescriptorSetAllocateInfo(
-    sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-    descriptorPool: pool,
-    descriptorSetCount: uint32(layouts.len),
-    pSetLayouts: layouts.ToCPointer,
-  )
-  checkVkResult vkAllocateDescriptorSets(device, addr(allocInfo), descriptorSets.ToCPointer)
-  ]#
 
 
 
