@@ -8,7 +8,6 @@ import std/sequtils
 import std/typetraits as tt
 
 import semicongine/core/utils
-import semicongine/core/imagetypes
 import semicongine/core/vector
 import semicongine/core/matrix
 import semicongine/core/vulkanapi
@@ -58,6 +57,15 @@ type
     vk: VkBuffer
     offset: uint64
     size: uint64
+  Texture[Channels: static int, TMemory: GPUMemory] = object
+    memory: TMemory
+    vk: VkImage
+    imageview: VkImageView
+    sampler: VkSampler
+    offset: uint64
+    size: uint64
+    width: int
+    data: seq[array[Channels, uint8]]
 
   GPUArray[T: SupportedGPUType, TMemory: GPUMemory] = object
     data: seq[T]
@@ -74,7 +82,7 @@ type
     MaterialSet
   DescriptorSet[T: object, sType: static DescriptorSetType] = object
     data: T
-    vk: array[INFLIGHTFRAMES, VkDescriptorSet]
+    vk: array[INFLIGHTFRAMES.int, VkDescriptorSet]
 
   Pipeline[TShader] = object
     vk: VkPipeline
@@ -197,7 +205,7 @@ template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename
         const `isinstancename` {.inject.} = hasCustomPragma(value, InstanceAttribute)
         body
 
-template ForDescriptorFields(shader: typed, fieldname, typename, countname, bindingNumber, body: untyped): untyped =
+template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 1'u32
   for theFieldname, value in fieldPairs(shader):
     when typeof(value) is Texture:
@@ -205,6 +213,7 @@ template ForDescriptorFields(shader: typed, fieldname, typename, countname, bind
         const `fieldname` {.inject.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         const `countname` {.inject.} = 1'u32
+        let `valuename` {.inject.} = value
         body
         `bindingNumber`.inc
     elif typeof(value) is object:
@@ -212,6 +221,7 @@ template ForDescriptorFields(shader: typed, fieldname, typename, countname, bind
         const `fieldname` {.inject.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
         const `countname` {.inject.} = 1'u32
+        let `valuename` {.inject.} = value
         body
         `bindingNumber`.inc
     elif typeof(value) is array:
@@ -220,6 +230,7 @@ template ForDescriptorFields(shader: typed, fieldname, typename, countname, bind
           const `fieldname` {.inject.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
           const `countname` {.inject.} = uint32(typeof(value).len)
+          let `valuename` {.inject.} = value
           body
           `bindingNumber`.inc
       elif elementType(value) is object:
@@ -227,8 +238,11 @@ template ForDescriptorFields(shader: typed, fieldname, typename, countname, bind
           const `fieldname` {.inject.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
           const `countname` {.inject.} = uint32(typeof(value).len)
+          let `valuename` {.inject.} = value
           body
           `bindingNumber`.inc
+      else:
+        {.error: "Unsupported descriptor type: " & tt.name(typeof(value)).}
 
 func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Texture](value: T): uint32 =
   when T is TMat2[float32] or T is TMat2[float64] or T is TMat23[float32] or T is TMat23[float64]:
@@ -469,12 +483,13 @@ proc InitDescriptorSet(
   layout: VkDescriptorSetLayout,
   descriptorSet: var DescriptorSet,
 ) =
+  # santization checks
   for name, value in descriptorSet.data.fieldPairs:
     when typeof(value) is GPUValue:
-      assert value.buffer.vk.valid
+      assert value.buffer.vk.Valid
     # TODO:
     # when typeof(value) is Texture:
-    # assert value.texture.vk.valid
+    # assert value.texture.vk.Valid
 
   # allocate
   var layouts = newSeqWith(descriptorSet.vk.len, layout)
@@ -487,9 +502,45 @@ proc InitDescriptorSet(
   checkVkResult vkAllocateDescriptorSets(vulkan.device, addr(allocInfo), descriptorSet.vk.ToCPointer)
 
   # write
-  var descriptorSetWrites: newSeq[VkWriteDescriptorSet](descriptorSet.vk.len)
-  for i in 0 ..< descriptorSet.vk.len:
-    descriptorSetWrites.add
+  var descriptorSetWrites = newSeq[VkWriteDescriptorSet](descriptorSet.vk.len)
+
+  var descriptorBinding = 0
+  ForDescriptorFields(descriptorSet.data, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
+    for i in 0 ..< descriptorSet.vk.len:
+      when typeof(fieldValue) is GPUValue:
+        let bufferInfo = VkDescriptorBufferInfo(
+          buffer: fieldValue.buffer.vk,
+          offset: fieldValue.buffer.offset,
+          range: fieldValue.buffer.size,
+        )
+        descriptorSetWrites[i] = VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: descriptorSet.vk[i],
+          dstBinding: descriptorBindingNumber,
+          dstArrayElement: uint32(0),
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          pImageInfo: nil,
+          pBufferInfo: addr(bufferInfo),
+        )
+      elif typeof(fieldValue) is Texture:
+        let imageInfo = VkDescriptorImageInfo(
+          sampler: fieldValue.sampler,
+          imageView: fieldValue.imageView,
+          imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        )
+        descriptorSetWrites[i] = VkWriteDescriptorSet(
+          sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          dstSet: descriptorSet.vk[i],
+          dstBinding: descriptorBindingNumber,
+          dstArrayElement: uint32(0),
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          pImageInfo: addr(imageInfo),
+          pBufferInfo: nil,
+        )
+      else:
+        {.error: "Unsupported descriptor type: " & tt.name(typeof(fieldValue)).}
 
 
   vkUpdateDescriptorSets(vulkan.device, descriptorSetWrites.len.uint32, descriptorSetWrites.ToCPointer, 0, nil)
@@ -789,7 +840,7 @@ proc CreatePipeline[TShader](
   for theFieldname, value in fieldPairs(default(TShader)):
     when typeof(value) is DescriptorSet:
       var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-      ForDescriptorFields(value.data, fieldName, descriptorType, descriptorCount, descriptorBindingNumber):
+      ForDescriptorFields(value.data, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
         layoutbindings.add VkDescriptorSetLayoutBinding(
           binding: descriptorBindingNumber,
           descriptorType: descriptorType,
@@ -1329,14 +1380,14 @@ when isMainModule:
       reflection: float32
       baseColor: Vec3f
     UniformsA = object
-      defaultTexture: Texture
+      defaultTexture: Texture[3, IndirectGPUMemory]
       defaultMaterial: GPUValue[MaterialA, IndirectGPUMemory]
       materials: GPUValue[array[3, MaterialA], IndirectGPUMemory]
-      materialTextures: array[3, Texture]
+      materialTextures: array[3, Texture[3, IndirectGPUMemory]]
     ShaderSettings = object
       gamma: float32
     GlobalsA = object
-      fontAtlas: Texture
+      fontAtlas: Texture[1, IndirectGPUMemory]
       settings: GPUValue[ShaderSettings, IndirectGPUMemory]
 
     ShaderA = object
@@ -1396,9 +1447,9 @@ when isMainModule:
         MaterialA(reflection: 0.5, baseColor: NewVec3f(0, 0, 1)),
     ]),
     materialTextures: [
-      Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 1, height: 1, imagedata: @[[255'u8, 0'u8, 0'u8, 255'u8]])),
-      Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 1, height: 1, imagedata: @[[0'u8, 255'u8, 0'u8, 255'u8]])),
-      Texture(isGrayscale: false, colorImage: Image[RGBAPixel](width: 1, height: 1, imagedata: @[[0'u8, 0'u8, 255'u8, 255'u8]])),
+      Texture[3, IndirectGPUMemory](),
+      Texture[3, IndirectGPUMemory](),
+      Texture[3, IndirectGPUMemory](),
     ]
   )
   )
