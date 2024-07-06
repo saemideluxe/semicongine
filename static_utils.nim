@@ -1,3 +1,4 @@
+import std/algorithm
 import std/os
 import std/enumerate
 import std/hashes
@@ -19,11 +20,12 @@ template InstanceAttribute {.pragma.}
 template Pass {.pragma.}
 template PassFlat {.pragma.}
 template ShaderOutput {.pragma.}
-template VertexIndices {.pragma.}
 
 const INFLIGHTFRAMES = 2'u32
 const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
 const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
+const MEMORY_BLOCK_ALLOCATION_SIZE = 100_000_000'u64 # ca. 100mb per block, seems reasonable
+const BUFFER_ALLOCATION_SIZE = 9_000_000'u64 # ca. 9mb per block, seems reasonable, can put 10 buffers into one memory block
 
 # some globals that will (likely?) never change during the life time of the engine
 type
@@ -37,23 +39,28 @@ type
   IndexType = enum
     None, UInt8, UInt16, UInt32
 
-  IndirectGPUMemory = object
+  MemoryBlock = object
     vk: VkDeviceMemory
     size: uint64
-    needsTransfer: bool # usually true
-  DirectGPUMemory = object
-    vk: VkDeviceMemory
-    size: uint64
-    rawPointer: pointer
-  GPUMemory = IndirectGPUMemory | DirectGPUMemory
+    rawPointer: pointer # if not nil, this is mapped memory
+    offsetNextFree: uint64
 
-  Buffer[TMemory: GPUMemory] = object
+  BufferType = enum
+    VertexBuffer
+    VertexBufferMapped
+    IndexBuffer
+    IndexBufferMapped
+    UniformBuffer
+    UniformBufferMapped
+  Buffer = object
     vk: VkBuffer
     size: uint64
-    rawPointer: pointer
-  Texture[T: TextureType, TMemory: GPUMemory] = object
+    rawPointer: pointer # if not nil, buffer is using mapped memory
+    offsetNextFree: uint64
+
+  Texture[T: TextureType] = object
     vk: VkImage
-    memory: TMemory
+    memory: MemoryBlock
     format: VkFormat
     imageview: VkImageView
     sampler: VkSampler
@@ -63,13 +70,13 @@ type
     height: uint32
     data: seq[T]
 
-  GPUArray[T: SupportedGPUType, TMemory: GPUMemory] = object
+  GPUArray[T: SupportedGPUType, TBuffer: static BufferType] = object
     data: seq[T]
-    buffer: Buffer[TMemory]
+    buffer: Buffer
     offset: uint64
-  GPUValue[T: object|array, TMemory: GPUMemory] = object
+  GPUValue[T: object|array, TBuffer: static BufferType] = object
     data: T
-    buffer: Buffer[TMemory]
+    buffer: Buffer
     offset: uint64
   GPUData = GPUArray | GPUValue
 
@@ -84,15 +91,10 @@ type
     vk: VkPipeline
     layout: VkPipelineLayout
     descriptorSetLayouts: array[DescriptorSetType, VkDescriptorSetLayout]
-  BufferType = enum
-    VertexBuffer, IndexBuffer, UniformBuffer
   RenderData = object
     descriptorPool: VkDescriptorPool
-    # tuple is memory and offset to next free allocation in that memory
-    indirectMemory: seq[tuple[memory: IndirectGPUMemory, usedOffset: uint64]]
-    directMemory: seq[tuple[memory: DirectGPUMemory, usedOffset: uint64]]
-    indirectBuffers: seq[tuple[buffer: Buffer[IndirectGPUMemory], btype: BufferType, usedOffset: uint64]]
-    directBuffers: seq[tuple[buffer: Buffer[DirectGPUMemory], btype: BufferType, usedOffset: uint64]]
+    memory: array[VK_MAX_MEMORY_TYPES.int, seq[MemoryBlock]]
+    buffers: array[BufferType, seq[Buffer]]
 
 func size(texture: Texture): uint64 =
   texture.data.len * sizeof(elementType(texture.data))
@@ -100,9 +102,17 @@ func size(texture: Texture): uint64 =
 func depth(texture: Texture): int =
   default(elementType(texture.data)).len
 
-func pointerOffset[T: SomeInteger](p: pointer, offset: T): pointer =
+func pointerAddOffset[T: SomeInteger](p: pointer, offset: T): pointer =
   cast[pointer](cast[T](p) + offset)
 
+func usage(bType: BufferType): seq[VkBufferUsageFlagBits] =
+  case bType:
+    of VertexBuffer: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of VertexBufferMapped: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of IndexBuffer: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of IndexBufferMapped: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of UniformBuffer: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of UniformBufferMapped: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
 
 proc GetVkFormat(depth: int, usage: openArray[VkImageUsageFlagBits]): VkFormat =
   const DEPTH_FORMAT_MAP = [
@@ -322,10 +332,12 @@ func NLocationSlots[T: SupportedGPUType|Texture](value: T): uint32 =
 template sType(descriptorSet: DescriptorSet): untyped =
   get(genericParams(typeof(gpuData)), 1)
 
-template UsesIndirectMemory(gpuData: GPUData): untyped =
-  get(genericParams(typeof(gpuData)), 1) is IndirectGPUMemory
-template UsesDirectMemory(gpuData: GPUData): untyped =
-  get(genericParams(typeof(gpuData)), 1) is DirectGPUMemory
+template bufferType(gpuData: GPUData): untyped =
+  get(genericParams(typeof(gpuData)), 1)
+func NeedsMapping(bType: BufferType): bool =
+  bType in [VertexBufferMapped, IndexBufferMapped, UniformBufferMapped]
+template NeedsMapping(gpuData: GPUData): untyped =
+  gpuData.bufferType.NeedsMapping
 
 template size(gpuArray: GPUArray): uint64 =
   (gpuArray.data.len * sizeof(elementType(gpuArray.data))).uint64
@@ -336,16 +348,6 @@ template rawPointer(gpuArray: GPUArray): pointer =
   addr(gpuArray.data[0])
 template rawPointer(gpuValue: GPUValue): pointer =
   addr(gpuValue.data)
-
-proc RequiredMemorySize(buffer: VkBuffer): uint64 =
-  var req: VkMemoryRequirements
-  vkGetBufferMemoryRequirements(vulkan.device, buffer, addr(req))
-  return req.size
-
-proc RequiredMemorySize(image: VkImage): uint64 =
-  var req: VkMemoryRequirements
-  vkGetImageMemoryRequirements(vulkan.device, image, addr req)
-  return req.size
 
 proc GetPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
   var nDevices: uint32
@@ -371,22 +373,11 @@ proc GetPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
 
   assert score > 0, "Unable to find integrated or discrete GPU"
 
-
-proc GetDirectMemoryType(): uint32 =
+proc IsMappable(memoryTypeIndex: uint32): bool =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))
-
-  var biggestHeap: uint64 = 0
-  result = high(uint32)
-  # try to find host-visible type
-  for i in 0'u32 ..< physicalProperties.memoryTypeCount:
-    let flags = toEnums(physicalProperties.memoryTypes[i].propertyFlags)
-    if VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags:
-      let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
-      if size > biggestHeap:
-        biggestHeap = size
-        result = i
-  assert result != high(uint32), "There is not host visible memory. This is likely a driver bug."
+  let flags = toEnums(physicalProperties.memoryTypes[memoryTypeIndex].propertyFlags)
+  return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags
 
 proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
   var nQueuefamilies: uint32
@@ -402,20 +393,6 @@ proc GetSurfaceFormat(): VkFormat =
   # EVERY windows driver and almost every linux driver should support this
   VK_FORMAT_B8G8R8A8_SRGB
 
-proc UpdateGPUBuffer(gpuData: GPUData) =
-  if gpuData.size == 0:
-    return
-  when UsesDirectMemory(gpuData):
-    copyMem(pointerOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
-  else:
-    WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.buffer.vk.RequiredMemorySize(), GetDirectMemoryType(), stagingPtr):
-      copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
-
-proc UpdateAllGPUBuffers[T](value: T) =
-  for name, fieldvalue in value.fieldPairs():
-    when typeof(fieldvalue) is GPUData:
-      UpdateGPUBuffer(fieldvalue)
-
 proc InitDescriptorSet(
   renderData: RenderData,
   layout: VkDescriptorSetLayout,
@@ -425,11 +402,11 @@ proc InitDescriptorSet(
   for name, value in descriptorSet.data.fieldPairs:
     when typeof(value) is GPUValue:
       assert value.buffer.vk.Valid
-    # TODO:
-    # when typeof(value) is Texture:
-    # assert value.texture.vk.Valid
+    elif typeof(value) is Texture:
+      assert value.vk.Valid
+      assert value.imageview.Valid
+      assert value.sampler.Valid
 
-  # TODO: missing stuff here? only for FiF, but not multiple different sets?
   # allocate
   var layouts = newSeqWith(descriptorSet.vk.len, layout)
   var allocInfo = VkDescriptorSetAllocateInfo(
@@ -896,116 +873,119 @@ proc CreatePipeline[TShader](
     addr(result.vk)
   )
 
-proc AllocateIndirectMemory(size: uint64): IndirectGPUMemory =
-  # chooses biggest memory type that has NOT VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-  result.size = size
-  result.needsTransfer = true
-
-  # find a good memory type
-  var physicalProperties: VkPhysicalDeviceMemoryProperties
-  vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr physicalProperties)
-
-  var biggestHeap: uint64 = 0
-  var memoryTypeIndex = high(uint32)
-  # try to find non-host-visible type
-  for i in 0'u32 ..< physicalProperties.memoryTypeCount:
-    if not (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in toEnums(physicalProperties.memoryTypes[i].propertyFlags)):
-      let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
-      if size > biggestHeap:
-        biggestHeap = size
-        memoryTypeIndex = i
-
-  # If we did not found a device-only memory type, let's just take the biggest overall
-  if memoryTypeIndex == high(uint32):
-    result.needsTransfer = false
-    for i in 0'u32 ..< physicalProperties.memoryTypeCount:
-      let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
-      if size > biggestHeap:
-        biggestHeap = size
-        memoryTypeIndex = i
-
-  assert memoryTypeIndex != high(uint32), "Unable to find indirect memory type"
-  result.vk = svkAllocateMemory(result.size, memoryTypeIndex)
-
-proc AllocateDirectMemory(size: uint64): DirectGPUMemory =
-  result.size = size
-
-  # find a good memory type
-  var physicalProperties: VkPhysicalDeviceMemoryProperties
-  vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr physicalProperties)
-
-  var biggestHeap: uint64 = 0
-  var memoryTypeIndex = high(uint32)
-  # try to find host-visible type
-  for i in 0 ..< physicalProperties.memoryTypeCount:
-    let flags = toEnums(physicalProperties.memoryTypes[i].propertyFlags)
-    if VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags:
-      let size = physicalProperties.memoryHeaps[physicalProperties.memoryTypes[i].heapIndex].size
-      if size > biggestHeap:
-        biggestHeap = size
-        memoryTypeIndex = i
-
-  assert memoryTypeIndex != high(uint32), "Unable to find indirect memory type"
-  result.vk = svkAllocateMemory(result.size, GetDirectMemoryType())
-  checkVkResult vkMapMemory(
-    device = vulkan.device,
-    memory = result.vk,
-    offset = 0'u64,
-    size = result.size,
-    flags = VkMemoryMapFlags(0),
-    ppData = addr(result.rawPointer)
+proc AllocateNewMemoryBlock(size: uint64, mType: uint32): MemoryBlock =
+  result = MemoryBlock(
+    vk: svkAllocateMemory(size, mType),
+    size: size,
+    rawPointer: nil,
+    offsetNextFree: 0,
   )
+  if mType.IsMappable():
+    checkVkResult vkMapMemory(
+      device = vulkan.device,
+      memory = result.vk,
+      offset = 0'u64,
+      size = result.size,
+      flags = VkMemoryMapFlags(0),
+      ppData = addr(result.rawPointer)
+    )
 
-proc AllocateIndirectBuffer(renderData: var RenderData, size: uint64, btype: BufferType) =
-  if size == 0:
+proc FlushAllMemory(renderData: RenderData) =
+  var flushRegions = newSeq[VkMappedMemoryRange]()
+  for memoryBlocks in renderData.memory:
+    for memoryBlock in memoryBlocks:
+      if memoryBlock.rawPointer != nil and memoryBlock.offsetNextFree > 0:
+        flushRegions.add VkMappedMemoryRange(
+          sType: VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+          memory: memoryBlock.vk,
+          size: memoryBlock.offsetNextFree,
+        )
+  if flushRegions.len > 0:
+    checkVkResult vkFlushMappedMemoryRanges(vulkan.device, flushRegions.len.uint32, flushRegions.ToCPointer())
+
+proc AllocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: BufferType): Buffer =
+  result = Buffer(
+    vk: svkCreateBuffer(size, bufferType.usage),
+    size: size,
+    rawPointer: nil,
+    offsetNextFree: 0,
+  )
+  let memoryRequirements = svkGetBufferMemoryRequirements(result.vk)
+  let memoryType = BestMemory(mappable = bufferType.NeedsMapping, filter = memoryRequirements.memoryTypes)
+
+  # check if there is an existing allocated memory block that is large enough to be used
+  var selectedBlockI = -1
+  for i in 0 ..< renderData.memory[memoryType].len:
+    let memoryBlock = renderData.memory[memoryType][i]
+    if memoryBlock.size - alignedTo(memoryBlock.offsetNextFree, memoryRequirements.alignment) >= memoryRequirements.size:
+      selectedBlockI = i
+      break
+  # otherwise, allocate a new block of memory and use that
+  if selectedBlockI < 0:
+    selectedBlockI = renderData.memory[memoryType].len
+    renderData.memory[memoryType].add AllocateNewMemoryBlock(
+      size = max(size, MEMORY_BLOCK_ALLOCATION_SIZE),
+      mType = memoryType
+    )
+
+  let selectedBlock = renderData.memory[memoryType][selectedBlockI]
+  renderData.memory[memoryType][selectedBlockI].offsetNextFree = alignedTo(
+    selectedBlock.offsetNextFree,
+    memoryRequirements.alignment,
+  )
+  checkVkResult vkBindBufferMemory(
+    vulkan.device,
+    result.vk,
+    selectedBlock.vk,
+    selectedBlock.offsetNextFree,
+  )
+  result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
+  renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
+
+proc AssignBuffers[T](renderdata: var RenderData, data: var T) =
+  for name, value in fieldPairs(data):
+    when typeof(value) is GPUData:
+
+      # find buffer that has space
+      var selectedBufferI = -1
+      for i in 0 ..< renderData.buffers[value.bufferType].len:
+        let buffer = renderData.buffers[value.bufferType][i]
+        if buffer.size - alignedTo(buffer.offsetNextFree, BUFFER_ALIGNMENT) >= value.size:
+          selectedBufferI = i
+
+      # otherwise create new buffer
+      if selectedBufferI < 0:
+        selectedBufferI = renderdata.buffers[value.bufferType].len
+        renderdata.buffers[value.bufferType].add renderdata.AllocateNewBuffer(
+          size = max(value.size, BUFFER_ALLOCATION_SIZE),
+          bType = value.bufferType,
+          mappable = value.NeedsMapping,
+        )
+
+      # assigne value
+      let selectedBuffer = renderdata.buffers[value.bufferType][selectedBufferI]
+      renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree = alignedTo(
+        selectedBuffer.offsetNextFree,
+        BUFFER_ALIGNMENT
+      )
+      value.buffer = selectedBuffer
+      value.offset = renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree
+      renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree += value.size
+
+proc UpdateGPUBuffer(gpuData: GPUData) =
+  if gpuData.size == 0:
     return
-  var buffer = Buffer[IndirectGPUMemory](size: size, rawPointer: nil)
+  when NeedsMapping(gpuData):
+    copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
+  else:
+    WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.buffer.size, stagingPtr):
+      copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
 
-  let usageFlags = case btype:
-    of VertexBuffer: [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-    of IndexBuffer: [VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-    of UniformBuffer: [VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+proc UpdateAllGPUBuffers[T](value: T) =
+  for name, fieldvalue in value.fieldPairs():
+    when typeof(fieldvalue) is GPUData:
+      UpdateGPUBuffer(fieldvalue)
 
-  # iterate through memory areas to find big enough free space
-  # TODO: dynamically expand memory allocations
-  # TODO: use RequiredMemorySize()
-  for (memory, usedOffset) in renderData.indirectMemory.mitems:
-    if memory.size - usedOffset >= size:
-      # create buffer
-      buffer.vk = svkCreateBuffer(buffer.size, usageFlags)
-      checkVkResult vkBindBufferMemory(vulkan.device, buffer.vk, memory.vk, usedOffset)
-      renderData.indirectBuffers.add (buffer, btype, 0'u64)
-      # update memory area offset
-      usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
-      return
-
-  assert false, "Did not find allocated memory region with enough space"
-
-proc AllocateDirectBuffer(renderData: var RenderData, size: uint64, btype: BufferType) =
-  if size == 0:
-    return
-
-  var buffer = Buffer[DirectGPUMemory](size: size)
-
-  let usageFlags = case btype:
-    of VertexBuffer: [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-    of IndexBuffer: [VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-    of UniformBuffer: [VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-
-  # iterate through memory areas to find big enough free space
-  # TODO: dynamically expand memory allocations
-  # TODO: use RequiredMemorySize()
-  for (memory, usedOffset) in renderData.directMemory.mitems:
-    if memory.size - usedOffset >= size:
-      buffer.vk = svkCreateBuffer(buffer.size, usageFlags)
-      checkVkResult vkBindBufferMemory(vulkan.device, buffer.vk, memory.vk, usedOffset)
-      buffer.rawPointer = pointerOffset(memory.rawPointer, usedOffset)
-      renderData.directBuffers.add (buffer, btype, 0'u64)
-      # update memory area offset
-      usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
-      return
-
-  assert false, "Did not find allocated memory region with enough space"
 
 proc InitRenderData(descriptorPoolLimit = 1024'u32): RenderData =
   # allocate descriptor pools
@@ -1020,95 +1000,6 @@ proc InitRenderData(descriptorPoolLimit = 1024'u32): RenderData =
     maxSets: descriptorPoolLimit,
   )
   checkVkResult vkCreateDescriptorPool(vulkan.device, addr(poolInfo), nil, addr(result.descriptorPool))
-
-  # allocate some memory
-  var initialAllocationSize = 1_000_000_000'u64 # TODO: make this more dynamic or something?
-  result.indirectMemory = @[(memory: AllocateIndirectMemory(size = initialAllocationSize), usedOffset: 0'u64)]
-  result.directMemory = @[(memory: AllocateDirectMemory(size = initialAllocationSize), usedOffset: 0'u64)]
-
-proc FlushDirectMemory(renderData: RenderData) =
-  var flushRegions = newSeqOfCap[VkMappedMemoryRange](renderData.directMemory.len)
-  for entry in renderData.directMemory:
-    if entry.usedOffset > 0:
-      flushRegions.add VkMappedMemoryRange(
-        sType: VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-        memory: entry.memory.vk,
-        size: entry.usedOffset,
-      )
-  if flushRegions.len > 0:
-    checkVkResult vkFlushMappedMemoryRanges(vulkan.device, flushRegions.len.uint32, flushRegions.ToCPointer())
-
-# For the Get*BufferSize:
-# BUFFER_ALIGNMENT is just added for a rough estimate, to ensure we have enough space to align when binding
-proc GetIndirectBufferSizes[T](data: T): uint64 =
-  for name, value in fieldPairs(data):
-    when not hasCustomPragma(value, VertexIndices):
-      when typeof(value) is GPUData:
-        when UsesIndirectMemory(value):
-          result += value.size + BUFFER_ALIGNMENT
-proc GetIndirectBufferSizes(data: DescriptorSet): uint64 =
-  GetIndirectBufferSizes(data.data)
-proc GetDirectBufferSizes[T](data: T): uint64 =
-  for name, value in fieldPairs(data):
-    when not hasCustomPragma(value, VertexIndices):
-      when typeof(value) is GPUData:
-        when UsesDirectMemory(value):
-          result += value.size + BUFFER_ALIGNMENT
-proc GetDirectBufferSizes(data: DescriptorSet): uint64 =
-  GetDirectBufferSizes(data.data)
-proc GetIndirectIndexBufferSizes[T](data: T): uint64 =
-  for name, value in fieldPairs(data):
-    when hasCustomPragma(value, VertexIndices):
-      static: assert typeof(value) is GPUArray, "Index buffers must be of type GPUArray"
-      static: assert elementType(value.data) is uint8 or elementType(value.data) is uint16 or elementType(value.data) is uint32
-      when UsesIndirectMemory(value):
-        result += value.size + BUFFER_ALIGNMENT
-proc GetDirectIndexBufferSizes[T](data: T): uint64 =
-  for name, value in fieldPairs(data):
-    when hasCustomPragma(value, VertexIndices):
-      static: assert typeof(value) is GPUArray, "Index buffers must be of type GPUArray"
-      static: assert elementType(value.data) is uint8 or elementType(value.data) is uint16 or elementType(value.data) is uint32
-      when UsesDirectMemory(value):
-        result += value.size + BUFFER_ALIGNMENT
-
-proc AssignIndirectBuffers[T](renderdata: var RenderData, btype: BufferType, data: var T) =
-  for name, value in fieldPairs(data):
-    when typeof(value) is GPUData:
-      when UsesIndirectMemory(value):
-        # find next buffer of correct type with enough free space
-        if btype == IndexBuffer == value.hasCustomPragma(VertexIndices):
-          var foundBuffer = false
-          for (buffer, bt, offset) in renderData.indirectBuffers.mitems:
-            if bt == btype and buffer.size - offset >= value.size:
-              assert not value.buffer.vk.Valid, "GPUData-Buffer has already been assigned"
-              assert buffer.vk.Valid, "RenderData-Buffer has not yet been created"
-              value.buffer = buffer
-              value.offset = offset
-              offset = alignedTo(offset + value.size, BUFFER_ALIGNMENT)
-              foundBuffer = true
-              break
-          assert foundBuffer, &"Unable to find large enough '{btype}' for '{data}'"
-proc AssignIndirectBuffers(renderdata: var RenderData, btype: BufferType, data: var DescriptorSet) =
-  AssignIndirectBuffers(renderdata, btype, data.data)
-proc AssignDirectBuffers[T](renderdata: var RenderData, btype: BufferType, data: var T) =
-  for name, value in fieldPairs(data):
-    when typeof(value) is GPUData:
-      when UsesDirectMemory(value):
-        # find next buffer of correct type with enough free space
-        if btype == IndexBuffer == value.hasCustomPragma(VertexIndices):
-          var foundBuffer = false
-          for (buffer, bt, offset) in renderData.directBuffers.mitems:
-            if bt == btype and buffer.size - offset >= value.size:
-              assert not value.buffer.vk.Valid, "GPUData-Buffer has already been assigned"
-              assert buffer.vk.Valid, "RenderData-Buffer has not yet been created"
-              value.buffer = buffer
-              value.offset = offset
-              offset = alignedTo(offset + value.size, BUFFER_ALIGNMENT)
-              foundBuffer = true
-              break
-          assert foundBuffer, &"Unable to find large enough '{btype}' for '{data}'"
-proc AssignDirectBuffers(renderdata: var RenderData, btype: BufferType, data: var DescriptorSet) =
-  AssignDirectBuffers(renderdata, btype, data.data)
 
 proc TransitionImageLayout(image: VkImage, oldLayout, newLayout: VkImageLayout) =
   var
@@ -1213,24 +1104,17 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 
   texture.format = GetVkFormat(texture.depth, usage = usage)
   texture.vk = svkCreate2DImage(texture.width, texture.height, texture.format, usage)
-  let size = texture.vk.RequiredMemorySize()
+  let reqs = texture.vk.svkGetImageMemoryRequirements()
 
-  when genericParams(typeof(texture)).get(1) is IndirectGPUMemory:
-    for (memory, usedOffset) in renderData.indirectMemory.mitems:
-      if memory.size - usedOffset >= size:
-        texture.memory = memory
-        texture.offset = usedOffset
-        # update memory area offset
-        usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
-        break
-  elif genericParams(typeof(texture)).get(1) is DirectGPUMemory:
-    for (memory, usedOffset) in renderData.directMemory.mitems:
-      if memory.size - usedOffset >= size:
-        texture.memory = memory
-        texture.offset = usedOffset
-        # update memory area offset
-        usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
-        break
+  # TODO
+
+  for (memory, usedOffset) in renderData.indirectMemory.mitems:
+    if memory.size - usedOffset >= size:
+      texture.memory = memory
+      texture.offset = usedOffset
+      # update memory area offset
+      usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
+      break
 
   checkVkResult vkBindImageMemory(
     vulkan.device,
@@ -1241,7 +1125,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 
   # data transfer and layout transition
   TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-  WithStagingBuffer((texture.vk, texture.imageview, texture.width, texture.height), size, GetDirectMemoryType(), stagingPtr):
+  WithStagingBuffer((texture.vk, texture.imageview, texture.width, texture.height), size, stagingPtr):
     copyMem(stagingPtr, texture.data.ToCPointer, size)
     TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 
@@ -1376,24 +1260,24 @@ when isMainModule:
 
   type
     MeshA = object
-      position: GPUArray[Vec3f, IndirectGPUMemory]
-      indices {.VertexIndices.}: GPUArray[uint16, IndirectGPUMemory]
+      position: GPUArray[Vec3f, VertexBuffer]
+      indices: GPUArray[uint16, IndexBuffer]
     InstanceA = object
-      rotation: GPUArray[Vec4f, IndirectGPUMemory]
-      objPosition: GPUArray[Vec3f, IndirectGPUMemory]
+      rotation: GPUArray[Vec4f, VertexBuffer]
+      objPosition: GPUArray[Vec3f, VertexBuffer]
     MaterialA = object
       reflection: float32
       baseColor: Vec3f
     UniformsA = object
-      defaultTexture: Texture[TVec3[uint8], IndirectGPUMemory]
-      defaultMaterial: GPUValue[MaterialA, IndirectGPUMemory]
-      materials: GPUValue[array[3, MaterialA], IndirectGPUMemory]
-      materialTextures: array[3, Texture[TVec3[uint8], IndirectGPUMemory]]
+      defaultTexture: Texture[TVec3[uint8]]
+      defaultMaterial: GPUValue[MaterialA, UniformBuffer]
+      materials: GPUValue[array[3, MaterialA], UniformBuffer]
+      materialTextures: array[3, Texture[TVec3[uint8]]]
     ShaderSettings = object
       gamma: float32
     GlobalsA = object
-      fontAtlas: Texture[TVec3[uint8], IndirectGPUMemory]
-      settings: GPUValue[ShaderSettings, IndirectGPUMemory]
+      fontAtlas: Texture[TVec3[uint8]]
+      settings: GPUValue[ShaderSettings, UniformBuffer]
 
     ShaderA = object
       # vertex input
@@ -1442,31 +1326,31 @@ when isMainModule:
   )
 
   var myMesh1 = MeshA(
-    position: GPUArray[Vec3f, IndirectGPUMemory](data: @[NewVec3f(0, 0, ), NewVec3f(0, 0, ), NewVec3f(0, 0, )]),
+    position: GPUArray[Vec3f, VertexBuffer](data: @[NewVec3f(0, 0, ), NewVec3f(0, 0, ), NewVec3f(0, 0, )]),
   )
   var uniforms1 = DescriptorSet[UniformsA, MaterialSet](
     data: UniformsA(
-      defaultTexture: Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
-      materials: GPUValue[array[3, MaterialA], IndirectGPUMemory](data: [
+      defaultTexture: Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      materials: GPUValue[array[3, MaterialA], UniformBuffer](data: [
         MaterialA(reflection: 0, baseColor: NewVec3f(1, 0, 0)),
         MaterialA(reflection: 0.1, baseColor: NewVec3f(0, 1, 0)),
         MaterialA(reflection: 0.5, baseColor: NewVec3f(0, 0, 1)),
     ]),
     materialTextures: [
-      Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
-      Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
-      Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
     ]
   )
   )
   var instances1 = InstanceA(
-    rotation: GPUArray[Vec4f, IndirectGPUMemory](data: @[NewVec4f(1, 0, 0, 0.1), NewVec4f(0, 1, 0, 0.1)]),
-    objPosition: GPUArray[Vec3f, IndirectGPUMemory](data: @[NewVec3f(0, 0, 0), NewVec3f(1, 1, 1)]),
+    rotation: GPUArray[Vec4f, VertexBuffer](data: @[NewVec4f(1, 0, 0, 0.1), NewVec4f(0, 1, 0, 0.1)]),
+    objPosition: GPUArray[Vec3f, VertexBuffer](data: @[NewVec3f(0, 0, 0), NewVec3f(1, 1, 1)]),
   )
   var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
     data: GlobalsA(
-      fontAtlas: Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
-      settings: GPUValue[ShaderSettings, IndirectGPUMemory](data: ShaderSettings(gamma: 1.0))
+      fontAtlas: Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      settings: GPUValue[ShaderSettings, UniformBuffer](data: ShaderSettings(gamma: 1.0))
     )
   )
 
@@ -1480,56 +1364,13 @@ when isMainModule:
 
   var renderdata = InitRenderData()
 
-  # buffer allocation
-  echo "Allocating GPU buffers"
-
-  var indirectVertexSizes = 0'u64
-  indirectVertexSizes += GetIndirectBufferSizes(myMesh1)
-  indirectVertexSizes += GetIndirectBufferSizes(instances1)
-  AllocateIndirectBuffer(renderdata, indirectVertexSizes, VertexBuffer)
-
-  var directVertexSizes = 0'u64
-  directVertexSizes += GetDirectBufferSizes(myMesh1)
-  directVertexSizes += GetDirectBufferSizes(instances1)
-  AllocateDirectBuffer(renderdata, directVertexSizes, VertexBuffer)
-
-  var indirectIndexSizes = 0'u64
-  indirectIndexSizes += GetIndirectIndexBufferSizes(myMesh1)
-  AllocateIndirectBuffer(renderdata, indirectIndexSizes, IndexBuffer)
-
-  var directIndexSizes = 0'u64
-  directIndexSizes += GetDirectIndexBufferSizes(myMesh1)
-  AllocateDirectBuffer(renderdata, directIndexSizes, IndexBuffer)
-
-  var indirectUniformSizes = 0'u64
-  indirectUniformSizes += GetIndirectBufferSizes(uniforms1)
-  indirectUniformSizes += GetIndirectBufferSizes(myGlobals)
-  AllocateIndirectBuffer(renderdata, indirectUniformSizes, UniformBuffer)
-
-  var directUniformSizes = 0'u64
-  directUniformSizes += GetDirectBufferSizes(uniforms1)
-  directUniformSizes += GetDirectBufferSizes(myGlobals)
-  AllocateDirectBuffer(renderdata, directUniformSizes, UniformBuffer)
-
-
   # buffer assignment
   echo "Assigning buffers to GPUData fields"
 
-  # for meshes we do:
-  renderdata.AssignIndirectBuffers(VertexBuffer, myMesh1)
-  renderdata.AssignDirectBuffers(VertexBuffer, myMesh1)
-  renderdata.AssignIndirectBuffers(IndexBuffer, myMesh1)
-  renderdata.AssignDirectBuffers(IndexBuffer, myMesh1)
-
-  # for instances we do:
-  renderdata.AssignIndirectBuffers(VertexBuffer, instances1)
-  renderdata.AssignDirectBuffers(VertexBuffer, instances1)
-
-  # for uniforms/globals we do:
-  renderdata.AssignIndirectBuffers(UniformBuffer, uniforms1)
-  renderdata.AssignDirectBuffers(UniformBuffer, uniforms1)
-  renderdata.AssignIndirectBuffers(UniformBuffer, myGlobals)
-  renderdata.AssignDirectBuffers(UniformBuffer, myGlobals)
+  renderdata.AssignBuffers(myMesh1)
+  renderdata.AssignBuffers(instances1)
+  renderdata.AssignBuffers(myGlobals)
+  renderdata.AssignBuffers(uniforms1)
 
   renderdata.UploadTextures(myGlobals)
   renderdata.UploadTextures(uniforms1)
@@ -1540,7 +1381,7 @@ when isMainModule:
   UpdateAllGPUBuffers(instances1)
   UpdateAllGPUBuffers(uniforms1)
   UpdateAllGPUBuffers(myGlobals)
-  renderdata.FlushDirectMemory()
+  renderdata.FlushAllMemory()
 
 
   # descriptors
