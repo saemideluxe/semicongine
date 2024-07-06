@@ -44,18 +44,16 @@ type
   DirectGPUMemory = object
     vk: VkDeviceMemory
     size: uint64
-    data: pointer
-    needsFlush: bool # usually true
+    rawPointer: pointer
   GPUMemory = IndirectGPUMemory | DirectGPUMemory
 
   Buffer[TMemory: GPUMemory] = object
-    memory: TMemory
     vk: VkBuffer
-    offset: uint64
     size: uint64
+    rawPointer: pointer
   Texture[T: TextureType, TMemory: GPUMemory] = object
-    memory: TMemory
     vk: VkImage
+    memory: TMemory
     format: VkFormat
     imageview: VkImageView
     sampler: VkSampler
@@ -101,6 +99,10 @@ func size(texture: Texture): uint64 =
 
 func depth(texture: Texture): int =
   default(elementType(texture.data)).len
+
+func pointerOffset[T: SomeInteger](p: pointer, offset: T): pointer =
+  cast[pointer](cast[T](p) + offset)
+
 
 proc GetVkFormat(depth: int, usage: openArray[VkImageUsageFlagBits]): VkFormat =
   const DEPTH_FORMAT_MAP = [
@@ -330,9 +332,9 @@ template size(gpuArray: GPUArray): uint64 =
 template size(gpuValue: GPUValue): uint64 =
   sizeof(gpuValue.data).uint64
 
-template datapointer(gpuArray: GPUArray): pointer =
+template rawPointer(gpuArray: GPUArray): pointer =
   addr(gpuArray.data[0])
-template datapointer(gpuValue: GPUValue): pointer =
+template rawPointer(gpuValue: GPUValue): pointer =
   addr(gpuValue.data)
 
 proc RequiredMemorySize(buffer: VkBuffer): uint64 =
@@ -370,7 +372,7 @@ proc GetPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
   assert score > 0, "Unable to find integrated or discrete GPU"
 
 
-proc GetDirectMemoryTypeIndex(): uint32 =
+proc GetDirectMemoryType(): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))
 
@@ -396,72 +398,18 @@ proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
       return i
   assert false, &"Queue of type {qType} not found"
 
-proc GetQueue(device: VkDevice, queueFamilyIndex: uint32, qType: VkQueueFlagBits): VkQueue =
-  vkGetDeviceQueue(
-    device,
-    queueFamilyIndex,
-    0,
-    addr(result),
-  )
-
 proc GetSurfaceFormat(): VkFormat =
   # EVERY windows driver and almost every linux driver should support this
   VK_FORMAT_B8G8R8A8_SRGB
-
-template WithSingleUseCommandBuffer(cmd, body: untyped): untyped =
-  block:
-    var
-      commandBufferPool: VkCommandPool
-      createInfo = VkCommandPoolCreateInfo(
-        sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
-        queueFamilyIndex: vulkan.queueFamilyIndex,
-      )
-    checkVkResult vkCreateCommandPool(vulkan.device, addr createInfo, nil, addr(commandBufferPool))
-    var
-      `cmd` {.inject.}: VkCommandBuffer
-      allocInfo = VkCommandBufferAllocateInfo(
-        sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        commandPool: commandBufferPool,
-        level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        commandBufferCount: 1,
-      )
-    checkVkResult vulkan.device.vkAllocateCommandBuffers(addr allocInfo, addr(`cmd`))
-    var beginInfo = VkCommandBufferBeginInfo(
-      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-      flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
-    )
-    checkVkResult `cmd`.vkBeginCommandBuffer(addr beginInfo)
-
-    body
-
-    checkVkResult `cmd`.vkEndCommandBuffer()
-    var submitInfo = VkSubmitInfo(
-      sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
-      commandBufferCount: 1,
-      pCommandBuffers: addr(`cmd`),
-    )
-
-    var
-      fence: VkFence
-      fenceInfo = VkFenceCreateInfo(
-        sType: VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-        # flags: toBits [VK_FENCE_CREATE_SIGNALED_BIT]
-      )
-    checkVkResult vulkan.device.vkCreateFence(addr(fenceInfo), nil, addr(fence))
-    checkVkResult vkQueueSubmit(vulkan.queue, 1, addr(submitInfo), fence)
-    checkVkResult vkWaitForFences(vulkan.device, 1, addr fence, false, high(uint64))
-    vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
-
 
 proc UpdateGPUBuffer(gpuData: GPUData) =
   if gpuData.size == 0:
     return
   when UsesDirectMemory(gpuData):
-    copyMem(cast[pointer](cast[uint64](gpuData.buffer.memory.data) + gpuData.buffer.offset + gpuData.offset), gpuData.datapointer, gpuData.size)
+    copyMem(pointerOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
   else:
-    WithStagingBuffer(gpuData.buffer.vk, gpuData.buffer.vk.RequiredMemorySize(), GetDirectMemoryTypeIndex(), stagingPtr):
-      copyMem(stagingPtr, gpuData.datapointer, gpuData.size)
+    WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.buffer.vk.RequiredMemorySize(), GetDirectMemoryType(), stagingPtr):
+      copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
 
 proc UpdateAllGPUBuffers[T](value: T) =
   for name, fieldvalue in value.fieldPairs():
@@ -481,6 +429,7 @@ proc InitDescriptorSet(
     # when typeof(value) is Texture:
     # assert value.texture.vk.Valid
 
+  # TODO: missing stuff here? only for FiF, but not multiple different sets?
   # allocate
   var layouts = newSeqWith(descriptorSet.vk.len, layout)
   var allocInfo = VkDescriptorSetAllocateInfo(
@@ -491,7 +440,8 @@ proc InitDescriptorSet(
   )
   checkVkResult vkAllocateDescriptorSets(vulkan.device, addr(allocInfo), descriptorSet.vk.ToCPointer)
 
-  # write
+  # allocate seq with high cap to prevent realocation while adding to set
+  # (which invalidates pointers that are passed to the vulkan api call)
   var descriptorSetWrites = newSeqOfCap[VkWriteDescriptorSet](1024)
   var imageWrites = newSeqOfCap[VkDescriptorImageInfo](1024)
   var bufferWrites = newSeqOfCap[VkDescriptorBufferInfo](1024)
@@ -501,8 +451,8 @@ proc InitDescriptorSet(
       when typeof(fieldValue) is GPUValue:
         bufferWrites.add VkDescriptorBufferInfo(
           buffer: fieldValue.buffer.vk,
-          offset: fieldValue.buffer.offset,
-          range: fieldValue.buffer.size,
+          offset: fieldValue.offset,
+          range: fieldValue.size,
         )
         descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -533,7 +483,6 @@ proc InitDescriptorSet(
       elif typeof(fieldValue) is array:
         discard
         when elementType(fieldValue) is Texture:
-          echo "Add texture array descriptor set write for set " & $i & " " & fieldName
           for textureIndex in 0 ..< descriptorCount:
             imageWrites.add VkDescriptorImageInfo(
               sampler: fieldValue[textureIndex].sampler,
@@ -547,7 +496,7 @@ proc InitDescriptorSet(
             dstArrayElement: 0,
             descriptorType: descriptorType,
             descriptorCount: descriptorCount,
-            pImageInfo: addr(imageWrites[^fieldValue.len]),
+            pImageInfo: addr(imageWrites[^descriptorCount.int]),
             pBufferInfo: nil,
           )
         else:
@@ -555,7 +504,13 @@ proc InitDescriptorSet(
       else:
         {.error: "Unsupported descriptor type: " & tt.name(typeof(fieldValue)).}
 
-  vkUpdateDescriptorSets(vulkan.device, descriptorSetWrites.len.uint32, descriptorSetWrites.ToCPointer, 0, nil)
+  vkUpdateDescriptorSets(
+    device = vulkan.device,
+    descriptorWriteCount = descriptorSetWrites.len.uint32,
+    pDescriptorWrites = descriptorSetWrites.ToCPointer,
+    descriptorCopyCount = 0,
+    pDescriptorCopies = nil,
+  )
 
 converter toVkIndexType(indexType: IndexType): VkIndexType =
   case indexType:
@@ -974,7 +929,6 @@ proc AllocateIndirectMemory(size: uint64): IndirectGPUMemory =
 
 proc AllocateDirectMemory(size: uint64): DirectGPUMemory =
   result.size = size
-  result.needsFlush = true
 
   # find a good memory type
   var physicalProperties: VkPhysicalDeviceMemoryProperties
@@ -990,23 +944,22 @@ proc AllocateDirectMemory(size: uint64): DirectGPUMemory =
       if size > biggestHeap:
         biggestHeap = size
         memoryTypeIndex = i
-        result.needsFlush = not (VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in flags)
 
   assert memoryTypeIndex != high(uint32), "Unable to find indirect memory type"
-  result.vk = svkAllocateMemory(result.size, GetDirectMemoryTypeIndex())
+  result.vk = svkAllocateMemory(result.size, GetDirectMemoryType())
   checkVkResult vkMapMemory(
     device = vulkan.device,
     memory = result.vk,
     offset = 0'u64,
     size = result.size,
     flags = VkMemoryMapFlags(0),
-    ppData = addr(result.data)
+    ppData = addr(result.rawPointer)
   )
 
 proc AllocateIndirectBuffer(renderData: var RenderData, size: uint64, btype: BufferType) =
   if size == 0:
     return
-  var buffer = Buffer[IndirectGPUMemory](size: size)
+  var buffer = Buffer[IndirectGPUMemory](size: size, rawPointer: nil)
 
   let usageFlags = case btype:
     of VertexBuffer: [VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
@@ -1018,10 +971,9 @@ proc AllocateIndirectBuffer(renderData: var RenderData, size: uint64, btype: Buf
   # TODO: use RequiredMemorySize()
   for (memory, usedOffset) in renderData.indirectMemory.mitems:
     if memory.size - usedOffset >= size:
-      buffer.offset = usedOffset
       # create buffer
       buffer.vk = svkCreateBuffer(buffer.size, usageFlags)
-      checkVkResult vkBindBufferMemory(vulkan.device, buffer.vk, memory.vk, buffer.offset)
+      checkVkResult vkBindBufferMemory(vulkan.device, buffer.vk, memory.vk, usedOffset)
       renderData.indirectBuffers.add (buffer, btype, 0'u64)
       # update memory area offset
       usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
@@ -1045,9 +997,9 @@ proc AllocateDirectBuffer(renderData: var RenderData, size: uint64, btype: Buffe
   # TODO: use RequiredMemorySize()
   for (memory, usedOffset) in renderData.directMemory.mitems:
     if memory.size - usedOffset >= size:
-      buffer.offset = usedOffset
       buffer.vk = svkCreateBuffer(buffer.size, usageFlags)
-      checkVkResult vkBindBufferMemory(vulkan.device, buffer.vk, memory.vk, buffer.offset)
+      checkVkResult vkBindBufferMemory(vulkan.device, buffer.vk, memory.vk, usedOffset)
+      buffer.rawPointer = pointerOffset(memory.rawPointer, usedOffset)
       renderData.directBuffers.add (buffer, btype, 0'u64)
       # update memory area offset
       usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
@@ -1289,7 +1241,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 
   # data transfer and layout transition
   TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-  WithStagingBuffer((texture.vk, texture.imageview, texture.width, texture.height), size, GetDirectMemoryTypeIndex(), stagingPtr):
+  WithStagingBuffer((texture.vk, texture.imageview, texture.width, texture.height), size, GetDirectMemoryType(), stagingPtr):
     copyMem(stagingPtr, texture.data.ToCPointer, size)
     TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 
@@ -1299,7 +1251,13 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 proc UploadTextures(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
   for name, value in fieldPairs(descriptorSet.data):
     when typeof(value) is Texture:
+      echo "Upload texture '", name, "'"
       renderdata.createTextureImage(value)
+    elif typeof(value) is array:
+      when elementType(value) is Texture:
+        echo "Upload texture ARRAY '", name, "'"
+        for texture in value.mitems:
+          renderdata.createTextureImage(texture)
 
 proc HasGPUValueField[T](name: static string): bool {.compileTime.} =
   for fieldname, value in default(T).fieldPairs():
@@ -1480,7 +1438,7 @@ when isMainModule:
     device: dev,
     physicalDevice: pDevice,
     queueFamilyIndex: qfi,
-    queue: dev.GetQueue(qfi, VK_QUEUE_GRAPHICS_BIT)
+    queue: svkGetDeviceQueue(dev, qfi, VK_QUEUE_GRAPHICS_BIT)
   )
 
   var myMesh1 = MeshA(
@@ -1488,15 +1446,16 @@ when isMainModule:
   )
   var uniforms1 = DescriptorSet[UniformsA, MaterialSet](
     data: UniformsA(
+      defaultTexture: Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
       materials: GPUValue[array[3, MaterialA], IndirectGPUMemory](data: [
         MaterialA(reflection: 0, baseColor: NewVec3f(1, 0, 0)),
         MaterialA(reflection: 0.1, baseColor: NewVec3f(0, 1, 0)),
         MaterialA(reflection: 0.5, baseColor: NewVec3f(0, 0, 1)),
     ]),
     materialTextures: [
-      Texture[TVec3[uint8], IndirectGPUMemory](),
-      Texture[TVec3[uint8], IndirectGPUMemory](),
-      Texture[TVec3[uint8], IndirectGPUMemory](),
+      Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
     ]
   )
   )
@@ -1504,7 +1463,12 @@ when isMainModule:
     rotation: GPUArray[Vec4f, IndirectGPUMemory](data: @[NewVec4f(1, 0, 0, 0.1), NewVec4f(0, 1, 0, 0.1)]),
     objPosition: GPUArray[Vec3f, IndirectGPUMemory](data: @[NewVec3f(0, 0, 0), NewVec3f(1, 1, 1)]),
   )
-  var myGlobals = DescriptorSet[GlobalsA, GlobalSet]()
+  var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
+    data: GlobalsA(
+      fontAtlas: Texture[TVec3[uint8], IndirectGPUMemory](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      settings: GPUValue[ShaderSettings, IndirectGPUMemory](data: ShaderSettings(gamma: 1.0))
+    )
+  )
 
   # setup for rendering (TODO: swapchain & framebuffers)
   let renderpass = CreateRenderPass(GetSurfaceFormat())
@@ -1567,11 +1531,8 @@ when isMainModule:
   renderdata.AssignIndirectBuffers(UniformBuffer, myGlobals)
   renderdata.AssignDirectBuffers(UniformBuffer, myGlobals)
 
-  renderdata.UploadTextures(uniforms1)
   renderdata.UploadTextures(myGlobals)
-
-  echo uniforms1.data.materialTextures
-
+  renderdata.UploadTextures(uniforms1)
 
   # copy everything to GPU
   echo "Copying all data to GPU memory"
