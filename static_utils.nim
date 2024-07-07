@@ -1291,14 +1291,14 @@ when isMainModule:
       reflection: float32
       baseColor: Vec3f
     UniformsA = object
-      defaultTexture: Texture[TVec3[uint8]]
+      defaultTexture: Texture[TVec4[uint8]]
       defaultMaterial: GPUValue[MaterialA, UniformBuffer]
       materials: GPUValue[array[3, MaterialA], UniformBuffer]
-      materialTextures: array[3, Texture[TVec3[uint8]]]
+      materialTextures: array[3, Texture[TVec4[uint8]]]
     ShaderSettings = object
       gamma: float32
     GlobalsA = object
-      fontAtlas: Texture[TVec3[uint8]]
+      fontAtlas: Texture[TVec4[uint8]]
       settings: GPUValue[ShaderSettings, UniformBuffer]
 
     ShaderA = object
@@ -1352,16 +1352,16 @@ when isMainModule:
   )
   var uniforms1 = DescriptorSet[UniformsA, MaterialSet](
     data: UniformsA(
-      defaultTexture: Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      defaultTexture: Texture[TVec4[uint8]](width: 1, height: 1, data: @[TVec4[uint8]([0'u8, 0'u8, 0'u8, 1'u8])]),
       materials: GPUValue[array[3, MaterialA], UniformBuffer](data: [
         MaterialA(reflection: 0, baseColor: NewVec3f(1, 0, 0)),
         MaterialA(reflection: 0.1, baseColor: NewVec3f(0, 1, 0)),
         MaterialA(reflection: 0.5, baseColor: NewVec3f(0, 0, 1)),
     ]),
     materialTextures: [
-      Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
-      Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
-      Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      Texture[TVec4[uint8]](width: 1, height: 1, data: @[TVec4[uint8]([0'u8, 0'u8, 0'u8, 1'u8])]),
+      Texture[TVec4[uint8]](width: 1, height: 1, data: @[TVec4[uint8]([0'u8, 0'u8, 0'u8, 1'u8])]),
+      Texture[TVec4[uint8]](width: 1, height: 1, data: @[TVec4[uint8]([0'u8, 0'u8, 0'u8, 1'u8])]),
     ]
   )
   )
@@ -1371,7 +1371,7 @@ when isMainModule:
   )
   var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
     data: GlobalsA(
-      fontAtlas: Texture[TVec3[uint8]](width: 1, height: 1, data: @[TVec3[uint8]([0'u8, 0'u8, 0'u8])]),
+      fontAtlas: Texture[TVec4[uint8]](width: 1, height: 1, data: @[TVec4[uint8]([0'u8, 0'u8, 0'u8, 1'u8])]),
       settings: GPUValue[ShaderSettings, UniformBuffer](data: ShaderSettings(gamma: 1.0))
     )
   )
