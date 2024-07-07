@@ -1,3 +1,9 @@
+import std/typetraits
+import std/strutils
+import std/paths
+import std/os
+import std/strformat
+
 type
   HorizontalAlignment* = enum
     Left

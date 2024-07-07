@@ -1,28 +1,21 @@
+import std/algorithm
+import std/dynlib
+import std/logging
 import std/math
-export math
+import std/macros
+import std/os
+import std/paths
+import std/random
+import std/sequtils
+import std/strformat
+import std/strutils
+import std/tables
+import std/typetraits as typetraits
 
-import ./core/audiotypes
-import ./core/buildconfig
-import ./core/color
-import ./core/constants
-import ./core/dynamic_arrays
-import ./core/fonttypes
-import ./core/gpu_types
-import ./core/imagetypes
-import ./core/matrix
-import ./core/utils
-import ./core/vector
-import ./core/vulkanapi
+const RESOURCEROOT = "resources"
 
-export audiotypes
-export buildconfig
-export color
-export constants
-export dynamic_arrays
-export fonttypes
-export gpu_types
-export imagetypes
-export matrix
-export utils
-export vector
-export vulkanapi
+include ./core/utils
+include ./core/vulkan/api
+include ./core/buildconfig
+include ./core/vector
+include ./core/matrix

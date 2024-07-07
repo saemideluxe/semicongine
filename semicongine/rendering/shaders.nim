@@ -1,0 +1,342 @@
+type
+  ShaderObject[TShader] = object
+    vertexShader: VkShaderModule
+    fragmentShader: VkShaderModule
+
+proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileTime.} =
+  const GLSL_VERSION = "450"
+  var vsInput: seq[string]
+  var vsOutput: seq[string]
+  var fsInput: seq[string]
+  var fsOutput: seq[string]
+  var uniforms: seq[string]
+  var samplers: seq[string]
+  var vsInputLocation = 0'u32
+  var passLocation = 0
+  var fsOutputLocation = 0
+
+  var descriptorSetCount = 0
+  for fieldname, value in fieldPairs(shader):
+    # vertex shader inputs
+    when hasCustomPragma(value, VertexAttribute) or hasCustomPragma(value, InstanceAttribute):
+      assert typeof(value) is SupportedGPUType
+      vsInput.add "layout(location = " & $vsInputLocation & ") in " & GlslType(value) & " " & fieldname & ";"
+      for j in 0 ..< NumberOfVertexInputAttributeDescriptors(value):
+        vsInputLocation += NLocationSlots(value)
+
+    # intermediate values, passed between shaders
+    elif hasCustomPragma(value, Pass) or hasCustomPragma(value, PassFlat):
+      let flat = if hasCustomPragma(value, PassFlat): "flat " else: ""
+      vsOutput.add "layout(location = " & $passLocation & ") " & flat & "out " & GlslType(value) & " " & fieldname & ";"
+      fsInput.add "layout(location = " & $passLocation & ") " & flat & "in " & GlslType(value) & " " & fieldname & ";"
+      passLocation.inc
+
+    # fragment shader output
+    elif hasCustomPragma(value, ShaderOutput):
+      fsOutput.add &"layout(location = " & $fsOutputLocation & ") out " & GlslType(value) & " " & fieldname & ";"
+      fsOutputLocation.inc
+
+    # descriptor sets
+    # need to consider 4 cases: uniform block, texture, uniform block array, texture array
+    elif typeof(value) is DescriptorSet:
+      assert descriptorSetCount <= DescriptorSetType.high.int, &"{typetraits.name(TShader)}: maximum {DescriptorSetType.high} allowed"
+
+      var descriptorBinding = 0
+      for descriptorName, descriptorValue in fieldPairs(value.data):
+
+        when typeof(descriptorValue) is Texture:
+          samplers.add "layout(set=" & $descriptorSetCount & ", binding = " & $descriptorBinding & ") uniform " & GlslType(descriptorValue) & " " & descriptorName & ";"
+          descriptorBinding.inc
+
+        elif typeof(descriptorValue) is GPUValue:
+          uniforms.add "layout(set=" & $descriptorSetCount & ", binding = " & $descriptorBinding & ") uniform T" & descriptorName & " {"
+          when typeof(descriptorValue.data) is object:
+            for blockFieldName, blockFieldValue in descriptorValue.data.fieldPairs():
+              assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
+              uniforms.add "  " & GlslType(blockFieldValue) & " " & blockFieldName & ";"
+            uniforms.add "} " & descriptorName & ";"
+          elif typeof(descriptorValue.data) is array:
+            for blockFieldName, blockFieldValue in default(elementType(descriptorValue.data)).fieldPairs():
+              assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
+              uniforms.add "  " & GlslType(blockFieldValue) & " " & blockFieldName & ";"
+            uniforms.add "} " & descriptorName & "[" & $descriptorValue.data.len & "];"
+          descriptorBinding.inc
+        elif typeof(descriptorValue) is array:
+          when elementType(descriptorValue) is Texture:
+            let arrayDecl = "[" & $typeof(descriptorValue).len & "]"
+            samplers.add "layout(set=" & $descriptorSetCount & ", binding = " & $descriptorBinding & ") uniform " & GlslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"
+            descriptorBinding.inc
+          else:
+            {.error: "Unsupported shader descriptor field " & descriptorName.}
+      descriptorSetCount.inc
+    elif fieldname in ["vertexCode", "fragmentCode"]:
+      discard
+    else:
+      {.error: "Unsupported shader field '" & typetraits.name(TShader) & "." & fieldname & "' of type " & typetraits.name(typeof(value)).}
+
+  result[0] = (@[&"#version {GLSL_VERSION}", "#extension GL_EXT_scalar_block_layout : require", ""] &
+    vsInput &
+    uniforms &
+    samplers &
+    vsOutput &
+    @[shader.vertexCode]).join("\n")
+
+  result[1] = (@[&"#version {GLSL_VERSION}", "#extension GL_EXT_scalar_block_layout : require", ""] &
+    fsInput &
+    uniforms &
+    samplers &
+    fsOutput &
+    @[shader.fragmentCode]).join("\n")
+
+proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string): seq[uint32] {.compileTime.} =
+  func stage2string(stage: VkShaderStageFlagBits): string {.compileTime.} =
+    case stage
+    of VK_SHADER_STAGE_VERTEX_BIT: "vert"
+    of VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT: "tesc"
+    of VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT: "tese"
+    of VK_SHADER_STAGE_GEOMETRY_BIT: "geom"
+    of VK_SHADER_STAGE_FRAGMENT_BIT: "frag"
+    of VK_SHADER_STAGE_COMPUTE_BIT: "comp"
+    else: ""
+
+  when defined(nimcheck): # will not run if nimcheck is running
+    return result
+
+  let
+    stagename = stage2string(stage)
+    shaderHash = hash(shaderSource)
+    shaderfile = getTempDir() / &"shader_{shaderHash}.{stagename}"
+
+  if not shaderfile.fileExists:
+    echo "shader of type ", stage
+    for i, line in enumerate(shaderSource.splitlines()):
+      echo "  ", i + 1, " ", line
+    # var glslExe = currentSourcePath.parentDir.parentDir.parentDir / "tools" / "glslangValidator"
+    var glslExe = currentSourcePath.parentDir / "tools" / "glslangValidator"
+    when defined(windows):
+      glslExe = glslExe & "." & ExeExt
+    let command = &"{glslExe} --entry-point main -V --stdin -S {stagename} -o {shaderfile}"
+    echo "run: ", command
+    discard StaticExecChecked(
+        command = command,
+        input = shaderSource
+    )
+  else:
+    echo &"shaderfile {shaderfile} is up-to-date"
+
+  when defined(mingw) and defined(linux): # required for crosscompilation, path separators get messed up
+    let shaderbinary = staticRead shaderfile.replace("\\", "/")
+  else:
+    let shaderbinary = staticRead shaderfile
+
+  var i = 0
+  while i < shaderbinary.len:
+    result.add(
+      (uint32(shaderbinary[i + 0]) shl 0) or
+      (uint32(shaderbinary[i + 1]) shl 8) or
+      (uint32(shaderbinary[i + 2]) shl 16) or
+      (uint32(shaderbinary[i + 3]) shl 24)
+    )
+    i += 4
+
+
+proc CompileShader[TShader](shader: static TShader): ShaderObject[TShader] =
+  const (vertexShaderSource, fragmentShaderSource) = generateShaderSource(shader)
+
+  let vertexBinary = compileGlslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderSource)
+  let fragmentBinary = compileGlslToSPIRV(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderSource)
+
+  var createInfoVertex = VkShaderModuleCreateInfo(
+    sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+    codeSize: csize_t(vertexBinary.len * sizeof(uint32)),
+    pCode: vertexBinary.ToCPointer,
+  )
+  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoVertex), nil, addr(result.vertexShader))
+  var createInfoFragment = VkShaderModuleCreateInfo(
+    sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+    codeSize: csize_t(fragmentBinary.len * sizeof(uint32)),
+    pCode: fragmentBinary.ToCPointer,
+  )
+  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoFragment), nil, addr(result.fragmentShader))
+
+template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename, body: untyped): untyped =
+  for theFieldname, value in fieldPairs(shader):
+    when hasCustomPragma(value, VertexAttribute) or hasCustomPragma(value, InstanceAttribute):
+      when not typeof(value) is seq:
+        {.error: "field '" & theFieldname & "' needs to be a seq".}
+      when not typeof(value) is SupportedGPUType:
+        {.error: "field '" & theFieldname & "' is not a supported GPU type".}
+      block:
+        const `fieldname` {.inject.} = theFieldname
+        let `valuename` {.inject.} = value
+        const `isinstancename` {.inject.} = hasCustomPragma(value, InstanceAttribute)
+        body
+
+proc CreatePipeline[TShader](
+  renderPass: VkRenderPass,
+  shader: ShaderObject[TShader],
+  topology: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+  polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
+  cullMode: VkCullModeFlagBits = VK_CULL_MODE_BACK_BIT,
+  frontFace: VkFrontFace = VK_FRONT_FACE_CLOCKWISE,
+  descriptorPoolLimit = 1024
+): Pipeline[TShader] =
+  # create pipeline
+
+  for theFieldname, value in fieldPairs(default(TShader)):
+    when typeof(value) is DescriptorSet:
+      var layoutbindings: seq[VkDescriptorSetLayoutBinding]
+      ForDescriptorFields(value.data, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
+        layoutbindings.add VkDescriptorSetLayoutBinding(
+          binding: descriptorBindingNumber,
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
+          pImmutableSamplers: nil,
+        )
+      var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
+        sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        bindingCount: layoutbindings.len.uint32,
+        pBindings: layoutbindings.ToCPointer
+      )
+      checkVkResult vkCreateDescriptorSetLayout(
+        vulkan.device,
+        addr(layoutCreateInfo),
+        nil,
+        addr(result.descriptorSetLayouts[value.sType])
+      )
+  let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
+    sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+    setLayoutCount: result.descriptorSetLayouts.len.uint32,
+    pSetLayouts: result.descriptorSetLayouts.ToCPointer,
+    # pushConstantRangeCount: uint32(pushConstants.len),
+      # pPushConstantRanges: pushConstants.ToCPointer,
+  )
+  checkVkResult vkCreatePipelineLayout(vulkan.device, addr(pipelineLayoutInfo), nil, addr(result.layout))
+
+  let stages = [
+    VkPipelineShaderStageCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+      stage: VK_SHADER_STAGE_VERTEX_BIT,
+      module: shader.vertexShader,
+      pName: "main",
+    ),
+    VkPipelineShaderStageCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+      stage: VK_SHADER_STAGE_FRAGMENT_BIT,
+      module: shader.fragmentShader,
+      pName: "main",
+    ),
+  ]
+  var
+    bindings: seq[VkVertexInputBindingDescription]
+    attributes: seq[VkVertexInputAttributeDescription]
+  var inputBindingNumber = 0'u32
+  var location = 0'u32
+  ForVertexDataFields(default(TShader), fieldname, value, isInstanceAttr):
+    bindings.add VkVertexInputBindingDescription(
+      binding: inputBindingNumber,
+      stride: sizeof(value).uint32,
+      inputRate: if isInstanceAttr: VK_VERTEX_INPUT_RATE_INSTANCE else: VK_VERTEX_INPUT_RATE_VERTEX,
+    )
+    # allows to submit larger data structures like Mat44, for most other types will be 1
+    let perDescriptorSize = sizeof(value).uint32 div NumberOfVertexInputAttributeDescriptors(value)
+    for i in 0'u32 ..< NumberOfVertexInputAttributeDescriptors(value):
+      attributes.add VkVertexInputAttributeDescription(
+        binding: inputBindingNumber,
+        location: location,
+        format: VkType(value),
+        offset: i * perDescriptorSize,
+      )
+      location += NLocationSlots(value)
+    inc inputBindingNumber
+
+  let
+    vertexInputInfo = VkPipelineVertexInputStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+      vertexBindingDescriptionCount: uint32(bindings.len),
+      pVertexBindingDescriptions: bindings.ToCPointer,
+      vertexAttributeDescriptionCount: uint32(attributes.len),
+      pVertexAttributeDescriptions: attributes.ToCPointer,
+    )
+    inputAssembly = VkPipelineInputAssemblyStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+      topology: topology,
+      primitiveRestartEnable: false,
+    )
+    viewportState = VkPipelineViewportStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+      viewportCount: 1,
+      scissorCount: 1,
+    )
+    rasterizer = VkPipelineRasterizationStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+      depthClampEnable: VK_FALSE,
+      rasterizerDiscardEnable: VK_FALSE,
+      polygonMode: polygonMode,
+      lineWidth: 1.0,
+      cullMode: toBits [cullMode],
+      frontFace: frontFace,
+      depthBiasEnable: VK_FALSE,
+      depthBiasConstantFactor: 0.0,
+      depthBiasClamp: 0.0,
+      depthBiasSlopeFactor: 0.0,
+    )
+    multisampling = VkPipelineMultisampleStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+      sampleShadingEnable: VK_FALSE,
+      rasterizationSamples: VK_SAMPLE_COUNT_1_BIT,
+      minSampleShading: 1.0,
+      pSampleMask: nil,
+      alphaToCoverageEnable: VK_FALSE,
+      alphaToOneEnable: VK_FALSE,
+    )
+    colorBlendAttachment = VkPipelineColorBlendAttachmentState(
+      colorWriteMask: toBits [VK_COLOR_COMPONENT_R_BIT, VK_COLOR_COMPONENT_G_BIT, VK_COLOR_COMPONENT_B_BIT, VK_COLOR_COMPONENT_A_BIT],
+      blendEnable: VK_TRUE,
+      srcColorBlendFactor: VK_BLEND_FACTOR_SRC_ALPHA,
+      dstColorBlendFactor: VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+      colorBlendOp: VK_BLEND_OP_ADD,
+      srcAlphaBlendFactor: VK_BLEND_FACTOR_ONE,
+      dstAlphaBlendFactor: VK_BLEND_FACTOR_ZERO,
+      alphaBlendOp: VK_BLEND_OP_ADD,
+    )
+    colorBlending = VkPipelineColorBlendStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+      logicOpEnable: false,
+      attachmentCount: 1,
+      pAttachments: addr(colorBlendAttachment),
+    )
+    dynamicStates = [VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR]
+    dynamicState = VkPipelineDynamicStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+      dynamicStateCount: dynamicStates.len.uint32,
+      pDynamicStates: dynamicStates.ToCPointer,
+    )
+  let createInfo = VkGraphicsPipelineCreateInfo(
+    sType: VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+    stageCount: 2,
+    pStages: stages.ToCPointer,
+    pVertexInputState: addr(vertexInputInfo),
+    pInputAssemblyState: addr(inputAssembly),
+    pViewportState: addr(viewportState),
+    pRasterizationState: addr(rasterizer),
+    pMultisampleState: addr(multisampling),
+    pDepthStencilState: nil,
+    pColorBlendState: addr(colorBlending),
+    pDynamicState: addr(dynamicState),
+    layout: result.layout,
+    renderPass: renderPass,
+    subpass: 0,
+    basePipelineHandle: VkPipeline(0),
+    basePipelineIndex: -1,
+  )
+  checkVkResult vkCreateGraphicsPipelines(
+    vulkan.device,
+    VkPipelineCache(0),
+    1,
+    addr(createInfo),
+    nil,
+    addr(result.vk)
+  )
+

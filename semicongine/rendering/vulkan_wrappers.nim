@@ -1,7 +1,3 @@
-import std/strformat
-
-import semicongine/core/vulkanapi
-
 type
   VulkanGlobals* = object
     instance*: VkInstance

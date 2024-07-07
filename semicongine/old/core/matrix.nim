@@ -1,3 +1,12 @@
+import std/math
+import std/macros
+import std/random
+import std/strutils
+import std/strformat
+import std/typetraits
+
+import ./vector
+
 export math
 
 type
@@ -50,7 +59,7 @@ func MakeUnit4*[T: SomeNumber](): auto {.compiletime.} = TMat4[T](data: [
 # generates constants: Unit
 # Also for Y, Z, R, G, B
 # not sure if this is necessary or even a good idea...
-macro generateAllMatrixConsts() =
+macro generateAllConsts() =
   result = newStmtList()
   for theType in ["int", "int8", "int16", "int32", "int64", "float", "float32", "float64"]:
     var typename = theType[0 .. 0]
@@ -71,7 +80,7 @@ macro generateAllMatrixConsts() =
       newCall(nnkBracketExpr.newTree(ident("MakeUnit4"), ident(theType)))
     ))
 
-generateAllMatrixConsts()
+generateAllConsts()
 
 const Unit2* = MakeUnit2[float32]()
 const Unit3* = MakeUnit3[float32]()
@@ -103,7 +112,7 @@ template matlen(m: typedesc): int =
   elif m is TMat4: 16
 
 
-func toString[T: TMat](value: T): string =
+func toString[T](value: T): string =
   var
     strvalues: seq[string]
     maxwidth = 0
@@ -417,7 +426,7 @@ func Inversed*(m: Mat4): Mat4 =
 
 
 # call e.g. TMat32[int]().randomized() to get a random matrix
-template makeRandomMatrixInit(mattype: typedesc) =
+template makeRandomInit(mattype: typedesc) =
   proc Randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
     for i in 0 ..< result.data.len:
       result.data[i] = rand(low(typeof(m.data[0])) .. high(typeof(m.data[0])))
@@ -425,13 +434,13 @@ template makeRandomMatrixInit(mattype: typedesc) =
     for i in 0 ..< result.data.len:
       result.data[i] = rand(T(1.0))
 
-makeRandomMatrixInit(TMat2)
-makeRandomMatrixInit(TMat23)
-makeRandomMatrixInit(TMat32)
-makeRandomMatrixInit(TMat3)
-makeRandomMatrixInit(TMat34)
-makeRandomMatrixInit(TMat43)
-makeRandomMatrixInit(TMat4)
+makeRandomInit(TMat2)
+makeRandomInit(TMat23)
+makeRandomInit(TMat32)
+makeRandomInit(TMat3)
+makeRandomInit(TMat34)
+makeRandomInit(TMat43)
+makeRandomInit(TMat4)
 
 func Perspective*(fovy, aspect, zNear, zFar: float32): Mat4 =
   let tanHalfFovy = tan(fovy / 2)

@@ -1,3 +1,12 @@
+import std/random
+import std/math
+import std/strutils
+import std/strformat
+import std/macros
+import std/typetraits
+import std/tables
+
+import ./vulkanapi
 
 type
   TVec1*[T: SomeNumber] = array[1, T]
@@ -66,7 +75,7 @@ func NewVec4u*(x = 0'u32, y = 0'u32, z = 0'u32, a = 0'u32): auto =
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
 # Also for Y, Z, R, G, B and One
 # not sure if this is necessary or even a good idea...
-macro generateAllVectorConsts() =
+macro generateAllConsts() =
   result = newStmtList()
   for component in ["X", "Y", "Z", "R", "G", "B", "One2", "One3", "One4"]:
     for theType in ["int", "int8", "int16", "int32", "int64", "float", "float32", "float64"]:
@@ -82,7 +91,7 @@ macro generateAllVectorConsts() =
         )
       )
 
-generateAllVectorConsts()
+generateAllConsts()
 
 const X* = ConstX[float32]()
 const Y* = ConstY[float32]()
@@ -102,7 +111,7 @@ func To*[T](v: TVec2): auto = TVec2([T(v[0]), T(v[1])])
 func To*[T](v: TVec3): auto = TVec3([T(v[0]), T(v[1]), T(v[2])])
 func To*[T](v: TVec4): auto = TVec4([T(v[0]), T(v[1]), T(v[2]), T(v[3])])
 
-func toString[T: TVec](value: T): string =
+func toString[T](value: T): string =
   var items: seq[string]
   for item in value:
     items.add(&"{item.float:.5f}")
@@ -348,7 +357,7 @@ macro createVectorAttribAccessorFuncs() =
 createVectorAttribAccessorFuncs()
 
 # call e.g. Vec2[int]().randomized() to get a random matrix
-template makeRandomVectorInit(mattype: typedesc) =
+template makeRandomInit(mattype: typedesc) =
   proc Randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
     for i in 0 ..< result.len:
       result[i] = rand(low(typeof(m[0])) .. high(typeof(m[0])))
@@ -356,10 +365,10 @@ template makeRandomVectorInit(mattype: typedesc) =
     for i in 0 ..< result.len:
       result[i] = rand(1.0)
 
-makeRandomVectorInit(TVec1)
-makeRandomVectorInit(TVec2)
-makeRandomVectorInit(TVec3)
-makeRandomVectorInit(TVec4)
+makeRandomInit(TVec1)
+makeRandomInit(TVec2)
+makeRandomInit(TVec3)
+makeRandomInit(TVec4)
 
 converter Vec2VkExtent*(vec: TVec2[uint32]): VkExtent2D = VkExtent2D(width: vec[0], height: vec[1])
 converter Vec3VkExtent*(vec: TVec2[uint32]): VkExtent3D = VkExtent3D(width: vec[0], height: vec[1], depth: vec[2])

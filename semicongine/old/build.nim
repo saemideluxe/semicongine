@@ -4,7 +4,8 @@ import std/strformat
 import std/os
 import std/strutils
 
-include ./core/globals
+import ./core/audiotypes
+import ./core/constants
 
 const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("tools/blender_gltf_converter.py")
 const STEAMCMD_ZIP = currentSourcePath().parentDir().parentDir().joinPath("tools/steamcmd.zip")

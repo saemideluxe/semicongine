@@ -1,4 +1,8 @@
-const ENGINENAME = "semicongine"
+import std/strutils
+import std/logging
+import std/os
+
+import ./constants
 
 # checks required build options:
 static:
