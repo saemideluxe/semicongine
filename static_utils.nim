@@ -60,12 +60,10 @@ type
 
   Texture[T: TextureType] = object
     vk: VkImage
-    memory: MemoryBlock
-    format: VkFormat
     imageview: VkImageView
     sampler: VkSampler
-    offset: uint64
-    size: uint64
+    # offset: uint64
+    # size: uint64
     width: uint32
     height: uint32
     data: seq[T]
@@ -95,9 +93,6 @@ type
     descriptorPool: VkDescriptorPool
     memory: array[VK_MAX_MEMORY_TYPES.int, seq[MemoryBlock]]
     buffers: array[BufferType, seq[Buffer]]
-
-func size(texture: Texture): uint64 =
-  texture.data.len * sizeof(elementType(texture.data))
 
 func depth(texture: Texture): int =
   default(elementType(texture.data)).len
@@ -330,10 +325,15 @@ func NLocationSlots[T: SupportedGPUType|Texture](value: T): uint32 =
     return 1
 
 template sType(descriptorSet: DescriptorSet): untyped =
-  get(genericParams(typeof(gpuData)), 1)
+  get(genericParams(typeof(descriptorSet)), 1)
+
+# template bufferType[T: SupportedGPUType, TBuffer: static BufferType](gpuArray: GPUArray[T, TBuffer]): untyped =
+  # TBuffer
+# template bufferType[T: SupportedGPUType, TBuffer: static BufferType](gpuValue: GPUValue[T, TBuffer]): untyped =
+  # TBuffer
 
 template bufferType(gpuData: GPUData): untyped =
-  get(genericParams(typeof(gpuData)), 1)
+  typeof(gpuData).TBuffer
 func NeedsMapping(bType: BufferType): bool =
   bType in [VertexBufferMapped, IndexBufferMapped, UniformBufferMapped]
 template NeedsMapping(gpuData: GPUData): untyped =
@@ -343,6 +343,8 @@ template size(gpuArray: GPUArray): uint64 =
   (gpuArray.data.len * sizeof(elementType(gpuArray.data))).uint64
 template size(gpuValue: GPUValue): uint64 =
   sizeof(gpuValue.data).uint64
+func size(texture: Texture): uint64 =
+  texture.data.len.uint64 * sizeof(elementType(texture.data)).uint64
 
 template rawPointer(gpuArray: GPUArray): pointer =
   addr(gpuArray.data[0])
@@ -358,6 +360,7 @@ proc GetPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
   var score = 0'u32
   for pDevice in devices:
     var props: VkPhysicalDeviceProperties
+    # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
     vkGetPhysicalDeviceProperties(pDevice, addr(props))
     if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU and props.limits.maxImageDimension2D > score:
       score = props.limits.maxImageDimension2D
@@ -366,6 +369,7 @@ proc GetPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
   if score == 0:
     for pDevice in devices:
       var props: VkPhysicalDeviceProperties
+      # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
       vkGetPhysicalDeviceProperties(pDevice, addr(props))
       if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU and props.limits.maxImageDimension2D > score:
         score = props.limits.maxImageDimension2D
@@ -898,7 +902,7 @@ proc FlushAllMemory(renderData: RenderData) =
         flushRegions.add VkMappedMemoryRange(
           sType: VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
           memory: memoryBlock.vk,
-          size: memoryBlock.offsetNextFree,
+          size: alignedTo(memoryBlock.offsetNextFree, svkGetPhysicalDeviceProperties().limits.nonCoherentAtomSize),
         )
   if flushRegions.len > 0:
     checkVkResult vkFlushMappedMemoryRanges(vulkan.device, flushRegions.len.uint32, flushRegions.ToCPointer())
@@ -924,7 +928,7 @@ proc AllocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   if selectedBlockI < 0:
     selectedBlockI = renderData.memory[memoryType].len
     renderData.memory[memoryType].add AllocateNewMemoryBlock(
-      size = max(size, MEMORY_BLOCK_ALLOCATION_SIZE),
+      size = max(memoryRequirements.size, MEMORY_BLOCK_ALLOCATION_SIZE),
       mType = memoryType
     )
 
@@ -958,8 +962,7 @@ proc AssignBuffers[T](renderdata: var RenderData, data: var T) =
         selectedBufferI = renderdata.buffers[value.bufferType].len
         renderdata.buffers[value.bufferType].add renderdata.AllocateNewBuffer(
           size = max(value.size, BUFFER_ALLOCATION_SIZE),
-          bType = value.bufferType,
-          mappable = value.NeedsMapping,
+          bufferType = value.bufferType,
         )
 
       # assigne value
@@ -971,6 +974,8 @@ proc AssignBuffers[T](renderdata: var RenderData, data: var T) =
       value.buffer = selectedBuffer
       value.offset = renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree
       renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree += value.size
+proc AssignBuffers(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
+  AssignBuffers(renderdata, descriptorSet.data)
 
 proc UpdateGPUBuffer(gpuData: GPUData) =
   if gpuData.size == 0:
@@ -978,7 +983,7 @@ proc UpdateGPUBuffer(gpuData: GPUData) =
   when NeedsMapping(gpuData):
     copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
   else:
-    WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.buffer.size, stagingPtr):
+    WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
       copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
 
 proc UpdateAllGPUBuffers[T](value: T) =
@@ -1099,38 +1104,55 @@ proc createSampler(
 
 proc createTextureImage(renderData: var RenderData, texture: var Texture) =
   assert texture.vk == VkImage(0)
-  assert texture.offset == 0
   const usage = [VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
+  let format = GetVkFormat(texture.depth, usage = usage)
 
-  texture.format = GetVkFormat(texture.depth, usage = usage)
-  texture.vk = svkCreate2DImage(texture.width, texture.height, texture.format, usage)
-  let reqs = texture.vk.svkGetImageMemoryRequirements()
+  texture.vk = svkCreate2DImage(texture.width, texture.height, format, usage)
+  texture.sampler = createSampler()
 
-  # TODO
-
-  for (memory, usedOffset) in renderData.indirectMemory.mitems:
-    if memory.size - usedOffset >= size:
-      texture.memory = memory
-      texture.offset = usedOffset
-      # update memory area offset
-      usedOffset = alignedTo(usedOffset + size, MEMORY_ALIGNMENT)
+  let memoryRequirements = texture.vk.svkGetImageMemoryRequirements()
+  let memoryType = BestMemory(mappable = false, filter = memoryRequirements.memoryTypes)
+  # check if there is an existing allocated memory block that is large enough to be used
+  var selectedBlockI = -1
+  for i in 0 ..< renderData.memory[memoryType].len:
+    let memoryBlock = renderData.memory[memoryType][i]
+    if memoryBlock.size - alignedTo(memoryBlock.offsetNextFree, memoryRequirements.alignment) >= memoryRequirements.size:
+      selectedBlockI = i
       break
+  # otherwise, allocate a new block of memory and use that
+  if selectedBlockI < 0:
+    selectedBlockI = renderData.memory[memoryType].len
+    renderData.memory[memoryType].add AllocateNewMemoryBlock(
+      size = max(memoryRequirements.size, MEMORY_BLOCK_ALLOCATION_SIZE),
+      mType = memoryType
+    )
+  let selectedBlock = renderData.memory[memoryType][selectedBlockI]
+  renderData.memory[memoryType][selectedBlockI].offsetNextFree = alignedTo(
+    selectedBlock.offsetNextFree,
+    memoryRequirements.alignment,
+  )
 
   checkVkResult vkBindImageMemory(
     vulkan.device,
     texture.vk,
-    texture.memory.vk,
-    texture.offset,
+    selectedBlock.vk,
+    renderData.memory[memoryType][selectedBlockI].offsetNextFree,
   )
+  renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
+
+  # imageview can only be created after memory is bound
+  texture.imageview = createImageView(texture.vk, format)
 
   # data transfer and layout transition
   TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-  WithStagingBuffer((texture.vk, texture.imageview, texture.width, texture.height), size, stagingPtr):
-    copyMem(stagingPtr, texture.data.ToCPointer, size)
-    TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+  WithStagingBuffer(
+    (texture.vk, texture.width, texture.height),
+    memoryRequirements.size,
+    stagingPtr
+  ):
+    copyMem(stagingPtr, texture.data.ToCPointer, texture.size)
+  TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 
-  texture.imageview = createImageView(texture.vk, texture.format)
-  texture.sampler = createSampler()
 
 proc UploadTextures(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
   for name, value in fieldPairs(descriptorSet.data):
@@ -1367,10 +1389,10 @@ when isMainModule:
   # buffer assignment
   echo "Assigning buffers to GPUData fields"
 
-  renderdata.AssignBuffers(myMesh1)
-  renderdata.AssignBuffers(instances1)
-  renderdata.AssignBuffers(myGlobals)
-  renderdata.AssignBuffers(uniforms1)
+  AssignBuffers(renderdata, myMesh1)
+  AssignBuffers(renderdata, instances1)
+  AssignBuffers(renderdata, myGlobals)
+  AssignBuffers(renderdata, uniforms1)
 
   renderdata.UploadTextures(myGlobals)
   renderdata.UploadTextures(uniforms1)
