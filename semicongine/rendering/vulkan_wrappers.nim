@@ -1,13 +1,66 @@
+include ../platform/vulkan_extensions
+include ../platform/window
+include ../platform/surface
+
 type
   VulkanGlobals* = object
     instance*: VkInstance
     device*: VkDevice
     physicalDevice*: VkPhysicalDevice
+    surface: VkSurfaceKHR
+    window: NativeWindow
     queueFamilyIndex*: uint32
     queue*: VkQueue
     anisotropy*: float32 = 0 # needs to be enable during device creation
 
 var vulkan*: VulkanGlobals
+
+proc hasValidationLayer*(): bool =
+  var n_layers: uint32
+  checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), nil)
+  if n_layers > 0:
+    var layers = newSeq[VkLayerProperties](n_layers)
+    checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), layers.ToCPointer)
+    for layer in layers:
+      if layer.layerName.CleanString == "VK_LAYER_KHRONOS_validation":
+        return true
+  return false
+
+proc initVulkan*(platformLayers: seq[string], appName: string = "semicongine app") =
+
+  when not defined(release):
+    let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface", "VK_EXT_debug_utils"]
+    let layers: seq[string] = if hasValidationLayer(): @["VK_LAYER_KHRONOS_validation"] else: @[]
+  else:
+    let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface"]
+    let layers: seq[string]
+
+  var
+    layersC = allocCStringArray(layers)
+    instanceExtensionsC = allocCStringArray(requiredExtensions)
+    appinfo = VkApplicationInfo(
+      sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
+      pApplicationName: appName,
+      pEngineName: "semicongine",
+      apiVersion: VK_MAKE_API_VERSION(0, 1, 3, 0),
+    )
+    createinfo = VkInstanceCreateInfo(
+      sType: VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+      pApplicationInfo: addr(appinfo),
+      enabledLayerCount: layers.len.uint32,
+      ppEnabledLayerNames: layersC,
+      enabledExtensionCount: requiredExtensions.len.uint32,
+      ppEnabledExtensionNames: instanceExtensionsC
+    )
+  checkVkResult vkCreateInstance(addr(createinfo), nil, addr(vulkan.instance))
+  loadVulkan(vulkan.instance)
+  deallocCStringArray(layersC)
+  deallocCStringArray(instanceExtensionsC)
+  for extension in requiredExtensions:
+    loadExtension(vulkan.instance, $extension)
+  vulkan.window = CreateWindow(appName)
+  vulkan.surface = CreateNativeSurface(vulkan.instance, vulkan.window)
+
 
 proc svkGetPhysicalDeviceProperties*(): VkPhysicalDeviceProperties =
   vkGetPhysicalDeviceProperties(vulkan.physicalDevice, addr(result))

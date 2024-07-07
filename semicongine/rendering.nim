@@ -1,10 +1,4 @@
-include ./core
-
-import std/enumerate
-import std/hashes
-
 const INFLIGHTFRAMES = 2'u32
-const MEMORY_ALIGNMENT = 65536'u64 # Align buffers inside memory along this alignment
 const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
 const MEMORY_BLOCK_ALLOCATION_SIZE = 100_000_000'u64 # ca. 100mb per block, seems reasonable
 const BUFFER_ALLOCATION_SIZE = 9_000_000'u64 # ca. 9mb per block, seems reasonable, can put 10 buffers into one memory block
