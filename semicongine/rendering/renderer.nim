@@ -1,6 +1,3 @@
-
-# some globals that will (likely?) never change during the life time of the engine
-
 func depth(texture: Texture): int =
   default(elementType(texture.data)).len
 

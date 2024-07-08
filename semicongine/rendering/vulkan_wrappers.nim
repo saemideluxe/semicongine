@@ -24,6 +24,12 @@ proc GetBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
 
   assert score > 0, "Unable to find integrated or discrete GPU"
 
+proc svkGetPhysicalDeviceSurfaceSupportKHR*(queueFamily: uint32): bool =
+  assert surface.Valid
+  var presentation = VkBool32(false)
+  checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkan.device, queueFamily, vulkan.surface, addr(presentation))
+  return bool(presentation)
+
 proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, nil)
@@ -31,7 +37,9 @@ proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
   vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, queuFamilies.ToCPointer)
   for i in 0'u32 ..< nQueuefamilies:
     if qType in toEnums(queuFamilies[i].queueFlags):
-      return i
+      # for graphics queues we always also want prsentation, they seem never to be separated in practice
+      if svkGetPhysicalDeviceSurfaceSupportKHR(i) or qType != VK_QUEUE_GRAPHICS_BIT:
+        return i
   assert false, &"Queue of type {qType} not found"
 
 proc svkGetDeviceQueue*(device: VkDevice, queueFamilyIndex: uint32, qType: VkQueueFlagBits): VkQueue =
@@ -46,17 +54,23 @@ proc DefaultSurfaceFormat(): VkFormat =
   # EVERY windows driver and almost every linux driver should support this
   VK_FORMAT_B8G8R8A8_SRGB
 
+func size(format: VkFormat): uint64 =
+  const formatSize = [
+    VK_FORMAT_B8G8R8A8_SRGB.int: 4'u64,
+  ]
+  return formatSize[format.int]
+
 proc svkGetPhysicalDeviceSurfacePresentModesKHR*(): seq[VkPresentModeKHR] =
   var n_modes: uint32
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.device, vulkan.surface, addr(n_modes), nil)
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.physicalDevice, vulkan.surface, addr(n_modes), nil)
   result = newSeq[VkPresentModeKHR](n_modes)
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.device, vulkan.surface, addr(n_modes), result.ToCPointer)
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.physicalDevice, vulkan.surface, addr(n_modes), result.ToCPointer)
 
-proc svkGetPhysicalDeviceSurfaceFormatsKHR()
+proc svkGetPhysicalDeviceSurfaceFormatsKHR(): seq[VkSurfaceFormatKHR] =
   var n_formats: uint32
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.device, vulkan.surface, addr(n_formats), nil)
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.physicalDevice, vulkan.surface, addr(n_formats), nil)
   result = newSeq[VkSurfaceFormatKHR](n_formats)
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.device, vulkan.surface, addr(n_formats), result.ToCPointer)
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.physicalDevice, vulkan.surface, addr(n_formats), result.ToCPointer)
 
 proc hasValidationLayer*(): bool =
   var n_layers: uint32
@@ -149,6 +163,18 @@ proc svkCreate2DImageView(image: VkImage, format: VkFormat): VkImageView =
   )
   checkVkResult vkCreateImageView(vulkan.device, addr(createInfo), nil, addr(result))
 
+proc svkCreateFramebuffer*(renderpass: VkRenderPass, width, height: uint32, attachments: openArray[VkImageView]): VkFramebuffer =
+  var framebufferInfo = VkFramebufferCreateInfo(
+    sType: VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+    renderPass: renderpass,
+    attachmentCount: attachments.len.uint32,
+    pAttachments: attachments.ToCPointer,
+    width: width,
+    height: height,
+    layers: 1,
+  )
+  checkVkResult vkCreateFramebuffer(vulkan.device, addr(framebufferInfo), nil, addr(result))
+
 proc svkGetBufferMemoryRequirements*(buffer: VkBuffer): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
   var reqs: VkMemoryRequirements
   vkGetBufferMemoryRequirements(vulkan.device, buffer, addr(reqs))
@@ -166,6 +192,23 @@ proc svkGetImageMemoryRequirements*(image: VkImage): tuple[size: uint64, alignme
   for i in 0'u32 ..< VK_MAX_MEMORY_TYPES:
     if ((1'u32 shl i) and reqs.memoryTypeBits) > 0:
       result.memoryTypes.add i
+
+proc svkCreateFence*(signaled = false): VkFence =
+  var fenceInfo = VkFenceCreateInfo(
+    sType: VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+    flags: if signaled: toBits [VK_FENCE_CREATE_SIGNALED_BIT] else: VkFenceCreateFlags(0)
+  )
+  checkVkResult vkCreateFence(vulkan.device, addr(fenceInfo), nil, addr(result))
+
+proc svkCreateSemaphore*(): VkSemaphore =
+  var semaphoreInfo = VkSemaphoreCreateInfo(sType: VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
+  checkVkResult vkCreateSemaphore(vulkan.deivce, addr(semaphoreInfo), nil, addr(result))
+
+proc Await*(fence: VkFence, timeout = high(uint64)) =
+  checkVkResult vkWaitForFences(vulkan.device, 1, addr(fence), false, timeout)
+
+proc Reset*(fence: VkFence) =
+  checkVkResult vkResetFences(vulkan.device, 1, addr(fence))
 
 proc BestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
@@ -221,15 +264,9 @@ template WithSingleUseCommandBuffer*(cmd, body: untyped): untyped =
       pCommandBuffers: addr(`cmd`),
     )
 
-    var
-      fence: VkFence
-      fenceInfo = VkFenceCreateInfo(
-        sType: VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-        # flags: toBits [VK_FENCE_CREATE_SIGNALED_BIT]
-      )
-    checkVkResult vulkan.device.vkCreateFence(addr(fenceInfo), nil, addr(fence))
+    var fence = svkCreateFence()
     checkVkResult vkQueueSubmit(vulkan.graphicsQueue, 1, addr(submitInfo), fence)
-    checkVkResult vkWaitForFences(vulkan.device, 1, addr fence, false, high(uint64))
+    fence.Await()
     vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
 
 template WithStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](

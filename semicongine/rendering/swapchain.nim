@@ -1,27 +1,41 @@
-const N_FRAMEBUFFERS = 3'32
+const N_FRAMEBUFFERS = 3'u32
 
-proc svkCreateSwapchainKHR(vSync: bool, oldSwapchain = VkSwapchainKHR(0)): VkSwapchainKHR =
+proc InitSwapchain*(
+  renderPass: VkRenderPass,
+  vSync: bool,
+  samples = VK_SAMPLE_COUNT_1_BIT,
+  nFramebuffers = N_FRAMEBUFFERS,
+  oldSwapchain = VkSwapchainKHR(0),
+): Swapchain =
+  assert vulkan.instance.Valid
+
+  result.renderPass = renderPass
+  result.vSync = vSync
+  result.samples = samples
 
   var capabilities: VkSurfaceCapabilitiesKHR
-  checkVkResult device.vk.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.surface, addr(capabilities))
+  checkVkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, vulkan.surface, addr(capabilities))
+  let
+    format = DefaultSurfaceFormat()
+    width = capabilities.currentExtent.width
+    height = capabilities.currentExtent.height
 
-  if capabilities.currentExtent.width == 0 or capabilities.currentExtent.height == 0:
+  if width == 0 or height == 0:
     return VkSwapchainKHR(0)
 
-  # following is according to vulkan specs
+  # following "count" is established according to vulkan specs
   var minFramebufferCount = N_FRAMEBUFFERS
   minFramebufferCount = max(minFramebufferCount, capabilities.minImageCount)
   if capabilities.maxImageCount != 0:
     minFramebufferCount = min(minFramebufferCount, capabilities.maxImageCount)
 
-  svkGetPhysicalDeviceSurfaceFormatsKHR()
-
+  # create swapchain
   let hasTripleBuffering = VK_PRESENT_MODE_MAILBOX_KHR in svkGetPhysicalDeviceSurfacePresentModesKHR()
   var createInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-    surface: device.physicalDevice.surface,
+    surface: vulkan.surface,
     minImageCount: minFramebufferCount,
-    imageFormat: DefaultSurfaceFormat(),
+    imageFormat: format,
     imageColorSpace: VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, # only one supported without special extensions
     imageExtent: capabilities.currentExtent,
     imageArrayLayers: 1,
@@ -33,25 +47,101 @@ proc svkCreateSwapchainKHR(vSync: bool, oldSwapchain = VkSwapchainKHR(0)): VkSwa
     clipped: true,
     oldSwapchain: oldSwapchain,
   )
-  if device.vk.vkCreateSwapchainKHR(addr(createInfo), nil, addr(result)) != VK_SUCCESS:
+  if vkCreateSwapchainKHR(vulkan.device, addr(createInfo), nil, addr(result.vk)) != VK_SUCCESS:
     return VkSwapchainKHR(0)
 
+  # create msaa image+view if desired
   if samples != VK_SAMPLE_COUNT_1_BIT:
-    vulkan.msaaImage = svkCreate2DImage(
-      width = capabilities.currentExtent.width,
-      height = capabilities.currentExtent.height,
-      format = DefaultSurfaceFormat(),
+    let imgSize = width * height * format.size
+    result.msaaImage = svkCreate2DImage(
+      width = width,
+      height = height,
+      format = format,
       usage = [VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
     )
-    # TODO: memory
-    vk: svkAllocateMemory(size, mType),
+    result.msaaMemory = svkAllocateMemory(imgSize, BestMemory(mappable = false))
     checkVkResult vkBindImageMemory(
       vulkan.device,
-      vulkan.msaaImage,
-      selectedBlock.vk,
+      result.msaaImage,
+      result.msaaMemory,
       0,
     )
+    result.msaaImageView = svkCreate2DImageView(result.msaaImage, format)
 
+    # create framebuffers
+    var actualNFramebuffers: uint32
+    checkVkResult vkGetSwapchainImagesKHR(vulkan.device, result.vk, addr(actualNFramebuffers), nil)
+    var framebuffers = newSeq[VkImage](actualNFramebuffers)
+    checkVkResult vkGetSwapchainImagesKHR(vulkan.device, result.vk, addr(actualNFramebuffers), framebuffers.ToCPointer)
 
+    for framebuffer in framebuffers:
+      result.framebufferViews.add svkCreate2DImageView(framebuffer, format)
+      if samples == VK_SAMPLE_COUNT_1_BIT:
+        svkCreateFramebuffer(renderPass, width, height, [result.framebufferViews[^1]])
+      else:
+        svkCreateFramebuffer(renderPass, width, height, [result.msaaImageView, result.framebufferViews[^1]])
 
-    vulkan.msaaImageView = svkCreate2DImageView(vulkan.msaaImageView, DefaultSurfaceFormat())
+    # create sync primitives
+    for i in 0 ..< INFLIGHTFRAMES:
+      result.queueFinishedFence[i] = svkCreateFence(signaled = true)
+      result.imageAvailableSemaphore[i] = svkCreateSemaphore()
+      result.renderFinishedSemaphore[i] = svkCreateSemaphore()
+
+proc TryAcquireNextImage*(swapchain: var Swapchain): bool =
+  swapchain.queueFinishedFence[swapchain.currentFiF].Await()
+
+  let nextImageResult = vkAcquireNextImageKHR(
+    vulkan.device,
+    swapchain.vk,
+    high(uint64),
+    swapchain.imageAvailableSemaphore[swapchain.currentFiF],
+    VkFence(0),
+    addr(swapchain.currentFramebufferIndex),
+  )
+
+  swapchain.queueFinishedFence[swapchain.currentFiF].Reset()
+
+  return nextImageResult == VK_SUCCESS
+
+proc Swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
+  var
+    waitStage = VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
+    submitInfo = VkSubmitInfo(
+      sType: VK_STRUCTURE_TYPE_SUBMIT_INFO,
+      waitSemaphoreCount: 1,
+      pWaitSemaphores: addr(swapchain.imageAvailableSemaphore[swapchain.currentFiF]),
+      pWaitDstStageMask: addr(waitStage),
+      commandBufferCount: 1,
+      pCommandBuffers: addr(commandBuffer),
+      signalSemaphoreCount: 1,
+      pSignalSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentFiF]),
+    )
+  checkVkResult queue.vk.vkQueueSubmit(
+    submitCount = 1,
+    pSubmits = addr submitInfo,
+    fence = swapchain.queueFinishedFence[swapchain.currentInFlight].vk
+  )
+
+  var presentInfo = VkPresentInfoKHR(
+    sType: VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+    waitSemaphoreCount: 1,
+    pWaitSemaphores: addr swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk,
+    swapchainCount: 1,
+    pSwapchains: addr swapchain.vk,
+    pImageIndices: addr swapchain.currentFramebufferIndex,
+    pResults: nil,
+  )
+  let presentResult = vkQueuePresentKHR(swapchain.presentQueue.vk, addr presentInfo)
+  if presentResult != VK_SUCCESS:
+    return false
+
+  return true
+
+proc Recreate*(swapchain: Swapchain): Swapchain =
+  initSwapchain(
+    renderPass = swapchain.renderPass,
+    vSync = swapchain.vSync,
+    samples = swapchain.samples,
+    nFramebuffers = swapchain.framebuffers.len.uint32,
+    oldSwapchain = swapchain.vk,
+  )

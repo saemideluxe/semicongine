@@ -27,16 +27,31 @@ include ./platform/surface # For CreateNativeSurface
 
 type
   VulkanGlobals* = object
+    # populated through InitVulkan proc
     instance*: VkInstance
     device*: VkDevice
     physicalDevice*: VkPhysicalDevice
     surface: VkSurfaceKHR
-    swapchain: VkSwapchainKHR
-    msaaImage: VkImage
-    msaaImageView: VkImageView
     window: NativeWindow
     graphicsQueueFamily*: uint32
     graphicsQueue*: VkQueue
+  Swapchain = object
+    # parameters to InitSwapchain, required for swapchain recreation
+    renderPass: VkRenderPass
+    vSync: bool
+    samples: VkSampleCountFlagBits
+    # populated through InitSwapchain proc
+    vk: VkSwapchainKHR
+    msaaImage: VkImage
+    msaaMemory: VkDeviceMemory
+    msaaImageView: VkImageView
+    framebuffers: seq[VkFramebuffer]
+    framebufferViews: seq[VkImageView]
+    queueFinishedFence*: array[INFLIGHTFRAMES, VkFence]
+    imageAvailableSemaphore*: array[INFLIGHTFRAMES, VkSemaphore]
+    renderFinishedSemaphore*: array[INFLIGHTFRAMES, VkSemaphore]
+    currentFiF: int[0 .. INFLIGHTFRAMES - 1]
+    # unclear as of yet
     anisotropy*: float32 = 0 # needs to be enable during device creation
 
 var vulkan*: VulkanGlobals
@@ -146,7 +161,7 @@ include ./rendering/shaders
 include ./rendering/renderer
 
 
-proc initVulkan(appName: string = "semicongine app") =
+proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
 
   include ./platform/vulkan_extensions # for REQUIRED_PLATFORM_EXTENSIONS
 
@@ -181,15 +196,15 @@ proc initVulkan(appName: string = "semicongine app") =
       enabledExtensionCount: requiredExtensions.len.uint32,
       ppEnabledExtensionNames: instanceExtensionsC
     )
-  checkVkResult vkCreateInstance(addr(createinfo), nil, addr(vulkan.instance))
-  loadVulkan(vulkan.instance)
+  checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result.instance))
+  loadVulkan(result.instance)
 
   # load extensions
   #
   for extension in requiredExtensions:
-    loadExtension(vulkan.instance, $extension)
-  vulkan.window = CreateWindow(appName)
-  vulkan.surface = CreateNativeSurface(vulkan.instance, vulkan.window)
+    loadExtension(result.instance, $extension)
+  result.window = CreateWindow(appName)
+  result.surface = CreateNativeSurface(result.instance, result.window)
 
   # logical device creation
 
@@ -200,17 +215,17 @@ proc initVulkan(appName: string = "semicongine app") =
   # var deviceExtensions  = @["VK_KHR_swapchain", "VK_KHR_uniform_buffer_standard_layout"]
   var deviceExtensions = @["VK_KHR_swapchain"]
   for extension in deviceExtensions:
-    loadExtension(vulkan.instance, extension)
+    loadExtension(result.instance, extension)
 
   # get physical device and graphics queue family
-  vulkan.physicalDevice = GetBestPhysicalDevice(vulkan.instance)
-  vulkan.graphicsQueueFamily = GetQueueFamily(vulkan.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
+  result.physicalDevice = GetBestPhysicalDevice(result.instance)
+  result.graphicsQueueFamily = GetQueueFamily(result.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
 
   let
     priority = cfloat(1)
     queueInfo = VkDeviceQueueCreateInfo(
       sType: VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      queueFamilyIndex: vulkan.graphicsQueueFamily,
+      queueFamilyIndex: result.graphicsQueueFamily,
       queueCount: 1,
       pQueuePriorities: addr(priority),
     )
@@ -227,11 +242,11 @@ proc initVulkan(appName: string = "semicongine app") =
     pEnabledFeatures: nil,
   )
   checkVkResult vkCreateDevice(
-    physicalDevice = vulkan.physicalDevice,
+    physicalDevice = result.physicalDevice,
     pCreateInfo = addr createDeviceInfo,
     pAllocator = nil,
-    pDevice = addr vulkan.device
+    pDevice = addr result.device
   )
-  vulkan.graphicsQueue = svkGetDeviceQueue(vulkan.device, vulkan.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
+  result.graphicsQueue = svkGetDeviceQueue(result.device, result.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
 
-initVulkan()
+vulkan = InitVulkan()
