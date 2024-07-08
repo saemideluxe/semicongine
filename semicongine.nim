@@ -18,5 +18,3 @@ import std/typetraits as typetraits
 include semicongine/core
 include semicongine/events
 include semicongine/rendering
-
-initVulkan(REQUIRED_PLATFORM_EXTENSIONS)
