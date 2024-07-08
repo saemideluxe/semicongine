@@ -9,11 +9,55 @@ type
     physicalDevice*: VkPhysicalDevice
     surface: VkSurfaceKHR
     window: NativeWindow
-    queueFamilyIndex*: uint32
-    queue*: VkQueue
+    graphicsQueueFamily*: uint32
+    graphicsQueue*: VkQueue
     anisotropy*: float32 = 0 # needs to be enable during device creation
 
 var vulkan*: VulkanGlobals
+
+proc GetBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
+  var nDevices: uint32
+  checkVkResult vkEnumeratePhysicalDevices(instance, addr(nDevices), nil)
+  var devices = newSeq[VkPhysicalDevice](nDevices)
+  checkVkResult vkEnumeratePhysicalDevices(instance, addr(nDevices), devices.ToCPointer)
+
+  var score = 0'u32
+  for pDevice in devices:
+    var props: VkPhysicalDeviceProperties
+    # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
+    vkGetPhysicalDeviceProperties(pDevice, addr(props))
+    if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU and props.limits.maxImageDimension2D > score:
+      score = props.limits.maxImageDimension2D
+      result = pDevice
+
+  if score == 0:
+    for pDevice in devices:
+      var props: VkPhysicalDeviceProperties
+      # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
+      vkGetPhysicalDeviceProperties(pDevice, addr(props))
+      if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU and props.limits.maxImageDimension2D > score:
+        score = props.limits.maxImageDimension2D
+        result = pDevice
+
+  assert score > 0, "Unable to find integrated or discrete GPU"
+
+proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
+  var nQueuefamilies: uint32
+  vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, nil)
+  var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
+  vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, queuFamilies.ToCPointer)
+  for i in 0'u32 ..< nQueuefamilies:
+    if qType in toEnums(queuFamilies[i].queueFlags):
+      return i
+  assert false, &"Queue of type {qType} not found"
+
+proc svkGetDeviceQueue*(device: VkDevice, queueFamilyIndex: uint32, qType: VkQueueFlagBits): VkQueue =
+  vkGetDeviceQueue(
+    device,
+    queueFamilyIndex,
+    0,
+    addr(result),
+  )
 
 proc hasValidationLayer*(): bool =
   var n_layers: uint32
@@ -28,6 +72,8 @@ proc hasValidationLayer*(): bool =
 
 proc initVulkan*(platformLayers: seq[string], appName: string = "semicongine app") =
 
+  # instance creation
+  #
   when not defined(release):
     let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface", "VK_EXT_debug_utils"]
     let layers: seq[string] = if hasValidationLayer(): @["VK_LAYER_KHRONOS_validation"] else: @[]
@@ -38,6 +84,11 @@ proc initVulkan*(platformLayers: seq[string], appName: string = "semicongine app
   var
     layersC = allocCStringArray(layers)
     instanceExtensionsC = allocCStringArray(requiredExtensions)
+  defer:
+    deallocCStringArray(layersC)
+    deallocCStringArray(instanceExtensionsC)
+
+  var
     appinfo = VkApplicationInfo(
       sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
       pApplicationName: appName,
@@ -54,12 +105,62 @@ proc initVulkan*(platformLayers: seq[string], appName: string = "semicongine app
     )
   checkVkResult vkCreateInstance(addr(createinfo), nil, addr(vulkan.instance))
   loadVulkan(vulkan.instance)
-  deallocCStringArray(layersC)
-  deallocCStringArray(instanceExtensionsC)
+
+  # load extensions
+  #
   for extension in requiredExtensions:
     loadExtension(vulkan.instance, $extension)
   vulkan.window = CreateWindow(appName)
   vulkan.surface = CreateNativeSurface(vulkan.instance, vulkan.window)
+
+
+
+
+  # logical device creation
+
+
+
+
+  # TODO: allowing support for physical devices without hasUniformBufferStandardLayout
+  # would require us to ship different shaders, so we don't support standard layout
+  # if that will be added, check the function vulkan/shaders.nim:glslUniforms and update accordingly
+  # let hasUniformBufferStandardLayout = "VK_KHR_uniform_buffer_standard_layout" in physicalDevice.getExtensions()
+  # var deviceExtensions  = @["VK_KHR_swapchain", "VK_KHR_uniform_buffer_standard_layout"]
+  var deviceExtensions = @["VK_KHR_swapchain"]
+  for extension in deviceExtensions:
+    loadExtension(vulkan.instance, extension)
+
+  # get physical device and graphics queue family
+  vulkan.physicalDevice = GetBestPhysicalDevice(vulkan.instance)
+  vulkan.graphicsQueueFamily = GetQueueFamily(vulkan.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
+
+  let
+    priority = cfloat(1)
+    queueInfo = VkDeviceQueueCreateInfo(
+      sType: VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+      queueFamilyIndex: vulkan.graphicsQueueFamily,
+      queueCount: 1,
+      pQueuePriorities: addr(priority),
+    )
+    deviceExtensionsC = allocCStringArray(deviceExtensions)
+  defer: deallocCStringArray(deviceExtensionsC)
+  var createDeviceInfo = VkDeviceCreateInfo(
+    sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+    queueCreateInfoCount: 1,
+    pQueueCreateInfos: addr(queueInfo),
+    enabledLayerCount: 0,
+    ppEnabledLayerNames: nil,
+    enabledExtensionCount: uint32(deviceExtensions.len),
+    ppEnabledExtensionNames: deviceExtensionsC,
+    pEnabledFeatures: nil,
+  )
+  checkVkResult vkCreateDevice(
+    physicalDevice = vulkan.physicalDevice,
+    pCreateInfo = addr createDeviceInfo,
+    pAllocator = nil,
+    pDevice = addr vulkan.device
+  )
+  vulkan.graphicsQueue = svkGetDeviceQueue(vulkan.device, vulkan.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
 
 
 proc svkGetPhysicalDeviceProperties*(): VkPhysicalDeviceProperties =
@@ -120,14 +221,6 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
   )
   checkVkResult vkCreateImage(vulkan.device, addr imageInfo, nil, addr(result))
 
-proc svkGetDeviceQueue*(device: VkDevice, queueFamilyIndex: uint32, qType: VkQueueFlagBits): VkQueue =
-  vkGetDeviceQueue(
-    device,
-    queueFamilyIndex,
-    0,
-    addr(result),
-  )
-
 proc svkGetBufferMemoryRequirements*(buffer: VkBuffer): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
   var reqs: VkMemoryRequirements
   vkGetBufferMemoryRequirements(vulkan.device, buffer, addr(reqs))
@@ -173,7 +266,7 @@ template WithSingleUseCommandBuffer*(cmd, body: untyped): untyped =
       createInfo = VkCommandPoolCreateInfo(
         sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
         flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
-        queueFamilyIndex: vulkan.queueFamilyIndex,
+        queueFamilyIndex: vulkan.graphicsQueueFamily,
       )
     checkVkResult vkCreateCommandPool(vulkan.device, addr createInfo, nil, addr(commandBufferPool))
     var
@@ -207,7 +300,7 @@ template WithSingleUseCommandBuffer*(cmd, body: untyped): untyped =
         # flags: toBits [VK_FENCE_CREATE_SIGNALED_BIT]
       )
     checkVkResult vulkan.device.vkCreateFence(addr(fenceInfo), nil, addr(fence))
-    checkVkResult vkQueueSubmit(vulkan.queue, 1, addr(submitInfo), fence)
+    checkVkResult vkQueueSubmit(vulkan.graphicsQueue, 1, addr(submitInfo), fence)
     checkVkResult vkWaitForFences(vulkan.device, 1, addr fence, false, high(uint64))
     vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
 

@@ -40,34 +40,10 @@ type
     vertexCode: string = "void main() {}"
     fragmentCode: string = "void main() {}"
 
-let w = CreateWindow("test2")
 putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_AMD,VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_NVIDIA,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT")
 
-# TODO: remove those ugly wrappers
-let theInstance = w.CreateInstance(
-  vulkanVersion = VK_MAKE_API_VERSION(0, 1, 3, 0),
-  instanceExtensions = @[],
-  layers = @["VK_LAYER_KHRONOS_validation"],
-)
-
-let dev = theInstance.CreateDevice(
-  theInstance.GetPhysicalDevices().FilterBestGraphics(),
-  enabledExtensions = @[],
-  theInstance.GetPhysicalDevices().FilterBestGraphics().FilterForGraphicsPresentationQueues()
-).vk
 let frameWidth = 100'u32
 let frameHeight = 100'u32
-
-# TODO: pack this stuff into a setup method and condense everything a bit
-let pDevice = theInstance.vk.GetPhysicalDevice()
-let qfi = pDevice.GetQueueFamily(VK_QUEUE_GRAPHICS_BIT)
-vulkan = VulkanGlobals(
-  instance: theInstance.vk,
-  device: dev,
-  physicalDevice: pDevice,
-  queueFamilyIndex: qfi,
-  queue: svkGetDeviceQueue(dev, qfi, VK_QUEUE_GRAPHICS_BIT)
-)
 
 var myMesh1 = MeshA(
   position: GPUArray[Vec3f, VertexBuffer](data: @[NewVec3f(0, 0, ), NewVec3f(0, 0, ), NewVec3f(0, 0, )]),
@@ -98,13 +74,10 @@ var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
   )
 )
 
-# setup for rendering (TODO: swapchain & framebuffers)
-let renderpass = CreateRenderPass(GetSurfaceFormat())
+let renderpass = CreatePresentationRenderPass()
 
 # shaders
-const shader = ShaderA()
-let shaderObject = CompileShader(shader)
-var pipeline1 = CreatePipeline(renderPass = renderpass, shader = shaderObject)
+var pipeline1 = CreatePipeline[ShaderA](renderPass = renderpass)
 
 var renderdata = InitRenderData()
 
@@ -130,8 +103,8 @@ renderdata.FlushAllMemory()
 
 # descriptors
 echo "Writing descriptors"
-InitDescriptorSet(renderdata, pipeline1.descriptorSetLayouts[GlobalSet], myGlobals)
-InitDescriptorSet(renderdata, pipeline1.descriptorSetLayouts[MaterialSet], uniforms1)
+InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(GlobalSet), myGlobals)
+InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(MaterialSet), uniforms1)
 
 
 # command buffer

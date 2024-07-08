@@ -1,3 +1,12 @@
+# in this file:
+# - const defintions for rendering
+# - custom pragma defintions for rendering
+# - type defintions for rendering
+# - some utils code that is used in mutiple rendering files
+# - inclusion of all rendering files
+
+
+# const definitions
 const INFLIGHTFRAMES = 2'u32
 const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
 const MEMORY_BLOCK_ALLOCATION_SIZE = 100_000_000'u64 # ca. 100mb per block, seems reasonable
@@ -23,7 +32,7 @@ type
     GlobalSet
     MaterialSet
   DescriptorSet*[T: object, sType: static DescriptorSetType] = object
-    data: T
+    data*: T
     vk: array[INFLIGHTFRAMES.int, VkDescriptorSet]
   Pipeline*[TShader] = object
     vk: VkPipeline
@@ -52,15 +61,15 @@ type
     vk: VkImage
     imageview: VkImageView
     sampler: VkSampler
-    width: uint32
-    height: uint32
-    data: seq[T]
+    width*: uint32
+    height*: uint32
+    data*: seq[T]
   GPUArray*[T: SupportedGPUType, TBuffer: static BufferType] = object
-    data: seq[T]
+    data*: seq[T]
     buffer: Buffer
     offset: uint64
   GPUValue*[T: object|array, TBuffer: static BufferType] = object
-    data: T
+    data*: T
     buffer: Buffer
     offset: uint64
   GPUData = GPUArray | GPUValue
@@ -69,6 +78,45 @@ type
     descriptorPool: VkDescriptorPool
     memory: array[VK_MAX_MEMORY_TYPES.int, seq[MemoryBlock]]
     buffers: array[BufferType, seq[Buffer]]
+
+template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
+  var `bindingNumber` {.inject.} = 1'u32
+  for theFieldname, value in fieldPairs(shader):
+    when typeof(value) is Texture:
+      block:
+        const `fieldname` {.inject.} = theFieldname
+        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+        const `countname` {.inject.} = 1'u32
+        let `valuename` {.inject.} = value
+        body
+        `bindingNumber`.inc
+    elif typeof(value) is object:
+      block:
+        const `fieldname` {.inject.} = theFieldname
+        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+        const `countname` {.inject.} = 1'u32
+        let `valuename` {.inject.} = value
+        body
+        `bindingNumber`.inc
+    elif typeof(value) is array:
+      when elementType(value) is Texture:
+        block:
+          const `fieldname` {.inject.} = theFieldname
+          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+          const `countname` {.inject.} = uint32(typeof(value).len)
+          let `valuename` {.inject.} = value
+          body
+          `bindingNumber`.inc
+      elif elementType(value) is object:
+        block:
+          const `fieldname` {.inject.} = theFieldname
+          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+          const `countname` {.inject.} = uint32(typeof(value).len)
+          let `valuename` {.inject.} = value
+          body
+          `bindingNumber`.inc
+      else:
+        {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
 
 include ./rendering/vulkan_wrappers
 include ./rendering/shaders

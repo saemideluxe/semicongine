@@ -56,168 +56,6 @@ func alignedTo[T: SomeInteger](value: T, alignment: T): T =
   else:
     return value + alignment - remainder
 
-func VkType[T: SupportedGPUType](value: T): VkFormat =
-  when T is float32: VK_FORMAT_R32_SFLOAT
-  elif T is float64: VK_FORMAT_R64_SFLOAT
-  elif T is int8: VK_FORMAT_R8_SINT
-  elif T is int16: VK_FORMAT_R16_SINT
-  elif T is int32: VK_FORMAT_R32_SINT
-  elif T is int64: VK_FORMAT_R64_SINT
-  elif T is uint8: VK_FORMAT_R8_UINT
-  elif T is uint16: VK_FORMAT_R16_UINT
-  elif T is uint32: VK_FORMAT_R32_UINT
-  elif T is uint64: VK_FORMAT_R64_UINT
-  elif T is TVec2[int32]: VK_FORMAT_R32G32_SINT
-  elif T is TVec2[int64]: VK_FORMAT_R64G64_SINT
-  elif T is TVec3[int32]: VK_FORMAT_R32G32B32_SINT
-  elif T is TVec3[int64]: VK_FORMAT_R64G64B64_SINT
-  elif T is TVec4[int32]: VK_FORMAT_R32G32B32A32_SINT
-  elif T is TVec4[int64]: VK_FORMAT_R64G64B64A64_SINT
-  elif T is TVec2[uint32]: VK_FORMAT_R32G32_UINT
-  elif T is TVec2[uint64]: VK_FORMAT_R64G64_UINT
-  elif T is TVec3[uint32]: VK_FORMAT_R32G32B32_UINT
-  elif T is TVec3[uint64]: VK_FORMAT_R64G64B64_UINT
-  elif T is TVec4[uint32]: VK_FORMAT_R32G32B32A32_UINT
-  elif T is TVec4[uint64]: VK_FORMAT_R64G64B64A64_UINT
-  elif T is TVec2[float32]: VK_FORMAT_R32G32_SFLOAT
-  elif T is TVec2[float64]: VK_FORMAT_R64G64_SFLOAT
-  elif T is TVec3[float32]: VK_FORMAT_R32G32B32_SFLOAT
-  elif T is TVec3[float64]: VK_FORMAT_R64G64B64_SFLOAT
-  elif T is TVec4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
-  elif T is TVec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
-  elif T is TMat2[float32]: VK_FORMAT_R32G32_SFLOAT
-  elif T is TMat2[float64]: VK_FORMAT_R64G64_SFLOAT
-  elif T is TMat23[float32]: VK_FORMAT_R32G32B32_SFLOAT
-  elif T is TMat23[float64]: VK_FORMAT_R64G64B64_SFLOAT
-  elif T is TMat32[float32]: VK_FORMAT_R32G32_SFLOAT
-  elif T is TMat32[float64]: VK_FORMAT_R64G64_SFLOAT
-  elif T is TMat3[float32]: VK_FORMAT_R32G32B32_SFLOAT
-  elif T is TMat3[float64]: VK_FORMAT_R64G64B64_SFLOAT
-  elif T is TMat34[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
-  elif T is TMat34[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
-  elif T is TMat43[float32]: VK_FORMAT_R32G32B32_SFLOAT
-  elif T is TMat43[float64]: VK_FORMAT_R64G64B64_SFLOAT
-  elif T is TMat4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
-  elif T is TMat4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
-  else: {.error: "Unsupported data type on GPU".}
-
-func GlslType[T: SupportedGPUType|Texture](value: T): string =
-  when T is float32: "float"
-  elif T is float64: "double"
-  elif T is int8 or T is int16 or T is int32 or T is int64: "int"
-  elif T is uint8 or T is uint16 or T is uint32 or T is uint64: "uint"
-  elif T is TVec2[int32]: "ivec2"
-  elif T is TVec2[int64]: "ivec2"
-  elif T is TVec3[int32]: "ivec3"
-  elif T is TVec3[int64]: "ivec3"
-  elif T is TVec4[int32]: "ivec4"
-  elif T is TVec4[int64]: "ivec4"
-  elif T is TVec2[uint32]: "uvec2"
-  elif T is TVec2[uint64]: "uvec2"
-  elif T is TVec3[uint32]: "uvec3"
-  elif T is TVec3[uint64]: "uvec3"
-  elif T is TVec4[uint32]: "uvec4"
-  elif T is TVec4[uint64]: "uvec4"
-  elif T is TVec2[float32]: "vec2"
-  elif T is TVec2[float64]: "dvec2"
-  elif T is TVec3[float32]: "vec3"
-  elif T is TVec3[float64]: "dvec3"
-  elif T is TVec4[float32]: "vec4"
-  elif T is TVec4[float64]: "dvec4"
-  elif T is TMat2[float32]: "mat2"
-  elif T is TMat2[float64]: "dmat2"
-  elif T is TMat23[float32]: "mat23"
-  elif T is TMat23[float64]: "dmat23"
-  elif T is TMat32[float32]: "mat32"
-  elif T is TMat32[float64]: "dmat32"
-  elif T is TMat3[float32]: "mat3"
-  elif T is TMat3[float64]: "dmat3"
-  elif T is TMat34[float32]: "mat34"
-  elif T is TMat34[float64]: "dmat34"
-  elif T is TMat43[float32]: "mat43"
-  elif T is TMat43[float64]: "dmat43"
-  elif T is TMat4[float32]: "mat4"
-  elif T is TMat4[float64]: "dmat4"
-  elif T is Texture: "sampler2D"
-  else: {.error: "Unsupported data type on GPU".}
-
-template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
-  var `bindingNumber` {.inject.} = 1'u32
-  for theFieldname, value in fieldPairs(shader):
-    when typeof(value) is Texture:
-      block:
-        const `fieldname` {.inject.} = theFieldname
-        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-        const `countname` {.inject.} = 1'u32
-        let `valuename` {.inject.} = value
-        body
-        `bindingNumber`.inc
-    elif typeof(value) is object:
-      block:
-        const `fieldname` {.inject.} = theFieldname
-        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-        const `countname` {.inject.} = 1'u32
-        let `valuename` {.inject.} = value
-        body
-        `bindingNumber`.inc
-    elif typeof(value) is array:
-      when elementType(value) is Texture:
-        block:
-          const `fieldname` {.inject.} = theFieldname
-          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-          const `countname` {.inject.} = uint32(typeof(value).len)
-          let `valuename` {.inject.} = value
-          body
-          `bindingNumber`.inc
-      elif elementType(value) is object:
-        block:
-          const `fieldname` {.inject.} = theFieldname
-          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-          const `countname` {.inject.} = uint32(typeof(value).len)
-          let `valuename` {.inject.} = value
-          body
-          `bindingNumber`.inc
-      else:
-        {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
-
-func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Texture](value: T): uint32 =
-  when T is TMat2[float32] or T is TMat2[float64] or T is TMat23[float32] or T is TMat23[float64]:
-    2
-  elif T is TMat32[float32] or T is TMat32[float64] or T is TMat3[float32] or T is TMat3[float64] or T is TMat34[float32] or T is TMat34[float64]:
-    3
-  elif T is TMat43[float32] or T is TMat43[float64] or T is TMat4[float32] or T is TMat4[float64]:
-    4
-  else:
-    1
-
-func NLocationSlots[T: SupportedGPUType|Texture](value: T): uint32 =
-  #[
-  single location:
-    - any scalar
-    - any 16-bit vector
-    - any 32-bit vector
-    - any 64-bit vector that has max. 2 components
-    16-bit scalar and vector types, and
-    32-bit scalar and vector types, and
-    64-bit scalar and 2-component vector types.
-  two locations
-    64-bit three- and four-component vectors
-  ]#
-  when T is TVec3[int64] or
-    T is TVec4[int64] or
-    T is TVec3[uint64] or
-    T is TVec4[uint64] or
-    T is TVec3[float64] or
-    T is TVec4[float64] or
-    T is TMat23[float64] or
-    T is TMat3[float64] or
-    T is TMat34[float64] or
-    T is TMat43[float64] or
-    T is TMat4[float64]:
-    return 2
-  else:
-    return 1
-
 template sType(descriptorSet: DescriptorSet): untyped =
   get(genericParams(typeof(descriptorSet)), 1)
 
@@ -245,53 +83,20 @@ template rawPointer(gpuArray: GPUArray): pointer =
 template rawPointer(gpuValue: GPUValue): pointer =
   addr(gpuValue.data)
 
-proc GetPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
-  var nDevices: uint32
-  checkVkResult vkEnumeratePhysicalDevices(instance, addr(nDevices), nil)
-  var devices = newSeq[VkPhysicalDevice](nDevices)
-  checkVkResult vkEnumeratePhysicalDevices(instance, addr(nDevices), devices.ToCPointer)
-
-  var score = 0'u32
-  for pDevice in devices:
-    var props: VkPhysicalDeviceProperties
-    # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
-    vkGetPhysicalDeviceProperties(pDevice, addr(props))
-    if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU and props.limits.maxImageDimension2D > score:
-      score = props.limits.maxImageDimension2D
-      result = pDevice
-
-  if score == 0:
-    for pDevice in devices:
-      var props: VkPhysicalDeviceProperties
-      # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
-      vkGetPhysicalDeviceProperties(pDevice, addr(props))
-      if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU and props.limits.maxImageDimension2D > score:
-        score = props.limits.maxImageDimension2D
-        result = pDevice
-
-  assert score > 0, "Unable to find integrated or discrete GPU"
-
 proc IsMappable(memoryTypeIndex: uint32): bool =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))
   let flags = toEnums(physicalProperties.memoryTypes[memoryTypeIndex].propertyFlags)
   return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags
 
-proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
-  var nQueuefamilies: uint32
-  vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, nil)
-  var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, queuFamilies.ToCPointer)
-  for i in 0'u32 ..< nQueuefamilies:
-    if qType in toEnums(queuFamilies[i].queueFlags):
-      return i
-  assert false, &"Queue of type {qType} not found"
-
 proc GetSurfaceFormat(): VkFormat =
   # EVERY windows driver and almost every linux driver should support this
   VK_FORMAT_B8G8R8A8_SRGB
 
-proc InitDescriptorSet(
+proc GetLayoutFor*(pipeline: Pipeline, dType: DescriptorSetType): VkDescriptorSetLayout =
+  pipeline.descriptorSetLayouts[dType]
+
+proc InitDescriptorSet*(
   renderData: RenderData,
   layout: VkDescriptorSetLayout,
   descriptorSet: var DescriptorSet,
@@ -394,18 +199,30 @@ converter toVkIndexType(indexType: IndexType): VkIndexType =
     of UInt16: VK_INDEX_TYPE_UINT16
     of UInt32: VK_INDEX_TYPE_UINT32
 
-proc CreateRenderPass(format: VkFormat): VkRenderPass =
+proc CreatePresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPass =
+  let format = GetSurfaceFormat()
+  var attachments = @[VkAttachmentDescription(
+    format: format,
+    samples: samples,
+    loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
+    storeOp: VK_ATTACHMENT_STORE_OP_STORE,
+    stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+    finalLayout: if samples == VK_SAMPLE_COUNT_1_BIT: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR else: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+  )]
+  if samples != VK_SAMPLE_COUNT_1_BIT:
+    attachments.add VkAttachmentDescription(
+      format: format,
+      samples: VK_SAMPLE_COUNT_1_BIT,
+      loadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      storeOp: VK_ATTACHMENT_STORE_OP_STORE,
+      stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+      finalLayout: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    )
   var
-    attachments = @[VkAttachmentDescription(
-        format: format,
-        samples: VK_SAMPLE_COUNT_1_BIT,
-        loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
-        storeOp: VK_ATTACHMENT_STORE_OP_STORE,
-        stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-        stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
-        finalLayout: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-    )]
     dependencies = @[VkSubpassDependency(
       srcSubpass: VK_SUBPASS_EXTERNAL,
       dstSubpass: 0,
@@ -414,34 +231,33 @@ proc CreateRenderPass(format: VkFormat): VkRenderPass =
       dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT],
       dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
     )]
-    outputs = @[
-      VkAttachmentReference(
-        attachment: 0,
-        layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      )
-    ]
-
-  var subpassesList = [
-    VkSubpassDescription(
-      flags: VkSubpassDescriptionFlags(0),
-      pipelineBindPoint: VK_PIPELINE_BIND_POINT_GRAPHICS,
-      inputAttachmentCount: 0,
-      pInputAttachments: nil,
-      colorAttachmentCount: uint32(outputs.len),
-      pColorAttachments: outputs.ToCPointer,
-      pResolveAttachments: nil,
-      pDepthStencilAttachment: nil,
-      preserveAttachmentCount: 0,
-      pPreserveAttachments: nil,
+    colorAttachment = VkAttachmentReference(
+      attachment: 0,
+      layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )
-  ]
+    resolveAttachment = VkAttachmentReference(
+      attachment: 1,
+      layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    )
 
+  var subpass = VkSubpassDescription(
+    flags: VkSubpassDescriptionFlags(0),
+    pipelineBindPoint: VK_PIPELINE_BIND_POINT_GRAPHICS,
+    inputAttachmentCount: 0,
+    pInputAttachments: nil,
+    colorAttachmentCount: 1,
+    pColorAttachments: addr(colorAttachment),
+    pResolveAttachments: if samples == VK_SAMPLE_COUNT_1_BIT: nil else: addr(resolveAttachment),
+    pDepthStencilAttachment: nil,
+    preserveAttachmentCount: 0,
+    pPreserveAttachments: nil,
+  )
   var createInfo = VkRenderPassCreateInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
       attachmentCount: uint32(attachments.len),
       pAttachments: attachments.ToCPointer,
-      subpassCount: uint32(subpassesList.len),
-      pSubpasses: subpassesList.ToCPointer,
+      subpassCount: 1,
+      pSubpasses: addr(subpass),
       dependencyCount: uint32(dependencies.len),
       pDependencies: dependencies.ToCPointer,
     )
@@ -465,7 +281,7 @@ proc AllocateNewMemoryBlock(size: uint64, mType: uint32): MemoryBlock =
       ppData = addr(result.rawPointer)
     )
 
-proc FlushAllMemory(renderData: RenderData) =
+proc FlushAllMemory*(renderData: RenderData) =
   var flushRegions = newSeq[VkMappedMemoryRange]()
   for memoryBlocks in renderData.memory:
     for memoryBlock in memoryBlocks:
@@ -517,7 +333,7 @@ proc AllocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
-proc AssignBuffers[T](renderdata: var RenderData, data: var T) =
+proc AssignBuffers*[T](renderdata: var RenderData, data: var T) =
   for name, value in fieldPairs(data):
     when typeof(value) is GPUData:
 
@@ -545,7 +361,7 @@ proc AssignBuffers[T](renderdata: var RenderData, data: var T) =
       value.buffer = selectedBuffer
       value.offset = renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree
       renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree += value.size
-proc AssignBuffers(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
+proc AssignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
   AssignBuffers(renderdata, descriptorSet.data)
 
 proc UpdateGPUBuffer(gpuData: GPUData) =
@@ -557,13 +373,13 @@ proc UpdateGPUBuffer(gpuData: GPUData) =
     WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
       copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
 
-proc UpdateAllGPUBuffers[T](value: T) =
+proc UpdateAllGPUBuffers*[T](value: T) =
   for name, fieldvalue in value.fieldPairs():
     when typeof(fieldvalue) is GPUData:
       UpdateGPUBuffer(fieldvalue)
 
 
-proc InitRenderData(descriptorPoolLimit = 1024'u32): RenderData =
+proc InitRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
   # allocate descriptor pools
   var poolSizes = [
     VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, descriptorCount: descriptorPoolLimit),
@@ -725,7 +541,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
   TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 
 
-proc UploadTextures(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
+proc UploadTextures*(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
   for name, value in fieldPairs(descriptorSet.data):
     when typeof(value) is Texture:
       echo "Upload texture '", name, "'"

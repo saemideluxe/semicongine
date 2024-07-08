@@ -21,7 +21,7 @@ template checkXlibResult(call: untyped) =
         " returned " & $value)
 
 proc XErrorLogger(display: PDisplay, event: PXErrorEvent): cint {.cdecl.} =
-  error &"Xlib: {event[]}"
+  logging.error &"Xlib: {event[]}"
 
 proc CreateWindow*(title: string): NativeWindow =
   checkXlibResult XInitThreads()

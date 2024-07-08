@@ -1,7 +1,131 @@
 type
   ShaderObject[TShader] = object
-    vertexShader: VkShaderModule
-    fragmentShader: VkShaderModule
+    vertexShaderModule: VkShaderModule
+    fragmentShaderModule: VkShaderModule
+
+func GlslType[T: SupportedGPUType|Texture](value: T): string =
+  when T is float32: "float"
+  elif T is float64: "double"
+  elif T is int8 or T is int16 or T is int32 or T is int64: "int"
+  elif T is uint8 or T is uint16 or T is uint32 or T is uint64: "uint"
+  elif T is TVec2[int32]: "ivec2"
+  elif T is TVec2[int64]: "ivec2"
+  elif T is TVec3[int32]: "ivec3"
+  elif T is TVec3[int64]: "ivec3"
+  elif T is TVec4[int32]: "ivec4"
+  elif T is TVec4[int64]: "ivec4"
+  elif T is TVec2[uint32]: "uvec2"
+  elif T is TVec2[uint64]: "uvec2"
+  elif T is TVec3[uint32]: "uvec3"
+  elif T is TVec3[uint64]: "uvec3"
+  elif T is TVec4[uint32]: "uvec4"
+  elif T is TVec4[uint64]: "uvec4"
+  elif T is TVec2[float32]: "vec2"
+  elif T is TVec2[float64]: "dvec2"
+  elif T is TVec3[float32]: "vec3"
+  elif T is TVec3[float64]: "dvec3"
+  elif T is TVec4[float32]: "vec4"
+  elif T is TVec4[float64]: "dvec4"
+  elif T is TMat2[float32]: "mat2"
+  elif T is TMat2[float64]: "dmat2"
+  elif T is TMat23[float32]: "mat23"
+  elif T is TMat23[float64]: "dmat23"
+  elif T is TMat32[float32]: "mat32"
+  elif T is TMat32[float64]: "dmat32"
+  elif T is TMat3[float32]: "mat3"
+  elif T is TMat3[float64]: "dmat3"
+  elif T is TMat34[float32]: "mat34"
+  elif T is TMat34[float64]: "dmat34"
+  elif T is TMat43[float32]: "mat43"
+  elif T is TMat43[float64]: "dmat43"
+  elif T is TMat4[float32]: "mat4"
+  elif T is TMat4[float64]: "dmat4"
+  elif T is Texture: "sampler2D"
+  else: {.error: "Unsupported data type on GPU".}
+
+func VkType[T: SupportedGPUType](value: T): VkFormat =
+  when T is float32: VK_FORMAT_R32_SFLOAT
+  elif T is float64: VK_FORMAT_R64_SFLOAT
+  elif T is int8: VK_FORMAT_R8_SINT
+  elif T is int16: VK_FORMAT_R16_SINT
+  elif T is int32: VK_FORMAT_R32_SINT
+  elif T is int64: VK_FORMAT_R64_SINT
+  elif T is uint8: VK_FORMAT_R8_UINT
+  elif T is uint16: VK_FORMAT_R16_UINT
+  elif T is uint32: VK_FORMAT_R32_UINT
+  elif T is uint64: VK_FORMAT_R64_UINT
+  elif T is TVec2[int32]: VK_FORMAT_R32G32_SINT
+  elif T is TVec2[int64]: VK_FORMAT_R64G64_SINT
+  elif T is TVec3[int32]: VK_FORMAT_R32G32B32_SINT
+  elif T is TVec3[int64]: VK_FORMAT_R64G64B64_SINT
+  elif T is TVec4[int32]: VK_FORMAT_R32G32B32A32_SINT
+  elif T is TVec4[int64]: VK_FORMAT_R64G64B64A64_SINT
+  elif T is TVec2[uint32]: VK_FORMAT_R32G32_UINT
+  elif T is TVec2[uint64]: VK_FORMAT_R64G64_UINT
+  elif T is TVec3[uint32]: VK_FORMAT_R32G32B32_UINT
+  elif T is TVec3[uint64]: VK_FORMAT_R64G64B64_UINT
+  elif T is TVec4[uint32]: VK_FORMAT_R32G32B32A32_UINT
+  elif T is TVec4[uint64]: VK_FORMAT_R64G64B64A64_UINT
+  elif T is TVec2[float32]: VK_FORMAT_R32G32_SFLOAT
+  elif T is TVec2[float64]: VK_FORMAT_R64G64_SFLOAT
+  elif T is TVec3[float32]: VK_FORMAT_R32G32B32_SFLOAT
+  elif T is TVec3[float64]: VK_FORMAT_R64G64B64_SFLOAT
+  elif T is TVec4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
+  elif T is TVec4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
+  elif T is TMat2[float32]: VK_FORMAT_R32G32_SFLOAT
+  elif T is TMat2[float64]: VK_FORMAT_R64G64_SFLOAT
+  elif T is TMat23[float32]: VK_FORMAT_R32G32B32_SFLOAT
+  elif T is TMat23[float64]: VK_FORMAT_R64G64B64_SFLOAT
+  elif T is TMat32[float32]: VK_FORMAT_R32G32_SFLOAT
+  elif T is TMat32[float64]: VK_FORMAT_R64G64_SFLOAT
+  elif T is TMat3[float32]: VK_FORMAT_R32G32B32_SFLOAT
+  elif T is TMat3[float64]: VK_FORMAT_R64G64B64_SFLOAT
+  elif T is TMat34[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
+  elif T is TMat34[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
+  elif T is TMat43[float32]: VK_FORMAT_R32G32B32_SFLOAT
+  elif T is TMat43[float64]: VK_FORMAT_R64G64B64_SFLOAT
+  elif T is TMat4[float32]: VK_FORMAT_R32G32B32A32_SFLOAT
+  elif T is TMat4[float64]: VK_FORMAT_R64G64B64A64_SFLOAT
+  else: {.error: "Unsupported data type on GPU".}
+
+
+func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Texture](value: T): uint32 =
+  when T is TMat2[float32] or T is TMat2[float64] or T is TMat23[float32] or T is TMat23[float64]:
+    2
+  elif T is TMat32[float32] or T is TMat32[float64] or T is TMat3[float32] or T is TMat3[float64] or T is TMat34[float32] or T is TMat34[float64]:
+    3
+  elif T is TMat43[float32] or T is TMat43[float64] or T is TMat4[float32] or T is TMat4[float64]:
+    4
+  else:
+    1
+
+func NLocationSlots[T: SupportedGPUType|Texture](value: T): uint32 =
+  #[
+  single location:
+    - any scalar
+    - any 16-bit vector
+    - any 32-bit vector
+    - any 64-bit vector that has max. 2 components
+    16-bit scalar and vector types, and
+    32-bit scalar and vector types, and
+    64-bit scalar and 2-component vector types.
+  two locations
+    64-bit three- and four-component vectors
+  ]#
+  when T is TVec3[int64] or
+    T is TVec4[int64] or
+    T is TVec3[uint64] or
+    T is TVec4[uint64] or
+    T is TVec3[float64] or
+    T is TVec4[float64] or
+    T is TMat23[float64] or
+    T is TMat3[float64] or
+    T is TMat34[float64] or
+    T is TMat43[float64] or
+    T is TMat4[float64]:
+    return 2
+  else:
+    return 1
 
 proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileTime.} =
   const GLSL_VERSION = "450"
@@ -39,7 +163,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
     # descriptor sets
     # need to consider 4 cases: uniform block, texture, uniform block array, texture array
     elif typeof(value) is DescriptorSet:
-      assert descriptorSetCount <= DescriptorSetType.high.int, &"{typetraits.name(TShader)}: maximum {DescriptorSetType.high} allowed"
+      assert descriptorSetCount <= DescriptorSetType.high.int, typetraits.name(TShader) & ": maximum " & $DescriptorSetType.high & " allowed"
 
       var descriptorBinding = 0
       for descriptorName, descriptorValue in fieldPairs(value.data):
@@ -111,8 +235,7 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string): seq
     echo "shader of type ", stage
     for i, line in enumerate(shaderSource.splitlines()):
       echo "  ", i + 1, " ", line
-    # var glslExe = currentSourcePath.parentDir.parentDir.parentDir / "tools" / "glslangValidator"
-    var glslExe = currentSourcePath.parentDir / "tools" / "glslangValidator"
+    var glslExe = currentSourcePath.parentDir.parentDir.parentDir / "tools" / "glslangValidator"
     when defined(windows):
       glslExe = glslExe & "." & ExeExt
     let command = &"{glslExe} --entry-point main -V --stdin -S {stagename} -o {shaderfile}"
@@ -151,13 +274,13 @@ proc CompileShader[TShader](shader: static TShader): ShaderObject[TShader] =
     codeSize: csize_t(vertexBinary.len * sizeof(uint32)),
     pCode: vertexBinary.ToCPointer,
   )
-  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoVertex), nil, addr(result.vertexShader))
+  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoVertex), nil, addr(result.vertexShaderModule))
   var createInfoFragment = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     codeSize: csize_t(fragmentBinary.len * sizeof(uint32)),
     pCode: fragmentBinary.ToCPointer,
   )
-  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoFragment), nil, addr(result.fragmentShader))
+  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoFragment), nil, addr(result.fragmentShaderModule))
 
 template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename, body: untyped): untyped =
   for theFieldname, value in fieldPairs(shader):
@@ -172,9 +295,8 @@ template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename
         const `isinstancename` {.inject.} = hasCustomPragma(value, InstanceAttribute)
         body
 
-proc CreatePipeline[TShader](
+proc CreatePipeline*[TShader](
   renderPass: VkRenderPass,
-  shader: ShaderObject[TShader],
   topology: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
   cullMode: VkCullModeFlagBits = VK_CULL_MODE_BACK_BIT,
@@ -182,6 +304,9 @@ proc CreatePipeline[TShader](
   descriptorPoolLimit = 1024
 ): Pipeline[TShader] =
   # create pipeline
+
+  const shader = default(TShader)
+  let shaderObject = CompileShader(shader)
 
   for theFieldname, value in fieldPairs(default(TShader)):
     when typeof(value) is DescriptorSet:
@@ -218,13 +343,13 @@ proc CreatePipeline[TShader](
     VkPipelineShaderStageCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
       stage: VK_SHADER_STAGE_VERTEX_BIT,
-      module: shader.vertexShader,
+      module: shaderObject.vertexShaderModule,
       pName: "main",
     ),
     VkPipelineShaderStageCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
       stage: VK_SHADER_STAGE_FRAGMENT_BIT,
-      module: shader.fragmentShader,
+      module: shaderObject.fragmentShaderModule,
       pName: "main",
     ),
   ]
