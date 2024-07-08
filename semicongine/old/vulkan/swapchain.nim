@@ -99,6 +99,7 @@ proc CreateSwapchain*(
     swapchain.colorImageView = swapchain.colorImage.CreateImageView()
 
   if device.vk.vkCreateSwapchainKHR(addr createInfo, nil, addr swapchain.vk) == VK_SUCCESS:
+
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, nil)
     var framebuffers = newSeq[VkImage](swapchain.nFramebuffers)
     checkVkResult device.vk.vkGetSwapchainImagesKHR(swapchain.vk, addr swapchain.nFramebuffers, framebuffers.ToCPointer)

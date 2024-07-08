@@ -89,10 +89,6 @@ proc IsMappable(memoryTypeIndex: uint32): bool =
   let flags = toEnums(physicalProperties.memoryTypes[memoryTypeIndex].propertyFlags)
   return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags
 
-proc GetSurfaceFormat(): VkFormat =
-  # EVERY windows driver and almost every linux driver should support this
-  VK_FORMAT_B8G8R8A8_SRGB
-
 proc GetLayoutFor*(pipeline: Pipeline, dType: DescriptorSetType): VkDescriptorSetLayout =
   pipeline.descriptorSetLayouts[dType]
 
@@ -200,7 +196,7 @@ converter toVkIndexType(indexType: IndexType): VkIndexType =
     of UInt32: VK_INDEX_TYPE_UINT32
 
 proc CreatePresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPass =
-  let format = GetSurfaceFormat()
+  let format = DefaultSurfaceFormat()
   var attachments = @[VkAttachmentDescription(
     format: format,
     samples: samples,
@@ -440,28 +436,6 @@ proc TransitionImageLayout(image: VkImage, oldLayout, newLayout: VkImageLayout) 
       pImageMemoryBarriers = addr(barrier),
     )
 
-proc createImageView(image: VkImage, format: VkFormat): VkImageView =
-  var createInfo = VkImageViewCreateInfo(
-    sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-    image: image,
-    viewType: VK_IMAGE_VIEW_TYPE_2D,
-    format: format,
-    components: VkComponentMapping(
-      r: VK_COMPONENT_SWIZZLE_IDENTITY,
-      g: VK_COMPONENT_SWIZZLE_IDENTITY,
-      b: VK_COMPONENT_SWIZZLE_IDENTITY,
-      a: VK_COMPONENT_SWIZZLE_IDENTITY,
-    ),
-    subresourceRange: VkImageSubresourceRange(
-      aspectMask: VkImageAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT),
-      baseMipLevel: 0,
-      levelCount: 1,
-      baseArrayLayer: 0,
-      layerCount: 1,
-    ),
-  )
-  checkVkResult vkCreateImageView(vulkan.device, addr(createInfo), nil, addr(result))
-
 proc createSampler(
   magFilter = VK_FILTER_LINEAR,
   minFilter = VK_FILTER_LINEAR,
@@ -528,7 +502,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
   # imageview can only be created after memory is bound
-  texture.imageview = createImageView(texture.vk, format)
+  texture.imageview = svkCreate2DImageView(texture.vk, format)
 
   # data transfer and layout transition
   TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)

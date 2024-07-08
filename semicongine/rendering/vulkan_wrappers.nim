@@ -42,6 +42,22 @@ proc svkGetDeviceQueue*(device: VkDevice, queueFamilyIndex: uint32, qType: VkQue
     addr(result),
   )
 
+proc DefaultSurfaceFormat(): VkFormat =
+  # EVERY windows driver and almost every linux driver should support this
+  VK_FORMAT_B8G8R8A8_SRGB
+
+proc svkGetPhysicalDeviceSurfacePresentModesKHR*(): seq[VkPresentModeKHR] =
+  var n_modes: uint32
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.device, vulkan.surface, addr(n_modes), nil)
+  result = newSeq[VkPresentModeKHR](n_modes)
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.device, vulkan.surface, addr(n_modes), result.ToCPointer)
+
+proc svkGetPhysicalDeviceSurfaceFormatsKHR()
+  var n_formats: uint32
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.device, vulkan.surface, addr(n_formats), nil)
+  result = newSeq[VkSurfaceFormatKHR](n_formats)
+  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.device, vulkan.surface, addr(n_formats), result.ToCPointer)
+
 proc hasValidationLayer*(): bool =
   var n_layers: uint32
   checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), nil)
@@ -110,6 +126,28 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
     samples: VK_SAMPLE_COUNT_1_BIT,
   )
   checkVkResult vkCreateImage(vulkan.device, addr imageInfo, nil, addr(result))
+
+proc svkCreate2DImageView(image: VkImage, format: VkFormat): VkImageView =
+  var createInfo = VkImageViewCreateInfo(
+    sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+    image: image,
+    viewType: VK_IMAGE_VIEW_TYPE_2D,
+    format: format,
+    components: VkComponentMapping(
+      r: VK_COMPONENT_SWIZZLE_IDENTITY,
+      g: VK_COMPONENT_SWIZZLE_IDENTITY,
+      b: VK_COMPONENT_SWIZZLE_IDENTITY,
+      a: VK_COMPONENT_SWIZZLE_IDENTITY,
+    ),
+    subresourceRange: VkImageSubresourceRange(
+      aspectMask: VkImageAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT),
+      baseMipLevel: 0,
+      levelCount: 1,
+      baseArrayLayer: 0,
+      layerCount: 1,
+    ),
+  )
+  checkVkResult vkCreateImageView(vulkan.device, addr(createInfo), nil, addr(result))
 
 proc svkGetBufferMemoryRequirements*(buffer: VkBuffer): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
   var reqs: VkMemoryRequirements

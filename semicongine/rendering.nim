@@ -31,6 +31,9 @@ type
     device*: VkDevice
     physicalDevice*: VkPhysicalDevice
     surface: VkSurfaceKHR
+    swapchain: VkSwapchainKHR
+    msaaImage: VkImage
+    msaaImageView: VkImageView
     window: NativeWindow
     graphicsQueueFamily*: uint32
     graphicsQueue*: VkQueue
@@ -138,6 +141,7 @@ template ForDescriptorFields(shader: typed, fieldname, valuename, typename, coun
         {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
 
 include ./rendering/vulkan_wrappers
+include ./rendering/swapchain
 include ./rendering/shaders
 include ./rendering/renderer
 
