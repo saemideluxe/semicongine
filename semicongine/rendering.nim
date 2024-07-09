@@ -50,7 +50,7 @@ type
     queueFinishedFence*: array[INFLIGHTFRAMES, VkFence]
     imageAvailableSemaphore*: array[INFLIGHTFRAMES, VkSemaphore]
     renderFinishedSemaphore*: array[INFLIGHTFRAMES, VkSemaphore]
-    currentFiF: int[0 .. INFLIGHTFRAMES - 1]
+    currentFiF: range[0 .. (INFLIGHTFRAMES - 1).int]
     # unclear as of yet
     anisotropy*: float32 = 0 # needs to be enable during device creation
 

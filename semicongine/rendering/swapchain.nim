@@ -2,16 +2,12 @@ const N_FRAMEBUFFERS = 3'u32
 
 proc InitSwapchain*(
   renderPass: VkRenderPass,
-  vSync: bool,
+  vSync: bool = false,
   samples = VK_SAMPLE_COUNT_1_BIT,
   nFramebuffers = N_FRAMEBUFFERS,
   oldSwapchain = VkSwapchainKHR(0),
-): Swapchain =
+): Option[Swapchain] =
   assert vulkan.instance.Valid
-
-  result.renderPass = renderPass
-  result.vSync = vSync
-  result.samples = samples
 
   var capabilities: VkSurfaceCapabilitiesKHR
   checkVkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, vulkan.surface, addr(capabilities))
@@ -21,7 +17,7 @@ proc InitSwapchain*(
     height = capabilities.currentExtent.height
 
   if width == 0 or height == 0:
-    return VkSwapchainKHR(0)
+    return none(Swapchain)
 
   # following "count" is established according to vulkan specs
   var minFramebufferCount = N_FRAMEBUFFERS
@@ -47,47 +43,56 @@ proc InitSwapchain*(
     clipped: true,
     oldSwapchain: oldSwapchain,
   )
-  if vkCreateSwapchainKHR(vulkan.device, addr(createInfo), nil, addr(result.vk)) != VK_SUCCESS:
-    return VkSwapchainKHR(0)
+  var swapchain: Swapchain
+  if vkCreateSwapchainKHR(vulkan.device, addr(createInfo), nil, addr(swapchain.vk)) != VK_SUCCESS:
+    return none(Swapchain)
+
+  swapchain.renderPass = renderPass
+  swapchain.vSync = vSync
+  swapchain.samples = samples
 
   # create msaa image+view if desired
   if samples != VK_SAMPLE_COUNT_1_BIT:
-    let imgSize = width * height * format.size
-    result.msaaImage = svkCreate2DImage(
+    swapchain.msaaImage = svkCreate2DImage(
       width = width,
       height = height,
       format = format,
       usage = [VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
     )
-    result.msaaMemory = svkAllocateMemory(imgSize, BestMemory(mappable = false))
+    let requirements = svkGetImageMemoryRequirements(swapchain.msaaImage)
+    swapchain.msaaMemory = svkAllocateMemory(
+      requirements.size,
+      BestMemory(mappable = false, filter = requirements.memoryTypes)
+    )
     checkVkResult vkBindImageMemory(
       vulkan.device,
-      result.msaaImage,
-      result.msaaMemory,
+      swapchain.msaaImage,
+      swapchain.msaaMemory,
       0,
     )
-    result.msaaImageView = svkCreate2DImageView(result.msaaImage, format)
+    swapchain.msaaImageView = svkCreate2DImageView(swapchain.msaaImage, format)
 
-    # create framebuffers
-    var actualNFramebuffers: uint32
-    checkVkResult vkGetSwapchainImagesKHR(vulkan.device, result.vk, addr(actualNFramebuffers), nil)
-    var framebuffers = newSeq[VkImage](actualNFramebuffers)
-    checkVkResult vkGetSwapchainImagesKHR(vulkan.device, result.vk, addr(actualNFramebuffers), framebuffers.ToCPointer)
+  # create framebuffers
+  var actualNFramebuffers: uint32
+  checkVkResult vkGetSwapchainImagesKHR(vulkan.device, swapchain.vk, addr(actualNFramebuffers), nil)
+  var framebuffers = newSeq[VkImage](actualNFramebuffers)
+  checkVkResult vkGetSwapchainImagesKHR(vulkan.device, swapchain.vk, addr(actualNFramebuffers), framebuffers.ToCPointer)
 
-    for framebuffer in framebuffers:
-      result.framebufferViews.add svkCreate2DImageView(framebuffer, format)
-      if samples == VK_SAMPLE_COUNT_1_BIT:
-        svkCreateFramebuffer(renderPass, width, height, [result.framebufferViews[^1]])
-      else:
-        svkCreateFramebuffer(renderPass, width, height, [result.msaaImageView, result.framebufferViews[^1]])
+  for framebuffer in framebuffers:
+    swapchain.framebufferViews.add svkCreate2DImageView(framebuffer, format)
+    if samples == VK_SAMPLE_COUNT_1_BIT:
+      svkCreateFramebuffer(renderPass, width, height, [swapchain.framebufferViews[^1]])
+    else:
+      svkCreateFramebuffer(renderPass, width, height, [swapchain.msaaImageView, swapchain.framebufferViews[^1]])
 
-    # create sync primitives
-    for i in 0 ..< INFLIGHTFRAMES:
-      result.queueFinishedFence[i] = svkCreateFence(signaled = true)
-      result.imageAvailableSemaphore[i] = svkCreateSemaphore()
-      result.renderFinishedSemaphore[i] = svkCreateSemaphore()
+  # create sync primitives
+  for i in 0 ..< INFLIGHTFRAMES:
+    swapchain.queueFinishedFence[i] = svkCreateFence(signaled = true)
+    swapchain.imageAvailableSemaphore[i] = svkCreateSemaphore()
+    swapchain.renderFinishedSemaphore[i] = svkCreateSemaphore()
+  return some(swapchain)
 
-proc TryAcquireNextImage*(swapchain: var Swapchain): bool =
+proc TryAcquireNextImage*(swapchain: var Swapchain): Option[VkFramebuffer] =
   swapchain.queueFinishedFence[swapchain.currentFiF].Await()
 
   let nextImageResult = vkAcquireNextImageKHR(
@@ -101,7 +106,9 @@ proc TryAcquireNextImage*(swapchain: var Swapchain): bool =
 
   swapchain.queueFinishedFence[swapchain.currentFiF].Reset()
 
-  return nextImageResult == VK_SUCCESS
+  if nextImageResult != VK_SUCCESS:
+    return none(VkFramebuffer)
+  return some(swapchain.framebuffers[swapchain.currentFramebufferIndex])
 
 proc Swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
   var

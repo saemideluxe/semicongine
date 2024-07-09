@@ -25,9 +25,8 @@ proc GetBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
   assert score > 0, "Unable to find integrated or discrete GPU"
 
 proc svkGetPhysicalDeviceSurfaceSupportKHR*(queueFamily: uint32): bool =
-  assert surface.Valid
   var presentation = VkBool32(false)
-  checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkan.device, queueFamily, vulkan.surface, addr(presentation))
+  checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkan.physicalDevice, queueFamily, vulkan.surface, addr(presentation))
   return bool(presentation)
 
 proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
@@ -202,7 +201,7 @@ proc svkCreateFence*(signaled = false): VkFence =
 
 proc svkCreateSemaphore*(): VkSemaphore =
   var semaphoreInfo = VkSemaphoreCreateInfo(sType: VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
-  checkVkResult vkCreateSemaphore(vulkan.deivce, addr(semaphoreInfo), nil, addr(result))
+  checkVkResult vkCreateSemaphore(vulkan.device, addr(semaphoreInfo), nil, addr(result))
 
 proc Await*(fence: VkFence, timeout = high(uint64)) =
   checkVkResult vkWaitForFences(vulkan.device, 1, addr(fence), false, timeout)

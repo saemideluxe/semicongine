@@ -75,6 +75,9 @@ var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
 )
 
 let renderpass = CreatePresentationRenderPass()
+var swapchainResult = InitSwapchain(renderpass)
+assert swapchainResult.isSome()
+var swapchain = swapchainResult.get()
 
 # shaders
 var pipeline1 = CreatePipeline[ShaderA](renderPass = renderpass)
@@ -105,6 +108,10 @@ renderdata.FlushAllMemory()
 echo "Writing descriptors"
 InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(GlobalSet), myGlobals)
 InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(MaterialSet), uniforms1)
+
+
+
+
 
 
 # command buffer
