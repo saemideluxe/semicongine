@@ -7,7 +7,7 @@
 
 
 # const definitions
-const INFLIGHTFRAMES = 2'u32
+const INFLIGHTFRAMES* = 2'u32
 const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
 const MEMORY_BLOCK_ALLOCATION_SIZE = 100_000_000'u64 # ca. 100mb per block, seems reasonable
 const BUFFER_ALLOCATION_SIZE = 9_000_000'u64 # ca. 9mb per block, seems reasonable, can put 10 buffers into one memory block
@@ -35,6 +35,8 @@ type
     window: NativeWindow
     graphicsQueueFamily*: uint32
     graphicsQueue*: VkQueue
+    # unclear as of yet
+    anisotropy*: float32 = 0 # needs to be enable during device creation
   Swapchain = object
     # parameters to InitSwapchain, required for swapchain recreation
     renderPass: VkRenderPass
@@ -47,12 +49,11 @@ type
     msaaImageView: VkImageView
     framebuffers: seq[VkFramebuffer]
     framebufferViews: seq[VkImageView]
-    queueFinishedFence*: array[INFLIGHTFRAMES, VkFence]
-    imageAvailableSemaphore*: array[INFLIGHTFRAMES, VkSemaphore]
-    renderFinishedSemaphore*: array[INFLIGHTFRAMES, VkSemaphore]
+    queueFinishedFence*: array[INFLIGHTFRAMES.int, VkFence]
+    imageAvailableSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
+    renderFinishedSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
     currentFiF: range[0 .. (INFLIGHTFRAMES - 1).int]
-    # unclear as of yet
-    anisotropy*: float32 = 0 # needs to be enable during device creation
+    currentFramebufferIndex: uint32
 
 var vulkan*: VulkanGlobals
 

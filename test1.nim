@@ -1,4 +1,5 @@
-import os
+import std/os
+import std/options
 
 import semicongine
 
@@ -133,6 +134,8 @@ var
   )
 checkVkResult vkAllocateCommandBuffers(vulkan.device, addr allocInfo, cmdBuffers.ToCPointer)
 
+
+
 # start command buffer
 block:
   let
@@ -180,12 +183,12 @@ block:
     vkCmdSetScissor(cmd, firstScissor = 0, scissorCount = 1, addr(scissor))
 
     # bind pipeline, will be loop
-    block:
-      Bind(pipeline1, cmd, currentFrameInFlight = currentFrameInFlight)
+    # block:
+      # Bind(pipeline1, cmd, currentFrameInFlight = currentFrameInFlight)
 
       # render object, will be loop
-      block:
-        Render(cmd, pipeline1, myGlobals, uniforms1, myMesh1, instances1)
+      # block:
+        # Render(cmd, pipeline1, myGlobals, uniforms1, myMesh1, instances1)
 
     vkCmdEndRenderPass(cmd)
   checkVkResult cmd.vkEndCommandBuffer()

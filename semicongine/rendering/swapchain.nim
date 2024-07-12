@@ -81,9 +81,9 @@ proc InitSwapchain*(
   for framebuffer in framebuffers:
     swapchain.framebufferViews.add svkCreate2DImageView(framebuffer, format)
     if samples == VK_SAMPLE_COUNT_1_BIT:
-      svkCreateFramebuffer(renderPass, width, height, [swapchain.framebufferViews[^1]])
+      swapchain.framebuffers.add svkCreateFramebuffer(renderPass, width, height, [swapchain.framebufferViews[^1]])
     else:
-      svkCreateFramebuffer(renderPass, width, height, [swapchain.msaaImageView, swapchain.framebufferViews[^1]])
+      swapchain.framebuffers.add svkCreateFramebuffer(renderPass, width, height, [swapchain.msaaImageView, swapchain.framebufferViews[^1]])
 
   # create sync primitives
   for i in 0 ..< INFLIGHTFRAMES:
@@ -110,7 +110,7 @@ proc TryAcquireNextImage*(swapchain: var Swapchain): Option[VkFramebuffer] =
     return none(VkFramebuffer)
   return some(swapchain.framebuffers[swapchain.currentFramebufferIndex])
 
-proc Swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffer): bool =
+proc Swap*(swapchain: var Swapchain, queue: VkQueue, commandBuffer: VkCommandBuffer): bool =
   var
     waitStage = VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
     submitInfo = VkSubmitInfo(
@@ -123,29 +123,30 @@ proc Swap*(swapchain: var Swapchain, queue: Queue, commandBuffer: VkCommandBuffe
       signalSemaphoreCount: 1,
       pSignalSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentFiF]),
     )
-  checkVkResult queue.vk.vkQueueSubmit(
+  checkVkResult vkQueueSubmit(
+    queue = queue,
     submitCount = 1,
-    pSubmits = addr submitInfo,
-    fence = swapchain.queueFinishedFence[swapchain.currentInFlight].vk
+    pSubmits = addr(submitInfo),
+    fence = swapchain.queueFinishedFence[swapchain.currentFiF]
   )
 
   var presentInfo = VkPresentInfoKHR(
     sType: VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
     waitSemaphoreCount: 1,
-    pWaitSemaphores: addr swapchain.renderFinishedSemaphore[swapchain.currentInFlight].vk,
+    pWaitSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentFiF]),
     swapchainCount: 1,
-    pSwapchains: addr swapchain.vk,
-    pImageIndices: addr swapchain.currentFramebufferIndex,
+    pSwapchains: addr(swapchain.vk),
+    pImageIndices: addr(swapchain.currentFramebufferIndex),
     pResults: nil,
   )
-  let presentResult = vkQueuePresentKHR(swapchain.presentQueue.vk, addr presentInfo)
+  let presentResult = vkQueuePresentKHR(vulkan.graphicsQueue, addr(presentInfo))
   if presentResult != VK_SUCCESS:
     return false
 
   return true
 
-proc Recreate*(swapchain: Swapchain): Swapchain =
-  initSwapchain(
+proc Recreate*(swapchain: Swapchain): Option[Swapchain] =
+  InitSwapchain(
     renderPass = swapchain.renderPass,
     vSync = swapchain.vSync,
     samples = swapchain.samples,
