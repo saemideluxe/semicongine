@@ -41,8 +41,6 @@ type
     vertexCode: string = "void main() {}"
     fragmentCode: string = "void main() {}"
 
-putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_AMD,VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_NVIDIA,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT")
-
 let frameWidth = 100'u32
 let frameHeight = 100'u32
 
@@ -76,7 +74,7 @@ var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
 )
 
 let renderpass = CreatePresentationRenderPass()
-var swapchainResult = InitSwapchain(renderpass)
+var swapchainResult = InitSwapchain(renderpass = renderpass)
 assert swapchainResult.isSome()
 var swapchain = swapchainResult.get()
 
@@ -104,59 +102,21 @@ UpdateAllGPUBuffers(uniforms1)
 UpdateAllGPUBuffers(myGlobals)
 renderdata.FlushAllMemory()
 
-
 # descriptors
 echo "Writing descriptors"
 InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(GlobalSet), myGlobals)
 InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(MaterialSet), uniforms1)
 
 
-
-
-
-
-# command buffer
-var
-  commandBufferPool: VkCommandPool
-  createInfo = VkCommandPoolCreateInfo(
-    sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-    flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
-    queueFamilyIndex: vulkan.graphicsQueueFamily,
-  )
-checkVkResult vkCreateCommandPool(vulkan.device, addr createInfo, nil, addr commandBufferPool)
-var
-  cmdBuffers: array[INFLIGHTFRAMES.int, VkCommandBuffer]
-  allocInfo = VkCommandBufferAllocateInfo(
-    sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-    commandPool: commandBufferPool,
-    level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-    commandBufferCount: INFLIGHTFRAMES,
-  )
-checkVkResult vkAllocateCommandBuffers(vulkan.device, addr allocInfo, cmdBuffers.ToCPointer)
-
-
-
 # start command buffer
-block:
-  let
-    currentFramebuffer = VkFramebuffer(0) # TODO
-    currentFrameInFlight = 1
-    cmd = cmdBuffers[currentFrameInFlight]
-    beginInfo = VkCommandBufferBeginInfo(
-      sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-      flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
-    )
-  checkVkResult cmd.vkResetCommandBuffer(VkCommandBufferResetFlags(0))
-  checkVkResult cmd.vkBeginCommandBuffer(addr(beginInfo))
-
-  # start renderpass
-  block:
+while true:
+  RecordRenderingCommands(swapchain, framebuffer, commandbuffer):
     var
       clearColors = [VkClearValue(color: VkClearColorValue(float32: [0, 0, 0, 0]))]
       renderPassInfo = VkRenderPassBeginInfo(
         sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         renderPass: renderpass,
-        framebuffer: currentFramebuffer, # TODO
+        framebuffer: framebuffer,
         renderArea: VkRect2D(
           offset: VkOffset2D(x: 0, y: 0),
           extent: VkExtent2D(width: frameWidth, height: frameHeight),
@@ -176,19 +136,18 @@ block:
         offset: VkOffset2D(x: 0, y: 0),
         extent: VkExtent2D(width: frameWidth, height: frameHeight)
       )
-    vkCmdBeginRenderPass(cmd, addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
+    vkCmdBeginRenderPass(commandbuffer, addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
 
     # setup viewport
-    vkCmdSetViewport(cmd, firstViewport = 0, viewportCount = 1, addr(viewport))
-    vkCmdSetScissor(cmd, firstScissor = 0, scissorCount = 1, addr(scissor))
+    vkCmdSetViewport(commandbuffer, firstViewport = 0, viewportCount = 1, addr(viewport))
+    vkCmdSetScissor(commandbuffer, firstScissor = 0, scissorCount = 1, addr(scissor))
 
     # bind pipeline, will be loop
     # block:
-      # Bind(pipeline1, cmd, currentFrameInFlight = currentFrameInFlight)
+      # Bind(pipeline1, commandbuffer, currentFrameInFlight = currentFrameInFlight)
 
       # render object, will be loop
       # block:
-        # Render(cmd, pipeline1, myGlobals, uniforms1, myMesh1, instances1)
+        # Render(commandbuffer, pipeline1, myGlobals, uniforms1, myMesh1, instances1)
 
-    vkCmdEndRenderPass(cmd)
-  checkVkResult cmd.vkEndCommandBuffer()
+    vkCmdEndRenderPass(commandbuffer)

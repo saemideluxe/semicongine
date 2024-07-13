@@ -4,7 +4,6 @@ proc InitSwapchain*(
   renderPass: VkRenderPass,
   vSync: bool = false,
   samples = VK_SAMPLE_COUNT_1_BIT,
-  nFramebuffers = N_FRAMEBUFFERS,
   oldSwapchain = VkSwapchainKHR(0),
 ): Option[Swapchain] =
   assert vulkan.instance.Valid
@@ -27,7 +26,7 @@ proc InitSwapchain*(
 
   # create swapchain
   let hasTripleBuffering = VK_PRESENT_MODE_MAILBOX_KHR in svkGetPhysicalDeviceSurfacePresentModesKHR()
-  var createInfo = VkSwapchainCreateInfoKHR(
+  var swapchainCreateInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: vulkan.surface,
     minImageCount: minFramebufferCount,
@@ -44,7 +43,7 @@ proc InitSwapchain*(
     oldSwapchain: oldSwapchain,
   )
   var swapchain: Swapchain
-  if vkCreateSwapchainKHR(vulkan.device, addr(createInfo), nil, addr(swapchain.vk)) != VK_SUCCESS:
+  if vkCreateSwapchainKHR(vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)) != VK_SUCCESS:
     return none(Swapchain)
 
   swapchain.renderPass = renderPass
@@ -90,9 +89,25 @@ proc InitSwapchain*(
     swapchain.queueFinishedFence[i] = svkCreateFence(signaled = true)
     swapchain.imageAvailableSemaphore[i] = svkCreateSemaphore()
     swapchain.renderFinishedSemaphore[i] = svkCreateSemaphore()
+
+  # command buffers
+  var commandPoolCreateInfo = VkCommandPoolCreateInfo(
+    sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+    flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
+    queueFamilyIndex: vulkan.graphicsQueueFamily,
+  )
+  checkVkResult vkCreateCommandPool(vulkan.device, addr(commandPoolCreateInfo), nil, addr(swapchain.commandBufferPool))
+  var allocInfo = VkCommandBufferAllocateInfo(
+    sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+    commandPool: swapchain.commandBufferPool,
+    level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+    commandBufferCount: INFLIGHTFRAMES,
+  )
+  checkVkResult vkAllocateCommandBuffers(vulkan.device, addr(allocInfo), swapchain.commandBuffers.ToCPointer)
+
   return some(swapchain)
 
-proc TryAcquireNextImage*(swapchain: var Swapchain): Option[VkFramebuffer] =
+proc TryAcquireNextImage(swapchain: var Swapchain): Option[VkFramebuffer] =
   swapchain.queueFinishedFence[swapchain.currentFiF].Await()
 
   let nextImageResult = vkAcquireNextImageKHR(
@@ -110,7 +125,7 @@ proc TryAcquireNextImage*(swapchain: var Swapchain): Option[VkFramebuffer] =
     return none(VkFramebuffer)
   return some(swapchain.framebuffers[swapchain.currentFramebufferIndex])
 
-proc Swap*(swapchain: var Swapchain, queue: VkQueue, commandBuffer: VkCommandBuffer): bool =
+proc Swap(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
   var
     waitStage = VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
     submitInfo = VkSubmitInfo(
@@ -124,7 +139,7 @@ proc Swap*(swapchain: var Swapchain, queue: VkQueue, commandBuffer: VkCommandBuf
       pSignalSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentFiF]),
     )
   checkVkResult vkQueueSubmit(
-    queue = queue,
+    queue = vulkan.graphicsQueue,
     submitCount = 1,
     pSubmits = addr(submitInfo),
     fence = swapchain.queueFinishedFence[swapchain.currentFiF]
@@ -143,13 +158,47 @@ proc Swap*(swapchain: var Swapchain, queue: VkQueue, commandBuffer: VkCommandBuf
   if presentResult != VK_SUCCESS:
     return false
 
+  swapchain.currentFiF = (uint32(swapchain.currentFiF) + 1) mod INFLIGHTFRAMES
   return true
 
-proc Recreate*(swapchain: Swapchain): Option[Swapchain] =
+proc Recreate(swapchain: Swapchain): Option[Swapchain] =
   InitSwapchain(
     renderPass = swapchain.renderPass,
     vSync = swapchain.vSync,
     samples = swapchain.samples,
-    nFramebuffers = swapchain.framebuffers.len.uint32,
     oldSwapchain = swapchain.vk,
   )
+
+template RecordRenderingCommands*(swapchain: var Swapchain, framebufferName, commandBufferName, body: untyped): untyped =
+  var nextFrameReady = true
+
+  var maybeFramebuffer = TryAcquireNextImage(swapchain)
+  if not maybeFramebuffer.isSome:
+    let maybeNewSwapchain = Recreate(swapchain)
+    # unable to recreate swapchain
+    if not maybeNewSwapchain.isSome:
+      nextFrameReady = false
+    else:
+      swapchain = maybeNewSwapchain.get
+      maybeFramebuffer = TryAcquireNextImage(swapchain)
+      if not maybeFramebuffer.isSome:
+        nextFrameReady = false
+
+  if nextFrameReady:
+    block:
+      let `framebufferName` {.inject.} = maybeFramebuffer.get
+      let `commandBufferName` {.inject.} = swapchain.commandBuffers[swapchain.currentFiF]
+      let beginInfo = VkCommandBufferBeginInfo(
+        sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
+      )
+      checkVkResult vkResetCommandBuffer(`commandBufferName`, VkCommandBufferResetFlags(0))
+      checkVkResult vkBeginCommandBuffer(`commandBufferName`, addr(beginInfo))
+
+      body
+
+      checkVkResult vkEndCommandBuffer(`commandBufferName`)
+      if not Swap(swapchain = swapchain, commandBuffer = `commandBufferName`):
+        let maybeNewSwapchain = Recreate(swapchain)
+        if maybeNewSwapchain.isSome:
+          swapchain = maybeNewSwapchain.get

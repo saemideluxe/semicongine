@@ -49,11 +49,14 @@ type
     msaaImageView: VkImageView
     framebuffers: seq[VkFramebuffer]
     framebufferViews: seq[VkImageView]
+    currentFramebufferIndex: uint32
+    commandBufferPool: VkCommandPool
+    # frame-in-flight handling
+    currentFiF: range[0 .. (INFLIGHTFRAMES - 1).int]
     queueFinishedFence*: array[INFLIGHTFRAMES.int, VkFence]
     imageAvailableSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
     renderFinishedSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
-    currentFiF: range[0 .. (INFLIGHTFRAMES - 1).int]
-    currentFramebufferIndex: uint32
+    commandBuffers: array[INFLIGHTFRAMES.int, VkCommandBuffer]
 
 var vulkan*: VulkanGlobals
 
@@ -167,10 +170,12 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
   include ./platform/vulkan_extensions # for REQUIRED_PLATFORM_EXTENSIONS
 
   # instance creation
-  #
+
+  # enagle all kind of debug stuff
   when not defined(release):
     let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface", "VK_EXT_debug_utils"]
     let layers: seq[string] = if hasValidationLayer(): @["VK_LAYER_KHRONOS_validation"] else: @[]
+    putEnv("VK_LAYER_ENABLES", "VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_AMD,VALIDATION_CHECK_ENABLE_VENDOR_SPECIFIC_NVIDIA,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXTVK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT")
   else:
     let requiredExtensions = REQUIRED_PLATFORM_EXTENSIONS & @["VK_KHR_surface"]
     let layers: seq[string]
