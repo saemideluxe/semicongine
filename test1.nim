@@ -1,4 +1,6 @@
 import std/os
+import std/monotimes
+import std/times
 import std/options
 
 import semicongine
@@ -73,13 +75,14 @@ var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
   )
 )
 
-let renderpass = CreatePresentationRenderPass()
-var swapchainResult = InitSwapchain(renderpass = renderpass)
+let mainRenderpass = CreatePresentationRenderPass()
+var swapchainResult = InitSwapchain(renderpass = mainRenderpass)
+
 assert swapchainResult.isSome()
 var swapchain = swapchainResult.get()
 
 # shaders
-var pipeline1 = CreatePipeline[ShaderA](renderPass = renderpass)
+var pipeline1 = CreatePipeline[ShaderA](renderPass = mainRenderpass)
 
 var renderdata = InitRenderData()
 
@@ -109,45 +112,9 @@ InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(MaterialSet), uniforms1)
 
 
 # start command buffer
-while true:
-  RecordRenderingCommands(swapchain, framebuffer, commandbuffer):
-    var
-      clearColors = [VkClearValue(color: VkClearColorValue(float32: [0, 0, 0, 0]))]
-      renderPassInfo = VkRenderPassBeginInfo(
-        sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        renderPass: renderpass,
-        framebuffer: framebuffer,
-        renderArea: VkRect2D(
-          offset: VkOffset2D(x: 0, y: 0),
-          extent: VkExtent2D(width: frameWidth, height: frameHeight),
-        ),
-        clearValueCount: uint32(clearColors.len),
-        pClearValues: clearColors.ToCPointer(),
-      )
-      viewport = VkViewport(
-        x: 0.0,
-        y: 0.0,
-        width: frameWidth.float32,
-        height: frameHeight.float32,
-        minDepth: 0.0,
-        maxDepth: 1.0,
-      )
-      scissor = VkRect2D(
-        offset: VkOffset2D(x: 0, y: 0),
-        extent: VkExtent2D(width: frameWidth, height: frameHeight)
-      )
-    vkCmdBeginRenderPass(commandbuffer, addr(renderPassInfo), VK_SUBPASS_CONTENTS_INLINE)
-
-    # setup viewport
-    vkCmdSetViewport(commandbuffer, firstViewport = 0, viewportCount = 1, addr(viewport))
-    vkCmdSetScissor(commandbuffer, firstScissor = 0, scissorCount = 1, addr(scissor))
-
-    # bind pipeline, will be loop
-    # block:
-      # Bind(pipeline1, commandbuffer, currentFrameInFlight = currentFrameInFlight)
-
-      # render object, will be loop
-      # block:
-        # Render(commandbuffer, pipeline1, myGlobals, uniforms1, myMesh1, instances1)
-
-    vkCmdEndRenderPass(commandbuffer)
+var t = getMonoTime()
+while UpdateInputs():
+  WithNextFrame(swapchain, framebuffer, commandbuffer):
+    WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(1, 0, 0, 0)):
+      # echo (getMonoTime() - t).inMicroseconds.float / 1000.0
+      t = getMonoTime()

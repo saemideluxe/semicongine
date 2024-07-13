@@ -35,6 +35,7 @@ type
     window: NativeWindow
     graphicsQueueFamily*: uint32
     graphicsQueue*: VkQueue
+    debugMessenger: VkDebugUtilsMessengerEXT
     # unclear as of yet
     anisotropy*: float32 = 0 # needs to be enable during device creation
   Swapchain = object
@@ -44,6 +45,8 @@ type
     samples: VkSampleCountFlagBits
     # populated through InitSwapchain proc
     vk: VkSwapchainKHR
+    width: uint32
+    height: uint32
     msaaImage: VkImage
     msaaMemory: VkDeviceMemory
     msaaImageView: VkImageView
@@ -160,10 +163,32 @@ template ForDescriptorFields(shader: typed, fieldname, valuename, typename, coun
         {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
 
 include ./rendering/vulkan_wrappers
+include ./rendering/renderpasses
 include ./rendering/swapchain
 include ./rendering/shaders
 include ./rendering/renderer
 
+proc debugCallback(
+  messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
+  messageTypes: VkDebugUtilsMessageTypeFlagsEXT,
+  pCallbackData: ptr VkDebugUtilsMessengerCallbackDataEXT,
+  userData: pointer
+): VkBool32 {.cdecl.} =
+  const LOG_LEVEL_MAPPING = {
+      VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: lvlDebug,
+      VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: lvlInfo,
+      VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: lvlWarn,
+      VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: lvlError,
+  }.toTable
+  log LOG_LEVEL_MAPPING[messageSeverity], &"{toEnums messageTypes}: {pCallbackData.pMessage}"
+  if messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+    stderr.writeLine "-----------------------------------"
+    stderr.write getStackTrace()
+    stderr.writeLine LOG_LEVEL_MAPPING[messageSeverity], &"{toEnums messageTypes}: {pCallbackData.pMessage}"
+    stderr.writeLine "-----------------------------------"
+    let errorMsg = getStackTrace() & &"\n{toEnums messageTypes}: {pCallbackData.pMessage}"
+    raise newException(Exception, errorMsg)
+  return false
 
 proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
 
@@ -222,6 +247,21 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
   var deviceExtensions = @["VK_KHR_swapchain"]
   for extension in deviceExtensions:
     loadExtension(result.instance, extension)
+
+  when not defined(release):
+    var debugMessengerCreateInfo = VkDebugUtilsMessengerCreateInfoEXT(
+      sType: VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+      messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT.items.toSeq.toBits,
+      messageType: VkDebugUtilsMessageTypeFlagBitsEXT.items.toSeq.toBits,
+      pfnUserCallback: debugCallback,
+      pUserData: nil,
+    )
+    checkVkResult vkCreateDebugUtilsMessengerEXT(
+      result.instance,
+      addr(debugMessengerCreateInfo),
+      nil,
+      addr(result.debugMessenger)
+    )
 
   # get physical device and graphics queue family
   result.physicalDevice = GetBestPhysicalDevice(result.instance)

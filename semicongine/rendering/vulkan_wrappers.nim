@@ -203,10 +203,14 @@ proc svkCreateSemaphore*(): VkSemaphore =
   var semaphoreInfo = VkSemaphoreCreateInfo(sType: VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
   checkVkResult vkCreateSemaphore(vulkan.device, addr(semaphoreInfo), nil, addr(result))
 
-proc Await*(fence: VkFence, timeout = high(uint64)) =
-  checkVkResult vkWaitForFences(vulkan.device, 1, addr(fence), false, timeout)
+proc Await*(fence: VkFence, timeout = high(uint64)): bool =
+  let waitResult = vkWaitForFences(vulkan.device, 1, addr(fence), false, timeout)
+  if waitResult == VK_TIMEOUT:
+    return false
+  checkVkResult waitResult
+  return true
 
-proc Reset*(fence: VkFence) =
+proc svkResetFences*(fence: VkFence) =
   checkVkResult vkResetFences(vulkan.device, 1, addr(fence))
 
 proc BestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
@@ -265,7 +269,7 @@ template WithSingleUseCommandBuffer*(cmd, body: untyped): untyped =
 
     var fence = svkCreateFence()
     checkVkResult vkQueueSubmit(vulkan.graphicsQueue, 1, addr(submitInfo), fence)
-    fence.Await()
+    discard fence.Await()
     vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
 
 template WithStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](

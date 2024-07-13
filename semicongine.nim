@@ -3,6 +3,7 @@ import std/dynlib
 import std/enumerate
 import std/hashes
 import std/logging
+import std/marshal
 import std/math
 import std/macros
 import std/os
@@ -15,6 +16,11 @@ import std/strutils
 import std/tables
 import std/typetraits as typetraits
 
-include semicongine/core
-include semicongine/events
-include semicongine/rendering
+include ./semicongine/rendering/vulkan/api
+include ./semicongine/core
+
+include ./semicongine/events
+include ./semicongine/rendering
+
+include ./semicongine/storage
+include ./semicongine/input

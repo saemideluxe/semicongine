@@ -46,6 +46,8 @@ proc InitSwapchain*(
   if vkCreateSwapchainKHR(vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)) != VK_SUCCESS:
     return none(Swapchain)
 
+  swapchain.width = width
+  swapchain.height = height
   swapchain.renderPass = renderPass
   swapchain.vSync = vSync
   swapchain.samples = samples
@@ -108,7 +110,8 @@ proc InitSwapchain*(
   return some(swapchain)
 
 proc TryAcquireNextImage(swapchain: var Swapchain): Option[VkFramebuffer] =
-  swapchain.queueFinishedFence[swapchain.currentFiF].Await()
+  if not swapchain.queueFinishedFence[swapchain.currentFiF].Await(1_000_000_000):
+    return none(VkFramebuffer)
 
   let nextImageResult = vkAcquireNextImageKHR(
     vulkan.device,
@@ -119,7 +122,7 @@ proc TryAcquireNextImage(swapchain: var Swapchain): Option[VkFramebuffer] =
     addr(swapchain.currentFramebufferIndex),
   )
 
-  swapchain.queueFinishedFence[swapchain.currentFiF].Reset()
+  swapchain.queueFinishedFence[swapchain.currentFiF].svkResetFences()
 
   if nextImageResult != VK_SUCCESS:
     return none(VkFramebuffer)
@@ -162,6 +165,7 @@ proc Swap(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
   return true
 
 proc Recreate(swapchain: Swapchain): Option[Swapchain] =
+  echo "Recreating swapchain"
   InitSwapchain(
     renderPass = swapchain.renderPass,
     vSync = swapchain.vSync,
@@ -169,7 +173,8 @@ proc Recreate(swapchain: Swapchain): Option[Swapchain] =
     oldSwapchain = swapchain.vk,
   )
 
-template RecordRenderingCommands*(swapchain: var Swapchain, framebufferName, commandBufferName, body: untyped): untyped =
+template WithNextFrame*(swapchain: var Swapchain, framebufferName, commandBufferName, body: untyped): untyped =
+
   var nextFrameReady = true
 
   var maybeFramebuffer = TryAcquireNextImage(swapchain)
