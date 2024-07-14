@@ -126,7 +126,12 @@ proc DestroySwapchain*(swapchain: Swapchain) =
   for imageView in swapchain.framebufferViews:
     vkDestroyImageView(vulkan.device, imageView, nil)
 
+  for framebuffer in swapchain.framebuffers:
+    vkDestroyFramebuffer(vulkan.device, framebuffer, nil)
+
   vkDestroyCommandPool(vulkan.device, swapchain.commandBufferPool, nil)
+
+  vkDestroySwapchainKHR(vulkan.device, swapchain.vk, nil)
 
 proc TryAcquireNextImage(swapchain: var Swapchain): Option[VkFramebuffer] =
   if not swapchain.queueFinishedFence[swapchain.currentFiF].Await(100_000_000):
@@ -183,7 +188,6 @@ proc Swap(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
     if swapchain.oldSwapchainCounter <= 0:
       DestroySwapchain(swapchain.oldSwapchain[])
       swapchain.oldSwapchain = nil
-
 
   if presentResult != VK_SUCCESS:
     return false

@@ -14,7 +14,7 @@ import std/sequtils
 import std/strformat
 import std/strutils
 import std/tables
-import std/typetraits as typetraits
+import std/typetraits
 
 include ./semicongine/rendering/vulkan/api
 include ./semicongine/core

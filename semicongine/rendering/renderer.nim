@@ -331,6 +331,9 @@ proc DestroyRenderData*(renderData: RenderData) =
   for imageView in renderData.imageViews:
     vkDestroyImageView(vulkan.device, imageView, nil)
 
+  for sampler in renderData.samplers:
+    vkDestroySampler(vulkan.device, sampler, nil)
+
   for image in renderData.images:
     vkDestroyImage(vulkan.device, image, nil)
 
@@ -420,6 +423,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
   texture.vk = svkCreate2DImage(texture.width, texture.height, format, usage)
   renderData.images.add texture.vk
   texture.sampler = createSampler()
+  renderData.samplers.add texture.sampler
 
   let memoryRequirements = texture.vk.svkGetImageMemoryRequirements()
   let memoryType = BestMemory(mappable = false, filter = memoryRequirements.memoryTypes)
@@ -520,7 +524,7 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial: typedesc) 
 
     # descriptors
     elif typeof(shaderAttribute) is DescriptorSet:
-      assert descriptorSetCount <= DescriptorSetType.high.int, &"{typetraits.name(TShader)}: maximum {DescriptorSetType.high} allowed"
+      assert descriptorSetCount <= DescriptorSetType.high.int, typetraits.name(TShader) & ": maximum " & $DescriptorSetType.high & " allowed"
       descriptorSetCount.inc
 
 
@@ -532,7 +536,7 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial: typedesc) 
         assert typeof(shaderAttribute) is TMaterial, "Shader has materialdescriptor type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TMaterial)
 
 
-proc Render[TShader, TGlobals, TMaterial, TMesh, TInstance](
+proc Render*[TShader, TGlobals, TMaterial, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
   globalSet: TGlobals,

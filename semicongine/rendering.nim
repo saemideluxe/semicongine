@@ -128,6 +128,7 @@ type
     buffers: array[BufferType, seq[Buffer]]
     images: seq[VkImage]
     imageViews: seq[VkImageView]
+    samplers: seq[VkSampler]
 
 template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 1'u32
@@ -303,6 +304,8 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
 
 proc DestroyVulkan*() =
   vkDestroyDevice(vulkan.device, nil)
+  vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
+  vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
   vkDestroyInstance(vulkan.instance, nil)
 
 vulkan = InitVulkan()

@@ -461,5 +461,11 @@ proc CreatePipeline*[TShader](
   )
 
 proc DestroyPipeline*(pipeline: Pipeline) =
+
+  for descriptorSetLayout in pipeline.descriptorSetLayouts:
+    vkDestroyDescriptorSetLayout(vulkan.device, descriptorSetLayout, nil)
+
   vkDestroyShaderModule(vulkan.device, pipeline.vertexShaderModule, nil)
   vkDestroyShaderModule(vulkan.device, pipeline.fragmentShaderModule, nil)
+  vkDestroyPipelineLayout(vulkan.device, pipeline.layout, nil)
+  vkDestroyPipeline(vulkan.device, pipeline.vk, nil)
