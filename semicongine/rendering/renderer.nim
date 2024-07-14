@@ -86,14 +86,12 @@ proc IsMappable(memoryTypeIndex: uint32): bool =
   let flags = toEnums(physicalProperties.memoryTypes[memoryTypeIndex].propertyFlags)
   return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags
 
-proc GetLayoutFor*(pipeline: Pipeline, dType: DescriptorSetType): VkDescriptorSetLayout =
-  pipeline.descriptorSetLayouts[dType]
-
 proc InitDescriptorSet*(
   renderData: RenderData,
   layout: VkDescriptorSetLayout,
   descriptorSet: var DescriptorSet,
 ) =
+
   # santization checks
   for name, value in descriptorSet.data.fieldPairs:
     when typeof(value) is GPUValue:
@@ -184,13 +182,6 @@ proc InitDescriptorSet*(
     descriptorCopyCount = 0,
     pDescriptorCopies = nil,
   )
-
-converter toVkIndexType(indexType: IndexType): VkIndexType =
-  case indexType:
-    of None: VK_INDEX_TYPE_NONE_KHR
-    of UInt8: VK_INDEX_TYPE_UINT8_EXT
-    of UInt16: VK_INDEX_TYPE_UINT16
-    of UInt32: VK_INDEX_TYPE_UINT32
 
 proc AllocateNewMemoryBlock(size: uint64, mType: uint32): MemoryBlock =
   result = MemoryBlock(
@@ -536,6 +527,22 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial: typedesc) 
         assert typeof(shaderAttribute) is TMaterial, "Shader has materialdescriptor type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TMaterial)
 
 
+
+template WithBind*[A, B](commandBuffer: VkCommandBuffer, globalDescriptorSet: DescriptorSet[A, GlobalSet], materialDescriptorSet: DescriptorSet[B, MaterialSet], pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+  block:
+    let sets = [globalDescriptorSet.vk[currentFiF], materialDescriptorSet.vk[currentFiF]]
+    vkCmdBindDescriptorSets(
+      commandBuffer = commandBuffer,
+      pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+      layout = pipeline.layout,
+      firstSet = 0,
+      descriptorSetCount = sets.len.uint32,
+      pDescriptorSets = sets.ToCPointer,
+      dynamicOffsetCount = 0,
+      pDynamicOffsets = nil
+    )
+    body
+
 proc Render*[TShader, TGlobals, TMaterial, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
@@ -544,33 +551,91 @@ proc Render*[TShader, TGlobals, TMaterial, TMesh, TInstance](
   mesh: TMesh,
   instances: TInstance,
 ) =
-  static: AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial)
-  #[
-  if renderable.vertexBuffers.len > 0:
-    commandBuffer.vkCmdBindVertexBuffers(
+  when not defined(release):
+    static: AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial)
+
+  var vertexBuffers: seq[VkBuffer]
+  var vertexBuffersOffsets: seq[uint64]
+  var elementCount = 0'u32
+  var instanceCount = 1'u32
+
+  for shaderAttributeName, shaderAttribute in default(TShader).fieldPairs:
+    when hasCustomPragma(shaderAttribute, VertexAttribute):
+      for meshName, meshValue in mesh.fieldPairs:
+        when meshName == shaderAttributeName:
+          vertexBuffers.add meshValue.buffer.vk
+          vertexBuffersOffsets.add meshValue.offset
+          elementCount = meshValue.data.len.uint32
+    elif hasCustomPragma(shaderAttribute, InstanceAttribute):
+      for instanceName, instanceValue in instances.fieldPairs:
+        when instanceName == shaderAttributeName:
+          vertexBuffers.add instanceValue.buffer.vk
+          vertexBuffersOffsets.add instanceValue.offset
+          instanceCount = instanceValue.data.len.uint32
+
+  if vertexBuffers.len > 0:
+    vkCmdBindVertexBuffers(
+      commandBuffer = commandBuffer,
       firstBinding = 0'u32,
-      bindingCount = uint32(renderable.vertexBuffers.len),
-      pBuffers = renderable.vertexBuffers.ToCPointer(),
-      pOffsets = renderable.bufferOffsets.ToCPointer()
+      bindingCount = uint32(vertexBuffers.len),
+      pBuffers = vertexBuffers.ToCPointer(),
+      pOffsets = vertexBuffersOffsets.ToCPointer()
     )
-  if renderable.indexType != None:
-    commandBuffer.vkCmdBindIndexBuffer(
-      renderable.indexBuffer,
-      renderable.indexBufferOffset,
-      renderable.indexType,
+
+  var indexBuffer: VkBuffer
+  var indexBufferOffset: uint64
+  var indexType = VK_INDEX_TYPE_NONE_KHR
+
+  for meshName, meshValue in mesh.fieldPairs:
+    when typeof(meshValue) is GPUArray[uint8, IndexBuffer]:
+      indexBuffer = meshValue.buffer.vk
+      indexBufferOffset = meshValue.offset
+      indexType = VK_INDEX_TYPE_UINT8_EXT
+      elementCount = meshValue.data.len.uint32
+    elif typeof(meshValue) is GPUArray[uint16, IndexBuffer]:
+      indexBuffer = meshValue.buffer.vk
+      indexBufferOffset = meshValue.offset
+      indexType = VK_INDEX_TYPE_UINT16
+      elementCount = meshValue.data.len.uint32
+    elif typeof(meshValue) is GPUArray[uint32, IndexBuffer]:
+      indexBuffer = meshValue.buffer.vk
+      indexBufferOffset = meshValue.offset
+      indexType = VK_INDEX_TYPE_UINT32
+      elementCount = meshValue.data.len.uint32
+
+  assert elementCount > 0
+
+  if indexType != VK_INDEX_TYPE_NONE_KHR:
+    vkCmdBindIndexBuffer(
+      commandBuffer,
+      indexBuffer,
+      indexBufferOffset,
+      indexType,
     )
-    commandBuffer.vkCmdDrawIndexed(
-      indexCount = renderable.indexCount,
-      instanceCount = renderable.instanceCount,
+    vkCmdDrawIndexed(
+      commandBuffer = commandBuffer,
+      indexCount = elementCount,
+      instanceCount = instanceCount,
       firstIndex = 0,
       vertexOffset = 0,
       firstInstance = 0
     )
   else:
-    commandBuffer.vkCmdDraw(
-      vertexCount = renderable.vertexCount,
-      instanceCount = renderable.instanceCount,
+    vkCmdDraw(
+      commandBuffer = commandBuffer,
+      vertexCount = elementCount,
+      instanceCount = instanceCount,
       firstVertex = 0,
       firstInstance = 0
     )
-  ]#
+
+type EMPTY = object
+
+proc Render*[TShader, TGlobals, TMaterial, TMesh](
+  commandBuffer: VkCommandBuffer,
+  pipeline: Pipeline[TShader],
+  globalSet: TGlobals,
+  materialSet: TMaterial,
+  mesh: TMesh,
+) =
+  Render(commandBuffer, pipeline, globalSet, materialSet, mesh, EMPTY())

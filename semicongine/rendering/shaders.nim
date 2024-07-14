@@ -460,6 +460,15 @@ proc CreatePipeline*[TShader](
     addr(result.vk)
   )
 
+proc GetLayoutFor*(pipeline: Pipeline, dType: DescriptorSetType): VkDescriptorSetLayout =
+  pipeline.descriptorSetLayouts[dType]
+
+
+template WithPipeline*(commandbuffer: VkCommandBuffer, pipeline: Pipeline, body: untyped): untyped =
+  block:
+    vkCmdBindPipeline(commandbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
+    body
+
 proc DestroyPipeline*(pipeline: Pipeline) =
 
   for descriptorSetLayout in pipeline.descriptorSetLayouts:

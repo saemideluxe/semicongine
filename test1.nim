@@ -29,8 +29,8 @@ type
   ShaderA = object
     # vertex input
     position {.VertexAttribute.}: Vec3f
-    objPosition {.InstanceAttribute.}: Vec3f
-    rotation {.InstanceAttribute.}: Vec4f
+    # objPosition {.InstanceAttribute.}: Vec3f
+    # rotation {.InstanceAttribute.}: Vec4f
     # intermediate
     test {.Pass.}: float32
     test1 {.PassFlat.}: Vec3f
@@ -40,14 +40,16 @@ type
     globals: DescriptorSet[GlobalsA, GlobalSet]
     uniforms: DescriptorSet[UniformsA, MaterialSet]
     # code
-    vertexCode: string = "void main() {}"
-    fragmentCode: string = "void main() {}"
-
-let frameWidth = 100'u32
-let frameHeight = 100'u32
+    vertexCode: string = """void main() {
+    gl_Position = vec4(position, 1);
+}"""
+    fragmentCode: string = """void main() {
+    color = vec4(1, 0, 0, 1);
+}"""
 
 var myMesh1 = MeshA(
-  position: GPUArray[Vec3f, VertexBuffer](data: @[NewVec3f(0, 0, ), NewVec3f(0, 0, ), NewVec3f(0, 0, )]),
+  position: GPUArray[Vec3f, VertexBuffer](data: @[NewVec3f(-0.5, 0.5, ), NewVec3f(0, -0.5, ), NewVec3f(0.5, 0.5, )]),
+  indices: GPUArray[uint16, IndexBuffer](data: @[0'u16, 1'u16, 2'u16])
 )
 var uniforms1 = DescriptorSet[UniformsA, MaterialSet](
   data: UniformsA(
@@ -76,12 +78,7 @@ var myGlobals = DescriptorSet[GlobalsA, GlobalSet](
 )
 
 let mainRenderpass = CreatePresentationRenderPass()
-var swapchainResult = InitSwapchain(renderpass = mainRenderpass)
-
-assert swapchainResult.isSome()
-var swapchain = swapchainResult.get()
-
-# shaders
+var swapchain = InitSwapchain(renderpass = mainRenderpass).get()
 var pipeline1 = CreatePipeline[ShaderA](renderPass = mainRenderpass)
 
 var renderdata = InitRenderData()
@@ -111,24 +108,25 @@ InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(GlobalSet), myGlobals)
 InitDescriptorSet(renderdata, pipeline1.GetLayoutFor(MaterialSet), uniforms1)
 
 
-# start command buffer
+# main loop
 var t = getMonoTime()
 while UpdateInputs():
   WithNextFrame(swapchain, framebuffer, commandbuffer):
-    WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(1, 0, 0, 0)):
-      vkCmdBindPipeline(commandbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline1.vk)
+    WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithPipeline(commandbuffer, pipeline1):
+        WithBind(commandBuffer, myGlobals, uniforms1, pipeline1, swapchain.currentFiF.int):
+          Render(
+            commandbuffer = commandbuffer,
+            pipeline = pipeline1,
+            globalSet = myGlobals,
+            materialSet = uniforms1,
+            mesh = myMesh1,
+            # instances = instances1,
+          )
+  echo (getMonoTime() - t).inMicroseconds.float / 1000.0
+  t = getMonoTime()
 
-      Render(
-        commandbuffer = commandbuffer,
-        pipeline = pipeline1,
-        globalSet = myGlobals,
-        materialSet = uniforms1,
-        mesh = myMesh1,
-        instances = instances1,
-      )
-      echo (getMonoTime() - t).inMicroseconds.float / 1000.0
-      t = getMonoTime()
-
+# cleanup
 checkVkResult vkDeviceWaitIdle(vulkan.device)
 DestroyPipeline(pipeline1)
 vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)
