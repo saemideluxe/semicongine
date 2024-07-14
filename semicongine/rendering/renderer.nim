@@ -321,6 +321,23 @@ proc InitRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
   )
   checkVkResult vkCreateDescriptorPool(vulkan.device, addr(poolInfo), nil, addr(result.descriptorPool))
 
+proc DestroyRenderData*(renderData: RenderData) =
+  vkDestroyDescriptorPool(vulkan.device, renderData.descriptorPool, nil)
+
+  for buffers in renderData.buffers:
+    for buffer in buffers:
+      vkDestroyBuffer(vulkan.device, buffer.vk, nil)
+
+  for imageView in renderData.imageViews:
+    vkDestroyImageView(vulkan.device, imageView, nil)
+
+  for image in renderData.images:
+    vkDestroyImage(vulkan.device, image, nil)
+
+  for memoryBlocks in renderData.memory:
+    for memory in memoryBlocks:
+      vkFreeMemory(vulkan.device, memory.vk, nil)
+
 proc TransitionImageLayout(image: VkImage, oldLayout, newLayout: VkImageLayout) =
   var
     barrier = VkImageMemoryBarrier(
@@ -401,6 +418,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
   let format = GetVkFormat(texture.depth, usage = usage)
 
   texture.vk = svkCreate2DImage(texture.width, texture.height, format, usage)
+  renderData.images.add texture.vk
   texture.sampler = createSampler()
 
   let memoryRequirements = texture.vk.svkGetImageMemoryRequirements()
@@ -435,6 +453,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 
   # imageview can only be created after memory is bound
   texture.imageview = svkCreate2DImageView(texture.vk, format)
+  renderData.imageViews.add texture.imageview
 
   # data transfer and layout transition
   TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
@@ -470,20 +489,6 @@ template WithGPUValueField(obj: object, name: static string, fieldvalue, body: u
       block:
         let `fieldvalue` {.inject.} = value
         body
-
-#[
-proc Bind[T](pipeline: Pipeline[T], commandBuffer: VkCommandBuffer, currentFrameInFlight: int) =
-  commandBuffer.vkCmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
-  commandBuffer.vkCmdBindDescriptorSets(
-    VK_PIPELINE_BIND_POINT_GRAPHICS,
-    pipeline.layout,
-    0,
-    1,
-    addr pipeline.descriptorSets[currentFrameInFlight],
-    0,
-    nil,
-  )
-  ]#
 
 proc AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial: typedesc) =
   var descriptorSetCount = 0

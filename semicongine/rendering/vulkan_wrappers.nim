@@ -270,6 +270,7 @@ template WithSingleUseCommandBuffer*(cmd, body: untyped): untyped =
     var fence = svkCreateFence()
     checkVkResult vkQueueSubmit(vulkan.graphicsQueue, 1, addr(submitInfo), fence)
     discard fence.Await()
+    vkDestroyFence(vulkan.device, fence, nil)
     vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
 
 template WithStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](

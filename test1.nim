@@ -116,5 +116,13 @@ var t = getMonoTime()
 while UpdateInputs():
   WithNextFrame(swapchain, framebuffer, commandbuffer):
     WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(1, 0, 0, 0)):
-      # echo (getMonoTime() - t).inMicroseconds.float / 1000.0
+      vkCmdBindPipeline(commandbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline1.vk)
+      echo (getMonoTime() - t).inMicroseconds.float / 1000.0
       t = getMonoTime()
+
+DestroyPipeline(pipeline1)
+
+DestroyRenderData(renderdata)
+checkVkResult vkDeviceWaitIdle(vulkan.device)
+DestroySwapchain(swapchain)
+DestroyVulkan()

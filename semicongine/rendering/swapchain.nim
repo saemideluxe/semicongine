@@ -4,7 +4,7 @@ proc InitSwapchain*(
   renderPass: VkRenderPass,
   vSync: bool = false,
   samples = VK_SAMPLE_COUNT_1_BIT,
-  oldSwapchain = VkSwapchainKHR(0),
+  oldSwapchain: ref Swapchain = nil,
 ): Option[Swapchain] =
   assert vulkan.instance.Valid
 
@@ -40,7 +40,7 @@ proc InitSwapchain*(
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,  # only used for blending with other windows, can be opaque
     presentMode: if (vSync or not hasTripleBuffering): VK_PRESENT_MODE_FIFO_KHR else: VK_PRESENT_MODE_MAILBOX_KHR,
     clipped: true,
-    oldSwapchain: oldSwapchain,
+    oldSwapchain: if oldSwapchain != nil: oldSwapchain.vk else: VkSwapchainKHR(0),
   )
   var swapchain: Swapchain
   if vkCreateSwapchainKHR(vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)) != VK_SUCCESS:
@@ -51,6 +51,9 @@ proc InitSwapchain*(
   swapchain.renderPass = renderPass
   swapchain.vSync = vSync
   swapchain.samples = samples
+  swapchain.oldSwapchain = oldSwapchain
+  if swapchain.oldSwapchain != nil:
+    swapchain.oldSwapchainCounter = INFLIGHTFRAMES.int * 2
 
   # create msaa image+view if desired
   if samples != VK_SAMPLE_COUNT_1_BIT:
@@ -109,8 +112,24 @@ proc InitSwapchain*(
 
   return some(swapchain)
 
+proc DestroySwapchain*(swapchain: Swapchain) =
+
+  for fence in swapchain.queueFinishedFence:
+    vkDestroyFence(vulkan.device, fence, nil)
+
+  for semaphore in swapchain.imageAvailableSemaphore:
+    vkDestroySemaphore(vulkan.device, semaphore, nil)
+
+  for semaphore in swapchain.renderFinishedSemaphore:
+    vkDestroySemaphore(vulkan.device, semaphore, nil)
+
+  for imageView in swapchain.framebufferViews:
+    vkDestroyImageView(vulkan.device, imageView, nil)
+
+  vkDestroyCommandPool(vulkan.device, swapchain.commandBufferPool, nil)
+
 proc TryAcquireNextImage(swapchain: var Swapchain): Option[VkFramebuffer] =
-  if not swapchain.queueFinishedFence[swapchain.currentFiF].Await(1_000_000_000):
+  if not swapchain.queueFinishedFence[swapchain.currentFiF].Await(100_000_000):
     return none(VkFramebuffer)
 
   let nextImageResult = vkAcquireNextImageKHR(
@@ -158,6 +177,14 @@ proc Swap(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
     pResults: nil,
   )
   let presentResult = vkQueuePresentKHR(vulkan.graphicsQueue, addr(presentInfo))
+
+  if swapchain.oldSwapchain != nil:
+    dec swapchain.oldSwapchainCounter
+    if swapchain.oldSwapchainCounter <= 0:
+      DestroySwapchain(swapchain.oldSwapchain[])
+      swapchain.oldSwapchain = nil
+
+
   if presentResult != VK_SUCCESS:
     return false
 
@@ -165,31 +192,18 @@ proc Swap(swapchain: var Swapchain, commandBuffer: VkCommandBuffer): bool =
   return true
 
 proc Recreate(swapchain: Swapchain): Option[Swapchain] =
-  echo "Recreating swapchain"
+  var oldSwapchain = new Swapchain
+  oldSwapchain[] = swapchain
   InitSwapchain(
     renderPass = swapchain.renderPass,
     vSync = swapchain.vSync,
     samples = swapchain.samples,
-    oldSwapchain = swapchain.vk,
+    oldSwapchain = oldSwapchain,
   )
 
 template WithNextFrame*(swapchain: var Swapchain, framebufferName, commandBufferName, body: untyped): untyped =
-
-  var nextFrameReady = true
-
   var maybeFramebuffer = TryAcquireNextImage(swapchain)
-  if not maybeFramebuffer.isSome:
-    let maybeNewSwapchain = Recreate(swapchain)
-    # unable to recreate swapchain
-    if not maybeNewSwapchain.isSome:
-      nextFrameReady = false
-    else:
-      swapchain = maybeNewSwapchain.get
-      maybeFramebuffer = TryAcquireNextImage(swapchain)
-      if not maybeFramebuffer.isSome:
-        nextFrameReady = false
-
-  if nextFrameReady:
+  if maybeFramebuffer.isSome:
     block:
       let `framebufferName` {.inject.} = maybeFramebuffer.get
       let `commandBufferName` {.inject.} = swapchain.commandBuffers[swapchain.currentFiF]
@@ -203,7 +217,9 @@ template WithNextFrame*(swapchain: var Swapchain, framebufferName, commandBuffer
       body
 
       checkVkResult vkEndCommandBuffer(`commandBufferName`)
-      if not Swap(swapchain = swapchain, commandBuffer = `commandBufferName`):
-        let maybeNewSwapchain = Recreate(swapchain)
-        if maybeNewSwapchain.isSome:
-          swapchain = maybeNewSwapchain.get
+      discard Swap(swapchain = swapchain, commandBuffer = `commandBufferName`)
+  else:
+    let maybeNewSwapchain = Recreate(swapchain)
+    if maybeNewSwapchain.isSome:
+      swapchain = maybeNewSwapchain.get
+

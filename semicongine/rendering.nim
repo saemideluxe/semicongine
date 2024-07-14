@@ -60,6 +60,8 @@ type
     imageAvailableSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
     renderFinishedSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
     commandBuffers: array[INFLIGHTFRAMES.int, VkCommandBuffer]
+    oldSwapchain: ref Swapchain
+    oldSwapchainCounter: int # swaps until old swapchain will be destroyed
 
 var vulkan*: VulkanGlobals
 
@@ -80,6 +82,8 @@ type
     vk: array[INFLIGHTFRAMES.int, VkDescriptorSet]
   Pipeline*[TShader] = object
     vk: VkPipeline
+    vertexShaderModule: VkShaderModule
+    fragmentShaderModule: VkShaderModule
     layout: VkPipelineLayout
     descriptorSetLayouts: array[DescriptorSetType, VkDescriptorSetLayout]
 
@@ -122,6 +126,8 @@ type
     descriptorPool: VkDescriptorPool
     memory: array[VK_MAX_MEMORY_TYPES.int, seq[MemoryBlock]]
     buffers: array[BufferType, seq[Buffer]]
+    images: seq[VkImage]
+    imageViews: seq[VkImageView]
 
 template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 1'u32
@@ -294,5 +300,9 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
     pDevice = addr result.device
   )
   result.graphicsQueue = svkGetDeviceQueue(result.device, result.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
+
+proc DestroyVulkan*() =
+  vkDestroyDevice(vulkan.device, nil)
+  vkDestroyInstance(vulkan.instance, nil)
 
 vulkan = InitVulkan()

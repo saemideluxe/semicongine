@@ -1,8 +1,3 @@
-type
-  ShaderObject[TShader] = object
-    vertexShaderModule: VkShaderModule
-    fragmentShaderModule: VkShaderModule
-
 func GlslType[T: SupportedGPUType|Texture](value: T): string =
   when T is float32: "float"
   elif T is float64: "double"
@@ -263,7 +258,7 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string): seq
     i += 4
 
 
-proc CompileShader[TShader](shader: static TShader): ShaderObject[TShader] =
+proc CompileShader[TShader](shader: static TShader): (VkShaderModule, VkShaderModule) =
   const (vertexShaderSource, fragmentShaderSource) = generateShaderSource(shader)
 
   let vertexBinary = compileGlslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderSource)
@@ -274,13 +269,13 @@ proc CompileShader[TShader](shader: static TShader): ShaderObject[TShader] =
     codeSize: csize_t(vertexBinary.len * sizeof(uint32)),
     pCode: vertexBinary.ToCPointer,
   )
-  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoVertex), nil, addr(result.vertexShaderModule))
+  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoVertex), nil, addr(result[0]))
   var createInfoFragment = VkShaderModuleCreateInfo(
     sType: VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     codeSize: csize_t(fragmentBinary.len * sizeof(uint32)),
     pCode: fragmentBinary.ToCPointer,
   )
-  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoFragment), nil, addr(result.fragmentShaderModule))
+  checkVkResult vulkan.device.vkCreateShaderModule(addr(createInfoFragment), nil, addr(result[1]))
 
 template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename, body: untyped): untyped =
   for theFieldname, value in fieldPairs(shader):
@@ -306,7 +301,7 @@ proc CreatePipeline*[TShader](
   # create pipeline
 
   const shader = default(TShader)
-  let shaderObject = CompileShader(shader)
+  (result.vertexShaderModule, result.fragmentShaderModule) = CompileShader(shader)
 
   for theFieldname, value in fieldPairs(default(TShader)):
     when typeof(value) is DescriptorSet:
@@ -343,13 +338,13 @@ proc CreatePipeline*[TShader](
     VkPipelineShaderStageCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
       stage: VK_SHADER_STAGE_VERTEX_BIT,
-      module: shaderObject.vertexShaderModule,
+      module: result.vertexShaderModule,
       pName: "main",
     ),
     VkPipelineShaderStageCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
       stage: VK_SHADER_STAGE_FRAGMENT_BIT,
-      module: shaderObject.fragmentShaderModule,
+      module: result.fragmentShaderModule,
       pName: "main",
     ),
   ]
@@ -465,3 +460,6 @@ proc CreatePipeline*[TShader](
     addr(result.vk)
   )
 
+proc DestroyPipeline*(pipeline: Pipeline) =
+  vkDestroyShaderModule(vulkan.device, pipeline.vertexShaderModule, nil)
+  vkDestroyShaderModule(vulkan.device, pipeline.fragmentShaderModule, nil)
