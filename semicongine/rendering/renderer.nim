@@ -639,3 +639,14 @@ proc Render*[TShader, TGlobals, TMaterial, TMesh](
   mesh: TMesh,
 ) =
   Render(commandBuffer, pipeline, globalSet, materialSet, mesh, EMPTY())
+
+#[
+proc `@`*[T: SupportedGPUType, BT: static BufferType](
+  bufferType: BT,
+  data: openArray[T]
+): GPUArray[T, BT] =
+  GPUArray[T, BT](data: @data)
+]#
+
+proc asGPUArray*[T](data: openArray[T], bufferType: static BufferType): auto =
+  GPUArray[T, bufferType](data: @data)
