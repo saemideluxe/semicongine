@@ -6,7 +6,7 @@ proc InitSwapchain*(
   samples = VK_SAMPLE_COUNT_1_BIT,
   oldSwapchain: ref Swapchain = nil,
 ): Option[Swapchain] =
-  assert vulkan.instance.Valid
+  assert vulkan.instance.Valid, "Vulkan not initialized"
 
   var capabilities: VkSurfaceCapabilitiesKHR
   checkVkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, vulkan.surface, addr(capabilities))
@@ -62,6 +62,7 @@ proc InitSwapchain*(
       height = height,
       format = format,
       usage = [VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
+      samples = samples,
     )
     let requirements = svkGetImageMemoryRequirements(swapchain.msaaImage)
     swapchain.msaaMemory = svkAllocateMemory(
@@ -113,6 +114,11 @@ proc InitSwapchain*(
   return some(swapchain)
 
 proc DestroySwapchain*(swapchain: Swapchain) =
+
+  if swapchain.samples != VK_SAMPLE_COUNT_1_BIT:
+    vkDestroyImageView(vulkan.device, swapchain.msaaImageView, nil)
+    vkDestroyImage(vulkan.device, swapchain.msaaImage, nil)
+    vkFreeMemory(vulkan.device, swapchain.msaaMemory, nil)
 
   for fence in swapchain.queueFinishedFence:
     vkDestroyFence(vulkan.device, fence, nil)

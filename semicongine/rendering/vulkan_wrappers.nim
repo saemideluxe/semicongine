@@ -113,7 +113,7 @@ proc svkAllocateMemory*(size: uint64, typeIndex: uint32): VkDeviceMemory =
     addr(result),
   )
 
-proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray[VkImageUsageFlagBits]): VkImage =
+proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray[VkImageUsageFlagBits], samples = VK_SAMPLE_COUNT_1_BIT): VkImage =
   var imageProps: VkImageFormatProperties
   checkVkResult vkGetPhysicalDeviceImageFormatProperties(
     vulkan.physicalDevice,
@@ -136,7 +136,7 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
     initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
     usage: usage.toBits,
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
-    samples: VK_SAMPLE_COUNT_1_BIT,
+    samples: samples,
   )
   checkVkResult vkCreateImage(vulkan.device, addr imageInfo, nil, addr(result))
 

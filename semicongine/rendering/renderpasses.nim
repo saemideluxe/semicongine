@@ -1,4 +1,6 @@
 proc CreatePresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPass =
+  assert vulkan.instance.Valid, "Vulkan not initialized"
+
   let format = DefaultSurfaceFormat()
   var attachments = @[VkAttachmentDescription(
     format: format,
@@ -86,9 +88,9 @@ template WithRenderPass*(
     )
     viewport = VkViewport(
       x: 0.0,
-      y: 0.0,
+      y: renderHeight.float32,
       width: renderWidth.float32,
-      height: renderHeight.float32,
+      height: -renderHeight.float32,
       minDepth: 0.0,
       maxDepth: 1.0,
     )

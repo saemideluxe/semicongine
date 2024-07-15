@@ -56,11 +56,6 @@ func alignedTo[T: SomeInteger](value: T, alignment: T): T =
 template sType(descriptorSet: DescriptorSet): untyped =
   get(genericParams(typeof(descriptorSet)), 1)
 
-# template bufferType[T: SupportedGPUType, TBuffer: static BufferType](gpuArray: GPUArray[T, TBuffer]): untyped =
-  # TBuffer
-# template bufferType[T: SupportedGPUType, TBuffer: static BufferType](gpuValue: GPUValue[T, TBuffer]): untyped =
-  # TBuffer
-
 template bufferType(gpuData: GPUData): untyped =
   typeof(gpuData).TBuffer
 func NeedsMapping(bType: BufferType): bool =
@@ -252,7 +247,21 @@ proc AllocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
-proc AssignBuffers*[T](renderdata: var RenderData, data: var T) =
+proc UpdateGPUBuffer(gpuData: GPUData) =
+  if gpuData.size == 0:
+    return
+  when NeedsMapping(gpuData):
+    copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
+  else:
+    WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
+      copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
+
+proc UpdateAllGPUBuffers*[T](value: T) =
+  for name, fieldvalue in value.fieldPairs():
+    when typeof(fieldvalue) is GPUData:
+      UpdateGPUBuffer(fieldvalue)
+
+proc AssignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = true) =
   for name, value in fieldPairs(data):
     when typeof(value) is GPUData:
 
@@ -280,23 +289,11 @@ proc AssignBuffers*[T](renderdata: var RenderData, data: var T) =
       value.buffer = selectedBuffer
       value.offset = renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree
       renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree += value.size
-proc AssignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
-  AssignBuffers(renderdata, descriptorSet.data)
+  if uploadData:
+    UpdateAllGPUBuffers(data)
 
-proc UpdateGPUBuffer(gpuData: GPUData) =
-  if gpuData.size == 0:
-    return
-  when NeedsMapping(gpuData):
-    copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
-  else:
-    WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
-      copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
-
-proc UpdateAllGPUBuffers*[T](value: T) =
-  for name, fieldvalue in value.fieldPairs():
-    when typeof(fieldvalue) is GPUData:
-      UpdateGPUBuffer(fieldvalue)
-
+proc AssignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSet, uploadData = true) =
+  AssignBuffers(renderdata, descriptorSet.data, uploadData = uploadData)
 
 proc InitRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
   # allocate descriptor pools
@@ -485,7 +482,7 @@ template WithGPUValueField(obj: object, name: static string, fieldvalue, body: u
         let `fieldvalue` {.inject.} = value
         body
 
-proc AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial: typedesc) =
+proc AssertCompatible(TShader, TMesh, TInstance, TFirstDescriptorSet, TSecondDescriptorSet: typedesc) =
   var descriptorSetCount = 0
 
   for shaderAttributeName, shaderAttribute in default(TShader).fieldPairs:
@@ -519,18 +516,18 @@ proc AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial: typedesc) 
       descriptorSetCount.inc
 
 
-      when shaderAttribute.sType == GlobalSet:
-        assert shaderAttribute.sType == default(TGlobals).sType, "Shader has global descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TGlobals).sType & "'"
-        assert typeof(shaderAttribute) is TGlobals, "Shader has global descriptor set type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TGlobals)
-      elif shaderAttribute.sType == MaterialSet:
-        assert shaderAttribute.sType == default(TMaterial).sType, "Shader has material descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TMaterial).sType & "'"
-        assert typeof(shaderAttribute) is TMaterial, "Shader has materialdescriptor type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TMaterial)
+      when shaderAttribute.sType == First:
+        assert shaderAttribute.sType == default(TFirstDescriptorSet).sType, "Shader has first descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TFirstDescriptorSet).sType & "'"
+        assert typeof(shaderAttribute) is TFirstDescriptorSet, "Shader has first descriptor set type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TFirstDescriptorSet)
+      elif shaderAttribute.sType == Second:
+        assert shaderAttribute.sType == default(TSecondDescriptorSet).sType, "Shader has second descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TSecondDescriptorSet).sType & "'"
+        assert typeof(shaderAttribute) is TSecondDescriptorSet, "Shader has seconddescriptor type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TSecondDescriptorSet)
 
 
 
-template WithBind*[A, B](commandBuffer: VkCommandBuffer, globalDescriptorSet: DescriptorSet[A, GlobalSet], materialDescriptorSet: DescriptorSet[B, MaterialSet], pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+template WithBind*[A, B](commandBuffer: VkCommandBuffer, firstDescriptorSet: DescriptorSet[A, First], secondDescriptorSet: DescriptorSet[B, Second], pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
   block:
-    let sets = [globalDescriptorSet.vk[currentFiF], materialDescriptorSet.vk[currentFiF]]
+    let sets = [firstDescriptorSet.vk[currentFiF], secondDescriptorSet.vk[currentFiF]]
     vkCmdBindDescriptorSets(
       commandBuffer = commandBuffer,
       pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -543,16 +540,31 @@ template WithBind*[A, B](commandBuffer: VkCommandBuffer, globalDescriptorSet: De
     )
     body
 
-proc Render*[TShader, TGlobals, TMaterial, TMesh, TInstance](
+template WithBind*[A](commandBuffer: VkCommandBuffer, firstDescriptorSet: DescriptorSet[A, First], pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+  block:
+    let sets = [firstDescriptorSet.vk[currentFiF]]
+    vkCmdBindDescriptorSets(
+      commandBuffer = commandBuffer,
+      pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+      layout = pipeline.layout,
+      firstSet = 0,
+      descriptorSetCount = sets.len.uint32,
+      pDescriptorSets = sets.ToCPointer,
+      dynamicOffsetCount = 0,
+      pDynamicOffsets = nil
+    )
+    body
+
+proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
-  globalSet: TGlobals,
-  materialSet: TMaterial,
+  firstSet: TFirstDescriptorSet,
+  secondSet: TSecondDescriptorSet,
   mesh: TMesh,
   instances: TInstance,
 ) =
   when not defined(release):
-    static: AssertCompatible(TShader, TMesh, TInstance, TGlobals, TMaterial)
+    static: AssertCompatible(TShader, TMesh, TInstance, TFirstDescriptorSet, TSecondDescriptorSet)
 
   var vertexBuffers: seq[VkBuffer]
   var vertexBuffersOffsets: seq[uint64]
@@ -630,23 +642,48 @@ proc Render*[TShader, TGlobals, TMaterial, TMesh, TInstance](
     )
 
 type EMPTY = object
+type EMPTY_FIRST_DESCRIPTORSET = DescriptorSet[EMPTY, First]
+type EMPTY_SECOND_DESCRIPTORSET = DescriptorSet[EMPTY, Second]
 
-proc Render*[TShader, TGlobals, TMaterial, TMesh](
+proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, TMesh](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
-  globalSet: TGlobals,
-  materialSet: TMaterial,
+  firstSet: TFirstDescriptorSet,
+  secondSet: TSecondDescriptorSet,
   mesh: TMesh,
 ) =
-  Render(commandBuffer, pipeline, globalSet, materialSet, mesh, EMPTY())
-
-#[
-proc `@`*[T: SupportedGPUType, BT: static BufferType](
-  bufferType: BT,
-  data: openArray[T]
-): GPUArray[T, BT] =
-  GPUArray[T, BT](data: @data)
-]#
+  Render(commandBuffer, pipeline, firstSet, secondSet, mesh, EMPTY())
+proc Render*[TFirstDescriptorSet: DescriptorSet, TMesh, TShader](
+  commandBuffer: VkCommandBuffer,
+  pipeline: Pipeline[TShader],
+  firstSet: TFirstDescriptorSet,
+  mesh: TMesh,
+) =
+  Render(commandBuffer, pipeline, firstSet, EMPTY_SECOND_DESCRIPTORSET(), mesh, EMPTY())
+proc Render*[TShader, TMesh](
+  commandBuffer: VkCommandBuffer,
+  pipeline: Pipeline[TShader],
+  mesh: TMesh,
+) =
+  Render(commandBuffer, pipeline, EMPTY_FIRST_DESCRIPTORSET(), EMPTY_SECOND_DESCRIPTORSET(), mesh, EMPTY())
+proc Render*[TFirstDescriptorSet: DescriptorSet, TMesh, TShader, TInstance](
+  commandBuffer: VkCommandBuffer,
+  pipeline: Pipeline[TShader],
+  firstSet: TFirstDescriptorSet,
+  mesh: TMesh,
+  instances: TInstance,
+) =
+  Render(commandBuffer, pipeline, firstSet, EMPTY_SECOND_DESCRIPTORSET(), mesh, instances)
+proc Render*[TShader, TMesh, TInstance](
+  commandBuffer: VkCommandBuffer,
+  pipeline: Pipeline[TShader],
+  mesh: TMesh,
+  instances: TInstance,
+) =
+  Render(commandBuffer, pipeline, EMPTY_FIRST_DESCRIPTORSET(), EMPTY_SECOND_DESCRIPTORSET(), mesh, instances)
 
 proc asGPUArray*[T](data: openArray[T], bufferType: static BufferType): auto =
   GPUArray[T, bufferType](data: @data)
+
+proc asGPUValue*[T](data: T, bufferType: static BufferType): auto =
+  GPUValue[T, bufferType](data: data)

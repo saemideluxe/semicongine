@@ -296,13 +296,15 @@ proc CreatePipeline*[TShader](
   polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
   cullMode: VkCullModeFlagBits = VK_CULL_MODE_BACK_BIT,
   frontFace: VkFrontFace = VK_FRONT_FACE_CLOCKWISE,
-  descriptorPoolLimit = 1024
+  descriptorPoolLimit = 1024,
+  samples = VK_SAMPLE_COUNT_1_BIT,
 ): Pipeline[TShader] =
   # create pipeline
 
   const shader = default(TShader)
   (result.vertexShaderModule, result.fragmentShaderModule) = CompileShader(shader)
 
+  var n = 0'u32
   for theFieldname, value in fieldPairs(default(TShader)):
     when typeof(value) is DescriptorSet:
       var layoutbindings: seq[VkDescriptorSetLayoutBinding]
@@ -325,10 +327,11 @@ proc CreatePipeline*[TShader](
         nil,
         addr(result.descriptorSetLayouts[value.sType])
       )
+      inc n
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-    setLayoutCount: result.descriptorSetLayouts.len.uint32,
-    pSetLayouts: result.descriptorSetLayouts.ToCPointer,
+    setLayoutCount: n,
+    pSetLayouts: if n == 0: nil else: result.descriptorSetLayouts.ToCPointer,
     # pushConstantRangeCount: uint32(pushConstants.len),
       # pPushConstantRanges: pushConstants.ToCPointer,
   )
@@ -405,7 +408,7 @@ proc CreatePipeline*[TShader](
     multisampling = VkPipelineMultisampleStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
       sampleShadingEnable: VK_FALSE,
-      rasterizationSamples: VK_SAMPLE_COUNT_1_BIT,
+      rasterizationSamples: samples,
       minSampleShading: 1.0,
       pSampleMask: nil,
       alphaToCoverageEnable: VK_FALSE,

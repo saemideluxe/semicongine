@@ -42,7 +42,7 @@ type
     # parameters to InitSwapchain, required for swapchain recreation
     renderPass: VkRenderPass
     vSync: bool
-    samples: VkSampleCountFlagBits
+    samples*: VkSampleCountFlagBits
     # populated through InitSwapchain proc
     vk: VkSwapchainKHR
     width: uint32
@@ -74,8 +74,11 @@ type
 
   # shader related types
   DescriptorSetType* = enum
-    GlobalSet
-    MaterialSet
+    First
+    Second
+    # only two supported for now, but more should be easy to add
+    # Third
+    # Fourth
   DescriptorSet*[T: object, sType: static DescriptorSetType] = object
     data*: T
     vk: array[INFLIGHTFRAMES.int, VkDescriptorSet]
@@ -196,7 +199,7 @@ proc debugCallback(
     raise newException(Exception, errorMsg)
   return false
 
-proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
+proc InitVulkan*(appName: string = "semicongine app") =
 
   include ./platform/vulkan_extensions # for REQUIRED_PLATFORM_EXTENSIONS
 
@@ -233,15 +236,15 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
       enabledExtensionCount: requiredExtensions.len.uint32,
       ppEnabledExtensionNames: instanceExtensionsC
     )
-  checkVkResult vkCreateInstance(addr(createinfo), nil, addr(result.instance))
-  loadVulkan(result.instance)
+  checkVkResult vkCreateInstance(addr(createinfo), nil, addr(vulkan.instance))
+  loadVulkan(vulkan.instance)
 
   # load extensions
   #
   for extension in requiredExtensions:
-    loadExtension(result.instance, $extension)
-  result.window = CreateWindow(appName)
-  result.surface = CreateNativeSurface(result.instance, result.window)
+    loadExtension(vulkan.instance, $extension)
+  vulkan.window = CreateWindow(appName)
+  vulkan.surface = CreateNativeSurface(vulkan.instance, vulkan.window)
 
   # logical device creation
 
@@ -252,7 +255,7 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
   # var deviceExtensions  = @["VK_KHR_swapchain", "VK_KHR_uniform_buffer_standard_layout"]
   var deviceExtensions = @["VK_KHR_swapchain"]
   for extension in deviceExtensions:
-    loadExtension(result.instance, extension)
+    loadExtension(vulkan.instance, extension)
 
   when not defined(release):
     var debugMessengerCreateInfo = VkDebugUtilsMessengerCreateInfoEXT(
@@ -263,21 +266,21 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
       pUserData: nil,
     )
     checkVkResult vkCreateDebugUtilsMessengerEXT(
-      result.instance,
+      vulkan.instance,
       addr(debugMessengerCreateInfo),
       nil,
-      addr(result.debugMessenger)
+      addr(vulkan.debugMessenger)
     )
 
   # get physical device and graphics queue family
-  result.physicalDevice = GetBestPhysicalDevice(result.instance)
-  result.graphicsQueueFamily = GetQueueFamily(result.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
+  vulkan.physicalDevice = GetBestPhysicalDevice(vulkan.instance)
+  vulkan.graphicsQueueFamily = GetQueueFamily(vulkan.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
 
   let
     priority = cfloat(1)
     queueInfo = VkDeviceQueueCreateInfo(
       sType: VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      queueFamilyIndex: result.graphicsQueueFamily,
+      queueFamilyIndex: vulkan.graphicsQueueFamily,
       queueCount: 1,
       pQueuePriorities: addr(priority),
     )
@@ -294,17 +297,15 @@ proc InitVulkan(appName: string = "semicongine app"): VulkanGlobals =
     pEnabledFeatures: nil,
   )
   checkVkResult vkCreateDevice(
-    physicalDevice = result.physicalDevice,
+    physicalDevice = vulkan.physicalDevice,
     pCreateInfo = addr createDeviceInfo,
     pAllocator = nil,
-    pDevice = addr result.device
+    pDevice = addr vulkan.device
   )
-  result.graphicsQueue = svkGetDeviceQueue(result.device, result.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
+  vulkan.graphicsQueue = svkGetDeviceQueue(vulkan.device, vulkan.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
 
 proc DestroyVulkan*() =
   vkDestroyDevice(vulkan.device, nil)
   vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
   vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
   vkDestroyInstance(vulkan.instance, nil)
-
-vulkan = InitVulkan()

@@ -47,9 +47,11 @@ type
     color = vec4(1, 0, 0, 1);
 }"""
 
+InitVulkan()
+
 var myMesh1 = MeshA(
-  position: GPUArray[Vec3f, VertexBuffer](data: @[NewVec3f(-0.5, 0.5, ), NewVec3f(0, -0.5, ), NewVec3f(0.5, 0.5, )]),
-  indices: GPUArray[uint16, IndexBuffer](data: @[0'u16, 1'u16, 2'u16])
+  position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
+  indices: asGPUArray([0'u16, 1'u16, 2'u16], IndexBuffer),
 )
 var uniforms1 = DescriptorSet[UniformsA, MaterialSet](
   data: UniformsA(
@@ -96,10 +98,6 @@ renderdata.UploadTextures(uniforms1)
 
 # copy everything to GPU
 echo "Copying all data to GPU memory"
-UpdateAllGPUBuffers(myMesh1)
-UpdateAllGPUBuffers(instances1)
-UpdateAllGPUBuffers(uniforms1)
-UpdateAllGPUBuffers(myGlobals)
 renderdata.FlushAllMemory()
 
 # descriptors
