@@ -124,55 +124,63 @@ proc test_03_global_descriptorset(nFrames: int) =
 
   type
     RenderSettings = object
-      gamma: float32
-    FirstDS = object
-      settings: GPUValue[RenderSettings, UniformBufferMapped]
+      brigthness: float32
+    ObjectSettings = object
+      baseColor: Vec3f
+    MainSet = object
+      renderSettings: GPUValue[RenderSettings, UniformBufferMapped]
+      materialSettings: GPUValue[ObjectSettings, UniformBuffer]
+    OtherSet = object
+    # TODO
+
     QuadShader = object
       position {.VertexAttribute.}: Vec3f
-      color {.VertexAttribute.}: Vec3f
       fragmentColor {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
-      descriptorSets {.DescriptorSets.}: (FirstDS, )
+      descriptorSets {.DescriptorSets.}: (MainSet, OtherSet)
       # code
       vertexCode: string = """void main() {
-      fragmentColor = vec3(pow(color.r, settings.gamma), pow(color.g, settings.gamma), pow(color.b, settings.gamma));
+      fragmentColor = materialSettings.baseColor * renderSettings.brigthness;
       gl_Position = vec4(position, 1);}"""
       fragmentCode: string = """void main() {
       outColor = vec4(fragmentColor, 1);}"""
     QuadMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
-      color: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
 
   var quad = QuadMesh(
-    position: asGPUArray([NewVec3f(-0.9, -0.5), NewVec3f(-0.9, 0.5), NewVec3f(0.9, 0.5), NewVec3f(0.9, -0.5)], VertexBuffer),
+    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(-0.5, 0.5), NewVec3f(0.5, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
-    color: asGPUArray([NewVec3f(0, 0, 0), NewVec3f(0, 0, 0), NewVec3f(1, 1, 1), NewVec3f(1, 1, 1)], VertexBuffer),
   )
-  var settings = DescriptorSet[FirstDS](
-    data: FirstDS(
-        settings: asGPUValue(RenderSettings(
-            gamma: 0.01'f32
-    ), UniformBufferMapped)
+  var mainSet = asDescriptorSet(
+    MainSet(
+      renderSettings: asGPUValue(RenderSettings(brigthness: 0), UniformBufferMapped),
+      materialSettings: asGPUValue(ObjectSettings(baseColor: NewVec3f(1, 1, 0)), UniformBuffer),
+    )
   )
+  var settings = asDescriptorSet(
+    OtherSet(
+    # TODO
+    )
   )
+
   AssignBuffers(renderdata, quad)
-  AssignBuffers(renderdata, settings)
+  AssignBuffers(renderdata, mainSet)
   renderdata.FlushAllMemory()
 
   var pipeline = CreatePipeline[QuadShader](renderPass = mainRenderpass, samples = swapchain.samples)
 
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], settings)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], mainSet)
 
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithBind(commandbuffer, (settings, ), pipeline, swapchain.currentFiF):
+      WithBind(commandbuffer, (mainSet, ), pipeline, swapchain.currentFiF):
         WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
           WithPipeline(commandbuffer, pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, firstSet = settings, mesh = quad)
-    settings.data.settings.data.gamma = 0.01'f32 + (c.float32 / nFrames.float32) * 5'f32
-    UpdateGPUBuffer(settings.data.settings)
+            Render(commandbuffer = commandbuffer, pipeline = pipeline, firstSet = mainSet, mesh = quad)
+    mainSet.data.renderSettings.data.brigthness = (c.float32 / nFrames.float32)
+    UpdateGPUBuffer(mainSet.data.renderSettings)
     renderdata.FlushAllMemory()
     inc c
 
@@ -191,10 +199,10 @@ when isMainModule:
     swapchain = InitSwapchain(renderpass = mainRenderpass).get()
 
     # tests a simple triangle with minimalistic shader and vertex format
-    test_01_triangle(nFrames)
+    # test_01_triangle(nFrames)
 
     # tests instanced triangles and quads, mixing meshes and instances
-    test_02_triangle_quad_instanced(nFrames)
+    # test_02_triangle_quad_instanced(nFrames)
 
     # tests
     test_03_global_descriptorset(nFrames)
@@ -208,7 +216,7 @@ when isMainModule:
     mainRenderpass = CreatePresentationRenderPass(samples = VK_SAMPLE_COUNT_4_BIT)
     swapchain = InitSwapchain(renderpass = mainRenderpass, samples = VK_SAMPLE_COUNT_4_BIT).get()
 
-    test_01_triangle(99999999)
+    # test_01_triangle(99999999)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)

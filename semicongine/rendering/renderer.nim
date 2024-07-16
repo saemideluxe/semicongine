@@ -687,3 +687,6 @@ proc asGPUArray*[T](data: openArray[T], bufferType: static BufferType): auto =
 
 proc asGPUValue*[T](data: T, bufferType: static BufferType): auto =
   GPUValue[T, bufferType](data: data)
+
+proc asDescriptorSet*[T](data: T): auto =
+  DescriptorSet[T](data: data)
