@@ -119,31 +119,126 @@ proc test_02_triangle_quad_instanced(nFrames: int) =
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_03_global_descriptorset(nFrames: int) =
+proc test_03_simple_descriptorset(nFrames: int) =
+  var renderdata = InitRenderData()
+
+  type
+    Material = object
+      baseColor: Vec3f
+
+    Uniforms = object
+      material: GPUValue[Material, UniformBuffer]
+      texture1: Texture[TVec3[uint8]]
+
+    QuadShader = object
+      position {.VertexAttribute.}: Vec3f
+      fragmentColor {.Pass.}: Vec3f
+      uv {.Pass.}: Vec2f
+      outColor {.ShaderOutput.}: Vec4f
+      descriptorSets {.DescriptorSets.}: (Uniforms, )
+      # code
+      vertexCode: string = """void main() {
+      fragmentColor = material.baseColor;
+      gl_Position = vec4(position, 1);
+      gl_Position.x += ((material.baseColor.b - 0.5) * 2) - 0.5;
+      uv = position.xy + 0.5;
+      }"""
+      fragmentCode: string = """void main() {
+      outColor = vec4(fragmentColor, 1) * texture(texture1, uv);}"""
+    QuadMesh = object
+      position: GPUArray[Vec3f, VertexBuffer]
+      indices: GPUArray[uint16, IndexBuffer]
+
+  let R = TVec3[uint8]([255'u8, 0'u8, 0'u8])
+  let G = TVec3[uint8]([0'u8, 255'u8, 0'u8])
+  let B = TVec3[uint8]([0'u8, 0'u8, 255'u8])
+  let W = TVec3[uint8]([255'u8, 255'u8, 255'u8])
+  var
+    quad = QuadMesh(
+      position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(-0.5, 0.5), NewVec3f(0.5, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
+      indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
+    )
+    uniforms1 = asDescriptorSet(
+      Uniforms(
+        material: asGPUValue(Material(baseColor: NewVec3f(1, 1, 1)), UniformBuffer),
+        texture1: Texture[TVec3[uint8]](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], interpolation: VK_FILTER_NEAREST),
+      )
+    )
+    uniforms2 = asDescriptorSet(
+      Uniforms(
+        material: asGPUValue(Material(baseColor: NewVec3f(0.5, 0.5, 0.5)), UniformBuffer),
+        texture1: Texture[TVec3[uint8]](width: 2, height: 2, data: @[R, G, B, W]),
+      )
+    )
+
+  AssignBuffers(renderdata, quad)
+  AssignBuffers(renderdata, uniforms1)
+  AssignBuffers(renderdata, uniforms2)
+  UploadTextures(renderdata, uniforms1)
+  UploadTextures(renderdata, uniforms2)
+  renderdata.FlushAllMemory()
+
+  var pipeline = CreatePipeline[QuadShader](renderPass = mainRenderpass, samples = swapchain.samples)
+
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms2)
+
+  var c = 0
+  while UpdateInputs() and c < nFrames:
+    WithNextFrame(swapchain, framebuffer, commandbuffer):
+      WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+        WithPipeline(commandbuffer, pipeline):
+          WithBind(commandbuffer, (uniforms1, ), pipeline, swapchain.currentFiF):
+            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          WithBind(commandbuffer, (uniforms2, ), pipeline, swapchain.currentFiF):
+            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+    inc c
+
+  # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  DestroyPipeline(pipeline)
+  DestroyRenderData(renderdata)
+
+proc test_04_multiple_descriptorsets(nFrames: int) =
   var renderdata = InitRenderData()
 
   type
     RenderSettings = object
       brigthness: float32
-    ObjectSettings = object
+    Material = object
       baseColor: Vec3f
+    ObjectSettings = object
+      scale: float32
+      materialIndex: uint32
+    Constants = object
+      offset: Vec2f
+
+    ConstSet = object
+      constants: GPUValue[Constants, UniformBuffer]
     MainSet = object
       renderSettings: GPUValue[RenderSettings, UniformBufferMapped]
-      materialSettings: GPUValue[ObjectSettings, UniformBuffer]
+      material: array[2, GPUValue[Material, UniformBuffer]]
+      texture1: array[2, Texture[TVec1[uint8]]]
     OtherSet = object
-    # TODO
+      objectSettings: GPUValue[ObjectSettings, UniformBufferMapped]
 
     QuadShader = object
       position {.VertexAttribute.}: Vec3f
       fragmentColor {.Pass.}: Vec3f
+      uv {.Pass.}: Vec2f
       outColor {.ShaderOutput.}: Vec4f
-      descriptorSets {.DescriptorSets.}: (MainSet, OtherSet)
+      descriptorSets {.DescriptorSets.}: (ConstSet, MainSet, OtherSet)
       # code
       vertexCode: string = """void main() {
-      fragmentColor = materialSettings.baseColor * renderSettings.brigthness;
-      gl_Position = vec4(position, 1);}"""
+      fragmentColor = material[objectSettings.materialIndex].baseColor * renderSettings.brigthness;
+      gl_Position = vec4(position * objectSettings.scale, 1);
+      gl_Position.xy += constants.offset.xy;
+      gl_Position.x += material[objectSettings.materialIndex].baseColor.b - 0.5;
+      uv = position.xy + 0.5;
+      }"""
       fragmentCode: string = """void main() {
-      outColor = vec4(fragmentColor, 1);}"""
+      outColor = vec4(fragmentColor * texture(texture1[objectSettings.materialIndex], uv).rrr, 1);
+      }"""
     QuadMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
@@ -152,35 +247,65 @@ proc test_03_global_descriptorset(nFrames: int) =
     position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(-0.5, 0.5), NewVec3f(0.5, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
   )
-  var mainSet = asDescriptorSet(
-    MainSet(
-      renderSettings: asGPUValue(RenderSettings(brigthness: 0), UniformBufferMapped),
-      materialSettings: asGPUValue(ObjectSettings(baseColor: NewVec3f(1, 1, 0)), UniformBuffer),
+  var constset = asDescriptorSet(
+    ConstSet(
+      constants: asGPUValue(Constants(offset: NewVec2f(-0.3, 0.2)), UniformBuffer),
     )
   )
-  var settings = asDescriptorSet(
+  let G = TVec1[uint8]([50'u8])
+  let W = TVec1[uint8]([255'u8])
+  var mainset = asDescriptorSet(
+    MainSet(
+      renderSettings: asGPUValue(RenderSettings(brigthness: 0), UniformBufferMapped),
+      material: [
+        asGPUValue(Material(baseColor: NewVec3f(1, 1, 0)), UniformBuffer),
+        asGPUValue(Material(baseColor: NewVec3f(1, 0, 1)), UniformBuffer),
+    ],
+    texture1: [
+      Texture[TVec1[uint8]](width: 2, height: 2, data: @[W, G, G, W], interpolation: VK_FILTER_NEAREST),
+      Texture[TVec1[uint8]](width: 3, height: 3, data: @[W, G, W, G, W, G, W, G, W], interpolation: VK_FILTER_NEAREST),
+    ],
+  ),
+  )
+  var otherset1 = asDescriptorSet(
     OtherSet(
-    # TODO
+      objectSettings: asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 0), UniformBufferMapped),
+    )
+  )
+  var otherset2 = asDescriptorSet(
+    OtherSet(
+      objectSettings: asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 1), UniformBufferMapped),
     )
   )
 
   AssignBuffers(renderdata, quad)
-  AssignBuffers(renderdata, mainSet)
+  AssignBuffers(renderdata, constset)
+  AssignBuffers(renderdata, mainset)
+  AssignBuffers(renderdata, otherset1)
+  AssignBuffers(renderdata, otherset2)
+  UploadTextures(renderdata, mainset)
   renderdata.FlushAllMemory()
 
   var pipeline = CreatePipeline[QuadShader](renderPass = mainRenderpass, samples = swapchain.samples)
 
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], mainSet)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], constset)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[1], mainset)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset1)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset2)
 
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithBind(commandbuffer, (mainSet, ), pipeline, swapchain.currentFiF):
-        WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
-          WithPipeline(commandbuffer, pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, firstSet = mainSet, mesh = quad)
-    mainSet.data.renderSettings.data.brigthness = (c.float32 / nFrames.float32)
-    UpdateGPUBuffer(mainSet.data.renderSettings)
+      WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+        WithPipeline(commandbuffer, pipeline):
+          WithBind(commandbuffer, (constset, mainset, otherset1), pipeline, swapchain.currentFiF):
+            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          WithBind(commandbuffer, (constset, mainset, otherset2), pipeline, swapchain.currentFiF):
+            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+    mainset.data.renderSettings.data.brigthness = (c.float32 / nFrames.float32)
+    otherset1.data.objectSettings.data.scale = 0.5 + (c.float32 / nFrames.float32)
+    UpdateGPUBuffer(mainset.data.renderSettings)
+    UpdateGPUBuffer(otherset1.data.objectSettings)
     renderdata.FlushAllMemory()
     inc c
 
@@ -204,8 +329,10 @@ when isMainModule:
     # tests instanced triangles and quads, mixing meshes and instances
     # test_02_triangle_quad_instanced(nFrames)
 
+    # test_03_simple_descriptorset(nFrames)
+
     # tests
-    test_03_global_descriptorset(nFrames)
+    test_04_multiple_descriptorsets(nFrames)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)

@@ -104,17 +104,18 @@ type
     rawPointer: pointer # if not nil, buffer is using mapped memory
     offsetNextFree: uint64
   Texture*[T: TextureType] = object
+    width*: uint32
+    height*: uint32
+    interpolation*: VkFilter = VK_FILTER_LINEAR
+    data*: seq[T]
     vk: VkImage
     imageview: VkImageView
     sampler: VkSampler
-    width*: uint32
-    height*: uint32
-    data*: seq[T]
   GPUArray*[T: SupportedGPUType, TBuffer: static BufferType] = object
     data*: seq[T]
     buffer*: Buffer
     offset*: uint64
-  GPUValue*[T: object|array, TBuffer: static BufferType] = object
+  GPUValue*[T: object, TBuffer: static BufferType] = object
     data*: T
     buffer: Buffer
     offset: uint64
@@ -139,7 +140,7 @@ template ForDescriptorFields(shader: typed, fieldname, valuename, typename, coun
         let `valuename` {.inject.} = value
         body
         `bindingNumber`.inc
-    elif typeof(value) is object:
+    elif typeof(value) is GPUValue:
       block:
         const `fieldname` {.inject.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
@@ -156,16 +157,18 @@ template ForDescriptorFields(shader: typed, fieldname, valuename, typename, coun
           let `valuename` {.inject.} = value
           body
           `bindingNumber`.inc
-      elif elementType(value) is object:
+      elif elementType(value) is GPUValue:
         block:
           const `fieldname` {.inject.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-          const `countname` {.inject.} = uint32(typeof(value).len)
+          const `countname` {.inject.} = len(value).uint32
           let `valuename` {.inject.} = value
           body
           `bindingNumber`.inc
       else:
         {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
+    else:
+      {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
 
 include ./rendering/vulkan_wrappers
 include ./rendering/renderpasses

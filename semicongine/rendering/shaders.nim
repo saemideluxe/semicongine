@@ -166,6 +166,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
       for descriptor in value.fields:
 
         var descriptorBinding = 0
+
         for descriptorName, descriptorValue in fieldPairs(descriptor):
 
           when typeof(descriptorValue) is Texture:
@@ -173,25 +174,40 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
             descriptorBinding.inc
 
           elif typeof(descriptorValue) is GPUValue:
+
             uniforms.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform T" & descriptorName & " {"
             when typeof(descriptorValue.data) is object:
+
               for blockFieldName, blockFieldValue in descriptorValue.data.fieldPairs():
                 assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
                 uniforms.add "  " & GlslType(blockFieldValue) & " " & blockFieldName & ";"
               uniforms.add "} " & descriptorName & ";"
-            elif typeof(descriptorValue.data) is array:
-              for blockFieldName, blockFieldValue in default(elementType(descriptorValue.data)).fieldPairs():
-                assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
-                uniforms.add "  " & GlslType(blockFieldValue) & " " & blockFieldName & ";"
-              uniforms.add "} " & descriptorName & "[" & $descriptorValue.data.len & "];"
+
+            else:
+              {.error: "Unsupported shader descriptor field " & descriptorName & " (must be object)".}
             descriptorBinding.inc
+
           elif typeof(descriptorValue) is array:
+
             when elementType(descriptorValue) is Texture:
+
               let arrayDecl = "[" & $typeof(descriptorValue).len & "]"
               samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & GlslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"
               descriptorBinding.inc
+
+            elif elementType(descriptorValue) is GPUValue:
+
+              uniforms.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform T" & descriptorName & " {"
+
+              for blockFieldName, blockFieldValue in default(elementType(descriptorValue)).data.fieldPairs():
+                assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
+                uniforms.add "  " & GlslType(blockFieldValue) & " " & blockFieldName & ";"
+              uniforms.add "} " & descriptorName & "[" & $descriptorValue.len & "];"
+              descriptorBinding.inc
+
             else:
               {.error: "Unsupported shader descriptor field " & descriptorName.}
+
         descriptorSetIndex.inc
     elif fieldname in ["vertexCode", "fragmentCode"]:
       discard
@@ -304,9 +320,9 @@ proc CreateDescriptorSetLayouts[TShader](): array[MAX_DESCRIPTORSETS, VkDescript
   var setNumber: int
   for _, value in fieldPairs(default(TShader)):
     when hasCustomPragma(value, DescriptorSets):
-      for descriptor in value.fields:
+      for descriptorSet in value.fields:
         var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-        ForDescriptorFields(descriptor, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
+        ForDescriptorFields(descriptorSet, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
           layoutbindings.add VkDescriptorSetLayoutBinding(
             binding: descriptorBindingNumber,
             descriptorType: descriptorType,

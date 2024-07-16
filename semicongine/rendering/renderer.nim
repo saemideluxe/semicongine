@@ -88,13 +88,26 @@ proc InitDescriptorSet*(
 ) =
 
   # santization checks
-  for name, value in descriptorSet.data.fieldPairs:
+  for theName, value in descriptorSet.data.fieldPairs:
     when typeof(value) is GPUValue:
       assert value.buffer.vk.Valid
     elif typeof(value) is Texture:
       assert value.vk.Valid
       assert value.imageview.Valid
       assert value.sampler.Valid
+    elif typeof(value) is array:
+      when elementType(value) is Texture:
+        for t in value:
+          assert t.vk.Valid
+          assert t.imageview.Valid
+          assert t.sampler.Valid
+      elif elementType(value) is GPUValue:
+        for t in value:
+          assert t.buffer.vk.Valid
+      else:
+        {.error: "Unsupported descriptor set field: '" & theName & "'".}
+    else:
+      {.error: "Unsupported descriptor set field: '" & theName & "'".}
 
   # allocate
   var layouts = newSeqWith(descriptorSet.vk.len, layout)
@@ -147,12 +160,11 @@ proc InitDescriptorSet*(
           pBufferInfo: nil,
         )
       elif typeof(fieldValue) is array:
-        discard
         when elementType(fieldValue) is Texture:
-          for textureIndex in 0 ..< descriptorCount:
+          for texture in fieldValue:
             imageWrites.add VkDescriptorImageInfo(
-              sampler: fieldValue[textureIndex].sampler,
-              imageView: fieldValue[textureIndex].imageView,
+              sampler: texture.sampler,
+              imageView: texture.imageView,
               imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             )
           descriptorSetWrites.add VkWriteDescriptorSet(
@@ -164,6 +176,23 @@ proc InitDescriptorSet*(
             descriptorCount: descriptorCount,
             pImageInfo: addr(imageWrites[^descriptorCount.int]),
             pBufferInfo: nil,
+          )
+        elif elementType(fieldValue) is GPUValue:
+          for entry in fieldValue:
+            bufferWrites.add VkDescriptorBufferInfo(
+              buffer: entry.buffer.vk,
+              offset: entry.offset,
+              range: entry.size,
+            )
+          descriptorSetWrites.add VkWriteDescriptorSet(
+            sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            dstSet: descriptorSet.vk[i],
+            dstBinding: descriptorBindingNumber,
+            dstArrayElement: 0,
+            descriptorType: descriptorType,
+            descriptorCount: descriptorCount,
+            pImageInfo: nil,
+            pBufferInfo: addr(bufferWrites[^descriptorCount.int]),
           )
         else:
           {.error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldValue)).}
@@ -260,35 +289,48 @@ proc UpdateAllGPUBuffers*[T](value: T) =
   for name, fieldvalue in value.fieldPairs():
     when typeof(fieldvalue) is GPUData:
       UpdateGPUBuffer(fieldvalue)
+    when typeof(fieldvalue) is array:
+      when elementType(fieldvalue) is GPUData:
+        for entry in fieldvalue:
+          UpdateGPUBuffer(entry)
+
+proc AssignGPUData(renderdata: var RenderData, value: var GPUData) =
+  # find buffer that has space
+  var selectedBufferI = -1
+
+  for i in 0 ..< renderData.buffers[value.bufferType].len:
+    let buffer = renderData.buffers[value.bufferType][i]
+    if buffer.size - alignedTo(buffer.offsetNextFree, BUFFER_ALIGNMENT) >= value.size:
+      selectedBufferI = i
+
+  # otherwise create new buffer
+  if selectedBufferI < 0:
+    selectedBufferI = renderdata.buffers[value.bufferType].len
+    renderdata.buffers[value.bufferType].add renderdata.AllocateNewBuffer(
+      size = max(value.size, BUFFER_ALLOCATION_SIZE),
+      bufferType = value.bufferType,
+    )
+
+  # assigne value
+  let selectedBuffer = renderdata.buffers[value.bufferType][selectedBufferI]
+  renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree = alignedTo(
+    selectedBuffer.offsetNextFree,
+    BUFFER_ALIGNMENT
+  )
+  value.buffer = selectedBuffer
+  value.offset = renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree
+  renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree += value.size
 
 proc AssignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = true) =
   for name, value in fieldPairs(data):
+
     when typeof(value) is GPUData:
+      AssignGPUData(renderdata, value)
+    elif typeof(value) is array:
+      when elementType(value) is GPUValue:
+        for v in value.mitems:
+          AssignGPUData(renderdata, v)
 
-      # find buffer that has space
-      var selectedBufferI = -1
-      for i in 0 ..< renderData.buffers[value.bufferType].len:
-        let buffer = renderData.buffers[value.bufferType][i]
-        if buffer.size - alignedTo(buffer.offsetNextFree, BUFFER_ALIGNMENT) >= value.size:
-          selectedBufferI = i
-
-      # otherwise create new buffer
-      if selectedBufferI < 0:
-        selectedBufferI = renderdata.buffers[value.bufferType].len
-        renderdata.buffers[value.bufferType].add renderdata.AllocateNewBuffer(
-          size = max(value.size, BUFFER_ALLOCATION_SIZE),
-          bufferType = value.bufferType,
-        )
-
-      # assigne value
-      let selectedBuffer = renderdata.buffers[value.bufferType][selectedBufferI]
-      renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree = alignedTo(
-        selectedBuffer.offsetNextFree,
-        BUFFER_ALIGNMENT
-      )
-      value.buffer = selectedBuffer
-      value.offset = renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree
-      renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree += value.size
   if uploadData:
     UpdateAllGPUBuffers(data)
 
@@ -410,7 +452,7 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 
   texture.vk = svkCreate2DImage(texture.width, texture.height, format, usage)
   renderData.images.add texture.vk
-  texture.sampler = createSampler()
+  texture.sampler = createSampler(magFilter = texture.interpolation, minFilter = texture.interpolation)
   renderData.samplers.add texture.sampler
 
   let memoryRequirements = texture.vk.svkGetImageMemoryRequirements()
@@ -480,48 +522,6 @@ template WithGPUValueField(obj: object, name: static string, fieldvalue, body: u
         let `fieldvalue` {.inject.} = value
         body
 
-proc AssertCompatible(TShader, TMesh, TInstance, TFirstDescriptorSet, TSecondDescriptorSet: typedesc) =
-  var descriptorSetCount = 0
-
-  for shaderAttributeName, shaderAttribute in default(TShader).fieldPairs:
-    var foundField = false
-
-    # Vertex input data
-    when hasCustomPragma(shaderAttribute, VertexAttribute):
-      assert typeof(shaderAttribute) is SupportedGPUType
-      for meshName, meshValue in default(TMesh).fieldPairs:
-        when meshName == shaderAttributeName:
-          assert meshValue is GPUArray, "Mesh attribute '" & meshName & "' must be of type 'GPUArray' but is of type " & typetraits.name(typeof(meshValue))
-          assert foundField == false, "Shader input '" & typetraits.name(TShader) & "." & shaderAttributeName & "' has been found more than once"
-          assert elementType(meshValue.data) is typeof(shaderAttribute), "Shader input " & typetraits.name(TShader) & "." & shaderAttributeName & " is of type '" & typetraits.name(typeof(shaderAttribute)) & "' but mesh attribute is of type '" & typetraits.name(elementType(meshValue.data)) & "'"
-          foundField = true
-      assert foundField, "Shader input '" & typetraits.name(TShader) & "." & shaderAttributeName & ": " & typetraits.name(typeof(shaderAttribute)) & "' not found in '" & typetraits.name(TMesh) & "'"
-
-    # Instance input data
-    elif hasCustomPragma(shaderAttribute, InstanceAttribute):
-      assert typeof(shaderAttribute) is SupportedGPUType
-      for instanceName, instanceValue in default(TInstance).fieldPairs:
-        when instanceName == shaderAttributeName:
-          assert instanceValue is GPUArray, "Instance attribute '" & instanceName & "' must be of type 'GPUArray' but is of type " & typetraits.name(typeof(instanceName))
-          assert foundField == false, "Shader input '" & typetraits.name(TShader) & "." & shaderAttributeName & "' has been found more than once"
-          assert elementType(instanceValue.data) is typeof(shaderAttribute), "Shader input " & typetraits.name(TShader) & "." & shaderAttributeName & " is of type '" & typetraits.name(typeof(shaderAttribute)) & "' but instance attribute is of type '" & typetraits.name(elementType(instanceValue.data)) & "'"
-          foundField = true
-      assert foundField, "Shader input '" & typetraits.name(TShader) & "." & shaderAttributeName & ": " & typetraits.name(typeof(shaderAttribute)) & "' not found in '" & typetraits.name(TInstance) & "'"
-
-    # descriptors
-    elif typeof(shaderAttribute) is DescriptorSet:
-      assert descriptorSetCount <= MAX_DESCRIPTORSETS.int, typetraits.name(TShader) & ": maximum " & $MAX_DESCRIPTORSETS & " allowed"
-      descriptorSetCount.inc
-
-
-      when shaderAttribute.sType == First:
-        assert shaderAttribute.sType == default(TFirstDescriptorSet).sType, "Shader has first descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TFirstDescriptorSet).sType & "'"
-        assert typeof(shaderAttribute) is TFirstDescriptorSet, "Shader has first descriptor set type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TFirstDescriptorSet)
-      elif shaderAttribute.sType == Second:
-        assert shaderAttribute.sType == default(TSecondDescriptorSet).sType, "Shader has second descriptor set of type '" & $shaderAttribute.sType & "' but matching provided type is '" & $default(TSecondDescriptorSet).sType & "'"
-        assert typeof(shaderAttribute) is TSecondDescriptorSet, "Shader has seconddescriptor type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TSecondDescriptorSet)
-
-
 template WithBind*[A, B, C, D](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C], DescriptorSet[D]), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
   block:
     var descriptorSets: seq[VkDescriptorSet]
@@ -555,17 +555,12 @@ template WithBind*[A](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], )
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
     body
 
-
-proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, TMesh, TInstance](
+proc Render*[TShader, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
-  firstSet: TFirstDescriptorSet,
-  secondSet: TSecondDescriptorSet,
   mesh: TMesh,
   instances: TInstance,
 ) =
-  when not defined(release):
-    static: AssertCompatible(TShader, TMesh, TInstance, TFirstDescriptorSet, TSecondDescriptorSet)
 
   var vertexBuffers: seq[VkBuffer]
   var vertexBuffersOffsets: seq[uint64]
@@ -643,44 +638,13 @@ proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, 
     )
 
 type EMPTY = object
-type EMPTY_DESCRIPTORSET = DescriptorSet[EMPTY]
 
-proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, TMesh](
-  commandBuffer: VkCommandBuffer,
-  pipeline: Pipeline[TShader],
-  firstSet: TFirstDescriptorSet,
-  secondSet: TSecondDescriptorSet,
-  mesh: TMesh,
-) =
-  Render(commandBuffer, pipeline, firstSet, secondSet, mesh, EMPTY())
-proc Render*[TFirstDescriptorSet: DescriptorSet, TMesh, TShader](
-  commandBuffer: VkCommandBuffer,
-  pipeline: Pipeline[TShader],
-  firstSet: TFirstDescriptorSet,
-  mesh: TMesh,
-) =
-  Render(commandBuffer, pipeline, firstSet, EMPTY_DESCRIPTORSET(), mesh, EMPTY())
 proc Render*[TShader, TMesh](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
   mesh: TMesh,
 ) =
-  Render(commandBuffer, pipeline, EMPTY_DESCRIPTORSET(), EMPTY_DESCRIPTORSET(), mesh, EMPTY())
-proc Render*[TFirstDescriptorSet: DescriptorSet, TMesh, TShader, TInstance](
-  commandBuffer: VkCommandBuffer,
-  pipeline: Pipeline[TShader],
-  firstSet: TFirstDescriptorSet,
-  mesh: TMesh,
-  instances: TInstance,
-) =
-  Render(commandBuffer, pipeline, firstSet, EMPTY_DESCRIPTORSET(), mesh, instances)
-proc Render*[TShader, TMesh, TInstance](
-  commandBuffer: VkCommandBuffer,
-  pipeline: Pipeline[TShader],
-  mesh: TMesh,
-  instances: TInstance,
-) =
-  Render(commandBuffer, pipeline, EMPTY_DESCRIPTORSET(), EMPTY_DESCRIPTORSET(), mesh, instances)
+  Render(commandBuffer, pipeline, mesh, EMPTY())
 
 proc asGPUArray*[T](data: openArray[T], bufferType: static BufferType): auto =
   GPUArray[T, bufferType](data: @data)
