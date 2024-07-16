@@ -11,6 +11,7 @@ const INFLIGHTFRAMES* = 2'u32
 const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignment
 const MEMORY_BLOCK_ALLOCATION_SIZE = 100_000_000'u64 # ca. 100mb per block, seems reasonable
 const BUFFER_ALLOCATION_SIZE = 9_000_000'u64 # ca. 9mb per block, seems reasonable, can put 10 buffers into one memory block
+const MAX_DESCRIPTORSETS = 4
 
 # custom pragmas to classify shader attributes
 template VertexAttribute* {.pragma.}
@@ -18,6 +19,7 @@ template InstanceAttribute* {.pragma.}
 template Pass* {.pragma.}
 template PassFlat* {.pragma.}
 template ShaderOutput* {.pragma.}
+template DescriptorSets* {.pragma.}
 
 # there is a big, bad global vulkan object
 # believe me, this makes everything much, much easier
@@ -73,13 +75,7 @@ type
   TextureType = TVec1[uint8] | TVec2[uint8] | TVec3[uint8] | TVec4[uint8]
 
   # shader related types
-  DescriptorSetType* = enum
-    First
-    Second
-    # only two supported for now, but more should be easy to add
-    # Third
-    # Fourth
-  DescriptorSet*[T: object, sType: static DescriptorSetType] = object
+  DescriptorSet*[T: object] = object
     data*: T
     vk: array[INFLIGHTFRAMES.int, VkDescriptorSet]
   Pipeline*[TShader] = object
@@ -87,7 +83,7 @@ type
     vertexShaderModule: VkShaderModule
     fragmentShaderModule: VkShaderModule
     layout: VkPipelineLayout
-    descriptorSetLayouts: array[DescriptorSetType, VkDescriptorSetLayout]
+    descriptorSetLayouts*: array[MAX_DESCRIPTORSETS, VkDescriptorSetLayout]
 
   # memory/buffer related types
   MemoryBlock* = object
@@ -133,7 +129,7 @@ type
     samplers: seq[VkSampler]
 
 template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
-  var `bindingNumber` {.inject.} = 1'u32
+  var `bindingNumber` {.inject.} = 0'u32
   for theFieldname, value in fieldPairs(shader):
     when typeof(value) is Texture:
       block:

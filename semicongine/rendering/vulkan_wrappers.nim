@@ -213,6 +213,18 @@ proc Await*(fence: VkFence, timeout = high(uint64)): bool =
 proc svkResetFences*(fence: VkFence) =
   checkVkResult vkResetFences(vulkan.device, 1, addr(fence))
 
+proc svkCmdBindDescriptorSets(commandBuffer: VkCommandBuffer, descriptorSets: openArray[VkDescriptorSet], layout: VkPipelineLayout) =
+  vkCmdBindDescriptorSets(
+    commandBuffer = commandBuffer,
+    pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+    layout = layout,
+    firstSet = 0,
+    descriptorSetCount = descriptorSets.len.uint32,
+    pDescriptorSets = descriptorSets.ToCPointer,
+    dynamicOffsetCount = 0,
+    pDynamicOffsets = nil
+  )
+
 proc BestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))

@@ -247,7 +247,7 @@ proc AllocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
-proc UpdateGPUBuffer(gpuData: GPUData) =
+proc UpdateGPUBuffer*(gpuData: GPUData) =
   if gpuData.size == 0:
     return
   when NeedsMapping(gpuData):
@@ -461,11 +461,9 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 proc UploadTextures*(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
   for name, value in fieldPairs(descriptorSet.data):
     when typeof(value) is Texture:
-      echo "Upload texture '", name, "'"
       renderdata.createTextureImage(value)
     elif typeof(value) is array:
       when elementType(value) is Texture:
-        echo "Upload texture ARRAY '", name, "'"
         for texture in value.mitems:
           renderdata.createTextureImage(texture)
 
@@ -512,7 +510,7 @@ proc AssertCompatible(TShader, TMesh, TInstance, TFirstDescriptorSet, TSecondDes
 
     # descriptors
     elif typeof(shaderAttribute) is DescriptorSet:
-      assert descriptorSetCount <= DescriptorSetType.high.int, typetraits.name(TShader) & ": maximum " & $DescriptorSetType.high & " allowed"
+      assert descriptorSetCount <= MAX_DESCRIPTORSETS.int, typetraits.name(TShader) & ": maximum " & $MAX_DESCRIPTORSETS & " allowed"
       descriptorSetCount.inc
 
 
@@ -524,36 +522,39 @@ proc AssertCompatible(TShader, TMesh, TInstance, TFirstDescriptorSet, TSecondDes
         assert typeof(shaderAttribute) is TSecondDescriptorSet, "Shader has seconddescriptor type '" & typetraits.name(get(genericParams(typeof(shaderAttribute)), 0)) & "' but provided type is " & typetraits.name(TSecondDescriptorSet)
 
 
-
-template WithBind*[A, B](commandBuffer: VkCommandBuffer, firstDescriptorSet: DescriptorSet[A, First], secondDescriptorSet: DescriptorSet[B, Second], pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+template WithBind*[A, B, C, D](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C], DescriptorSet[D]), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
   block:
-    let sets = [firstDescriptorSet.vk[currentFiF], secondDescriptorSet.vk[currentFiF]]
-    vkCmdBindDescriptorSets(
-      commandBuffer = commandBuffer,
-      pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-      layout = pipeline.layout,
-      firstSet = 0,
-      descriptorSetCount = sets.len.uint32,
-      pDescriptorSets = sets.ToCPointer,
-      dynamicOffsetCount = 0,
-      pDynamicOffsets = nil
-    )
+    var descriptorSets: seq[VkDescriptorSet]
+    for dSet in sets.fields:
+      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF]
+    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
+    body
+template WithBind*[A, B, C](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C]), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+  block:
+    var descriptorSets: seq[VkDescriptorSet]
+    for dSet in sets.fields:
+      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF]
+    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
+    body
+template WithBind*[A, B](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B]), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+  block:
+    var descriptorSets: seq[VkDescriptorSet]
+    for dSet in sets.fields:
+      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF]
+    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
+    body
+template WithBind*[A](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], ), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+  block:
+    var descriptorSets: seq[VkDescriptorSet]
+    for dSet in sets.fields:
+      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF]
+    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
     body
 
-template WithBind*[A](commandBuffer: VkCommandBuffer, firstDescriptorSet: DescriptorSet[A, First], pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
-  block:
-    let sets = [firstDescriptorSet.vk[currentFiF]]
-    vkCmdBindDescriptorSets(
-      commandBuffer = commandBuffer,
-      pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-      layout = pipeline.layout,
-      firstSet = 0,
-      descriptorSetCount = sets.len.uint32,
-      pDescriptorSets = sets.ToCPointer,
-      dynamicOffsetCount = 0,
-      pDynamicOffsets = nil
-    )
-    body
 
 proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
@@ -642,8 +643,7 @@ proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, 
     )
 
 type EMPTY = object
-type EMPTY_FIRST_DESCRIPTORSET = DescriptorSet[EMPTY, First]
-type EMPTY_SECOND_DESCRIPTORSET = DescriptorSet[EMPTY, Second]
+type EMPTY_DESCRIPTORSET = DescriptorSet[EMPTY]
 
 proc Render*[TFirstDescriptorSet, TSecondDescriptorSet: DescriptorSet, TShader, TMesh](
   commandBuffer: VkCommandBuffer,
@@ -659,13 +659,13 @@ proc Render*[TFirstDescriptorSet: DescriptorSet, TMesh, TShader](
   firstSet: TFirstDescriptorSet,
   mesh: TMesh,
 ) =
-  Render(commandBuffer, pipeline, firstSet, EMPTY_SECOND_DESCRIPTORSET(), mesh, EMPTY())
+  Render(commandBuffer, pipeline, firstSet, EMPTY_DESCRIPTORSET(), mesh, EMPTY())
 proc Render*[TShader, TMesh](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
   mesh: TMesh,
 ) =
-  Render(commandBuffer, pipeline, EMPTY_FIRST_DESCRIPTORSET(), EMPTY_SECOND_DESCRIPTORSET(), mesh, EMPTY())
+  Render(commandBuffer, pipeline, EMPTY_DESCRIPTORSET(), EMPTY_DESCRIPTORSET(), mesh, EMPTY())
 proc Render*[TFirstDescriptorSet: DescriptorSet, TMesh, TShader, TInstance](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
@@ -673,14 +673,14 @@ proc Render*[TFirstDescriptorSet: DescriptorSet, TMesh, TShader, TInstance](
   mesh: TMesh,
   instances: TInstance,
 ) =
-  Render(commandBuffer, pipeline, firstSet, EMPTY_SECOND_DESCRIPTORSET(), mesh, instances)
+  Render(commandBuffer, pipeline, firstSet, EMPTY_DESCRIPTORSET(), mesh, instances)
 proc Render*[TShader, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
   mesh: TMesh,
   instances: TInstance,
 ) =
-  Render(commandBuffer, pipeline, EMPTY_FIRST_DESCRIPTORSET(), EMPTY_SECOND_DESCRIPTORSET(), mesh, instances)
+  Render(commandBuffer, pipeline, EMPTY_DESCRIPTORSET(), EMPTY_DESCRIPTORSET(), mesh, instances)
 
 proc asGPUArray*[T](data: openArray[T], bufferType: static BufferType): auto =
   GPUArray[T, bufferType](data: @data)
