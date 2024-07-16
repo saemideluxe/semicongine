@@ -113,13 +113,13 @@ type
     sType*: VkStructureType
     pNext*: pointer
     fullScreenExclusiveSupported*: VkBool32
-  HINSTANCE *{.header: "windows.h".} = object
-  HWND *{.header: "windows.h".} = object
-  HMONITOR *{.header: "windows.h".} = object
-  HANDLE *{.header: "windows.h".} = object
-  SECURITY_ATTRIBUTES *{.header: "windows.h".} = object
-  DWORD *{.header: "windows.h".} = object
-  LPCWSTR *{.header: "windows.h".} = object
+  HINSTANCE {.header: "windows.h".} = int
+  HWND {.header: "windows.h".} = int
+  HMONITOR {.header: "windows.h".} = int
+  HANDLE {.header: "windows.h".} = int
+  SECURITY_ATTRIBUTES {.header: "windows.h".} = object
+  DWORD {.header: "windows.h".} = int32
+  LPCWSTR {.header: "windows.h".} = ptr uint16
 # extension VK_KHR_external_semaphore_win32
 var
   vkImportSemaphoreWin32HandleKHR*: proc(device: VkDevice, pImportSemaphoreWin32HandleInfo: ptr VkImportSemaphoreWin32HandleInfoKHR): VkResult {.stdcall.}

@@ -1,6 +1,5 @@
-import ../thirdparty/winim/winim
-import ../thirdparty/winim/winim/extra
-import ../thirdparty/winim/winim/core
+import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
+import ../../thirdparty/winim/winim/[winstr, utils]
 
 include ./virtualkey_map
 
@@ -22,8 +21,8 @@ template CheckWin32Result*(call: untyped) =
 let
   andCursorMask = [0xff]
   xorCursorMask = [0x00]
-  invisibleCursor = CreateCursor(HINSTANCE(0), 0, 0, 1, 1, pointer(addr andCursorMask), pointer(addr xorCursorMask))
-  defaultCursor = LoadCursor(HINSTANCE(0), IDC_ARROW)
+  invisibleCursor = CreateCursor(0, 0, 0, 1, 1, pointer(addr andCursorMask), pointer(addr xorCursorMask))
+  defaultCursor = LoadCursor(0, IDC_ARROW)
 var currentCursor = defaultCursor
 
 proc MapLeftRightKeys(key: INT, lparam: LPARAM): INT =
@@ -40,7 +39,7 @@ proc MapLeftRightKeys(key: INT, lparam: LPARAM): INT =
 proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.stdcall.} =
   case uMsg
   of WM_DESTROY:
-    currentEvents.add(Event(eventType: events.EventType.Quit))
+    currentEvents.add(Event(eventType: EventType.Quit))
   of WM_KEYDOWN, WM_SYSKEYDOWN:
     let key = MapLeftRightKeys(INT(wParam), lParam)
     currentEvents.add(Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(key, Key.UNKNOWN)))
@@ -60,9 +59,9 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
   of WM_RBUTTONUP:
     currentEvents.add(Event(eventType: MouseReleased, button: MouseButton.Mouse3))
   of WM_MOUSEMOVE:
-    currentEvents.add(Event(eventType: events.MouseMoved, x: GET_X_LPARAM(lParam), y: GET_Y_LPARAM(lParam)))
+    currentEvents.add(Event(eventType: MouseMoved, x: GET_X_LPARAM(lParam), y: GET_Y_LPARAM(lParam)))
   of WM_MOUSEWHEEL:
-    currentEvents.add(Event(eventType: events.MouseWheel, amount: float32(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA))
+    currentEvents.add(Event(eventType: MouseWheel, amount: float32(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA))
   of WM_SIZING:
     currentEvents.add(Event(eventType: ResizedWindow))
   of WM_SIZE:
