@@ -191,10 +191,10 @@ when isMainModule:
     swapchain = InitSwapchain(renderpass = mainRenderpass).get()
 
     # tests a simple triangle with minimalistic shader and vertex format
-    # test_01_triangle(nFrames)
+    test_01_triangle(nFrames)
 
     # tests instanced triangles and quads, mixing meshes and instances
-    # test_02_triangle_quad_instanced(nFrames)
+    test_02_triangle_quad_instanced(nFrames)
 
     # tests
     test_03_global_descriptorset(nFrames)
@@ -208,7 +208,7 @@ when isMainModule:
     mainRenderpass = CreatePresentationRenderPass(samples = VK_SAMPLE_COUNT_4_BIT)
     swapchain = InitSwapchain(renderpass = mainRenderpass, samples = VK_SAMPLE_COUNT_4_BIT).get()
 
-    # test_01_triangle(nFrames)
+    test_01_triangle(99999999)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)
