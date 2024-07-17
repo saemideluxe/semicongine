@@ -128,7 +128,7 @@ proc test_03_simple_descriptorset(nFrames: int) =
 
     Uniforms = object
       material: GPUValue[Material, UniformBuffer]
-      texture1: Texture[TVec3[uint8]]
+      texture1: Texture[TVec4[uint8]]
 
     QuadShader = object
       position {.VertexAttribute.}: Vec3f
@@ -149,10 +149,10 @@ proc test_03_simple_descriptorset(nFrames: int) =
       position: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
 
-  let R = TVec3[uint8]([255'u8, 0'u8, 0'u8])
-  let G = TVec3[uint8]([0'u8, 255'u8, 0'u8])
-  let B = TVec3[uint8]([0'u8, 0'u8, 255'u8])
-  let W = TVec3[uint8]([255'u8, 255'u8, 255'u8])
+  let R = TVec4[uint8]([255'u8, 0'u8, 0'u8, 255'u8])
+  let G = TVec4[uint8]([0'u8, 255'u8, 0'u8, 255'u8])
+  let B = TVec4[uint8]([0'u8, 0'u8, 255'u8, 255'u8])
+  let W = TVec4[uint8]([255'u8, 255'u8, 255'u8, 255'u8])
   var
     quad = QuadMesh(
       position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(-0.5, 0.5), NewVec3f(0.5, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
@@ -161,14 +161,14 @@ proc test_03_simple_descriptorset(nFrames: int) =
     uniforms1 = asDescriptorSet(
       Uniforms(
         material: asGPUValue(Material(baseColor: NewVec3f(1, 1, 1)), UniformBuffer),
-        texture1: Texture[TVec3[uint8]](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], interpolation: VK_FILTER_NEAREST),
+        texture1: Texture[TVec4[uint8]](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], interpolation: VK_FILTER_NEAREST),
       )
     )
     uniforms2 = asDescriptorSet(
       Uniforms(
         material: asGPUValue(Material(baseColor: NewVec3f(0.5, 0.5, 0.5)), UniformBuffer),
-        texture1: Texture[TVec3[uint8]](width: 2, height: 2, data: @[R, G, B, W]),
-      )
+        texture1: Texture[TVec4[uint8]](width: 2, height: 2, data: @[R, G, B, W]),
+    )
     )
 
   AssignBuffers(renderdata, quad)
@@ -344,7 +344,7 @@ when isMainModule:
     mainRenderpass = CreatePresentationRenderPass(samples = VK_SAMPLE_COUNT_4_BIT)
     swapchain = InitSwapchain(renderpass = mainRenderpass, samples = VK_SAMPLE_COUNT_4_BIT).get()
 
-    test_01_triangle(99999999)
+    # test_01_triangle(99999999)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)

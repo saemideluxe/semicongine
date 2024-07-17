@@ -1,6 +1,3 @@
-func depth(texture: Texture): int =
-  default(elementType(texture.data)).len
-
 func pointerAddOffset[T: SomeInteger](p: pointer, offset: T): pointer =
   cast[pointer](cast[T](p) + offset)
 
@@ -13,17 +10,12 @@ func usage(bType: BufferType): seq[VkBufferUsageFlagBits] =
     of UniformBuffer: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
     of UniformBufferMapped: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
 
-proc GetVkFormat(depth: int, usage: openArray[VkImageUsageFlagBits]): VkFormat =
-  const DEPTH_FORMAT_MAP = [
-    0: [VK_FORMAT_UNDEFINED, VK_FORMAT_UNDEFINED],
-    1: [VK_FORMAT_R8_SRGB, VK_FORMAT_R8_UNORM],
-    2: [VK_FORMAT_R8G8_SRGB, VK_FORMAT_R8G8_UNORM],
-    3: [VK_FORMAT_R8G8B8_SRGB, VK_FORMAT_R8G8B8_UNORM],
-    4: [VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_UNORM],
-  ]
+proc GetVkFormat(grayscale: bool, usage: openArray[VkImageUsageFlagBits]): VkFormat =
+  let formats = if grayscale: [VK_FORMAT_R8_SRGB, VK_FORMAT_R8_UNORM]
+                else: [VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_UNORM]
 
   var formatProperties = VkImageFormatProperties2(sType: VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2)
-  for format in DEPTH_FORMAT_MAP[depth]:
+  for format in formats:
     var formatInfo = VkPhysicalDeviceImageFormatInfo2(
       sType: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2,
       format: format,
@@ -446,9 +438,9 @@ proc createSampler(
   checkVkResult vkCreateSampler(vulkan.device, addr(samplerInfo), nil, addr(result))
 
 proc createTextureImage(renderData: var RenderData, texture: var Texture) =
-  assert texture.vk == VkImage(0)
+  assert texture.vk == VkImage(0), "Texture has already been created"
   const usage = [VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
-  let format = GetVkFormat(texture.depth, usage = usage)
+  let format = GetVkFormat(elementType(texture.data) is TVec1[uint8], usage = usage)
 
   texture.vk = svkCreate2DImage(texture.width, texture.height, format, usage)
   renderData.images.add texture.vk
