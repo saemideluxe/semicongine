@@ -1,14 +1,7 @@
-const ENGINENAME = "semicongine"
+const ENGINENAME = "semiconginev2"
 
 # checks required build options:
 static:
-  assert compileOption("threads"), ENGINENAME & " requires --threads=on"
-  assert defined(nimPreviewHashRef), ENGINENAME & " requires -d:nimPreviewHashRef"
-
-  if defined(release) or defined(windows):
-    assert compileOption("app", "gui"), ENGINENAME & " requires --app=gui for release builds and all windows builds"
-
-
   if defined(linux):
     assert defined(VK_USE_PLATFORM_XLIB_KHR), ENGINENAME & " requires --d:VK_USE_PLATFORM_XLIB_KHR for linux builds"
   elif defined(windows):

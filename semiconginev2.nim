@@ -18,11 +18,11 @@ import std/tables
 import std/times
 import std/typetraits
 
-include ./semicongine/rendering/vulkan/api
-include ./semicongine/core
+include ./semiconginev2/rendering/vulkan/api
+include ./semiconginev2/core
 
-include ./semicongine/events
-include ./semicongine/rendering
+include ./semiconginev2/events
+include ./semiconginev2/rendering
 
-include ./semicongine/storage
-include ./semicongine/input
+include ./semiconginev2/storage
+include ./semiconginev2/input

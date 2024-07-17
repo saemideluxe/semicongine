@@ -1,7 +1,7 @@
 import std/options
 import std/random
 
-import ../semicongine
+import ../semiconginev2
 
 var
   mainRenderpass: VkRenderPass
