@@ -1,4 +1,4 @@
-include ./thirdparty/winim/winim/inc/mmsystem
+import ./thirdparty/winim/winim/inc/mmsystem
 
 template CheckWinMMResult*(call: untyped) =
   let value = call

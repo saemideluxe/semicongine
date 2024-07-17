@@ -24,8 +24,10 @@ template DescriptorSets* {.pragma.}
 # there is a big, bad global vulkan object
 # believe me, this makes everything much, much easier
 
-include ./platform/window # for NativeWindow
-include ./platform/surface # For CreateNativeSurface
+when defined(windows):
+  include ./rendering/platform/windows
+when defined(linux):
+  include ./rendering/platform/linux
 
 type
   VulkanGlobals* = object

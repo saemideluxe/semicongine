@@ -2,6 +2,7 @@ import std/algorithm
 import std/dynlib
 import std/enumerate
 import std/hashes
+import std/locks
 import std/logging
 import std/marshal
 import std/math
@@ -21,8 +22,13 @@ import std/typetraits
 include ./semiconginev2/rendering/vulkan/api
 include ./semiconginev2/core
 
+
 include ./semiconginev2/events
 include ./semiconginev2/rendering
 
 include ./semiconginev2/storage
 include ./semiconginev2/input
+
+include ./semiconginev2/audio
+
+StartMixerThread()
