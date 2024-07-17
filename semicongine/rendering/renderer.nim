@@ -12,7 +12,7 @@ func usage(bType: BufferType): seq[VkBufferUsageFlagBits] =
 
 proc GetVkFormat(grayscale: bool, usage: openArray[VkImageUsageFlagBits]): VkFormat =
   let formats = if grayscale: [VK_FORMAT_R8_SRGB, VK_FORMAT_R8_UNORM]
-                else: [VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_UNORM]
+                else: [VK_FORMAT_B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_UNORM]
 
   var formatProperties = VkImageFormatProperties2(sType: VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2)
   for format in formats:
@@ -439,7 +439,9 @@ proc createSampler(
 
 proc createTextureImage(renderData: var RenderData, texture: var Texture) =
   assert texture.vk == VkImage(0), "Texture has already been created"
-  const usage = [VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
+  var usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
+  if texture.isRenderTarget:
+    usage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
   let format = GetVkFormat(elementType(texture.data) is TVec1[uint8], usage = usage)
 
   texture.vk = svkCreate2DImage(texture.width, texture.height, format, usage)

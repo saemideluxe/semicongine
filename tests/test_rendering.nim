@@ -7,7 +7,7 @@ var
   mainRenderpass: VkRenderPass
   swapchain: Swapchain
 
-proc test_01_triangle(nFrames: int) =
+proc test_01_triangle(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
   var renderdata = InitRenderData()
 
   type
@@ -33,12 +33,12 @@ proc test_01_triangle(nFrames: int) =
   renderdata.FlushAllMemory()
 
   var
-    pipeline = CreatePipeline[TrianglShader](renderPass = mainRenderpass, samples = swapchain.samples)
+    pipeline = CreatePipeline[TrianglShader](renderPass = renderPass, samples = samples)
 
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
     inc c
@@ -49,7 +49,7 @@ proc test_01_triangle(nFrames: int) =
   DestroyRenderData(renderdata)
 
 
-proc test_02_triangle_quad_instanced(nFrames: int) =
+proc test_02_triangle_quad_instanced(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
   var renderdata = InitRenderData()
 
   type
@@ -101,12 +101,12 @@ proc test_02_triangle_quad_instanced(nFrames: int) =
   AssignBuffers(renderdata, instancesB)
   renderdata.FlushAllMemory()
 
-  var pipeline = CreatePipeline[SomeShader](renderPass = mainRenderpass, samples = swapchain.samples)
+  var pipeline = CreatePipeline[SomeShader](renderPass = renderPass, samples = samples)
 
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesA)
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesB)
@@ -119,7 +119,7 @@ proc test_02_triangle_quad_instanced(nFrames: int) =
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_03_simple_descriptorset(nFrames: int) =
+proc test_03_simple_descriptorset(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
   var renderdata = InitRenderData()
 
   type
@@ -178,7 +178,7 @@ proc test_03_simple_descriptorset(nFrames: int) =
   UploadTextures(renderdata, uniforms2)
   renderdata.FlushAllMemory()
 
-  var pipeline = CreatePipeline[QuadShader](renderPass = mainRenderpass, samples = swapchain.samples)
+  var pipeline = CreatePipeline[QuadShader](renderPass = renderPass, samples = samples)
 
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms2)
@@ -186,7 +186,7 @@ proc test_03_simple_descriptorset(nFrames: int) =
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           WithBind(commandbuffer, (uniforms1, ), pipeline, swapchain.currentFiF):
             Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
@@ -199,7 +199,7 @@ proc test_03_simple_descriptorset(nFrames: int) =
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_04_multiple_descriptorsets(nFrames: int) =
+proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
   var renderdata = InitRenderData()
 
   type
@@ -286,7 +286,7 @@ proc test_04_multiple_descriptorsets(nFrames: int) =
   UploadTextures(renderdata, mainset)
   renderdata.FlushAllMemory()
 
-  var pipeline = CreatePipeline[QuadShader](renderPass = mainRenderpass, samples = swapchain.samples)
+  var pipeline = CreatePipeline[QuadShader](renderPass = renderPass, samples = samples)
 
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], constset)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[1], mainset)
@@ -295,13 +295,14 @@ proc test_04_multiple_descriptorsets(nFrames: int) =
 
   var c = 0
   while UpdateInputs() and c < nFrames:
-    WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithRenderPass(mainRenderpass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, pipeline):
-          WithBind(commandbuffer, (constset, mainset, otherset1), pipeline, swapchain.currentFiF):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
-          WithBind(commandbuffer, (constset, mainset, otherset2), pipeline, swapchain.currentFiF):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+    TimeAndLog:
+      WithNextFrame(swapchain, framebuffer, commandbuffer):
+        WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+          WithPipeline(commandbuffer, pipeline):
+            WithBind(commandbuffer, (constset, mainset, otherset1), pipeline, swapchain.currentFiF):
+              Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+            WithBind(commandbuffer, (constset, mainset, otherset2), pipeline, swapchain.currentFiF):
+              Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
     mainset.data.renderSettings.data.brigthness = (c.float32 / nFrames.float32)
     otherset1.data.objectSettings.data.scale = 0.5 + (c.float32 / nFrames.float32)
     UpdateGPUBuffer(mainset.data.renderSettings)
@@ -314,26 +315,134 @@ proc test_04_multiple_descriptorsets(nFrames: int) =
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
+proc test_05_triangle_2pass(nFrames: int, samples = VK_SAMPLE_COUNT_1_BIT) =
+  var
+    (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass()
+    swapchain = InitSwapchain(renderpass = presentRP).get()
+
+  var renderdata = InitRenderData()
+
+  type
+    Uniforms = object
+      frameTexture: Texture[TVec4[uint8]]
+    TriangleShader = object
+      position {.VertexAttribute.}: Vec3f
+      color {.VertexAttribute.}: Vec3f
+      fragmentColor {.Pass.}: Vec3f
+      outColor {.ShaderOutput.}: Vec4f
+      # code
+      vertexCode: string = """void main() {
+      fragmentColor = color;
+      gl_Position = vec4(position, 1);}"""
+      fragmentCode: string = """void main() {
+      outColor = vec4(fragmentColor, 1);}"""
+    PresentShader = object
+      position {.VertexAttribute.}: Vec2f
+      uv {.Pass.}: Vec2f
+      outColor {.ShaderOutput.}: Vec4f
+      descriptorSets {.DescriptorSets.}: (Uniforms, )
+      # code
+      vertexCode: string = """void main() {
+      uv = ((position + 1) * 0.5) * vec2(1, -1);
+      gl_Position = vec4(position, 0, 1);}"""
+      fragmentCode: string = """void main() {
+      vec2 uv1 = uv + vec2(0.001, 0.001);
+      vec2 uv2 = uv + vec2(0.001, -0.001);
+      vec2 uv3 = uv + vec2(-0.001, 0.001);
+      vec2 uv4 = uv + vec2(-0.001, -0.001);
+      outColor = (
+        texture(frameTexture, uv1) +
+        texture(frameTexture, uv2) +
+        texture(frameTexture, uv3) +
+        texture(frameTexture, uv4)
+      ) / 4;
+      }"""
+    TriangleMesh = object
+      position: GPUArray[Vec3f, VertexBuffer]
+      color: GPUArray[Vec3f, VertexBuffer]
+    QuadMesh = object
+      position: GPUArray[Vec2f, VertexBuffer]
+      indices: GPUArray[uint16, IndexBuffer]
+  var mesh = TriangleMesh(
+    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
+    color: asGPUArray([NewVec3f(0, 0, 1), NewVec3f(0, 1, 0), NewVec3f(1, 0, 0)], VertexBuffer),
+  )
+  var quad = QuadMesh(
+    position: asGPUArray([NewVec2f(-1, -1), NewVec2f(-1, 1), NewVec2f(1, 1), NewVec2f(1, -1)], VertexBuffer),
+    indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
+  )
+  var uniforms1 = asDescriptorSet(
+    Uniforms(
+      frameTexture: Texture[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
+    )
+  )
+  var uniforms2 = asDescriptorSet(
+    Uniforms(
+      frameTexture: Texture[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
+    )
+  )
+  AssignBuffers(renderdata, mesh)
+  AssignBuffers(renderdata, quad)
+  UploadTextures(renderdata, uniforms1)
+  UploadTextures(renderdata, uniforms2)
+  renderdata.FlushAllMemory()
+
+  var
+    drawPipeline = CreatePipeline[TriangleShader](renderPass = offscreenRP, samples = samples)
+    presentPipeline = CreatePipeline[PresentShader](renderPass = presentRP, samples = samples)
+
+  InitDescriptorSet(renderdata, presentPipeline.descriptorSetLayouts[0], uniforms1)
+  InitDescriptorSet(renderdata, presentPipeline.descriptorSetLayouts[0], uniforms2)
+
+  var offscreenFB = svkCreateFramebuffer(offscreenRP, swapchain.width, swapchain.height, [uniforms1.data.frameTexture.imageview])
+
+  var c = 0
+  while UpdateInputs() and c < nFrames:
+
+    TimeAndLog:
+      WithNextFrame(swapchain, framebuffer, commandbuffer):
+
+        WithRenderPass(offscreenRP, offscreenFB, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+          WithPipeline(commandbuffer, drawPipeline):
+            Render(commandbuffer = commandbuffer, pipeline = drawPipeline, mesh = mesh)
+
+        WithRenderPass(presentRP, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+          WithPipeline(commandbuffer, presentPipeline):
+            WithBind(commandbuffer, (uniforms1, ), presentPipeline, swapchain.currentFiF):
+              Render(commandbuffer = commandbuffer, pipeline = presentPipeline, mesh = quad)
+    inc c
+
+  # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  DestroyPipeline(presentPipeline)
+  DestroyPipeline(drawPipeline)
+  DestroyRenderData(renderdata)
+  vkDestroyRenderPass(vulkan.device, offscreenRP, nil)
+  vkDestroyRenderPass(vulkan.device, presentRP, nil)
+  vkDestroyFramebuffer(vulkan.device, offscreenFB, nil)
+  DestroySwapchain(swapchain)
+
 when isMainModule:
   var nFrames = 2000
   InitVulkan()
 
+
   # test normal
   block:
-    mainRenderpass = CreatePresentationRenderPass()
+    mainRenderpass = CreateDirectPresentationRenderPass()
     swapchain = InitSwapchain(renderpass = mainRenderpass).get()
 
     # tests a simple triangle with minimalistic shader and vertex format
-    test_01_triangle(nFrames)
+    test_01_triangle(nFrames, renderPass = mainRenderpass)
 
     # tests instanced triangles and quads, mixing meshes and instances
-    test_02_triangle_quad_instanced(nFrames)
+    test_02_triangle_quad_instanced(nFrames, renderPass = mainRenderpass)
 
     # teste descriptor sets
-    test_03_simple_descriptorset(nFrames)
+    test_03_simple_descriptorset(nFrames, renderPass = mainRenderpass)
 
     # tests multiple descriptor sets and arrays
-    test_04_multiple_descriptorsets(nFrames)
+    test_04_multiple_descriptorsets(nFrames, renderPass = mainRenderpass)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)
@@ -341,13 +450,17 @@ when isMainModule:
 
   # test MSAA
   block:
-    mainRenderpass = CreatePresentationRenderPass(samples = VK_SAMPLE_COUNT_4_BIT)
+    mainRenderpass = CreateDirectPresentationRenderPass(samples = VK_SAMPLE_COUNT_4_BIT)
     swapchain = InitSwapchain(renderpass = mainRenderpass, samples = VK_SAMPLE_COUNT_4_BIT).get()
 
-    test_01_triangle(99999999)
+    test_01_triangle(nFrames, renderPass = mainRenderpass, VK_SAMPLE_COUNT_4_BIT)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)
     DestroySwapchain(swapchain)
+
+  # test multiple render passes
+  block:
+    test_05_triangle_2pass(999999999)
 
   DestroyVulkan()

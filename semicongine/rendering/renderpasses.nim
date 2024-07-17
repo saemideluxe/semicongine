@@ -1,4 +1,4 @@
-proc CreatePresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPass =
+proc CreateDirectPresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPass =
   assert vulkan.instance.Valid, "Vulkan not initialized"
 
   let format = DefaultSurfaceFormat()
@@ -24,14 +24,16 @@ proc CreatePresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPas
       finalLayout: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
     )
   var
-    dependencies = @[VkSubpassDependency(
-      srcSubpass: VK_SUBPASS_EXTERNAL,
-      dstSubpass: 0,
-      srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT],
-      srcAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
-      dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT],
-      dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
-    )]
+    dependencies = @[
+      VkSubpassDependency(
+        srcSubpass: VK_SUBPASS_EXTERNAL,
+        dstSubpass: 0,
+        srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT],
+        dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT],
+        srcAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+      )
+    ]
     colorAttachment = VkAttachmentReference(
       attachment: 0,
       layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -41,28 +43,88 @@ proc CreatePresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPas
       layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )
 
-  var subpass = VkSubpassDescription(
-    flags: VkSubpassDescriptionFlags(0),
-    pipelineBindPoint: VK_PIPELINE_BIND_POINT_GRAPHICS,
-    inputAttachmentCount: 0,
-    pInputAttachments: nil,
-    colorAttachmentCount: 1,
-    pColorAttachments: addr(colorAttachment),
-    pResolveAttachments: if samples == VK_SAMPLE_COUNT_1_BIT: nil else: addr(resolveAttachment),
-    pDepthStencilAttachment: nil,
-    preserveAttachmentCount: 0,
-    pPreserveAttachments: nil,
-  )
-  var createInfo = VkRenderPassCreateInfo(
-      sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-      attachmentCount: uint32(attachments.len),
-      pAttachments: attachments.ToCPointer,
-      subpassCount: 1,
-      pSubpasses: addr(subpass),
-      dependencyCount: uint32(dependencies.len),
-      pDependencies: dependencies.ToCPointer,
+  if samples == VK_SAMPLE_COUNT_1_BIT:
+    return svkCreateRenderPass(attachments, [colorAttachment], [], dependencies)
+  else:
+    return svkCreateRenderPass(attachments, [colorAttachment], [resolveAttachment], dependencies)
+
+proc CreateIndirectPresentationRenderPass*(): (VkRenderPass, VkRenderPass) =
+  assert vulkan.instance.Valid, "Vulkan not initialized"
+
+  # first renderpass, drawing
+  let format = DefaultSurfaceFormat()
+  var
+    attachments = @[VkAttachmentDescription(
+      format: format,
+      samples: VK_SAMPLE_COUNT_1_BIT,
+      loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
+      storeOp: VK_ATTACHMENT_STORE_OP_STORE,
+      stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+      finalLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    )]
+
+    dependencies = @[
+      VkSubpassDependency(
+        srcSubpass: VK_SUBPASS_EXTERNAL,
+        dstSubpass: 0,
+        srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+        dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+        srcAccessMask: VkAccessFlags(0),
+        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+      ),
+      VkSubpassDependency(
+        srcSubpass: VK_SUBPASS_EXTERNAL,
+        dstSubpass: 0,
+        srcStageMask: toBits [VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT],
+        dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+        srcAccessMask: toBits [VK_ACCESS_SHADER_READ_BIT],
+        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+      ),
+      VkSubpassDependency(
+        srcSubpass: 0,
+        dstSubpass: VK_SUBPASS_EXTERNAL,
+        srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+        dstStageMask: toBits [VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT],
+        srcAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+        dstAccessMask: toBits [VK_ACCESS_SHADER_READ_BIT],
+      ),
+    ]
+    colorAttachment = VkAttachmentReference(
+      attachment: 0,
+      layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )
-  checkVkResult vulkan.device.vkCreateRenderPass(addr(createInfo), nil, addr(result))
+
+  # second renderpass, presentation
+  var
+    presentAttachments = @[VkAttachmentDescription(
+      format: format,
+      samples: VK_SAMPLE_COUNT_1_BIT,
+      loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
+      storeOp: VK_ATTACHMENT_STORE_OP_STORE,
+      stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+      finalLayout: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    )]
+    presentDependencies = @[VkSubpassDependency(
+      srcSubpass: VK_SUBPASS_EXTERNAL,
+      dstSubpass: 0,
+      srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+      dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
+      srcAccessMask: VkAccessFlags(0),
+      dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+    )]
+    presentColorAttachment = VkAttachmentReference(
+      attachment: 0,
+      layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    )
+
+  result = (
+    svkCreateRenderPass(attachments, [colorAttachment], [], dependencies),
+    svkCreateRenderPass(presentAttachments, [presentColorAttachment], [], presentDependencies)
+  )
 
 template WithRenderPass*(
   theRenderpass: VkRenderPass,

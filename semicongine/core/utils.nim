@@ -30,3 +30,13 @@ proc AppName*(): string =
 
 func Size*[T: seq](list: T): uint64 =
   uint64(list.len * sizeof(get(genericParams(typeof(list)), 0)))
+
+template TimeAndLog*(body: untyped): untyped =
+  let t0 = getMonoTime()
+  body
+  echo (getMonoTime() - t0).inNanoseconds.float / 1_000_000
+
+template TimeAndLog*(name: string, body: untyped): untyped =
+  let t0 = getMonoTime()
+  body
+  echo name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000

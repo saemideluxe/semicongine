@@ -47,8 +47,8 @@ type
     samples*: VkSampleCountFlagBits
     # populated through InitSwapchain proc
     vk: VkSwapchainKHR
-    width: uint32
-    height: uint32
+    width*: uint32
+    height*: uint32
     msaaImage: VkImage
     msaaMemory: VkDeviceMemory
     msaaImageView: VkImageView
@@ -108,9 +108,10 @@ type
     height*: uint32
     interpolation*: VkFilter = VK_FILTER_LINEAR
     data*: seq[T]
-    vk: VkImage
-    imageview: VkImageView
-    sampler: VkSampler
+    vk*: VkImage
+    imageview*: VkImageView
+    sampler*: VkSampler
+    isRenderTarget*: bool = false
   GPUArray*[T: SupportedGPUType, TBuffer: static BufferType] = object
     data*: seq[T]
     buffer*: Buffer
