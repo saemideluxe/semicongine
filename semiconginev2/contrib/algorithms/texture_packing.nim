@@ -1,7 +1,3 @@
-import std/algorithm
-
-import ./core
-
 type
   Rect = tuple
     i: int
@@ -46,12 +42,12 @@ proc find_insertion_position(alreadyPlaced: seq[Rect], area: tuple[i: int, w, h:
   return (false, newRect)
 
 
-proc Pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[tuple[x: uint32, y: uint32]]] =
+proc Pack*[T](textures: seq[Texture[T]]): tuple[atlas: Texture[T], coords: seq[tuple[x: uint32, y: uint32]]] =
   const MAX_ATLAS_SIZE = 4096'u32
   var areas: seq[tuple[i: int, w, h: uint32]]
 
-  for i in 0 ..< images.len:
-    areas.add (i, images[i].width, images[i].height)
+  for i in 0 ..< textures.len:
+    areas.add (i, textures[i].width, textures[i].height)
 
   let areasBySize = areas.sortedByIt(-(it[1] * it[2]).int64)
   var assignedAreas: seq[Rect]
@@ -61,7 +57,7 @@ proc Pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[
     var pos = find_insertion_position(assignedAreas, area, maxDim)
     while not pos[0]: # this should actually never loop more than once, but weird things happen ¯\_(ツ)_/¯
       maxDim = maxDim * 2
-      assert maxDim <= MAX_ATLAS_SIZE, &"Atlas gets bigger than {MAX_ATLAS_SIZE}, cannot pack images"
+      assert maxDim <= MAX_ATLAS_SIZE, &"Atlas gets bigger than {MAX_ATLAS_SIZE}, cannot pack textures"
       pos = find_insertion_position(assignedAreas, area, maxDim)
 
     assignedAreas.add pos[1]
@@ -71,11 +67,11 @@ proc Pack*[T: Pixel](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[
     for j in i + 1 ..< assignedAreas.len:
       assert not assignedAreas[i].advanceIfOverlap(assignedAreas[j])[0], &"{assignedAreas[i]} and {assignedAreas[j]} overlap!"
 
-  result.atlas = NewImage[T](maxDim, maxDim)
-  result.coords.setLen(images.len)
+  result.atlas = Texture[T](width: maxDim, height: maxDim, data: newSeq[T](maxDim * maxDim))
+  result.coords.setLen(textures.len)
   for rect in assignedAreas:
     for y in 0 ..< rect.h:
       for x in 0 ..< rect.w:
         assert result.atlas[rect.x + x, rect.y + y] == 0, "Atlas texture packing encountered an overlap error"
-        result.atlas[rect.x + x, rect.y + y] = images[rect.i][x, y]
+        result.atlas[rect.x + x, rect.y + y] = textures[rect.i][x, y]
         result.coords[rect.i] = (x: rect.x, y: rect.y)

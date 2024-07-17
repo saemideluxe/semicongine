@@ -1,7 +1,3 @@
-import std/dynlib
-import std/strutils
-import std/logging
-
 var
   steam_api: LibHandle
   steam_is_loaded = false
@@ -9,8 +5,6 @@ var
 when defined(linux):
   proc dlerror(): cstring {.stdcall, importc.}
   steam_api = "libsteam_api.so".loadLib()
-  if steam_api == nil:
-    echo dlerror()
 elif defined(windows):
   steam_api = "steam_api".loadLib()
   # TODO: maybe should get some error reporting on windows too?

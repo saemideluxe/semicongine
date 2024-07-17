@@ -1,9 +1,3 @@
-import hashes
-import math
-
-import ./core/vector
-
-
 proc randomGradient(pos: Vec2f, seed: int32 = 0): Vec2f =
   let randomAngle: float32 = TAU * (float32(int(hash((pos.x, pos.y, seed)))) / float32(high(int)))
   return NewVec2f(cos(randomAngle), sin(randomAngle))

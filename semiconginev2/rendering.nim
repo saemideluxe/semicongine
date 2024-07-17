@@ -68,6 +68,7 @@ type
     oldSwapchainCounter: int # swaps until old swapchain will be destroyed
 
 var vulkan*: VulkanGlobals
+var fullscreen: bool
 
 func currentFiF*(swapchain: Swapchain): int = swapchain.currentFiF
 
@@ -311,3 +312,33 @@ proc DestroyVulkan*() =
   vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
   vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
   vkDestroyInstance(vulkan.instance, nil)
+
+proc ShowSystemCursor*() = vulkan.window.ShowSystemCursor()
+proc HideSystemCursor*() = vulkan.window.HideSystemCursor()
+proc Fullscreen*(): bool = fullscreen
+proc `Fullscreen=`*(enable: bool) =
+  if enable != fullscreen:
+    fullscreen = enable
+    vulkan.window.Fullscreen(fullscreen)
+
+func GetAspectRatio*(swapchain: Swapchain): float32 = swapchain.width.float32 / swapchain.height.float32
+
+proc MaxFramebufferSampleCount*(maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCountFlagBits =
+  let limits = svkGetPhysicalDeviceProperties().limits
+  let available = VkSampleCountFlags(
+    limits.framebufferColorSampleCounts.uint32 and limits.framebufferDepthSampleCounts.uint32
+  ).toEnums
+  return min(max(available), maxSamples)
+
+
+proc `[]`*(texture: Texture, x, y: uint32): auto =
+  assert x < texture.width, &"{x} < {texture.width} is not true"
+  assert y < texture.height, &"{y} < {texture.height} is not true"
+
+  texture[].imagedata[y * texture.width + x]
+
+proc `[]=`*[T](texture: var Texture[T], x, y: uint32, value: T) =
+  assert x < texture.width
+  assert y < texture.height
+
+  texture[].imagedata[y * texture.width + x] = value

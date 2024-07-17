@@ -1,13 +1,9 @@
-import std/logging
-import std/streams
-import std/parsecfg
-import std/strutils
-import std/parseutils
-import std/strformat
-import std/tables
-import std/os
-
-import ./core
+const CONFIGROOT: string = "."
+const CONFIGEXTENSION: string = "ini"
+# by default enable hot-reload of runtime-configuration only in debug builds
+const CONFIGHOTRELOAD: bool = not defined(release)
+# milliseconds to wait between checks for settings hotreload
+const CONFIGHOTRELOADINTERVAL: int = 1000
 
 when CONFIGHOTRELOAD:
   var
@@ -84,11 +80,11 @@ when CONFIGHOTRELOAD == true:
   import std/times
 
   proc configFileWatchdog() {.thread.} =
-    var configModTimes: Table[string, Time]
+    var configModTimes: Table[string, times.Time]
     while true:
       for namespace in walkConfigNamespaces():
         if not (namespace in configModTimes):
-          configModTimes[namespace] = Time()
+          configModTimes[namespace] = times.Time()
         let lastMod = namespace.getFile().getLastModificationTime()
         if lastMod > configModTimes[namespace]:
           configModTimes[namespace] = lastMod
@@ -98,7 +94,7 @@ when CONFIGHOTRELOAD == true:
   var thethread: Thread[void]
   createThread(thethread, configFileWatchdog)
 
-if DEBUG:
+if not defined(release):
   setLogFilter(lvlAll)
 else:
   setLogFilter(lvlWarn)

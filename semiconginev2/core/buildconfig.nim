@@ -12,24 +12,6 @@ static:
 # build configuration
 # =====================
 
-# compile-time defines, usefull for build-dependent settings
-# can be overriden with compiler flags, e.g. -d:Foo=42 -d:Bar=false
-# pramas: {.intdefine.} {.strdefine.} {.booldefine.}
-
-# root of where settings files will be searched
-# must be relative (to the directory of the binary)
-const DEBUG* {.booldefine.} = not defined(release)
-const CONFIGROOT* {.strdefine.}: string = "."
-assert not isAbsolute(CONFIGROOT)
-
-const CONFIGEXTENSION* {.strdefine.}: string = "ini"
-
-# by default enable hot-reload of runtime-configuration only in debug builds
-const CONFIGHOTRELOAD* {.booldefine.}: bool = DEBUG
-
-# milliseconds to wait between checks for settings hotreload
-const CONFIGHOTRELOADINTERVAL* {.intdefine.}: int = 1000
-
 # log level
 const LOGLEVEL {.strdefine.}: string = "Warn"
 const ENGINE_LOGLEVEL* = parseEnum[Level]("lvl" & LOGLEVEL)

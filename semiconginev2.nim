@@ -13,6 +13,7 @@ import std/monotimes
 import std/os
 import std/options
 import std/parsecfg
+import std/parseutils
 import std/paths
 import std/random
 import std/sequtils
@@ -25,8 +26,11 @@ import std/times
 import std/typetraits
 import std/unicode
 
+
 include ./semiconginev2/rendering/vulkan/api
 include ./semiconginev2/core
+
+setLogFilter(ENGINE_LOGLEVEL)
 
 include ./semiconginev2/resources
 
@@ -38,4 +42,9 @@ include ./semiconginev2/input
 
 include ./semiconginev2/audio
 
-StartMixerThread()
+when not defined(NO_CONTRIB):
+  include ./semiconginev2/contrib/steam
+  include ./semiconginev2/contrib/settings
+  include ./semiconginev2/contrib/algorithms/collision
+  include ./semiconginev2/contrib/algorithms/noise
+  include ./semiconginev2/contrib/algorithms/texture_packing
