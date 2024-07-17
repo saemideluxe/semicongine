@@ -2,12 +2,12 @@ import std/os
 import std/sequtils
 import std/times
 
-import semicongine
+import ../semiconginev2
 
 
 proc test1() =
-  mixer[].AddSound("test1", NewSound(SineSoundData(1000, 2, 44100)))
-  mixer[].AddSound("test2", NewSound(SineSoundData(500, 2, 44100)))
+  mixer[].AddSound("test1", SineSoundData(1000, 2, 44100))
+  mixer[].AddSound("test2", SineSoundData(500, 2, 44100))
 
 
   let s1 = mixer[].Play("test1", loop = true)
@@ -55,7 +55,7 @@ proc test2() =
       f, c, f, f,
     )
 
-  mixer[].AddSound("frerejaques", NewSound(frerejaquesData))
+  mixer[].AddSound("frerejaques", frerejaquesData)
   discard mixer[].Play("frerejaques")
 
   while mixer[].IsPlaying():
@@ -63,13 +63,12 @@ proc test2() =
 
 proc test3() =
   mixer[].AddSound("toccata et fugue", LoadAudio("toccata_et_fugue.ogg"))
-  mixer[].AddSound("ping", NewSound(SineSoundData(500, 0.05, 44100)))
+  mixer[].AddSound("ping", SineSoundData(500, 0.05, 44100))
   mixer[].AddTrack("effects")
   discard mixer[].Play("toccata et fugue")
 
 
 when isMainModule:
-  StartMixerThread()
   test1()
   mixer[].Stop()
   test2()

@@ -1,0 +1,1 @@
+const REQUIRED_PLATFORM_EXTENSIONS = @["VK_KHR_win32_surface"]

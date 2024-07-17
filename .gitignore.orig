@@ -1,0 +1,15 @@
+# nim directories
+nimcache/
+nimblecache/
+nimbledeps/
+
+# for builds in general
+build/
+
+# from windows build
+*.pdb
+
+# other
+notes
+github-push.sh
+semicongine/old/
