@@ -225,6 +225,37 @@ proc svkCmdBindDescriptorSets(commandBuffer: VkCommandBuffer, descriptorSets: op
     pDynamicOffsets = nil
   )
 
+
+proc svkCreateRenderPass(
+  attachments: openArray[VkAttachmentDescription],
+  colorAttachments: openArray[VkAttachmentReference],
+  resolveAttachments: openArray[VkAttachmentReference],
+  dependencies: openArray[VkSubpassDependency],
+): VkRenderPass =
+  assert colorAttachments.len == resolveAttachments.len or resolveAttachments.len == 0
+  var subpass = VkSubpassDescription(
+    flags: VkSubpassDescriptionFlags(0),
+    pipelineBindPoint: VK_PIPELINE_BIND_POINT_GRAPHICS,
+    inputAttachmentCount: 0,
+    pInputAttachments: nil,
+    colorAttachmentCount: colorAttachments.len.uint32,
+    pColorAttachments: colorAttachments.ToCPointer,
+    pResolveAttachments: resolveAttachments.ToCPointer,
+    pDepthStencilAttachment: nil,
+    preserveAttachmentCount: 0,
+    pPreserveAttachments: nil,
+  )
+  var createInfo = VkRenderPassCreateInfo(
+      sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+      attachmentCount: uint32(attachments.len),
+      pAttachments: attachments.ToCPointer,
+      subpassCount: 1,
+      pSubpasses: addr(subpass),
+      dependencyCount: uint32(dependencies.len),
+      pDependencies: dependencies.ToCPointer,
+    )
+  checkVkResult vkCreateRenderPass(vulkan.device, addr(createInfo), nil, addr(result))
+
 proc BestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))
