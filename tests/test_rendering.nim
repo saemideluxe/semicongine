@@ -344,7 +344,7 @@ when isMainModule:
     mainRenderpass = CreatePresentationRenderPass(samples = VK_SAMPLE_COUNT_4_BIT)
     swapchain = InitSwapchain(renderpass = mainRenderpass, samples = VK_SAMPLE_COUNT_4_BIT).get()
 
-    # test_01_triangle(99999999)
+    test_01_triangle(99999999)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)
