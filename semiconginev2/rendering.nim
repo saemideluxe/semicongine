@@ -116,6 +116,8 @@ type
     size: uint64
     rawPointer: pointer # if not nil, buffer is using mapped memory
     offsetNextFree: uint64
+    memoryOffset: uint64
+    memory: VkDeviceMemory
   Image*[T: PixelType] = object
     width*: uint32
     height*: uint32
@@ -132,7 +134,7 @@ type
     offset*: uint64
   GPUValue*[T: object, TBuffer: static BufferType] = object
     data*: T
-    buffer: Buffer
+    buffer*: Buffer
     offset: uint64
   GPUData = GPUArray | GPUValue
 

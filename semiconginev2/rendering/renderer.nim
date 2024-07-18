@@ -216,6 +216,15 @@ proc AllocateNewMemoryBlock(size: uint64, mType: uint32): MemoryBlock =
       ppData = addr(result.rawPointer)
     )
 
+proc FlushBuffer*(buffer: Buffer) =
+  var flushRegion = VkMappedMemoryRange(
+    sType: VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+    memory: buffer.memory,
+    offset: buffer.memoryOffset,
+    size: buffer.size,
+  )
+  checkVkResult vkFlushMappedMemoryRanges(vulkan.device, 1, addr(flushRegion))
+
 proc FlushAllMemory*(renderData: RenderData) =
   var flushRegions = newSeq[VkMappedMemoryRange]()
   for memoryBlocks in renderData.memory:
@@ -265,14 +274,18 @@ proc AllocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
     selectedBlock.vk,
     selectedBlock.offsetNextFree,
   )
+  result.memory = selectedBlock.vk
+  result.memoryOffset = selectedBlock.offsetNextFree
   result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
-proc UpdateGPUBuffer*(gpuData: GPUData) =
+proc UpdateGPUBuffer*(gpuData: GPUData, flush = false) =
   if gpuData.size == 0:
     return
   when NeedsMapping(gpuData):
     copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
+    if flush:
+      FlushBuffer(gpuData.buffer)
   else:
     WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
       copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)

@@ -347,7 +347,7 @@ proc CreatePipeline*[TShader](
   renderPass: RenderPass,
   topology: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
-  cullMode: VkCullModeFlagBits = VK_CULL_MODE_BACK_BIT,
+  cullMode: openArray[VkCullModeFlagBits] = [VK_CULL_MODE_BACK_BIT],
   frontFace: VkFrontFace = VK_FRONT_FACE_CLOCKWISE,
   descriptorPoolLimit = 1024,
 ): Pipeline[TShader] =
@@ -428,7 +428,7 @@ proc CreatePipeline*[TShader](
       rasterizerDiscardEnable: VK_FALSE,
       polygonMode: polygonMode,
       lineWidth: 1.0,
-      cullMode: toBits [cullMode],
+      cullMode: toBits cullMode,
       frontFace: frontFace,
       depthBiasEnable: VK_FALSE,
       depthBiasConstantFactor: 0.0,

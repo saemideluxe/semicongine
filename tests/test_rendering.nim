@@ -1,3 +1,4 @@
+import std/sequtils
 import std/options
 import std/random
 
@@ -311,7 +312,122 @@ proc test_04_multiple_descriptorsets(nFrames: int, swapchain: var Swapchain) =
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_05_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCountFlagBits) =
+proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
+  type
+
+    UniformData = object
+      m: Mat4
+    Uniforms = object
+      data: GPUValue[UniformData, UniformBufferMapped]
+    CubeShader = object
+      position {.VertexAttribute.}: Vec3f
+      color {.VertexAttribute.}: Vec4f
+      fragmentColor {.Pass.}: Vec4f
+      outColor {.ShaderOutput.}: Vec4f
+      descriptorSets {.DescriptorSets.}: (Uniforms, )
+      # code
+      vertexCode = """void main() {
+    fragmentColor = color;
+    gl_Position = data.m * vec4(position, 1);
+}"""
+      fragmentCode = """void main() {
+      outColor = fragmentColor;
+}"""
+    Mesh = object
+      position: GPUArray[Vec3f, VertexBuffer]
+      normals: GPUArray[Vec3f, VertexBuffer]
+      color: GPUArray[Vec4f, VertexBuffer]
+
+  let quad = @[
+    NewVec3f(-0.5, -0.5), NewVec3f(-0.5, +0.5), NewVec3f(+0.5, +0.5),
+    NewVec3f(+0.5, +0.5), NewVec3f(+0.5, -0.5), NewVec3f(-0.5, -0.5),
+  ]
+  proc transf(data: seq[Vec3f], m: Mat4): seq[Vec3f] =
+    for v in data:
+      result.add m * v
+
+  var
+    vertices: seq[Vec3f]
+    colors: seq[Vec4f]
+    normals: seq[Vec3f]
+
+  # front, red
+  vertices.add quad.transf(Translate(0, 0, -0.5))
+  colors.add newSeqWith(6, NewVec4f(1, 0, 0, 1))
+  normals.add newSeqWith(6, NewVec3f(0, 0, -1))
+
+  # back, cyan
+  vertices.add quad.transf(Rotate(PI, Y) * Translate(0, 0, -0.5))
+  colors.add newSeqWith(6, NewVec4f(0, 1, 1, 1))
+  normals.add newSeqWith(6, NewVec3f(0, 0, 1))
+
+  # right, green
+  vertices.add quad.transf(Rotate(PI / 2, Y) * Translate(0, 0, -0.5))
+  colors.add newSeqWith(6, NewVec4f(0, 1, 0, 1))
+  normals.add newSeqWith(6, NewVec3f(-1, 0, 0))
+
+  # left, magenta
+  vertices.add quad.transf(Rotate(-PI / 2, Y) * Translate(0, 0, -0.5))
+  colors.add newSeqWith(6, NewVec4f(1, 0, 1, 1))
+  normals.add newSeqWith(6, NewVec3f(1, 0, 0))
+
+  # bottom, blue
+  vertices.add quad.transf(Rotate(PI / 2, X) * Translate(0, 0, -0.5))
+  colors.add newSeqWith(6, NewVec4f(0, 0, 1, 1))
+  normals.add newSeqWith(6, NewVec3f(0, -1, 0))
+
+  # top, yellow
+  vertices.add quad.transf(Rotate(-PI / 2, X) * Translate(0, 0, -0.5))
+  colors.add newSeqWith(6, NewVec4f(1, 1, 0, 1))
+  normals.add newSeqWith(6, NewVec3f(0, 1, 0))
+
+  var renderdata = InitRenderData()
+
+  var mesh = Mesh(
+    position: asGPUArray(vertices, VertexBuffer),
+    color: asGPUArray(colors, VertexBuffer),
+    normals: asGPUArray(normals, VertexBuffer),
+  )
+  AssignBuffers(renderdata, mesh)
+
+  var floor = Mesh(
+    position: asGPUArray(quad.transf(Scale(10, 10, 10) * Rotate(-PI / 2, X) * Translate(0, 0, 0.05)), VertexBuffer),
+    color: asGPUArray(newSeqWith(6, NewVec4f(0.1, 0.1, 0.1, 1)), VertexBuffer),
+    normals: asGPUArray(newSeqWith(6, Y), VertexBuffer),
+  )
+  AssignBuffers(renderdata, floor)
+
+  var uniforms1 = asDescriptorSet(
+    Uniforms(
+      data: asGPUValue(UniformData(m: Unit4), UniformBufferMapped)
+    )
+  )
+  AssignBuffers(renderdata, uniforms1)
+
+  renderdata.FlushAllMemory()
+
+  var pipeline = CreatePipeline[CubeShader](renderPass = swapchain.renderPass)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
+
+  var c = 0
+  while UpdateInputs() and c < nFrames:
+
+    uniforms1.data.data.data.m = Translate(0, 0, -2) * Rotate(PI * 2 * c.float32 / nFrames.float32, Y) * Rotate(-PI / 4, X) * Perspective(-PI / 2, GetAspectRatio(swapchain), 0.01, 100)
+    UpdateGPUBuffer(uniforms1.data.data, flush = true)
+    WithNextFrame(swapchain, framebuffer, commandbuffer):
+      WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+        WithPipeline(commandbuffer, pipeline):
+          WithBind(commandbuffer, (uniforms1, ), pipeline, swapchain.currentFiF):
+            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = floor)
+    inc c
+
+  # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  DestroyPipeline(pipeline)
+  DestroyRenderData(renderdata)
+
+proc test_06_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCountFlagBits) =
   var
     (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
     swapchain = InitSwapchain(renderpass = presentRP).get()
@@ -493,15 +609,15 @@ proc test_05_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCo
   DestroySwapchain(swapchain)
 
 when isMainModule:
-  var nFrames = 1000
+  var nFrames = 3000
   InitVulkan()
 
   var mainRenderpass: RenderPass
   var renderPasses = [
-    (depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT),
-    (depthBuffer: false, samples: VK_SAMPLE_COUNT_4_BIT),
+    # (depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT),
+      # (depthBuffer: false, samples: VK_SAMPLE_COUNT_4_BIT),
     (depthBuffer: true, samples: VK_SAMPLE_COUNT_1_BIT),
-    (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
+    # (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
   ]
 
   # test normal
@@ -509,6 +625,7 @@ when isMainModule:
     var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
     var swapchain = InitSwapchain(renderpass = renderpass).get()
 
+    #[
     # tests a simple triangle with minimalistic shader and vertex format
     test_01_triangle(nFrames, swapchain)
 
@@ -520,13 +637,18 @@ when isMainModule:
 
     # tests multiple descriptor sets and arrays
     test_04_multiple_descriptorsets(nFrames, swapchain)
+    ]#
+
+    # rotating cube
+    while true:
+      test_05_cube(nFrames, swapchain)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
     DestroySwapchain(swapchain)
 
   # test multiple render passes
-  for i, (depthBuffer, samples) in renderPasses:
-    test_05_triangle_2pass(nFrames, depthBuffer, samples)
+  # for i, (depthBuffer, samples) in renderPasses:
+    # test_06_triangle_2pass(nFrames, depthBuffer, samples)
 
   DestroyVulkan()
