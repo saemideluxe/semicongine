@@ -311,9 +311,9 @@ proc test_04_multiple_descriptorsets(nFrames: int, swapchain: var Swapchain) =
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_05_triangle_2pass(nFrames: int) =
+proc test_05_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCountFlagBits) =
   var
-    (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass(depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT)
+    (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
     swapchain = InitSwapchain(renderpass = presentRP).get()
 
   var renderdata = InitRenderData()
@@ -505,29 +505,28 @@ when isMainModule:
   ]
 
   # test normal
-  if false:
-    for i, (depthBuffer, samples) in renderPasses:
-      var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
-      var swapchain = InitSwapchain(renderpass = renderpass).get()
+  for i, (depthBuffer, samples) in renderPasses:
+    var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
+    var swapchain = InitSwapchain(renderpass = renderpass).get()
 
-      # tests a simple triangle with minimalistic shader and vertex format
-      test_01_triangle(nFrames, swapchain)
+    # tests a simple triangle with minimalistic shader and vertex format
+    test_01_triangle(nFrames, swapchain)
 
-      # tests instanced triangles and quads, mixing meshes and instances
-      test_02_triangle_quad_instanced(nFrames, swapchain)
+    # tests instanced triangles and quads, mixing meshes and instances
+    test_02_triangle_quad_instanced(nFrames, swapchain)
 
-      # teste descriptor sets
-      test_03_simple_descriptorset(nFrames, swapchain)
+    # teste descriptor sets
+    test_03_simple_descriptorset(nFrames, swapchain)
 
-      # tests multiple descriptor sets and arrays
-      test_04_multiple_descriptorsets(nFrames, swapchain)
+    # tests multiple descriptor sets and arrays
+    test_04_multiple_descriptorsets(nFrames, swapchain)
 
-      checkVkResult vkDeviceWaitIdle(vulkan.device)
-      vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
-      DestroySwapchain(swapchain)
+    checkVkResult vkDeviceWaitIdle(vulkan.device)
+    vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+    DestroySwapchain(swapchain)
 
   # test multiple render passes
-  block:
-    test_05_triangle_2pass(nFrames)
+  for i, (depthBuffer, samples) in renderPasses:
+    test_05_triangle_2pass(nFrames, depthBuffer, samples)
 
   DestroyVulkan()
