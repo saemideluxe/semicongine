@@ -1,9 +1,9 @@
-proc CreateDirectPresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRenderPass =
+proc CreateDirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT): RenderPass =
   assert vulkan.instance.Valid, "Vulkan not initialized"
+  result = RenderPass(depthBuffer: depthBuffer, samples: samples)
 
-  let format = DefaultSurfaceFormat()
   var attachments = @[VkAttachmentDescription(
-    format: format,
+    format: SURFACE_FORMAT,
     samples: samples,
     loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
     storeOp: VK_ATTACHMENT_STORE_OP_STORE,
@@ -12,9 +12,20 @@ proc CreateDirectPresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRen
     initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
     finalLayout: if samples == VK_SAMPLE_COUNT_1_BIT: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR else: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
   )]
+  if depthBuffer:
+    attachments.add VkAttachmentDescription(
+      format: DEPTH_FORMAT,
+      samples: samples,
+      loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
+      storeOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+      finalLayout: VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    )
   if samples != VK_SAMPLE_COUNT_1_BIT:
     attachments.add VkAttachmentDescription(
-      format: format,
+      format: SURFACE_FORMAT,
       samples: VK_SAMPLE_COUNT_1_BIT,
       loadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
       storeOp: VK_ATTACHMENT_STORE_OP_STORE,
@@ -30,49 +41,82 @@ proc CreateDirectPresentationRenderPass*(samples = VK_SAMPLE_COUNT_1_BIT): VkRen
         dstSubpass: 0,
         srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT],
         dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT],
-        srcAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
-        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+        srcAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
+        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
       )
     ]
     colorAttachment = VkAttachmentReference(
       attachment: 0,
       layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )
-    resolveAttachment = VkAttachmentReference(
+    depthAttachment = VkAttachmentReference(
       attachment: 1,
+      layout: VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    )
+    resolveAttachment = VkAttachmentReference(
+      attachment: (attachments.len - 1).uint32, # depending on whether depthBuffer is used or not
       layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )
 
-  if samples == VK_SAMPLE_COUNT_1_BIT:
-    return svkCreateRenderPass(attachments, [colorAttachment], [], dependencies)
-  else:
-    return svkCreateRenderPass(attachments, [colorAttachment], [resolveAttachment], dependencies)
+  result.vk = svkCreateRenderPass(
+    attachments = attachments,
+    colorAttachments = [colorAttachment],
+    depthAttachments = if depthBuffer: @[depthAttachment] else: @[],
+    resolveAttachments = if samples > VK_SAMPLE_COUNT_1_BIT: @[resolveAttachment] else: @[],
+    dependencies = dependencies,
+  )
 
-proc CreateIndirectPresentationRenderPass*(): (VkRenderPass, VkRenderPass) =
+proc CreateIndirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT): (RenderPass, RenderPass) =
   assert vulkan.instance.Valid, "Vulkan not initialized"
 
+  result[0] = RenderPass(depthBuffer: depthBuffer, samples: samples)
+  result[1] = RenderPass(depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT)
+
   # first renderpass, drawing
-  let format = DefaultSurfaceFormat()
   var
     attachments = @[VkAttachmentDescription(
-      format: format,
-      samples: VK_SAMPLE_COUNT_1_BIT,
+      format: SURFACE_FORMAT, # not strictly necessary
+      samples: samples,
       loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
       storeOp: VK_ATTACHMENT_STORE_OP_STORE,
       stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
       stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
       initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
-      finalLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+      # finalLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+      finalLayout: if samples == VK_SAMPLE_COUNT_1_BIT: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL else: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )]
+  if depthBuffer:
+    attachments.add VkAttachmentDescription(
+      format: DEPTH_FORMAT,
+      samples: samples,
+      loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
+      storeOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+      finalLayout: VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    )
+  if samples != VK_SAMPLE_COUNT_1_BIT:
+    attachments.add VkAttachmentDescription(
+      format: SURFACE_FORMAT,
+      samples: VK_SAMPLE_COUNT_1_BIT,
+      loadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      storeOp: VK_ATTACHMENT_STORE_OP_STORE,
+      stencilLoadOp: VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+      stencilStoreOp: VK_ATTACHMENT_STORE_OP_DONT_CARE,
+      initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
+      finalLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    )
 
+  var
     dependencies = @[
       VkSubpassDependency(
         srcSubpass: VK_SUBPASS_EXTERNAL,
         dstSubpass: 0,
-        srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
-        dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT],
-        srcAccessMask: VkAccessFlags(0),
-        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT],
+        srcStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT],
+        dstStageMask: toBits [VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT],
+        srcAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
+        dstAccessMask: toBits [VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT],
       ),
       VkSubpassDependency(
         srcSubpass: VK_SUBPASS_EXTERNAL,
@@ -95,11 +139,26 @@ proc CreateIndirectPresentationRenderPass*(): (VkRenderPass, VkRenderPass) =
       attachment: 0,
       layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )
+    depthAttachment = VkAttachmentReference(
+      attachment: 1,
+      layout: VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    )
+    resolveAttachment = VkAttachmentReference(
+      attachment: (attachments.len - 1).uint32, # depending on whether depthBuffer is used or not
+      layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    )
+  result[0].vk = svkCreateRenderPass(
+    attachments = attachments,
+    colorAttachments = [colorAttachment],
+    depthAttachments = if depthBuffer: @[depthAttachment] else: @[],
+    resolveAttachments = if samples > VK_SAMPLE_COUNT_1_BIT: @[resolveAttachment] else: @[],
+    dependencies = dependencies
+  )
 
   # second renderpass, presentation
   var
     presentAttachments = @[VkAttachmentDescription(
-      format: format,
+      format: SURFACE_FORMAT,
       samples: VK_SAMPLE_COUNT_1_BIT,
       loadOp: VK_ATTACHMENT_LOAD_OP_CLEAR,
       storeOp: VK_ATTACHMENT_STORE_OP_STORE,
@@ -121,13 +180,16 @@ proc CreateIndirectPresentationRenderPass*(): (VkRenderPass, VkRenderPass) =
       layout: VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     )
 
-  result = (
-    svkCreateRenderPass(attachments, [colorAttachment], [], dependencies),
-    svkCreateRenderPass(presentAttachments, [presentColorAttachment], [], presentDependencies)
+  result[1].vk = svkCreateRenderPass(
+    attachments = presentAttachments,
+    colorAttachments = [presentColorAttachment],
+    depthAttachments = [],
+    resolveAttachments = [],
+    dependencies = presentDependencies
   )
 
 template WithRenderPass*(
-  theRenderpass: VkRenderPass,
+  theRenderpass: RenderPass,
   theFramebuffer: VkFramebuffer,
   commandbuffer: VkCommandBuffer,
   renderWidth: uint32,
@@ -136,16 +198,19 @@ template WithRenderPass*(
   body: untyped
 ): untyped =
   var
-    clearColors = [VkClearValue(color: VkClearColorValue(float32: clearColor))]
+    clearColors = [
+      VkClearValue(color: VkClearColorValue(float32: clearColor)),
+      VkClearValue(depthStencil: VkClearDepthStencilValue(depth: 1'f32, stencil: 0))
+    ]
     renderPassInfo = VkRenderPassBeginInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-      renderPass: theRenderpass,
+      renderPass: theRenderpass.vk,
       framebuffer: theFramebuffer,
       renderArea: VkRect2D(
         offset: VkOffset2D(x: 0, y: 0),
         extent: VkExtent2D(width: renderWidth, height: renderHeight),
       ),
-      clearValueCount: uint32(clearColors.len),
+      clearValueCount: clearColors.len.uint32,
       pClearValues: clearColors.ToCPointer(),
     )
     viewport = VkViewport(

@@ -344,13 +344,12 @@ proc CreateDescriptorSetLayouts[TShader](): array[MAX_DESCRIPTORSETS, VkDescript
         inc setNumber
 
 proc CreatePipeline*[TShader](
-  renderPass: VkRenderPass,
+  renderPass: RenderPass,
   topology: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
   cullMode: VkCullModeFlagBits = VK_CULL_MODE_BACK_BIT,
   frontFace: VkFrontFace = VK_FRONT_FACE_CLOCKWISE,
   descriptorPoolLimit = 1024,
-  samples = VK_SAMPLE_COUNT_1_BIT,
 ): Pipeline[TShader] =
   # create pipeline
 
@@ -439,11 +438,22 @@ proc CreatePipeline*[TShader](
     multisampling = VkPipelineMultisampleStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
       sampleShadingEnable: VK_FALSE,
-      rasterizationSamples: samples,
+      rasterizationSamples: renderPass.samples,
       minSampleShading: 1.0,
       pSampleMask: nil,
       alphaToCoverageEnable: VK_FALSE,
       alphaToOneEnable: VK_FALSE,
+    )
+    # will only be enabled it the renderpass actually uses a depth buffer
+    depthStencil = VkPipelineDepthStencilStateCreateInfo(
+      sType: VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+      depthTestEnable: true,
+      depthWriteEnable: true,
+      depthCompareOp: VK_COMPARE_OP_LESS,
+      depthBoundsTestEnable: false,
+      stencilTestEnable: false,
+      minDepthBounds: 0'f32,
+      maxDepthBounds: 0'f32,
     )
     colorBlendAttachment = VkPipelineColorBlendAttachmentState(
       colorWriteMask: toBits [VK_COLOR_COMPONENT_R_BIT, VK_COLOR_COMPONENT_G_BIT, VK_COLOR_COMPONENT_B_BIT, VK_COLOR_COMPONENT_A_BIT],
@@ -476,11 +486,11 @@ proc CreatePipeline*[TShader](
     pViewportState: addr(viewportState),
     pRasterizationState: addr(rasterizer),
     pMultisampleState: addr(multisampling),
-    pDepthStencilState: nil,
+    pDepthStencilState: if renderPass.depthBuffer: addr(depthStencil) else: nil,
     pColorBlendState: addr(colorBlending),
     pDynamicState: addr(dynamicState),
     layout: result.layout,
-    renderPass: renderPass,
+    renderPass: renderPass.vk,
     subpass: 0,
     basePipelineHandle: VkPipeline(0),
     basePipelineIndex: -1,

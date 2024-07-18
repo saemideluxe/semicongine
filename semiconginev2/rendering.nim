@@ -12,6 +12,8 @@ const BUFFER_ALIGNMENT = 64'u64 # align offsets inside buffers along this alignm
 const MEMORY_BLOCK_ALLOCATION_SIZE = 100_000_000'u64 # ca. 100mb per block, seems reasonable
 const BUFFER_ALLOCATION_SIZE = 9_000_000'u64 # ca. 9mb per block, seems reasonable, can put 10 buffers into one memory block
 const MAX_DESCRIPTORSETS = 4
+const SURFACE_FORMAT* = VK_FORMAT_B8G8R8A8_SRGB
+const DEPTH_FORMAT* = VK_FORMAT_D32_SFLOAT
 
 # custom pragmas to classify shader attributes
 template VertexAttribute* {.pragma.}
@@ -42,29 +44,37 @@ type
     debugMessenger: VkDebugUtilsMessengerEXT
     # unclear as of yet
     anisotropy*: float32 = 0 # needs to be enable during device creation
-  Swapchain* = object
-    # parameters to InitSwapchain, required for swapchain recreation
-    renderPass: VkRenderPass
-    vSync: bool
+  Renderpass* = ref object
+    vk*: VkRenderPass
     samples*: VkSampleCountFlagBits
+    depthBuffer*: bool
+  Swapchain* = ref object
+    # parameters to InitSwapchain, required for swapchain recreation
+    renderPass*: RenderPass
+    vSync: bool
     # populated through InitSwapchain proc
     vk: VkSwapchainKHR
     width*: uint32
     height*: uint32
-    msaaImage: VkImage
-    msaaMemory: VkDeviceMemory
-    msaaImageView: VkImageView
     framebuffers: seq[VkFramebuffer]
     framebufferViews: seq[VkImageView]
     currentFramebufferIndex: uint32
     commandBufferPool: VkCommandPool
+    # depth buffer stuff, if enabled
+    depthImage: VkImage
+    depthImageView*: VkImageView
+    depthMemory: VkDeviceMemory
+    # MSAA stuff, if enabled
+    msaaImage: VkImage
+    msaaImageView*: VkImageView
+    msaaMemory: VkDeviceMemory
     # frame-in-flight handling
     currentFiF: range[0 .. (INFLIGHTFRAMES - 1).int]
     queueFinishedFence*: array[INFLIGHTFRAMES.int, VkFence]
     imageAvailableSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
     renderFinishedSemaphore*: array[INFLIGHTFRAMES.int, VkSemaphore]
     commandBuffers: array[INFLIGHTFRAMES.int, VkCommandBuffer]
-    oldSwapchain: ref Swapchain
+    oldSwapchain: Swapchain
     oldSwapchainCounter: int # swaps until old swapchain will be destroyed
 
 var vulkan*: VulkanGlobals
@@ -115,6 +125,7 @@ type
     imageview*: VkImageView
     sampler*: VkSampler
     isRenderTarget*: bool = false
+    samples*: VkSampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT
   GPUArray*[T: SupportedGPUType, TBuffer: static BufferType] = object
     data*: seq[T]
     buffer*: Buffer

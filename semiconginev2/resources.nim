@@ -96,8 +96,6 @@ elif thebundletype == Zip:
 
 elif thebundletype == Exe:
 
-  import std/tables
-
   const BUILD_RESOURCEROOT* {.strdefine.}: string = ""
 
   proc loadResources(): Table[string, Table[string, string]] {.compileTime.} =

@@ -444,7 +444,7 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
     usage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
   let format = GetVkFormat(elementType(image.data) is TVec1[uint8], usage = usage)
 
-  image.vk = svkCreate2DImage(image.width, image.height, format, usage)
+  image.vk = svkCreate2DImage(image.width, image.height, format, usage, image.samples)
   renderData.images.add image.vk
   image.sampler = createSampler(magFilter = image.interpolation, minFilter = image.interpolation)
   renderData.samplers.add image.sampler
@@ -485,12 +485,13 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
 
   # data transfer and layout transition
   TransitionImageLayout(image.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-  WithStagingBuffer(
-    (image.vk, image.width, image.height),
-    memoryRequirements.size,
-    stagingPtr
-  ):
-    copyMem(stagingPtr, image.data.ToCPointer, image.size)
+  if image.data.len > 0:
+    WithStagingBuffer(
+      (image.vk, image.width, image.height),
+      memoryRequirements.size,
+      stagingPtr
+    ):
+      copyMem(stagingPtr, image.data.ToCPointer, image.size)
   TransitionImageLayout(image.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 
 

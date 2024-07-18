@@ -3,11 +3,7 @@ import std/random
 
 import ../semiconginev2
 
-var
-  mainRenderpass: VkRenderPass
-  swapchain: Swapchain
-
-proc test_01_triangle(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
+proc test_01_triangle(nFrames: int, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -33,12 +29,12 @@ proc test_01_triangle(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPL
   renderdata.FlushAllMemory()
 
   var
-    pipeline = CreatePipeline[TrianglShader](renderPass = renderPass, samples = samples)
+    pipeline = CreatePipeline[TrianglShader](renderPass = swapchain.renderPass)
 
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
     inc c
@@ -49,7 +45,7 @@ proc test_01_triangle(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPL
   DestroyRenderData(renderdata)
 
 
-proc test_02_triangle_quad_instanced(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
+proc test_02_triangle_quad_instanced(nFrames: int, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -101,12 +97,12 @@ proc test_02_triangle_quad_instanced(nFrames: int, renderPass: VkRenderPass, sam
   AssignBuffers(renderdata, instancesB)
   renderdata.FlushAllMemory()
 
-  var pipeline = CreatePipeline[SomeShader](renderPass = renderPass, samples = samples)
+  var pipeline = CreatePipeline[SomeShader](renderPass = swapchain.renderPass)
 
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesA)
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesB)
@@ -119,7 +115,7 @@ proc test_02_triangle_quad_instanced(nFrames: int, renderPass: VkRenderPass, sam
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_03_simple_descriptorset(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
+proc test_03_simple_descriptorset(nFrames: int, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -178,7 +174,7 @@ proc test_03_simple_descriptorset(nFrames: int, renderPass: VkRenderPass, sample
   UploadImages(renderdata, uniforms2)
   renderdata.FlushAllMemory()
 
-  var pipeline = CreatePipeline[QuadShader](renderPass = renderPass, samples = samples)
+  var pipeline = CreatePipeline[QuadShader](renderPass = swapchain.renderPass)
 
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms2)
@@ -186,7 +182,7 @@ proc test_03_simple_descriptorset(nFrames: int, renderPass: VkRenderPass, sample
   var c = 0
   while UpdateInputs() and c < nFrames:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
-      WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           WithBind(commandbuffer, (uniforms1, ), pipeline, swapchain.currentFiF):
             Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
@@ -199,7 +195,7 @@ proc test_03_simple_descriptorset(nFrames: int, renderPass: VkRenderPass, sample
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, samples = VK_SAMPLE_COUNT_1_BIT) =
+proc test_04_multiple_descriptorsets(nFrames: int, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -286,7 +282,7 @@ proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, sam
   UploadImages(renderdata, mainset)
   renderdata.FlushAllMemory()
 
-  var pipeline = CreatePipeline[QuadShader](renderPass = renderPass, samples = samples)
+  var pipeline = CreatePipeline[QuadShader](renderPass = swapchain.renderPass)
 
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], constset)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[1], mainset)
@@ -297,7 +293,7 @@ proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, sam
   while UpdateInputs() and c < nFrames:
     TimeAndLog:
       WithNextFrame(swapchain, framebuffer, commandbuffer):
-        WithRenderPass(renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
+        WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
           WithPipeline(commandbuffer, pipeline):
             WithBind(commandbuffer, (constset, mainset, otherset1), pipeline, swapchain.currentFiF):
               Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
@@ -315,9 +311,9 @@ proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, sam
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_05_triangle_2pass(nFrames: int, samples = VK_SAMPLE_COUNT_1_BIT) =
+proc test_05_triangle_2pass(nFrames: int) =
   var
-    (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass()
+    (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass(depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT)
     swapchain = InitSwapchain(renderpass = presentRP).get()
 
   var renderdata = InitRenderData()
@@ -376,25 +372,91 @@ proc test_05_triangle_2pass(nFrames: int, samples = VK_SAMPLE_COUNT_1_BIT) =
       frameTexture: Image[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
     )
   )
-  var uniforms2 = asDescriptorSet(
-    Uniforms(
-      frameTexture: Image[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
-    )
-  )
   AssignBuffers(renderdata, mesh)
   AssignBuffers(renderdata, quad)
   UploadImages(renderdata, uniforms1)
-  UploadImages(renderdata, uniforms2)
   renderdata.FlushAllMemory()
 
   var
-    drawPipeline = CreatePipeline[TriangleShader](renderPass = offscreenRP, samples = samples)
-    presentPipeline = CreatePipeline[PresentShader](renderPass = presentRP, samples = samples)
+    drawPipeline = CreatePipeline[TriangleShader](renderPass = offscreenRP)
+    presentPipeline = CreatePipeline[PresentShader](renderPass = presentRP)
 
   InitDescriptorSet(renderdata, presentPipeline.descriptorSetLayouts[0], uniforms1)
-  InitDescriptorSet(renderdata, presentPipeline.descriptorSetLayouts[0], uniforms2)
 
-  var offscreenFB = svkCreateFramebuffer(offscreenRP, swapchain.width, swapchain.height, [uniforms1.data.frameTexture.imageview])
+  # create depth buffer images (will not use the one in the swapchain
+  var
+    depthImage: VkImage
+    depthImageView: VkImageView
+    depthMemory: VkDeviceMemory
+  if offscreenRP.depthBuffer:
+    depthImage = svkCreate2DImage(
+      width = swapchain.width,
+      height = swapchain.height,
+      format = DEPTH_FORMAT,
+      usage = [VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT],
+      samples = offscreenRP.samples,
+    )
+    let requirements = svkGetImageMemoryRequirements(depthImage)
+    depthMemory = svkAllocateMemory(
+      requirements.size,
+      BestMemory(mappable = false, filter = requirements.memoryTypes)
+    )
+    checkVkResult vkBindImageMemory(
+      vulkan.device,
+      depthImage,
+      depthMemory,
+      0,
+    )
+    depthImageView = svkCreate2DImageView(
+      image = depthImage,
+      format = DEPTH_FORMAT,
+      aspect = VK_IMAGE_ASPECT_DEPTH_BIT
+    )
+
+  # create msaa images (will not use the one in the swapchain
+  var
+    msaaImage: VkImage
+    msaaImageView: VkImageView
+    msaaMemory: VkDeviceMemory
+  if offscreenRP.samples != VK_SAMPLE_COUNT_1_BIT:
+    msaaImage = svkCreate2DImage(
+      width = swapchain.width,
+      height = swapchain.height,
+      format = SURFACE_FORMAT,
+      usage = [VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
+      samples = offscreenRP.samples,
+    )
+    let requirements = svkGetImageMemoryRequirements(msaaImage)
+    msaaMemory = svkAllocateMemory(
+      requirements.size,
+      BestMemory(mappable = false, filter = requirements.memoryTypes)
+    )
+    checkVkResult vkBindImageMemory(
+      vulkan.device,
+      msaaImage,
+      msaaMemory,
+      0,
+    )
+    msaaImageView = svkCreate2DImageView(image = msaaImage, format = SURFACE_FORMAT)
+
+  var attachments: seq[VkImageView]
+  if offscreenRP.samples == VK_SAMPLE_COUNT_1_BIT:
+    if offscreenRP.depthBuffer:
+      attachments = @[uniforms1.data.frameTexture.imageview, depthImageView]
+    else:
+      attachments = @[uniforms1.data.frameTexture.imageview]
+  else:
+    if offscreenRP.depthBuffer:
+      attachments = @[msaaImageView, depthImageView, uniforms1.data.frameTexture.imageview]
+    else:
+      attachments = @[msaaImageView, uniforms1.data.frameTexture.imageview]
+  echo attachments
+  var offscreenFB = svkCreateFramebuffer(
+    offscreenRP.vk,
+    swapchain.width,
+    swapchain.height,
+    attachments
+  )
 
   var c = 0
   while UpdateInputs() and c < nFrames:
@@ -417,50 +479,55 @@ proc test_05_triangle_2pass(nFrames: int, samples = VK_SAMPLE_COUNT_1_BIT) =
   DestroyPipeline(presentPipeline)
   DestroyPipeline(drawPipeline)
   DestroyRenderData(renderdata)
-  vkDestroyRenderPass(vulkan.device, offscreenRP, nil)
-  vkDestroyRenderPass(vulkan.device, presentRP, nil)
+  if depthImage.Valid:
+    vkDestroyImageView(vulkan.device, depthImageView, nil)
+    vkDestroyImage(vulkan.device, depthImage, nil)
+    vkFreeMemory(vulkan.device, depthMemory, nil)
+  if msaaImage.Valid:
+    vkDestroyImageView(vulkan.device, msaaImageView, nil)
+    vkDestroyImage(vulkan.device, msaaImage, nil)
+    vkFreeMemory(vulkan.device, msaaMemory, nil)
+  vkDestroyRenderPass(vulkan.device, offscreenRP.vk, nil)
+  vkDestroyRenderPass(vulkan.device, presentRP.vk, nil)
   vkDestroyFramebuffer(vulkan.device, offscreenFB, nil)
   DestroySwapchain(swapchain)
 
 when isMainModule:
-  var nFrames = 2000
+  var nFrames = 1000
   InitVulkan()
 
+  var mainRenderpass: RenderPass
+  var renderPasses = [
+    (depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT),
+    (depthBuffer: false, samples: VK_SAMPLE_COUNT_4_BIT),
+    (depthBuffer: true, samples: VK_SAMPLE_COUNT_1_BIT),
+    (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
+  ]
 
   # test normal
-  block:
-    mainRenderpass = CreateDirectPresentationRenderPass()
-    swapchain = InitSwapchain(renderpass = mainRenderpass).get()
+  if false:
+    for i, (depthBuffer, samples) in renderPasses:
+      var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
+      var swapchain = InitSwapchain(renderpass = renderpass).get()
 
-    # tests a simple triangle with minimalistic shader and vertex format
-    test_01_triangle(nFrames, renderPass = mainRenderpass)
+      # tests a simple triangle with minimalistic shader and vertex format
+      test_01_triangle(nFrames, swapchain)
 
-    # tests instanced triangles and quads, mixing meshes and instances
-    test_02_triangle_quad_instanced(nFrames, renderPass = mainRenderpass)
+      # tests instanced triangles and quads, mixing meshes and instances
+      test_02_triangle_quad_instanced(nFrames, swapchain)
 
-    # teste descriptor sets
-    test_03_simple_descriptorset(nFrames, renderPass = mainRenderpass)
+      # teste descriptor sets
+      test_03_simple_descriptorset(nFrames, swapchain)
 
-    # tests multiple descriptor sets and arrays
-    test_04_multiple_descriptorsets(nFrames, renderPass = mainRenderpass)
+      # tests multiple descriptor sets and arrays
+      test_04_multiple_descriptorsets(nFrames, swapchain)
 
-    checkVkResult vkDeviceWaitIdle(vulkan.device)
-    vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)
-    DestroySwapchain(swapchain)
-
-  # test MSAA
-  block:
-    mainRenderpass = CreateDirectPresentationRenderPass(samples = VK_SAMPLE_COUNT_4_BIT)
-    swapchain = InitSwapchain(renderpass = mainRenderpass, samples = VK_SAMPLE_COUNT_4_BIT).get()
-
-    test_01_triangle(nFrames, renderPass = mainRenderpass, VK_SAMPLE_COUNT_4_BIT)
-
-    checkVkResult vkDeviceWaitIdle(vulkan.device)
-    vkDestroyRenderPass(vulkan.device, mainRenderpass, nil)
-    DestroySwapchain(swapchain)
+      checkVkResult vkDeviceWaitIdle(vulkan.device)
+      vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+      DestroySwapchain(swapchain)
 
   # test multiple render passes
   block:
-    test_05_triangle_2pass(999999999)
+    test_05_triangle_2pass(nFrames)
 
   DestroyVulkan()

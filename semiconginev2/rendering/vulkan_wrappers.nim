@@ -49,10 +49,6 @@ proc svkGetDeviceQueue*(device: VkDevice, queueFamilyIndex: uint32, qType: VkQue
     addr(result),
   )
 
-proc DefaultSurfaceFormat(): VkFormat =
-  # EVERY windows driver and almost every linux driver should support this
-  VK_FORMAT_B8G8R8A8_SRGB
-
 func size(format: VkFormat): uint64 =
   const formatSize = [
     VK_FORMAT_B8G8R8A8_SRGB.int: 4'u64,
@@ -140,7 +136,7 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
   )
   checkVkResult vkCreateImage(vulkan.device, addr imageInfo, nil, addr(result))
 
-proc svkCreate2DImageView(image: VkImage, format: VkFormat): VkImageView =
+proc svkCreate2DImageView*(image: VkImage, format: VkFormat, aspect = VK_IMAGE_ASPECT_COLOR_BIT): VkImageView =
   var createInfo = VkImageViewCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
     image: image,
@@ -153,7 +149,7 @@ proc svkCreate2DImageView(image: VkImage, format: VkFormat): VkImageView =
       a: VK_COMPONENT_SWIZZLE_IDENTITY,
     ),
     subresourceRange: VkImageSubresourceRange(
-      aspectMask: VkImageAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT),
+      aspectMask: toBits [aspect],
       baseMipLevel: 0,
       levelCount: 1,
       baseArrayLayer: 0,
@@ -229,6 +225,7 @@ proc svkCmdBindDescriptorSets(commandBuffer: VkCommandBuffer, descriptorSets: op
 proc svkCreateRenderPass(
   attachments: openArray[VkAttachmentDescription],
   colorAttachments: openArray[VkAttachmentReference],
+  depthAttachments: openArray[VkAttachmentReference],
   resolveAttachments: openArray[VkAttachmentReference],
   dependencies: openArray[VkSubpassDependency],
 ): VkRenderPass =
@@ -241,7 +238,7 @@ proc svkCreateRenderPass(
     colorAttachmentCount: colorAttachments.len.uint32,
     pColorAttachments: colorAttachments.ToCPointer,
     pResolveAttachments: resolveAttachments.ToCPointer,
-    pDepthStencilAttachment: nil,
+    pDepthStencilAttachment: depthAttachments.ToCPointer,
     preserveAttachmentCount: 0,
     pPreserveAttachments: nil,
   )
