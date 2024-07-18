@@ -128,7 +128,7 @@ proc test_03_simple_descriptorset(nFrames: int, renderPass: VkRenderPass, sample
 
     Uniforms = object
       material: GPUValue[Material, UniformBuffer]
-      texture1: Texture[TVec4[uint8]]
+      texture1: Image[TVec4[uint8]]
 
     QuadShader = object
       position {.VertexAttribute.}: Vec3f
@@ -161,21 +161,21 @@ proc test_03_simple_descriptorset(nFrames: int, renderPass: VkRenderPass, sample
     uniforms1 = asDescriptorSet(
       Uniforms(
         material: asGPUValue(Material(baseColor: NewVec3f(1, 1, 1)), UniformBuffer),
-        texture1: Texture[TVec4[uint8]](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], interpolation: VK_FILTER_NEAREST),
+        texture1: Image[TVec4[uint8]](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], interpolation: VK_FILTER_NEAREST),
       )
     )
     uniforms2 = asDescriptorSet(
       Uniforms(
         material: asGPUValue(Material(baseColor: NewVec3f(0.5, 0.5, 0.5)), UniformBuffer),
-        texture1: Texture[TVec4[uint8]](width: 2, height: 2, data: @[R, G, B, W]),
+        texture1: Image[TVec4[uint8]](width: 2, height: 2, data: @[R, G, B, W]),
     )
     )
 
   AssignBuffers(renderdata, quad)
   AssignBuffers(renderdata, uniforms1)
   AssignBuffers(renderdata, uniforms2)
-  UploadTextures(renderdata, uniforms1)
-  UploadTextures(renderdata, uniforms2)
+  UploadImages(renderdata, uniforms1)
+  UploadImages(renderdata, uniforms2)
   renderdata.FlushAllMemory()
 
   var pipeline = CreatePipeline[QuadShader](renderPass = renderPass, samples = samples)
@@ -218,7 +218,7 @@ proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, sam
     MainSet = object
       renderSettings: GPUValue[RenderSettings, UniformBufferMapped]
       material: array[2, GPUValue[Material, UniformBuffer]]
-      texture1: array[2, Texture[TVec1[uint8]]]
+      texture1: array[2, Image[TVec1[uint8]]]
     OtherSet = object
       objectSettings: GPUValue[ObjectSettings, UniformBufferMapped]
 
@@ -262,8 +262,8 @@ proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, sam
         asGPUValue(Material(baseColor: NewVec3f(1, 0, 1)), UniformBuffer),
     ],
     texture1: [
-      Texture[TVec1[uint8]](width: 2, height: 2, data: @[W, G, G, W], interpolation: VK_FILTER_NEAREST),
-      Texture[TVec1[uint8]](width: 3, height: 3, data: @[W, G, W, G, W, G, W, G, W], interpolation: VK_FILTER_NEAREST),
+      Image[TVec1[uint8]](width: 2, height: 2, data: @[W, G, G, W], interpolation: VK_FILTER_NEAREST),
+      Image[TVec1[uint8]](width: 3, height: 3, data: @[W, G, W, G, W, G, W, G, W], interpolation: VK_FILTER_NEAREST),
     ],
   ),
   )
@@ -283,7 +283,7 @@ proc test_04_multiple_descriptorsets(nFrames: int, renderPass: VkRenderPass, sam
   AssignBuffers(renderdata, mainset)
   AssignBuffers(renderdata, otherset1)
   AssignBuffers(renderdata, otherset2)
-  UploadTextures(renderdata, mainset)
+  UploadImages(renderdata, mainset)
   renderdata.FlushAllMemory()
 
   var pipeline = CreatePipeline[QuadShader](renderPass = renderPass, samples = samples)
@@ -324,7 +324,7 @@ proc test_05_triangle_2pass(nFrames: int, samples = VK_SAMPLE_COUNT_1_BIT) =
 
   type
     Uniforms = object
-      frameTexture: Texture[TVec4[uint8]]
+      frameTexture: Image[TVec4[uint8]]
     TriangleShader = object
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec3f
@@ -373,18 +373,18 @@ proc test_05_triangle_2pass(nFrames: int, samples = VK_SAMPLE_COUNT_1_BIT) =
   )
   var uniforms1 = asDescriptorSet(
     Uniforms(
-      frameTexture: Texture[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
+      frameTexture: Image[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
     )
   )
   var uniforms2 = asDescriptorSet(
     Uniforms(
-      frameTexture: Texture[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
+      frameTexture: Image[TVec4[uint8]](width: swapchain.width, height: swapchain.height, isRenderTarget: true),
     )
   )
   AssignBuffers(renderdata, mesh)
   AssignBuffers(renderdata, quad)
-  UploadTextures(renderdata, uniforms1)
-  UploadTextures(renderdata, uniforms2)
+  UploadImages(renderdata, uniforms1)
+  UploadImages(renderdata, uniforms2)
   renderdata.FlushAllMemory()
 
   var

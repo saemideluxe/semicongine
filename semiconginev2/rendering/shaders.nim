@@ -1,4 +1,4 @@
-func GlslType[T: SupportedGPUType|Texture](value: T): string =
+func GlslType[T: SupportedGPUType|Image](value: T): string =
   when T is float32: "float"
   elif T is float64: "double"
   elif T is int8 or T is int16 or T is int32 or T is int64: "int"
@@ -35,7 +35,7 @@ func GlslType[T: SupportedGPUType|Texture](value: T): string =
   elif T is TMat43[float64]: "dmat43"
   elif T is TMat4[float32]: "mat4"
   elif T is TMat4[float64]: "dmat4"
-  elif T is Texture: "sampler2D"
+  elif T is Image: "sampler2D"
   else: {.error: "Unsupported data type on GPU".}
 
 func VkType[T: SupportedGPUType](value: T): VkFormat =
@@ -84,7 +84,7 @@ func VkType[T: SupportedGPUType](value: T): VkFormat =
   else: {.error: "Unsupported data type on GPU".}
 
 
-func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Texture](value: T): uint32 =
+func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Image](value: T): uint32 =
   when T is TMat2[float32] or T is TMat2[float64] or T is TMat23[float32] or T is TMat23[float64]:
     2
   elif T is TMat32[float32] or T is TMat32[float64] or T is TMat3[float32] or T is TMat3[float64] or T is TMat34[float32] or T is TMat34[float64]:
@@ -94,7 +94,7 @@ func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Texture](value:
   else:
     1
 
-func NLocationSlots[T: SupportedGPUType|Texture](value: T): uint32 =
+func NLocationSlots[T: SupportedGPUType|Image](value: T): uint32 =
   #[
   single location:
     - any scalar
@@ -169,7 +169,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
         for descriptorName, descriptorValue in fieldPairs(descriptor):
 
-          when typeof(descriptorValue) is Texture:
+          when typeof(descriptorValue) is Image:
             samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & GlslType(descriptorValue) & " " & descriptorName & ";"
             descriptorBinding.inc
 
@@ -189,7 +189,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
           elif typeof(descriptorValue) is array:
 
-            when elementType(descriptorValue) is Texture:
+            when elementType(descriptorValue) is Image:
 
               let arrayDecl = "[" & $typeof(descriptorValue).len & "]"
               samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & GlslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"

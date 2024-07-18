@@ -59,8 +59,8 @@ template size(gpuArray: GPUArray): uint64 =
   (gpuArray.data.len * sizeof(elementType(gpuArray.data))).uint64
 template size(gpuValue: GPUValue): uint64 =
   sizeof(gpuValue.data).uint64
-func size(texture: Texture): uint64 =
-  texture.data.len.uint64 * sizeof(elementType(texture.data)).uint64
+func size(image: Image): uint64 =
+  image.data.len.uint64 * sizeof(elementType(image.data)).uint64
 
 template rawPointer(gpuArray: GPUArray): pointer =
   addr(gpuArray.data[0])
@@ -83,12 +83,12 @@ proc InitDescriptorSet*(
   for theName, value in descriptorSet.data.fieldPairs:
     when typeof(value) is GPUValue:
       assert value.buffer.vk.Valid
-    elif typeof(value) is Texture:
+    elif typeof(value) is Image:
       assert value.vk.Valid
       assert value.imageview.Valid
       assert value.sampler.Valid
     elif typeof(value) is array:
-      when elementType(value) is Texture:
+      when elementType(value) is Image:
         for t in value:
           assert t.vk.Valid
           assert t.imageview.Valid
@@ -135,7 +135,7 @@ proc InitDescriptorSet*(
           pImageInfo: nil,
           pBufferInfo: addr(bufferWrites[^1]),
         )
-      elif typeof(fieldValue) is Texture:
+      elif typeof(fieldValue) is Image:
         imageWrites.add VkDescriptorImageInfo(
           sampler: fieldValue.sampler,
           imageView: fieldValue.imageView,
@@ -152,11 +152,11 @@ proc InitDescriptorSet*(
           pBufferInfo: nil,
         )
       elif typeof(fieldValue) is array:
-        when elementType(fieldValue) is Texture:
-          for texture in fieldValue:
+        when elementType(fieldValue) is Image:
+          for image in fieldValue:
             imageWrites.add VkDescriptorImageInfo(
-              sampler: texture.sampler,
-              imageView: texture.imageView,
+              sampler: image.sampler,
+              imageView: image.imageView,
               imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             )
           descriptorSetWrites.add VkWriteDescriptorSet(
@@ -437,19 +437,19 @@ proc createSampler(
   )
   checkVkResult vkCreateSampler(vulkan.device, addr(samplerInfo), nil, addr(result))
 
-proc createTextureImage(renderData: var RenderData, texture: var Texture) =
-  assert texture.vk == VkImage(0), "Texture has already been created"
+proc createVulkanImage(renderData: var RenderData, image: var Image) =
+  assert image.vk == VkImage(0), "Image has already been created"
   var usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
-  if texture.isRenderTarget:
+  if image.isRenderTarget:
     usage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-  let format = GetVkFormat(elementType(texture.data) is TVec1[uint8], usage = usage)
+  let format = GetVkFormat(elementType(image.data) is TVec1[uint8], usage = usage)
 
-  texture.vk = svkCreate2DImage(texture.width, texture.height, format, usage)
-  renderData.images.add texture.vk
-  texture.sampler = createSampler(magFilter = texture.interpolation, minFilter = texture.interpolation)
-  renderData.samplers.add texture.sampler
+  image.vk = svkCreate2DImage(image.width, image.height, format, usage)
+  renderData.images.add image.vk
+  image.sampler = createSampler(magFilter = image.interpolation, minFilter = image.interpolation)
+  renderData.samplers.add image.sampler
 
-  let memoryRequirements = texture.vk.svkGetImageMemoryRequirements()
+  let memoryRequirements = image.vk.svkGetImageMemoryRequirements()
   let memoryType = BestMemory(mappable = false, filter = memoryRequirements.memoryTypes)
   # check if there is an existing allocated memory block that is large enough to be used
   var selectedBlockI = -1
@@ -473,35 +473,35 @@ proc createTextureImage(renderData: var RenderData, texture: var Texture) =
 
   checkVkResult vkBindImageMemory(
     vulkan.device,
-    texture.vk,
+    image.vk,
     selectedBlock.vk,
     renderData.memory[memoryType][selectedBlockI].offsetNextFree,
   )
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
   # imageview can only be created after memory is bound
-  texture.imageview = svkCreate2DImageView(texture.vk, format)
-  renderData.imageViews.add texture.imageview
+  image.imageview = svkCreate2DImageView(image.vk, format)
+  renderData.imageViews.add image.imageview
 
   # data transfer and layout transition
-  TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+  TransitionImageLayout(image.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
   WithStagingBuffer(
-    (texture.vk, texture.width, texture.height),
+    (image.vk, image.width, image.height),
     memoryRequirements.size,
     stagingPtr
   ):
-    copyMem(stagingPtr, texture.data.ToCPointer, texture.size)
-  TransitionImageLayout(texture.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+    copyMem(stagingPtr, image.data.ToCPointer, image.size)
+  TransitionImageLayout(image.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 
 
-proc UploadTextures*(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
+proc UploadImages*(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
   for name, value in fieldPairs(descriptorSet.data):
-    when typeof(value) is Texture:
-      renderdata.createTextureImage(value)
+    when typeof(value) is Image:
+      renderdata.createVulkanImage(value)
     elif typeof(value) is array:
-      when elementType(value) is Texture:
-        for texture in value.mitems:
-          renderdata.createTextureImage(texture)
+      when elementType(value) is Image:
+        for image in value.mitems:
+          renderdata.createVulkanImage(image)
 
 proc HasGPUValueField[T](name: static string): bool {.compileTime.} =
   for fieldname, value in default(T).fieldPairs():

@@ -75,7 +75,7 @@ func currentFiF*(swapchain: Swapchain): int = swapchain.currentFiF
 type
   # type aliases
   SupportedGPUType = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
-  TextureType = TVec1[uint8] | TVec4[uint8]
+  PixelType = TVec1[uint8] | TVec4[uint8]
 
   # shader related types
   DescriptorSet*[T: object] = object
@@ -106,7 +106,7 @@ type
     size: uint64
     rawPointer: pointer # if not nil, buffer is using mapped memory
     offsetNextFree: uint64
-  Texture*[T: TextureType] = object
+  Image*[T: PixelType] = object
     width*: uint32
     height*: uint32
     interpolation*: VkFilter = VK_FILTER_LINEAR
@@ -136,7 +136,7 @@ type
 template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 0'u32
   for theFieldname, value in fieldPairs(shader):
-    when typeof(value) is Texture:
+    when typeof(value) is Image:
       block:
         const `fieldname` {.inject.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
@@ -153,7 +153,7 @@ template ForDescriptorFields(shader: typed, fieldname, valuename, typename, coun
         body
         `bindingNumber`.inc
     elif typeof(value) is array:
-      when elementType(value) is Texture:
+      when elementType(value) is Image:
         block:
           const `fieldname` {.inject.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
@@ -331,14 +331,14 @@ proc MaxFramebufferSampleCount*(maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCou
   return min(max(available), maxSamples)
 
 
-proc `[]`*(texture: Texture, x, y: uint32): auto =
-  assert x < texture.width, &"{x} < {texture.width} is not true"
-  assert y < texture.height, &"{y} < {texture.height} is not true"
+proc `[]`*(image: Image, x, y: uint32): auto =
+  assert x < image.width, &"{x} < {image.width} is not true"
+  assert y < image.height, &"{y} < {image.height} is not true"
 
-  texture[].imagedata[y * texture.width + x]
+  image[].imagedata[y * image.width + x]
 
-proc `[]=`*[T](texture: var Texture[T], x, y: uint32, value: T) =
-  assert x < texture.width
-  assert y < texture.height
+proc `[]=`*[T](image: var Image[T], x, y: uint32, value: T) =
+  assert x < image.width
+  assert y < image.height
 
-  texture[].imagedata[y * texture.width + x] = value
+  image[].imagedata[y * image.width + x] = value
