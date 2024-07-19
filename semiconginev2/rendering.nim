@@ -85,7 +85,9 @@ func currentFiF*(swapchain: Swapchain): int = swapchain.currentFiF
 type
   # type aliases
   SupportedGPUType = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
-  PixelType = TVec1[uint8] | TVec4[uint8]
+  Gray = TVec1[uint8]
+  RGBA = TVec4[uint8]
+  PixelType = Gray | RGBA
 
   # shader related types
   DescriptorSet*[T: object] = object
@@ -346,10 +348,10 @@ proc `[]`*(image: Image, x, y: uint32): auto =
   assert x < image.width, &"{x} < {image.width} is not true"
   assert y < image.height, &"{y} < {image.height} is not true"
 
-  image[].imagedata[y * image.width + x]
+  image.data[y * image.width + x]
 
 proc `[]=`*[T](image: var Image[T], x, y: uint32, value: T) =
   assert x < image.width
   assert y < image.height
 
-  image[].imagedata[y * image.width + x] = value
+  image.data[y * image.width + x] = value

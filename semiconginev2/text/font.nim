@@ -1,16 +1,3 @@
-import std/tables
-import std/strutils
-import std/strformat
-import std/streams
-import std/os
-import std/unicode
-import std/logging
-
-import ../core/vector
-import ../core/imagetypes
-import ../core/fonttypes
-import ../algorithms
-
 {.emit: "#define STBTT_STATIC".}
 {.emit: "#define STB_TRUETYPE_IMPLEMENTATION".}
 {.emit: "#include \"" & currentSourcePath.parentDir() & "/stb_truetype.h\"".}
@@ -28,8 +15,6 @@ proc stbtt_GetCodepointKernAdvance(info: ptr stbtt_fontinfo, ch1, ch2: cint): ci
 proc stbtt_FindGlyphIndex(info: ptr stbtt_fontinfo, codepoint: cint): cint {.importc, nodecl.}
 
 proc stbtt_GetFontVMetrics(info: ptr stbtt_fontinfo, ascent, descent, lineGap: ptr cint) {.importc, nodecl.}
-
-proc free(p: pointer) {.importc.}
 
 proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32): Font =
   var
@@ -54,8 +39,8 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
 
   var
     topOffsets: Table[Rune, int]
-    images: seq[Image[GrayPixel]]
-  let empty_image = NewImage[GrayPixel](1, 1, [0'u8])
+    images: seq[Image[Gray]]
+  let empty_image = Image[Gray](width: 1, height: 1, data: @[[0'u8]])
 
   for codePoint in codePoints:
     var
@@ -78,23 +63,18 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
       result.xHeight = float32(height)
 
     if width > 0 and height > 0:
-      var bitmap = newSeq[GrayPixel](width * height)
+      var bitmap = newSeq[Gray](width * height)
       for i in 0 ..< width * height:
-        bitmap[i] = GrayPixel(data[i])
-      images.add NewImage[GrayPixel](width.uint32, height.uint32, bitmap)
+        bitmap[i] = [data[i].uint8]
+      images.add Image[Gray](width: width.uint32, height: height.uint32, data: bitmap)
     else:
       images.add empty_image
 
-    free(data)
+    nativeFree(data)
 
   let packed = Pack(images)
 
-  result.fontAtlas = Texture(
-    name: name & "_texture",
-    isGrayscale: true,
-    grayImage: packed.atlas,
-    sampler: FONTSAMPLER_SOFT,
-  )
+  result.fontAtlas = packed.atlas
 
   let w = float32(packed.atlas.width)
   let h = float32(packed.atlas.height)
@@ -128,3 +108,63 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
         cint(codePoint),
         cint(codePointAfter)
       )) * result.fontscale
+
+func TextWidth*(text: seq[Rune], font: FontObj): float32 =
+  var currentWidth = 0'f32
+  var lineWidths: seq[float32]
+  for i in 0 ..< text.len:
+    if text[i] == NEWLINE:
+      lineWidths.add currentWidth
+      currentWidth = 0'f32
+    else:
+      if not (i == text.len - 1 and text[i].isWhiteSpace):
+        currentWidth += font.glyphs[text[i]].advance
+      if i < text.len - 1:
+        currentWidth += font.kerning[(text[i], text[i + 1])]
+  lineWidths.add currentWidth
+  return lineWidths.max
+
+func WordWrapped*(text: seq[Rune], font: FontObj, maxWidth: float32): seq[Rune] =
+  var remaining: seq[seq[Rune]] = @[@[]]
+  for c in text:
+    if c == SPACE:
+      remaining.add newSeq[Rune]()
+    else:
+      remaining[^1].add c
+  remaining.reverse()
+
+  var currentLine: seq[Rune]
+
+  while remaining.len > 0:
+    var currentWord = remaining.pop()
+    assert not (SPACE in currentWord)
+
+    if currentWord.len == 0:
+      currentLine.add SPACE
+    else:
+      assert currentWord[^1] != SPACE
+      # if this is the first word of the line and it is too long we need to
+      # split by character
+      if currentLine.len == 0 and (SPACE & currentWord).TextWidth(font) > maxWidth:
+        var subWord = @[currentWord[0]]
+        for c in currentWord[1 .. ^1]:
+          if (subWord & c).TextWidth(font) > maxWidth:
+            break
+          subWord.add c
+        result.add subWord & NEWLINE
+        remaining.add currentWord[subWord.len .. ^1] # process rest of the word in next iteration
+      else:
+        if (currentLine & SPACE & currentWord).TextWidth(font) <= maxWidth:
+          if currentLine.len == 0:
+            currentLine = currentWord
+          else:
+            currentLine = currentLine & SPACE & currentWord
+        else:
+          result.add currentLine & NEWLINE
+          remaining.add currentWord
+          currentLine = @[]
+  if currentLine.len > 0 and currentLine != @[SPACE]:
+    result.add currentLine
+
+  return result
+

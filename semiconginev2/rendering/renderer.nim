@@ -331,6 +331,10 @@ proc AssignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = tru
 
     when typeof(value) is GPUData:
       AssignGPUData(renderdata, value)
+
+    elif typeof(value) is DescriptorSet:
+      AssignBuffers(renderdata, value.data, uploadData = uploadData)
+
     elif typeof(value) is array:
       when elementType(value) is GPUValue:
         for v in value.mitems:
@@ -455,7 +459,7 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
   var usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
   if image.isRenderTarget:
     usage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-  let format = GetVkFormat(elementType(image.data) is TVec1[uint8], usage = usage)
+  let format = GetVkFormat(grayscale = elementType(image.data) is Gray, usage = usage)
 
   image.vk = svkCreate2DImage(image.width, image.height, format, usage, image.samples)
   renderData.images.add image.vk

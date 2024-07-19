@@ -1,24 +1,3 @@
-import std/tables
-import std/unicode
-
-import ./vulkanapi
-import ./imagetypes
-import ./vector
-
-var FONTSAMPLER_SOFT* = Sampler(
-  magnification: VK_FILTER_LINEAR,
-  minification: VK_FILTER_LINEAR,
-  wrapModeS: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-  wrapModeT: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-)
-var FONTSAMPLER_HARD* = Sampler(
-  magnification: VK_FILTER_NEAREST,
-  minification: VK_FILTER_NEAREST,
-  wrapModeS: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-  wrapModeT: VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-)
-
-
 type
   GlyphInfo* = object
     uvs*: array[4, Vec2f]

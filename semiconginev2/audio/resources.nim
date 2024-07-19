@@ -54,7 +54,6 @@ proc ReadAU*(stream: Stream): SoundData =
 {.compile: currentSourcePath.parentDir() & "/stb_vorbis.c".}
 
 proc stb_vorbis_decode_memory(mem: pointer, len: cint, channels: ptr cint, sample_rate: ptr cint, output: ptr ptr cshort): cint {.importc.}
-proc free(p: pointer) {.importc.}
 
 proc ReadVorbis*(stream: Stream): SoundData =
   var
@@ -73,14 +72,14 @@ proc ReadVorbis*(stream: Stream): SoundData =
   if channels == 2:
     result.setLen(int(nSamples))
     copyMem(addr result[0], output, nSamples * sizeof(Sample))
-    free(output)
+    nativeFree(output)
   elif channels == 1:
     for i in 0 ..< nSamples:
       let value = cast[ptr UncheckedArray[int16]](output)[i]
       result.add [value, value]
-    free(output)
+    nativeFree(output)
   else:
-    free(output)
+    nativeFree(output)
     raise newException(Exception, "Only support mono and stereo audio at the moment (1 or 2 channels), but found " & $channels)
 
 proc LoadAudio*(path: string, package = DEFAULT_PACKAGE): SoundData =
