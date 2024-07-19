@@ -1,4 +1,6 @@
 import std/sequtils
+import std/monotimes
+import std/times
 import std/options
 import std/random
 
@@ -316,7 +318,7 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
   type
 
     UniformData = object
-      m: Mat4
+      mvp: Mat4
     Uniforms = object
       data: GPUValue[UniformData, UniformBufferMapped]
     CubeShader = object
@@ -328,7 +330,7 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
       # code
       vertexCode = """void main() {
     fragmentColor = color;
-    gl_Position = data.m * vec4(position, 1);
+    gl_Position = vec4(position, 1) * data.mvp;
 }"""
       fragmentCode = """void main() {
       outColor = fragmentColor;
@@ -342,9 +344,9 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
     NewVec3f(-0.5, -0.5), NewVec3f(-0.5, +0.5), NewVec3f(+0.5, +0.5),
     NewVec3f(+0.5, +0.5), NewVec3f(+0.5, -0.5), NewVec3f(-0.5, -0.5),
   ]
-  proc transf(data: seq[Vec3f], m: Mat4): seq[Vec3f] =
+  proc transf(data: seq[Vec3f], mat: Mat4): seq[Vec3f] =
     for v in data:
-      result.add m * v
+      result.add mat * v
 
   var
     vertices: seq[Vec3f]
@@ -399,7 +401,7 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
 
   var uniforms1 = asDescriptorSet(
     Uniforms(
-      data: asGPUValue(UniformData(m: Unit4), UniformBufferMapped)
+      data: asGPUValue(UniformData(mvp: Unit4), UniformBufferMapped)
     )
   )
   AssignBuffers(renderdata, uniforms1)
@@ -410,9 +412,18 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
 
   var c = 0
+  var tStart = getMonoTime()
+  var t = tStart
   while UpdateInputs() and c < nFrames:
 
-    uniforms1.data.data.data.m = Translate(0, 0, -2) * Rotate(PI * 2 * c.float32 / nFrames.float32, Y) * Rotate(-PI / 4, X) * Perspective(-PI / 2, GetAspectRatio(swapchain), 0.01, 100)
+    let t = getMonoTime() - tStart
+
+    uniforms1.data.data.data.mvp = (
+      Perspective(-PI / 2, GetAspectRatio(swapchain), 0.01, 100) *
+      Translate(0, 0, 2) *
+      Rotate(PI / 4, X) *
+      Rotate(PI * 0.5 * (t.inMicroseconds() / 1_000_000), Y)
+    )
     UpdateGPUBuffer(uniforms1.data.data, flush = true)
     WithNextFrame(swapchain, framebuffer, commandbuffer):
       WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
@@ -640,8 +651,7 @@ when isMainModule:
     ]#
 
     # rotating cube
-    while true:
-      test_05_cube(nFrames, swapchain)
+    test_05_cube(999999999, swapchain)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
