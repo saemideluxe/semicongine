@@ -1,3 +1,4 @@
+import std/os
 import std/sequtils
 import std/monotimes
 import std/times
@@ -416,13 +417,13 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
   var t = tStart
   while UpdateInputs() and c < nFrames:
 
-    let t = getMonoTime() - tStart
+    let tStartLoop = getMonoTime() - tStart
 
     uniforms1.data.data.data.mvp = (
       Perspective(-PI / 2, GetAspectRatio(swapchain), 0.01, 100) *
       Translate(0, 0, 2) *
       Rotate(PI / 4, X) *
-      Rotate(PI * 0.5 * (t.inMicroseconds() / 1_000_000), Y)
+      Rotate(PI * 0.1 * (tStartLoop.inMicroseconds() / 1_000_000), Y)
     )
     UpdateGPUBuffer(uniforms1.data.data, flush = true)
     WithNextFrame(swapchain, framebuffer, commandbuffer):
@@ -431,6 +432,13 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
           WithBind(commandbuffer, (uniforms1, ), pipeline, swapchain.currentFiF):
             Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
             Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = floor)
+
+    let tEndLoop = getMonoTime() - tStart
+    let looptime = tEndLoop - tStartLoop
+    let waitTime = 16_666 - looptime.inMicroseconds
+    if waitTime > 0:
+      echo "sleep ", waitTime / 1000
+      sleep((waitTime / 1000).int)
     inc c
 
   # cleanup

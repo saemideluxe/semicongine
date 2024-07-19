@@ -217,8 +217,6 @@ proc debugCallback(
 
 proc InitVulkan*(appName: string = "semicongine app") =
 
-  include ./platform/vulkan_extensions # for REQUIRED_PLATFORM_EXTENSIONS
-
   # instance creation
 
   # enagle all kind of debug stuff
