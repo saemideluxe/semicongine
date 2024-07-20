@@ -7,7 +7,7 @@ import std/random
 
 import ../semiconginev2
 
-proc test_01_triangle(nFrames: int, swapchain: var Swapchain) =
+proc test_01_triangle(time: float32, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -35,13 +35,12 @@ proc test_01_triangle(nFrames: int, swapchain: var Swapchain) =
   var
     pipeline = CreatePipeline[TrianglShader](renderPass = swapchain.renderPass)
 
-  var c = 0
-  while UpdateInputs() and c < nFrames:
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
       WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
-    inc c
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -49,7 +48,7 @@ proc test_01_triangle(nFrames: int, swapchain: var Swapchain) =
   DestroyRenderData(renderdata)
 
 
-proc test_02_triangle_quad_instanced(nFrames: int, swapchain: var Swapchain) =
+proc test_02_triangle_quad_instanced(time: float32, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -103,8 +102,8 @@ proc test_02_triangle_quad_instanced(nFrames: int, swapchain: var Swapchain) =
 
   var pipeline = CreatePipeline[SomeShader](renderPass = swapchain.renderPass)
 
-  var c = 0
-  while UpdateInputs() and c < nFrames:
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
       WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
@@ -112,14 +111,13 @@ proc test_02_triangle_quad_instanced(nFrames: int, swapchain: var Swapchain) =
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesB)
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesA)
           Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesB)
-    inc c
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_03_simple_descriptorset(nFrames: int, swapchain: var Swapchain) =
+proc test_03_simple_descriptorset(time: float32, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -183,8 +181,8 @@ proc test_03_simple_descriptorset(nFrames: int, swapchain: var Swapchain) =
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms2)
 
-  var c = 0
-  while UpdateInputs() and c < nFrames:
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     WithNextFrame(swapchain, framebuffer, commandbuffer):
       WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
@@ -192,14 +190,13 @@ proc test_03_simple_descriptorset(nFrames: int, swapchain: var Swapchain) =
             Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
           WithBind(commandbuffer, (uniforms2, ), pipeline, swapchain.currentFiF):
             Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
-    inc c
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_04_multiple_descriptorsets(nFrames: int, swapchain: var Swapchain) =
+proc test_04_multiple_descriptorsets(time: float32, swapchain: var Swapchain) =
   var renderdata = InitRenderData()
 
   type
@@ -293,8 +290,8 @@ proc test_04_multiple_descriptorsets(nFrames: int, swapchain: var Swapchain) =
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset1)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset2)
 
-  var c = 0
-  while UpdateInputs() and c < nFrames:
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     TimeAndLog:
       WithNextFrame(swapchain, framebuffer, commandbuffer):
         WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
@@ -303,19 +300,18 @@ proc test_04_multiple_descriptorsets(nFrames: int, swapchain: var Swapchain) =
               Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
             WithBind(commandbuffer, (constset, mainset, otherset2), pipeline, swapchain.currentFiF):
               Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
-    mainset.data.renderSettings.data.brigthness = (c.float32 / nFrames.float32)
-    otherset1.data.objectSettings.data.scale = 0.5 + (c.float32 / nFrames.float32)
+    mainset.data.renderSettings.data.brigthness = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
+    otherset1.data.objectSettings.data.scale = 0.5 + ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     UpdateGPUBuffer(mainset.data.renderSettings)
     UpdateGPUBuffer(otherset1.data.objectSettings)
     renderdata.FlushAllMemory()
-    inc c
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
+proc test_05_cube(time: float32, swapchain: var Swapchain) =
   type
 
     UniformData = object
@@ -412,11 +408,11 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
   var pipeline = CreatePipeline[CubeShader](renderPass = swapchain.renderPass)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
 
-  var c = 0
   var tStart = getMonoTime()
   var t = tStart
-  while UpdateInputs() and c < nFrames:
 
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let tStartLoop = getMonoTime() - tStart
 
     uniforms1.data.data.data.mvp = (
@@ -439,14 +435,13 @@ proc test_05_cube(nFrames: int, swapchain: var Swapchain) =
     if waitTime > 0:
       echo "sleep ", waitTime / 1000
       sleep((waitTime / 1000).int)
-    inc c
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_06_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCountFlagBits) =
+proc test_06_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleCountFlagBits) =
   var
     (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
     swapchain = InitSwapchain(renderpass = presentRP).get()
@@ -593,8 +588,8 @@ proc test_06_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCo
     attachments
   )
 
-  var c = 0
-  while UpdateInputs() and c < nFrames:
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
     TimeAndLog:
       WithNextFrame(swapchain, framebuffer, commandbuffer):
@@ -607,7 +602,6 @@ proc test_06_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCo
           WithPipeline(commandbuffer, presentPipeline):
             WithBind(commandbuffer, (uniforms1, ), presentPipeline, swapchain.currentFiF):
               Render(commandbuffer = commandbuffer, pipeline = presentPipeline, mesh = quad)
-    inc c
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -628,15 +622,15 @@ proc test_06_triangle_2pass(nFrames: int, depthBuffer: bool, samples: VkSampleCo
   DestroySwapchain(swapchain)
 
 when isMainModule:
-  var nFrames = 3000
+  var time = 1'f32
   InitVulkan()
 
   var mainRenderpass: RenderPass
   var renderPasses = [
-    # (depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT),
-      # (depthBuffer: false, samples: VK_SAMPLE_COUNT_4_BIT),
-    (depthBuffer: true, samples: VK_SAMPLE_COUNT_1_BIT),
-    # (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
+     (depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT),
+     (depthBuffer: false, samples: VK_SAMPLE_COUNT_4_BIT),
+     (depthBuffer: true, samples: VK_SAMPLE_COUNT_1_BIT),
+     (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
   ]
 
   # test normal
@@ -644,29 +638,27 @@ when isMainModule:
     var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
     var swapchain = InitSwapchain(renderpass = renderpass).get()
 
-    #[
     # tests a simple triangle with minimalistic shader and vertex format
-    test_01_triangle(nFrames, swapchain)
+    test_01_triangle(time, swapchain)
 
     # tests instanced triangles and quads, mixing meshes and instances
-    test_02_triangle_quad_instanced(nFrames, swapchain)
+    test_02_triangle_quad_instanced(time, swapchain)
 
     # teste descriptor sets
-    test_03_simple_descriptorset(nFrames, swapchain)
+    test_03_simple_descriptorset(time, swapchain)
 
     # tests multiple descriptor sets and arrays
-    test_04_multiple_descriptorsets(nFrames, swapchain)
-    ]#
+    test_04_multiple_descriptorsets(time, swapchain)
 
     # rotating cube
-    test_05_cube(999999999, swapchain)
+    test_05_cube(time, swapchain)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
     DestroySwapchain(swapchain)
 
   # test multiple render passes
-  # for i, (depthBuffer, samples) in renderPasses:
-    # test_06_triangle_2pass(nFrames, depthBuffer, samples)
+  for i, (depthBuffer, samples) in renderPasses:
+    test_06_triangle_2pass(time, depthBuffer, samples)
 
   DestroyVulkan()
