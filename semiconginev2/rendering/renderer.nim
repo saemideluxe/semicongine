@@ -290,14 +290,14 @@ proc UpdateGPUBuffer*(gpuData: GPUData, flush = false) =
     WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
       copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
 
-proc UpdateAllGPUBuffers*[T](value: T) =
+proc UpdateAllGPUBuffers*[T](value: T, flush = false) =
   for name, fieldvalue in value.fieldPairs():
     when typeof(fieldvalue) is GPUData:
-      UpdateGPUBuffer(fieldvalue)
+      UpdateGPUBuffer(fieldvalue, flush = flush)
     when typeof(fieldvalue) is array:
       when elementType(fieldvalue) is GPUData:
         for entry in fieldvalue:
-          UpdateGPUBuffer(entry)
+          UpdateGPUBuffer(entry, flush = flush)
 
 proc AssignGPUData(renderdata: var RenderData, value: var GPUData) =
   # find buffer that has space

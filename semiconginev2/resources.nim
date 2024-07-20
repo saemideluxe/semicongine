@@ -156,19 +156,6 @@ proc LoadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
 proc LoadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
   path.loadResource_intern(package = package).loadConfig(filename = path)
 
-proc LoadFont*(
-  path: string,
-  name = "",
-  lineHeightPixels = 80'f32,
-  additional_codepoints: openArray[Rune] = [],
-  charset = ASCII_CHARSET,
-  package = DEFAULT_PACKAGE
-): Font =
-  var thename = name
-  if thename == "":
-    thename = path.splitFile().name
-  loadResource_intern(path, package = package).ReadTrueType(name, charset & additional_codepoints.toSeq, lineHeightPixels)
-
 proc LoadMeshes*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): seq[MeshTree] =
   loadResource_intern(path, package = package).ReadglTF(defaultMaterial)
 

@@ -20,11 +20,13 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
   var
     indata = stream.readAll()
     fontinfo: stbtt_fontinfo
-  if stbtt_InitFont(addr fontinfo, addr indata[0], 0) == 0:
-    raise newException(Exception, "An error occured while loading PNG file")
+  if stbtt_InitFont(addr fontinfo, indata.ToCPointer, 0) == 0:
+    raise newException(Exception, "An error occured while loading font file")
 
-  result.name = name
-  result.fontscale = float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels)))
+  result = Font(
+    name: name,
+    fontscale: float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels))),
+  )
 
   var ascent, descent, lineGap: cint
   stbtt_GetFontVMetrics(addr fontinfo, addr ascent, addr descent, addr lineGap)
@@ -108,6 +110,19 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
         cint(codePoint),
         cint(codePointAfter)
       )) * result.fontscale
+
+proc LoadFont*(
+  path: string,
+  name = "",
+  lineHeightPixels = 80'f32,
+  additional_codepoints: openArray[Rune] = [],
+  charset = ASCII_CHARSET,
+  package = DEFAULT_PACKAGE
+): Font =
+  var thename = name
+  if thename == "":
+    thename = path.splitFile().name
+  loadResource_intern(path, package = package).ReadTrueType(thename, charset & additional_codepoints.toSeq, lineHeightPixels)
 
 func TextWidth*(text: seq[Rune], font: FontObj): float32 =
   var currentWidth = 0'f32

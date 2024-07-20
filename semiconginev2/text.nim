@@ -26,6 +26,7 @@ type
     color: Vec4f
     position: Vec3f
     scale: float32
+    aspectratio: float32
   TextboxDescriptorSet = object
     textbox: GPUValue[TextboxData, UniformBufferMapped]
     fontAtlas: Image[Gray]
@@ -36,11 +37,13 @@ type
     fragmentUv {.Pass.}: Vec2f
     color {.ShaderOutput.}: Vec4f
     descriptorSets {.DescriptorSets.}: (TextboxDescriptorSet, )
-    vertexCode = &"""
-  gl_Position = vec4(position * textbox.scale + textbox.position, 1.0);
+    vertexCode = """void main() {
+  gl_Position = vec4(position * vec3(1, textbox.aspectratio, 1) * textbox.scale + textbox.position, 1.0);
   fragmentUv = uv;
-  """
-    fragmentCode = &"""color = vec4(textbox.color.rgb, textbox.color.rgb.a * texture(fontAtlas, fragmentUv).r);"""
+}  """
+    fragmentCode = """void main() {
+    color = vec4(textbox.color.rgb, textbox.color.a * texture(fontAtlas, fragmentUv).r);
+}"""
 
 
 include ./text/font
