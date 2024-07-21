@@ -97,6 +97,8 @@ proc RefreshGeometry(textbox: var Textbox) =
       textbox.position.data[vertexOffset + 1] = NewVec3f()
       textbox.position.data[vertexOffset + 2] = NewVec3f()
       textbox.position.data[vertexOffset + 3] = NewVec3f()
+  UpdateGPUBuffer(textbox.position, flush = true)
+  UpdateGPUBuffer(textbox.uv, flush = true)
   textbox.lastRenderedText = textbox.processedText
 
 func text*(textbox: Textbox): seq[Rune] =

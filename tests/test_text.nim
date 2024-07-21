@@ -1,4 +1,5 @@
 import std/os
+import std/strutils
 import std/sequtils
 import std/monotimes
 import std/times
@@ -48,7 +49,7 @@ proc test_02_multiple_animated(time: float32, swapchain: var Swapchain) =
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font1,
-      "0",
+      "  0",
       color = NewVec4f(0, 1, 1, 1),
       scale = 0.004,
       position = NewVec3f(-0.3, 0.5)
@@ -57,7 +58,7 @@ proc test_02_multiple_animated(time: float32, swapchain: var Swapchain) =
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font2,
-      "1",
+      "  1",
       color = NewVec4f(1, 0, 1, 1),
       scale = 0.001,
       position = NewVec3f(0, 0)
@@ -66,7 +67,7 @@ proc test_02_multiple_animated(time: float32, swapchain: var Swapchain) =
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font3,
-      "2",
+      "  2",
       color = NewVec4f(1, 1, 0, 1),
       scale = 0.001,
       position = NewVec3f(0.3, -0.5)
@@ -74,15 +75,18 @@ proc test_02_multiple_animated(time: float32, swapchain: var Swapchain) =
   ]
 
   var start = getMonoTime()
+  var p = 0
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     for i in 0 ..< labels.len:
       var c = labels[i].Color
       c[i] = progress
       labels[i].Color = c
-      labels[i].Scale = labels[i].Scale * 1.002
+      labels[i].Scale = labels[i].Scale * (1.0 + (i + 1).float * 0.001)
       labels[i].Position = labels[i].Position + NewVec3f(0.001 * (i.float - 1'f))
+      labels[i].text = $(p + i)
       labels[i].Refresh(swapchain.GetAspectRatio())
+    inc p
     WithNextFrame(swapchain, framebuffer, commandbuffer):
       WithRenderPass(swapchain.renderPass, framebuffer, commandbuffer, swapchain.width, swapchain.height, NewVec4f(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
