@@ -4,11 +4,11 @@ func pointerAddOffset[T: SomeInteger](p: pointer, offset: T): pointer =
 func usage(bType: BufferType): seq[VkBufferUsageFlagBits] =
   case bType:
     of VertexBuffer: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-    of VertexBufferMapped: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of VertexBufferMapped: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT]
     of IndexBuffer: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-    of IndexBufferMapped: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of IndexBufferMapped: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT]
     of UniformBuffer: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-    of UniformBufferMapped: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
+    of UniformBufferMapped: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT]
 
 proc GetVkFormat(grayscale: bool, usage: openArray[VkImageUsageFlagBits]): VkFormat =
   let formats = if grayscale: [VK_FORMAT_R8_SRGB, VK_FORMAT_R8_UNORM]
@@ -279,9 +279,10 @@ proc AllocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
-proc UpdateGPUBuffer*(gpuData: GPUData, flush = false) =
+proc UpdateGPUBuffer*(gpuData: GPUData, flush = false, allFrames = false) =
   if gpuData.size == 0:
     return
+
   when NeedsMapping(gpuData):
     copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
     if flush:
@@ -290,47 +291,57 @@ proc UpdateGPUBuffer*(gpuData: GPUData, flush = false) =
     WithStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
       copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
 
-proc UpdateAllGPUBuffers*[T](value: T, flush = false) =
+proc UpdateAllGPUBuffers*[T](value: T, flush = false, allFrames = false) =
   for name, fieldvalue in value.fieldPairs():
     when typeof(fieldvalue) is GPUData:
-      UpdateGPUBuffer(fieldvalue, flush = flush)
+      UpdateGPUBuffer(fieldvalue, flush = flush, allFrames = allFrames)
     when typeof(fieldvalue) is array:
       when elementType(fieldvalue) is GPUData:
         for entry in fieldvalue:
-          UpdateGPUBuffer(entry, flush = flush)
+          UpdateGPUBuffer(entry, flush = flush, allFrames = allFrames)
 
-proc AssignGPUData(renderdata: var RenderData, value: var GPUData) =
+proc AllocateGPUData(
+  renderdata: var RenderData,
+  bufferType: BufferType,
+  size: uint64,
+  needsFrameInFlight = -1
+): (Buffer, uint64) =
+
   # find buffer that has space
   var selectedBufferI = -1
 
-  for i in 0 ..< renderData.buffers[value.bufferType].len:
-    let buffer = renderData.buffers[value.bufferType][i]
-    if buffer.size - alignedTo(buffer.offsetNextFree, BUFFER_ALIGNMENT) >= value.size:
-      selectedBufferI = i
+  for i in 0 ..< renderData.buffers[bufferType].len:
+    let buffer = renderData.buffers[bufferType][i]
+    if needsFrameInFlight == -1 or buffer.useForFrameInFlight == needsFrameInFlight:
+      if buffer.size - alignedTo(buffer.offsetNextFree, BUFFER_ALIGNMENT) >= size:
+        selectedBufferI = i
 
   # otherwise create new buffer
   if selectedBufferI < 0:
-    selectedBufferI = renderdata.buffers[value.bufferType].len
-    renderdata.buffers[value.bufferType].add renderdata.AllocateNewBuffer(
-      size = max(value.size, BUFFER_ALLOCATION_SIZE),
-      bufferType = value.bufferType,
+    selectedBufferI = renderdata.buffers[bufferType].len
+    renderdata.buffers[bufferType].add renderdata.AllocateNewBuffer(
+      size = max(size, BUFFER_ALLOCATION_SIZE),
+      bufferType = bufferType,
     )
+    if needsFrameInFlight >= 0:
+      renderdata.buffers[bufferType][selectedBufferI].useForFrameInFlight = needsFrameInFlight
 
   # assigne value
-  let selectedBuffer = renderdata.buffers[value.bufferType][selectedBufferI]
-  renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree = alignedTo(
+  let selectedBuffer = renderdata.buffers[bufferType][selectedBufferI]
+  renderdata.buffers[bufferType][selectedBufferI].offsetNextFree = alignedTo(
     selectedBuffer.offsetNextFree,
     BUFFER_ALIGNMENT
   )
-  value.buffer = selectedBuffer
-  value.offset = renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree
-  renderdata.buffers[value.bufferType][selectedBufferI].offsetNextFree += value.size
+
+  result[0] = selectedBuffer
+  result[1] = renderdata.buffers[bufferType][selectedBufferI].offsetNextFree
+  renderdata.buffers[bufferType][selectedBufferI].offsetNextFree += size
 
 proc AssignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = true) =
   for name, value in fieldPairs(data):
 
     when typeof(value) is GPUData:
-      AssignGPUData(renderdata, value)
+      (value.buffer, value.offset) = AllocateGPUData(renderdata, value.bufferType, value.size)
 
     elif typeof(value) is DescriptorSet:
       AssignBuffers(renderdata, value.data, uploadData = uploadData)
@@ -338,10 +349,10 @@ proc AssignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = tru
     elif typeof(value) is array:
       when elementType(value) is GPUValue:
         for v in value.mitems:
-          AssignGPUData(renderdata, v)
+          (v.buffer, v.offset) = AllocateGPUData(renderdata, v.bufferType, v.size)
 
   if uploadData:
-    UpdateAllGPUBuffers(data)
+    UpdateAllGPUBuffers(data, flush = true, allFrames = true)
 
 proc AssignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSet, uploadData = true) =
   AssignBuffers(renderdata, descriptorSet.data, uploadData = uploadData)
@@ -534,36 +545,36 @@ template WithGPUValueField(obj: object, name: static string, fieldvalue, body: u
         let `fieldvalue` {.inject.} = value
         body
 
-template WithBind*[A, B, C, D](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C], DescriptorSet[D]), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+template WithBind*[A, B, C, D](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C], DescriptorSet[D]), pipeline: Pipeline, body: untyped): untyped =
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
-      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF]
+      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
     body
-template WithBind*[A, B, C](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C]), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+template WithBind*[A, B, C](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C]), pipeline: Pipeline, body: untyped): untyped =
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
-      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF]
+      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
     body
-template WithBind*[A, B](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B]), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+template WithBind*[A, B](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B]), pipeline: Pipeline, body: untyped): untyped =
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
-      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF]
+      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
     body
-template WithBind*[A](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], ), pipeline: Pipeline, currentFiF: int, body: untyped): untyped =
+template WithBind*[A](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], ), pipeline: Pipeline, body: untyped): untyped =
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
-      assert dSet.vk[currentFiF].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF]
+      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
+      descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
     body
 

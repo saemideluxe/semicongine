@@ -23,7 +23,7 @@ func `$`*(textbox: Textbox): string =
   "\"" & $textbox.text[0 ..< min(textbox.text.len, 16)] & "\""
 
 proc RefreshShaderdata(textbox: Textbox) =
-  textbox.shaderdata.data.textbox.UpdateGPUBuffer()
+  textbox.shaderdata.data.textbox.UpdateGPUBuffer(flush = true)
 
 proc RefreshGeometry(textbox: var Textbox) =
   # pre-calculate text-width
@@ -45,8 +45,9 @@ proc RefreshGeometry(textbox: var Textbox) =
 
   let anchorY = (case textbox.verticalAlignment
     of Top: 0'f32
-    of Center: height / 2
-    of Bottom: height) - textbox.font.capHeight
+    of Center: -height / 2
+    of Bottom: -height
+  ) - textbox.font.capHeight
 
   var
     offsetX = 0'f32
@@ -61,7 +62,7 @@ proc RefreshGeometry(textbox: var Textbox) =
     if i < textbox.processedText.len:
       if textbox.processedText[i] == Rune('\n'):
         offsetX = 0
-        offsetY += textbox.font.lineAdvance
+        offsetY -= textbox.font.lineAdvance
         textbox.position.data[vertexOffset + 0] = NewVec3f()
         textbox.position.data[vertexOffset + 1] = NewVec3f()
         textbox.position.data[vertexOffset + 2] = NewVec3f()
@@ -76,13 +77,13 @@ proc RefreshGeometry(textbox: var Textbox) =
           glyph = textbox.font.glyphs[textbox.processedText[i]]
           left = offsetX + glyph.leftOffset
           right = offsetX + glyph.leftOffset + glyph.dimension.x
-          top = offsetY + glyph.topOffset
-          bottom = offsetY + glyph.topOffset + glyph.dimension.y
+          top = offsetY - glyph.topOffset
+          bottom = offsetY - glyph.topOffset - glyph.dimension.y
 
-        textbox.position.data[vertexOffset + 1] = NewVec3f(left - anchorX, bottom - anchorY)
-        textbox.position.data[vertexOffset + 0] = NewVec3f(left - anchorX, top - anchorY)
-        textbox.position.data[vertexOffset + 3] = NewVec3f(right - anchorX, top - anchorY)
-        textbox.position.data[vertexOffset + 2] = NewVec3f(right - anchorX, bottom - anchorY)
+        textbox.position.data[vertexOffset + 0] = NewVec3f(left - anchorX, bottom - anchorY)
+        textbox.position.data[vertexOffset + 1] = NewVec3f(left - anchorX, top - anchorY)
+        textbox.position.data[vertexOffset + 2] = NewVec3f(right - anchorX, top - anchorY)
+        textbox.position.data[vertexOffset + 3] = NewVec3f(right - anchorX, bottom - anchorY)
 
         textbox.uv.data[vertexOffset + 0] = glyph.uvs[0]
         textbox.uv.data[vertexOffset + 1] = glyph.uvs[1]
@@ -97,8 +98,8 @@ proc RefreshGeometry(textbox: var Textbox) =
       textbox.position.data[vertexOffset + 1] = NewVec3f()
       textbox.position.data[vertexOffset + 2] = NewVec3f()
       textbox.position.data[vertexOffset + 3] = NewVec3f()
-  UpdateGPUBuffer(textbox.position, flush = true)
-  UpdateGPUBuffer(textbox.uv, flush = true)
+  UpdateGPUBuffer(textbox.position)
+  UpdateGPUBuffer(textbox.uv)
   textbox.lastRenderedText = textbox.processedText
 
 func text*(textbox: Textbox): seq[Rune] =
@@ -137,14 +138,6 @@ proc `Scale=`*(textbox: var Textbox, value: float32) =
     textbox.dirtyShaderdata = true
     textbox.shaderdata.data.textbox.data.scale = value
 
-proc AspectRatio*(textbox: Textbox): float32 =
-  textbox.shaderdata.data.textbox.data.aspectratio
-
-proc `AspectRatio=`*(textbox: var Textbox, value: float32) =
-  if textbox.shaderdata.data.textbox.data.aspectratio != value:
-    textbox.dirtyShaderdata = true
-    textbox.shaderdata.data.textbox.data.aspectratio = value
-
 proc Position*(textbox: Textbox): Vec3f =
   textbox.shaderdata.data.textbox.data.position
 
@@ -167,8 +160,10 @@ proc `verticalAlignment=`*(textbox: var Textbox, value: VerticalAlignment) =
     textbox.verticalAlignment = value
     textbox.dirtyGeometry = true
 
-proc Refresh*(textbox: var Textbox, aspectratio: float32) =
-  `AspectRatio=`(textbox, aspectratio)
+proc Refresh*(textbox: var Textbox) =
+  if textbox.shaderdata.data.textbox.data.aspectratio != GetAspectRatio():
+    textbox.dirtyShaderdata = true
+    textbox.shaderdata.data.textbox.data.aspectratio = GetAspectRatio()
 
   if textbox.dirtyShaderdata:
     textbox.RefreshShaderdata()
@@ -178,8 +173,8 @@ proc Refresh*(textbox: var Textbox, aspectratio: float32) =
     textbox.RefreshGeometry()
     textbox.dirtyGeometry = false
 
-proc Render*(textbox: Textbox, commandbuffer: VkCommandBuffer, pipeline: Pipeline, currentFiF: int) =
-  WithBind(commandbuffer, (textbox.shaderdata, ), pipeline, currentFiF):
+proc Render*(textbox: Textbox, commandbuffer: VkCommandBuffer, pipeline: Pipeline) =
+  WithBind(commandbuffer, (textbox.shaderdata, ), pipeline):
     Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = textbox)
 
 proc InitTextbox*[T: string | seq[Rune]](
@@ -238,6 +233,6 @@ proc InitTextbox*[T: string | seq[Rune]](
   UploadImages(renderdata, result.shaderdata)
   InitDescriptorSet(renderdata, descriptorSetLayout, result.shaderdata)
 
-  result.Refresh(1)
-  UpdateAllGPUBuffers(result, flush = true)
+  result.Refresh()
+  UpdateAllGPUBuffers(result, flush = true, allFrames = true)
   UpdateAllGPUBuffers(result.shaderdata.data, flush = true)

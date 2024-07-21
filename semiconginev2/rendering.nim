@@ -42,6 +42,8 @@ type
     graphicsQueueFamily*: uint32
     graphicsQueue*: VkQueue
     debugMessenger: VkDebugUtilsMessengerEXT
+    # populated through the InitSwapchain proc
+    swapchain*: Swapchain
     # unclear as of yet
     anisotropy*: float32 = 0 # needs to be enable during device creation
   Renderpass* = ref object
@@ -79,8 +81,6 @@ type
 
 var vulkan*: VulkanGlobals
 var fullscreen: bool
-
-func currentFiF*(swapchain: Swapchain): int = swapchain.currentFiF
 
 type
   # type aliases
@@ -320,7 +320,18 @@ proc InitVulkan*(appName: string = "semicongine app") =
   )
   vulkan.graphicsQueue = svkGetDeviceQueue(vulkan.device, vulkan.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
 
+proc ClearSwapchain*() =
+  assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  DestroySwapchain(vulkan.swapchain)
+  vulkan.swapchain = nil
+
+proc SetupSwapchain*(renderPass: RenderPass, vSync: bool = false) =
+  assert vulkan.swapchain == nil, "Swapchain has already been initialized yet"
+  vulkan.swapchain = InitSwapchain(renderPass, vSync = vSync)
+
 proc DestroyVulkan*() =
+  if vulkan.swapchain != nil:
+    DestroySwapchain(vulkan.swapchain)
   vkDestroyDevice(vulkan.device, nil)
   vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
   vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
@@ -334,7 +345,13 @@ proc `Fullscreen=`*(enable: bool) =
     fullscreen = enable
     vulkan.window.Fullscreen(fullscreen)
 
-func GetAspectRatio*(swapchain: Swapchain): float32 = swapchain.width.float32 / swapchain.height.float32
+proc GetAspectRatio*(): float32 =
+  assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  vulkan.swapchain.width.float32 / vulkan.swapchain.height.float32
+
+proc currentFiF*(): int =
+  assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  vulkan.swapchain.currentFiF
 
 proc MaxFramebufferSampleCount*(maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCountFlagBits =
   let limits = svkGetPhysicalDeviceProperties().limits

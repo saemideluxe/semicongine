@@ -1,10 +1,10 @@
 const N_FRAMEBUFFERS = 3'u32
 
-proc InitSwapchain*(
+proc InitSwapchain(
   renderPass: RenderPass,
   vSync: bool = false,
   oldSwapchain: Swapchain = nil,
-): Option[Swapchain] =
+): Swapchain =
   assert vulkan.instance.Valid, "Vulkan not initialized"
 
   var capabilities: VkSurfaceCapabilitiesKHR
@@ -14,7 +14,7 @@ proc InitSwapchain*(
     height = capabilities.currentExtent.height
 
   if width == 0 or height == 0:
-    return none(Swapchain)
+    return nil
 
   # following "count" is established according to vulkan specs
   var minFramebufferCount = N_FRAMEBUFFERS
@@ -49,7 +49,7 @@ proc InitSwapchain*(
   )
 
   if vkCreateSwapchainKHR(vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)) != VK_SUCCESS:
-    return none(Swapchain)
+    return nil
 
   if swapchain.oldSwapchain != nil:
     swapchain.oldSwapchainCounter = INFLIGHTFRAMES.int * 2
@@ -150,9 +150,11 @@ proc InitSwapchain*(
   )
   checkVkResult vkAllocateCommandBuffers(vulkan.device, addr(allocInfo), swapchain.commandBuffers.ToCPointer)
 
-  return some(swapchain)
+  return swapchain
 
 proc DestroySwapchain*(swapchain: Swapchain) =
+  if swapchain.oldSwapchain != nil:
+    DestroySwapchain(swapchain.oldSwapchain)
 
   if swapchain.msaaImage.Valid:
     vkDestroyImageView(vulkan.device, swapchain.msaaImageView, nil)
@@ -245,19 +247,20 @@ proc Swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
   swapchain.currentFiF = (uint32(swapchain.currentFiF) + 1) mod INFLIGHTFRAMES
   return true
 
-proc Recreate(swapchain: Swapchain): Option[Swapchain] =
+proc Recreate(swapchain: Swapchain): Swapchain =
   InitSwapchain(
     renderPass = swapchain.renderPass,
     vSync = swapchain.vSync,
     oldSwapchain = swapchain,
   )
 
-template WithNextFrame*(theSwapchain: var Swapchain, framebufferName, commandBufferName, body: untyped): untyped =
-  var maybeFramebuffer = TryAcquireNextImage(theSwapchain)
+template WithNextFrame*(framebufferName, commandBufferName, body: untyped): untyped =
+  assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  var maybeFramebuffer = TryAcquireNextImage(vulkan.swapchain)
   if maybeFramebuffer.isSome:
     block:
       let `framebufferName` {.inject.} = maybeFramebuffer.get
-      let `commandBufferName` {.inject.} = theSwapchain.commandBuffers[theSwapchain.currentFiF]
+      let `commandBufferName` {.inject.} = vulkan.swapchain.commandBuffers[vulkan.swapchain.currentFiF]
       let beginInfo = VkCommandBufferBeginInfo(
         sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
@@ -268,9 +271,8 @@ template WithNextFrame*(theSwapchain: var Swapchain, framebufferName, commandBuf
       body
 
       checkVkResult vkEndCommandBuffer(`commandBufferName`)
-      discard Swap(swapchain = theSwapchain, commandBuffer = `commandBufferName`)
+      discard Swap(swapchain = vulkan.swapchain, commandBuffer = `commandBufferName`)
   else:
-    let maybeNewSwapchain = Recreate(theSwapchain)
-    if maybeNewSwapchain.isSome:
-      theSwapchain = maybeNewSwapchain.get
-
+    let newSwapchain = Recreate(vulkan.swapchain)
+    if newSwapchain != nil:
+      vulkan.swapchain = newSwapchain

@@ -347,6 +347,22 @@ template WithStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
 
   WithSingleUseCommandBuffer(commandBuffer):
     when T is (VkBuffer, uint64):
+      # first make sure memory has been made available with a memory barrier
+      # we are just waiting for the vertex input stage, but I think that is fine for most buffer copies (for now at least)
+      let memoryBarrier = VkMemoryBarrier(sType: VK_STRUCTURE_TYPE_MEMORY_BARRIER)
+      vkCmdPipelineBarrier(
+        commandBuffer = commandBuffer,
+        srcStageMask = toBits [VK_PIPELINE_STAGE_VERTEX_INPUT_BIT],
+        dstStageMask = toBits [VK_PIPELINE_STAGE_TRANSFER_BIT],
+        dependencyFlags = VkDependencyFlags(0),
+        memoryBarrierCount = 1,
+        pMemoryBarriers = addr(memoryBarrier),
+        bufferMemoryBarrierCount = 0,
+        pBufferMemoryBarriers = nil,
+        imageMemoryBarrierCount = 0,
+        pImageMemoryBarriers = nil,
+      )
+      # now copy stuff
       let copyRegion = VkBufferCopy(
         size: bufferSize,
         dstOffset: target[1],
