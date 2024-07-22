@@ -85,9 +85,6 @@ var fullscreen: bool
 type
   # type aliases
   SupportedGPUType = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
-  Gray = TVec1[uint8]
-  RGBA = TVec4[uint8]
-  PixelType = Gray | RGBA
 
   # shader related types
   DescriptorSet*[T: object] = object
@@ -120,16 +117,6 @@ type
     offsetNextFree: uint64
     memoryOffset: uint64
     memory: VkDeviceMemory
-  Image*[T: PixelType] = object
-    width*: uint32
-    height*: uint32
-    interpolation*: VkFilter = VK_FILTER_LINEAR
-    data*: seq[T]
-    vk*: VkImage
-    imageview*: VkImageView
-    sampler*: VkSampler
-    isRenderTarget*: bool = false
-    samples*: VkSampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT
   GPUArray*[T: SupportedGPUType, TBuffer: static BufferType] = object
     data*: seq[T]
     buffer*: Buffer

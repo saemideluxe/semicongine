@@ -34,6 +34,8 @@ setLogFilter(ENGINE_LOGLEVEL)
 
 include ./semiconginev2/resources
 
+include ./semiconginev2/image
+
 include ./semiconginev2/events
 include ./semiconginev2/rendering
 

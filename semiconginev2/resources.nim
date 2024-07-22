@@ -141,27 +141,25 @@ elif thebundletype == Exe:
 proc LoadResource*(path: string, package = DEFAULT_PACKAGE): Stream =
   loadResource_intern(path, package = package)
 
-#[
-proc LoadImage*[T](path: string, package = DEFAULT_PACKAGE): Image[RGBAPixel] =
-  if path.splitFile().ext.toLowerAscii == ".bmp":
-    loadResource_intern(path, package = package).ReadBMP()
-  elif path.splitFile().ext.toLowerAscii == ".png":
-    loadResource_intern(path, package = package).ReadPNG()
-  else:
-    raise newException(Exception, "Unsupported image file type: " & path)
-
 proc LoadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
   path.loadResource_intern(package = package).readAll().parseJson()
 
 proc LoadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
   path.loadResource_intern(package = package).loadConfig(filename = path)
 
+# PNG-images
+
+{.compile: currentSourcePath.parentDir() & "/contrib/lodepng.c".}
+proc lodepng_decode_memory(out_data: ptr cstring, w: ptr cuint, h: ptr cuint, in_data: cstring, insize: csize_t, colorType: cint, bitdepth: cuint): cuint {.importc.}
+
+proc lodepng_encode_memory(out_data: ptr cstring, outsize: ptr csize_t, image: cstring, w: cuint, h: cuint, colorType: cint, bitdepth: cuint): cuint {.importc.}
+
+#[
 proc LoadMeshes*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): seq[MeshTree] =
   loadResource_intern(path, package = package).ReadglTF(defaultMaterial)
 
 proc LoadFirstMesh*(path: string, defaultMaterial: MaterialType, package = DEFAULT_PACKAGE): Mesh =
   loadResource_intern(path, package = package).ReadglTF(defaultMaterial)[0].toSeq[0]
-
 ]#
 
 proc Packages*(): seq[string] =
