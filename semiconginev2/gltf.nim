@@ -1,16 +1,3 @@
-import std/strutils
-import std/json
-import std/logging
-import std/tables
-import std/strformat
-import std/streams
-
-import ../mesh
-import ../material
-import ../core
-
-import ./image
-
 type
   glTFHeader = object
     magic: uint32
