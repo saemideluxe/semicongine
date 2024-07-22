@@ -42,7 +42,11 @@ type
   fragmentUv = uv;
 }  """
     fragmentCode = """void main() {
-    color = vec4(textbox.color.rgb, textbox.color.a * texture(fontAtlas, fragmentUv).r);
+    float v = texture(fontAtlas, fragmentUv).r;
+    if(v == 0) {
+      discard;
+    }
+    color = vec4(textbox.color.rgb, textbox.color.a * v);
 }"""
 
 

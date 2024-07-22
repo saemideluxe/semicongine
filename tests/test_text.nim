@@ -195,20 +195,21 @@ proc test_04_lots_of_texts(time: float32) =
   DestroyRenderData(renderdata)
 
 when isMainModule:
-  var time = 1000'f32
+  var time = 1'f32
   InitVulkan()
 
-  var renderpass = CreateDirectPresentationRenderPass(depthBuffer = true)
-  SetupSwapchain(renderpass = renderpass)
+  for depthBuffer in [true, false]:
+    var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer)
+    SetupSwapchain(renderpass = renderpass)
 
-  # tests a simple triangle with minimalistic shader and vertex format
-  # test_01_static_label(time, swapchain)
-  # test_02_multiple_animated(time)
-  # test_03_layouting(time)
-  test_04_lots_of_texts(time)
+    # tests a simple triangle with minimalistic shader and vertex format
+    test_01_static_label(time)
+    test_02_multiple_animated(time)
+    test_03_layouting(time)
+    test_04_lots_of_texts(time)
 
-
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
-  vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+    checkVkResult vkDeviceWaitIdle(vulkan.device)
+    vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+    ClearSwapchain()
 
   DestroyVulkan()
