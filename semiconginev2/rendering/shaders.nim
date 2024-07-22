@@ -349,7 +349,7 @@ proc CreatePipeline*[TShader](
   polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
   cullMode: openArray[VkCullModeFlagBits] = [VK_CULL_MODE_BACK_BIT],
   frontFace: VkFrontFace = VK_FRONT_FACE_CLOCKWISE,
-  descriptorPoolLimit = 1024,
+  lineWidth = 1'f32,
 ): Pipeline[TShader] =
   # create pipeline
 
@@ -427,7 +427,7 @@ proc CreatePipeline*[TShader](
       depthClampEnable: VK_FALSE,
       rasterizerDiscardEnable: VK_FALSE,
       polygonMode: polygonMode,
-      lineWidth: 1.0,
+      lineWidth: lineWidth,
       cullMode: toBits cullMode,
       frontFace: frontFace,
       depthBiasEnable: VK_FALSE,
@@ -457,7 +457,7 @@ proc CreatePipeline*[TShader](
     )
     colorBlendAttachment = VkPipelineColorBlendAttachmentState(
       colorWriteMask: toBits [VK_COLOR_COMPONENT_R_BIT, VK_COLOR_COMPONENT_G_BIT, VK_COLOR_COMPONENT_B_BIT, VK_COLOR_COMPONENT_A_BIT],
-      blendEnable: VK_TRUE,
+      blendEnable: true,
       srcColorBlendFactor: VK_BLEND_FACTOR_SRC_ALPHA,
       dstColorBlendFactor: VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
       colorBlendOp: VK_BLEND_OP_ADD,
@@ -468,8 +468,10 @@ proc CreatePipeline*[TShader](
     colorBlending = VkPipelineColorBlendStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
       logicOpEnable: false,
+      logicOp: VK_LOGIC_OP_COPY,
       attachmentCount: 1,
       pAttachments: addr(colorBlendAttachment),
+      blendConstants: [0'f32, 0'f32, 0'f32, 0'f32]
     )
     dynamicStates = [VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR]
     dynamicState = VkPipelineDynamicStateCreateInfo(

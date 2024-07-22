@@ -302,6 +302,11 @@ proc InitVulkan*(appName: string = "semicongine app") =
     )
     deviceExtensionsC = allocCStringArray(deviceExtensions)
   defer: deallocCStringArray(deviceExtensionsC)
+  let enabledFeatures = VkPhysicalDeviceFeatures(
+   fillModeNonSolid: true,
+   wideLines: true,
+   largePoints: true,
+  )
   var createDeviceInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     queueCreateInfoCount: 1,
@@ -310,7 +315,7 @@ proc InitVulkan*(appName: string = "semicongine app") =
     ppEnabledLayerNames: nil,
     enabledExtensionCount: uint32(deviceExtensions.len),
     ppEnabledExtensionNames: deviceExtensionsC,
-    pEnabledFeatures: nil,
+    pEnabledFeatures: addr(enabledFeatures),
   )
   checkVkResult vkCreateDevice(
     physicalDevice = vulkan.physicalDevice,

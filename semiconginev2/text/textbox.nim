@@ -47,7 +47,7 @@ proc RefreshGeometry(textbox: var Textbox) =
     of Top: 0'f32
     of Center: -height / 2
     of Bottom: -height
-  ) - textbox.font.capHeight
+  ) + textbox.font.capHeight
 
   var
     offsetX = 0'f32

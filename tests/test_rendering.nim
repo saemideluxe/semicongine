@@ -433,7 +433,6 @@ proc test_05_cube(time: float32) =
     let looptime = tEndLoop - tStartLoop
     let waitTime = 16_666 - looptime.inMicroseconds
     if waitTime > 0:
-      echo "sleep ", waitTime / 1000
       sleep((waitTime / 1000).int)
 
   # cleanup
@@ -441,7 +440,64 @@ proc test_05_cube(time: float32) =
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 
-proc test_06_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleCountFlagBits) =
+proc test_06_different_draw_modes(time: float32) =
+  var renderdata = InitRenderData()
+
+  type
+    Shader = object
+      position {.VertexAttribute.}: Vec3f
+      color {.VertexAttribute.}: Vec3f
+      fragmentColor {.Pass.}: Vec3f
+      outColor {.ShaderOutput.}: Vec4f
+      # code
+      vertexCode: string = """void main() {
+      gl_PointSize = 100;
+      fragmentColor = color;
+      gl_Position = vec4(position, 1);}"""
+      fragmentCode: string = """void main() {
+      outColor = vec4(fragmentColor, 1);}"""
+    TriangleMesh = object
+      position: GPUArray[Vec3f, VertexBuffer]
+      color: GPUArray[Vec3f, VertexBuffer]
+  var triangle = TriangleMesh(
+    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
+    color: asGPUArray([NewVec3f(0, 0, 1), NewVec3f(0, 1, 0), NewVec3f(1, 0, 0)], VertexBuffer),
+  )
+  var lines = TriangleMesh(
+    position: asGPUArray([NewVec3f(-0.9, 0), NewVec3f(-0.05, -0.9), NewVec3f(0.05, -0.9), NewVec3f(0.9, 0)], VertexBuffer),
+    color: asGPUArray([NewVec3f(1, 1, 0), NewVec3f(1, 1, 0), NewVec3f(0, 1, 0), NewVec3f(0, 1, 0)], VertexBuffer),
+  )
+  AssignBuffers(renderdata, triangle)
+  AssignBuffers(renderdata, lines)
+  renderdata.FlushAllMemory()
+
+  var pipeline1 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_LINE, lineWidth = 20'f32)
+  var pipeline2 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_POINT)
+  var pipeline3 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, lineWidth = 5)
+  var pipeline4 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
+
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
+    WithNextFrame(framebuffer, commandbuffer):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+        WithPipeline(commandbuffer, pipeline1):
+          Render(commandbuffer = commandbuffer, pipeline = pipeline1, mesh = triangle)
+        WithPipeline(commandbuffer, pipeline2):
+          Render(commandbuffer = commandbuffer, pipeline = pipeline2, mesh = triangle)
+        WithPipeline(commandbuffer, pipeline3):
+          Render(commandbuffer = commandbuffer, pipeline = pipeline3, mesh = lines)
+        WithPipeline(commandbuffer, pipeline4):
+          Render(commandbuffer = commandbuffer, pipeline = pipeline4, mesh = lines)
+
+  # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  DestroyPipeline(pipeline1)
+  DestroyPipeline(pipeline2)
+  DestroyPipeline(pipeline3)
+  DestroyPipeline(pipeline4)
+  DestroyRenderData(renderdata)
+
+proc test_07_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleCountFlagBits) =
   var (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
 
   SetupSwapchain(renderpass = presentRP)
@@ -580,7 +636,6 @@ proc test_06_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
       attachments = @[msaaImageView, depthImageView, uniforms1.data.frameTexture.imageview]
     else:
       attachments = @[msaaImageView, uniforms1.data.frameTexture.imageview]
-  echo attachments
   var offscreenFB = svkCreateFramebuffer(
     offscreenRP.vk,
     vulkan.swapchain.width,
@@ -633,6 +688,7 @@ when isMainModule:
      (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
   ]
 
+
   # test normal
   for i, (depthBuffer, samples) in renderPasses:
     var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
@@ -653,12 +709,15 @@ when isMainModule:
     # rotating cube
     test_05_cube(time)
 
+    # different draw modes (lines, points, and topologies)
+    test_06_different_draw_modes(time)
+
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
     ClearSwapchain()
 
   # test multiple render passes
   for i, (depthBuffer, samples) in renderPasses:
-    test_06_triangle_2pass(time, depthBuffer, samples)
+    test_07_triangle_2pass(time, depthBuffer, samples)
 
   DestroyVulkan()

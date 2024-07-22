@@ -1,4 +1,5 @@
 import std/os
+import std/algorithm
 import std/strutils
 import std/sequtils
 import std/monotimes
@@ -160,10 +161,41 @@ It should display with some space above and have a pleasing appearance overall! 
   DestroyRenderData(renderdata)
 
 proc test_04_lots_of_texts(time: float32) =
-  discard # TODO
+  var renderdata = InitRenderData()
+
+  var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
+
+  var font = LoadFont("DejaVuSans.ttf", lineHeightPixels = 160)
+  var labels: seq[Textbox]
+  for i in 0 ..< 100:
+    labels.add InitTextbox(
+      renderdata,
+      pipeline.descriptorSetLayouts[0],
+      font,
+      $i,
+      color = NewVec4f(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0)),
+      scale = rand(0.0002 .. 0.002),
+      position = NewVec3f(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
+    )
+  labels = labels.sortedByIt(-it.Position.z)
+
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
+    for l in labels.mitems:
+      l.Refresh()
+    WithNextFrame(framebuffer, commandbuffer):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+        WithPipeline(commandbuffer, pipeline):
+          for l in labels:
+            Render(l, commandbuffer, pipeline)
+
+        # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  DestroyPipeline(pipeline)
+  DestroyRenderData(renderdata)
 
 when isMainModule:
-  var time = 10'f32
+  var time = 1000'f32
   InitVulkan()
 
   var renderpass = CreateDirectPresentationRenderPass(depthBuffer = true)
@@ -172,7 +204,8 @@ when isMainModule:
   # tests a simple triangle with minimalistic shader and vertex format
   # test_01_static_label(time, swapchain)
   # test_02_multiple_animated(time)
-  test_03_layouting(time)
+  # test_03_layouting(time)
+  test_04_lots_of_texts(time)
 
 
   checkVkResult vkDeviceWaitIdle(vulkan.device)

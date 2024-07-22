@@ -304,7 +304,6 @@ proc AllocateGPUData(
   renderdata: var RenderData,
   bufferType: BufferType,
   size: uint64,
-  needsFrameInFlight = -1
 ): (Buffer, uint64) =
 
   # find buffer that has space
@@ -312,9 +311,8 @@ proc AllocateGPUData(
 
   for i in 0 ..< renderData.buffers[bufferType].len:
     let buffer = renderData.buffers[bufferType][i]
-    if needsFrameInFlight == -1 or buffer.useForFrameInFlight == needsFrameInFlight:
-      if buffer.size - alignedTo(buffer.offsetNextFree, BUFFER_ALIGNMENT) >= size:
-        selectedBufferI = i
+    if buffer.size - alignedTo(buffer.offsetNextFree, BUFFER_ALIGNMENT) >= size:
+      selectedBufferI = i
 
   # otherwise create new buffer
   if selectedBufferI < 0:
@@ -323,8 +321,6 @@ proc AllocateGPUData(
       size = max(size, BUFFER_ALLOCATION_SIZE),
       bufferType = bufferType,
     )
-    if needsFrameInFlight >= 0:
-      renderdata.buffers[bufferType][selectedBufferI].useForFrameInFlight = needsFrameInFlight
 
   # assigne value
   let selectedBuffer = renderdata.buffers[bufferType][selectedBufferI]
