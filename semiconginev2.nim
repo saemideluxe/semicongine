@@ -48,7 +48,7 @@ include ./semiconginev2/audio
 include ./semiconginev2/contrib/algorithms/texture_packing
 include ./semiconginev2/text
 
-when not defined(NO_CONTRIB):
+when not defined(WITHOUT_CONTRIB):
   include ./semiconginev2/contrib/steam
   include ./semiconginev2/contrib/settings
   include ./semiconginev2/contrib/algorithms/collision
