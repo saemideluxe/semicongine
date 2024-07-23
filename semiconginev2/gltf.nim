@@ -1,4 +1,9 @@
 type
+  GLTFMesh[TMesh, TMaterial] = object
+    scenes: seq[int]
+    nodes: seq[int]
+    meshes: seq[TMesh]
+    materials: seq[TMaterial]
   glTFHeader = object
     magic: uint32
     version: uint32
@@ -7,7 +12,19 @@ type
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
 
+  MaterialAttributeNames = object
+    baseColorFactor: string
+    emissiveFactor: string
+    metallicFactor: string
+    roughnessFactor: string
+    baseColorTexture: string
+    metallicRoughnessTexture: string
+    normalTexture: string
+    occlusionTexture: string
+    emissiveTexture: string
+
 const
+  HEADER_MAGIC = 0x46546C67
   JSON_CHUNK = 0x4E4F534A
   BINARY_CHUNK = 0x004E4942
   ACCESSOR_TYPE_MAP = {
@@ -150,9 +167,20 @@ proc loadTexture(root: JsonNode, textureIndex: int, mainBuffer: seq[uint8]): Tex
       result.sampler.wrapModeT = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
 
 
-proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: MaterialType, mainBuffer: seq[uint8]): MaterialData =
+proc loadMaterial[TMaterial](
+  root: JsonNode,
+  materialNode: JsonNode,
+  mainBuffer: seq[uint8],
+  mapping: MaterialAttributeNames
+): TMaterial =
   let pbr = materialNode["pbrMetallicRoughness"]
-  var attributes: Table[string, DataList]
+  for glName, glValue in fieldPairs(mapping):
+    if glValue != "":
+      for name, value in fieldPairs(result):
+        when name == glName:
+          value = 
+
+  #[
 
   # color
   if defaultMaterial.attributes.contains("color"):
@@ -207,8 +235,8 @@ proc loadMaterial(root: JsonNode, materialNode: JsonNode, defaultMaterial: Mater
       )]
     else:
       attributes["emissiveColor"] = @[NewVec3f(1'f32, 1'f32, 1'f32)]
+  ]#
 
-  result = InitMaterialData(theType = defaultMaterial, name = materialNode["name"].getStr(), attributes = attributes)
 
 proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, materials: seq[MaterialData], mainBuffer: seq[uint8]): Mesh =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
@@ -313,7 +341,7 @@ proc loadNode(root: JsonNode, node: JsonNode, materials: seq[MaterialData], main
     for childNode in node["children"]:
       result.children.add loadNode(root, root["nodes"][childNode.getInt()], materials, mainBuffer)
 
-proc loadMeshTree(root: JsonNode, scenenode: JsonNode, materials: seq[MaterialData], mainBuffer: var seq[uint8]): MeshTree =
+proc loadScene(root: JsonNode, scenenode: JsonNode, materials: seq[MaterialData], mainBuffer: var seq[uint8]): MeshTree =
   result = MeshTree()
   for nodeId in scenenode["nodes"]:
     result.children.add loadNode(root, root["nodes"][nodeId.getInt()], materials, mainBuffer)
@@ -322,7 +350,30 @@ proc loadMeshTree(root: JsonNode, scenenode: JsonNode, materials: seq[MaterialDa
   result.updateTransforms()
 
 
-proc ReadglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
+proc ReadglTF*[TMaterial, TMesh](
+  stream: Stream,
+  attributeNames: MaterialAttributeNames,
+  baseColorFactor = "",
+  emissiveFactor = "",
+  metallicFactor = "",
+  roughnessFactor = "",
+  baseColorTexture = "",
+  metallicRoughnessTexture = "",
+  normalTexture = "",
+  occlusionTexture = "",
+  emissiveTexture = "",
+): GLTFMesh[TMesh, TMaterial] =
+  let mapping = MaterialAttributeNames(
+    baseColorFactor: baseColorFactor
+    emissiveFactor: emissiveFactor
+    metallicFactor: metallicFactor
+    roughnessFactor: roughnessFactor
+    baseColorTexture: baseColorTexture
+    metallicRoughnessTexture: metallicRoughnessTexture
+    normalTexture: normalTexture
+    occlusionTexture: occlusionTexture
+    emissiveTexture: emissiveTexture
+  )
   var
     header: glTFHeader
     data: glTFData
@@ -330,7 +381,7 @@ proc ReadglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
   for name, value in fieldPairs(header):
     stream.read(value)
 
-  assert header.magic == 0x46546C67
+  assert header.magic == HEADER_MAGIC
   assert header.version == 2
 
   var chunkLength = stream.readUint32()
@@ -353,7 +404,7 @@ proc ReadglTF*(stream: Stream, defaultMaterial: MaterialType): seq[MeshTree] =
 
   var materials: seq[MaterialData]
   for materialnode in data.structuredContent["materials"]:
-    materials.add data.structuredContent.loadMaterial(materialnode, defaultMaterial, data.binaryBufferData)
+    result.materials.add loadMaterial[TMaterial](data.structuredContent, materialnode, data.binaryBufferData, mapping)
 
   for scenedata in data.structuredContent["scenes"]:
-    result.add data.structuredContent.loadMeshTree(scenedata, materials, data.binaryBufferData)
+    result.add data.structuredContent.loadScene(scenedata, materials, data.binaryBufferData)

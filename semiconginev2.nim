@@ -48,6 +48,8 @@ include ./semiconginev2/audio
 include ./semiconginev2/contrib/algorithms/texture_packing
 include ./semiconginev2/text
 
+include ./semiconginev2/gltf
+
 when not defined(WITHOUT_CONTRIB):
   include ./semiconginev2/contrib/steam
   include ./semiconginev2/contrib/settings
