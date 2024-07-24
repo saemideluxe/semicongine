@@ -36,7 +36,9 @@ func GlslType[T: SupportedGPUType|Image](value: T): string =
   elif T is TMat4[float32]: "mat4"
   elif T is TMat4[float64]: "dmat4"
   elif T is Image: "sampler2D"
-  else: {.error: "Unsupported data type on GPU".}
+  else:
+    const n = typetraits.name(T)
+    {.error: "Unsupported data type on GPU: " & n.}
 
 func VkType[T: SupportedGPUType](value: T): VkFormat =
   when T is float32: VK_FORMAT_R32_SFLOAT

@@ -74,7 +74,7 @@ proc Pack*[T: PixelType](images: seq[Image[T]]): tuple[atlas: Image[T], coords: 
       for x in 0 ..< rect.w:
         when T is Gray:
           assert result.atlas[rect.x + x, rect.y + y] == [0'u8], "Atlas texture packing encountered an overlap error"
-        elif T is RGBA:
+        elif T is BGRA:
           assert result.atlas[rect.x + x, rect.y + y] == [0'u8, 0'u8, 0'u8, 0'u8], "Atlas texture packing encountered an overlap error"
         else:
           {.error: "Unsupported type for texture packing".}

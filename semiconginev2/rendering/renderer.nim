@@ -470,7 +470,12 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
 
   image.vk = svkCreate2DImage(image.width, image.height, format, usage, image.samples)
   renderData.images.add image.vk
-  image.sampler = createSampler(magFilter = image.interpolation, minFilter = image.interpolation)
+  image.sampler = createSampler(
+    magFilter = image.magInterpolation,
+    minFilter = image.minInterpolation,
+    addressModeU = image.wrapU,
+    addressModeV = image.wrapV,
+  )
   renderData.samplers.add image.sampler
 
   let memoryRequirements = image.vk.svkGetImageMemoryRequirements()
