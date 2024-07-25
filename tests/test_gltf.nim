@@ -26,7 +26,6 @@ proc test_gltf(time: float32) =
       material: GPUValue[Material, UniformBuffer]
     Shader = object
       position {.VertexAttribute.}: Vec3f
-      color {.VertexAttribute.}: Vec4f
       uv {.VertexAttribute.}: Vec2f
       fragmentColor {.Pass.}: Vec4f
       fragmentUv {.Pass.}: Vec2f
@@ -35,23 +34,21 @@ proc test_gltf(time: float32) =
       # code
       vertexCode: string = """
 void main() {
-  fragmentColor = color;
+  fragmentColor = vec4(1, 1, 1, 1);
   fragmentUv = uv;
   gl_Position = vec4(position, 1);
 }"""
       fragmentCode: string = """void main() { outColor = fragmentColor;}"""
     Mesh = object
       position: GPUArray[Vec3f, VertexBuffer]
-      color: GPUArray[Vec4f, VertexBuffer]
       uv: GPUArray[Vec2f, VertexBuffer]
 
-  let gltfMesh = LoadMeshes[Mesh, Material](
+  var gltfMesh = LoadMeshes[Mesh, Material](
     "town.glb",
     MeshAttributeNames(
       POSITION: "position",
-      COLOR: @["color"],
-      TEXCOORD: @["uv"],
-    ),
+    TEXCOORD: @["uv"],
+  ),
     MaterialAttributeNames(
       baseColorFactor: "color",
       baseColorTexture: "colorTexture",
@@ -64,8 +61,9 @@ void main() {
       emissiveFactor: "emissive",
     )
   )
-  var mesh = gltfMesh.meshes[0][0]
-  renderdata.AssignBuffers(mesh)
+  for mesh in mitems(gltfMesh.meshes):
+    for primitive in mitems(mesh):
+      renderdata.AssignBuffers(primitive[0])
   renderdata.FlushAllMemory()
 
   var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
@@ -79,14 +77,16 @@ void main() {
 
         WithPipeline(commandbuffer, pipeline):
 
-          Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+          for mesh in gltfMesh.meshes:
+            for primitive in mesh:
+              Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = primitive[0])
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   DestroyPipeline(pipeline)
   DestroyRenderData(renderdata)
 when isMainModule:
-  var time = 1'f32
+  var time = 5'f32
   InitVulkan()
 
   var renderpass = CreateDirectPresentationRenderPass(depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT)

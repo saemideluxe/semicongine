@@ -141,7 +141,34 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
     raise newException(Exception, "Unsupported feature: byteStride in buffer view")
   copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
+proc componentTypeId(t: typedesc): int =
+  if t is int8: return 5120
+  elif t is uint8: return 5121
+  elif t is int16: return 5122
+  elif t is uint16: return 5123
+  elif t is uint32: return 5125
+  elif t is float32: return 5126
+
 proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): seq[T] =
+  let componentType = accessor["componentType"].getInt()
+  let itemType = accessor["type"].getStr()
+
+  when T is TVec or T is TMat:
+    assert componentTypeId(elementType(default(T))) == componentType, name(T) & " != " & $componentType
+  else:
+    assert componentTypeId(T) == componentType, name(T) & " != " & $componentType
+
+  when T is TVec:
+    when len(default(T)) == 2: assert itemType == "VEC2"
+    elif len(default(T)) == 3: assert itemType == "VEC3"
+    elif len(default(T)) == 4: assert itemType == "VEC4"
+  elif T is TMat:
+    when T is Mat2: assert itemType == "MAT2"
+    elif T is Mat3: assert itemType == "MAT3"
+    elif T is Mat4: assert itemType == "MAT4"
+  else:
+    assert itemType == "SCALAR"
+
   result.setLen(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
@@ -158,9 +185,9 @@ proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint
   if bufferView.hasKey("byteStride"):
     warn "Congratulations, you try to test a feature (loading buffer data with stride attributes) that we have no idea where it is used and how it can be tested (need a coresponding *.glb file)."
     # we don't support stride, have to convert stuff here... does this even work?
-    for i in 0 ..< int(result.len):
-      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], result.len * sizeof(T))
-      dstPointer = cast[typeof(dstPointer)](cast[uint](dstPointer) + (result.len * sizeof(T)).uint)
+    for i in 0 ..< result.len:
+      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], sizeof(T))
+      dstPointer = cast[typeof(dstPointer)](cast[uint](dstPointer) + sizeof(T).uint)
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
@@ -193,8 +220,8 @@ proc getVec4f(node: JsonNode): Vec4f =
 proc loadMaterial[TMaterial](
   root: JsonNode,
   materialNode: JsonNode,
+  mapping: static MaterialAttributeNames,
   mainBuffer: seq[uint8],
-  mapping: static MaterialAttributeNames
 ): TMaterial =
   result = TMaterial()
 
@@ -214,16 +241,43 @@ proc loadMaterial[TMaterial](
           else:
             {.error: "Unsupported gltf material attribute".}
 
-proc loadPrimitive[TMesh](root: JsonNode, primitive: JsonNode, mapping: static MeshAttributeNames, mainBuffer: seq[uint8]): (TMesh, VkPrimitiveTopology) =
+proc loadPrimitive[TMesh](
+  root: JsonNode,
+  primitive: JsonNode,
+  mapping: static MeshAttributeNames,
+  mainBuffer: seq[uint8]
+): (TMesh, VkPrimitiveTopology) =
   result[0] = TMesh()
   result[1] = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
   if primitive.hasKey("mode"):
     result[1] = PRIMITIVE_MODE_MAP[primitive["mode"].getInt()]
 
-  for name, value in fieldPairs(result[0]):
+  for resultFieldName, resultValue in fieldPairs(result[0]):
     for gltfAttribute, mappedName in fieldPairs(mapping):
-      when gltfAttribute != "" and name == mappedName:
-        assert value is GPUData, "Attribute " & name & " must be of type GPUData"
+      when typeof(mappedName) is string:
+        when gltfAttribute != "" and resultFieldName == mappedName:
+          assert resultValue is GPUData, "Attribute " & resultFieldName & " must be of type GPUData"
+          when gltfAttribute == "indices":
+            if primitive.hasKey(gltfAttribute):
+              let accessor = primitive[gltfAttribute].getInt()
+              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
+          elif gltfAttribute == "material":
+            if primitive.hasKey(gltfAttribute):
+              resultValue.data = typeof(resultValue.data)(primitive[gltfAttribute].getInt())
+          else:
+            if primitive["attributes"].hasKey(gltfAttribute):
+              let accessor = primitive["attributes"][gltfAttribute].getInt()
+              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
+      else:
+        var i = 0
+        for mappedIndexName in mappedName:
+          if gltfAttribute != "" and resultFieldName == mappedIndexName:
+            assert resultValue is GPUData, "Attribute " & resultFieldName & " must be of type GPUData"
+            let gltfAttributeIndexed = gltfAttribute & "_" & $i
+            if primitive["attributes"].hasKey(gltfAttributeIndexed):
+              let accessor = primitive["attributes"][gltfAttributeIndexed].getInt()
+              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
+          inc i
         #[
         when gltfAttribute == "indices":
           if primitive.hasKey(gltfAttribute):
@@ -436,7 +490,7 @@ proc ReadglTF*[TMesh, TMaterial](
 
   if "materials" in data.structuredContent:
     for materialnode in items(data.structuredContent["materials"]):
-      result.materials.add loadMaterial[TMaterial](data.structuredContent, materialnode, data.binaryBufferData, materialAttributesMapping)
+      result.materials.add loadMaterial[TMaterial](data.structuredContent, materialnode, materialAttributesMapping, data.binaryBufferData)
 
   if "textures" in data.structuredContent:
     for texturenode in items(data.structuredContent["textures"]):
@@ -461,7 +515,9 @@ proc ReadglTF*[TMesh, TMaterial](
   for m in result.meshes:
     echo "  Primitives:"
     for p in m:
-      echo "    ", p[1], ": ", p[0]
+      for field, value in fieldPairs(p[0]):
+        if typeof(value) is GPUData:
+          echo "    ", field, ": ", value.data.len
 
 proc LoadMeshes*[TMesh, TMaterial](
   path: string,
