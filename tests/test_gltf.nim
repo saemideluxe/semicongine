@@ -12,15 +12,15 @@ proc test_gltf(time: float32) =
 
   type
     Material = object
-      color: Vec4f
+      color: Vec4f = NewVec4f(1, 1, 1, 1)
       colorTexture: int32 = -1
-      metallic: float32 = -1
-      roughness: float32 = -1
+      metallic: float32 = 0
+      roughness: float32 = 0
       metallicRoughnessTexture: int32 = -1
 
       normalTexture: int32 = -1
       occlusionTexture: int32 = -1
-      emissive: Vec4f = NewVec4f(-1, -1, -1, -1)
+      emissive: Vec4f = NewVec4f(0, 0, 0, 0)
       emissiveTexture: int32 = -1
     MainDescriptors = object
       material: GPUValue[Material, UniformBuffer]
@@ -47,17 +47,24 @@ void main() {
 
   let gltfMesh = LoadMeshes[Mesh, Material](
     "town.glb",
-    baseColorFactor = "color",
-    baseColorTexture = "colorTexture",
-    metallicFactor = "metallic",
-    roughnessFactor = "roughness",
-    metallicRoughnessTexture = "metallicRoughnessTexture",
-    normalTexture = "normalTexture",
-    occlusionTexture = "occlusionTexture",
-    emissiveTexture = "emissiveTexture",
-    emissiveFactor = "emissive",
+    MeshAttributeNames(
+      POSITION: "position",
+      COLOR: @["color"],
+      TEXCOORD: @["uv"],
+    ),
+    MaterialAttributeNames(
+      baseColorFactor: "color",
+      baseColorTexture: "colorTexture",
+      metallicFactor: "metallic",
+      roughnessFactor: "roughness",
+      metallicRoughnessTexture: "metallicRoughnessTexture",
+      normalTexture: "normalTexture",
+      occlusionTexture: "occlusionTexture",
+      emissiveTexture: "emissiveTexture",
+      emissiveFactor: "emissive",
+    )
   )
-  var mesh = gltfMesh.meshes[0]
+  var mesh = gltfMesh.meshes[0][0]
   renderdata.AssignBuffers(mesh)
   renderdata.FlushAllMemory()
 

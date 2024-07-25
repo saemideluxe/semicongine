@@ -2,7 +2,7 @@ type
   GLTFMesh*[TMesh, TMaterial] = object
     scenes*: seq[seq[int]] # each scene has a seq of node indices
     nodes*: seq[seq[int]]  # each node has a seq of mesh indices
-    meshes*: seq[TMesh]
+    meshes*: seq[seq[(TMesh, VkPrimitiveTopology)]]
     materials*: seq[TMaterial]
     textures*: seq[Image[BGRA]]
   glTFHeader = object
@@ -13,24 +13,35 @@ type
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
 
-  MaterialAttributeNames = object
+  MaterialAttributeNames* = object
     # pbr
-    baseColorTexture: string
-    baseColorTextureUv: string
-    baseColorFactor: string
-    metallicRoughnessTexture: string
-    metallicRoughnessTextureUv: string
-    metallicFactor: string
-    roughnessFactor: string
+    baseColorTexture*: string
+    baseColorTextureUv*: string
+    baseColorFactor*: string
+    metallicRoughnessTexture*: string
+    metallicRoughnessTextureUv*: string
+    metallicFactor*: string
+    roughnessFactor*: string
 
     # other
-    normalTexture: string
-    normalTextureUv: string
-    occlusionTexture: string
-    occlusionTextureUv: string
-    emissiveTexture: string
-    emissiveTextureUv: string
-    emissiveFactor: string
+    normalTexture*: string
+    normalTextureUv*: string
+    occlusionTexture*: string
+    occlusionTextureUv*: string
+    emissiveTexture*: string
+    emissiveTextureUv*: string
+    emissiveFactor*: string
+
+  MeshAttributeNames* = object
+    POSITION*: string
+    NORMAL*: string
+    TANGENT*: string
+    TEXCOORD*: seq[string]
+    COLOR*: seq[string]
+    JOINTS*: seq[string]
+    WEIGHTS*: seq[string]
+    indices*: string
+    material*: string
 
 #[
 static:
@@ -71,6 +82,15 @@ const
     33648: VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
     10497: VK_SAMPLER_ADDRESS_MODE_REPEAT
   }.toTable
+  PRIMITIVE_MODE_MAP = [
+    0: VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+    1: VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+    2: VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, # not correct, as mode 2 would be a loo, but vulkan has no concept of this
+    3: VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
+    4: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+    5: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
+    6: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
+  ]
 
 #[
 proc getGPUType(accessor: JsonNode, attribute: string): DataType =
@@ -121,31 +141,28 @@ proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferO
     raise newException(Exception, "Unsupported feature: byteStride in buffer view")
   copyMem(dstPointer, addr mainBuffer[bufferOffset], result.len)
 
-#[
-proc getAccessorData(root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): DataList =
-  result = InitDataList(thetype = accessor.getGPUType("??"))
-  result.SetLen(accessor["count"].getInt())
+proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): seq[T] =
+  result.setLen(accessor["count"].getInt())
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
 
   if accessor.hasKey("sparse"):
-    raise newException(Exception, "Sparce accessors are currently not implemented")
+    raise newException(Exception, "Sparce accessors are currently not supported")
 
   let accessorOffset = if accessor.hasKey("byteOffset"): accessor["byteOffset"].getInt() else: 0
   let length = bufferView["byteLength"].getInt()
   let bufferOffset = bufferView["byteOffset"].getInt() + accessorOffset
-  var dstPointer = result.GetPointer()
+  var dstPointer = result.ToCPointer()
 
   if bufferView.hasKey("byteStride"):
     warn "Congratulations, you try to test a feature (loading buffer data with stride attributes) that we have no idea where it is used and how it can be tested (need a coresponding *.glb file)."
     # we don't support stride, have to convert stuff here... does this even work?
     for i in 0 ..< int(result.len):
-      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], int(result.thetype.Size))
-      dstPointer = cast[pointer](cast[uint](dstPointer) + result.thetype.Size)
+      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], result.len * sizeof(T))
+      dstPointer = cast[typeof(dstPointer)](cast[uint](dstPointer) + (result.len * sizeof(T)).uint)
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
-]#
 
 proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[uint8]): Image[BGRA] =
 
@@ -197,10 +214,80 @@ proc loadMaterial[TMaterial](
           else:
             {.error: "Unsupported gltf material attribute".}
 
+proc loadPrimitive[TMesh](root: JsonNode, primitive: JsonNode, mapping: static MeshAttributeNames, mainBuffer: seq[uint8]): (TMesh, VkPrimitiveTopology) =
+  result[0] = TMesh()
+  result[1] = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+  if primitive.hasKey("mode"):
+    result[1] = PRIMITIVE_MODE_MAP[primitive["mode"].getInt()]
+
+  for name, value in fieldPairs(result[0]):
+    for gltfAttribute, mappedName in fieldPairs(mapping):
+      when gltfAttribute != "" and name == mappedName:
+        assert value is GPUData, "Attribute " & name & " must be of type GPUData"
+        #[
+        when gltfAttribute == "indices":
+          if primitive.hasKey(gltfAttribute):
+            let accessor = primitive[gltfAttribute].getInt()
+            value.data = getAccessorData[elementType(value.data)](root, root["accessors"][accessor], mainBuffer)
+        elif gltfAttribute == "material":
+          if primitive.hasKey(gltfAttribute):
+            value.data = typeof(value.data)(primitive[gltfAttribute].getInt())
+        else:
+          if primitive["attributes"].hasKey(gltfAttribute):
+            let accessor = primitive["attributes"][gltfAttribute].getInt()
+            value.data = getAccessorData[elementType(value.data)](root, root["accessors"][accessor], mainBuffer)
+        ]#
+
+  #[
+  var indexType = None
+  let indexed = primitive.hasKey("indices")
+  if indexed:
+    var indexCount = root["accessors"][primitive["indices"].getInt()]["count"].getInt()
+    if indexCount < int(high(uint16)):
+      indexType = Small
+    else:
+      indexType = Big
+
+  for attribute, accessor in primitive["attributes"].pairs:
+    let data = root.getAccessorData(root["accessors"][accessor.getInt()], mainBuffer)
+    if result.vertexCount == 0:
+      result.vertexCount = data.len
+    assert data.len == result.vertexCount
+    result[].InitVertexAttribute(attribute.toLowerAscii, data)
+
+  if primitive.hasKey("material"):
+    let materialId = primitive["material"].getInt()
+    result[].material = materials[materialId]
+  else:
+    result[].material = EMPTY_MATERIAL.InitMaterialData()
+
+  if primitive.hasKey("indices"):
+    assert result[].indexType != None
+    let data = root.getAccessorData(root["accessors"][primitive["indices"].getInt()], mainBuffer)
+    var tri: seq[int]
+    case data.thetype
+      of UInt16:
+        for entry in data[uint16][]:
+          tri.add int(entry)
+          if tri.len == 3:
+            # FYI gltf uses counter-clockwise indexing
+            result[].AppendIndicesData(tri[0], tri[1], tri[2])
+            tri.setLen(0)
+      of UInt32:
+        for entry in data[uint32][]:
+          tri.add int(entry)
+          if tri.len == 3:
+            # FYI gltf uses counter-clockwise indexing
+            result[].AppendIndicesData(tri[0], tri[1], tri[2])
+            tri.setLen(0)
+      else:
+        raise newException(Exception, &"Unsupported index data type: {data.thetype}")
+  ]#
+
 
 #[
 
-proc loadMesh(meshname: string, root: JsonNode, primitiveNode: JsonNode, materials: seq[MaterialData], mainBuffer: seq[uint8]): Mesh =
+proc loadPrimitive(meshname: string, root: JsonNode, primitiveNode: JsonNode, materials: seq[MaterialData], mainBuffer: seq[uint8]): Mesh =
   if primitiveNode.hasKey("mode") and primitiveNode["mode"].getInt() != 4:
     raise newException(Exception, "Currently only TRIANGLE mode is supported for geometry mode")
 
@@ -265,7 +352,7 @@ proc loadNode(root: JsonNode, node: JsonNode, materials: seq[MaterialData], main
   if node.hasKey("mesh"):
     let mesh = root["meshes"][node["mesh"].getInt()]
     for primitive in mesh["primitives"]:
-      result.children.add MeshTree(mesh: loadMesh(mesh["name"].getStr(), root, primitive, materials, mainBuffer))
+      result.children.add MeshTree(mesh: loadPrimitive(mesh["name"].getStr(), root, primitive, materials, mainBuffer))
 
   # transformation
   if node.hasKey("matrix"):
@@ -316,27 +403,9 @@ proc loadScene(root: JsonNode, scenenode: JsonNode, materials: seq[MaterialData]
 
 proc ReadglTF*[TMesh, TMaterial](
   stream: Stream,
-  baseColorFactor: static string = "",
-  emissiveFactor: static string = "",
-  metallicFactor: static string = "",
-  roughnessFactor: static string = "",
-  baseColorTexture: static string = "",
-  metallicRoughnessTexture: static string = "",
-  normalTexture: static string = "",
-  occlusionTexture: static string = "",
-  emissiveTexture: static string = "",
+  meshAttributesMapping: static MeshAttributeNames,
+  materialAttributesMapping: static MaterialAttributeNames,
 ): GLTFMesh[TMesh, TMaterial] =
-  const mapping = MaterialAttributeNames(
-    baseColorFactor: baseColorFactor,
-    emissiveFactor: emissiveFactor,
-    metallicFactor: metallicFactor,
-    roughnessFactor: roughnessFactor,
-    baseColorTexture: baseColorTexture,
-    metallicRoughnessTexture: metallicRoughnessTexture,
-    normalTexture: normalTexture,
-    occlusionTexture: occlusionTexture,
-    emissiveTexture: emissiveTexture,
-  )
   var
     header: glTFHeader
     data: glTFData
@@ -367,38 +436,41 @@ proc ReadglTF*[TMesh, TMaterial](
 
   if "materials" in data.structuredContent:
     for materialnode in items(data.structuredContent["materials"]):
-      result.materials.add loadMaterial[TMaterial](data.structuredContent, materialnode, data.binaryBufferData, mapping)
+      result.materials.add loadMaterial[TMaterial](data.structuredContent, materialnode, data.binaryBufferData, materialAttributesMapping)
 
   if "textures" in data.structuredContent:
     for texturenode in items(data.structuredContent["textures"]):
       result.textures.add loadTexture(data.structuredContent, texturenode, data.binaryBufferData)
 
-  echo result
-  # for scenedata in data.structuredContent["scenes"]:
-    # result.add data.structuredContent.loadScene(scenedata, materials, data.binaryBufferData)
-    #
+  if "meshes" in data.structuredContent:
+    for mesh in items(data.structuredContent["meshes"]):
+      var primitives: seq[(TMesh, VkPrimitiveTopology)]
+      for primitive in items(mesh["primitives"]):
+        primitives.add loadPrimitive[TMesh](data.structuredContent, primitive, meshAttributesMapping, data.binaryBufferData)
+      result.meshes.add primitives
+
+  echo "Textures:"
+  for t in result.textures:
+    echo "  ", t
+
+  echo "Materials:"
+  for m in result.materials:
+    echo "  ", m
+
+  echo "Meshes:"
+  for m in result.meshes:
+    echo "  Primitives:"
+    for p in m:
+      echo "    ", p[1], ": ", p[0]
+
 proc LoadMeshes*[TMesh, TMaterial](
   path: string,
-  baseColorFactor: static string = "",
-  emissiveFactor: static string = "",
-  metallicFactor: static string = "",
-  roughnessFactor: static string = "",
-  baseColorTexture: static string = "",
-  metallicRoughnessTexture: static string = "",
-  normalTexture: static string = "",
-  occlusionTexture: static string = "",
-  emissiveTexture: static string = "",
+  meshAttributesMapping: static MeshAttributeNames,
+  materialAttributesMapping: static MaterialAttributeNames,
   package = DEFAULT_PACKAGE
 ): GLTFMesh[TMesh, TMaterial] =
   ReadglTF[TMesh, TMaterial](
     stream = loadResource_intern(path, package = package),
-    baseColorFactor = baseColorFactor,
-    emissiveFactor = emissiveFactor,
-    metallicFactor = metallicFactor,
-    roughnessFactor = roughnessFactor,
-    baseColorTexture = baseColorTexture,
-    metallicRoughnessTexture = metallicRoughnessTexture,
-    normalTexture = normalTexture,
-    occlusionTexture = occlusionTexture,
-    emissiveTexture = emissiveTexture,
+    meshAttributesMapping = meshAttributesMapping,
+    materialAttributesMapping = materialAttributesMapping,
   )
