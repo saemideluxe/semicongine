@@ -233,31 +233,32 @@ proc loadNode(node: JsonNode): GltfNode =
   if "matrix" in node:
     for i in 0 ..< node["matrix"].len:
       result.transform[i] = node["matrix"][i].getFloat()
-
-  var (t, r, s) = (Unit4, Unit4, Unit4)
-  if "translation" in node:
-    t = Translate(
-      float32(node["translation"][0].getFloat()),
-      float32(node["translation"][1].getFloat()),
-      float32(node["translation"][2].getFloat())
-    )
-  if "rotation" in node:
-    t = Rotate(
-      float32(node["rotation"][3].getFloat()),
-      NewVec3f(
-        float32(node["rotation"][0].getFloat()),
-        float32(node["rotation"][1].getFloat()),
-        float32(node["rotation"][2].getFloat())
+    result.transform = result.transform.Transposed()
+  else:
+    var (t, r, s) = (Unit4, Unit4, Unit4)
+    if "translation" in node:
+      t = Translate(
+        float32(node["translation"][0].getFloat()),
+        float32(node["translation"][1].getFloat()),
+        float32(node["translation"][2].getFloat())
       )
-    )
-  if "scale" in node:
-    t = Scale(
-      float32(node["scale"][0].getFloat()),
-      float32(node["scale"][1].getFloat()),
-      float32(node["scale"][2].getFloat())
-    )
+    if "rotation" in node:
+      t = Rotate(
+        float32(node["rotation"][3].getFloat()),
+        NewVec3f(
+          float32(node["rotation"][0].getFloat()),
+          float32(node["rotation"][1].getFloat()),
+          float32(node["rotation"][2].getFloat())
+        )
+      )
+    if "scale" in node:
+      t = Scale(
+        float32(node["scale"][0].getFloat()),
+        float32(node["scale"][1].getFloat()),
+        float32(node["scale"][2].getFloat())
+      )
 
-  result.transform = t * r * s * result.transform
+    result.transform = t * r * s
 
 proc ReadglTF*[TMesh, TMaterial](
   stream: Stream,

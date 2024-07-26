@@ -14,6 +14,7 @@ const BUFFER_ALLOCATION_SIZE = 9_000_000'u64 # ca. 9mb per block, seems reasonab
 const MAX_DESCRIPTORSETS = 4
 const SURFACE_FORMAT* = VK_FORMAT_B8G8R8A8_SRGB
 const DEPTH_FORMAT* = VK_FORMAT_D32_SFLOAT
+const PUSH_CONSTANT_SIZE = 128
 
 # custom pragmas to classify shader attributes
 template VertexAttribute* {.pragma.}

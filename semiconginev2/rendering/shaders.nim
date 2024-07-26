@@ -376,7 +376,7 @@ proc CreatePipeline*[TShader](
   let pushConstant = VkPushConstantRange(
     stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
     offset: 0,
-    size: 128, # currently supported everywhere, places for two mat4
+    size: PUSH_CONSTANT_SIZE, # currently supported everywhere, places for two mat4
   )
 
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(

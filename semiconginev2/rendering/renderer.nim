@@ -670,6 +670,16 @@ proc Render*[TShader, TMesh](
 ) =
   Render(commandBuffer, pipeline, mesh, EMPTY())
 
+proc assertValidPushConstantType(TShader, TPushConstant: typedesc) =
+  assert sizeof(TPushConstant) <= PUSH_CONSTANT_SIZE, "Push constant values must be <= 128 bytes"
+  var foundPushConstant = false
+  for fieldname, fieldvalue in default(TShader).fieldPairs():
+    when hasCustomPragma(fieldvalue, PushConstantAttribute):
+      assert typeof(fieldvalue) is TPushConstant, "Provided push constant has not same type as declared in shader"
+      assert foundPushConstant == false, "More than on push constant found in shader"
+      foundPushConstant = true
+  assert foundPushConstant == true, "No push constant found in shader"
+
 proc RenderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
@@ -677,12 +687,13 @@ proc RenderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
   instances: TInstance,
   pushConstant: TPushConstant,
 ) =
+  static: assertValidPushConstantType(TShader, TPushConstant)
   vkCmdPushConstants(
     commandBuffer = commandBuffer,
     layout = pipeline.layout,
     stageFlags = VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
     offset = 0,
-    size = 128,
+    size = PUSH_CONSTANT_SIZE,
     pValues = addr(pushConstant)
   );
   Render(commandBuffer, pipeline, mesh, instances)
@@ -692,12 +703,13 @@ proc RenderWithPushConstant*[TShader, TMesh, TPushConstant](
   mesh: TMesh,
   pushConstant: TPushConstant,
 ) =
+  static: assertValidPushConstantType(TShader, TPushConstant)
   vkCmdPushConstants(
     commandBuffer = commandBuffer,
     layout = pipeline.layout,
     stageFlags = VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
     offset = 0,
-    size = 128,
+    size = PUSH_CONSTANT_SIZE,
     pValues = addr(pushConstant)
   );
   Render(commandBuffer, pipeline, mesh, EMPTY())

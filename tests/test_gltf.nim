@@ -11,6 +11,11 @@ proc test_gltf(time: float32) =
   var renderdata = InitRenderData()
 
   type
+    ObjectData = object
+      transform: Mat4
+    Camera = object
+      view: Mat4
+      perspective: Mat4
     Material = object
       color: Vec4f = NewVec4f(1, 1, 1, 1)
       colorTexture: int32 = -1
@@ -24,7 +29,9 @@ proc test_gltf(time: float32) =
       emissiveTexture: int32 = -1
     MainDescriptors = object
       material: GPUValue[Material, UniformBuffer]
+      camera: GPUValue[Camera, UniformBufferMapped]
     Shader = object
+      objectData {.PushConstantAttribute.}: ObjectData
       position {.VertexAttribute.}: Vec3f
       uv {.VertexAttribute.}: Vec2f
       fragmentColor {.Pass.}: Vec4f
@@ -36,7 +43,7 @@ proc test_gltf(time: float32) =
 void main() {
   fragmentColor = vec4(1, 1, 1, 1);
   fragmentUv = uv;
-  gl_Position = vec4(position, 1);
+  gl_Position = vec4(position, 1) * camera.perspective * camera.view;
 }"""
       fragmentCode: string = """void main() { outColor = fragmentColor;}"""
     Mesh = object
@@ -61,18 +68,28 @@ void main() {
       emissiveFactor: "emissive",
     )
   )
+  var descriptors = asDescriptorSet(
+    MainDescriptors(
+      camera: asGPUValue(Camera(
+        view: Unit4,
+        perspective: Unit4,
+    ), UniformBufferMapped)
+  )
+  )
   for mesh in mitems(gltfData.meshes):
     for primitive in mitems(mesh):
       renderdata.AssignBuffers(primitive[0])
-  renderdata.FlushAllMemory()
+  renderdata.AssignBuffers(descriptors)
 
   var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
+  renderdata.FlushAllMemory()
 
   proc drawNode(commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int, transform: Mat4 = Unit4) =
     let nodeTransform = gltfData.nodes[nodeId].transform * transform
     if gltfData.nodes[nodeId].mesh >= 0:
       for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh]:
-        Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = primitive[0])
+        RenderWithPushConstant(commandbuffer = commandbuffer, pipeline = pipeline, mesh = primitive[0], pushConstant = ObjectData(transform: nodeTransform))
     for childNode in gltfData.nodes[nodeId].children:
       drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = childNode, transform = nodeTransform)
 
@@ -85,8 +102,9 @@ void main() {
       WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
-          for nodeId in gltfData.scenes[0]:
-            drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = nodeId)
+          WithBind(commandbuffer, (descriptors, ), pipeline):
+            for nodeId in gltfData.scenes[0]:
+              drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = nodeId)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)

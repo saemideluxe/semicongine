@@ -103,7 +103,7 @@ template matlen(m: typedesc): int =
   elif m is TMat4: 16
 
 
-func toString[T: TMat](value: T): string =
+func toMatString[T: TMat](value: T): string =
   var
     strvalues: seq[string]
     maxwidth = 0
@@ -123,13 +123,13 @@ func toString[T: TMat](value: T): string =
         result &= "  "
       result &= filler & strvalues[i] & "  "
 
-func `$`*(v: TMat2[SomeNumber]): string = toString[TMat2[SomeNumber]](v)
-func `$`*(v: TMat23[SomeNumber]): string = toString[TMat23[SomeNumber]](v)
-func `$`*(v: TMat32[SomeNumber]): string = toString[TMat32[SomeNumber]](v)
-func `$`*(v: TMat3[SomeNumber]): string = toString[TMat3[SomeNumber]](v)
-func `$`*(v: TMat34[SomeNumber]): string = toString[TMat34[SomeNumber]](v)
-func `$`*(v: TMat43[SomeNumber]): string = toString[TMat43[SomeNumber]](v)
-func `$`*(v: TMat4[SomeNumber]): string = toString[TMat4[SomeNumber]](v)
+func `$`*(v: TMat2[SomeNumber]): string = toMatString[TMat2[SomeNumber]](v)
+func `$`*(v: TMat23[SomeNumber]): string = toMatString[TMat23[SomeNumber]](v)
+func `$`*(v: TMat32[SomeNumber]): string = toMatString[TMat32[SomeNumber]](v)
+func `$`*(v: TMat3[SomeNumber]): string = toMatString[TMat3[SomeNumber]](v)
+func `$`*(v: TMat34[SomeNumber]): string = toMatString[TMat34[SomeNumber]](v)
+func `$`*(v: TMat43[SomeNumber]): string = toMatString[TMat43[SomeNumber]](v)
+func `$`*(v: TMat4[SomeNumber]): string = toMatString[TMat4[SomeNumber]](v)
 
 func `[]`*[T: TMat](m: T, row, col: int): auto = m.data[col + row * T.ColumnCount]
 func `[]=`*[T: TMat, U](m: var T, row, col: int, value: U) = m.data[col + row * T.ColumnCount] = value

@@ -102,16 +102,16 @@ func To*[T](v: TVec2): auto = TVec2([T(v[0]), T(v[1])])
 func To*[T](v: TVec3): auto = TVec3([T(v[0]), T(v[1]), T(v[2])])
 func To*[T](v: TVec4): auto = TVec4([T(v[0]), T(v[1]), T(v[2]), T(v[3])])
 
-func toString[T: TVec](value: T): string =
+func toVecString[T: TVec](value: T): string =
   var items: seq[string]
   for item in value:
     items.add(&"{item.float:.5f}")
   & "(" & join(items, "  ") & ")"
 
-func `$`*(v: TVec1[SomeNumber]): string = toString[TVec1[SomeNumber]](v)
-func `$`*(v: TVec2[SomeNumber]): string = toString[TVec2[SomeNumber]](v)
-func `$`*(v: TVec3[SomeNumber]): string = toString[TVec3[SomeNumber]](v)
-func `$`*(v: TVec4[SomeNumber]): string = toString[TVec4[SomeNumber]](v)
+func `$`*(v: TVec1[SomeNumber]): string = toVecString[TVec1[SomeNumber]](v)
+func `$`*(v: TVec2[SomeNumber]): string = toVecString[TVec2[SomeNumber]](v)
+func `$`*(v: TVec3[SomeNumber]): string = toVecString[TVec3[SomeNumber]](v)
+func `$`*(v: TVec4[SomeNumber]): string = toVecString[TVec4[SomeNumber]](v)
 
 func Length*(vec: TVec1): auto = vec[0]
 func Length*(vec: TVec2[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1])
