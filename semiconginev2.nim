@@ -55,3 +55,8 @@ when not defined(WITHOUT_CONTRIB):
   include ./semiconginev2/contrib/settings
   include ./semiconginev2/contrib/algorithms/collision
   include ./semiconginev2/contrib/algorithms/noise
+
+if not defined(release):
+  setLogFilter(lvlAll)
+else:
+  setLogFilter(lvlWarn)

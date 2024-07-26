@@ -18,6 +18,7 @@ const DEPTH_FORMAT* = VK_FORMAT_D32_SFLOAT
 # custom pragmas to classify shader attributes
 template VertexAttribute* {.pragma.}
 template InstanceAttribute* {.pragma.}
+template PushConstantAttribute* {.pragma.}
 template Pass* {.pragma.}
 template PassFlat* {.pragma.}
 template ShaderOutput* {.pragma.}

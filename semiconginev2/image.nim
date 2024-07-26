@@ -16,7 +16,7 @@ type
     isRenderTarget*: bool = false
     samples*: VkSampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT
 
-proc LoadImage*[T: PixelType](pngData: seq[uint8]): Image[T] =
+proc LoadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
   when T is Gray:
     let pngType = 0.cint
   elif T is BGRA:
@@ -38,13 +38,13 @@ proc LoadImage*[T: PixelType](pngData: seq[uint8]): Image[T] =
       swap(result.data[i][0], result.data[i][2])
 
 proc LoadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
-  assert path.splitFile().ext.toLowerAscii == ".png"
+  assert path.splitFile().ext.toLowerAscii == ".png", "Unsupported image type: " & path.splitFile().ext.toLowerAscii
   when T is Gray:
     let pngType = 0.cint
   elif T is BGRA:
     let pngType = 6.cint
 
-  result = LoadImage[T](loadResource_intern(path, package = package).readAll())
+  result = LoadImageData[T](loadResource_intern(path, package = package).readAll())
 
 
 proc toPNG[T: PixelType](image: Image[T]): seq[uint8] =

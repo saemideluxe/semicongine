@@ -670,6 +670,38 @@ proc Render*[TShader, TMesh](
 ) =
   Render(commandBuffer, pipeline, mesh, EMPTY())
 
+proc RenderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
+  commandBuffer: VkCommandBuffer,
+  pipeline: Pipeline[TShader],
+  mesh: TMesh,
+  instances: TInstance,
+  pushConstant: TPushConstant,
+) =
+  vkCmdPushConstants(
+    commandBuffer = commandBuffer,
+    layout = pipeline.layout,
+    stageFlags = VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
+    offset = 0,
+    size = 128,
+    pValues = addr(pushConstant)
+  );
+  Render(commandBuffer, pipeline, mesh, instances)
+proc RenderWithPushConstant*[TShader, TMesh, TPushConstant](
+  commandBuffer: VkCommandBuffer,
+  pipeline: Pipeline[TShader],
+  mesh: TMesh,
+  pushConstant: TPushConstant,
+) =
+  vkCmdPushConstants(
+    commandBuffer = commandBuffer,
+    layout = pipeline.layout,
+    stageFlags = VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
+    offset = 0,
+    size = 128,
+    pValues = addr(pushConstant)
+  );
+  Render(commandBuffer, pipeline, mesh, EMPTY())
+
 proc asGPUArray*[T](data: openArray[T], bufferType: static BufferType): auto =
   GPUArray[T, bufferType](data: @data)
 

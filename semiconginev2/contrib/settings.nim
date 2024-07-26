@@ -1,9 +1,8 @@
-const CONFIGROOT: string = "."
-const CONFIGEXTENSION: string = "ini"
-# by default enable hot-reload of runtime-configuration only in debug builds
-const CONFIGHOTRELOAD: bool = not defined(release)
-# milliseconds to wait between checks for settings hotreload
-const CONFIGHOTRELOADINTERVAL: int = 1000
+const CONFIGHOTRELOAD {.booldefine.}: bool = not defined(release)
+const CONFIGHOTRELOADINTERVAL {.intdefine.}: int = 1000
+const CONFIGROOT {.strdefine.}: string = "."
+const CONFIGEXTENSION {.strdefine.}: string = "ini"
+
 
 when CONFIGHOTRELOAD:
   var
@@ -77,8 +76,6 @@ proc HadConfigUpdate*(): bool =
 allsettings = loadAllConfig()
 
 when CONFIGHOTRELOAD == true:
-  import std/times
-
   proc configFileWatchdog() {.thread.} =
     var configModTimes: Table[string, times.Time]
     while true:
@@ -93,8 +90,3 @@ when CONFIGHOTRELOAD == true:
       sleep CONFIGHOTRELOADINTERVAL
   var thethread: Thread[void]
   createThread(thethread, configFileWatchdog)
-
-if not defined(release):
-  setLogFilter(lvlAll)
-else:
-  setLogFilter(lvlWarn)

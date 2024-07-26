@@ -11,15 +11,18 @@ proc test_01_triangle(time: float32) =
   var renderdata = InitRenderData()
 
   type
+    PushConstant = object
+      scale: float32
     Shader = object
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec3f
+      pushConstant {.PushConstantAttribute.}: PushConstant
       fragmentColor {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
       # code
       vertexCode: string = """void main() {
       fragmentColor = color;
-      gl_Position = vec4(position, 1);}"""
+      gl_Position = vec4(position * pushConstant.scale, 1);}"""
       fragmentCode: string = """void main() {
       outColor = vec4(fragmentColor, 1);}"""
     TriangleMesh = object
@@ -43,7 +46,7 @@ proc test_01_triangle(time: float32) =
 
         WithPipeline(commandbuffer, pipeline):
 
-          Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+          RenderWithPushConstant(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh, pushConstant = PushConstant(scale: 0.3 + ((getMonoTime() - start).inMilliseconds().int / 1000)))
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -133,7 +136,7 @@ proc test_03_simple_descriptorset(time: float32) =
 
     Uniforms = object
       material: GPUValue[Material, UniformBuffer]
-      texture1: Image[RGBA]
+      texture1: Image[BGRA]
 
     QuadShader = object
       position {.VertexAttribute.}: Vec3f
@@ -154,10 +157,10 @@ proc test_03_simple_descriptorset(time: float32) =
       position: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
 
-  let R = RGBA([255'u8, 0'u8, 0'u8, 255'u8])
-  let G = RGBA([0'u8, 255'u8, 0'u8, 255'u8])
-  let B = RGBA([0'u8, 0'u8, 255'u8, 255'u8])
-  let W = RGBA([255'u8, 255'u8, 255'u8, 255'u8])
+  let R = BGRA([255'u8, 0'u8, 0'u8, 255'u8])
+  let G = BGRA([0'u8, 255'u8, 0'u8, 255'u8])
+  let B = BGRA([0'u8, 0'u8, 255'u8, 255'u8])
+  let W = BGRA([255'u8, 255'u8, 255'u8, 255'u8])
   var
     quad = QuadMesh(
       position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(-0.5, 0.5), NewVec3f(0.5, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
@@ -166,13 +169,13 @@ proc test_03_simple_descriptorset(time: float32) =
     uniforms1 = asDescriptorSet(
       Uniforms(
         material: asGPUValue(Material(baseColor: NewVec3f(1, 1, 1)), UniformBuffer),
-        texture1: Image[RGBA](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], interpolation: VK_FILTER_NEAREST),
+        texture1: Image[BGRA](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
       )
     )
     uniforms2 = asDescriptorSet(
       Uniforms(
         material: asGPUValue(Material(baseColor: NewVec3f(0.5, 0.5, 0.5)), UniformBuffer),
-        texture1: Image[RGBA](width: 2, height: 2, data: @[R, G, B, W]),
+        texture1: Image[BGRA](width: 2, height: 2, data: @[R, G, B, W]),
     )
     )
 
@@ -271,8 +274,8 @@ proc test_04_multiple_descriptorsets(time: float32) =
         asGPUValue(Material(baseColor: NewVec3f(1, 0, 1)), UniformBuffer),
     ],
     texture1: [
-      Image[Gray](width: 2, height: 2, data: @[W, G, G, W], interpolation: VK_FILTER_NEAREST),
-      Image[Gray](width: 3, height: 3, data: @[W, G, W, G, W, G, W, G, W], interpolation: VK_FILTER_NEAREST),
+      Image[Gray](width: 2, height: 2, data: @[W, G, G, W], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
+      Image[Gray](width: 3, height: 3, data: @[W, G, W, G, W, G, W, G, W], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
     ],
   ),
   )
@@ -522,7 +525,7 @@ proc test_07_png_texture(time: float32) =
 
   type
     Uniforms = object
-      texture1: Image[RGBA]
+      texture1: Image[BGRA]
     Shader = object
       position {.VertexAttribute.}: Vec3f
       uv {.VertexAttribute.}: Vec2f
@@ -558,7 +561,7 @@ void main() {
   var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
   var uniforms1 = asDescriptorSet(
     Uniforms(
-      texture1: LoadImage[RGBA]("art.png"),
+      texture1: LoadImage[BGRA]("art.png"),
     )
   )
   UploadImages(renderdata, uniforms1)
@@ -590,7 +593,7 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
 
   type
     Uniforms = object
-      frameTexture: Image[RGBA]
+      frameTexture: Image[BGRA]
     TriangleShader = object
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec3f
@@ -639,7 +642,7 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
   )
   var uniforms1 = asDescriptorSet(
     Uniforms(
-      frameTexture: Image[RGBA](width: vulkan.swapchain.width, height: vulkan.swapchain.height, isRenderTarget: true),
+      frameTexture: Image[BGRA](width: vulkan.swapchain.width, height: vulkan.swapchain.height, isRenderTarget: true),
     )
   )
   AssignBuffers(renderdata, mesh)

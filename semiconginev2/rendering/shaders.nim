@@ -131,6 +131,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
   var fsInput: seq[string]
   var fsOutput: seq[string]
   var uniforms: seq[string]
+  var pushConstants: seq[string]
   var samplers: seq[string]
   var vsInputLocation = 0'u32
   var passLocation = 0
@@ -213,12 +214,22 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
         descriptorSetIndex.inc
     elif fieldname in ["vertexCode", "fragmentCode"]:
       discard
+    elif hasCustomPragma(value, PushConstantAttribute):
+      assert pushConstants.len == 0, "Only one push constant value allowed"
+      assert value is object, "push constants need to be objects"
+      pushConstants.add "layout( push_constant ) uniform constants"
+      pushConstants.add "{"
+      for constFieldName, constFieldValue in value.fieldPairs():
+        assert typeof(constFieldValue) is SupportedGPUType, "push constant field '" & constFieldName & "' is not a SupportedGPUType"
+        pushConstants.add "  " & GlslType(constFieldValue) & " " & constFieldName & ";"
+      pushConstants.add "} " & fieldname & ";"
     else:
       {.error: "Unsupported shader field '" & typetraits.name(TShader) & "." & fieldname & "' of type " & typetraits.name(typeof(value)).}
 
   result[0] = (@[&"#version {GLSL_VERSION}", "#extension GL_EXT_scalar_block_layout : require", ""] &
     vsInput &
     uniforms &
+    pushConstants &
     samplers &
     vsOutput &
     @[shader.vertexCode]).join("\n")
@@ -226,6 +237,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
   result[1] = (@[&"#version {GLSL_VERSION}", "#extension GL_EXT_scalar_block_layout : require", ""] &
     fsInput &
     uniforms &
+    pushConstants &
     samplers &
     fsOutput &
     @[shader.fragmentCode]).join("\n")
@@ -360,12 +372,19 @@ proc CreatePipeline*[TShader](
 
   var nSets = GetDescriptorSetCount[TShader]()
   result.descriptorSetLayouts = CreateDescriptorSetLayouts[TShader]()
+
+  let pushConstant = VkPushConstantRange(
+    stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
+    offset: 0,
+    size: 128, # currently supported everywhere, places for two mat4
+  )
+
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
     setLayoutCount: nSets,
     pSetLayouts: if nSets == 0: nil else: result.descriptorSetLayouts.ToCPointer,
-    # pushConstantRangeCount: uint32(pushConstants.len),
-      # pPushConstantRanges: pushConstants.ToCPointer,
+    pushConstantRangeCount: 1,
+    pPushConstantRanges: addr(pushConstant),
   )
   checkVkResult vkCreatePipelineLayout(vulkan.device, addr(pipelineLayoutInfo), nil, addr(result.layout))
 

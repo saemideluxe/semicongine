@@ -145,7 +145,7 @@ proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[uint8]):
   assert imageType == "image/png", "glTF loader currently only supports PNG"
 
   let bufferView = root["bufferViews"][root["images"][imageIndex]["bufferView"].getInt()]
-  result = LoadImage[BGRA](getBufferViewData(bufferView, mainBuffer))
+  result = LoadImageData[BGRA](getBufferViewData(bufferView, mainBuffer))
 
   if textureNode.hasKey("sampler"):
     let sampler = root["samplers"][textureNode["sampler"].getInt()]
