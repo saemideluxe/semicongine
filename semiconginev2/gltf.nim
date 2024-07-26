@@ -1,9 +1,9 @@
 type
   GltfNode* = object
-    children: seq[int]
-    mesh: int
-    transform: Mat4
-  GltfMesh*[TMesh, TMaterial] = object
+    children*: seq[int]
+    mesh*: int = -1
+    transform*: Mat4 = Unit4
+  GltfData*[TMesh, TMaterial] = object
     scenes*: seq[seq[int]] # each scene has a seq of node indices
     nodes*: seq[GltfNode]  # each node has a seq of mesh indices
     meshes*: seq[seq[(TMesh, VkPrimitiveTopology)]]
@@ -224,7 +224,7 @@ proc loadPrimitive[TMesh](
           inc i
 
 proc loadNode(node: JsonNode): GltfNode =
-  result.transform = Unit4
+  result = GltfNode()
   if "mesh" in node:
     result.mesh = node["mesh"].getInt()
   if "children" in node:
@@ -263,7 +263,7 @@ proc ReadglTF*[TMesh, TMaterial](
   stream: Stream,
   meshAttributesMapping: static MeshAttributeNames,
   materialAttributesMapping: static MaterialAttributeNames,
-): GltfMesh[TMesh, TMaterial] =
+): GltfData[TMesh, TMaterial] =
   var
     header: glTFHeader
     data: glTFData
@@ -324,7 +324,7 @@ proc LoadMeshes*[TMesh, TMaterial](
   meshAttributesMapping: static MeshAttributeNames,
   materialAttributesMapping: static MaterialAttributeNames,
   package = DEFAULT_PACKAGE
-): GltfMesh[TMesh, TMaterial] =
+): GltfData[TMesh, TMaterial] =
   ReadglTF[TMesh, TMaterial](
     stream = loadResource_intern(path, package = package),
     meshAttributesMapping = meshAttributesMapping,

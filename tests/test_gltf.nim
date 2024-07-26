@@ -43,7 +43,7 @@ void main() {
       position: GPUArray[Vec3f, VertexBuffer]
       uv: GPUArray[Vec2f, VertexBuffer]
 
-  var gltfMesh = LoadMeshes[Mesh, Material](
+  var gltfData = LoadMeshes[Mesh, Material](
     "town.glb",
     MeshAttributeNames(
       POSITION: "position",
@@ -61,12 +61,21 @@ void main() {
       emissiveFactor: "emissive",
     )
   )
-  for mesh in mitems(gltfMesh.meshes):
+  for mesh in mitems(gltfData.meshes):
     for primitive in mitems(mesh):
       renderdata.AssignBuffers(primitive[0])
   renderdata.FlushAllMemory()
 
   var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+
+  proc drawNode(commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int, transform: Mat4 = Unit4) =
+    let nodeTransform = gltfData.nodes[nodeId].transform * transform
+    if gltfData.nodes[nodeId].mesh >= 0:
+      for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh]:
+        Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = primitive[0])
+    for childNode in gltfData.nodes[nodeId].children:
+      drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = childNode, transform = nodeTransform)
+
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
@@ -76,10 +85,8 @@ void main() {
       WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
-
-          for mesh in gltfMesh.meshes:
-            for primitive in mesh:
-              Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = primitive[0])
+          for nodeId in gltfData.scenes[0]:
+            drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = nodeId)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
