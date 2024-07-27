@@ -204,6 +204,16 @@ proc GetMousePosition*(window: NativeWindow): Option[Vec2f] =
   if onscreen != 0:
     result = some(Vec2f([float32(winX), float32(winY)]))
 
+proc SetMousePosition*(window: NativeWindow, x, y: int) =
+  checkXlibResult XWarpPointer(
+    window.display,
+    default(x11.Window),
+    window.window,
+    0, 0, 0, 0,
+    x.cint,
+    y.cint,
+  )
+  checkXlibResult XSync(window.display, false.XBool)
 
 proc CreateNativeSurface(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(

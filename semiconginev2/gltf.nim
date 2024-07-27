@@ -74,7 +74,8 @@ const
     6: VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
   ]
 
-proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8], baseBufferOffset = 0): seq[uint8] =
+proc getBufferViewData(bufferView: JsonNode, mainBuffer: seq[uint8],
+    baseBufferOffset = 0): seq[uint8] =
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
 
   result = newSeq[uint8](bufferView["byteLength"].getInt())
@@ -93,12 +94,14 @@ proc componentTypeId(t: typedesc): int =
   elif t is uint32: return 5125
   elif t is float32: return 5126
 
-proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): seq[T] =
+proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[
+    uint8]): seq[T] =
   let componentType = accessor["componentType"].getInt()
   let itemType = accessor["type"].getStr()
 
   when T is TVec or T is TMat:
-    assert componentTypeId(elementType(default(T))) == componentType, name(T) & " != " & $componentType
+    assert componentTypeId(elementType(default(T))) == componentType, name(T) &
+        " != " & $componentType
   else:
     assert componentTypeId(T) == componentType, name(T) & " != " & $componentType
 
@@ -121,7 +124,8 @@ proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint
   if accessor.hasKey("sparse"):
     raise newException(Exception, "Sparce accessors are currently not supported")
 
-  let accessorOffset = if accessor.hasKey("byteOffset"): accessor["byteOffset"].getInt() else: 0
+  let accessorOffset = if accessor.hasKey("byteOffset"): accessor[
+      "byteOffset"].getInt() else: 0
   let length = bufferView["byteLength"].getInt()
   let bufferOffset = bufferView["byteOffset"].getInt() + accessorOffset
   var dstPointer = result.ToCPointer()
@@ -130,12 +134,14 @@ proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint
     warn "Congratulations, you try to test a feature (loading buffer data with stride attributes) that we have no idea where it is used and how it can be tested (need a coresponding *.glb file)."
     # we don't support stride, have to convert stuff here... does this even work?
     for i in 0 ..< result.len:
-      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()], sizeof(T))
+      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView[
+          "byteStride"].getInt()], sizeof(T))
       dstPointer = cast[typeof(dstPointer)](cast[uint](dstPointer) + sizeof(T).uint)
   else:
     copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
 
-proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[uint8]): Image[BGRA] =
+proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[
+    uint8]): Image[BGRA] =
 
   let imageIndex = textureNode["source"].getInt()
 
@@ -144,22 +150,26 @@ proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[uint8]):
   let imageType = root["images"][imageIndex]["mimeType"].getStr()
   assert imageType == "image/png", "glTF loader currently only supports PNG"
 
-  let bufferView = root["bufferViews"][root["images"][imageIndex]["bufferView"].getInt()]
+  let bufferView = root["bufferViews"][root["images"][imageIndex][
+      "bufferView"].getInt()]
   result = LoadImageData[BGRA](getBufferViewData(bufferView, mainBuffer))
 
   if textureNode.hasKey("sampler"):
     let sampler = root["samplers"][textureNode["sampler"].getInt()]
     if sampler.hasKey("magFilter"):
-      result.magInterpolation = SAMPLER_FILTER_MODE_MAP[sampler["magFilter"].getInt()]
+      result.magInterpolation = SAMPLER_FILTER_MODE_MAP[sampler[
+          "magFilter"].getInt()]
     if sampler.hasKey("minFilter"):
-      result.minInterpolation = SAMPLER_FILTER_MODE_MAP[sampler["minFilter"].getInt()]
+      result.minInterpolation = SAMPLER_FILTER_MODE_MAP[sampler[
+          "minFilter"].getInt()]
     if sampler.hasKey("wrapS"):
       result.wrapU = SAMPLER_WRAP_MODE_MAP[sampler["wrapS"].getInt()]
     if sampler.hasKey("wrapT"):
       result.wrapV = SAMPLER_WRAP_MODE_MAP[sampler["wrapT"].getInt()]
 
 proc getVec4f(node: JsonNode): Vec4f =
-  NewVec4f(node[0].getFloat(), node[1].getFloat(), node[2].getFloat(), node[3].getFloat())
+  NewVec4f(node[0].getFloat(), node[1].getFloat(), node[2].getFloat(), node[
+      3].getFloat())
 
 proc loadMaterial[TMaterial](
   root: JsonNode,
@@ -204,14 +214,17 @@ proc loadPrimitive[TMesh](
           when gltfAttribute == "indices":
             if primitive.hasKey(gltfAttribute):
               let accessor = primitive[gltfAttribute].getInt()
-              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
+              resultValue.data = getAccessorData[elementType(resultValue.data)](
+                  root, root["accessors"][accessor], mainBuffer)
           elif gltfAttribute == "material":
             if primitive.hasKey(gltfAttribute):
-              resultValue.data = typeof(resultValue.data)(primitive[gltfAttribute].getInt())
+              resultValue.data = typeof(resultValue.data)(primitive[
+                  gltfAttribute].getInt())
           else:
             if primitive["attributes"].hasKey(gltfAttribute):
               let accessor = primitive["attributes"][gltfAttribute].getInt()
-              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
+              resultValue.data = getAccessorData[elementType(resultValue.data)](
+                  root, root["accessors"][accessor], mainBuffer)
       else:
         var i = 0
         for mappedIndexName in mappedName:
@@ -219,8 +232,10 @@ proc loadPrimitive[TMesh](
             assert resultValue is GPUData, "Attribute " & resultFieldName & " must be of type GPUData"
             let gltfAttributeIndexed = gltfAttribute & "_" & $i
             if primitive["attributes"].hasKey(gltfAttributeIndexed):
-              let accessor = primitive["attributes"][gltfAttributeIndexed].getInt()
-              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
+              let accessor = primitive["attributes"][
+                  gltfAttributeIndexed].getInt()
+              resultValue.data = getAccessorData[elementType(resultValue.data)](
+                  root, root["accessors"][accessor], mainBuffer)
           inc i
 
 proc loadNode(node: JsonNode): GltfNode =
@@ -282,30 +297,35 @@ proc ReadglTF*[TMesh, TMaterial](
   chunkLength = stream.readUint32()
   assert stream.readUint32() == BINARY_CHUNK
   data.binaryBufferData.setLen(chunkLength)
-  assert stream.readData(addr data.binaryBufferData[0], int(chunkLength)) == int(chunkLength)
+  assert stream.readData(addr data.binaryBufferData[0], int(chunkLength)) ==
+      int(chunkLength)
 
   # check that the refered buffer is the same as the binary chunk
   # external binary buffers are not supported
   assert data.structuredContent["buffers"].len == 1
   assert not data.structuredContent["buffers"][0].hasKey("uri")
-  let bufferLenDiff = int(chunkLength) - data.structuredContent["buffers"][0]["byteLength"].getInt()
+  let bufferLenDiff = int(chunkLength) - data.structuredContent["buffers"][0][
+      "byteLength"].getInt()
   assert 0 <= bufferLenDiff and bufferLenDiff <= 3 # binary buffer may be aligned to 4 bytes
 
   debug "Loading mesh: ", data.structuredContent.pretty
 
   if "materials" in data.structuredContent:
     for materialnode in items(data.structuredContent["materials"]):
-      result.materials.add loadMaterial[TMaterial](data.structuredContent, materialnode, materialAttributesMapping, data.binaryBufferData)
+      result.materials.add loadMaterial[TMaterial](data.structuredContent,
+          materialnode, materialAttributesMapping, data.binaryBufferData)
 
   if "textures" in data.structuredContent:
     for texturenode in items(data.structuredContent["textures"]):
-      result.textures.add loadTexture(data.structuredContent, texturenode, data.binaryBufferData)
+      result.textures.add loadTexture(data.structuredContent, texturenode,
+          data.binaryBufferData)
 
   if "meshes" in data.structuredContent:
     for mesh in items(data.structuredContent["meshes"]):
       var primitives: seq[(TMesh, VkPrimitiveTopology)]
       for primitive in items(mesh["primitives"]):
-        primitives.add loadPrimitive[TMesh](data.structuredContent, primitive, meshAttributesMapping, data.binaryBufferData)
+        primitives.add loadPrimitive[TMesh](data.structuredContent, primitive,
+            meshAttributesMapping, data.binaryBufferData)
       result.meshes.add primitives
 
   if "nodes" in data.structuredContent:

@@ -533,51 +533,97 @@ proc UploadImages*(renderdata: var RenderData, descriptorSet: var DescriptorSet)
         for image in value.mitems:
           renderdata.createVulkanImage(image)
 
-proc HasGPUValueField[T](name: static string): bool {.compileTime.} =
-  for fieldname, value in default(T).fieldPairs():
-    when typeof(value) is GPUValue and fieldname == name: return true
-  return false
+type EMPTY = object # only used for static assertions
 
-template WithGPUValueField(obj: object, name: static string, fieldvalue, body: untyped): untyped =
-  # HasGPUValueField MUST be used to check if this is supported
-  for fieldname, value in obj.fieldPairs():
-    when fieldname == name:
-      block:
-        let `fieldvalue` {.inject.} = value
-        body
+proc assertAllDescriptorsBound(A, B, C, D, TShader: typedesc) =
+  var foundDescriptorSets = false
+  for attrName, attrValue in default(TShader).fieldPairs():
+    when hasCustomPragma(attrValue, DescriptorSets):
+      assert not foundDescriptorSets, "Only one shader attribute is allowed to have the pragma 'DescriptorSets'"
+      when not (A is EMPTY): assert typeof(attrValue[0]) is A
+      when not (B is EMPTY): assert typeof(attrValue[1]) is B
+      when not (C is EMPTY): assert typeof(attrValue[2]) is C
+      when not (D is EMPTY): assert typeof(attrValue[3]) is D
 
-template WithBind*[A, B, C, D](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C], DescriptorSet[D]), pipeline: Pipeline, body: untyped): untyped =
+var hasBoundDescriptorSets {.compileTime.} = false # okay, I am not sure if this is clean, unproblematic or sane. Just trying to get some comptime-validation
+var hasDescriptorSets {.compileTime} = false
+
+template WithBind*[A, B, C, D, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C], DescriptorSet[D]), pipeline: Pipeline[TShader], body: untyped): untyped =
+  static: assertAllDescriptorsBound(A, B, C, D, TShader)
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
       assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
       descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
+    static:
+      assert not hasBoundDescriptorSets, "Cannot call WithBind nested"
+      hasBoundDescriptorSets = true
     body
-template WithBind*[A, B, C](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C]), pipeline: Pipeline, body: untyped): untyped =
+    static:
+      hasBoundDescriptorSets = false
+template WithBind*[A, B, C, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C]), pipeline: Pipeline[TShader], body: untyped): untyped =
+  static: assertAllDescriptorsBound(A, B, C, EMPTY, TShader)
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
       assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
       descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
+    static:
+      assert not hasBoundDescriptorSets, "Cannot call WithBind nested"
+      hasBoundDescriptorSets = true
     body
-template WithBind*[A, B](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B]), pipeline: Pipeline, body: untyped): untyped =
+    static:
+      hasBoundDescriptorSets = false
+template WithBind*[A, B, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B]), pipeline: Pipeline[TShader], body: untyped): untyped =
+  static: assertAllDescriptorsBound(A, B, EMPTY, EMPTY, TShader)
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
       assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
       descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
+    static:
+      assert not hasBoundDescriptorSets, "Cannot call WithBind nested"
+      hasBoundDescriptorSets = true
     body
-template WithBind*[A](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], ), pipeline: Pipeline, body: untyped): untyped =
+    static:
+      hasBoundDescriptorSets = false
+template WithBind*[A, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], ), pipeline: Pipeline[TShader], body: untyped): untyped =
+  static: assertAllDescriptorsBound(A, EMPTY, EMPTY, EMPTY, TShader)
   block:
     var descriptorSets: seq[VkDescriptorSet]
     for dSet in sets.fields:
       assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call InitDescriptorSet"
       descriptorSets.add dSet.vk[currentFiF()]
     svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
+    static:
+      assert not hasBoundDescriptorSets, "Cannot call WithBind nested"
+      hasBoundDescriptorSets = true
     body
+    static:
+      hasBoundDescriptorSets = false
+
+proc assertCanRenderMesh(TShader, TMesh, TInstance: typedesc) =
+  for attrName, attrValue in default(TShader).fieldPairs:
+    if hasCustomPragma(attrValue, VertexAttribute):
+      var foundAttr = false
+      for meshAttrName, meshAttrValue in default(TMesh).fieldPairs:
+        if attrName == meshAttrName:
+          assert typeof(meshAttrValue) is GPUArray, "Mesh attribute '" & attrName & "' must be a GPUArray"
+          assert typeof(attrValue) is elementType(meshAttrValue.data), "Type of shader attribute and mesh attribute '" & attrName & "' is not the same"
+          foundAttr = true
+      assert foundAttr, "Attribute '" & attrName & "' is not provided in mesh type '" & name(TMesh) & "'"
+    if hasCustomPragma(attrValue, InstanceAttribute):
+      var foundAttr = false
+      for instAttrName, instAttrValue in default(TInstance).fieldPairs:
+        if attrName == instAttrName:
+          assert typeof(instAttrValue) is GPUArray, "Instance attribute '" & attrName & "' must be a GPUArray"
+          assert foundAttr == false, "Attribute '" & attrName & "' is defined in Mesh and Instance, can only be one"
+          assert typeof(attrValue) is elementType(instAttrValue.data), "Type of shader attribute and mesh attribute '" & attrName & "' is not the same"
+          foundAttr = true
+      assert foundAttr, "Attribute '" & attrName & "' is not provided in instance type '" & name(TInstance) & "'"
 
 proc Render*[TShader, TMesh, TInstance](
   commandBuffer: VkCommandBuffer,
@@ -585,6 +631,15 @@ proc Render*[TShader, TMesh, TInstance](
   mesh: TMesh,
   instances: TInstance,
 ) =
+
+  static: assertCanRenderMesh(TShader, TMesh, TInstance)
+  static:
+    hasDescriptorSets = false
+    for attrName, attrValue in default(TShader).fieldPairs():
+      if attrValue.hasCustomPragma(DescriptorSets):
+        hasDescriptorSets = true
+    if hasDescriptorSets:
+      assert hasBoundDescriptorSets, "Shader uses descriptor sets, but none are bound"
 
   var vertexBuffers: seq[VkBuffer]
   var vertexBuffersOffsets: seq[uint64]
@@ -660,8 +715,6 @@ proc Render*[TShader, TMesh, TInstance](
       firstVertex = 0,
       firstInstance = 0
     )
-
-type EMPTY = object
 
 proc Render*[TShader, TMesh](
   commandBuffer: VkCommandBuffer,

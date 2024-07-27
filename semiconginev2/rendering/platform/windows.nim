@@ -193,6 +193,8 @@ proc GetMousePosition*(window: NativeWindow): Option[Vec2f] =
     return some(Vec2f([float32(p.x), float32(p.y)]))
   return none(Vec2f)
 
+proc SetMousePosition*(window: NativeWindow, x, y: int) =
+  CheckWin32Result SetCursorPos(x, y)
 
 proc CreateNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   assert instance.Valid

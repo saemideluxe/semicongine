@@ -11,6 +11,7 @@ type
     mouseWheel: float32
     windowWasResized: bool = true
     windowIsMinimized: bool = false
+    lockMouse: bool = false
 
 # warning, shit is not thread safe
 var input: Input
@@ -24,6 +25,9 @@ proc UpdateInputs*(): bool =
   input.mouseWheel = 0
   input.mouseMove = NewVec2f()
   input.windowWasResized = false
+
+  if input.lockMouse:
+    SetMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
 
   var killed = false
   for event in vulkan.window.PendingEvents():
@@ -72,10 +76,12 @@ proc MousePosition*(): Vec2f = input.mousePosition
 proc MousePositionNormalized*(size: (int, int)): Vec2f =
   result.x = (input.mousePosition.x / float32(size[0])) * 2.0 - 1.0
   result.y = (input.mousePosition.y / float32(size[1])) * 2.0 - 1.0
-proc MouseMove*(): auto = input.mouseMove
-proc MouseWheel*(): auto = input.mouseWheel
+proc MouseMove*(): Vec2f = input.mouseMove
+proc MouseWheel*(): float32 = input.mouseWheel
 proc WindowWasResized*(): auto = input.windowWasResized
 proc WindowIsMinimized*(): auto = input.windowIsMinimized
+proc LockMouse*(value: bool) = input.lockMouse = value
+
 
 # actions as a slight abstraction over raw input
 

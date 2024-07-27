@@ -23,6 +23,7 @@ type
   TMat4*[T: SomeNumber] = object
     data*: array[16, T]
   TMat* = TMat2|TMat3|TMat4|TMat23|TMat32|TMat34|TMat43
+  TSquareMat = TMat2|TMat3|TMat4
   Mat2* = TMat2[float32]
   Mat23* = TMat23[float32]
   Mat32* = TMat32[float32]
@@ -311,6 +312,15 @@ macro createAllMultiplicationOperators() =
   result.add(createVecMatMultiplicationOperator(TMat4, TVec4))
 
 createAllMultiplicationOperators()
+
+proc `+=`*[T1: TSquareMat, T2: TSquareMat|SomeNumber](a: var T1, b: T2) =
+  a = a + b
+
+proc `-=`*[T1: TSquareMat, T2: TSquareMat|SomeNumber](a: var T1, b: T2) =
+  a = a + b
+
+proc `*=`*[T1: TSquareMat, T2: TSquareMat|SomeNumber](a: var T1, b: T2) =
+  a = a * b
 
 func `*`*(mat: Mat4, vec: Vec3f): Vec3f =
   (mat * vec.ToVec4(1)).ToVec3
