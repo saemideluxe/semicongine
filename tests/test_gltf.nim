@@ -13,53 +13,58 @@ proc test_gltf(time: float32) =
   type
     ObjectData = object
       transform: Mat4
+      materialId: int32
     Camera = object
       viewPerspective: Mat4
     Material = object
       color: Vec4f = NewVec4f(1, 1, 1, 1)
-      colorTexture: int32 = -1
+      # colorTexture: int32 = -1
       metallic: float32 = 0
       roughness: float32 = 0
-      metallicRoughnessTexture: int32 = -1
-
-      normalTexture: int32 = -1
-      occlusionTexture: int32 = -1
+      # metallicRoughnessTexture: int32 = -1
+      # normalTexture: int32 = -1
+      # occlusionTexture: int32 = -1
       emissive: Vec4f = NewVec4f(0, 0, 0, 0)
-      emissiveTexture: int32 = -1
+      # emissiveTexture: int32 = -1
     MainDescriptors = object
-      material: GPUValue[Material, UniformBuffer]
+      materials: array[32, GPUValue[Material, UniformBuffer]]
       camera: GPUValue[Camera, UniformBufferMapped]
     Shader = object
       objectData {.PushConstantAttribute.}: ObjectData
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec4f
-      # uv {.VertexAttribute.}: Vec2f
+      normal {.VertexAttribute.}: Vec3f
       fragmentColor {.Pass.}: Vec4f
-      fragmentUv {.Pass.}: Vec2f
+      fragmentNormal {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
       descriptors {.DescriptorSets.}: (MainDescriptors, )
       # code
       vertexCode: string = """
 void main() {
-  fragmentColor = color;
-  // fragmentUv = uv;
-  gl_Position = vec4(position, 1) * camera.viewPerspective;
+  fragmentColor = color * materials[objectData.materialId].color;
+  fragmentNormal = normal;
+  gl_Position = vec4(position, 1) * (objectData.transform * camera.viewPerspective);
 }"""
-      fragmentCode: string = """void main() { outColor = fragmentColor;}"""
+      fragmentCode: string = """
+const vec3 lightDir = normalize(vec3(1, -1, 1));
+void main() {
+  outColor = vec4(fragmentColor.rgb * (1 - abs(dot(fragmentNormal, lightDir))), fragmentColor.a);
+}"""
     Mesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec4f, VertexBuffer]
-      uv: GPUArray[Vec2f, VertexBuffer]
-    DebugMesh = object
-      position: GPUArray[Vec3f, VertexBuffer]
-      color: GPUArray[Vec4f, VertexBuffer]
+      normal: GPUArray[Vec3f, VertexBuffer]
+      indices: GPUArray[uint32, IndexBuffer]
+      material: int32
 
   var gltfData = LoadMeshes[Mesh, Material](
     "town.glb",
     MeshAttributeNames(
       POSITION: "position",
       COLOR: @["color"],
-      TEXCOORD: @["uv"],
+      NORMAL: "normal",
+      indices: "indices",
+      material: "material",
     ),
     MaterialAttributeNames(
       baseColorFactor: "color",
@@ -80,34 +85,20 @@ void main() {
       ), UniformBufferMapped)
     )
   )
+  for i in 0 ..< gltfData.materials.len:
+    descriptors.data.materials[i] = asGPUValue(gltfData.materials[i], UniformBuffer)
   for mesh in mitems(gltfData.meshes):
     for primitive in mitems(mesh):
       primitive[0].color = asGPUArray(newSeqWith(primitive[0].position.data.len, NewVec4f(1, 1, 1, 1)), VertexBuffer)
       renderdata.AssignBuffers(primitive[0])
   renderdata.AssignBuffers(descriptors)
 
-  let O = default(Vec3f)
-  let Gray = NewVec4f(0.5, 0.5, 0.5, 1)
-  var gridPos = @[O, X, O, Y, O, Z]
-  var gridColor = @[R, R, G, G, B, B]
-  for i in 0 ..< 10:
-    gridPos.add [NewVec3f(-5, -0.001, i.float32 - 5), NewVec3f(5, -0.001, i.float32 - 5)]
-    gridPos.add [NewVec3f(i.float32 - 5, -0.001, -5), NewVec3f(i.float32 - 5, -0.001, 5)]
-    gridColor.add [Gray, Gray, Gray, Gray]
-  var grid = DebugMesh(
-    position: asGPUArray(gridPos, VertexBuffer),
-    color: asGPUArray(gridColor, VertexBuffer),
-  )
-  renderdata.AssignBuffers(grid)
-
-  var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, cullMode = [])
-  var debugpipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, lineWidth=10)
+  var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
 
   renderdata.FlushAllMemory()
 
-  proc drawNode(commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int,
-      transform: Mat4 = Unit4) =
+  proc drawNode(commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int, transform: Mat4) =
     let nodeTransform = gltfData.nodes[nodeId].transform * transform
     if gltfData.nodes[nodeId].mesh >= 0:
       for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh]:
@@ -115,7 +106,7 @@ void main() {
           commandbuffer = commandbuffer,
           pipeline = pipeline,
           mesh = primitive[0],
-          pushConstant = ObjectData(transform: nodeTransform)
+          pushConstant = ObjectData(transform: nodeTransform, materialId: primitive[0].material)
         )
     for childNode in gltfData.nodes[nodeId].children:
       drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = childNode, transform = nodeTransform)
@@ -142,16 +133,13 @@ void main() {
     if KeyIsDown(A): sideward -= 2
     if KeyIsDown(D): sideward += 2
 
-    let camDir = (Rotate(camPitch, X) * Rotate(camYaw, Y)) * Z
-    echo camDir
-    let camDirSide = (Rotate(camPitch, X) * Rotate(camYaw, Y)) * X
-    # echo camDir
-    # echo camDirSide
+    let camDir = (Rotate(camYaw, Y) * Rotate(camPitch, X)) * Z
+    let camDirSide = camDir.Cross(-Y).Normalized
     camPos += camDir * forward * dt
     camPos += camDirSide * sideward * dt
 
     descriptors.data.camera.data.viewPerspective = (
-      Perspective(PI/3, aspect = GetAspectRatio(), zNear = 0.001, zFar = 100) *
+      Perspective(PI/3, aspect = GetAspectRatio(), zNear = 0.1, zFar = 1) *
       Rotate(-camPitch, X) * Rotate(-camYaw, Y) * Translate(-camPos)
     )
 
@@ -164,16 +152,18 @@ void main() {
         WithPipeline(commandbuffer, pipeline):
           WithBind(commandbuffer, (descriptors, ), pipeline):
             for nodeId in gltfData.scenes[0]:
-              drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = nodeId)
-        WithBind(commandbuffer, (descriptors, ), pipeline):
-          WithPipeline(commandbuffer, debugpipeline):
-            Render(commandbuffer = commandbuffer, pipeline = debugpipeline, mesh = grid)
+              drawNode(
+                commandbuffer = commandbuffer,
+                pipeline = pipeline,
+                nodeId = nodeId,
+                transform = Rotate(PI / 2, Z)
+              )
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   DestroyPipeline(pipeline)
-  DestroyPipeline(debugpipeline)
   DestroyRenderData(renderdata)
+
 when isMainModule:
   var time = 1000'f32
   InitVulkan()

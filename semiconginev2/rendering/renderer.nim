@@ -607,10 +607,10 @@ template WithBind*[A, TShader](commandBuffer: VkCommandBuffer, sets: (Descriptor
 
 proc assertCanRenderMesh(TShader, TMesh, TInstance: typedesc) =
   for attrName, attrValue in default(TShader).fieldPairs:
-    if hasCustomPragma(attrValue, VertexAttribute):
+    when hasCustomPragma(attrValue, VertexAttribute):
       var foundAttr = false
       for meshAttrName, meshAttrValue in default(TMesh).fieldPairs:
-        if attrName == meshAttrName:
+        when attrName == meshAttrName:
           assert typeof(meshAttrValue) is GPUArray, "Mesh attribute '" & attrName & "' must be a GPUArray"
           assert typeof(attrValue) is elementType(meshAttrValue.data), "Type of shader attribute and mesh attribute '" & attrName & "' is not the same"
           foundAttr = true

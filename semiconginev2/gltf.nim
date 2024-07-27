@@ -94,16 +94,25 @@ proc componentTypeId(t: typedesc): int =
   elif t is uint32: return 5125
   elif t is float32: return 5126
 
-proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[
-    uint8]): seq[T] =
+proc componentTypeName(id: int): string =
+  if id == 5120: return int8.name
+  elif id == 5121: return uint8.name
+  elif id == 5122: return int16.name
+  elif id == 5123: return uint16.name
+  elif id == 5125: return uint32.name
+  elif id == 5126: return float32.name
+
+proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[uint8]): seq[T] =
+  if accessor.hasKey("sparse"):
+    raise newException(Exception, "Sparce accessors are currently not supported")
+
   let componentType = accessor["componentType"].getInt()
   let itemType = accessor["type"].getStr()
 
   when T is TVec or T is TMat:
-    assert componentTypeId(elementType(default(T))) == componentType, name(T) &
-        " != " & $componentType
+    assert componentTypeId(elementType(default(T))) == componentType, "Requested type '" & name(elementType(default(T))) & $componentTypeId(elementType(default(T))) & "' but actual type is '" & componentTypeName(componentType) & "'"
   else:
-    assert componentTypeId(T) == componentType, name(T) & " != " & $componentType
+    assert componentTypeId(T) == componentType, "Requested type '" & name(T) & "' but actual type is '" & componentTypeName(componentType) & "'"
 
   when T is TVec:
     when len(default(T)) == 2: assert itemType == "VEC2"
@@ -120,25 +129,18 @@ proc getAccessorData[T](root: JsonNode, accessor: JsonNode, mainBuffer: seq[
 
   let bufferView = root["bufferViews"][accessor["bufferView"].getInt()]
   assert bufferView["buffer"].getInt() == 0, "Currently no external buffers supported"
-
-  if accessor.hasKey("sparse"):
-    raise newException(Exception, "Sparce accessors are currently not supported")
-
-  let accessorOffset = if accessor.hasKey("byteOffset"): accessor[
-      "byteOffset"].getInt() else: 0
-  let length = bufferView["byteLength"].getInt()
-  let bufferOffset = bufferView["byteOffset"].getInt() + accessorOffset
+  let accessorOffset = if accessor.hasKey("byteOffset"): accessor["byteOffset"].getInt() else: 0
+  let bufferOffset = (if "byteOffset" in bufferView: bufferView["byteOffset"].getInt() else: 0) + accessorOffset
   var dstPointer = result.ToCPointer()
 
   if bufferView.hasKey("byteStride"):
     warn "Congratulations, you try to test a feature (loading buffer data with stride attributes) that we have no idea where it is used and how it can be tested (need a coresponding *.glb file)."
     # we don't support stride, have to convert stuff here... does this even work?
     for i in 0 ..< result.len:
-      copyMem(dstPointer, addr mainBuffer[bufferOffset + i * bufferView[
-          "byteStride"].getInt()], sizeof(T))
+      copyMem(dstPointer, addr(mainBuffer[bufferOffset + i * bufferView["byteStride"].getInt()]), sizeof(T))
       dstPointer = cast[typeof(dstPointer)](cast[uint](dstPointer) + sizeof(T).uint)
   else:
-    copyMem(dstPointer, addr mainBuffer[bufferOffset], length)
+    copyMem(dstPointer, addr(mainBuffer[bufferOffset]), result.len * sizeof(T))
 
 proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[
     uint8]): Image[BGRA] =
@@ -206,37 +208,36 @@ proc loadPrimitive[TMesh](
   if primitive.hasKey("mode"):
     result[1] = PRIMITIVE_MODE_MAP[primitive["mode"].getInt()]
 
+  if primitive.hasKey("indices"):
+    assert mapping.indices != "", "Mesh requires indices"
+
   for resultFieldName, resultValue in fieldPairs(result[0]):
     for gltfAttribute, mappedName in fieldPairs(mapping):
-      when typeof(mappedName) is string:
-        when gltfAttribute != "" and resultFieldName == mappedName:
-          assert resultValue is GPUData, "Attribute " & resultFieldName & " must be of type GPUData"
+      when typeof(mappedName) is seq:
+        when resultFieldName in mappedName:
+          var i = 0
+          for mappedIndexName in mappedName:
+            if gltfAttribute != "" and resultFieldName == mappedIndexName:
+              assert resultValue is GPUData, "Attribute " & resultFieldName & " must be of type GPUData"
+              let gltfAttributeIndexed = gltfAttribute & "_" & $i
+              if primitive["attributes"].hasKey(gltfAttributeIndexed):
+                let accessor = primitive["attributes"][gltfAttributeIndexed].getInt()
+                resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
+          inc i
+      elif typeof(mappedName) is string:
+        when resultFieldName == mappedName:
+          assert resultValue is GPUData or gltfAttribute == "material", "Attribute " & resultFieldName & " must be of type GPUData"
           when gltfAttribute == "indices":
             if primitive.hasKey(gltfAttribute):
               let accessor = primitive[gltfAttribute].getInt()
-              resultValue.data = getAccessorData[elementType(resultValue.data)](
-                  root, root["accessors"][accessor], mainBuffer)
+              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
           elif gltfAttribute == "material":
-            if primitive.hasKey(gltfAttribute):
-              resultValue.data = typeof(resultValue.data)(primitive[
-                  gltfAttribute].getInt())
+            if primitive.hasKey(gltfAttribute): # assuming here that materials IDs are a normal field on the mesh, not GPUData
+              resultValue = typeof(resultValue)(primitive[gltfAttribute].getInt())
           else:
             if primitive["attributes"].hasKey(gltfAttribute):
               let accessor = primitive["attributes"][gltfAttribute].getInt()
-              resultValue.data = getAccessorData[elementType(resultValue.data)](
-                  root, root["accessors"][accessor], mainBuffer)
-      else:
-        var i = 0
-        for mappedIndexName in mappedName:
-          if gltfAttribute != "" and resultFieldName == mappedIndexName:
-            assert resultValue is GPUData, "Attribute " & resultFieldName & " must be of type GPUData"
-            let gltfAttributeIndexed = gltfAttribute & "_" & $i
-            if primitive["attributes"].hasKey(gltfAttributeIndexed):
-              let accessor = primitive["attributes"][
-                  gltfAttributeIndexed].getInt()
-              resultValue.data = getAccessorData[elementType(resultValue.data)](
-                  root, root["accessors"][accessor], mainBuffer)
-          inc i
+              resultValue.data = getAccessorData[elementType(resultValue.data)](root, root["accessors"][accessor], mainBuffer)
 
 proc loadNode(node: JsonNode): GltfNode =
   result = GltfNode()
@@ -304,8 +305,7 @@ proc ReadglTF*[TMesh, TMaterial](
   # external binary buffers are not supported
   assert data.structuredContent["buffers"].len == 1
   assert not data.structuredContent["buffers"][0].hasKey("uri")
-  let bufferLenDiff = int(chunkLength) - data.structuredContent["buffers"][0][
-      "byteLength"].getInt()
+  let bufferLenDiff = int(chunkLength) - data.structuredContent["buffers"][0]["byteLength"].getInt()
   assert 0 <= bufferLenDiff and bufferLenDiff <= 3 # binary buffer may be aligned to 4 bytes
 
   debug "Loading mesh: ", data.structuredContent.pretty
