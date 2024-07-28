@@ -2,7 +2,7 @@ import std/strformat
 import std/strutils
 import std/os
 
-import semiconginev2/build
+import semicongine/build
 
 task build_dev, "build dev":
   semicongine_build_switches(buildname = "dev")

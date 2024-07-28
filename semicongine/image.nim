@@ -1,3 +1,15 @@
+{.emit: "#define STB_IMAGE_STATIC".}
+{.emit: "#define STB_IMAGE_IMPLEMENTATION".}
+{.emit: "#include \"" & currentSourcePath.parentDir() & "/thirdparty/stb/stb_image.h\"".}
+
+proc stbi_load_from_memory(
+  buffer: ptr uint8,
+  len: cint,
+  x, y: ptr cint,
+  channels_in_file: ptr cint,
+  desired_channels: cint
+): ptr uint8 {.importc, nodecl.}
+
 type
   Gray* = TVec1[uint8]
   BGRA* = TVec4[uint8]
@@ -18,18 +30,26 @@ type
 
 proc LoadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
   when T is Gray:
-    let pngType = 0.cint
+    let nChannels = 1.cint
   elif T is BGRA:
-    let pngType = 6.cint
+    let nChannels = 4.cint
 
-  var w, h: cuint
-  var data: cstring
+  var w, h, c: cint
 
-  if lodepng_decode_memory(out_data = addr(data), w = addr(w), h = addr(h), in_data = cast[cstring](pngData.ToCPointer), insize = csize_t(pngData.len), colorType = pngType, bitdepth = 8) != 0:
+  let data = stbi_load_from_memory(
+    buffer = cast[ptr uint8](pngData.ToCPointer),
+    len = pngData.len.cint,
+    x = addr(w),
+    y = addr(h),
+    channels_in_file = addr(c),
+    desired_channels = nChannels
+  )
+  # if lodepng_decode_memory(out_data = addr(data), w = addr(w), h = addr(h), in_data = cast[cstring](pngData.ToCPointer), insize = csize_t(pngData.len), colorType = pngType, bitdepth = 8) != 0:
+  if data == nil:
     raise newException(Exception, "An error occured while loading PNG file")
 
   let imagesize = w * h * 4
-  result = Image[T](width: w, height: h, data: newSeq[T](w * h))
+  result = Image[T](width: w.uint32, height: h.uint32, data: newSeq[T](w * h))
   copyMem(result.data.ToCPointer, data, imagesize)
   nativeFree(data)
 
@@ -46,7 +66,11 @@ proc LoadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T]
 
   result = LoadImageData[T](loadResource_intern(path, package = package).readAll())
 
-
+# stb_image.h has no encoding support, maybe check stb_image_write or similar
+#
+# proc lodepng_encode_memory(out_data: ptr cstring, outsize: ptr csize_t, image: cstring, w: cuint, h: cuint, colorType: cint, bitdepth: cuint): cuint {.importc.}
+#
+#[
 proc toPNG[T: PixelType](image: Image[T]): seq[uint8] =
   when T is Gray:
     let pngType = 0 # hardcoded in lodepng.h
@@ -79,3 +103,4 @@ proc WritePNG*(image: Image, filename: string) =
   let written = f.writeBytes(data, 0, data.len)
   assert written == data.len, &"There was an error while saving '{filename}': only {written} of {data.len} bytes were written"
   f.close()
+]#
