@@ -91,8 +91,8 @@ void main() {
       material: int32
 
   var gltfData = LoadMeshes[Mesh, Material](
-    # "town.glb",
-    "forest.glb",
+    "town.glb",
+    # "forest.glb",
     MeshAttributeNames(
       POSITION: "position",
       COLOR: @["color"],
