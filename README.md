@@ -1,9 +1,6 @@
 Note: If you are reading this on Github, please not that this is only a mirror
-repository and the default branch is ```hg```.
-
-Also, some of the README is a bit out of date, as I am now focusing mostly on
-writing my first game. However, developement ist onging and the documentation
-will be overhauled once I start working on my next game.
+repository and the newest code is hosted on my mercurial repository at
+https://hg.basx.dev/games/semicongine/.
 
 # Semicongine
 
@@ -13,177 +10,116 @@ This is a little game engine, mainly trying to wrap around vulkan and the
 operating system's windowing, input and audio system. I am using the last
 programming language you will ever need, [Nim](https://nim-lang.org/)
 
+## Features
+
+The engine currently features the following:
+
+- No dependencies outside of this repo (except zip/unzip on Linux). All
+  dependencies are included.
+- Low-level, Vulkan-base rendering system
+- All vertex/uniform/descriptors/shader-formats, shaders can and must be
+  defined "freely". The only restriction that we currently have, is that vertex
+  data is non-interleaved.
+- A ton of compiletime checks to ensure the defined mesh-data and shaders are
+  compatible for rendering
+- Simple audio mixer, should suffice for most things
+- Simple input-system, no controller support at this time
+- Resource packaging of images, audio and 3D files.
+- A few additional utils like a simple storage API, a few algorithms for
+  collision detection, noise generation and texture packing, and a simple
+  settings API with hot-reloading
+
+## Hello world example
+
+Attention, this project is not optimized for "hello world"-scenarios, so you
+have quite a few lines to get something to display:
+
+```
+
+import semicongine
+
+# required
+InitVulkan()
+
+# set up a simple render pass to render the displayed frame
+var renderpass = CreateDirectPresentationRenderPass(depthBuffer = false, samples = VK_SAMPLE_COUNT_1_BIT)
+
+# the swapchain, needs to be attached to the main renderpass
+SetupSwapchain(renderpass = renderpass)
+
+# render data is used for memory management on the GPU
+var renderdata = InitRenderData()
+
+type
+  # define a push constant, to have something moving
+  PushConstant = object
+    scale: float32
+  # This is how we define shaders: the interface needs to be "typed"
+  # but the shader code itself can freely be written in glsl
+  Shader = object
+    position {.VertexAttribute.}: Vec3f
+    color {.VertexAttribute.}: Vec3f
+    pushConstant {.PushConstantAttribute.}: PushConstant
+    fragmentColor {.Pass.}: Vec3f
+    outColor {.ShaderOutput.}: Vec4f
+    # code
+    vertexCode: string = """void main() {
+    fragmentColor = color;
+    gl_Position = vec4(position * pushConstant.scale, 1);}"""
+    fragmentCode: string = """void main() {
+    outColor = vec4(fragmentColor, 1);}"""
+  # And we also need to define our Mesh, which does describe the vertex layout
+  TriangleMesh = object
+    position: GPUArray[Vec3f, VertexBuffer]
+    color: GPUArray[Vec3f, VertexBuffer]
+
+# instantiate the mesh and fill with data
+var mesh = TriangleMesh(
+  position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
+  color: asGPUArray([NewVec3f(0, 0, 1), NewVec3f(0, 1, 0), NewVec3f(1, 0, 0)], VertexBuffer),
+)
+
+# this allocates GPU data, uploads the data to the GPU and flushes any thing that is host-cached
+# this is a shortcut version, more fine-grained control is possible
+AssignBuffers(renderdata, mesh)
+renderdata.FlushAllMemory()
+
+# Now we need to instantiate the shader as a pipeline object that is attached to a renderpass
+var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+
+# the main render-loop will exit if we get a kill-signal from the OS
+while UpdateInputs():
+
+  # starts the drawing for the next frame and provides us necesseary framebuffer and commandbuffer objects in this scope
+  WithNextFrame(framebuffer, commandbuffer):
+
+    # start the main (and only) renderpass we have, needs to know the target framebuffer and a commandbuffer
+    WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+
+      # now activate our shader-pipeline
+      WithPipeline(commandbuffer, pipeline):
+
+        # and finally, draw the mesh and set a single parameter
+        # more complicated setups with descriptors/uniforms are of course possible
+        RenderWithPushConstant(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh, pushConstant = PushConstant(scale: 0.3))
+
+# cleanup
+checkVkResult vkDeviceWaitIdle(vulkan.device)
+DestroyPipeline(pipeline)
+DestroyRenderData(renderdata)
+vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+DestroyVulkan()
+
+```
+
 ## Roadmap
 
-Here a bit to see what has been planed and what is done already. Is being
-updated frequently (marking those checkboxes just feels to good to stop working).
+For now all features that I need are implemented. I will gradually add more
+stuff that I need, based on the games that I am developing. Here are a few
+things that I consider integrating at a later point, once I have gather some
+more experience what can/should be used across different projects:
 
-Rendering:
-
-- [x] Vertex attributes, vertex data
-- [x] Shaders (allow for predefined and custom shaders)
-- [x] Uniforms
-- [x] Per-instance vertex attributes (required to be able to draw scene graph)
-- [x] Fixed framerate
-- [x] Instanced drawing (currently can use instance attributes, but we only support a single instance per draw call)
-- [x] Textures
-- [x] Materials (vertices with material indices)
-- [x] Allow different shaders (ie pipelines) for different meshes
-
-Required for 3D rendering:
-
-- [ ] Depth buffering
-- [ ] Mipmaps
-
-Asset handling:
-
-- [x] Resource loading - [x] Mod/resource-pack concept - [x] Load from directory - [x] Load from zip - [x] Load from exe-embeded
-- [x] Mesh/material files (glTF, but incomplete, not all features supported)
-- [x] Image files (BMP RGBA)
-- [x] Audio files (AU)
-- [x] API to transform/recalculate mesh data
-
-Other (required for alpha release):
-
-- [x] Config files ala \*.ini files (use std/parsecfg)
-- [x] Mouse/Keyboard input handling
-  - [x] X11
-  - [x] Win32
-- [x] Enable/disable hardware cursor
-- [x] Fullscreen mode + switch between modes - [x] Linux - [x] Window
-- [x] Audio playing - [x] Linux - [x] Windows Waveform API
-- [ ] Generic configuration concept (engine defaults, per-user, etc)
-- [ ] Input-mapping configuration
-- [ ] Telemetry
-  - [x] Add simple event logging service
-  - [ ] Add exception reporting
-
-Other important features:
-
-- [ ] Multisampling
-- [x] Text rendering
-- [x] Animation system
-- [ ] Sprite system
-- [ ] Particle system
-- [ ] Sound-animation
-- [ ] Paletton-export-loader
-- [ ] Arrange buffer memory types based on per-mesh-attribute type instead of per-shader-attribute type (possible?)
-
-Other less important features:
-
-- [ ] Viewport scaling (e.g. framebuffer resolution != window resolution)
-- [ ] Query and display rendering information from Vulkan?
-- [ ] Game controller input handling
-- [ ] Allow multipel Uniform blocks
-- [ ] Documentation
-
-Quality improvments:
-
-- [x] Better scenegraph API
-- [x] Better rendering pipeline API
-
-Build-system:
-
-- [x] move all of Makefile to config.nims
-
-# Documentation
-
-Okay, here is first quick-n-dirty documentation, the only purpose to organize my thoughts a bit.
-
-## Engine parts
-
-Currently we have at least the following:
-
-- Rendering: rendering.nim vulkan/\*
-- Scene graph: entity.nim
-- Audio: audio.nim audiotypes.nim
-- Input: events.nim
-- Settings: settings.nim
-- Meshes: mesh.nim
-- Math: math/\*
-- Telemetry: telemetry.nim (wip)
-- Resources (loading, mods): resources.nim
-
-Got you: Everything is wip, but (wip) here means work has not started yet.
-
-## Handling of assets
-
-A short description how I want to handle assets.
-
-Support for file formats (super limited, no external dependencies, uses quite a bit of space, hoping for zip):
-
-- Images: BMP
-- Audio: AU
-- Mesh: glTF (\*.gld)
-
-In-memory layout of assets (everything needs to be converted to those while loading):
-
-- Images: 4 channel with each uint8 = 32 bit RGBA, little endian (R is low bits, A is high bits)
-- Audio: 2 Channel 16 bit signed little endian, 44100Hz
-- Meshes: non-interleaved, lists of values for each vertex, one list per attribute
-
-## Configuration
-
-Or: How to organize s\*\*t that is not code
-
-Not sure why, but this feels super important to get done right. The engine is
-being designed with a library-mindset, not a framework mindset. And with that,
-ensuring the configuration of the build, runtime and settings in general
-becomes a bit less straight-forward.
-
-So here is the idea: There are three to four different kinds of configurations
-that the engine should be able to handle:
-
-1. Build configuration: Engine version, project name, log level, etc.
-2. Runtime engine/project settings: Video/audio settings, telemetry, log-output, etc.
-3. Mods: Different sets of assets and configuration to allow easy testing of different scenarios
-4. Save data: Saving world state of the game
-
-Okay, let's look at each of those and how I plan to implement them:
-
-**1. Build configuration**
-
-**2. Runtime settings**
-
-This is mostly implemented already. I am using the Nim module std/parsecfg.
-There is also the option to watch the filesystem and update values at runtime,
-mostly usefull for development.
-
-The engine scans all files in the settings-root directory and builds a
-settings tree that can be access via a setting-hierarchy like this:
-
-    setting("a.b.c.d.e")
-
-`a.b` refers to the settings directory `./a/b/` (from the settings-root)
-`c` refers to the file `c.ini` inside `./a/b/`
-`d` refers to the ini-section inside the file `./a/b/c.ini`
-`e` refers to the key inside section `d` inside the file `./a/b/c.ini`
-
-`a.b` are optional, they just allow larger configuration trees.
-`d` is optional, if it is not give, `e` refers to the top-level section
-of the ini-file.
-
-**3. Mods**
-
-A mod is just a collection of resources for a game. Can maybe switched from
-inside a game. Current mod can be defined via "2. Runtime settings"
-
-I want to support mods from:
-
-a) a directory on the filesystem
-b) a zip-file on the filesystem
-c) a zip-file that is embeded in the executable
-
-The reasoning is simple: a) is helpfull for development, testing of
-new/replaced assets, b) is the default deployment with mod-support and c) is
-deployment without mod-support, demo-versions and similar.
-
-Should not be that difficult but give us everything we ever need in terms of
-resource packaging.
-
-**4. Save data**
-
-Not too much thought here yet. Maybe we can use Nim's std/marshal module. It
-produces JSON from nim objects. Pretty dope, but maybe pretty slow. However, we
-are indie-JSON here, not 10M of GTA Online JSON:
-https://nee.lv/2021/02/28/How-I-cut-GTA-Online-loading-times-by-70/
+[ ] More support for glTF format (JPEG textures, animations, morphing)
+[ ] Maybe some often used utils like camera-controllers, offscreen-rendering, shadow-map rendering, etc.
+[ ] Maybe some UI-stuff
+[ ] Controller support
