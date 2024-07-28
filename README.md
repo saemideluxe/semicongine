@@ -35,7 +35,7 @@ The engine currently features the following:
 Attention, this project is not optimized for "hello world"-scenarios, so you
 have quite a few lines to get something to display:
 
-```
+```nim
 
 import semicongine
 
@@ -120,7 +120,7 @@ stuff that I need, based on the games that I am developing. Here are a few
 things that I consider integrating at a later point, once I have gather some
 more experience what can/should be used across different projects:
 
-[ ] More support for glTF format (JPEG textures, animations, morphing)
-[ ] Maybe some often used utils like camera-controllers, offscreen-rendering, shadow-map rendering, etc.
-[ ] Maybe some UI-stuff
-[ ] Controller support
+- [ ] More support for glTF format (JPEG textures, animations, morphing)
+- [ ] Maybe some often used utils like camera-controllers, offscreen-rendering, shadow-map rendering, etc.
+- [ ] Maybe some UI-stuff
+- [ ] Controller support
