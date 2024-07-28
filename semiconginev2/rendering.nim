@@ -331,13 +331,12 @@ proc DestroyVulkan*() =
   vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
   vkDestroyInstance(vulkan.instance, nil)
 
-proc ShowSystemCursor*() = vulkan.window.ShowSystemCursor()
-proc HideSystemCursor*() = vulkan.window.HideSystemCursor()
+proc ShowSystemCursor*(value: bool) = vulkan.window.ShowSystemCursor(value)
 proc Fullscreen*(): bool = fullscreen
-proc `Fullscreen=`*(enable: bool) =
+proc SetFullscreen*(enable: bool) =
   if enable != fullscreen:
     fullscreen = enable
-    vulkan.window.Fullscreen(fullscreen)
+    vulkan.window.SetFullscreen(fullscreen)
 
 proc GetAspectRatio*(): float32 =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"

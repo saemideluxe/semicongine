@@ -5,6 +5,7 @@ type
     KeyPressed, KeyReleased
     MousePressed, MouseReleased, MouseMoved,
     MouseWheel
+    GotFocus, LostFocus
   Key* {.size: sizeof(cint), pure.} = enum
     UNKNOWN
     Escape, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12
@@ -31,5 +32,9 @@ type
       x*, y*: int
     of MouseWheel:
       amount*: float32
+    of GotFocus:
+      discard
+    of LostFocus:
+      discard
     else:
       discard

@@ -96,6 +96,10 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
       currentEvents.add(Event(eventType: MinimizedWindow))
     elif wParam == SIZE_RESTORED:
       currentEvents.add(Event(eventType: RestoredWindow))
+  of WM_SETFOCUS:
+    currentEvents.add(Event(eventType: GotFocus))
+  of WM_KILLFOCUS:
+    currentEvents.add(Event(eventType: LostFocus))
   of WM_SETCURSOR:
     if LOWORD(lParam) == HTCLIENT:
       SetCursor(currentCursor)
@@ -148,7 +152,7 @@ proc SetTitle*(window: NativeWindow, title: string) =
 
 # inspired by the one and only, Raymond Chen
 # https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
-proc Fullscreen*(window: var NativeWindow, enable: bool) =
+proc SetFullscreen*(window: var NativeWindow, enable: bool) =
   let dwStyle: DWORD = GetWindowLong(window.hwnd, GWL_STYLE)
   if enable:
     var mi = MONITORINFO(cbSize: DWORD(sizeof(MONITORINFO)))
@@ -160,13 +164,13 @@ proc Fullscreen*(window: var NativeWindow, enable: bool) =
     SetWindowPlacement(window.hwnd, addr window.g_wpPrev)
     SetWindowPos(window.hwnd, HWND(0), 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
 
-proc HideSystemCursor*(window: NativeWindow) =
-  currentCursor = invisibleCursor
-  SetCursor(currentCursor)
-
-proc ShowSystemCursor*(window: NativeWindow) =
-  currentCursor = defaultCursor
-  SetCursor(currentCursor)
+proc ShowSystemCursor*(window: NativeWindow, value: bool) =
+  if value == true:
+    currentCursor = defaultCursor
+    SetCursor(currentCursor)
+  else:
+    currentCursor = invisibleCursor
+    SetCursor(currentCursor)
 
 proc Destroy*(window: NativeWindow) =
   discard

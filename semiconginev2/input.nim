@@ -12,9 +12,10 @@ type
     windowWasResized: bool = true
     windowIsMinimized: bool = false
     lockMouse: bool = false
+    hasFocus: bool = false
 
 # warning, shit is not thread safe
-var input: Input
+var input = Input()
 
 proc UpdateInputs*(): bool =
   # reset input states
@@ -26,7 +27,7 @@ proc UpdateInputs*(): bool =
   input.mouseMove = NewVec2f()
   input.windowWasResized = false
 
-  if input.lockMouse:
+  if input.lockMouse and input.hasFocus:
     SetMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
 
   var killed = false
@@ -58,6 +59,10 @@ proc UpdateInputs*(): bool =
         input.windowIsMinimized = true
       of RestoredWindow:
         input.windowIsMinimized = false
+      of GotFocus:
+        input.hasFocus = true
+      of LostFocus:
+        input.hasFocus = false
 
   return not killed
 
@@ -81,6 +86,7 @@ proc MouseWheel*(): float32 = input.mouseWheel
 proc WindowWasResized*(): auto = input.windowWasResized
 proc WindowIsMinimized*(): auto = input.windowIsMinimized
 proc LockMouse*(value: bool) = input.lockMouse = value
+proc HasFocus*(): bool = input.hasFocus
 
 
 # actions as a slight abstraction over raw input

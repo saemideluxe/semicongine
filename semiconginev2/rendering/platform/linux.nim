@@ -81,7 +81,7 @@ proc CreateWindow*(title: string): NativeWindow =
     # foregroundColor, backgroundColor
   )
   checkXlibResult XSetStandardProperties(display, window, title, "window", 0, nil, 0, nil)
-  checkXlibResult XSelectInput(display, window, PointerMotionMask or ButtonPressMask or ButtonReleaseMask or KeyPressMask or KeyReleaseMask or ExposureMask)
+  checkXlibResult XSelectInput(display, window, PointerMotionMask or ButtonPressMask or ButtonReleaseMask or KeyPressMask or KeyReleaseMask or ExposureMask or FocusChangeMask)
   checkXlibResult XMapWindow(display, window)
 
   deleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", XBool(false))
@@ -97,7 +97,7 @@ proc CreateWindow*(title: string): NativeWindow =
 proc SetTitle*(window: NativeWindow, title: string) =
   checkXlibResult XSetStandardProperties(window.display, window.window, title, "window", 0, nil, 0, nil)
 
-proc Fullscreen*(window: var NativeWindow, enable: bool) =
+proc SetFullscreen*(window: var NativeWindow, enable: bool) =
   var
     wm_state = window.display.XInternAtom("_NET_WM_STATE", 0)
     wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 0)
@@ -127,13 +127,13 @@ proc Fullscreen*(window: var NativeWindow, enable: bool) =
   )
   checkXlibResult window.display.XFlush()
 
-proc HideSystemCursor*(window: NativeWindow) =
-  checkXlibResult XDefineCursor(window.display, window.window, window.emptyCursor)
-  checkXlibResult window.display.XFlush()
-
-proc ShowSystemCursor*(window: NativeWindow) =
-  checkXlibResult XUndefineCursor(window.display, window.window)
-  checkXlibResult window.display.XFlush()
+proc ShowSystemCursor*(window: NativeWindow, value: bool) =
+  if value == true:
+    checkXlibResult XUndefineCursor(window.display, window.window)
+    checkXlibResult window.display.XFlush()
+  else:
+    checkXlibResult XDefineCursor(window.display, window.window, window.emptyCursor)
+    checkXlibResult window.display.XFlush()
 
 proc Destroy*(window: NativeWindow) =
   checkXlibResult window.display.XFreeCursor(window.emptyCursor)
@@ -175,6 +175,10 @@ proc PendingEvents*(window: NativeWindow): seq[Event] =
     of MotionNotify:
       let motion = cast[PXMotionEvent](addr(event))
       result.add Event(eventType: MouseMoved, x: motion.x, y: motion.y)
+    of FocusIn:
+      result.add Event(eventType: GotFocus)
+    of FocusOut:
+      result.add Event(eventType: LostFocus)
     of ConfigureNotify, Expose:
       result.add Event(eventType: ResizedWindow)
     else:
