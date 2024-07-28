@@ -293,6 +293,7 @@ proc InitVulkan*(appName: string = "semicongine app") =
   defer: deallocCStringArray(deviceExtensionsC)
   let enabledFeatures = VkPhysicalDeviceFeatures(
    fillModeNonSolid: true,
+   depthClamp: true,
    wideLines: true,
    largePoints: true,
   )

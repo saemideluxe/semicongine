@@ -364,6 +364,7 @@ proc CreatePipeline*[TShader](
   cullMode: openArray[VkCullModeFlagBits] = [VK_CULL_MODE_BACK_BIT],
   frontFace: VkFrontFace = VK_FRONT_FACE_CLOCKWISE,
   lineWidth = 1'f32,
+  depthClampEnable = false,
 ): Pipeline[TShader] =
   # create pipeline
 
@@ -445,7 +446,7 @@ proc CreatePipeline*[TShader](
     )
     rasterizer = VkPipelineRasterizationStateCreateInfo(
       sType: VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-      depthClampEnable: VK_FALSE,
+      depthClampEnable: depthClampEnable,
       rasterizerDiscardEnable: VK_FALSE,
       polygonMode: polygonMode,
       lineWidth: lineWidth,

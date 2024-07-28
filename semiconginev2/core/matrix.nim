@@ -444,12 +444,12 @@ makeRandomMatrixInit(TMat43)
 makeRandomMatrixInit(TMat4)
 
 func Perspective*(fovy, aspect, zNear, zFar: float32): Mat4 =
-  let tanHalfFovy = tan(fovy / 2)
+  let tanHalfFovy = 1 / tan(fovy / 2)
   return Mat4(data: [
-    1 / (aspect * tanHalfFovy), 0, 0, 0,
-    0, 1 / tanHalfFovy, 0, 0,
+    tanHalfFovy / aspect, 0, 0, 0,
+    0, tanHalfFovy, 0, 0,
     0, 0, zFar / (zFar - zNear), -(zFar * zNear) / (zFar - zNear),
-    0, 0, 1, 1,
+    0, 0, 1, 0,
   ])
 
 func Ortho*(left, right, top, bottom, zNear, zFar: float32): Mat4 =

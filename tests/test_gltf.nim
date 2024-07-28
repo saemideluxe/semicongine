@@ -138,8 +138,10 @@ void main() {
     camPos += camDir * forward * dt
     camPos += camDirSide * sideward * dt
 
+    let fovH = PI / 2
+    let fovV = 2 * arctan(tan(fovH / 2) * 1 / GetAspectRatio())
     descriptors.data.camera.data.viewPerspective = (
-      Perspective(PI/3, aspect = GetAspectRatio(), zNear = 0.1, zFar = 1) *
+      Perspective(fovV, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20) *
       Rotate(-camPitch, X) * Rotate(-camYaw, Y) * Translate(-camPos)
     )
 
