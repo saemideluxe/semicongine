@@ -24,7 +24,8 @@ The engine currently features the following:
   compatible for rendering
 - Simple audio mixer, should suffice for most things
 - Simple input-system, no controller support at this time
-- Resource packaging of images, audio and 3D files.
+- Resource packaging of images, audio and 3D files
+- Simple font and text rendering
 - A few additional utils like a simple storage API, a few algorithms for
   collision detection, noise generation and texture packing, and a simple
   settings API with hot-reloading

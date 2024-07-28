@@ -5,7 +5,7 @@ import std/times
 import std/options
 import std/random
 
-import ../semiconginev2
+import ../semicongine
 
 proc test_gltf(time: float32) =
   var renderdata = InitRenderData()

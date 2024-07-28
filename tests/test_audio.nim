@@ -2,7 +2,7 @@ import std/os
 import std/sequtils
 import std/times
 
-import ../semiconginev2
+import ../semicongine
 
 
 proc test1() =

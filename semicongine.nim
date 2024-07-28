@@ -27,34 +27,34 @@ import std/typetraits
 import std/unicode
 
 
-include ./semiconginev2/rendering/vulkan/api
-include ./semiconginev2/core
+include ./semicongine/rendering/vulkan/api
+include ./semicongine/core
 
 setLogFilter(ENGINE_LOGLEVEL)
 
-include ./semiconginev2/resources
+include ./semicongine/resources
 
-include ./semiconginev2/image
+include ./semicongine/image
 
-include ./semiconginev2/events
-include ./semiconginev2/rendering
+include ./semicongine/events
+include ./semicongine/rendering
 
-include ./semiconginev2/storage
-include ./semiconginev2/input
+include ./semicongine/storage
+include ./semicongine/input
 
-include ./semiconginev2/audio
+include ./semicongine/audio
 
 # texture packing is required for font atlas
-include ./semiconginev2/contrib/algorithms/texture_packing
-include ./semiconginev2/text
+include ./semicongine/contrib/algorithms/texture_packing
+include ./semicongine/text
 
-include ./semiconginev2/gltf
+include ./semicongine/gltf
 
 when not defined(WITHOUT_CONTRIB):
-  include ./semiconginev2/contrib/steam
-  include ./semiconginev2/contrib/settings
-  include ./semiconginev2/contrib/algorithms/collision
-  include ./semiconginev2/contrib/algorithms/noise
+  include ./semicongine/contrib/steam
+  include ./semicongine/contrib/settings
+  include ./semicongine/contrib/algorithms/collision
+  include ./semicongine/contrib/algorithms/noise
 
 if not defined(release):
   setLogFilter(lvlAll)
