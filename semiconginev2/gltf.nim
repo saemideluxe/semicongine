@@ -150,7 +150,7 @@ proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[
   if root["images"][imageIndex].hasKey("uri"):
     raise newException(Exception, "Unsupported feature: Cannot load images from external files")
   let imageType = root["images"][imageIndex]["mimeType"].getStr()
-  assert imageType == "image/png", "glTF loader currently only supports PNG"
+  assert imageType == "image/png", "glTF loader currently only supports PNG, but found '" & imageType & "'"
 
   let bufferView = root["bufferViews"][root["images"][imageIndex][
       "bufferView"].getInt()]

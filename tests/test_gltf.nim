@@ -15,7 +15,9 @@ proc test_gltf(time: float32) =
       transform: Mat4
       materialId: int32
     Camera = object
-      viewPerspective: Mat4
+      view: Mat4
+      normal: Mat4
+      projection: Mat4
     Material = object
       color: Vec4f = NewVec4f(1, 1, 1, 1)
       # colorTexture: int32 = -1
@@ -34,6 +36,7 @@ proc test_gltf(time: float32) =
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec4f
       normal {.VertexAttribute.}: Vec3f
+      fragmentPosition {.Pass.}: Vec3f
       fragmentColor {.Pass.}: Vec4f
       fragmentNormal {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
@@ -41,14 +44,44 @@ proc test_gltf(time: float32) =
       # code
       vertexCode: string = """
 void main() {
+  mat4 modelView = objectData.transform * camera.view;
+  mat3 normalMat = mat3(transpose(inverse(objectData.transform)));
+  vec4 posTransformed = vec4(position, 1) * modelView;
+  fragmentPosition = posTransformed.xyz / posTransformed.w;
   fragmentColor = color * materials[objectData.materialId].color;
-  fragmentNormal = normal;
-  gl_Position = vec4(position, 1) * (objectData.transform * camera.viewPerspective);
+  fragmentNormal = normal * normalMat;
+  gl_Position = vec4(position, 1) * (modelView * camera.projection);
 }"""
       fragmentCode: string = """
-const vec3 lightDir = normalize(vec3(1, -1, 1));
+const vec3 lightPosition = vec3(7, 9, -12);
+const float shininess = 40;
+const vec3 ambientColor = vec3(0, 0, 0);
+const vec3 lightColor = vec3(1, 1, 1);
+// const vec3 specColor = vec3(1, 1, 1);
+const float lightPower = 20;
 void main() {
-  outColor = vec4(fragmentColor.rgb * (1 - abs(dot(fragmentNormal, lightDir))), fragmentColor.a);
+  // some setup
+  vec3 normal = normalize(fragmentNormal);
+  vec3 lightDir = lightPosition - fragmentPosition;
+  float dist = length(lightDir);
+  lightDir = normalize(lightDir);
+
+  float lambertian = max(dot(lightDir, normal), 0);
+  float specular = 0;
+
+  // blinn-phong
+  if (lambertian > 0) {
+    vec3 viewDir = normalize(-fragmentPosition);
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float specAngle = max(dot(halfDir, normal), 0.0);
+    specular = pow(specAngle, shininess);
+  }
+
+  vec3 diffuseColor = fragmentColor.rgb;
+  vec3 specColor = diffuseColor;
+  vec3 color = ambientColor + diffuseColor * lambertian * lightColor * lightPower / dist + specColor * specular * lightColor * lightPower / dist;
+
+  outColor = vec4(color, fragmentColor.a);
 }"""
     Mesh = object
       position: GPUArray[Vec3f, VertexBuffer]
@@ -58,7 +91,8 @@ void main() {
       material: int32
 
   var gltfData = LoadMeshes[Mesh, Material](
-    "town.glb",
+    # "town.glb",
+    "forest.glb",
     MeshAttributeNames(
       POSITION: "position",
       COLOR: @["color"],
@@ -81,7 +115,9 @@ void main() {
   var descriptors = asDescriptorSet(
     MainDescriptors(
       camera: asGPUValue(Camera(
-        viewPerspective: Unit4,
+        view: Unit4,
+        normal: Unit4,
+        projection: Unit4,
       ), UniformBufferMapped)
     )
   )
@@ -138,12 +174,10 @@ void main() {
     camPos += camDir * forward * dt
     camPos += camDirSide * sideward * dt
 
-    let fovH = PI / 2
-    let fovV = 2 * arctan(tan(fovH / 2) * 1 / GetAspectRatio())
-    descriptors.data.camera.data.viewPerspective = (
-      Perspective(fovV, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20) *
-      Rotate(-camPitch, X) * Rotate(-camYaw, Y) * Translate(-camPos)
-    )
+    let view = Rotate(-camPitch, X) * Rotate(-camYaw, Y) * Translate(-camPos)
+    descriptors.data.camera.data.view = view
+    descriptors.data.camera.data.normal = view
+    descriptors.data.camera.data.projection = Perspective(PI / 2, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20)
 
     UpdateGPUBuffer(descriptors.data.camera)
 
