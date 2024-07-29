@@ -759,8 +759,8 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
     vkDestroyImageView(vulkan.device, msaaImageView, nil)
     vkDestroyImage(vulkan.device, msaaImage, nil)
     vkFreeMemory(vulkan.device, msaaMemory, nil)
-  vkDestroyRenderPass(vulkan.device, offscreenRP.vk, nil)
-  vkDestroyRenderPass(vulkan.device, presentRP.vk, nil)
+  destroyRenderPass(offscreenRP)
+  destroyRenderPass(presentRP)
   vkDestroyFramebuffer(vulkan.device, offscreenFB, nil)
   clearSwapchain()
 
@@ -804,7 +804,7 @@ when isMainModule:
     test_07_png_texture(time)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
-    vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+    destroyRenderPass(renderpass)
     clearSwapchain()
 
   # test multiple render passes

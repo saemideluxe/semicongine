@@ -236,3 +236,6 @@ template withRenderPass*(
     body
 
   vkCmdEndRenderPass(commandbuffer)
+
+proc destroyRenderPass*(renderPass: RenderPass) =
+  vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
