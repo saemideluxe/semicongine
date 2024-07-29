@@ -163,7 +163,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
     elif hasCustomPragma(value, DescriptorSets):
       assert not sawDescriptorSets, "Only one field with pragma DescriptorSets allowed per shader"
       assert typeof(value) is tuple, "Descriptor field '" & fieldname & "' must be of type tuple"
-      assert tupleLen(typeof(value)) <= MAX_DESCRIPTORSETS, typetraits.name(TShader) & ": maximum " & $MAX_DESCRIPTORSETS & " allowed"
+      assert tupleLen(value) <= MAX_DESCRIPTORSETS, typetraits.name(TShader) & ": maximum " & $MAX_DESCRIPTORSETS & " allowed"
       sawDescriptorSets = true
       var descriptorSetIndex = 0
       for descriptor in value.fields:
@@ -224,7 +224,9 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
         pushConstants.add "  " & glslType(constFieldValue) & " " & constFieldName & ";"
       pushConstants.add "} " & fieldname & ";"
     else:
-      {.error: "Unsupported shader field '" & typetraits.name(TShader) & "." & fieldname & "' of type " & typetraits.name(typeof(value)).}
+      static:
+        echo "Unsupported shader field '" & typetraits.name(TShader) & "." & fieldname & "' of type " & typetraits.name(typeof(value))
+      {.error: "Unsupported shader field".}
 
   result[0] = (@[&"#version {GLSL_VERSION}", "#extension GL_EXT_scalar_block_layout : require", ""] &
     vsInput &
@@ -527,6 +529,9 @@ proc createPipeline*[TShader](
     nil,
     addr(result.vk)
   )
+
+func layout*(pipeline: Pipeline, level: int): VkDescriptorSetLayout =
+  pipeline.descriptorSetLayouts[level]
 
 template withPipeline*(commandbuffer: VkCommandBuffer, pipeline: Pipeline, body: untyped): untyped =
   block:

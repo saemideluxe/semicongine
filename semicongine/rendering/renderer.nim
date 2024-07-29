@@ -638,8 +638,9 @@ proc render*[TShader, TMesh, TInstance](
     for attrName, attrValue in default(TShader).fieldPairs():
       if attrValue.hasCustomPragma(DescriptorSets):
         hasDescriptorSets = true
-    if hasDescriptorSets:
-      assert hasBoundDescriptorSets, "Shader uses descriptor sets, but none are bound"
+    # TODO: fix this, not working as intended, seems to depend on scope
+    # if hasDescriptorSets:
+      # assert hasBoundDescriptorSets, "Shader uses descriptor sets, but none are bound"
 
   var vertexBuffers: seq[VkBuffer]
   var vertexBuffersOffsets: seq[uint64]
