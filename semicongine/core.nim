@@ -1,4 +1,4 @@
-const RESOURCEROOT = "resources"
+const RESOURCEROOT {.hint[XDeclaredButNotUsed]: off.} = "resources"
 
 include ./core/utils
 include ./core/buildconfig

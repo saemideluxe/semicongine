@@ -1,4 +1,4 @@
-proc GetBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
+proc getBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
   var nDevices: uint32
   checkVkResult vkEnumeratePhysicalDevices(instance, addr(nDevices), nil)
   var devices = newSeq[VkPhysicalDevice](nDevices)
@@ -29,7 +29,7 @@ proc svkGetPhysicalDeviceSurfaceSupportKHR*(queueFamily: uint32): bool =
   checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkan.physicalDevice, queueFamily, vulkan.surface, addr(presentation))
   return bool(presentation)
 
-proc GetQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
+proc getQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
@@ -199,7 +199,7 @@ proc svkCreateSemaphore*(): VkSemaphore =
   var semaphoreInfo = VkSemaphoreCreateInfo(sType: VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
   checkVkResult vkCreateSemaphore(vulkan.device, addr(semaphoreInfo), nil, addr(result))
 
-proc Await*(fence: VkFence, timeout = high(uint64)): bool =
+proc await*(fence: VkFence, timeout = high(uint64)): bool =
   let waitResult = vkWaitForFences(vulkan.device, 1, addr(fence), false, timeout)
   if waitResult == VK_TIMEOUT:
     return false
@@ -253,7 +253,7 @@ proc svkCreateRenderPass(
     )
   checkVkResult vkCreateRenderPass(vulkan.device, addr(createInfo), nil, addr(result))
 
-proc BestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
+proc bestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
   vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))
 
@@ -273,7 +273,7 @@ proc BestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
   assert maxScore > 0, &"Unable to find memory type (mappable: {mappable}, filter: {filter})"
   return maxIndex
 
-template WithSingleUseCommandBuffer*(cmd, body: untyped): untyped =
+template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
   block:
     var
       commandBufferPool: VkCommandPool
@@ -309,11 +309,11 @@ template WithSingleUseCommandBuffer*(cmd, body: untyped): untyped =
 
     var fence = svkCreateFence()
     checkVkResult vkQueueSubmit(vulkan.graphicsQueue, 1, addr(submitInfo), fence)
-    discard fence.Await()
+    discard fence.await()
     vkDestroyFence(vulkan.device, fence, nil)
     vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
 
-template WithStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
+template withStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
   target: T,
   bufferSize: uint64,
   dataPointer,
@@ -322,7 +322,7 @@ template WithStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
   var `dataPointer` {.inject.}: pointer
   let stagingBuffer = svkCreateBuffer(bufferSize, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT])
   let memoryRequirements = svkGetBufferMemoryRequirements(stagingBuffer)
-  let memoryType = BestMemory(mappable = true, filter = memoryRequirements.memoryTypes)
+  let memoryType = bestMemory(mappable = true, filter = memoryRequirements.memoryTypes)
   let stagingMemory = svkAllocateMemory(memoryRequirements.size, memoryType)
   checkVkResult vkMapMemory(
     device = vulkan.device,
@@ -345,7 +345,7 @@ template WithStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
   )
   checkVkResult vkFlushMappedMemoryRanges(vulkan.device, 1, addr(stagingRange))
 
-  WithSingleUseCommandBuffer(commandBuffer):
+  withSingleUseCommandBuffer(commandBuffer):
     when T is (VkBuffer, uint64):
       # first make sure memory has been made available with a memory barrier
       # we are just waiting for the vertex input stage, but I think that is fine for most buffer copies (for now at least)

@@ -1,4 +1,4 @@
-proc CreateDirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT): RenderPass =
+proc createDirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT): RenderPass =
   assert vulkan.instance.Valid, "Vulkan not initialized"
   result = RenderPass(depthBuffer: depthBuffer, samples: samples)
 
@@ -66,7 +66,7 @@ proc CreateDirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPLE_
     dependencies = dependencies,
   )
 
-proc CreateIndirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT): (RenderPass, RenderPass) =
+proc createIndirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT): (RenderPass, RenderPass) =
   assert vulkan.instance.Valid, "Vulkan not initialized"
 
   result[0] = RenderPass(depthBuffer: depthBuffer, samples: samples)
@@ -188,7 +188,7 @@ proc CreateIndirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPL
     dependencies = presentDependencies
   )
 
-template WithRenderPass*(
+template withRenderPass*(
   theRenderPass: RenderPass,
   theFramebuffer: VkFramebuffer,
   commandbuffer: VkCommandBuffer,

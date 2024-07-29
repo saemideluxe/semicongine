@@ -14,18 +14,18 @@ type
     lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
 
     # rendering data
-    position*: GPUArray[Vec3f, VertexBuffer]
-    uv*: GPUArray[Vec2f, VertexBuffer]
-    indices*: GPUArray[uint16, IndexBuffer]
-    shaderdata*: DescriptorSet[TextboxDescriptorSet]
+    position: GPUArray[Vec3f, VertexBuffer]
+    uv: GPUArray[Vec2f, VertexBuffer]
+    indices: GPUArray[uint16, IndexBuffer]
+    shaderdata: DescriptorSet[TextboxDescriptorSet]
 
 func `$`*(textbox: Textbox): string =
   "\"" & $textbox.text[0 ..< min(textbox.text.len, 16)] & "\""
 
-proc RefreshShaderdata(textbox: Textbox) =
-  textbox.shaderdata.data.textbox.UpdateGPUBuffer(flush = true)
+proc refreshShaderdata(textbox: Textbox) =
+  textbox.shaderdata.data.textbox.updateGPUBuffer(flush = true)
 
-proc RefreshGeometry(textbox: var Textbox) =
+proc refreshGeometry(textbox: var Textbox) =
   # pre-calculate text-width
   var width = 0'f32
   var lineWidths: seq[float32]
@@ -98,8 +98,8 @@ proc RefreshGeometry(textbox: var Textbox) =
       textbox.position.data[vertexOffset + 1] = vec3(0, 0, 0)
       textbox.position.data[vertexOffset + 2] = vec3(0, 0, 0)
       textbox.position.data[vertexOffset + 3] = vec3(0, 0, 0)
-  UpdateGPUBuffer(textbox.position)
-  UpdateGPUBuffer(textbox.uv)
+  updateGPUBuffer(textbox.position)
+  updateGPUBuffer(textbox.uv)
   textbox.lastRenderedText = textbox.processedText
 
 func text*(textbox: Textbox): seq[Rune] =
@@ -122,26 +122,26 @@ proc `text=`*(textbox: var Textbox, newText: seq[Rune]) =
 proc `text=`*(textbox: var Textbox, newText: string) =
   `text=`(textbox, newText.toRunes)
 
-proc Color*(textbox: Textbox): Vec4f =
+proc color*(textbox: Textbox): Vec4f =
   textbox.shaderdata.data.textbox.data.color
 
-proc `Color=`*(textbox: var Textbox, value: Vec4f) =
+proc `color=`*(textbox: var Textbox, value: Vec4f) =
   if textbox.shaderdata.data.textbox.data.color != value:
     textbox.dirtyShaderdata = true
     textbox.shaderdata.data.textbox.data.color = value
 
-proc Scale*(textbox: Textbox): float32 =
+proc scale*(textbox: Textbox): float32 =
   textbox.shaderdata.data.textbox.data.scale
 
-proc `Scale=`*(textbox: var Textbox, value: float32) =
+proc `scale=`*(textbox: var Textbox, value: float32) =
   if textbox.shaderdata.data.textbox.data.scale != value:
     textbox.dirtyShaderdata = true
     textbox.shaderdata.data.textbox.data.scale = value
 
-proc Position*(textbox: Textbox): Vec3f =
+proc position*(textbox: Textbox): Vec3f =
   textbox.shaderdata.data.textbox.data.position
 
-proc `Position=`*(textbox: var Textbox, value: Vec3f) =
+proc `position=`*(textbox: var Textbox, value: Vec3f) =
   if textbox.shaderdata.data.textbox.data.position != value:
     textbox.dirtyShaderdata = true
     textbox.shaderdata.data.textbox.data.position = value
@@ -160,24 +160,24 @@ proc `verticalAlignment=`*(textbox: var Textbox, value: VerticalAlignment) =
     textbox.verticalAlignment = value
     textbox.dirtyGeometry = true
 
-proc Refresh*(textbox: var Textbox) =
-  if textbox.shaderdata.data.textbox.data.aspectratio != GetAspectRatio():
+proc refresh*(textbox: var Textbox) =
+  if textbox.shaderdata.data.textbox.data.aspectratio != getAspectRatio():
     textbox.dirtyShaderdata = true
-    textbox.shaderdata.data.textbox.data.aspectratio = GetAspectRatio()
+    textbox.shaderdata.data.textbox.data.aspectratio = getAspectRatio()
 
   if textbox.dirtyShaderdata:
-    textbox.RefreshShaderdata()
+    textbox.refreshShaderdata()
     textbox.dirtyShaderdata = false
 
   if textbox.dirtyGeometry or textbox.processedText != textbox.lastRenderedText:
-    textbox.RefreshGeometry()
+    textbox.refreshGeometry()
     textbox.dirtyGeometry = false
 
-proc Render*(textbox: Textbox, commandbuffer: VkCommandBuffer, pipeline: Pipeline) =
-  WithBind(commandbuffer, (textbox.shaderdata, ), pipeline):
-    Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = textbox)
+proc render*(textbox: Textbox, commandbuffer: VkCommandBuffer, pipeline: Pipeline) =
+  withBind(commandbuffer, (textbox.shaderdata, ), pipeline):
+    render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = textbox)
 
-proc InitTextbox*[T: string | seq[Rune]](
+proc initTextbox*[T: string | seq[Rune]](
   renderdata: var RenderData,
   descriptorSetLayout: VkDescriptorSetLayout,
   font: Font,
@@ -229,10 +229,10 @@ proc InitTextbox*[T: string | seq[Rune]](
   else:
     `text=`(result, text)
 
-  AssignBuffers(renderdata, result, uploadData = false)
-  UploadImages(renderdata, result.shaderdata)
-  InitDescriptorSet(renderdata, descriptorSetLayout, result.shaderdata)
+  assignBuffers(renderdata, result, uploadData = false)
+  uploadImages(renderdata, result.shaderdata)
+  initDescriptorSet(renderdata, descriptorSetLayout, result.shaderdata)
 
-  result.Refresh()
-  UpdateAllGPUBuffers(result, flush = true, allFrames = true)
-  UpdateAllGPUBuffers(result.shaderdata.data, flush = true)
+  result.refresh()
+  updateAllGPUBuffers(result, flush = true, allFrames = true)
+  updateAllGPUBuffers(result.shaderdata.data, flush = true)

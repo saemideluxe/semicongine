@@ -31,23 +31,23 @@ proc ensureExists(storageType: StorageType, table: string) =
     value TEXT NOT NULL
   )"""))
 
-proc Store*[T](storageType: StorageType, key: string, value: T, table = DEFAULT_KEY_VALUE_TABLE_NAME) =
+proc store*[T](storageType: StorageType, key: string, value: T, table = DEFAULT_KEY_VALUE_TABLE_NAME) =
   storageType.ensureExists(table)
   db[storageType].exec(sql(&"""INSERT INTO {table} VALUES(?, ?)
   ON CONFLICT(key) DO UPDATE SET value=excluded.value
   """), key, $$value)
 
-proc Load*[T](storageType: StorageType, key: string, default: T, table = DEFAULT_KEY_VALUE_TABLE_NAME): T =
+proc load*[T](storageType: StorageType, key: string, default: T, table = DEFAULT_KEY_VALUE_TABLE_NAME): T =
   storageType.ensureExists(table)
   let dbResult = db[storageType].getValue(sql(&"""SELECT value FROM {table} WHERE key = ? """), key)
   if dbResult == "":
     return default
   return to[T](dbResult)
 
-proc List*[T](storageType: StorageType, table = DEFAULT_KEY_VALUE_TABLE_NAME): seq[string] =
+proc list*[T](storageType: StorageType, table = DEFAULT_KEY_VALUE_TABLE_NAME): seq[string] =
   storageType.ensureExists(table)
   for row in db[storageType].fastRows(sql(&"""SELECT key FROM {table}""")):
     result.add row[0]
 
-proc Purge*(storageType: StorageType) =
+proc purge*(storageType: StorageType) =
   storageType.path().string.removeFile()

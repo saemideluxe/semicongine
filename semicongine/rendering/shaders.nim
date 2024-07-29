@@ -1,4 +1,4 @@
-func GlslType[T: SupportedGPUType|Image](value: T): string =
+func glslType[T: SupportedGPUType|Image](value: T): string =
   when T is float32: "float"
   elif T is float64: "double"
   elif T is int8 or T is int16 or T is int32 or T is int64: "int"
@@ -40,7 +40,7 @@ func GlslType[T: SupportedGPUType|Image](value: T): string =
     const n = typetraits.name(T)
     {.error: "Unsupported data type on GPU: " & n.}
 
-func VkType[T: SupportedGPUType](value: T): VkFormat =
+func vkType[T: SupportedGPUType](value: T): VkFormat =
   when T is float32: VK_FORMAT_R32_SFLOAT
   elif T is float64: VK_FORMAT_R64_SFLOAT
   elif T is int8: VK_FORMAT_R8_SINT
@@ -86,7 +86,7 @@ func VkType[T: SupportedGPUType](value: T): VkFormat =
   else: {.error: "Unsupported data type on GPU".}
 
 
-func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Image](value: T): uint32 =
+func numberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Image](value: T): uint32 =
   when T is TMat2[float32] or T is TMat2[float64] or T is TMat23[float32] or T is TMat23[float64]:
     2
   elif T is TMat32[float32] or T is TMat32[float64] or T is TMat3[float32] or T is TMat3[float64] or T is TMat34[float32] or T is TMat34[float64]:
@@ -96,7 +96,7 @@ func NumberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Image](value: T
   else:
     1
 
-func NLocationSlots[T: SupportedGPUType|Image](value: T): uint32 =
+func nLocationSlots[T: SupportedGPUType|Image](value: T): uint32 =
   #[
   single location:
     - any scalar
@@ -142,20 +142,20 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
     # vertex shader inputs
     when hasCustomPragma(value, VertexAttribute) or hasCustomPragma(value, InstanceAttribute):
       assert typeof(value) is SupportedGPUType
-      vsInput.add "layout(location = " & $vsInputLocation & ") in " & GlslType(value) & " " & fieldname & ";"
-      for j in 0 ..< NumberOfVertexInputAttributeDescriptors(value):
-        vsInputLocation += NLocationSlots(value)
+      vsInput.add "layout(location = " & $vsInputLocation & ") in " & glslType(value) & " " & fieldname & ";"
+      for j in 0 ..< numberOfVertexInputAttributeDescriptors(value):
+        vsInputLocation += nLocationSlots(value)
 
     # intermediate values, passed between shaders
     elif hasCustomPragma(value, Pass) or hasCustomPragma(value, PassFlat):
       let flat = if hasCustomPragma(value, PassFlat): "flat " else: ""
-      vsOutput.add "layout(location = " & $passLocation & ") " & flat & "out " & GlslType(value) & " " & fieldname & ";"
-      fsInput.add "layout(location = " & $passLocation & ") " & flat & "in " & GlslType(value) & " " & fieldname & ";"
+      vsOutput.add "layout(location = " & $passLocation & ") " & flat & "out " & glslType(value) & " " & fieldname & ";"
+      fsInput.add "layout(location = " & $passLocation & ") " & flat & "in " & glslType(value) & " " & fieldname & ";"
       passLocation.inc
 
     # fragment shader output
     elif hasCustomPragma(value, ShaderOutput):
-      fsOutput.add &"layout(location = " & $fsOutputLocation & ") out " & GlslType(value) & " " & fieldname & ";"
+      fsOutput.add &"layout(location = " & $fsOutputLocation & ") out " & glslType(value) & " " & fieldname & ";"
       fsOutputLocation.inc
 
     # descriptor sets
@@ -173,7 +173,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
         for descriptorName, descriptorValue in fieldPairs(descriptor):
 
           when typeof(descriptorValue) is Image:
-            samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & GlslType(descriptorValue) & " " & descriptorName & ";"
+            samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(descriptorValue) & " " & descriptorName & ";"
             descriptorBinding.inc
 
           elif typeof(descriptorValue) is GPUValue:
@@ -183,7 +183,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
               for blockFieldName, blockFieldValue in descriptorValue.data.fieldPairs():
                 assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
-                uniforms.add "  " & GlslType(blockFieldValue) & " " & blockFieldName & ";"
+                uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
               uniforms.add "} " & descriptorName & ";"
 
             else:
@@ -195,7 +195,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
             when elementType(descriptorValue) is Image:
 
               let arrayDecl = "[" & $typeof(descriptorValue).len & "]"
-              samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & GlslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"
+              samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"
               descriptorBinding.inc
 
             elif elementType(descriptorValue) is GPUValue:
@@ -204,7 +204,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
               for blockFieldName, blockFieldValue in default(elementType(descriptorValue)).data.fieldPairs():
                 assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
-                uniforms.add "  " & GlslType(blockFieldValue) & " " & blockFieldName & ";"
+                uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
               uniforms.add "} " & descriptorName & "[" & $descriptorValue.len & "];"
               descriptorBinding.inc
 
@@ -221,7 +221,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
       pushConstants.add "{"
       for constFieldName, constFieldValue in value.fieldPairs():
         assert typeof(constFieldValue) is SupportedGPUType, "push constant field '" & constFieldName & "' is not a SupportedGPUType"
-        pushConstants.add "  " & GlslType(constFieldValue) & " " & constFieldName & ";"
+        pushConstants.add "  " & glslType(constFieldValue) & " " & constFieldName & ";"
       pushConstants.add "} " & fieldname & ";"
     else:
       {.error: "Unsupported shader field '" & typetraits.name(TShader) & "." & fieldname & "' of type " & typetraits.name(typeof(value)).}
@@ -293,7 +293,7 @@ proc compileGlslToSPIRV(stage: VkShaderStageFlagBits, shaderSource: string): seq
     i += 4
 
 
-proc CompileShader[TShader](shader: static TShader): (VkShaderModule, VkShaderModule) =
+proc compileShader[TShader](shader: static TShader): (VkShaderModule, VkShaderModule) =
   const (vertexShaderSource, fragmentShaderSource) = generateShaderSource(shader)
 
   let vertexBinary = compileGlslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderSource)
@@ -325,18 +325,18 @@ template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename
         const `isinstancename` {.inject.} = hasCustomPragma(value, InstanceAttribute)
         body
 
-proc GetDescriptorSetCount[TShader](): uint32 =
+proc getDescriptorSetCount[TShader](): uint32 =
   for _, value in fieldPairs(default(TShader)):
     when hasCustomPragma(value, DescriptorSets):
       return tupleLen(typeof(value)).uint32
 
-proc CreateDescriptorSetLayouts[TShader](): array[MAX_DESCRIPTORSETS, VkDescriptorSetLayout] =
+proc createDescriptorSetLayouts[TShader](): array[MAX_DESCRIPTORSETS, VkDescriptorSetLayout] =
   var setNumber: int
   for _, value in fieldPairs(default(TShader)):
     when hasCustomPragma(value, DescriptorSets):
       for descriptorSet in value.fields:
         var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-        ForDescriptorFields(descriptorSet, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
+        forDescriptorFields(descriptorSet, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
           layoutbindings.add VkDescriptorSetLayoutBinding(
             binding: descriptorBindingNumber,
             descriptorType: descriptorType,
@@ -357,7 +357,7 @@ proc CreateDescriptorSetLayouts[TShader](): array[MAX_DESCRIPTORSETS, VkDescript
         )
         inc setNumber
 
-proc CreatePipeline*[TShader](
+proc createPipeline*[TShader](
   renderPass: RenderPass,
   topology: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
@@ -369,10 +369,10 @@ proc CreatePipeline*[TShader](
   # create pipeline
 
   const shader = default(TShader)
-  (result.vertexShaderModule, result.fragmentShaderModule) = CompileShader(shader)
+  (result.vertexShaderModule, result.fragmentShaderModule) = compileShader(shader)
 
-  var nSets = GetDescriptorSetCount[TShader]()
-  result.descriptorSetLayouts = CreateDescriptorSetLayouts[TShader]()
+  var nSets = getDescriptorSetCount[TShader]()
+  result.descriptorSetLayouts = createDescriptorSetLayouts[TShader]()
 
   let pushConstant = VkPushConstantRange(
     stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
@@ -415,15 +415,15 @@ proc CreatePipeline*[TShader](
       inputRate: if isInstanceAttr: VK_VERTEX_INPUT_RATE_INSTANCE else: VK_VERTEX_INPUT_RATE_VERTEX,
     )
     # allows to submit larger data structures like Mat44, for most other types will be 1
-    let perDescriptorSize = sizeof(value).uint32 div NumberOfVertexInputAttributeDescriptors(value)
-    for i in 0'u32 ..< NumberOfVertexInputAttributeDescriptors(value):
+    let perDescriptorSize = sizeof(value).uint32 div numberOfVertexInputAttributeDescriptors(value)
+    for i in 0'u32 ..< numberOfVertexInputAttributeDescriptors(value):
       attributes.add VkVertexInputAttributeDescription(
         binding: inputBindingNumber,
         location: location,
-        format: VkType(value),
+        format: vkType(value),
         offset: i * perDescriptorSize,
       )
-      location += NLocationSlots(value)
+      location += nLocationSlots(value)
     inc inputBindingNumber
 
   let
@@ -528,12 +528,12 @@ proc CreatePipeline*[TShader](
     addr(result.vk)
   )
 
-template WithPipeline*(commandbuffer: VkCommandBuffer, pipeline: Pipeline, body: untyped): untyped =
+template withPipeline*(commandbuffer: VkCommandBuffer, pipeline: Pipeline, body: untyped): untyped =
   block:
     vkCmdBindPipeline(commandbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.vk)
     body
 
-proc DestroyPipeline*(pipeline: Pipeline) =
+proc destroyPipeline*(pipeline: Pipeline) =
 
   for descriptorSetLayout in pipeline.descriptorSetLayouts:
     vkDestroyDescriptorSetLayout(vulkan.device, descriptorSetLayout, nil)

@@ -154,7 +154,7 @@ proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[
 
   let bufferView = root["bufferViews"][root["images"][imageIndex][
       "bufferView"].getInt()]
-  result = LoadImageData[BGRA](getBufferViewData(bufferView, mainBuffer))
+  result = loadImageData[BGRA](getBufferViewData(bufferView, mainBuffer))
 
   if textureNode.hasKey("sampler"):
     let sampler = root["samplers"][textureNode["sampler"].getInt()]
@@ -339,7 +339,7 @@ proc ReadglTF*[TMesh, TMaterial](
           nodes.add nodeId.getInt()
         result.scenes.add nodes
 
-proc LoadMeshes*[TMesh, TMaterial](
+proc loadMeshes*[TMesh, TMaterial](
   path: string,
   meshAttributesMapping: static MeshAttributeNames,
   materialAttributesMapping: static MaterialAttributeNames,

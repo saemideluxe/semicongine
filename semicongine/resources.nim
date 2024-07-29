@@ -138,25 +138,25 @@ elif thebundletype == Exe:
             yield (kind: pcDir, path: components[0])
         yielded.incl components[0]
 
-proc LoadResource*(path: string, package = DEFAULT_PACKAGE): Stream =
+proc loadResource*(path: string, package = DEFAULT_PACKAGE): Stream =
   loadResource_intern(path, package = package)
 
-proc LoadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
+proc loadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
   path.loadResource_intern(package = package).readAll().parseJson()
 
-proc LoadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
+proc loadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
   path.loadResource_intern(package = package).loadConfig(filename = path)
 
-proc Packages*(): seq[string] =
+proc packages*(): seq[string] =
   modList_intern()
 
-proc WalkResources*(dir = "", package = DEFAULT_PACKAGE): seq[string] =
+proc walkResources*(dir = "", package = DEFAULT_PACKAGE): seq[string] =
   for i in walkResources_intern(dir, package = package):
     if i.startsWith(dir):
       result.add i
   result.sort()
 
-proc List*(dir: string, package = DEFAULT_PACKAGE): seq[tuple[kind: PathComponent, path: string]] =
+proc list*(dir: string, package = DEFAULT_PACKAGE): seq[tuple[kind: PathComponent, path: string]] =
   for i in ls_intern(dir = dir, package = package):
     result.add i
   result.sort()

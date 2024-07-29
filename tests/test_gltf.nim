@@ -8,7 +8,7 @@ import std/random
 import ../semicongine
 
 proc test_gltf(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     ObjectData = object
@@ -90,7 +90,7 @@ void main() {
       indices: GPUArray[uint32, IndexBuffer]
       material: int32
 
-  var gltfData = LoadMeshes[Mesh, Material](
+  var gltfData = loadMeshes[Mesh, Material](
     "town.glb",
     # "forest.glb",
     MeshAttributeNames(
@@ -126,19 +126,19 @@ void main() {
   for mesh in mitems(gltfData.meshes):
     for primitive in mitems(mesh):
       primitive[0].color = asGPUArray(newSeqWith(primitive[0].position.data.len, vec4(1, 1, 1, 1)), VertexBuffer)
-      renderdata.AssignBuffers(primitive[0])
-  renderdata.AssignBuffers(descriptors)
+      renderdata.assignBuffers(primitive[0])
+  renderdata.assignBuffers(descriptors)
 
-  var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, cullMode=[])
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
+  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, cullMode=[])
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
 
-  renderdata.FlushAllMemory()
+  renderdata.flushAllMemory()
 
   proc drawNode(commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int, transform: Mat4) =
     let nodeTransform = gltfData.nodes[nodeId].transform * transform
     if gltfData.nodes[nodeId].mesh >= 0:
       for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh]:
-        RenderWithPushConstant(
+        renderWithPushConstant(
           commandbuffer = commandbuffer,
           pipeline = pipeline,
           mesh = primitive[0],
@@ -151,23 +151,23 @@ void main() {
   var camYaw: float32
   var camPitch: float32
 
-  discard UpdateInputs() # clear inputs, otherwise MouseMove will have stuff
+  discard updateInputs() # clear inputs, otherwise MouseMove will have stuff
 
   var start = getMonoTime()
   var lastT = getMonoTime()
-  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time and UpdateInputs():
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time and updateInputs():
     let dt = ((getMonoTime() - lastT).inNanoseconds().int / 1_000_000_000).float32
     lastT = getMonoTime()
 
-    camYaw  -= MouseMove().x / 1000
-    camPitch -= MouseMove().y / 1000
+    camYaw  -= mouseMove().x / 1000
+    camPitch -= mouseMove().y / 1000
     var
       forward = 0'f32
       sideward = 0'f32
-    if KeyIsDown(W): forward += 2
-    if KeyIsDown(S): forward -= 2
-    if KeyIsDown(A): sideward -= 2
-    if KeyIsDown(D): sideward += 2
+    if keyIsDown(W): forward += 2
+    if keyIsDown(S): forward -= 2
+    if keyIsDown(A): sideward -= 2
+    if keyIsDown(D): sideward += 2
 
     let camDir = (rotate(camYaw, Y) * rotate(camPitch, X)) * Z
     let camDirSide = camDir.cross(-Y).normalized
@@ -177,16 +177,16 @@ void main() {
     let view = rotate(-camPitch, X) * rotate(-camYaw, Y) * translate(-camPos)
     descriptors.data.camera.data.view = view
     descriptors.data.camera.data.normal = view
-    descriptors.data.camera.data.projection = projection(PI / 2, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20)
+    descriptors.data.camera.data.projection = projection(PI / 2, aspect = getAspectRatio(), zNear = 0.01, zFar = 20)
 
-    UpdateGPUBuffer(descriptors.data.camera)
+    updateGPUBuffer(descriptors.data.camera)
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
-        WithPipeline(commandbuffer, pipeline):
-          WithBind(commandbuffer, (descriptors, ), pipeline):
+        withPipeline(commandbuffer, pipeline):
+          withBind(commandbuffer, (descriptors, ), pipeline):
             for nodeId in gltfData.scenes[0]:
               drawNode(
                 commandbuffer = commandbuffer,
@@ -197,23 +197,23 @@ void main() {
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 when isMainModule:
   var time = 1000'f32
-  InitVulkan()
+  initVulkan()
 
-  var renderpass = CreateDirectPresentationRenderPass(depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT)
-  SetupSwapchain(renderpass = renderpass)
-  LockMouse(true)
-  ShowSystemCursor(false)
+  var renderpass = createDirectPresentationRenderPass(depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT)
+  setupSwapchain(renderpass = renderpass)
+  lockMouse(true)
+  showSystemCursor(false)
 
   # tests a simple triangle with minimalistic shader and vertex format
   test_gltf(time)
 
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
-  ClearSwapchain()
+  clearSwapchain()
 
-  DestroyVulkan()
+  destroyVulkan()

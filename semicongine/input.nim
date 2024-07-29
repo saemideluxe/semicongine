@@ -17,7 +17,7 @@ type
 # warning, shit is not thread safe
 var input = Input()
 
-proc UpdateInputs*(): bool =
+proc updateInputs*(): bool =
   # reset input states
   input.keyWasPressed = {}
   input.keyWasReleased = {}
@@ -28,10 +28,10 @@ proc UpdateInputs*(): bool =
   input.windowWasResized = false
 
   if input.lockMouse and input.hasFocus:
-    SetMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
+    setMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
 
   var killed = false
-  for event in vulkan.window.PendingEvents():
+  for event in vulkan.window.pendingEvents():
     case event.eventType:
       of Quit:
         killed = true
@@ -66,27 +66,27 @@ proc UpdateInputs*(): bool =
 
   return not killed
 
-proc KeyIsDown*(key: Key): bool = key in input.keyIsDown
-proc KeyWasPressed*(key: Key): bool = key in input.keyWasPressed
-proc KeyWasPressed*(): bool = input.keyWasPressed.len > 0
-proc KeyWasReleased*(key: Key): bool = key in input.keyWasReleased
-proc MouseIsDown*(button: MouseButton): bool = button in input.mouseIsDown
-proc MouseWasPressed*(): bool = input.mouseWasPressed.len > 0
-proc MouseWasPressed*(button: MouseButton): bool = button in input.mouseWasPressed
-proc MousePressedButtons*(): set[MouseButton] = input.mouseWasPressed
-proc MouseWasReleased*(): bool = input.mouseWasReleased.len > 0
-proc MouseWasReleased*(button: MouseButton): bool = button in input.mouseWasReleased
-proc MouseReleasedButtons*(): set[MouseButton] = input.mouseWasReleased
-proc MousePosition*(): Vec2f = input.mousePosition
-proc MousePositionNormalized*(size: (int, int)): Vec2f =
+proc keyIsDown*(key: Key): bool = key in input.keyIsDown
+proc keyWasPressed*(key: Key): bool = key in input.keyWasPressed
+proc keyWasPressed*(): bool = input.keyWasPressed.len > 0
+proc keyWasReleased*(key: Key): bool = key in input.keyWasReleased
+proc mouseIsDown*(button: MouseButton): bool = button in input.mouseIsDown
+proc mouseWasPressed*(): bool = input.mouseWasPressed.len > 0
+proc mouseWasPressed*(button: MouseButton): bool = button in input.mouseWasPressed
+proc mousePressedButtons*(): set[MouseButton] = input.mouseWasPressed
+proc mouseWasReleased*(): bool = input.mouseWasReleased.len > 0
+proc mouseWasReleased*(button: MouseButton): bool = button in input.mouseWasReleased
+proc mouseReleasedButtons*(): set[MouseButton] = input.mouseWasReleased
+proc mousePosition*(): Vec2f = input.mousePosition
+proc mousePositionNormalized*(size: (int, int)): Vec2f =
   result.x = (input.mousePosition.x / float32(size[0])) * 2.0 - 1.0
   result.y = (input.mousePosition.y / float32(size[1])) * 2.0 - 1.0
-proc MouseMove*(): Vec2f = input.mouseMove
-proc MouseWheel*(): float32 = input.mouseWheel
-proc WindowWasResized*(): auto = input.windowWasResized
-proc WindowIsMinimized*(): auto = input.windowIsMinimized
-proc LockMouse*(value: bool) = input.lockMouse = value
-proc HasFocus*(): bool = input.hasFocus
+proc mouseMove*(): Vec2f = input.mouseMove
+proc mouseWheel*(): float32 = input.mouseWheel
+proc windowWasResized*(): auto = input.windowWasResized
+proc windowIsMinimized*(): auto = input.windowIsMinimized
+proc lockMouse*(value: bool) = input.lockMouse = value
+proc hasFocus*(): bool = input.hasFocus
 
 
 # actions as a slight abstraction over raw input
@@ -99,49 +99,49 @@ type
 # warning, shit is not thread safe
 var actionMap: ActionMap
 
-proc MapAction*[T: enum](action: T, key: Key) =
+proc mapAction*[T: enum](action: T, key: Key) =
   if not actionMap.keyActions.contains($action):
     actionMap.keyActions[$action] = {}
   actionMap.keyActions[$action].incl key
 
-proc MapAction*[T: enum](action: T, button: MouseButton) =
+proc mapAction*[T: enum](action: T, button: MouseButton) =
   if not actionMap.mouseActions.contains($action):
     actionMap.mouseActions[$action] = {}
   actionMap.mouseActions[$action].incl button
 
-proc MapAction*[T: enum](action: T, keys: openArray[Key|MouseButton]) =
+proc mapAction*[T: enum](action: T, keys: openArray[Key|MouseButton]) =
   for key in keys:
-    MapAction(action, key)
+    mapAction(action, key)
 
-proc UnmapAction*[T: enum](action: T, key: Key) =
+proc unmapAction*[T: enum](action: T, key: Key) =
   if actionMap.keyActions.contains($action):
     actionMap.keyActions[$action].excl(key)
 
-proc UnmapAction*[T: enum](action: T, button: MouseButton) =
+proc unmapAction*[T: enum](action: T, button: MouseButton) =
   if actionMap.mouseActions.contains($action):
     actionMap.mouseActions[$action].excl(button)
 
-proc UnmapAction*[T: enum](action: T) =
+proc unmapAction*[T: enum](action: T) =
   if actionMap.keyActions.contains($action):
     actionMap.keyActions[$action] = {}
   if actionMap.mouseActions.contains($action):
     actionMap.mouseActions[$action] = {}
 
-proc SaveCurrentActionMapping*() =
+proc saveCurrentActionMapping*() =
   for name, keys in actionMap.keyActions.pairs:
-    SystemStorage.Store(name, keys, table = "input_mapping_key")
+    SystemStorage.store(name, keys, table = "input_mapping_key")
   for name, buttons in actionMap.mouseActions.pairs:
-    SystemStorage.Store(name, buttons, table = "input_mapping_mouse")
+    SystemStorage.store(name, buttons, table = "input_mapping_mouse")
 
-proc LoadActionMapping*[T]() =
+proc loadActionMapping*[T]() =
   reset(actionMap)
   for name in SystemStorage.List(table = "input_mapping_key"):
     let action = parseEnum[T](name)
     let keys = SystemStorage.Load(name, set[Key](), table = "input_mapping_key")
     for key in keys:
-      MapAction(action, key)
+      mapAction(action, key)
 
-proc ActionDown*[T](action: T): bool =
+proc actionDown*[T](action: T): bool =
   if actionMap.keyActions.contains($action):
     for key in actionMap.keyActions[$action]:
       if key in input.keyIsDown:
@@ -153,7 +153,7 @@ proc ActionDown*[T](action: T): bool =
         return true
     return false
 
-proc ActionPressed*[T](action: T): bool =
+proc actionPressed*[T](action: T): bool =
   if actionMap.keyActions.contains($action):
     for key in actionMap.keyActions[$action]:
       if key in input.keyWasPressed:
@@ -163,7 +163,7 @@ proc ActionPressed*[T](action: T): bool =
       if button in input.mouseWasPressed:
         return true
 
-proc ActionReleased*[T](action: T): bool =
+proc actionReleased*[T](action: T): bool =
   if actionMap.keyActions.contains($action):
     for key in actionMap.keyActions[$action]:
       if key in input.keyWasReleased:
@@ -173,7 +173,7 @@ proc ActionReleased*[T](action: T): bool =
       if button in input.mouseWasReleased:
         return true
 
-proc ActionValue*[T](action: T): float32 =
+proc actionValue*[T](action: T): float32 =
   if actionMap.keyActions.contains($action):
     for key in actionMap.keyActions[$action]:
       if key in input.keyIsDown:

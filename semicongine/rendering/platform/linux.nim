@@ -51,7 +51,7 @@ template checkXlibResult(call: untyped) =
 proc XErrorLogger(display: PDisplay, event: PXErrorEvent): cint {.cdecl.} =
   logging.error &"Xlib: {event[]}"
 
-proc CreateWindow*(title: string): NativeWindow =
+proc createWindow*(title: string): NativeWindow =
   checkXlibResult XInitThreads()
   let display = XOpenDisplay(nil)
   if display == nil:
@@ -94,10 +94,10 @@ proc CreateWindow*(title: string): NativeWindow =
   checkXlibResult display.XFreePixmap(pixmap)
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
-proc SetTitle*(window: NativeWindow, title: string) =
+proc setTitle*(window: NativeWindow, title: string) =
   checkXlibResult XSetStandardProperties(window.display, window.window, title, "window", 0, nil, 0, nil)
 
-proc SetFullscreen*(window: var NativeWindow, enable: bool) =
+proc setFullscreen*(window: var NativeWindow, enable: bool) =
   var
     wm_state = window.display.XInternAtom("_NET_WM_STATE", 0)
     wm_fullscreen = window.display.XInternAtom("_NET_WM_STATE_FULLSCREEN", 0)
@@ -127,7 +127,7 @@ proc SetFullscreen*(window: var NativeWindow, enable: bool) =
   )
   checkXlibResult window.display.XFlush()
 
-proc ShowSystemCursor*(window: NativeWindow, value: bool) =
+proc showSystemCursor*(window: NativeWindow, value: bool) =
   if value == true:
     checkXlibResult XUndefineCursor(window.display, window.window)
     checkXlibResult window.display.XFlush()
@@ -135,17 +135,17 @@ proc ShowSystemCursor*(window: NativeWindow, value: bool) =
     checkXlibResult XDefineCursor(window.display, window.window, window.emptyCursor)
     checkXlibResult window.display.XFlush()
 
-proc Destroy*(window: NativeWindow) =
+proc destroy*(window: NativeWindow) =
   checkXlibResult window.display.XFreeCursor(window.emptyCursor)
   checkXlibResult window.display.XDestroyWindow(window.window)
   discard window.display.XCloseDisplay() # always returns 0
 
-proc Size*(window: NativeWindow): (int, int) =
+proc size*(window: NativeWindow): (int, int) =
   var attribs: XWindowAttributes
   checkXlibResult XGetWindowAttributes(window.display, window.window, addr(attribs))
   return (int(attribs.width), int(attribs.height))
 
-proc PendingEvents*(window: NativeWindow): seq[Event] =
+proc pendingEvents*(window: NativeWindow): seq[Event] =
   var event: XEvent
   while window.display.XPending() > 0:
     discard window.display.XNextEvent(addr(event))
@@ -185,7 +185,7 @@ proc PendingEvents*(window: NativeWindow): seq[Event] =
       discard
 
 
-proc GetMousePosition*(window: NativeWindow): Option[Vec2f] =
+proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
   var
     root: x11.Window
     win: x11.Window
@@ -208,7 +208,7 @@ proc GetMousePosition*(window: NativeWindow): Option[Vec2f] =
   if onscreen != 0:
     result = some(Vec2f([float32(winX), float32(winY)]))
 
-proc SetMousePosition*(window: NativeWindow, x, y: int) =
+proc setMousePosition*(window: NativeWindow, x, y: int) =
   checkXlibResult XWarpPointer(
     window.display,
     default(x11.Window),
@@ -219,7 +219,7 @@ proc SetMousePosition*(window: NativeWindow, x, y: int) =
   )
   checkXlibResult XSync(window.display, false.XBool)
 
-proc CreateNativeSurface(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
+proc createNativeSurface(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
     dpy: cast[ptr Display](window.display),

@@ -8,7 +8,7 @@ import std/random
 import ../semicongine
 
 proc test_01_triangle(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     PushConstant = object
@@ -32,30 +32,30 @@ proc test_01_triangle(time: float32) =
     position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
     color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
-  AssignBuffers(renderdata, mesh)
-  renderdata.FlushAllMemory()
+  assignBuffers(renderdata, mesh)
+  renderdata.flushAllMemory()
 
-  var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
-        WithPipeline(commandbuffer, pipeline):
+        withPipeline(commandbuffer, pipeline):
 
-          RenderWithPushConstant(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh, pushConstant = PushConstant(scale: 0.3 + ((getMonoTime() - start).inMilliseconds().int / 1000)))
+          renderWithPushConstant(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh, pushConstant = PushConstant(scale: 0.3 + ((getMonoTime() - start).inMilliseconds().int / 1000)))
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 
 proc test_02_triangle_quad_instanced(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     SomeShader = object
@@ -100,35 +100,35 @@ proc test_02_triangle_quad_instanced(time: float32) =
     instancesB.pos.data.add vec3(rand(-0.8'f32 .. 0.8'f32), rand(0'f32 .. 0.8'f32), 0)
     instancesB.scale.data.add rand(0.1'f32 .. 0.2'f32)
 
-  AssignBuffers(renderdata, tri)
-  AssignBuffers(renderdata, quad)
-  AssignBuffers(renderdata, instancesA)
-  AssignBuffers(renderdata, instancesB)
-  renderdata.FlushAllMemory()
+  assignBuffers(renderdata, tri)
+  assignBuffers(renderdata, quad)
+  assignBuffers(renderdata, instancesA)
+  assignBuffers(renderdata, instancesB)
+  renderdata.flushAllMemory()
 
-  var pipeline = CreatePipeline[SomeShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[SomeShader](renderPass = vulkan.swapchain.renderPass)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
-        WithPipeline(commandbuffer, pipeline):
+        withPipeline(commandbuffer, pipeline):
 
-          Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesA)
-          Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesB)
-          Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesA)
-          Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesB)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesA)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesB)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesA)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesB)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_03_simple_descriptorset(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     Material = object
@@ -179,40 +179,40 @@ proc test_03_simple_descriptorset(time: float32) =
     )
     )
 
-  AssignBuffers(renderdata, quad)
-  AssignBuffers(renderdata, uniforms1)
-  AssignBuffers(renderdata, uniforms2)
-  UploadImages(renderdata, uniforms1)
-  UploadImages(renderdata, uniforms2)
-  renderdata.FlushAllMemory()
+  assignBuffers(renderdata, quad)
+  assignBuffers(renderdata, uniforms1)
+  assignBuffers(renderdata, uniforms2)
+  uploadImages(renderdata, uniforms1)
+  uploadImages(renderdata, uniforms2)
+  renderdata.flushAllMemory()
 
-  var pipeline = CreatePipeline[QuadShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[QuadShader](renderPass = vulkan.swapchain.renderPass)
 
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms2)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms2)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
-        WithPipeline(commandbuffer, pipeline):
+        withPipeline(commandbuffer, pipeline):
 
-          WithBind(commandbuffer, (uniforms1, ), pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          withBind(commandbuffer, (uniforms1, ), pipeline):
+            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
-          WithBind(commandbuffer, (uniforms2, ), pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          withBind(commandbuffer, (uniforms2, ), pipeline):
+            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_04_multiple_descriptorsets(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     RenderSettings = object
@@ -290,46 +290,46 @@ proc test_04_multiple_descriptorsets(time: float32) =
     )
   )
 
-  AssignBuffers(renderdata, quad)
-  AssignBuffers(renderdata, constset)
-  AssignBuffers(renderdata, mainset)
-  AssignBuffers(renderdata, otherset1)
-  AssignBuffers(renderdata, otherset2)
-  UploadImages(renderdata, mainset)
-  renderdata.FlushAllMemory()
+  assignBuffers(renderdata, quad)
+  assignBuffers(renderdata, constset)
+  assignBuffers(renderdata, mainset)
+  assignBuffers(renderdata, otherset1)
+  assignBuffers(renderdata, otherset2)
+  uploadImages(renderdata, mainset)
+  renderdata.flushAllMemory()
 
-  var pipeline = CreatePipeline[QuadShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[QuadShader](renderPass = vulkan.swapchain.renderPass)
 
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], constset)
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[1], mainset)
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset1)
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset2)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], constset)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[1], mainset)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset1)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[2], otherset2)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
-        WithPipeline(commandbuffer, pipeline):
+        withPipeline(commandbuffer, pipeline):
 
-          WithBind(commandbuffer, (constset, mainset, otherset1), pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          withBind(commandbuffer, (constset, mainset, otherset1), pipeline):
+            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
-          WithBind(commandbuffer, (constset, mainset, otherset2), pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          withBind(commandbuffer, (constset, mainset, otherset2), pipeline):
+            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
     mainset.data.renderSettings.data.brigthness = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     otherset1.data.objectSettings.data.scale = 0.5 + ((getMonoTime() - start).inMilliseconds().int / 1000) / time
-    UpdateGPUBuffer(mainset.data.renderSettings)
-    UpdateGPUBuffer(otherset1.data.objectSettings)
-    renderdata.FlushAllMemory()
+    updateGPUBuffer(mainset.data.renderSettings)
+    updateGPUBuffer(otherset1.data.objectSettings)
+    renderdata.flushAllMemory()
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_05_cube(time: float32) =
   type
@@ -400,33 +400,33 @@ proc test_05_cube(time: float32) =
   colors.add newSeqWith(6, vec4(1, 1, 0, 1))
   normals.add newSeqWith(6, vec3(0, 1, 0))
 
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   var mesh = Mesh(
     position: asGPUArray(vertices, VertexBuffer),
     color: asGPUArray(colors, VertexBuffer),
     normals: asGPUArray(normals, VertexBuffer),
   )
-  AssignBuffers(renderdata, mesh)
+  assignBuffers(renderdata, mesh)
 
   var floor = Mesh(
     position: asGPUArray(quad.transf(scale(10, 10, 10) * rotate(-PI / 2, X) * translate(0, 0, 0.05)), VertexBuffer),
     color: asGPUArray(newSeqWith(6, vec4(0.1, 0.1, 0.1, 1)), VertexBuffer),
     normals: asGPUArray(newSeqWith(6, Y), VertexBuffer),
   )
-  AssignBuffers(renderdata, floor)
+  assignBuffers(renderdata, floor)
 
   var uniforms1 = asDescriptorSet(
     Uniforms(
       data: asGPUValue(UniformData(mvp: Unit4), UniformBufferMapped)
     )
   )
-  AssignBuffers(renderdata, uniforms1)
+  assignBuffers(renderdata, uniforms1)
 
-  renderdata.FlushAllMemory()
+  renderdata.flushAllMemory()
 
-  var pipeline = CreatePipeline[CubeShader](renderPass = vulkan.swapchain.renderPass)
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
+  var pipeline = createPipeline[CubeShader](renderPass = vulkan.swapchain.renderPass)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
 
   var tStart = getMonoTime()
   var t = tStart
@@ -436,21 +436,21 @@ proc test_05_cube(time: float32) =
     let tStartLoop = getMonoTime() - tStart
 
     uniforms1.data.data.data.mvp = (
-      projection(-PI / 2, GetAspectRatio(), 0.01, 100) *
+      projection(-PI / 2, getAspectRatio(), 0.01, 100) *
       translate(0, 0, 2) *
       rotate(PI / 4, X) *
       rotate(PI * 0.1 * (tStartLoop.inMicroseconds() / 1_000_000), Y)
     )
-    UpdateGPUBuffer(uniforms1.data.data, flush = true)
+    updateGPUBuffer(uniforms1.data.data, flush = true)
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, pipeline):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+        withPipeline(commandbuffer, pipeline):
 
-          WithBind(commandbuffer, (uniforms1, ), pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = floor)
+          withBind(commandbuffer, (uniforms1, ), pipeline):
+            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = floor)
 
     let tEndLoop = getMonoTime() - tStart
     let looptime = tEndLoop - tStartLoop
@@ -460,11 +460,11 @@ proc test_05_cube(time: float32) =
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_06_different_draw_modes(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     Shader = object
@@ -490,38 +490,38 @@ proc test_06_different_draw_modes(time: float32) =
     position: asGPUArray([vec3(-0.9, 0, 0), vec3(-0.05, -0.9, 0), vec3(0.05, -0.9, 0), vec3(0.9, 0, 0)], VertexBuffer),
     color: asGPUArray([vec3(1, 1, 0), vec3(1, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0)], VertexBuffer),
   )
-  AssignBuffers(renderdata, triangle)
-  AssignBuffers(renderdata, lines)
-  renderdata.FlushAllMemory()
+  assignBuffers(renderdata, triangle)
+  assignBuffers(renderdata, lines)
+  renderdata.flushAllMemory()
 
-  var pipeline1 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_LINE, lineWidth = 20'f32)
-  var pipeline2 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_POINT)
-  var pipeline3 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, lineWidth = 5)
-  var pipeline4 = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
+  var pipeline1 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_LINE, lineWidth = 20'f32)
+  var pipeline2 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_POINT)
+  var pipeline3 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, lineWidth = 5)
+  var pipeline4 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-    WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, pipeline1):
-          Render(commandbuffer = commandbuffer, pipeline = pipeline1, mesh = triangle)
-        WithPipeline(commandbuffer, pipeline2):
-          Render(commandbuffer = commandbuffer, pipeline = pipeline2, mesh = triangle)
-        WithPipeline(commandbuffer, pipeline3):
-          Render(commandbuffer = commandbuffer, pipeline = pipeline3, mesh = lines)
-        WithPipeline(commandbuffer, pipeline4):
-          Render(commandbuffer = commandbuffer, pipeline = pipeline4, mesh = lines)
+    withNextFrame(framebuffer, commandbuffer):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+        withPipeline(commandbuffer, pipeline1):
+          render(commandbuffer = commandbuffer, pipeline = pipeline1, mesh = triangle)
+        withPipeline(commandbuffer, pipeline2):
+          render(commandbuffer = commandbuffer, pipeline = pipeline2, mesh = triangle)
+        withPipeline(commandbuffer, pipeline3):
+          render(commandbuffer = commandbuffer, pipeline = pipeline3, mesh = lines)
+        withPipeline(commandbuffer, pipeline4):
+          render(commandbuffer = commandbuffer, pipeline = pipeline4, mesh = lines)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline1)
-  DestroyPipeline(pipeline2)
-  DestroyPipeline(pipeline3)
-  DestroyPipeline(pipeline4)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline1)
+  destroyPipeline(pipeline2)
+  destroyPipeline(pipeline3)
+  destroyPipeline(pipeline4)
+  destroyRenderData(renderdata)
 
 proc test_07_png_texture(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     Uniforms = object
@@ -555,41 +555,41 @@ void main() {
       vec2(1, 0), vec2(1, 1), vec2(0, 1),
     ], VertexBuffer),
   )
-  AssignBuffers(renderdata, mesh)
-  renderdata.FlushAllMemory()
+  assignBuffers(renderdata, mesh)
+  renderdata.flushAllMemory()
 
-  var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
   var uniforms1 = asDescriptorSet(
     Uniforms(
-      texture1: LoadImage[BGRA]("art.png"),
+      texture1: loadImage[BGRA]("art.png"),
     )
   )
-  UploadImages(renderdata, uniforms1)
-  InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
+  uploadImages(renderdata, uniforms1)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
-        WithPipeline(commandbuffer, pipeline):
+        withPipeline(commandbuffer, pipeline):
 
-          WithBind(commandbuffer, (uniforms1, ), pipeline):
-            Render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+          withBind(commandbuffer, (uniforms1, ), pipeline):
+            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleCountFlagBits) =
-  var (offscreenRP, presentRP) = CreateIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
+  var (offscreenRP, presentRP) = createIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
 
-  SetupSwapchain(renderpass = presentRP)
+  setupSwapchain(renderpass = presentRP)
 
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
   type
     Uniforms = object
@@ -645,16 +645,16 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
       frameTexture: Image[BGRA](width: vulkan.swapchain.width, height: vulkan.swapchain.height, isRenderTarget: true),
     )
   )
-  AssignBuffers(renderdata, mesh)
-  AssignBuffers(renderdata, quad)
-  UploadImages(renderdata, uniforms1)
-  renderdata.FlushAllMemory()
+  assignBuffers(renderdata, mesh)
+  assignBuffers(renderdata, quad)
+  uploadImages(renderdata, uniforms1)
+  renderdata.flushAllMemory()
 
   var
-    drawPipeline = CreatePipeline[TriangleShader](renderPass = offscreenRP)
-    presentPipeline = CreatePipeline[PresentShader](renderPass = presentRP)
+    drawPipeline = createPipeline[TriangleShader](renderPass = offscreenRP)
+    presentPipeline = createPipeline[PresentShader](renderPass = presentRP)
 
-  InitDescriptorSet(renderdata, presentPipeline.descriptorSetLayouts[0], uniforms1)
+  initDescriptorSet(renderdata, presentPipeline.descriptorSetLayouts[0], uniforms1)
 
   # create depth buffer images (will not use the one in the swapchain
   var
@@ -672,7 +672,7 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
     let requirements = svkGetImageMemoryRequirements(depthImage)
     depthMemory = svkAllocateMemory(
       requirements.size,
-      BestMemory(mappable = false, filter = requirements.memoryTypes)
+      bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
       vulkan.device,
@@ -702,7 +702,7 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
     let requirements = svkGetImageMemoryRequirements(msaaImage)
     msaaMemory = svkAllocateMemory(
       requirements.size,
-      BestMemory(mappable = false, filter = requirements.memoryTypes)
+      bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
       vulkan.device,
@@ -733,24 +733,24 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
-    WithNextFrame(framebuffer, commandbuffer):
+    withNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(offscreenRP, offscreenFB, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, drawPipeline):
-          Render(commandbuffer = commandbuffer, pipeline = drawPipeline, mesh = mesh)
+      withRenderPass(offscreenRP, offscreenFB, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+        withPipeline(commandbuffer, drawPipeline):
+          render(commandbuffer = commandbuffer, pipeline = drawPipeline, mesh = mesh)
 
-      WithRenderPass(presentRP, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(presentRP, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
-        WithPipeline(commandbuffer, presentPipeline):
+        withPipeline(commandbuffer, presentPipeline):
 
-          WithBind(commandbuffer, (uniforms1, ), presentPipeline):
-            Render(commandbuffer = commandbuffer, pipeline = presentPipeline, mesh = quad)
+          withBind(commandbuffer, (uniforms1, ), presentPipeline):
+            render(commandbuffer = commandbuffer, pipeline = presentPipeline, mesh = quad)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(presentPipeline)
-  DestroyPipeline(drawPipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(presentPipeline)
+  destroyPipeline(drawPipeline)
+  destroyRenderData(renderdata)
   if depthImage.Valid:
     vkDestroyImageView(vulkan.device, depthImageView, nil)
     vkDestroyImage(vulkan.device, depthImage, nil)
@@ -762,11 +762,11 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
   vkDestroyRenderPass(vulkan.device, offscreenRP.vk, nil)
   vkDestroyRenderPass(vulkan.device, presentRP.vk, nil)
   vkDestroyFramebuffer(vulkan.device, offscreenFB, nil)
-  ClearSwapchain()
+  clearSwapchain()
 
 when isMainModule:
   var time = 1'f32
-  InitVulkan()
+  initVulkan()
 
   var mainRenderpass: RenderPass
   var renderPasses = [
@@ -779,8 +779,8 @@ when isMainModule:
 
   # test normal
   for i, (depthBuffer, samples) in renderPasses:
-    var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
-    SetupSwapchain(renderpass = renderpass)
+    var renderpass = createDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
+    setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
     test_01_triangle(time)
@@ -805,10 +805,10 @@ when isMainModule:
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
-    ClearSwapchain()
+    clearSwapchain()
 
   # test multiple render passes
   for i, (depthBuffer, samples) in renderPasses:
     test_08_triangle_2pass(time, depthBuffer, samples)
 
-  DestroyVulkan()
+  destroyVulkan()

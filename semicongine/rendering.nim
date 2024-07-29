@@ -44,7 +44,7 @@ type
     graphicsQueueFamily*: uint32
     graphicsQueue*: VkQueue
     debugMessenger: VkDebugUtilsMessengerEXT
-    # populated through the InitSwapchain proc
+    # populated through the initSwapchain proc
     swapchain*: Swapchain
     # unclear as of yet
     anisotropy*: float32 = 0 # needs to be enable during device creation
@@ -53,10 +53,10 @@ type
     samples*: VkSampleCountFlagBits
     depthBuffer*: bool
   Swapchain* = ref object
-    # parameters to InitSwapchain, required for swapchain recreation
+    # parameters to initSwapchain, required for swapchain recreation
     renderPass*: RenderPass
     vSync: bool
-    # populated through InitSwapchain proc
+    # populated through initSwapchain proc
     vk: VkSwapchainKHR
     width*: uint32
     height*: uint32
@@ -82,7 +82,7 @@ type
     oldSwapchainCounter: int # swaps until old swapchain will be destroyed
 
 var vulkan*: VulkanGlobals
-var fullscreen: bool
+var fullscreen_internal: bool
 
 type
   # type aliases
@@ -137,40 +137,40 @@ type
     imageViews: seq[VkImageView]
     samplers: seq[VkSampler]
 
-template ForDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
+template forDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 0'u32
   for theFieldname, value in fieldPairs(shader):
     when typeof(value) is Image:
       block:
-        const `fieldname` {.inject.} = theFieldname
+        const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         const `countname` {.inject.} = 1'u32
-        let `valuename` {.inject.} = value
+        let `valuename` {.inject, hint[XDeclaredButNotUsed]: off.} = value
         body
         `bindingNumber`.inc
     elif typeof(value) is GPUValue:
       block:
-        const `fieldname` {.inject.} = theFieldname
+        const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
         const `countname` {.inject.} = 1'u32
-        let `valuename` {.inject.} = value
+        let `valuename` {.inject, hint[XDeclaredButNotUsed]: off.} = value
         body
         `bindingNumber`.inc
     elif typeof(value) is array:
       when elementType(value) is Image:
         block:
-          const `fieldname` {.inject.} = theFieldname
+          const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
           const `countname` {.inject.} = uint32(typeof(value).len)
-          let `valuename` {.inject.} = value
+          let `valuename` {.inject, hint[XDeclaredButNotUsed]: off.} = value
           body
           `bindingNumber`.inc
       elif elementType(value) is GPUValue:
         block:
-          const `fieldname` {.inject.} = theFieldname
+          const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
           const `countname` {.inject.} = len(value).uint32
-          let `valuename` {.inject.} = value
+          let `valuename` {.inject hint[XDeclaredButNotUsed]: off.} = value
           body
           `bindingNumber`.inc
       else:
@@ -206,7 +206,7 @@ proc debugCallback(
     raise newException(Exception, errorMsg)
   return false
 
-proc InitVulkan*(appName: string = "semicongine app") =
+proc initVulkan*(appName: string = "semicongine app") =
 
   # instance creation
 
@@ -248,8 +248,8 @@ proc InitVulkan*(appName: string = "semicongine app") =
   #
   for extension in requiredExtensions:
     loadExtension(vulkan.instance, $extension)
-  vulkan.window = CreateWindow(appName)
-  vulkan.surface = CreateNativeSurface(vulkan.instance, vulkan.window)
+  vulkan.window = createWindow(appName)
+  vulkan.surface = createNativeSurface(vulkan.instance, vulkan.window)
 
   # logical device creation
 
@@ -278,8 +278,8 @@ proc InitVulkan*(appName: string = "semicongine app") =
     )
 
   # get physical device and graphics queue family
-  vulkan.physicalDevice = GetBestPhysicalDevice(vulkan.instance)
-  vulkan.graphicsQueueFamily = GetQueueFamily(vulkan.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
+  vulkan.physicalDevice = getBestPhysicalDevice(vulkan.instance)
+  vulkan.graphicsQueueFamily = getQueueFamily(vulkan.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
 
   let
     priority = cfloat(1)
@@ -315,31 +315,31 @@ proc InitVulkan*(appName: string = "semicongine app") =
   )
   vulkan.graphicsQueue = svkGetDeviceQueue(vulkan.device, vulkan.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
 
-proc ClearSwapchain*() =
+proc clearSwapchain*() =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
-  DestroySwapchain(vulkan.swapchain)
+  destroySwapchain(vulkan.swapchain)
   vulkan.swapchain = nil
 
-proc SetupSwapchain*(renderPass: RenderPass, vSync: bool = false) =
+proc setupSwapchain*(renderPass: RenderPass, vSync: bool = false) =
   assert vulkan.swapchain == nil, "Swapchain has already been initialized yet"
-  vulkan.swapchain = InitSwapchain(renderPass, vSync = vSync)
+  vulkan.swapchain = initSwapchain(renderPass, vSync = vSync)
 
-proc DestroyVulkan*() =
+proc destroyVulkan*() =
   if vulkan.swapchain != nil:
-    DestroySwapchain(vulkan.swapchain)
+    destroySwapchain(vulkan.swapchain)
   vkDestroyDevice(vulkan.device, nil)
   vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
   vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
   vkDestroyInstance(vulkan.instance, nil)
 
-proc ShowSystemCursor*(value: bool) = vulkan.window.ShowSystemCursor(value)
-proc Fullscreen*(): bool = fullscreen
-proc SetFullscreen*(enable: bool) =
-  if enable != fullscreen:
-    fullscreen = enable
-    vulkan.window.SetFullscreen(fullscreen)
+proc showSystemCursor*(value: bool) = vulkan.window.showSystemCursor(value)
+proc fullscreen*(): bool = fullscreen_internal
+proc setFullscreen*(enable: bool) =
+  if enable != fullscreen_internal:
+    fullscreen_internal = enable
+    vulkan.window.setFullscreen(fullscreen_internal)
 
-proc GetAspectRatio*(): float32 =
+proc getAspectRatio*(): float32 =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
   vulkan.swapchain.width.float32 / vulkan.swapchain.height.float32
 
@@ -347,7 +347,7 @@ proc currentFiF*(): int =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
   vulkan.swapchain.currentFiF
 
-proc MaxFramebufferSampleCount*(maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCountFlagBits =
+proc maxFramebufferSampleCount*(maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCountFlagBits =
   let limits = svkGetPhysicalDeviceProperties().limits
   let available = VkSampleCountFlags(
     limits.framebufferColorSampleCounts.uint32 and limits.framebufferDepthSampleCounts.uint32

@@ -40,7 +40,7 @@ type
 # sorry, have to use module-global variable to capture windows events
 var currentEvents: seq[Event]
 
-template CheckWin32Result*(call: untyped) =
+template checkWin32Result*(call: untyped) =
   let value = call
   if value == 0:
     raise newException(Exception, "Win32 error: " & astToStr(call) & " returned " & $value)
@@ -52,7 +52,7 @@ let
   defaultCursor = LoadCursor(0, IDC_ARROW)
 var currentCursor = defaultCursor
 
-proc MapLeftRightKeys(key: INT, lparam: LPARAM): INT =
+proc mapLeftRightKeys(key: INT, lparam: LPARAM): INT =
   case key
   of VK_SHIFT:
     MapVirtualKey(UINT((lParam and 0x00ff0000) shr 16), MAPVK_VSC_TO_VK_EX)
@@ -63,7 +63,7 @@ proc MapLeftRightKeys(key: INT, lparam: LPARAM): INT =
   else:
     key
 
-proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.stdcall.} =
+proc windowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.stdcall.} =
   case uMsg
   of WM_DESTROY:
     currentEvents.add(Event(eventType: EventType.Quit))
@@ -110,7 +110,7 @@ proc WindowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 
 
-proc CreateWindow*(title: string): NativeWindow =
+proc createWindow*(title: string): NativeWindow =
   when DEBUG:
     AllocConsole()
     discard stdin.reopen("conIN$", fmRead)
@@ -147,12 +147,12 @@ proc CreateWindow*(title: string): NativeWindow =
   result.g_wpPrev.length = UINT(sizeof(WINDOWPLACEMENT))
   discard result.hwnd.ShowWindow(SW_SHOW)
 
-proc SetTitle*(window: NativeWindow, title: string) =
+proc setTitle*(window: NativeWindow, title: string) =
   window.hwnd.SetWindowText(T(title))
 
 # inspired by the one and only, Raymond Chen
 # https://devblogs.microsoft.com/oldnewthing/20100412-00/?p=14353
-proc SetFullscreen*(window: var NativeWindow, enable: bool) =
+proc setFullscreen*(window: var NativeWindow, enable: bool) =
   let dwStyle: DWORD = GetWindowLong(window.hwnd, GWL_STYLE)
   if enable:
     var mi = MONITORINFO(cbSize: DWORD(sizeof(MONITORINFO)))
@@ -164,7 +164,7 @@ proc SetFullscreen*(window: var NativeWindow, enable: bool) =
     SetWindowPlacement(window.hwnd, addr window.g_wpPrev)
     SetWindowPos(window.hwnd, HWND(0), 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_NOOWNERZORDER or SWP_FRAMECHANGED)
 
-proc ShowSystemCursor*(window: NativeWindow, value: bool) =
+proc showSystemCursor*(window: NativeWindow, value: bool) =
   if value == true:
     currentCursor = defaultCursor
     SetCursor(currentCursor)
@@ -172,15 +172,15 @@ proc ShowSystemCursor*(window: NativeWindow, value: bool) =
     currentCursor = invisibleCursor
     SetCursor(currentCursor)
 
-proc Destroy*(window: NativeWindow) =
+proc destroy*(window: NativeWindow) =
   discard
 
-proc Size*(window: NativeWindow): (int, int) =
+proc size*(window: NativeWindow): (int, int) =
   var rect: RECT
-  CheckWin32Result GetWindowRect(window.hwnd, addr(rect))
+  checkWin32Result GetWindowRect(window.hwnd, addr(rect))
   (int(rect.right - rect.left), int(rect.bottom - rect.top))
 
-proc PendingEvents*(window: NativeWindow): seq[Event] =
+proc pendingEvents*(window: NativeWindow): seq[Event] =
   # empty queue
   currentEvents = newSeq[Event]()
   var msg: MSG
@@ -190,17 +190,17 @@ proc PendingEvents*(window: NativeWindow): seq[Event] =
     DispatchMessage(addr(msg))
   return currentEvents
 
-proc GetMousePosition*(window: NativeWindow): Option[Vec2f] =
+proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
   var p: POINT
   let res = GetCursorPos(addr(p))
   if res:
     return some(Vec2f([float32(p.x), float32(p.y)]))
   return none(Vec2f)
 
-proc SetMousePosition*(window: NativeWindow, x, y: int) =
-  CheckWin32Result SetCursorPos(x, y)
+proc setMousePosition*(window: NativeWindow, x, y: int) =
+  checkWin32Result SetCursorPos(x, y)
 
-proc CreateNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
+proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   assert instance.Valid
   var surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,

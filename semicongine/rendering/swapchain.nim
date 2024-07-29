@@ -1,6 +1,6 @@
 const N_FRAMEBUFFERS = 3'u32
 
-proc InitSwapchain(
+proc initSwapchain(
   renderPass: RenderPass,
   vSync: bool = false,
   oldSwapchain: Swapchain = nil,
@@ -66,7 +66,7 @@ proc InitSwapchain(
     let requirements = svkGetImageMemoryRequirements(swapchain.depthImage)
     swapchain.depthMemory = svkAllocateMemory(
       requirements.size,
-      BestMemory(mappable = false, filter = requirements.memoryTypes)
+      bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
       vulkan.device,
@@ -92,7 +92,7 @@ proc InitSwapchain(
     let requirements = svkGetImageMemoryRequirements(swapchain.msaaImage)
     swapchain.msaaMemory = svkAllocateMemory(
       requirements.size,
-      BestMemory(mappable = false, filter = requirements.memoryTypes)
+      bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
       vulkan.device,
@@ -152,9 +152,9 @@ proc InitSwapchain(
 
   return swapchain
 
-proc DestroySwapchain*(swapchain: Swapchain) =
+proc destroySwapchain*(swapchain: Swapchain) =
   if swapchain.oldSwapchain != nil:
-    DestroySwapchain(swapchain.oldSwapchain)
+    destroySwapchain(swapchain.oldSwapchain)
 
   if swapchain.msaaImage.Valid:
     vkDestroyImageView(vulkan.device, swapchain.msaaImageView, nil)
@@ -185,8 +185,8 @@ proc DestroySwapchain*(swapchain: Swapchain) =
 
   vkDestroySwapchainKHR(vulkan.device, swapchain.vk, nil)
 
-proc TryAcquireNextImage(swapchain: Swapchain): Option[VkFramebuffer] =
-  if not swapchain.queueFinishedFence[swapchain.currentFiF].Await(100_000_000):
+proc tryAcquireNextImage(swapchain: Swapchain): Option[VkFramebuffer] =
+  if not swapchain.queueFinishedFence[swapchain.currentFiF].await(100_000_000):
     return none(VkFramebuffer)
 
   let nextImageResult = vkAcquireNextImageKHR(
@@ -204,7 +204,7 @@ proc TryAcquireNextImage(swapchain: Swapchain): Option[VkFramebuffer] =
     return none(VkFramebuffer)
   return some(swapchain.framebuffers[swapchain.currentFramebufferIndex])
 
-proc Swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
+proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
   var
     waitStage = VkPipelineStageFlags(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
     submitInfo = VkSubmitInfo(
@@ -238,7 +238,7 @@ proc Swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
   if swapchain.oldSwapchain != nil:
     dec swapchain.oldSwapchainCounter
     if swapchain.oldSwapchainCounter <= 0:
-      DestroySwapchain(swapchain.oldSwapchain)
+      destroySwapchain(swapchain.oldSwapchain)
       swapchain.oldSwapchain = nil
 
   if presentResult != VK_SUCCESS:
@@ -247,16 +247,16 @@ proc Swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
   swapchain.currentFiF = (uint32(swapchain.currentFiF) + 1) mod INFLIGHTFRAMES
   return true
 
-proc Recreate(swapchain: Swapchain): Swapchain =
-  InitSwapchain(
+proc recreate(swapchain: Swapchain): Swapchain =
+  initSwapchain(
     renderPass = swapchain.renderPass,
     vSync = swapchain.vSync,
     oldSwapchain = swapchain,
   )
 
-template WithNextFrame*(framebufferName, commandBufferName, body: untyped): untyped =
+template withNextFrame*(framebufferName, commandBufferName, body: untyped): untyped =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
-  var maybeFramebuffer = TryAcquireNextImage(vulkan.swapchain)
+  var maybeFramebuffer = tryAcquireNextImage(vulkan.swapchain)
   if maybeFramebuffer.isSome:
     block:
       let `framebufferName` {.inject.} = maybeFramebuffer.get
@@ -271,8 +271,8 @@ template WithNextFrame*(framebufferName, commandBufferName, body: untyped): unty
       body
 
       checkVkResult vkEndCommandBuffer(`commandBufferName`)
-      discard Swap(swapchain = vulkan.swapchain, commandBuffer = `commandBufferName`)
+      discard swap(swapchain = vulkan.swapchain, commandBuffer = `commandBufferName`)
   else:
-    let newSwapchain = Recreate(vulkan.swapchain)
+    let newSwapchain = recreate(vulkan.swapchain)
     if newSwapchain != nil:
       vulkan.swapchain = newSwapchain

@@ -28,7 +28,7 @@ type
     isRenderTarget*: bool = false
     samples*: VkSampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT
 
-proc LoadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
+proc loadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
   when T is Gray:
     let nChannels = 1.cint
   elif T is BGRA:
@@ -57,14 +57,14 @@ proc LoadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
     for i in 0 ..< result.data.len:
       swap(result.data[i][0], result.data[i][2])
 
-proc LoadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
+proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
   assert path.splitFile().ext.toLowerAscii == ".png", "Unsupported image type: " & path.splitFile().ext.toLowerAscii
   when T is Gray:
     let pngType = 0.cint
   elif T is BGRA:
     let pngType = 6.cint
 
-  result = LoadImageData[T](loadResource_intern(path, package = package).readAll())
+  result = loadImageData[T](loadResource_intern(path, package = package).readAll())
 
 # stb_image.h has no encoding support, maybe check stb_image_write or similar
 #

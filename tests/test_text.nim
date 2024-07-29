@@ -10,12 +10,12 @@ import std/random
 import ../semicongine
 
 proc test_01_static_label(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
-  var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
-  var label1 = InitTextbox(
+  var label1 = initTextbox(
     renderdata,
     pipeline.descriptorSetLayouts[0],
     font,
@@ -26,27 +26,27 @@ proc test_01_static_label(time: float32) =
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-    label1.Refresh()
-    WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, pipeline):
-          Render(label1, commandbuffer, pipeline)
+    label1.refresh()
+    withNextFrame(framebuffer, commandbuffer):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+        withPipeline(commandbuffer, pipeline):
+          render(label1, commandbuffer, pipeline)
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_02_multiple_animated(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
-  var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
   var font1 = loadFont("Overhaul.ttf", lineHeightPixels = 40)
   var font2 = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var font3 = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
   var labels = [
-    InitTextbox(
+    initTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font1,
@@ -55,7 +55,7 @@ proc test_02_multiple_animated(time: float32) =
       scale = 0.004,
       position = vec3(-0.3, 0.5)
     ),
-    InitTextbox(
+    initTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font2,
@@ -64,7 +64,7 @@ proc test_02_multiple_animated(time: float32) =
       scale = 0.001,
       position = vec3(0, 0)
     ),
-    InitTextbox(
+    initTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font3,
@@ -80,35 +80,35 @@ proc test_02_multiple_animated(time: float32) =
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     for i in 0 ..< labels.len:
-      var c = labels[i].Color
+      var c = labels[i].color
       c[i] = progress
-      labels[i].Color = c
-      labels[i].Scale = labels[i].Scale * (1.0 + (i + 1).float * 0.001)
-      labels[i].Position = labels[i].Position + vec3(0.001 * (i.float - 1'f))
+      labels[i].color = c
+      labels[i].scale = labels[i].scale * (1.0 + (i + 1).float * 0.001)
+      labels[i].position = labels[i].position + vec3(0.001 * (i.float - 1'f))
       labels[i].text = $(p + i)
-      labels[i].Refresh()
+      labels[i].refresh()
     inc p
-    WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, pipeline):
+    withNextFrame(framebuffer, commandbuffer):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+        withPipeline(commandbuffer, pipeline):
           for label in labels:
-            Render(label, commandbuffer, pipeline)
+            render(label, commandbuffer, pipeline)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_03_layouting(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
-  var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
   var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 40)
   var labels: seq[Textbox]
 
   for horizontal in HorizontalAlignment:
-    labels.add InitTextbox(
+    labels.add initTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font,
@@ -119,7 +119,7 @@ proc test_03_layouting(time: float32) =
       horizontalAlignment = horizontal,
     )
   for vertical in VerticalAlignment:
-    labels.add InitTextbox(
+    labels.add initTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font,
@@ -129,7 +129,7 @@ proc test_03_layouting(time: float32) =
       position = vec3(-0.35 + (vertical.float * 0.35), 0.3),
       verticalAlignment = vertical,
     )
-  labels.add InitTextbox(
+  labels.add initTextbox(
     renderdata,
     pipeline.descriptorSetLayouts[0],
     font,
@@ -149,26 +149,26 @@ It should display with some space above and have a pleasing appearance overall! 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
-    WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, pipeline):
+    withNextFrame(framebuffer, commandbuffer):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+        withPipeline(commandbuffer, pipeline):
           for label in labels:
-            Render(label, commandbuffer, pipeline)
+            render(label, commandbuffer, pipeline)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 proc test_04_lots_of_texts(time: float32) =
-  var renderdata = InitRenderData()
+  var renderdata = initRenderData()
 
-  var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
   var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
   var labels: seq[Textbox]
   for i in 0 ..< 100:
-    labels.add InitTextbox(
+    labels.add initTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font,
@@ -177,30 +177,30 @@ proc test_04_lots_of_texts(time: float32) =
       scale = rand(0.0002 .. 0.002),
       position = vec3(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
     )
-  labels = labels.sortedByIt(-it.Position.z)
+  labels = labels.sortedByIt(-it.position.z)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     for l in labels.mitems:
-      l.Refresh()
-    WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-        WithPipeline(commandbuffer, pipeline):
+      l.refresh()
+    withNextFrame(framebuffer, commandbuffer):
+      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+        withPipeline(commandbuffer, pipeline):
           for l in labels:
-            Render(l, commandbuffer, pipeline)
+            render(l, commandbuffer, pipeline)
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
-  DestroyPipeline(pipeline)
-  DestroyRenderData(renderdata)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
 
 when isMainModule:
   var time = 1'f32
-  InitVulkan()
+  initVulkan()
 
   for depthBuffer in [true, false]:
-    var renderpass = CreateDirectPresentationRenderPass(depthBuffer = depthBuffer)
-    SetupSwapchain(renderpass = renderpass)
+    var renderpass = createDirectPresentationRenderPass(depthBuffer = depthBuffer)
+    setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
     test_01_static_label(time)
@@ -210,6 +210,6 @@ when isMainModule:
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
-    ClearSwapchain()
+    clearSwapchain()
 
-  DestroyVulkan()
+  destroyVulkan()
