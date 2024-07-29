@@ -1,6 +1,6 @@
 {.emit: "#define STBTT_STATIC".}
 {.emit: "#define STB_TRUETYPE_IMPLEMENTATION".}
-{.emit: "#include \"" & currentSourcePath.parentDir() & "/stb_truetype.h\"".}
+{.emit: "#include \"" & currentSourcePath.parentDir().parentDir() & "/thirdparty/stb/stb_truetype.h\"".}
 
 type stbtt_fontinfo {.importc, incompleteStruct.} = object
 

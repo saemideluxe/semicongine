@@ -20,7 +20,7 @@ proc test_01_static_label(time: float32) =
     pipeline.descriptorSetLayouts[0],
     font,
     "Hello semicongine!",
-    color = NewVec4f(1, 1, 1, 1),
+    color = vec4(1, 1, 1, 1),
     scale = 0.0005,
   )
 
@@ -28,7 +28,7 @@ proc test_01_static_label(time: float32) =
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     label1.Refresh()
     WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           Render(label1, commandbuffer, pipeline)
 
@@ -51,27 +51,27 @@ proc test_02_multiple_animated(time: float32) =
       pipeline.descriptorSetLayouts[0],
       font1,
       "  0",
-      color = NewVec4f(0, 1, 1, 1),
+      color = vec4(0, 1, 1, 1),
       scale = 0.004,
-      position = NewVec3f(-0.3, 0.5)
+      position = vec3(-0.3, 0.5)
     ),
     InitTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font2,
       "  1",
-      color = NewVec4f(1, 0, 1, 1),
+      color = vec4(1, 0, 1, 1),
       scale = 0.001,
-      position = NewVec3f(0, 0)
+      position = vec3(0, 0)
     ),
     InitTextbox(
       renderdata,
       pipeline.descriptorSetLayouts[0],
       font3,
       "  2",
-      color = NewVec4f(1, 1, 0, 1),
+      color = vec4(1, 1, 0, 1),
       scale = 0.001,
-      position = NewVec3f(0.3, -0.5)
+      position = vec3(0.3, -0.5)
     )
   ]
 
@@ -84,12 +84,12 @@ proc test_02_multiple_animated(time: float32) =
       c[i] = progress
       labels[i].Color = c
       labels[i].Scale = labels[i].Scale * (1.0 + (i + 1).float * 0.001)
-      labels[i].Position = labels[i].Position + NewVec3f(0.001 * (i.float - 1'f))
+      labels[i].Position = labels[i].Position + vec3(0.001 * (i.float - 1'f))
       labels[i].text = $(p + i)
       labels[i].Refresh()
     inc p
     WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           for label in labels:
             Render(label, commandbuffer, pipeline)
@@ -113,9 +113,9 @@ proc test_03_layouting(time: float32) =
       pipeline.descriptorSetLayouts[0],
       font,
       $horizontal & " aligned",
-      color = NewVec4f(1, 1, 1, 1),
+      color = vec4(1, 1, 1, 1),
       scale = 0.001,
-      position = NewVec3f(0, 0.9 - (horizontal.float * 0.15)),
+      position = vec3(0, 0.9 - (horizontal.float * 0.15)),
       horizontalAlignment = horizontal,
     )
   for vertical in VerticalAlignment:
@@ -124,9 +124,9 @@ proc test_03_layouting(time: float32) =
       pipeline.descriptorSetLayouts[0],
       font,
       $vertical & " aligned",
-      color = NewVec4f(1, 1, 1, 1),
+      color = vec4(1, 1, 1, 1),
       scale = 0.001,
-      position = NewVec3f(-0.35 + (vertical.float * 0.35), 0.3),
+      position = vec3(-0.35 + (vertical.float * 0.35), 0.3),
       verticalAlignment = vertical,
     )
   labels.add InitTextbox(
@@ -138,9 +138,9 @@ This is a somewhat longer paragraph with a few newlines and a maximum width of 0
 
 It should display with some space above and have a pleasing appearance overall! :)""",
     maxWidth = 0.6,
-    color = NewVec4f(1, 1, 1, 1),
+    color = vec4(1, 1, 1, 1),
     scale = 0.001,
-    position = NewVec3f(-0.9, 0.1),
+    position = vec3(-0.9, 0.1),
     verticalAlignment = Top,
     horizontalAlignment = Left,
   )
@@ -150,7 +150,7 @@ It should display with some space above and have a pleasing appearance overall! 
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           for label in labels:
             Render(label, commandbuffer, pipeline)
@@ -173,9 +173,9 @@ proc test_04_lots_of_texts(time: float32) =
       pipeline.descriptorSetLayouts[0],
       font,
       $i,
-      color = NewVec4f(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0)),
+      color = vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0)),
       scale = rand(0.0002 .. 0.002),
-      position = NewVec3f(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
+      position = vec3(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
     )
   labels = labels.sortedByIt(-it.Position.z)
 
@@ -184,7 +184,7 @@ proc test_04_lots_of_texts(time: float32) =
     for l in labels.mitems:
       l.Refresh()
     WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
           for l in labels:
             Render(l, commandbuffer, pipeline)

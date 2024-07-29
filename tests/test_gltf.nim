@@ -29,7 +29,7 @@ proc test_gltf(time: float32) =
       emissive: Vec4f = vec4(0, 0, 0, 0)
       # emissiveTexture: int32 = -1
     MainDescriptors = object
-      materials: array[32, GPUValue[Material, UniformBuffer]]
+      materials: array[50, GPUValue[Material, UniformBuffer]]
       camera: GPUValue[Camera, UniformBufferMapped]
     Shader = object
       objectData {.PushConstantAttribute.}: ObjectData
@@ -129,7 +129,7 @@ void main() {
       renderdata.AssignBuffers(primitive[0])
   renderdata.AssignBuffers(descriptors)
 
-  var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = CreatePipeline[Shader](renderPass = vulkan.swapchain.renderPass, cullMode=[])
   InitDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
 
   renderdata.FlushAllMemory()
