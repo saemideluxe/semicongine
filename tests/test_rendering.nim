@@ -29,8 +29,8 @@ proc test_01_triangle(time: float32) =
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec3f, VertexBuffer]
   var mesh = TriangleMesh(
-    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
-    color: asGPUArray([NewVec3f(0, 0, 1), NewVec3f(0, 1, 0), NewVec3f(1, 0, 0)], VertexBuffer),
+    position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
+    color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   AssignBuffers(renderdata, mesh)
   renderdata.FlushAllMemory()
@@ -42,7 +42,7 @@ proc test_01_triangle(time: float32) =
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
 
@@ -82,22 +82,22 @@ proc test_02_triangle_quad_instanced(time: float32) =
       pos: GPUArray[Vec3f, VertexBuffer]
       scale: GPUArray[float32, VertexBuffer]
   var tri = TriangleMesh(
-    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
-    color: asGPUArray([NewVec3f(0, 0, 1), NewVec3f(0, 1, 0), NewVec3f(1, 0, 0)], VertexBuffer),
+    position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
+    color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   var quad = QuadMesh(
-    position: asGPUArray([NewVec3f(-0.3, -0.3), NewVec3f(-0.3, 0.3), NewVec3f(0.3, 0.3), NewVec3f(0.3, -0.3)], VertexBuffer),
+    position: asGPUArray([vec3(-0.3, -0.3, 0), vec3(-0.3, 0.3, 0), vec3(0.3, 0.3, 0), vec3(0.3, -0.3, 0)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
-    color: asGPUArray([NewVec3f(1, 1, 1), NewVec3f(1, 1, 1), NewVec3f(1, 1, 1), NewVec3f(1, 1, 1)], VertexBuffer),
+    color: asGPUArray([vec3(1, 1, 1), vec3(1, 1, 1), vec3(1, 1, 1), vec3(1, 1, 1)], VertexBuffer),
   )
 
   var instancesA: Instances
   for n in 1..100:
-    instancesA.pos.data.add NewVec3f(rand(-0.8'f32 .. 0.8'f32), rand(-0.8'f32 .. 0'f32))
+    instancesA.pos.data.add vec3(rand(-0.8'f32 .. 0.8'f32), rand(-0.8'f32 .. 0'f32), 0)
     instancesA.scale.data.add rand(0.3'f32 .. 0.4'f32)
   var instancesB: Instances
   for n in 1..100:
-    instancesB.pos.data.add NewVec3f(rand(-0.8'f32 .. 0.8'f32), rand(0'f32 .. 0.8'f32))
+    instancesB.pos.data.add vec3(rand(-0.8'f32 .. 0.8'f32), rand(0'f32 .. 0.8'f32), 0)
     instancesB.scale.data.add rand(0.1'f32 .. 0.2'f32)
 
   AssignBuffers(renderdata, tri)
@@ -113,7 +113,7 @@ proc test_02_triangle_quad_instanced(time: float32) =
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
 
@@ -163,18 +163,18 @@ proc test_03_simple_descriptorset(time: float32) =
   let W = BGRA([255'u8, 255'u8, 255'u8, 255'u8])
   var
     quad = QuadMesh(
-      position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(-0.5, 0.5), NewVec3f(0.5, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
+      position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(-0.5, 0.5, 0), vec3(0.5, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
       indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
     )
     uniforms1 = asDescriptorSet(
       Uniforms(
-        material: asGPUValue(Material(baseColor: NewVec3f(1, 1, 1)), UniformBuffer),
+        material: asGPUValue(Material(baseColor: vec3(1, 1, 1)), UniformBuffer),
         texture1: Image[BGRA](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
       )
     )
     uniforms2 = asDescriptorSet(
       Uniforms(
-        material: asGPUValue(Material(baseColor: NewVec3f(0.5, 0.5, 0.5)), UniformBuffer),
+        material: asGPUValue(Material(baseColor: vec3(0.5, 0.5, 0.5)), UniformBuffer),
         texture1: Image[BGRA](width: 2, height: 2, data: @[R, G, B, W]),
     )
     )
@@ -196,7 +196,7 @@ proc test_03_simple_descriptorset(time: float32) =
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
 
@@ -256,12 +256,12 @@ proc test_04_multiple_descriptorsets(time: float32) =
       indices: GPUArray[uint16, IndexBuffer]
 
   var quad = QuadMesh(
-    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(-0.5, 0.5), NewVec3f(0.5, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
+    position: asGPUArray([vec3(-0.5, -0.5), vec3(-0.5, 0.5), vec3(0.5, 0.5), vec3(0.5, -0.5)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
   )
   var constset = asDescriptorSet(
     ConstSet(
-      constants: asGPUValue(Constants(offset: NewVec2f(-0.3, 0.2)), UniformBuffer),
+      constants: asGPUValue(Constants(offset: vec2(-0.3, 0.2)), UniformBuffer),
     )
   )
   let G = Gray([50'u8])
@@ -270,8 +270,8 @@ proc test_04_multiple_descriptorsets(time: float32) =
     MainSet(
       renderSettings: asGPUValue(RenderSettings(brigthness: 0), UniformBufferMapped),
       material: [
-        asGPUValue(Material(baseColor: NewVec3f(1, 1, 0)), UniformBuffer),
-        asGPUValue(Material(baseColor: NewVec3f(1, 0, 1)), UniformBuffer),
+        asGPUValue(Material(baseColor: vec3(1, 1, 0)), UniformBuffer),
+        asGPUValue(Material(baseColor: vec3(1, 0, 1)), UniformBuffer),
     ],
     texture1: [
       Image[Gray](width: 2, height: 2, data: @[W, G, G, W], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
@@ -310,7 +310,7 @@ proc test_04_multiple_descriptorsets(time: float32) =
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
 
@@ -358,8 +358,8 @@ proc test_05_cube(time: float32) =
       color: GPUArray[Vec4f, VertexBuffer]
 
   let quad = @[
-    NewVec3f(-0.5, -0.5), NewVec3f(-0.5, +0.5), NewVec3f(+0.5, +0.5),
-    NewVec3f(+0.5, +0.5), NewVec3f(+0.5, -0.5), NewVec3f(-0.5, -0.5),
+    vec3(-0.5, -0.5), vec3(-0.5, +0.5), vec3(+0.5, +0.5),
+    vec3(+0.5, +0.5), vec3(+0.5, -0.5), vec3(-0.5, -0.5),
   ]
   proc transf(data: seq[Vec3f], mat: Mat4): seq[Vec3f] =
     for v in data:
@@ -371,34 +371,34 @@ proc test_05_cube(time: float32) =
     normals: seq[Vec3f]
 
   # front, red
-  vertices.add quad.transf(Translate(0, 0, -0.5))
-  colors.add newSeqWith(6, NewVec4f(1, 0, 0, 1))
-  normals.add newSeqWith(6, NewVec3f(0, 0, -1))
+  vertices.add quad.transf(translate(0, 0, -0.5))
+  colors.add newSeqWith(6, vec4(1, 0, 0, 1))
+  normals.add newSeqWith(6, vec3(0, 0, -1))
 
   # back, cyan
-  vertices.add quad.transf(Rotate(PI, Y) * Translate(0, 0, -0.5))
-  colors.add newSeqWith(6, NewVec4f(0, 1, 1, 1))
-  normals.add newSeqWith(6, NewVec3f(0, 0, 1))
+  vertices.add quad.transf(rotate(PI, Y) * translate(0, 0, -0.5))
+  colors.add newSeqWith(6, vec4(0, 1, 1, 1))
+  normals.add newSeqWith(6, vec3(0, 0, 1))
 
   # right, green
-  vertices.add quad.transf(Rotate(PI / 2, Y) * Translate(0, 0, -0.5))
-  colors.add newSeqWith(6, NewVec4f(0, 1, 0, 1))
-  normals.add newSeqWith(6, NewVec3f(-1, 0, 0))
+  vertices.add quad.transf(rotate(PI / 2, Y) * translate(0, 0, -0.5))
+  colors.add newSeqWith(6, vec4(0, 1, 0, 1))
+  normals.add newSeqWith(6, vec3(-1, 0, 0))
 
   # left, magenta
-  vertices.add quad.transf(Rotate(-PI / 2, Y) * Translate(0, 0, -0.5))
-  colors.add newSeqWith(6, NewVec4f(1, 0, 1, 1))
-  normals.add newSeqWith(6, NewVec3f(1, 0, 0))
+  vertices.add quad.transf(rotate(-PI / 2, Y) * translate(0, 0, -0.5))
+  colors.add newSeqWith(6, vec4(1, 0, 1, 1))
+  normals.add newSeqWith(6, vec3(1, 0, 0))
 
   # bottom, blue
-  vertices.add quad.transf(Rotate(PI / 2, X) * Translate(0, 0, -0.5))
-  colors.add newSeqWith(6, NewVec4f(0, 0, 1, 1))
-  normals.add newSeqWith(6, NewVec3f(0, -1, 0))
+  vertices.add quad.transf(rotate(PI / 2, X) * translate(0, 0, -0.5))
+  colors.add newSeqWith(6, vec4(0, 0, 1, 1))
+  normals.add newSeqWith(6, vec3(0, -1, 0))
 
   # top, yellow
-  vertices.add quad.transf(Rotate(-PI / 2, X) * Translate(0, 0, -0.5))
-  colors.add newSeqWith(6, NewVec4f(1, 1, 0, 1))
-  normals.add newSeqWith(6, NewVec3f(0, 1, 0))
+  vertices.add quad.transf(rotate(-PI / 2, X) * translate(0, 0, -0.5))
+  colors.add newSeqWith(6, vec4(1, 1, 0, 1))
+  normals.add newSeqWith(6, vec3(0, 1, 0))
 
   var renderdata = InitRenderData()
 
@@ -410,8 +410,8 @@ proc test_05_cube(time: float32) =
   AssignBuffers(renderdata, mesh)
 
   var floor = Mesh(
-    position: asGPUArray(quad.transf(Scale(10, 10, 10) * Rotate(-PI / 2, X) * Translate(0, 0, 0.05)), VertexBuffer),
-    color: asGPUArray(newSeqWith(6, NewVec4f(0.1, 0.1, 0.1, 1)), VertexBuffer),
+    position: asGPUArray(quad.transf(scale(10, 10, 10) * rotate(-PI / 2, X) * translate(0, 0, 0.05)), VertexBuffer),
+    color: asGPUArray(newSeqWith(6, vec4(0.1, 0.1, 0.1, 1)), VertexBuffer),
     normals: asGPUArray(newSeqWith(6, Y), VertexBuffer),
   )
   AssignBuffers(renderdata, floor)
@@ -436,16 +436,16 @@ proc test_05_cube(time: float32) =
     let tStartLoop = getMonoTime() - tStart
 
     uniforms1.data.data.data.mvp = (
-      Projection(-PI / 2, GetAspectRatio(), 0.01, 100) *
-      Translate(0, 0, 2) *
-      Rotate(PI / 4, X) *
-      Rotate(PI * 0.1 * (tStartLoop.inMicroseconds() / 1_000_000), Y)
+      projection(-PI / 2, GetAspectRatio(), 0.01, 100) *
+      translate(0, 0, 2) *
+      rotate(PI / 4, X) *
+      rotate(PI * 0.1 * (tStartLoop.inMicroseconds() / 1_000_000), Y)
     )
     UpdateGPUBuffer(uniforms1.data.data, flush = true)
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline):
 
           WithBind(commandbuffer, (uniforms1, ), pipeline):
@@ -483,12 +483,12 @@ proc test_06_different_draw_modes(time: float32) =
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec3f, VertexBuffer]
   var triangle = TriangleMesh(
-    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
-    color: asGPUArray([NewVec3f(0, 0, 1), NewVec3f(0, 1, 0), NewVec3f(1, 0, 0)], VertexBuffer),
+    position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
+    color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   var lines = TriangleMesh(
-    position: asGPUArray([NewVec3f(-0.9, 0), NewVec3f(-0.05, -0.9), NewVec3f(0.05, -0.9), NewVec3f(0.9, 0)], VertexBuffer),
-    color: asGPUArray([NewVec3f(1, 1, 0), NewVec3f(1, 1, 0), NewVec3f(0, 1, 0), NewVec3f(0, 1, 0)], VertexBuffer),
+    position: asGPUArray([vec3(-0.9, 0, 0), vec3(-0.05, -0.9, 0), vec3(0.05, -0.9, 0), vec3(0.9, 0, 0)], VertexBuffer),
+    color: asGPUArray([vec3(1, 1, 0), vec3(1, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0)], VertexBuffer),
   )
   AssignBuffers(renderdata, triangle)
   AssignBuffers(renderdata, lines)
@@ -502,7 +502,7 @@ proc test_06_different_draw_modes(time: float32) =
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     WithNextFrame(framebuffer, commandbuffer):
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         WithPipeline(commandbuffer, pipeline1):
           Render(commandbuffer = commandbuffer, pipeline = pipeline1, mesh = triangle)
         WithPipeline(commandbuffer, pipeline2):
@@ -547,12 +547,12 @@ void main() {
       uv: GPUArray[Vec2f, VertexBuffer]
   var mesh = Quad(
     position: asGPUArray([
-      NewVec3f(-0.8, -0.5), NewVec3f(-0.8, 0.5), NewVec3f(0.8, 0.5),
-      NewVec3f(0.8, 0.5), NewVec3f(0.8, -0.5), NewVec3f(-0.8, -0.5),
+      vec3(-0.8, -0.5), vec3(-0.8, 0.5), vec3(0.8, 0.5),
+      vec3(0.8, 0.5), vec3(0.8, -0.5), vec3(-0.8, -0.5),
     ], VertexBuffer),
     uv: asGPUArray([
-      NewVec2f(0, 1), NewVec2f(0, 0), NewVec2f(1, 0),
-      NewVec2f(1, 0), NewVec2f(1, 1), NewVec2f(0, 1),
+      vec2(0, 1), vec2(0, 0), vec2(1, 0),
+      vec2(1, 0), vec2(1, 1), vec2(0, 1),
     ], VertexBuffer),
   )
   AssignBuffers(renderdata, mesh)
@@ -572,7 +572,7 @@ void main() {
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
 
@@ -633,11 +633,11 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
       position: GPUArray[Vec2f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
   var mesh = TriangleMesh(
-    position: asGPUArray([NewVec3f(-0.5, -0.5), NewVec3f(0, 0.5), NewVec3f(0.5, -0.5)], VertexBuffer),
-    color: asGPUArray([NewVec3f(0, 0, 1), NewVec3f(0, 1, 0), NewVec3f(1, 0, 0)], VertexBuffer),
+    position: asGPUArray([vec3(-0.5, -0.5), vec3(0, 0.5), vec3(0.5, -0.5)], VertexBuffer),
+    color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   var quad = QuadMesh(
-    position: asGPUArray([NewVec2f(-1, -1), NewVec2f(-1, 1), NewVec2f(1, 1), NewVec2f(1, -1)], VertexBuffer),
+    position: asGPUArray([vec2(-1, -1), vec2(-1, 1), vec2(1, 1), vec2(1, -1)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
   )
   var uniforms1 = asDescriptorSet(
@@ -735,11 +735,11 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(offscreenRP, offscreenFB, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(offscreenRP, offscreenFB, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         WithPipeline(commandbuffer, drawPipeline):
           Render(commandbuffer = commandbuffer, pipeline = drawPipeline, mesh = mesh)
 
-      WithRenderPass(presentRP, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(presentRP, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, presentPipeline):
 

@@ -19,25 +19,25 @@ func Contains*(collider: Collider, x: Vec3f): bool =
   case collider.theType:
   of Box:
     let
-      P1 = collider.transform * NewVec3f(0, 0, 0) # origin
+      P1 = collider.transform * vec3(0, 0, 0) # origin
       P2 = collider.transform * Z
       P4 = collider.transform * X
       P5 = collider.transform * Y
-      u = (P1 - P4).Cross(P1 - P5)
-      v = (P1 - P2).Cross(P1 - P5)
-      w = (P1 - P2).Cross(P1 - P4)
-      uP1 = u.Dot(P1)
-      uP2 = u.Dot(P2)
-      vP1 = v.Dot(P1)
-      vP4 = v.Dot(P4)
-      wP1 = w.Dot(P1)
-      wP5 = w.Dot(P5)
-      ux = u.Dot(x)
-      vx = v.Dot(x)
-      wx = w.Dot(x)
+      u = (P1 - P4).cross(P1 - P5)
+      v = (P1 - P2).cross(P1 - P5)
+      w = (P1 - P2).cross(P1 - P4)
+      uP1 = u.dot(P1)
+      uP2 = u.dot(P2)
+      vP1 = v.dot(P1)
+      vP4 = v.dot(P4)
+      wP1 = w.dot(P1)
+      wP5 = w.dot(P5)
+      ux = u.dot(x)
+      vx = v.dot(x)
+      wx = w.dot(x)
     ux.between(uP1, uP2) and vx.between(vP1, vP4) and wx.between(wP1, wP5)
   of Sphere:
-    (collider.transform * x).Length < (collider.transform * NewVec3f()).Length
+    (collider.transform * x).length < (collider.transform * vec3(0, 0, 0)).length
   of Points:
     raise newException(Exception, "Points are not supported yet for 'contains'")
 
@@ -49,7 +49,7 @@ func Contains*(collider: Collider, x: Vec3f): bool =
 func findFurthestPoint(points: openArray[Vec3f], direction: Vec3f): Vec3f =
   var maxDist = low(float32)
   for p in points:
-    let dist = direction.Dot(p)
+    let dist = direction.dot(p)
     if dist > maxDist:
       maxDist = dist
       result = p
@@ -57,7 +57,7 @@ func findFurthestPoint(points: openArray[Vec3f], direction: Vec3f): Vec3f =
 func findFurthestPoint(transform: Mat4, direction: Vec3f): Vec3f =
   return findFurthestPoint(
     [
-      transform * NewVec3f(0, 0, 0),
+      transform * vec3(0, 0, 0),
       transform * X,
       transform * Y,
       transform * Z,
@@ -71,7 +71,7 @@ func findFurthestPoint(transform: Mat4, direction: Vec3f): Vec3f =
 func findFurthestPoint(collider: Collider, direction: Vec3f): Vec3f =
   case collider.theType
   of Sphere:
-    let directionNormalizedToSphere = ((direction / direction.Length) * collider.radius)
+    let directionNormalizedToSphere = ((direction / direction.length) * collider.radius)
     collider.transform * directionNormalizedToSphere
   of Box:
     findFurthestPoint(collider.transform, direction)
@@ -82,7 +82,7 @@ func supportPoint(a, b: Collider, direction: Vec3f): Vec3f =
   a.findFurthestPoint(direction) - b.findFurthestPoint(-direction)
 
 func sameDirection(direction: Vec3f, ao: Vec3f): bool =
-  direction.Dot(ao) > 0
+  direction.dot(ao) > 0
 
 func line(simplex: var seq[Vec3f], direction: var Vec3f): bool =
   let
@@ -92,7 +92,7 @@ func line(simplex: var seq[Vec3f], direction: var Vec3f): bool =
     ao = - a
 
   if sameDirection(ab, ao):
-    direction = Cross(Cross(ab, ao), ab)
+    direction = cross(cross(ab, ao), ab)
   else:
     simplex = @[a]
     direction = ao
@@ -107,17 +107,17 @@ func triangle(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional = fa
     ab = b - a
     ac = c - a
     ao = - a
-    abc = ab.Cross(ac)
+    abc = ab.cross(ac)
 
-  if sameDirection(abc.Cross(ac), ao):
+  if sameDirection(abc.cross(ac), ao):
     if sameDirection(ac, ao):
       simplex = @[a, c]
-      direction = ac.Cross(ao).Cross(ac)
+      direction = ac.cross(ao).cross(ac)
     else:
       simplex = @[a, b]
       return line(simplex, direction)
   else:
-    if (sameDirection(ab.Cross(abc), ao)):
+    if (sameDirection(ab.cross(abc), ao)):
       simplex = @[a, b]
       return line(simplex, direction)
     else:
@@ -141,9 +141,9 @@ func tetrahedron(simplex: var seq[Vec3f], direction: var Vec3f): bool =
     ac = c - a
     ad = d - a
     ao = - a
-    abc = ab.Cross(ac)
-    acd = ac.Cross(ad)
-    adb = ad.Cross(ab)
+    abc = ab.cross(ac)
+    acd = ac.cross(ad)
+    adb = ad.cross(ab)
 
   if sameDirection(abc, ao):
     simplex = @[a, b, c]
@@ -169,8 +169,8 @@ func getFaceNormals(polytope: seq[Vec3f], faces: seq[int]): (seq[Vec4f], int) =
       b = polytope[faces[i + 1]]
       c = polytope[faces[i + 2]]
 
-    var normal = (b - a).Cross(c - a).Normalized()
-    var distance = normal.Dot(a)
+    var normal = (b - a).cross(c - a).normalized()
+    var distance = normal.dot(a)
 
     if distance < 0:
       normal = normal * -1'f32
@@ -217,7 +217,7 @@ func collisionPoint3D(simplex: var seq[Vec3f], a, b: Collider): tuple[normal: Ve
     minDistance = normals[minFace].w
     var
       support = supportPoint(a, b, minNormal)
-      sDistance = minNormal.Dot(support)
+      sDistance = minNormal.dot(support)
 
     if abs(sDistance - minDistance) > 0.001'f32:
       minDistance = high(float32)
@@ -286,8 +286,8 @@ func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec
         vertexJ = polytope[j]
         ij = vertexJ - vertexI
       var
-        normal = NewVec2f(ij.y, -ij.x).Normalized()
-        distance = normal.Dot(vertexI)
+        normal = vec2(ij.y, -ij.x).normalized()
+        distance = normal.dot(vertexI)
 
       if (distance < 0):
         distance *= -1'f32
@@ -300,51 +300,51 @@ func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec
 
     let
       support = supportPoint(a, b, minNormal.ToVec3)
-      sDistance = minNormal.Dot(support)
+      sDistance = minNormal.dot(support)
 
     if(abs(sDistance - minDistance) > 0.001):
       minDistance = high(float32)
       polytope.insert(support, minIndex)
     inc iterCount
 
-  result = (normal: NewVec3f(minNormal.x, minNormal.y), penetrationDepth: minDistance + 0.001'f32)
+  result = (normal: vec3(minNormal.x, minNormal.y, 0), penetrationDepth: minDistance + 0.001'f32)
 
 func Intersects*(a, b: Collider, as2D = false): bool =
   var
-    support = supportPoint(a, b, NewVec3f(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
+    support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
     direction = -support
     n = 0
   simplex.insert(support, 0)
   while n < MAX_COLLISON_DETECTION_ITERATIONS:
     support = supportPoint(a, b, direction)
-    if support.Dot(direction) <= 0:
+    if support.dot(direction) <= 0:
       return false
     simplex.insert(support, 0)
     if nextSimplex(simplex, direction, twoDimensional = as2D):
       return true
     # prevent numeric instability
-    if direction == NewVec3f(0, 0, 0):
+    if direction == vec3(0, 0, 0):
       direction[0] = 0.0001
     inc n
 
 func Collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
   var
-    support = supportPoint(a, b, NewVec3f(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
+    support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
     direction = -support
     n = 0
   simplex.insert(support, 0)
   while n < MAX_COLLISON_DETECTION_ITERATIONS:
     support = supportPoint(a, b, direction)
-    if support.Dot(direction) <= 0:
+    if support.dot(direction) <= 0:
       return result
     simplex.insert(support, 0)
     if nextSimplex(simplex, direction, twoDimensional = as2D):
       let (normal, depth) = if as2D: collisionPoint2D(simplex, a, b) else: collisionPoint3D(simplex, a, b)
       return (true, normal, depth)
     # prevent numeric instability
-    if direction == NewVec3f(0, 0, 0):
+    if direction == vec3(0, 0, 0):
       direction[0] = 0.0001
     inc n
 
@@ -376,9 +376,9 @@ func CalculateCollider*(points: openArray[Vec3f], theType: ColliderType): Collid
   if theType == Points:
     result = Collider(theType: Points, points: @points)
   else:
-    result = Collider(theType: theType, transform: Translate(minX, minY, minZ) * Scale(scaleX, scaleY, scaleZ))
+    result = Collider(theType: theType, transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
 
     if theType == Sphere:
-      result.transform = Translate(center)
+      result.transform = translate(center)
       for p in points:
-        result.radius = max(result.radius, (p - center).Length)
+        result.radius = max(result.radius, (p - center).length)

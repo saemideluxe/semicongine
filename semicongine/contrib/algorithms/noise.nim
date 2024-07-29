@@ -1,6 +1,6 @@
 proc randomGradient(pos: Vec2f, seed: int32 = 0): Vec2f =
   let randomAngle: float32 = TAU * (float32(int(hash((pos.x, pos.y, seed)))) / float32(high(int)))
-  return NewVec2f(cos(randomAngle), sin(randomAngle))
+  return vec2(cos(randomAngle), sin(randomAngle))
 
 proc interpolate(a: float32, b: float32, weight: float32): float32 =
   # with Smootherstep
@@ -9,15 +9,15 @@ proc interpolate(a: float32, b: float32, weight: float32): float32 =
 proc Perlin*(pos: Vec2f, seed: int32 = 0): float32 =
   let
     # grid coordinates around target point
-    topleft = NewVec2f(trunc(pos.x), trunc(pos.y))
-    topright = topleft + NewVec2f(1, 0)
-    bottomleft = topleft + NewVec2f(0, 1)
-    bottomright = topleft + NewVec2f(1, 1)
+    topleft = vec2(trunc(pos.x), trunc(pos.y))
+    topright = topleft + vec2(1, 0)
+    bottomleft = topleft + vec2(0, 1)
+    bottomright = topleft + vec2(1, 1)
     # products for weights
-    topleft_dot = topleft.randomGradient(seed).Dot((pos - topleft))
-    topright_dot = topright.randomGradient(seed).Dot((pos - topright))
-    bottomleft_dot = bottomleft.randomGradient(seed).Dot((pos - bottomleft))
-    bottomright_dot = bottomright.randomGradient(seed).Dot((pos - bottomright))
+    topleft_dot = topleft.randomGradient(seed).dot((pos - topleft))
+    topright_dot = topright.randomGradient(seed).dot((pos - topright))
+    bottomleft_dot = bottomleft.randomGradient(seed).dot((pos - bottomleft))
+    bottomright_dot = bottomright.randomGradient(seed).dot((pos - bottomright))
     xinterpol = pos.x - topleft.x
     yinterpol = pos.y - topleft.y
 

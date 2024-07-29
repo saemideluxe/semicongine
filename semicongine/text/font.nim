@@ -92,12 +92,12 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
     stbtt_GetCodepointHMetrics(addr fontinfo, cint(codePoint), addr advance, addr leftBearing)
 
     result.glyphs[codePoint] = GlyphInfo(
-      dimension: NewVec2f(float32(image.width), float32(image.height)),
+      dimension: vec2(float32(image.width), float32(image.height)),
       uvs: [
-        NewVec2f((coord.x + 0.5) / w, (coord.y + ih - 0.5) / h),
-        NewVec2f((coord.x + 0.5) / w, (coord.y + 0.5) / h),
-        NewVec2f((coord.x + iw - 0.5) / w, (coord.y + 0.5) / h),
-        NewVec2f((coord.x + iw - 0.5) / w, (coord.y + ih - 0.5) / h),
+        vec2((coord.x + 0.5) / w, (coord.y + ih - 0.5) / h),
+        vec2((coord.x + 0.5) / w, (coord.y + 0.5) / h),
+        vec2((coord.x + iw - 0.5) / w, (coord.y + 0.5) / h),
+        vec2((coord.x + iw - 0.5) / w, (coord.y + ih - 0.5) / h),
       ],
       topOffset: float32(topOffsets[codePoint]),
       leftOffset: float32(leftBearing) * result.fontscale,

@@ -63,10 +63,10 @@ proc RefreshGeometry(textbox: var Textbox) =
       if textbox.processedText[i] == Rune('\n'):
         offsetX = 0
         offsetY -= textbox.font.lineAdvance
-        textbox.position.data[vertexOffset + 0] = NewVec3f()
-        textbox.position.data[vertexOffset + 1] = NewVec3f()
-        textbox.position.data[vertexOffset + 2] = NewVec3f()
-        textbox.position.data[vertexOffset + 3] = NewVec3f()
+        textbox.position.data[vertexOffset + 0] = vec3(0, 0, 0)
+        textbox.position.data[vertexOffset + 1] = vec3(0, 0, 0)
+        textbox.position.data[vertexOffset + 2] = vec3(0, 0, 0)
+        textbox.position.data[vertexOffset + 3] = vec3(0, 0, 0)
         inc lineIndex
         anchorX = case textbox.horizontalAlignment
           of Left: 0'f32
@@ -80,10 +80,10 @@ proc RefreshGeometry(textbox: var Textbox) =
           top = offsetY - glyph.topOffset
           bottom = offsetY - glyph.topOffset - glyph.dimension.y
 
-        textbox.position.data[vertexOffset + 0] = NewVec3f(left - anchorX, bottom - anchorY)
-        textbox.position.data[vertexOffset + 1] = NewVec3f(left - anchorX, top - anchorY)
-        textbox.position.data[vertexOffset + 2] = NewVec3f(right - anchorX, top - anchorY)
-        textbox.position.data[vertexOffset + 3] = NewVec3f(right - anchorX, bottom - anchorY)
+        textbox.position.data[vertexOffset + 0] = vec3(left - anchorX, bottom - anchorY, 0)
+        textbox.position.data[vertexOffset + 1] = vec3(left - anchorX, top - anchorY, 0)
+        textbox.position.data[vertexOffset + 2] = vec3(right - anchorX, top - anchorY, 0)
+        textbox.position.data[vertexOffset + 3] = vec3(right - anchorX, bottom - anchorY, 0)
 
         textbox.uv.data[vertexOffset + 0] = glyph.uvs[0]
         textbox.uv.data[vertexOffset + 1] = glyph.uvs[1]
@@ -94,10 +94,10 @@ proc RefreshGeometry(textbox: var Textbox) =
         if i < textbox.processedText.len - 1:
           offsetX += textbox.font.kerning[(textbox.processedText[i], textbox.processedText[i + 1])]
     else:
-      textbox.position.data[vertexOffset + 0] = NewVec3f()
-      textbox.position.data[vertexOffset + 1] = NewVec3f()
-      textbox.position.data[vertexOffset + 2] = NewVec3f()
-      textbox.position.data[vertexOffset + 3] = NewVec3f()
+      textbox.position.data[vertexOffset + 0] = vec3(0, 0, 0)
+      textbox.position.data[vertexOffset + 1] = vec3(0, 0, 0)
+      textbox.position.data[vertexOffset + 2] = vec3(0, 0, 0)
+      textbox.position.data[vertexOffset + 3] = vec3(0, 0, 0)
   UpdateGPUBuffer(textbox.position)
   UpdateGPUBuffer(textbox.uv)
   textbox.lastRenderedText = textbox.processedText
@@ -183,8 +183,8 @@ proc InitTextbox*[T: string | seq[Rune]](
   font: Font,
   text: T = default(T),
   scale: float32 = 1,
-  position: Vec3f = NewVec3f(),
-  color: Vec4f = NewVec4f(0, 0, 0, 1),
+  position: Vec3f = vec3(0, 0, 0),
+  color: Vec4f = vec4(0, 0, 0, 1),
   maxLen: int = text.len,
   verticalAlignment: VerticalAlignment = Center,
   horizontalAlignment: HorizontalAlignment = Center,

@@ -19,14 +19,14 @@ proc test_gltf(time: float32) =
       normal: Mat4
       projection: Mat4
     Material = object
-      color: Vec4f = NewVec4f(1, 1, 1, 1)
+      color: Vec4f = vec4(1, 1, 1, 1)
       # colorTexture: int32 = -1
       metallic: float32 = 0
       roughness: float32 = 0
       # metallicRoughnessTexture: int32 = -1
       # normalTexture: int32 = -1
       # occlusionTexture: int32 = -1
-      emissive: Vec4f = NewVec4f(0, 0, 0, 0)
+      emissive: Vec4f = vec4(0, 0, 0, 0)
       # emissiveTexture: int32 = -1
     MainDescriptors = object
       materials: array[32, GPUValue[Material, UniformBuffer]]
@@ -125,7 +125,7 @@ void main() {
     descriptors.data.materials[i] = asGPUValue(gltfData.materials[i], UniformBuffer)
   for mesh in mitems(gltfData.meshes):
     for primitive in mitems(mesh):
-      primitive[0].color = asGPUArray(newSeqWith(primitive[0].position.data.len, NewVec4f(1, 1, 1, 1)), VertexBuffer)
+      primitive[0].color = asGPUArray(newSeqWith(primitive[0].position.data.len, vec4(1, 1, 1, 1)), VertexBuffer)
       renderdata.AssignBuffers(primitive[0])
   renderdata.AssignBuffers(descriptors)
 
@@ -169,21 +169,21 @@ void main() {
     if KeyIsDown(A): sideward -= 2
     if KeyIsDown(D): sideward += 2
 
-    let camDir = (Rotate(camYaw, Y) * Rotate(camPitch, X)) * Z
-    let camDirSide = camDir.Cross(-Y).Normalized
+    let camDir = (rotate(camYaw, Y) * rotate(camPitch, X)) * Z
+    let camDirSide = camDir.cross(-Y).normalized
     camPos += camDir * forward * dt
     camPos += camDirSide * sideward * dt
 
-    let view = Rotate(-camPitch, X) * Rotate(-camYaw, Y) * Translate(-camPos)
+    let view = rotate(-camPitch, X) * rotate(-camYaw, Y) * translate(-camPos)
     descriptors.data.camera.data.view = view
     descriptors.data.camera.data.normal = view
-    descriptors.data.camera.data.projection = Projection(PI / 2, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20)
+    descriptors.data.camera.data.projection = projection(PI / 2, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20)
 
     UpdateGPUBuffer(descriptors.data.camera)
 
     WithNextFrame(framebuffer, commandbuffer):
 
-      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, NewVec4f(0, 0, 0, 0)):
+      WithRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         WithPipeline(commandbuffer, pipeline):
           WithBind(commandbuffer, (descriptors, ), pipeline):
@@ -192,7 +192,7 @@ void main() {
                 commandbuffer = commandbuffer,
                 pipeline = pipeline,
                 nodeId = nodeId,
-                transform = Rotate(PI / 2, Z)
+                transform = rotate(PI / 2, Z)
               )
 
   # cleanup

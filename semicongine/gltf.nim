@@ -170,8 +170,7 @@ proc loadTexture(root: JsonNode, textureNode: JsonNode, mainBuffer: seq[
       result.wrapV = SAMPLER_WRAP_MODE_MAP[sampler["wrapT"].getInt()]
 
 proc getVec4f(node: JsonNode): Vec4f =
-  NewVec4f(node[0].getFloat(), node[1].getFloat(), node[2].getFloat(), node[
-      3].getFloat())
+  vec4(node[0].getFloat(), node[1].getFloat(), node[2].getFloat(), node[3].getFloat())
 
 proc loadMaterial[TMaterial](
   root: JsonNode,
@@ -249,26 +248,26 @@ proc loadNode(node: JsonNode): GltfNode =
   if "matrix" in node:
     for i in 0 ..< node["matrix"].len:
       result.transform[i] = node["matrix"][i].getFloat()
-    result.transform = result.transform.Transposed()
+    result.transform = result.transform.transposed()
   else:
     var (t, r, s) = (Unit4, Unit4, Unit4)
     if "translation" in node:
-      t = Translate(
+      t = translate(
         float32(node["translation"][0].getFloat()),
         float32(node["translation"][1].getFloat()),
         float32(node["translation"][2].getFloat())
       )
     if "rotation" in node:
-      t = Rotate(
+      t = rotate(
         float32(node["rotation"][3].getFloat()),
-        NewVec3f(
+        vec3(
           float32(node["rotation"][0].getFloat()),
           float32(node["rotation"][1].getFloat()),
           float32(node["rotation"][2].getFloat())
         )
       )
     if "scale" in node:
-      t = Scale(
+      t = scale(
         float32(node["scale"][0].getFloat()),
         float32(node["scale"][1].getFloat()),
         float32(node["scale"][2].getFloat())
