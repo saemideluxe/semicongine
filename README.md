@@ -15,16 +15,17 @@ programming language you will ever need, [Nim](https://nim-lang.org/)
 The engine currently features the following:
 
 - No dependencies outside of this repo (except zip/unzip on Linux). All
-  dependencies are included.
+  dependencies are included (`libs` for library dependencies, `tools` for
+  binaries/scripts, `semicongine/thirdparty` for code dependencies)
 - Low-level, Vulkan-base rendering system
-- All vertex/uniform/descriptors/shader-formats, shaders can and must be
-  defined "freely". The only restriction that we currently have, is that vertex
-  data is non-interleaved.
+- All vertex/uniform/descriptors/shader-formats can and must be defined
+  "freely". The only restriction that we currently have, is that vertex data is
+  non-interleaved.
 - A ton of compiletime checks to ensure the defined mesh-data and shaders are
   compatible for rendering
 - Simple audio mixer, should suffice for most things
 - Simple input-system, no controller support at this time
-- Resource packaging of images, audio and 3D files
+- Resource packaging of images, audio and 3D files as either folders, zip files or embedded in the executable
 - Simple font and text rendering
 - A few additional utils like a simple storage API, a few algorithms for
   collision detection, noise generation and texture packing, and a simple
@@ -113,7 +114,7 @@ DestroyVulkan()
 
 ```
 
-## Roadmap
+## Future development
 
 For now all features that I need are implemented. I will gradually add more
 stuff that I need, based on the games that I am developing. Here are a few
@@ -121,6 +122,6 @@ things that I consider integrating at a later point, once I have gather some
 more experience what can/should be used across different projects:
 
 - [ ] More support for glTF format (JPEG textures, animations, morphing)
-- [ ] Maybe some often used utils like camera-controllers, offscreen-rendering, shadow-map rendering, etc.
-- [ ] Maybe some UI-stuff
+- [ ] Some often used utils like camera-controllers, offscreen-rendering, shadow-map rendering, etc.
+- [ ] Some UI-stuff
 - [ ] Controller support
