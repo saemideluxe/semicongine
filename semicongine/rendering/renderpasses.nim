@@ -189,7 +189,7 @@ proc CreateIndirectPresentationRenderPass*(depthBuffer: bool, samples = VK_SAMPL
   )
 
 template WithRenderPass*(
-  theRenderpass: RenderPass,
+  theRenderPass: RenderPass,
   theFramebuffer: VkFramebuffer,
   commandbuffer: VkCommandBuffer,
   renderWidth: uint32,
@@ -204,7 +204,7 @@ template WithRenderPass*(
     ]
     renderPassInfo = VkRenderPassBeginInfo(
       sType: VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-      renderPass: theRenderpass.vk,
+      renderPass: theRenderPass.vk,
       framebuffer: theFramebuffer,
       renderArea: VkRect2D(
         offset: VkOffset2D(x: 0, y: 0),

@@ -443,7 +443,7 @@ makeRandomMatrixInit(TMat34)
 makeRandomMatrixInit(TMat43)
 makeRandomMatrixInit(TMat4)
 
-func Perspective*(fovy, aspect, zNear, zFar: float32): Mat4 =
+func Projection*(fovy, aspect, zNear, zFar: float32): Mat4 =
   let tanHalfFovy = 1 / tan(fovy / 2)
   return Mat4(data: [
     tanHalfFovy / aspect, 0, 0, 0,

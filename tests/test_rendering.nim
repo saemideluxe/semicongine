@@ -436,7 +436,7 @@ proc test_05_cube(time: float32) =
     let tStartLoop = getMonoTime() - tStart
 
     uniforms1.data.data.data.mvp = (
-      Perspective(-PI / 2, GetAspectRatio(), 0.01, 100) *
+      Projection(-PI / 2, GetAspectRatio(), 0.01, 100) *
       Translate(0, 0, 2) *
       Rotate(PI / 4, X) *
       Rotate(PI * 0.1 * (tStartLoop.inMicroseconds() / 1_000_000), Y)

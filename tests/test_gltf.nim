@@ -177,7 +177,7 @@ void main() {
     let view = Rotate(-camPitch, X) * Rotate(-camYaw, Y) * Translate(-camPos)
     descriptors.data.camera.data.view = view
     descriptors.data.camera.data.normal = view
-    descriptors.data.camera.data.projection = Perspective(PI / 2, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20)
+    descriptors.data.camera.data.projection = Projection(PI / 2, aspect = GetAspectRatio(), zNear = 0.01, zFar = 20)
 
     UpdateGPUBuffer(descriptors.data.camera)
 
