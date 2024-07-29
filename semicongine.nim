@@ -55,8 +55,3 @@ when not defined(WITHOUT_CONTRIB):
   include ./semicongine/contrib/settings
   include ./semicongine/contrib/algorithms/collision
   include ./semicongine/contrib/algorithms/noise
-
-if not defined(release):
-  setLogFilter(lvlAll)
-else:
-  setLogFilter(lvlWarn)

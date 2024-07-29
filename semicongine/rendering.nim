@@ -48,7 +48,7 @@ type
     swapchain*: Swapchain
     # unclear as of yet
     anisotropy*: float32 = 0 # needs to be enable during device creation
-  Renderpass* = ref object
+  RenderPass* = ref object
     vk*: VkRenderPass
     samples*: VkSampleCountFlagBits
     depthBuffer*: bool

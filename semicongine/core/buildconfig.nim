@@ -12,10 +12,14 @@ static:
 # build configuration
 # =====================
 
-# log level
-const LOGLEVEL {.strdefine.}: string = "Warn"
-const ENGINE_LOGLEVEL* = parseEnum[Level]("lvl" & LOGLEVEL)
 
+# log level
+when not defined(release):
+  const LOGLEVEL {.strdefine.}: string = "Debug"
+else:
+  const LOGLEVEL {.strdefine.}: string = "Warn"
+
+const ENGINE_LOGLEVEL* = parseEnum[Level]("lvl" & LOGLEVEL)
 # resource bundleing settings, need to be configured per project
 const PACKAGETYPE* {.strdefine.}: string = "exe" # dir, zip, exe
 static:

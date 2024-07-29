@@ -63,6 +63,14 @@ func NewVec3u*(x = 0'u32, y = 0'u32, z = 0'u32): auto =
 func NewVec4u*(x = 0'u32, y = 0'u32, z = 0'u32, a = 0'u32): auto =
   Vec4u([x, y, z, a])
 
+# shortcuts
+func vec2*[T: SomeNumber](x, y: T): Vec2f =
+  Vec2f([float32(x), float32(y)])
+func vec3*[T: SomeNumber](x, y, z: T): Vec3f =
+  Vec3f([float32(x), float32(y), float32(z)])
+func vec4*[T: SomeNumber](x, y , z, w: T): Vec4f =
+  Vec4f([float32(x), float32(y), float32(z), float32(w)])
+
 # generates constants: Xf, Xf32, Xf64, Xi, Xi8, Xi16, Xi32, Xi64
 # Also for Y, Z, R, G, B and One
 # not sure if this is necessary or even a good idea...
