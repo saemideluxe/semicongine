@@ -28,7 +28,7 @@ proc readSample(stream: Stream, encoding: Encoding, channels: int): Sample =
     result[1] = result[0]
 
 # https://en.wikipedia.org/wiki/Au_file_format
-proc ReadAU*(stream: Stream): SoundData =
+proc readAU*(stream: Stream): SoundData =
   var header: AuHeader
 
   for name, value in fieldPairs(header):
@@ -55,7 +55,7 @@ proc ReadAU*(stream: Stream): SoundData =
 
 proc stb_vorbis_decode_memory(mem: pointer, len: cint, channels: ptr cint, sample_rate: ptr cint, output: ptr ptr cshort): cint {.importc.}
 
-proc ReadVorbis*(stream: Stream): SoundData =
+proc readVorbis*(stream: Stream): SoundData =
   var
     data = stream.readAll()
     channels: cint
@@ -82,11 +82,11 @@ proc ReadVorbis*(stream: Stream): SoundData =
     nativeFree(output)
     raise newException(Exception, "Only support mono and stereo audio at the moment (1 or 2 channels), but found " & $channels)
 
-proc LoadAudio*(path: string, package = DEFAULT_PACKAGE): SoundData =
+proc loadAudio*(path: string, package = DEFAULT_PACKAGE): SoundData =
   if path.splitFile().ext.toLowerAscii == ".au":
-    loadResource_intern(path, package = package).ReadAU()
+    loadResource_intern(path, package = package).readAU()
   elif path.splitFile().ext.toLowerAscii == ".ogg":
-    loadResource_intern(path, package = package).ReadVorbis()
+    loadResource_intern(path, package = package).readVorbis()
   else:
     raise newException(Exception, "Unsupported audio file type: " & path)
 

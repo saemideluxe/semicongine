@@ -19,7 +19,7 @@ func advanceIfOverlap(fix, newRect: Rect): (bool, uint32) =
   if overlapping: (true, fix.x + fix.w) # next free x coordinate to the right
   else: (false, newRect.x) # current position is fine
 
-proc find_insertion_position(alreadyPlaced: seq[Rect], area: tuple[i: int, w, h: uint32], maxDim: uint32): (bool, Rect) =
+proc findInsertionPosition(alreadyPlaced: seq[Rect], area: tuple[i: int, w, h: uint32], maxDim: uint32): (bool, Rect) =
   var newRect = (i: area.i, x: 0'u32, y: 0'u32, w: area.w, h: area.h)
 
   while newRect.y + newRect.h <= maxDim:
@@ -42,7 +42,7 @@ proc find_insertion_position(alreadyPlaced: seq[Rect], area: tuple[i: int, w, h:
   return (false, newRect)
 
 
-proc Pack*[T: PixelType](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[tuple[x: uint32, y: uint32]]] =
+proc pack*[T: PixelType](images: seq[Image[T]]): tuple[atlas: Image[T], coords: seq[tuple[x: uint32, y: uint32]]] =
   const MAX_ATLAS_SIZE = 4096'u32
   var areas: seq[tuple[i: int, w, h: uint32]]
 
@@ -54,11 +54,11 @@ proc Pack*[T: PixelType](images: seq[Image[T]]): tuple[atlas: Image[T], coords: 
   var maxDim = 128'u32
 
   for area in areasBySize:
-    var pos = find_insertion_position(assignedAreas, area, maxDim)
+    var pos = findInsertionPosition(assignedAreas, area, maxDim)
     while not pos[0]: # this should actually never loop more than once, but weird things happen ¯\_(ツ)_/¯
       maxDim = maxDim * 2
       assert maxDim <= MAX_ATLAS_SIZE, &"Atlas gets bigger than {MAX_ATLAS_SIZE}, cannot pack images"
-      pos = find_insertion_position(assignedAreas, area, maxDim)
+      pos = findInsertionPosition(assignedAreas, area, maxDim)
 
     assignedAreas.add pos[1]
 

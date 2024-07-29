@@ -14,7 +14,7 @@ type
 func between(value, b1, b2: float32): bool =
   min(b1, b2) <= value and value <= max(b1, b2)
 
-func Contains*(collider: Collider, x: Vec3f): bool =
+func contains*(collider: Collider, x: Vec3f): bool =
   # from https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
   case collider.theType:
   of Box:
@@ -309,7 +309,7 @@ func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec
 
   result = (normal: vec3(minNormal.x, minNormal.y, 0), penetrationDepth: minDistance + 0.001'f32)
 
-func Intersects*(a, b: Collider, as2D = false): bool =
+func intersects*(a, b: Collider, as2D = false): bool =
   var
     support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
@@ -328,7 +328,7 @@ func Intersects*(a, b: Collider, as2D = false): bool =
       direction[0] = 0.0001
     inc n
 
-func Collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
+func collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
   var
     support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
     simplex = newSeq[Vec3f]()
@@ -348,7 +348,7 @@ func Collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal:
       direction[0] = 0.0001
     inc n
 
-func CalculateCollider*(points: openArray[Vec3f], theType: ColliderType): Collider =
+func calculateCollider(points: openArray[Vec3f], theType: ColliderType): Collider =
   var
     minX = high(float32)
     maxX = low(float32)

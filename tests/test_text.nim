@@ -14,7 +14,7 @@ proc test_01_static_label(time: float32) =
 
   var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
-  var font = LoadFont("Overhaul.ttf", lineHeightPixels = 160)
+  var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var label1 = InitTextbox(
     renderdata,
     pipeline.descriptorSetLayouts[0],
@@ -42,9 +42,9 @@ proc test_02_multiple_animated(time: float32) =
 
   var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
-  var font1 = LoadFont("Overhaul.ttf", lineHeightPixels = 40)
-  var font2 = LoadFont("Overhaul.ttf", lineHeightPixels = 160)
-  var font3 = LoadFont("DejaVuSans.ttf", lineHeightPixels = 160)
+  var font1 = loadFont("Overhaul.ttf", lineHeightPixels = 40)
+  var font2 = loadFont("Overhaul.ttf", lineHeightPixels = 160)
+  var font3 = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
   var labels = [
     InitTextbox(
       renderdata,
@@ -104,7 +104,7 @@ proc test_03_layouting(time: float32) =
 
   var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
-  var font = LoadFont("DejaVuSans.ttf", lineHeightPixels = 40)
+  var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 40)
   var labels: seq[Textbox]
 
   for horizontal in HorizontalAlignment:
@@ -165,7 +165,7 @@ proc test_04_lots_of_texts(time: float32) =
 
   var pipeline = CreatePipeline[DefaultFontShader](renderPass = vulkan.swapchain.renderPass)
 
-  var font = LoadFont("DejaVuSans.ttf", lineHeightPixels = 160)
+  var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
   var labels: seq[Textbox]
   for i in 0 ..< 100:
     labels.add InitTextbox(

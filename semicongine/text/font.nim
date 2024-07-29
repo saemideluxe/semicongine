@@ -16,7 +16,7 @@ proc stbtt_FindGlyphIndex(info: ptr stbtt_fontinfo, codepoint: cint): cint {.imp
 
 proc stbtt_GetFontVMetrics(info: ptr stbtt_fontinfo, ascent, descent, lineGap: ptr cint) {.importc, nodecl.}
 
-proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32): Font =
+proc readTrueType(stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32): Font =
   var
     indata = stream.readAll()
     fontinfo: stbtt_fontinfo
@@ -74,7 +74,7 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
 
     nativeFree(data)
 
-  let packed = Pack(images)
+  let packed = pack(images)
 
   result.fontAtlas = packed.atlas
 
@@ -111,7 +111,7 @@ proc ReadTrueType*(stream: Stream, name: string, codePoints: seq[Rune], lineHeig
         cint(codePointAfter)
       )) * result.fontscale
 
-proc LoadFont*(
+proc loadFont*(
   path: string,
   name = "",
   lineHeightPixels = 80'f32,
@@ -122,9 +122,9 @@ proc LoadFont*(
   var thename = name
   if thename == "":
     thename = path.splitFile().name
-  loadResource_intern(path, package = package).ReadTrueType(thename, charset & additional_codepoints.toSeq, lineHeightPixels)
+  loadResource_intern(path, package = package).readTrueType(thename, charset & additional_codepoints.toSeq, lineHeightPixels)
 
-func TextWidth*(text: seq[Rune], font: FontObj): float32 =
+func textWidth*(text: seq[Rune], font: FontObj): float32 =
   var currentWidth = 0'f32
   var lineWidths: seq[float32]
   for i in 0 ..< text.len:
@@ -160,16 +160,16 @@ func WordWrapped*(text: seq[Rune], font: FontObj, maxWidth: float32): seq[Rune] 
       assert currentWord[^1] != SPACE
       # if this is the first word of the line and it is too long we need to
       # split by character
-      if currentLine.len == 0 and (SPACE & currentWord).TextWidth(font) > maxWidth:
+      if currentLine.len == 0 and (SPACE & currentWord).textWidth(font) > maxWidth:
         var subWord = @[currentWord[0]]
         for c in currentWord[1 .. ^1]:
-          if (subWord & c).TextWidth(font) > maxWidth:
+          if (subWord & c).textWidth(font) > maxWidth:
             break
           subWord.add c
         result.add subWord & NEWLINE
         remaining.add currentWord[subWord.len .. ^1] # process rest of the word in next iteration
       else:
-        if (currentLine & SPACE & currentWord).TextWidth(font) <= maxWidth:
+        if (currentLine & SPACE & currentWord).textWidth(font) <= maxWidth:
           if currentLine.len == 0:
             currentLine = currentWord
           else:

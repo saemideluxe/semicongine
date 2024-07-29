@@ -6,7 +6,7 @@ proc interpolate(a: float32, b: float32, weight: float32): float32 =
   # with Smootherstep
   (b - a) * ((weight * (weight * 6.0 - 15.0) + 10.0) * weight * weight * weight) + a;
 
-proc Perlin*(pos: Vec2f, seed: int32 = 0): float32 =
+proc perlin*(pos: Vec2f, seed: int32 = 0): float32 =
   let
     # grid coordinates around target point
     topleft = vec2(trunc(pos.x), trunc(pos.y))

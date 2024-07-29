@@ -3,7 +3,7 @@ proc sinewave(f: float): proc(x: float): float =
     sin(x * 2 * Pi * f)
   result = ret
 
-proc SineSoundData*(f: float, len: float, rate: int, amplitude = 0.5'f32): SoundData =
+proc sineSoundData*(f: float, len: float, rate: int, amplitude = 0.5'f32): SoundData =
   let dt = 1'f / float(rate)
   var sine = sinewave(f)
   for i in 0 ..< int(float(rate) * len):
