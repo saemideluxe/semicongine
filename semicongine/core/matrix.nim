@@ -392,11 +392,12 @@ func scale*(x = 1'f32, y = 1'f32, z = 1'f32): Mat4 = Mat4(data: [
 func scale*[T: TVec3](v: T): TMat4[float32] = scale(v[0], v[1], v[2])
 func rotate*(angle: float32, a: Vec3f): Mat4 =
   let
+    axis = a.normalized()
     cosa = cos(angle)
     sina = sin(angle)
-    x = a[0]
-    y = a[1]
-    z = a[2]
+    x = axis.x
+    y = axis.y
+    z = axis.z
   Mat4(data: [
     x * x * (1 - cosa) + cosa, y * x * (1 - cosa) - z * sina, z * x * (1 - cosa) + y * sina, 0'f32,
     x * y * (1 - cosa) + z * sina, y * y * (1 - cosa) + cosa, z * y * (1 - cosa) - x * sina, 0'f32,
@@ -412,20 +413,44 @@ func asMat3(m: Mat4): auto =
   ])
 
 
-func inversed*(m: Mat4): Mat4 =
-  # TODO: is this correct?
-  var m3 = m.asMat3.transposed
-  m3[0, 0] = 1'f32 / m3[0, 0]
-  m3[1, 1] = 1'f32 / m3[1, 1]
-  m3[2, 2] = 1'f32 / m3[2, 2]
-  let col3 = -(m3 * m.col(3).xyz)
-  return Mat4(data: [
-        m3[0, 0], m3[0, 1], m3[0, 2], col3.x,
-        m3[1, 0], m3[1, 1], m3[1, 2], col3.y,
-        m3[2, 0], m3[2, 1], m3[2, 2], col3.z,
-               0, 0, 0, 1,
-  ])
+func inversed*(a: Mat4): Mat4 =
+  # from: https://stackoverflow.com/a/9614511
+  var
+    s0 = a[0, 0] * a[1, 1] - a[1, 0] * a[0, 1]
+    s1 = a[0, 0] * a[1, 2] - a[1, 0] * a[0, 2]
+    s2 = a[0, 0] * a[1, 3] - a[1, 0] * a[0, 3]
+    s3 = a[0, 1] * a[1, 2] - a[1, 1] * a[0, 2]
+    s4 = a[0, 1] * a[1, 3] - a[1, 1] * a[0, 3]
+    s5 = a[0, 2] * a[1, 3] - a[1, 2] * a[0, 3]
+    c5 = a[2, 2] * a[3, 3] - a[3, 2] * a[2, 3]
+    c4 = a[2, 1] * a[3, 3] - a[3, 1] * a[2, 3]
+    c3 = a[2, 1] * a[3, 2] - a[3, 1] * a[2, 2]
+    c2 = a[2, 0] * a[3, 3] - a[3, 0] * a[2, 3]
+    c1 = a[2, 0] * a[3, 2] - a[3, 0] * a[2, 2]
+    c0 = a[2, 0] * a[3, 1] - a[3, 0] * a[2, 1]
 
+  # Should check for 0 determinant
+  var invdet = 1.0 / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
+
+  result[0, 0] = ( a[1, 1] * c5 - a[1, 2] * c4 + a[1, 3] * c3) * invdet;
+  result[0, 1] = (-a[0, 1] * c5 + a[0, 2] * c4 - a[0, 3] * c3) * invdet;
+  result[0, 2] = ( a[3, 1] * s5 - a[3, 2] * s4 + a[3, 3] * s3) * invdet;
+  result[0, 3] = (-a[2, 1] * s5 + a[2, 2] * s4 - a[2, 3] * s3) * invdet;
+
+  result[1, 0] = (-a[1, 0] * c5 + a[1, 2] * c2 - a[1, 3] * c1) * invdet;
+  result[1, 1] = ( a[0, 0] * c5 - a[0, 2] * c2 + a[0, 3] * c1) * invdet;
+  result[1, 2] = (-a[3, 0] * s5 + a[3, 2] * s2 - a[3, 3] * s1) * invdet;
+  result[1, 3] = ( a[2, 0] * s5 - a[2, 2] * s2 + a[2, 3] * s1) * invdet;
+
+  result[2, 0] = ( a[1, 0] * c4 - a[1, 1] * c2 + a[1, 3] * c0) * invdet;
+  result[2, 1] = (-a[0, 0] * c4 + a[0, 1] * c2 - a[0, 3] * c0) * invdet;
+  result[2, 2] = ( a[3, 0] * s4 - a[3, 1] * s2 + a[3, 3] * s0) * invdet;
+  result[2, 3] = (-a[2, 0] * s4 + a[2, 1] * s2 - a[2, 3] * s0) * invdet;
+
+  result[3, 0] = (-a[1, 0] * c3 + a[1, 1] * c1 - a[1, 2] * c0) * invdet;
+  result[3, 1] = ( a[0, 0] * c3 - a[0, 1] * c1 + a[0, 2] * c0) * invdet;
+  result[3, 2] = (-a[3, 0] * s3 + a[3, 1] * s1 - a[3, 2] * s0) * invdet;
+  result[3, 3] = ( a[2, 0] * s3 - a[2, 1] * s1 + a[2, 2] * s0) * invdet;
 
 # call e.g. TMat32[int]().randomized() to get a random matrix
 template makeRandomMatrixInit(mattype: typedesc) =
