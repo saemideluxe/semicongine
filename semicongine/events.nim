@@ -21,7 +21,7 @@ type
     PageUp, PageDown, Home, End, Insert, Delete
     PrintScreen, ScrollLock, Pause
   MouseButton* {.size: sizeof(cint), pure.} = enum
-    UNKNOWN, Mouse1, Mouse2, Mouse3
+    UNKNOWN, Mouse1, Mouse2, Mouse3 # Left, middle, right
   Event* = object
     case eventType*: EventType
     of KeyPressed, KeyReleased:
