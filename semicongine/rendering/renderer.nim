@@ -279,7 +279,7 @@ proc allocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
-proc updateGPUBuffer*(gpuData: GPUData, flush = false, allFrames = false) =
+proc updateGPUBuffer*(gpuData: GPUData, flush = false) =
   if gpuData.size == 0:
     return
 
@@ -291,14 +291,14 @@ proc updateGPUBuffer*(gpuData: GPUData, flush = false, allFrames = false) =
     withStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
       copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
 
-proc updateAllGPUBuffers*[T](value: T, flush = false, allFrames = false) =
+proc updateAllGPUBuffers*[T](value: T, flush = false) =
   for name, fieldvalue in value.fieldPairs():
     when typeof(fieldvalue) is GPUData:
-      updateGPUBuffer(fieldvalue, flush = flush, allFrames = allFrames)
+      updateGPUBuffer(fieldvalue, flush = flush)
     when typeof(fieldvalue) is array:
       when elementType(fieldvalue) is GPUData:
         for entry in fieldvalue:
-          updateGPUBuffer(entry, flush = flush, allFrames = allFrames)
+          updateGPUBuffer(entry, flush = flush)
 
 proc allocateGPUData(
   renderdata: var RenderData,
@@ -348,7 +348,7 @@ proc assignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = tru
           (v.buffer, v.offset) = allocateGPUData(renderdata, v.bufferType, v.size)
 
   if uploadData:
-    updateAllGPUBuffers(data, flush = true, allFrames = true)
+    updateAllGPUBuffers(data, flush = true)
 
 proc assignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSet, uploadData = true) =
   assignBuffers(renderdata, descriptorSet.data, uploadData = uploadData)
