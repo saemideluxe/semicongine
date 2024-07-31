@@ -691,8 +691,6 @@ proc render*[TShader, TMesh, TInstance](
       indexType = VK_INDEX_TYPE_UINT32
       elementCount = meshValue.data.len.uint32
 
-  assert elementCount > 0
-
   if indexType != VK_INDEX_TYPE_NONE_KHR:
     vkCmdBindIndexBuffer(
       commandBuffer,

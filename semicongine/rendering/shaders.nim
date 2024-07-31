@@ -134,7 +134,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
   var pushConstants: seq[string]
   var samplers: seq[string]
   var vsInputLocation = 0'u32
-  var passLocation = 0
+  var passLocation {.hint[XDeclaredButNotUsed]: off.} = 0
   var fsOutputLocation = 0
 
   var sawDescriptorSets = false

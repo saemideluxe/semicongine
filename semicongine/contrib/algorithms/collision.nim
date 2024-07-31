@@ -382,3 +382,16 @@ func calculateCollider(points: openArray[Vec3f], theType: ColliderType): Collide
       result.transform = translate(center)
       for p in points:
         result.radius = max(result.radius, (p - center).length)
+
+
+
+proc rayIntersectAABB*(origin, dir, boxA, boxB: Vec3f): Option[(Vec3f, float32)] =
+  let
+    tA = (boxA - origin) / dir
+    tB = (boxB - origin) / dir
+    t1 = vec3(min(tA.x, tB.x), min(tA.y, tB.y), min(tA.z, tB.z))
+    t2 = vec3(max(tA.x, tB.x), max(tA.y, tB.y), max(tA.z, tB.z))
+    tNear = max(max(t1.x, t1.y), t1.z)
+    tFar = min(min(t2.x, t2.y), t2.z)
+  if tNear <= tFar:
+    result = some((origin + dir * tNear, tNear))

@@ -32,7 +32,7 @@ func ToVec3*[T: SomeNumber](orig: TVec2[T], value: T = default(T)): TVec3[T] =
 func ToVec2*[T: SomeNumber](orig: TVec1[T], value: T = default(T)): TVec2[T] =
   TVec2[T]([orig[0], value])
 
-# shortcuts
+# shortcuts Vec3f
 func vec1*[T: SomeNumber](x: T): Vec1f =
   Vec1f([float32(x)])
 func vec2*[T, S: SomeNumber](x: T, y: S): Vec2f =
@@ -50,6 +50,21 @@ func vec4*[T, S, U: SomeNumber](x: T, y: S, z: U): Vec4f = vec4(x, y, z, 0)
 func vec4*[T, S: SomeNumber](x: T, y: S): Vec4f = vec4(x, y, 0, 0)
 func vec4*[T: SomeNumber](x: T): Vec4f = vec4(x, 0, 0, 0)
 func vec4*(): Vec4f = vec4(0, 0, 0, 0)
+
+# shortcuts Vec3i
+func vec1i*[T: SomeInteger](x: T): Vec1i = Vec1i([int32(x)])
+func vec2i*[T, S: SomeInteger](x: T, y: S): Vec2i = Vec2i([int32(x), int32(y)])
+func vec2i*[T: SomeInteger](x: T): Vec2i = vec2i(x, 0)
+func vec2i*(): Vec2i = vec2i(0, 0)
+func vec3i*[T, S, U: SomeInteger](x: T, y: S, z: U): Vec3i = Vec3i([int32(x), int32(y), int32(z)])
+func vec3i*[T, S: SomeInteger](x: T, y: S): Vec3i = vec3i(x, y, 0)
+func vec3i*[T: SomeInteger](x: T): Vec3i = vec3i(x, 0, 0)
+func vec3i*(): Vec3i = vec3i(0, 0, 0)
+func vec4i*[T, S, U, V: SomeInteger](x: T, y: S, z: U, w: V): Vec4i = Vec4i([int32(x), int32(y), int32(z), int32(w)])
+func vec4i*[T, S, U: SomeInteger](x: T, y: S, z: U): Vec4i = vec4i(x, y, z, 0)
+func vec4i*[T, S: SomeInteger](x: T, y: S): Vec4i = vec4i(x, y, 0, 0)
+func vec4i*[T: SomeInteger](x: T): Vec4i = vec4i(x, 0, 0, 0)
+func vec4i*(): Vec4i = vec4i(0, 0, 0, 0)
 
 const
   X* = vec3(1, 0, 0)
