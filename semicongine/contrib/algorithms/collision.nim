@@ -383,8 +383,6 @@ func calculateCollider(points: openArray[Vec3f], theType: ColliderType): Collide
       for p in points:
         result.radius = max(result.radius, (p - center).length)
 
-
-
 proc rayIntersectAABB*(origin, dir, boxA, boxB: Vec3f): Option[(Vec3f, float32)] =
   let
     tA = (boxA - origin) / dir
