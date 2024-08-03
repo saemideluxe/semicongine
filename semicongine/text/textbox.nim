@@ -173,7 +173,7 @@ proc refresh*(textbox: var Textbox) =
     textbox.refreshGeometry()
     textbox.dirtyGeometry = false
 
-proc render*(textbox: Textbox, commandbuffer: VkCommandBuffer, pipeline: Pipeline) =
+proc render*(commandbuffer: VkCommandBuffer, pipeline: Pipeline, textbox: Textbox) =
   withBind(commandbuffer, (textbox.shaderdata, ), pipeline):
     render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = textbox)
 
@@ -234,5 +234,5 @@ proc initTextbox*[T: string | seq[Rune]](
   initDescriptorSet(renderdata, descriptorSetLayout, result.shaderdata)
 
   result.refresh()
-  updateAllGPUBuffers(result, flush = true, allFrames = true)
+  updateAllGPUBuffers(result, flush = true)
   updateAllGPUBuffers(result.shaderdata.data, flush = true)

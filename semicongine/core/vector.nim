@@ -66,6 +66,29 @@ func vec4i*[T, S: SomeInteger](x: T, y: S): Vec4i = vec4i(x, y, 0, 0)
 func vec4i*[T: SomeInteger](x: T): Vec4i = vec4i(x, 0, 0, 0)
 func vec4i*(): Vec4i = vec4i(0, 0, 0, 0)
 
+# shortcuts color
+func toVec*(value: string): Vec4f =
+  assert value != ""
+  var hex = value
+  if hex[0] == '#':
+    hex = hex[1 .. ^1]
+  # when 3 or 6 -> set alpha to 1.0
+  assert hex.len == 3 or hex.len == 6 or hex.len == 4 or hex.len == 8
+  if hex.len == 3:
+    hex = hex & "f"
+  if hex.len == 4:
+    hex = hex[0] & hex[0] & hex[1] & hex[1] & hex[2] & hex[2] & hex[3] & hex[3]
+  if hex.len == 6:
+    hex = hex & "ff"
+  assert hex.len == 8
+  let
+    r = parseHexInt(hex[0 .. 1]).float32 / 255'f32
+    g = parseHexInt(hex[2 .. 3]).float32 / 255'f32
+    b = parseHexInt(hex[4 .. 5]).float32 / 255'f32
+    a = parseHexInt(hex[6 .. 7]).float32 / 255'f32
+  return vec4(r, g, b, a)
+
+
 const
   X* = vec3(1, 0, 0)
   Y* = vec3(0, 1, 0)

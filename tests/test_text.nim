@@ -17,7 +17,7 @@ proc test_01_static_label(time: float32) =
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var label1 = initTextbox(
     renderdata,
-    pipeline.descriptorSetLayouts[0],
+    pipeline.layout(0),
     font,
     "Hello semicongine!",
     color = vec4(1, 1, 1, 1),
@@ -30,7 +30,7 @@ proc test_01_static_label(time: float32) =
     withNextFrame(framebuffer, commandbuffer):
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         withPipeline(commandbuffer, pipeline):
-          render(label1, commandbuffer, pipeline)
+          render(commandbuffer, pipeline, label1)
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -48,7 +48,7 @@ proc test_02_multiple_animated(time: float32) =
   var labels = [
     initTextbox(
       renderdata,
-      pipeline.descriptorSetLayouts[0],
+      pipeline.layout(0),
       font1,
       "  0",
       color = vec4(0, 1, 1, 1),
@@ -57,7 +57,7 @@ proc test_02_multiple_animated(time: float32) =
     ),
     initTextbox(
       renderdata,
-      pipeline.descriptorSetLayouts[0],
+      pipeline.layout(0),
       font2,
       "  1",
       color = vec4(1, 0, 1, 1),
@@ -66,7 +66,7 @@ proc test_02_multiple_animated(time: float32) =
     ),
     initTextbox(
       renderdata,
-      pipeline.descriptorSetLayouts[0],
+      pipeline.layout(0),
       font3,
       "  2",
       color = vec4(1, 1, 0, 1),
@@ -92,7 +92,7 @@ proc test_02_multiple_animated(time: float32) =
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         withPipeline(commandbuffer, pipeline):
           for label in labels:
-            render(label, commandbuffer, pipeline)
+            render(commandbuffer, pipeline, label)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -110,7 +110,7 @@ proc test_03_layouting(time: float32) =
   for horizontal in HorizontalAlignment:
     labels.add initTextbox(
       renderdata,
-      pipeline.descriptorSetLayouts[0],
+      pipeline.layout(0),
       font,
       $horizontal & " aligned",
       color = vec4(1, 1, 1, 1),
@@ -121,7 +121,7 @@ proc test_03_layouting(time: float32) =
   for vertical in VerticalAlignment:
     labels.add initTextbox(
       renderdata,
-      pipeline.descriptorSetLayouts[0],
+      pipeline.layout(0),
       font,
       $vertical & " aligned",
       color = vec4(1, 1, 1, 1),
@@ -131,7 +131,7 @@ proc test_03_layouting(time: float32) =
     )
   labels.add initTextbox(
     renderdata,
-    pipeline.descriptorSetLayouts[0],
+    pipeline.layout(0),
     font,
     """Paragraph
 This is a somewhat longer paragraph with a few newlines and a maximum width of 0.2.
@@ -153,7 +153,7 @@ It should display with some space above and have a pleasing appearance overall! 
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         withPipeline(commandbuffer, pipeline):
           for label in labels:
-            render(label, commandbuffer, pipeline)
+            render(commandbuffer, pipeline, label)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -170,7 +170,7 @@ proc test_04_lots_of_texts(time: float32) =
   for i in 0 ..< 100:
     labels.add initTextbox(
       renderdata,
-      pipeline.descriptorSetLayouts[0],
+      pipeline.layout(0),
       font,
       $i,
       color = vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0)),
@@ -187,7 +187,7 @@ proc test_04_lots_of_texts(time: float32) =
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         withPipeline(commandbuffer, pipeline):
           for l in labels:
-            render(l, commandbuffer, pipeline)
+            render(commandbuffer, pipeline, l)
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
