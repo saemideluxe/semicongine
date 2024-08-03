@@ -10,7 +10,6 @@ type
     leftOffset*: float32
     advance*: float32
   FontObj* = object
-    name*: string
     glyphs*: Table[Rune, GlyphInfo]
     fontAtlas*: Image[Gray]
     maxHeight*: int
