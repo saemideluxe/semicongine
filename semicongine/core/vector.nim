@@ -105,7 +105,10 @@ func to*[T](v: TVec4): auto = TVec4([T(v[0]), T(v[1]), T(v[2]), T(v[3])])
 func toVecString[T: TVec](value: T): string =
   var items: seq[string]
   for item in value:
-    items.add(&"{item.float:.5f}")
+    when elementType(value) is SomeFloat:
+      items.add(&"{item:.5f}")
+    else:
+      items.add(&"{item}")
   & "(" & join(items, "  ") & ")"
 
 func `$`*(v: TVec1[SomeNumber]): string = toVecString[TVec1[SomeNumber]](v)
