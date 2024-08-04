@@ -96,11 +96,24 @@ const
   R* = vec4(1, 0, 0, 1)
   G* = vec4(1, 0, 0, 1)
   B* = vec4(1, 0, 0, 1)
+  Xi* = vec3i(1, 0, 0)
+  Yi* = vec3i(0, 1, 0)
+  Zi* = vec3i(0, 0, 1)
 
 func to*[T](v: TVec1): auto = TVec1([T(v[0])])
 func to*[T](v: TVec2): auto = TVec2([T(v[0]), T(v[1])])
 func to*[T](v: TVec3): auto = TVec3([T(v[0]), T(v[1]), T(v[2])])
 func to*[T](v: TVec4): auto = TVec4([T(v[0]), T(v[1]), T(v[2]), T(v[3])])
+
+func f32*(v: TVec1): auto = to[float32](v)
+func f32*(v: TVec2): auto = to[float32](v)
+func f32*(v: TVec3): auto = to[float32](v)
+func f32*(v: TVec4): auto = to[float32](v)
+
+func i32*(v: TVec1): auto = to[int32](v)
+func i32*(v: TVec2): auto = to[int32](v)
+func i32*(v: TVec3): auto = to[int32](v)
+func i32*(v: TVec4): auto = to[int32](v)
 
 func toVecString[T: TVec](value: T): string =
   var items: seq[string]
