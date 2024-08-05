@@ -37,7 +37,7 @@ type
     color {.ShaderOutput.}: Vec4f
     descriptorSets {.DescriptorSets.}: (TextboxDescriptorSet, )
     vertexCode = """void main() {
-  gl_Position = vec4(position * vec3(1, textbox.aspectratio, 1) * textbox.scale + textbox.position, 1.0);
+  gl_Position = vec4(position * vec3(1 / textbox.aspectratio, 1, 1) * textbox.scale + textbox.position, 1.0);
   fragmentUv = uv;
 }  """
     fragmentCode = """void main() {
