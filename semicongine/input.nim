@@ -1,3 +1,11 @@
+import std/strutils
+import std/tables
+
+import ./core
+import ./events
+import ./rendering
+import ./storage
+
 type
   Input = object
     keyIsDown: set[Key]

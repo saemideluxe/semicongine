@@ -1,3 +1,6 @@
+import std/math
+import std/tables
+import std/macros
 
 type
   TVec1*[T: SomeNumber] = array[1, T]
@@ -373,22 +376,8 @@ macro createVectorAttribAccessorFuncs() =
 
 createVectorAttribAccessorFuncs()
 
-# call e.g. Vec2[int]().randomized() to get a random matrix
-template makeRandomVectorInit(mattype: typedesc) =
-  proc randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
-    for i in 0 ..< result.len:
-      result[i] = rand(low(typeof(m[0])) .. high(typeof(m[0])))
-  proc randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
-    for i in 0 ..< result.len:
-      result[i] = rand(1.0)
-
-makeRandomVectorInit(TVec1)
-makeRandomVectorInit(TVec2)
-makeRandomVectorInit(TVec3)
-makeRandomVectorInit(TVec4)
-
-converter Vec2VkExtent*(vec: TVec2[uint32]): VkExtent2D = VkExtent2D(width: vec[0], height: vec[1])
-converter Vec3VkExtent*(vec: TVec2[uint32]): VkExtent3D = VkExtent3D(width: vec[0], height: vec[1], depth: vec[2])
+# converter Vec2VkExtent*(vec: TVec2[uint32]): VkExtent2D = VkExtent2D(width: vec[0], height: vec[1])
+# converter Vec3VkExtent*(vec: TVec2[uint32]): VkExtent3D = VkExtent3D(width: vec[0], height: vec[1], depth: vec[2])
 
 func angleBetween*(a, b: Vec3f): float32 =
   arccos(a.dot(b) / (a.length * b.length))

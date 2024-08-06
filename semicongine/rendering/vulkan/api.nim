@@ -1,3 +1,10 @@
+import std/dynlib
+import std/logging
+import std/macros
+import std/strutils
+import std/typetraits
+import std/tables
+
 type
   VkHandle* = distinct uint
   VkNonDispatchableHandle* = distinct uint

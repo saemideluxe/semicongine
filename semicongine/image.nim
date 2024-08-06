@@ -1,3 +1,9 @@
+import std/os
+
+import ./core
+import ./resources
+import ./rendering/vulkan/api
+
 {.emit: "#define STB_IMAGE_STATIC".}
 {.emit: "#define STB_IMAGE_IMPLEMENTATION".}
 {.emit: "#include \"" & currentSourcePath.parentDir() & "/thirdparty/stb/stb_image.h\"".}

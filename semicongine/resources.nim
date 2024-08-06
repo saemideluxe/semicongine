@@ -1,3 +1,18 @@
+import std/algorithm
+import std/dirs
+import std/json
+import std/parsecfg
+import std/os
+import std/paths
+import std/sequtils
+import std/sets
+import std/streams
+import std/strformat
+import std/strutils
+import std/tables
+
+import ./core
+
 type
   ResourceBundlingType = enum
     Dir # Directories
@@ -6,8 +21,6 @@ type
 
 const
   thebundletype = parseEnum[ResourceBundlingType](PACKAGETYPE.toLowerAscii().capitalizeAscii())
-  ASCII_CHARSET = PrintableChars.toSeq.toRunes
-  DEFAULT_PACKAGE = "default"
 
 # resource loading
 
@@ -28,7 +41,7 @@ when thebundletype == Dir:
   proc packageRoot(package: string): string =
     resourceRoot().joinPath(package)
 
-  proc loadResource_intern(path: string, package: string): Stream =
+  proc loadResource_intern*(path: string, package: string): Stream =
     let realpath = package.packageRoot().joinPath(path)
     if not realpath.fileExists():
       raise newException(Exception, &"Resource {path} not found (checked {realpath})")
@@ -56,7 +69,7 @@ elif thebundletype == Zip:
   proc packageRoot(package: string): string =
     resourceRoot().joinPath(package)
 
-  proc loadResource_intern(path: string, package: string): Stream =
+  proc loadResource_intern*(path: string, package: string): Stream =
     let archive = openZipArchive(package.packageRoot() & ".zip")
     try:
       result = newStringStream(archive.extractFile(path))
@@ -108,10 +121,10 @@ elif thebundletype == Exe:
           let package = packageDir.splitPath.tail
           result[package] = Table[string, string]()
           for resourcefile in walkDirRec(packageDir, relative = true):
-            result[package][resourcefile.replace('\\', '/')] = staticRead(packageDir.joinPath(resourcefile))
+            result[package][resourcefile.string.replace('\\', '/')] = staticRead(packageDir.joinPath(resourcefile))
   const bundledResources = loadResources()
 
-  proc loadResource_intern(path: string, package: string): Stream =
+  proc loadResource_intern*(path: string, package: string): Stream =
     if not (path in bundledResources[package]):
       raise newException(Exception, &"Resource {path} not found")
     newStringStream(bundledResources[package][path])

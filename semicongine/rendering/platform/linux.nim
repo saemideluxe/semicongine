@@ -1,8 +1,16 @@
+import std/logging
+import std/options
+import std/strformat
+import std/tables
+
 import ../../thirdparty/x11/xlib
 import ../../thirdparty/x11/xutil
 import ../../thirdparty/x11/keysym
 import ../../thirdparty/x11/x as x11
 import ../../thirdparty/x11/xkblib
+
+import ../../core
+import ../../events
 
 const REQUIRED_PLATFORM_EXTENSIONS = @["VK_KHR_xlib_surface"]
 
@@ -222,7 +230,7 @@ proc setMousePosition*(window: NativeWindow, x, y: int) =
 proc createNativeSurface(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-    dpy: cast[ptr Display](window.display),
-    window: cast[Window](window.window),
+    dpy: cast[ptr api.Display](window.display),
+    window: cast[api.Window](window.window),
   )
   checkVkResult vkCreateXlibSurfaceKHR(instance, addr(surfaceCreateInfo), nil, addr(result))

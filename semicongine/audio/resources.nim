@@ -1,3 +1,11 @@
+import std/endians
+import std/os
+import std/streams
+import std/strutils
+
+import ../core
+import ../resources
+
 type
   Encoding {.size: sizeof(uint32).} = enum
     # Unspecified = 0

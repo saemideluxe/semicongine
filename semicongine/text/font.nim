@@ -2,6 +2,8 @@
 {.emit: "#define STB_TRUETYPE_IMPLEMENTATION".}
 {.emit: "#include \"" & currentSourcePath.parentDir().parentDir() & "/thirdparty/stb/stb_truetype.h\"".}
 
+const ASCII_CHARSET = PrintableChars.toSeq.toRunes
+
 type stbtt_fontinfo {.importc, incompleteStruct.} = object
 
 proc stbtt_InitFont(info: ptr stbtt_fontinfo, data: ptr char, offset: cint): cint {.importc, nodecl.}

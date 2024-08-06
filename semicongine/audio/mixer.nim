@@ -1,3 +1,11 @@
+import std/locks
+import std/logging
+import std/math
+import std/monotimes
+import std/strformat
+import std/tables
+import std/times
+
 const NBUFFERS = 32
 const BUFFERSAMPLECOUNT = 256
 const AUDIO_SAMPLE_RATE* = 44100

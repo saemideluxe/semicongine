@@ -1,5 +1,10 @@
+import std/tables
+import std/options
+
 import ../../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
 import ../../../thirdparty/winim/winim/[winstr, utils]
+
+import ../../events
 
 const REQUIRED_PLATFORM_EXTENSIONS = @["VK_KHR_win32_surface"]
 

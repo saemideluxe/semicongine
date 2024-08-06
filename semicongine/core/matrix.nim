@@ -1,4 +1,4 @@
-export math
+import std/math
 
 type
   # layout is row-first
@@ -451,23 +451,6 @@ func inversed*(a: Mat4): Mat4 =
   result[3, 1] = ( a[0, 0] * c3 - a[0, 1] * c1 + a[0, 2] * c0) * invdet;
   result[3, 2] = (-a[3, 0] * s3 + a[3, 1] * s1 - a[3, 2] * s0) * invdet;
   result[3, 3] = ( a[2, 0] * s3 - a[2, 1] * s1 + a[2, 2] * s0) * invdet;
-
-# call e.g. TMat32[int]().randomized() to get a random matrix
-template makeRandomMatrixInit(mattype: typedesc) =
-  proc Randomized*[T: SomeInteger](m: mattype[T]): mattype[T] =
-    for i in 0 ..< result.data.len:
-      result.data[i] = rand(low(typeof(m.data[0])) .. high(typeof(m.data[0])))
-  proc Randomized*[T: SomeFloat](m: mattype[T]): mattype[T] =
-    for i in 0 ..< result.data.len:
-      result.data[i] = rand(T(1.0))
-
-makeRandomMatrixInit(TMat2)
-makeRandomMatrixInit(TMat23)
-makeRandomMatrixInit(TMat32)
-makeRandomMatrixInit(TMat3)
-makeRandomMatrixInit(TMat34)
-makeRandomMatrixInit(TMat43)
-makeRandomMatrixInit(TMat4)
 
 func projection*(fovy, aspect, zNear, zFar: float32): Mat4 =
   let tanHalfFovy = 1 / tan(fovy / 2)

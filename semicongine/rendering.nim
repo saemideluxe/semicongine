@@ -1,3 +1,15 @@
+import std/enumerate
+import std/hashes
+import std/macros
+import std/os
+import std/sequtils
+import std/strutils
+import std/typetraits
+
+import ./rendering/vulkan/api
+
+import ./image
+
 # in this file:
 # - const defintions for rendering
 # - custom pragma defintions for rendering
@@ -40,7 +52,7 @@ type
     device*: VkDevice
     physicalDevice*: VkPhysicalDevice
     surface: VkSurfaceKHR
-    window: NativeWindow
+    window*: NativeWindow
     graphicsQueueFamily*: uint32
     graphicsQueue*: VkQueue
     debugMessenger: VkDebugUtilsMessengerEXT

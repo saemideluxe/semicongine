@@ -1,3 +1,9 @@
+import std/strutils
+import std/strformat
+import std/paths
+import std/os
+import std/typetraits
+
 type
   HorizontalAlignment* = enum
     Left
@@ -18,7 +24,7 @@ func ToCPointer*[T](list: openArray[T]): ptr T =
   if list.len > 0: addr(list[0]) else: nil
 
 # required for some external libraries
-proc nativeFree(p: pointer) {.importc: "free".}
+proc nativeFree*(p: pointer) {.importc: "free".}
 
 proc StaticExecChecked*(command: string, input = ""): string {.compileTime.} =
   let (output, exitcode) = gorgeEx(
