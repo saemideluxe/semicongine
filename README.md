@@ -36,7 +36,7 @@ The engine currently features the following:
 ## Hello world example
 
 Attention, this project is not optimized for "hello world"-scenarios, so you
-have quite a few lines to get something to display:
+have to write quite a few lines to get something to display:
 
 ```nim
 
