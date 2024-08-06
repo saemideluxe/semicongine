@@ -90,15 +90,25 @@ func toVec*(value: string): Vec4f =
 
 
 const
-  X* = vec3(1, 0, 0)
-  Y* = vec3(0, 1, 0)
-  Z* = vec3(0, 0, 1)
   R* = vec4(1, 0, 0, 1)
   G* = vec4(1, 0, 0, 1)
   B* = vec4(1, 0, 0, 1)
+
+  X* = vec3(1, 0, 0)
+  Y* = vec3(0, 1, 0)
+  Z* = vec3(0, 0, 1)
+  XY* = vec3(1, 1, 0)
+  XZ* = vec3(1, 0, 1)
+  YZ* = vec3(0, 1, 1)
+  XYZ* = vec3(1, 1, 1)
+
   Xi* = vec3i(1, 0, 0)
   Yi* = vec3i(0, 1, 0)
   Zi* = vec3i(0, 0, 1)
+  XYi* = vec3i(1, 1, 0)
+  XZi* = vec3i(1, 0, 1)
+  YZi* = vec3i(0, 1, 1)
+  XYZi* = vec3i(1, 1, 1)
 
 func to*[T](v: TVec1): auto = TVec1([T(v[0])])
 func to*[T](v: TVec2): auto = TVec2([T(v[0]), T(v[1])])
