@@ -1,4 +1,6 @@
 import std/os
+import std/streams
+import std/strutils
 
 import ./core
 import ./resources
@@ -25,8 +27,8 @@ type
     height*: uint32
     minInterpolation*: VkFilter = VK_FILTER_LINEAR
     magInterpolation*: VkFilter = VK_FILTER_LINEAR
-    wrapU: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
-    wrapV: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
+    wrapU*: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
+    wrapV*: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
     data*: seq[T]
     vk*: VkImage
     imageview*: VkImageView

@@ -1,9 +1,8 @@
-import std/os
+import std/math
 import std/sequtils
 import std/monotimes
 import std/times
 import std/options
-import std/random
 
 import ../semicongine
 

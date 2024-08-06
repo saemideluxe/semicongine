@@ -1,10 +1,20 @@
+import std/algorithm
+import std/logging
 import std/os
+import std/sequtils
+import std/streams
+import std/strformat
+import std/strutils
 import std/tables
 import std/unicode
 
+
 import ./core
+import ./resources
 import ./rendering
+import ./rendering/vulkan/api
 import ./image
+import ./contrib/algorithms/texture_packing
 
 const
   NEWLINE = Rune('\n')
@@ -44,11 +54,11 @@ type
     fragmentUv {.Pass.}: Vec2f
     color {.ShaderOutput.}: Vec4f
     descriptorSets {.DescriptorSets.}: (TextboxDescriptorSet, )
-    vertexCode = """void main() {
+    vertexCode* = """void main() {
   gl_Position = vec4(position * vec3(1 / textbox.aspectratio, 1, 1) * textbox.scale + textbox.position, 1.0);
   fragmentUv = uv;
 }  """
-    fragmentCode = """void main() {
+    fragmentCode* = """void main() {
     float v = texture(fontAtlas, fragmentUv).r;
     if(v == 0) {
       discard;

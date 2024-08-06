@@ -17,20 +17,6 @@ if vulkanLib == nil:
 func VK_MAKE_API_VERSION*(variant: uint32, major: uint32, minor: uint32, patch: uint32): uint32 {.compileTime.} =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
 
-template checkVkResult*(call: untyped) =
-  when defined(release):
-    discard call
-  else:
-    # yes, a bit cheap, but this is only for nice debug output
-    var callstr = astToStr(call).replace("\n", "")
-    while callstr.find("  ") >= 0:
-      callstr = callstr.replace("  ", " ")
-    debug "Calling vulkan: ", callstr
-    let value = call
-    if value != VK_SUCCESS:
-      error "Vulkan error: ", astToStr(call), " returned ", $value
-      raise newException(Exception, "Vulkan error: " & astToStr(call) &
-          " returned " & $value)
 # custom enum iteration (for enum values > 2^16)
 macro enumFullRange(a: typed): untyped =
   newNimNode(nnkBracket).add(a.getType[1][1..^1])
@@ -12012,3 +11998,18 @@ block globalFunctions:
   vkCreateInstance = cast[proc(pCreateInfo: ptr VkInstanceCreateInfo, pAllocator: ptr VkAllocationCallbacks, pInstance: ptr VkInstance): VkResult {.stdcall.}](vkGetInstanceProcAddr(instance, "vkCreateInstance"))
 
 converter NimBool2VkBool*(a: bool): VkBool32 = VkBool32(a)
+
+template checkVkResult*(call: untyped) =
+  when defined(release):
+    discard call
+  else:
+    # yes, a bit cheap, but this is only for nice debug output
+    var callstr = astToStr(call).replace("\n", "")
+    while callstr.find("  ") >= 0:
+      callstr = callstr.replace("  ", " ")
+    debug "Calling vulkan: ", callstr
+    let value = call
+    if value != VK_SUCCESS:
+      error "Vulkan error: ", astToStr(call), " returned ", $value
+      raise newException(Exception, "Vulkan error: " & astToStr(call) &
+          " returned " & $value)

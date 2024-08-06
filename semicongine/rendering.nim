@@ -139,7 +139,7 @@ type
     data*: T
     buffer*: Buffer
     offset: uint64
-  GPUData = GPUArray | GPUValue
+  GPUData* = GPUArray | GPUValue
 
   RenderData* = object
     descriptorPool: VkDescriptorPool

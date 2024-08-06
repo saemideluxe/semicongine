@@ -1,3 +1,7 @@
+import std/algorithm
+
+import ../../image
+
 type
   Rect = tuple
     i: int

@@ -3,7 +3,6 @@ import std/dirs
 import std/json
 import std/parsecfg
 import std/os
-import std/paths
 import std/sequtils
 import std/sets
 import std/streams
@@ -121,7 +120,7 @@ elif thebundletype == Exe:
           let package = packageDir.splitPath.tail
           result[package] = Table[string, string]()
           for resourcefile in walkDirRec(packageDir, relative = true):
-            result[package][resourcefile.string.replace('\\', '/')] = staticRead(packageDir.joinPath(resourcefile))
+            result[package][resourcefile.replace('\\', '/')] = staticRead(packageDir.joinPath(resourcefile))
   const bundledResources = loadResources()
 
   proc loadResource_intern*(path: string, package: string): Stream =

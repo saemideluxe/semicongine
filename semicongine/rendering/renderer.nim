@@ -45,9 +45,6 @@ func alignedTo[T: SomeInteger](value: T, alignment: T): T =
   else:
     return value + alignment - remainder
 
-template sType(descriptorSet: DescriptorSet): untyped =
-  get(genericParams(typeof(descriptorSet)), 1)
-
 template bufferType(gpuData: GPUData): untyped =
   typeof(gpuData).TBuffer
 func needsMapping(bType: BufferType): bool =

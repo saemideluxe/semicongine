@@ -1,3 +1,7 @@
+import std/options
+
+import ../../core
+
 const MAX_COLLISON_DETECTION_ITERATIONS = 20
 const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 20
 
@@ -348,7 +352,7 @@ func collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal:
       direction[0] = 0.0001
     inc n
 
-func calculateCollider(points: openArray[Vec3f], theType: ColliderType): Collider =
+func calculateCollider*(points: openArray[Vec3f], theType: ColliderType): Collider =
   var
     minX = high(float32)
     maxX = low(float32)

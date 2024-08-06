@@ -1,3 +1,11 @@
+import std/os
+import std/parsecfg
+import std/streams
+import std/strformat
+import std/strutils
+import std/tables
+import std/times
+
 const CONFIGHOTRELOAD {.booldefine.}: bool = not defined(release)
 const CONFIGHOTRELOADINTERVAL {.intdefine.}: int = 1000
 const CONFIGROOT {.strdefine.}: string = "."

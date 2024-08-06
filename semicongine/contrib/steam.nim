@@ -1,9 +1,12 @@
+import std/dynlib
+import std/logging
+import std/strutils
+
 var
   steam_api: LibHandle
   steam_is_loaded = false
 
 when defined(linux):
-  proc dlerror(): cstring {.stdcall, importc.}
   steam_api = "libsteam_api.so".loadLib()
 elif defined(windows):
   steam_api = "steam_api".loadLib()

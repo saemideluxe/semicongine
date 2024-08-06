@@ -1,7 +1,3 @@
-import std/math
-import std/tables
-import std/macros
-
 type
   TVec1*[T: SomeNumber] = array[1, T]
   TVec2*[T: SomeNumber] = array[2, T]

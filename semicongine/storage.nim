@@ -2,7 +2,6 @@ import std/marshal
 import std/os
 import std/paths
 import std/strformat
-import std/strutils
 import std/tables
 
 import ./core

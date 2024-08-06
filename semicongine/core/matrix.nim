@@ -1,5 +1,3 @@
-import std/math
-
 type
   # layout is row-first
   # having an object instead of directly aliasing the array seems a bit ugly at

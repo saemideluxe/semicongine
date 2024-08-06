@@ -61,12 +61,6 @@ proc svkGetPhysicalDeviceSurfacePresentModesKHR*(): seq[VkPresentModeKHR] =
   result = newSeq[VkPresentModeKHR](n_modes)
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.physicalDevice, vulkan.surface, addr(n_modes), result.ToCPointer)
 
-proc svkGetPhysicalDeviceSurfaceFormatsKHR(): seq[VkSurfaceFormatKHR] =
-  var n_formats: uint32
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.physicalDevice, vulkan.surface, addr(n_formats), nil)
-  result = newSeq[VkSurfaceFormatKHR](n_formats)
-  checkVkResult vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan.physicalDevice, vulkan.surface, addr(n_formats), result.ToCPointer)
-
 proc hasValidationLayer*(): bool =
   var n_layers: uint32
   checkVkResult vkEnumerateInstanceLayerProperties(addr(n_layers), nil)

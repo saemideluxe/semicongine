@@ -9,8 +9,10 @@ export image
 
 import ./semicongine/events
 import ./semicongine/rendering
+import ./semicongine/rendering/vulkan/api
 export events
 export rendering
+export api
 
 import ./semicongine/storage
 import ./semicongine/input
