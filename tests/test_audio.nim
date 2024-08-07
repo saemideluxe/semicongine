@@ -76,12 +76,11 @@ when isMainModule:
   test3()
 
   while mixer[].isPlaying():
-    discard mixer[].play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
     # on windows we re-open stdin and this will not work
     when defined(linux):
+      discard mixer[].play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
       echo "Press q and enter to exit"
       if stdin.readLine() == "q":
         mixer[].stop()
     elif defined(windows):
-      sleep(5)
-      mixer[].stop()
+      sleep(1000)

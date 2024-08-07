@@ -297,7 +297,7 @@ proc audioWorker() {.thread.} =
 
 # for thread priority (really necessary?)
 when defined(windows):
-  import ./thirdparty/winim/winim/inc/winbase
+  import ../thirdparty/winim/winim/inc/winbase
 when defined(linux):
   import std/posix
 

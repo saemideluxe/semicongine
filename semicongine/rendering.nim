@@ -1,8 +1,10 @@
+import std/logging
 import std/enumerate
 import std/hashes
 import std/macros
 import std/os
 import std/sequtils
+import std/strformat
 import std/strutils
 import std/typetraits
 

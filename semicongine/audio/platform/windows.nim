@@ -1,4 +1,9 @@
-import ./thirdparty/winim/winim/inc/mmsystem
+import std/os
+
+import ../../thirdparty/winim/winim/inc/[mmsystem, windef]
+
+# import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
+
 
 template CheckWinMMResult*(call: untyped) =
   let value = call
@@ -24,7 +29,7 @@ proc OpenSoundDevice*(sampleRate: uint32, buffers: seq[ptr SoundData]): NativeSo
 
   for i in 0 ..< buffers.len:
     result.buffers.add WAVEHDR(
-      lpData: cast[cstring](addr buffers[i][][0]),
+      lpData: cast[ptr CHAR](addr buffers[i][][0]),
       dwBufferLength: DWORD(buffers[i][].len * sizeof(Sample)),
       dwLoops: 1,
     )

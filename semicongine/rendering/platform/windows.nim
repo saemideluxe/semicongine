@@ -1,8 +1,10 @@
 import std/tables
 import std/options
 
-import ../../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
-import ../../../thirdparty/winim/winim/[winstr, utils]
+import ../../core
+
+import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
+import ../../thirdparty/winim/winim/[winstr, utils]
 
 import ../../events
 
@@ -71,12 +73,12 @@ proc mapLeftRightKeys(key: INT, lparam: LPARAM): INT =
 proc windowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.stdcall.} =
   case uMsg
   of WM_DESTROY:
-    currentEvents.add(Event(eventType: EventType.Quit))
+    currentEvents.add(Event(eventType: events.EventType.Quit))
   of WM_KEYDOWN, WM_SYSKEYDOWN:
-    let key = MapLeftRightKeys(INT(wParam), lParam)
+    let key = mapLeftRightKeys(INT(wParam), lParam)
     currentEvents.add(Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(key, Key.UNKNOWN)))
   of WM_KEYUP, WM_SYSKEYUP:
-    let key = MapLeftRightKeys(INT(wParam), lParam)
+    let key = mapLeftRightKeys(INT(wParam), lParam)
     currentEvents.add(Event(eventType: KeyReleased, key: KeyTypeMap.getOrDefault(key, Key.UNKNOWN)))
   of WM_LBUTTONDOWN:
     currentEvents.add(Event(eventType: MousePressed, button: MouseButton.Mouse1))
@@ -116,7 +118,7 @@ proc windowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
 
 
 proc createWindow*(title: string): NativeWindow =
-  when DEBUG:
+  when not defined(release):
     AllocConsole()
     discard stdin.reopen("conIN$", fmRead)
     discard stdout.reopen("conOUT$", fmWrite)
@@ -128,7 +130,7 @@ proc createWindow*(title: string): NativeWindow =
     windowName = T(title)
     windowClass = WNDCLASSEX(
       cbSize: UINT(WNDCLASSEX.sizeof),
-      lpfnWndProc: WindowHandler,
+      lpfnWndProc: windowHandler,
       hInstance: result.hInstance,
       lpszClassName: windowClassName,
        hcursor: currentCursor,
@@ -151,6 +153,8 @@ proc createWindow*(title: string): NativeWindow =
 
   result.g_wpPrev.length = UINT(sizeof(WINDOWPLACEMENT))
   discard result.hwnd.ShowWindow(SW_SHOW)
+  discard result.hwnd.SetForegroundWindow()
+  discard result.hwnd.SetFocus()
 
 proc setTitle*(window: NativeWindow, title: string) =
   window.hwnd.SetWindowText(T(title))
@@ -187,13 +191,13 @@ proc size*(window: NativeWindow): (int, int) =
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
   # empty queue
-  currentEvents = newSeq[Event]()
   var msg: MSG
   # fill queue
   while PeekMessage(addr(msg), window.hwnd, 0, 0, PM_REMOVE):
     TranslateMessage(addr(msg))
     DispatchMessage(addr(msg))
-  return currentEvents
+  result = currentEvents
+  currentEvents.setLen(0)
 
 proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
   var p: POINT
@@ -203,7 +207,7 @@ proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
   return none(Vec2f)
 
 proc setMousePosition*(window: NativeWindow, x, y: int) =
-  checkWin32Result SetCursorPos(x, y)
+  checkWin32Result SetCursorPos(x.int32, y.int32)
 
 proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   assert instance.Valid

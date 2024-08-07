@@ -68,6 +68,7 @@ proc updateInputs*(): bool =
       of RestoredWindow:
         input.windowIsMinimized = false
       of GotFocus:
+        echo "got focus again"
         input.hasFocus = true
       of LostFocus:
         input.hasFocus = false
