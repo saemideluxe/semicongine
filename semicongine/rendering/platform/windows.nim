@@ -186,7 +186,7 @@ proc destroy*(window: NativeWindow) =
 
 proc size*(window: NativeWindow): (int, int) =
   var rect: RECT
-  checkWin32Result GetWindowRect(window.hwnd, addr(rect))
+  checkWin32Result GetClientRect(window.hwnd, addr(rect))
   (int(rect.right - rect.left), int(rect.bottom - rect.top))
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
@@ -199,15 +199,19 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
   result = currentEvents
   currentEvents.setLen(0)
 
+proc lockMouse*(window: NativeWindow, lock: bool) =
+  if lock:
+    let s = window.size()
+    var p = POINT(x: s[0].clong div 2, y: s[1].clong div 2)
+    ClientToScreen(window.hwnd, p)
+    checkWin32Result SetCursorPos(p.x.int32, p.y.int32)
+
 proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
   var p: POINT
-  let res = GetCursorPos(addr(p))
-  if res:
-    return some(Vec2f([float32(p.x), float32(p.y)]))
+  if GetCursorPos(addr(p)):
+    if ScreenToClient(window.hwnd, p)
+      return some(Vec2f([float32(p.x), float32(p.y)]))
   return none(Vec2f)
-
-proc setMousePosition*(window: NativeWindow, x, y: int) =
-  checkWin32Result SetCursorPos(x.int32, y.int32)
 
 proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   assert instance.Valid

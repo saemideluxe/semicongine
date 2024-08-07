@@ -35,8 +35,8 @@ proc updateInputs*(): bool =
   input.mouseMove = vec2(0, 0)
   input.windowWasResized = false
 
-  if input.lockMouse and input.hasFocus:
-    setMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
+  if input.lockMouse:
+    lockMouse(vulkan.window, input.hasFocus)
 
   var killed = false
   for event in vulkan.window.pendingEvents():
@@ -68,7 +68,6 @@ proc updateInputs*(): bool =
       of RestoredWindow:
         input.windowIsMinimized = false
       of GotFocus:
-        echo "got focus again"
         input.hasFocus = true
       of LostFocus:
         input.hasFocus = false
