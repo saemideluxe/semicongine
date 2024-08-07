@@ -3,7 +3,7 @@ type
     Quit
     ResizedWindow, MinimizedWindow, RestoredWindow
     KeyPressed, KeyReleased
-    MousePressed, MouseReleased, MouseMoved,
+    MousePressed, MouseReleased,
     MouseWheel
     GotFocus, LostFocus
   Key* {.size: sizeof(cint), pure.} = enum
@@ -28,8 +28,6 @@ type
       key*: Key
     of MousePressed, MouseReleased:
       button*: MouseButton
-    of MouseMoved:
-      x*, y*: int
     of MouseWheel:
       amount*: float32
     of GotFocus:

@@ -92,8 +92,6 @@ proc windowHandler(hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRES
     currentEvents.add(Event(eventType: MousePressed, button: MouseButton.Mouse3))
   of WM_RBUTTONUP:
     currentEvents.add(Event(eventType: MouseReleased, button: MouseButton.Mouse3))
-  of WM_MOUSEMOVE:
-    currentEvents.add(Event(eventType: MouseMoved, x: GET_X_LPARAM(lParam), y: GET_Y_LPARAM(lParam)))
   of WM_MOUSEWHEEL:
     currentEvents.add(Event(eventType: MouseWheel, amount: float32(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA))
   of WM_SIZING:
@@ -184,10 +182,10 @@ proc showSystemCursor*(window: NativeWindow, value: bool) =
 proc destroy*(window: NativeWindow) =
   discard
 
-proc size*(window: NativeWindow): (int, int) =
+proc size*(window: NativeWindow): Vec2i =
   var rect: RECT
-  checkWin32Result GetWindowRect(window.hwnd, addr(rect))
-  (int(rect.right - rect.left), int(rect.bottom - rect.top))
+  discard GetClientRect(window.hwnd, addr(rect))
+  vec2i(rect.right - rect.left, rect.bottom - rect.top)
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
   # empty queue
@@ -199,15 +197,16 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
   result = currentEvents
   currentEvents.setLen(0)
 
-proc getMousePosition*(window: NativeWindow): Option[Vec2i] =
+proc getMousePosition*(window: NativeWindow): Vec2i =
   var p: POINT
-  let res = GetCursorPos(addr(p))
-  if res:
-    return some(vec2i(p.x, p.y))
-  return none(Vec2i)
+  discard GetCursorPos(addr(p))
+  discard window.hwnd.ScreenToClient(addr(p))
+  vec2i(p.x, p.y)
 
-proc setMousePosition*(window: NativeWindow, x, y: int) =
-  checkWin32Result SetCursorPos(x.int32, y.int32)
+proc setMousePosition*(window: NativeWindow, pos: Vec2i) =
+  var p = POINT(x: pos.x, y: pos.y)
+  discard window.hwnd.ScreenToClient(addr(p))
+  discard SetCursorPos(pos.x, pos.y)
 
 proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   assert instance.Valid

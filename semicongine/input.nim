@@ -32,15 +32,20 @@ proc updateInputs*(): bool =
   input.mouseWasPressed = {}
   input.mouseWasReleased = {}
   input.mouseWheel = 0
-  input.mouseMove = vec2(0, 0)
+  input.mouseMove = vec2i(0, 0)
   input.windowWasResized = false
 
   # if input.lockMouse and input.hasFocus:
     # setMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
 
   let newMousePos = getMousePosition(vulkan.window)
-  input.mouseMove = newPos - input.mousePosition
-  input.mousePosition = newPos
+
+  input.mouseMove = newMousePos - input.mousePosition
+  if input.lockMouse and input.hasFocus:
+    input.mousePosition = vulkan.window.size div 2
+    setMousePosition(vulkan.window, input.mousePosition)
+  else:
+    input.mousePosition = newMousePos
 
   var killed = false
   for event in vulkan.window.pendingEvents():
@@ -89,7 +94,7 @@ proc mousePositionPixel*(): Vec2i = input.mousePosition
 proc mousePosition*(size: (int, int)): Vec2f =
   result.x = (input.mousePosition.x.float32 / float32(size[0])) * 2.0 - 1.0
   result.y = (input.mousePosition.y.float32 / float32(size[1])) * 2.0 - 1.0
-proc mouseMove*(): Vec2f = input.mouseMove
+proc mouseMove*(): Vec2i = input.mouseMove
 proc mouseWheel*(): float32 = input.mouseWheel
 proc windowWasResized*(): auto = input.windowWasResized
 proc windowIsMinimized*(): auto = input.windowIsMinimized

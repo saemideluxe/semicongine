@@ -88,7 +88,7 @@ proc createWindow*(title: string): NativeWindow =
     # foregroundColor, backgroundColor
   )
   checkXlibResult XSetStandardProperties(display, window, title, "window", 0, nil, 0, nil)
-  checkXlibResult XSelectInput(display, window, PointerMotionMask or ButtonPressMask or ButtonReleaseMask or KeyPressMask or KeyReleaseMask or ExposureMask or FocusChangeMask)
+  checkXlibResult XSelectInput(display, window, ButtonPressMask or ButtonReleaseMask or KeyPressMask or KeyReleaseMask or ExposureMask or FocusChangeMask)
   checkXlibResult XMapWindow(display, window)
 
   deleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", XBool(false))
@@ -102,7 +102,7 @@ proc createWindow*(title: string): NativeWindow =
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
 proc setTitle*(window: NativeWindow, title: string) =
-  checkXlibResult XSetStandardProperties(window.display, window.window, title, "window", 0, nil, 0, nil)
+  discard XSetStandardProperties(window.display, window.window, title, "window", 0, nil, 0, nil)
 
 proc setFullscreen*(window: var NativeWindow, enable: bool) =
   var
@@ -147,10 +147,10 @@ proc destroy*(window: NativeWindow) =
   checkXlibResult window.display.XDestroyWindow(window.window)
   discard window.display.XCloseDisplay() # always returns 0
 
-proc size*(window: NativeWindow): (int, int) =
+proc size*(window: NativeWindow): Vec2i =
   var attribs: XWindowAttributes
-  checkXlibResult XGetWindowAttributes(window.display, window.window, addr(attribs))
-  return (int(attribs.width), int(attribs.height))
+  discard XGetWindowAttributes(window.display, window.window, addr(attribs))
+  vec2i(attribs.width, attribs.height)
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
   var event: XEvent
@@ -179,10 +179,6 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     of ButtonRelease:
       let button = int(cast[PXButtonEvent](addr(event)).button)
       result.add Event(eventType: MouseReleased, button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN))
-    of MotionNotify:
-      let motion = cast[PXMotionEvent](addr(event))
-      if motion.x > 0 or motion.y > 0:
-        result.add Event(eventType: MouseMoved, x: motion.x, y: motion.y)
     of FocusIn:
       result.add Event(eventType: GotFocus)
     of FocusOut:
@@ -193,7 +189,7 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
       discard
 
 
-proc getMousePosition*(window: NativeWindow): Option[Vec2i] =
+proc getMousePosition*(window: NativeWindow): Vec2i =
   var
     root: x11.Window
     win: x11.Window
@@ -202,32 +198,28 @@ proc getMousePosition*(window: NativeWindow): Option[Vec2i] =
     winX: cint
     winY: cint
     mask: cuint
-    onscreen = XQueryPointer(
-      window.display,
-      window.window,
-      addr(root),
-      addr(win),
-      addr(rootX),
-      addr(rootY),
-      addr(winX),
-      addr(winY),
-      addr(mask),
-    )
-  if onscreen != 0:
-    result = some(vec2(winX, winY))
+  discard XQueryPointer(
+    window.display,
+    window.window,
+    addr(root),
+    addr(win),
+    addr(rootX),
+    addr(rootY),
+    addr(winX),
+    addr(winY),
+    addr(mask),
+  )
+  vec2i(winX, winY)
 
-proc lockMouse*(window: NativeWindow, lock: bool) =
-  if lock:
-    let s = window.size()
-    checkXlibResult XWarpPointer(
-      window.display,
-      default(x11.Window),
-      window.window,
-      0, 0, 0, 0,
-      s[0].cint div 2,
-      s[1].cint div 2,
-    )
-    checkXlibResult XSync(window.display, false.XBool)
+proc setMousePosition*(window: NativeWindow, pos: Vec2i) =
+  discard XWarpPointer(
+    window.display,
+    default(x11.Window),
+    window.window,
+    0, 0, 0, 0,
+    pos.x.cint,
+    pos.y.cint,
+  )
 
 proc createNativeSurface(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(

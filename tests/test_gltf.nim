@@ -158,8 +158,8 @@ void main() {
     let dt = ((getMonoTime() - lastT).inNanoseconds().int / 1_000_000_000).float32
     lastT = getMonoTime()
 
-    camYaw  -= mouseMove().x / 1000
-    camPitch -= mouseMove().y / 1000
+    camYaw  += mouseMove().x.float32 / 1000'f32
+    camPitch += mouseMove().y.float32 / 1000'f32
     var
       forward = 0'f32
       sideward = 0'f32
