@@ -206,7 +206,7 @@ when isMainModule:
   var renderpass = createDirectPresentationRenderPass(depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT)
   setupSwapchain(renderpass = renderpass)
   lockMouse(true)
-  showSystemCursor(false)
+  # showSystemCursor(false)
 
   # tests a simple triangle with minimalistic shader and vertex format
   test_gltf(time)

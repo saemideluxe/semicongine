@@ -181,7 +181,8 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
       result.add Event(eventType: MouseReleased, button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN))
     of MotionNotify:
       let motion = cast[PXMotionEvent](addr(event))
-      result.add Event(eventType: MouseMoved, x: motion.x, y: motion.y)
+      if motion.x > 0 or motion.y > 0:
+        result.add Event(eventType: MouseMoved, x: motion.x, y: motion.y)
     of FocusIn:
       result.add Event(eventType: GotFocus)
     of FocusOut:
@@ -192,7 +193,7 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
       discard
 
 
-proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
+proc getMousePosition*(window: NativeWindow): Option[Vec2i] =
   var
     root: x11.Window
     win: x11.Window
@@ -213,7 +214,7 @@ proc getMousePosition*(window: NativeWindow): Option[Vec2f] =
       addr(mask),
     )
   if onscreen != 0:
-    result = some(Vec2f([float32(winX), float32(winY)]))
+    result = some(vec2(winX, winY))
 
 proc lockMouse*(window: NativeWindow, lock: bool) =
   if lock:

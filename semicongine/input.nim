@@ -14,8 +14,8 @@ type
     mouseIsDown: set[MouseButton]
     mouseWasPressed: set[MouseButton]
     mouseWasReleased: set[MouseButton]
-    mousePosition: Vec2f
-    mouseMove: Vec2f
+    mousePosition: Vec2i
+    mouseMove: Vec2i
     mouseWheel: float32
     windowWasResized: bool = true
     windowIsMinimized: bool = false
@@ -35,8 +35,12 @@ proc updateInputs*(): bool =
   input.mouseMove = vec2(0, 0)
   input.windowWasResized = false
 
-  if input.lockMouse:
-    lockMouse(vulkan.window, input.hasFocus)
+  # if input.lockMouse and input.hasFocus:
+    # setMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
+
+  let newMousePos = getMousePosition(vulkan.window)
+  input.mouseMove = newPos - input.mousePosition
+  input.mousePosition = newPos
 
   var killed = false
   for event in vulkan.window.pendingEvents():
@@ -57,10 +61,6 @@ proc updateInputs*(): bool =
       of MouseReleased:
         input.mouseWasReleased.incl event.button
         input.mouseIsDown.excl event.button
-      of MouseMoved:
-        let newPos = vec2(event.x, event.y)
-        input.mouseMove = newPos - input.mousePosition
-        input.mousePosition = newPos
       of MouseWheel:
         input.mouseWheel = event.amount
       of MinimizedWindow:
@@ -85,10 +85,10 @@ proc mousePressedButtons*(): set[MouseButton] = input.mouseWasPressed
 proc mouseWasReleased*(): bool = input.mouseWasReleased.len > 0
 proc mouseWasReleased*(button: MouseButton): bool = button in input.mouseWasReleased
 proc mouseReleasedButtons*(): set[MouseButton] = input.mouseWasReleased
-proc mousePosition*(): Vec2f = input.mousePosition
-proc mousePositionNormalized*(size: (int, int)): Vec2f =
-  result.x = (input.mousePosition.x / float32(size[0])) * 2.0 - 1.0
-  result.y = (input.mousePosition.y / float32(size[1])) * 2.0 - 1.0
+proc mousePositionPixel*(): Vec2i = input.mousePosition
+proc mousePosition*(size: (int, int)): Vec2f =
+  result.x = (input.mousePosition.x.float32 / float32(size[0])) * 2.0 - 1.0
+  result.y = (input.mousePosition.y.float32 / float32(size[1])) * 2.0 - 1.0
 proc mouseMove*(): Vec2f = input.mouseMove
 proc mouseWheel*(): float32 = input.mouseWheel
 proc windowWasResized*(): auto = input.windowWasResized
