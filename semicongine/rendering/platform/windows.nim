@@ -205,8 +205,8 @@ proc getMousePosition*(window: NativeWindow): Vec2i =
 
 proc setMousePosition*(window: NativeWindow, pos: Vec2i) =
   var p = POINT(x: pos.x, y: pos.y)
-  discard window.hwnd.ScreenToClient(addr(p))
-  discard SetCursorPos(pos.x, pos.y)
+  discard window.hwnd.ClientToScreen(addr(p))
+  discard SetCursorPos(p.x, p.y)
 
 proc createNativeSurface*(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   assert instance.Valid

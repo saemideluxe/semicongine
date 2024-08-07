@@ -35,11 +35,7 @@ proc updateInputs*(): bool =
   input.mouseMove = vec2i(0, 0)
   input.windowWasResized = false
 
-  # if input.lockMouse and input.hasFocus:
-    # setMousePosition(vulkan.window, x=int(vulkan.swapchain.width div 2), y=int(vulkan.swapchain.height div 2))
-
   let newMousePos = getMousePosition(vulkan.window)
-
   input.mouseMove = newMousePos - input.mousePosition
   if input.lockMouse and input.hasFocus:
     input.mousePosition = vulkan.window.size div 2
