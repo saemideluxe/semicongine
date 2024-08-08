@@ -323,6 +323,9 @@ proc `*=`*[T1: TSquareMat, T2: TSquareMat|SomeNumber](a: var T1, b: T2) =
 func `*`*(mat: Mat4, vec: Vec3f): Vec3f =
   (mat * vec.ToVec4(1)).ToVec3
 
+func `*`*(mat: Mat3, vec: Vec2f): Vec2f =
+  (mat * vec.ToVec3(1)).ToVec2
+
 func transposed*[T](m: TMat2[T]): TMat2[T] = TMat2[T](data: [
   m[0, 0], m[1, 0],
   m[0, 1], m[1, 1],
