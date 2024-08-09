@@ -42,4 +42,4 @@ template TimeAndLog*(body: untyped): untyped =
 template TimeAndLog*(name: string, body: untyped): untyped =
   let t0 = getMonoTime()
   body
-  echo name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000
+  echo name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000, "ms"
