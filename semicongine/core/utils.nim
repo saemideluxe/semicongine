@@ -34,12 +34,20 @@ proc AppName*(): string =
 func Size*[T: seq](list: T): uint64 =
   uint64(list.len * sizeof(get(genericParams(typeof(list)), 0)))
 
+const ENABLE_TIMELOG {.booldefine.}: bool = not defined(release)
+
 template TimeAndLog*(body: untyped): untyped =
-  let t0 = getMonoTime()
-  body
-  echo (getMonoTime() - t0).inNanoseconds.float / 1_000_000
+  when ENABLE_TIMELOG:
+    let t0 = getMonoTime()
+    body
+    echo (getMonoTime() - t0).inNanoseconds.float / 1_000_000
+  else:
+    body
 
 template TimeAndLog*(name: string, body: untyped): untyped =
-  let t0 = getMonoTime()
-  body
-  echo name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000, "ms"
+  when ENABLE_TIMELOG:
+    let t0 = getMonoTime()
+    body
+    echo name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000, "ms"
+  else:
+    body
