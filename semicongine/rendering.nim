@@ -343,7 +343,8 @@ proc destroyVulkan*() =
     destroySwapchain(vulkan.swapchain)
   vkDestroyDevice(vulkan.device, nil)
   vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
-  vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
+  if vulkan.debugMessenger.Valid:
+    vkDestroyDebugUtilsMessengerEXT(vulkan.instance, vulkan.debugMessenger, nil)
   vkDestroyInstance(vulkan.instance, nil)
 
 proc showSystemCursor*(value: bool) = vulkan.window.showSystemCursor(value)
