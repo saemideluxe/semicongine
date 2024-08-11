@@ -17,6 +17,10 @@ type
   Vec3u* = TVec3[uint32]
   Vec4u* = TVec4[uint32]
 
+  # support for shorts
+  Vec2i8* = TVec2[int8]
+  Vec3i8* = TVec3[int8]
+
 converter ToVec1*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec1[T] =
   TVec1[T]([orig[0]])
 converter ToVec2*[T: SomeNumber](orig: TVec3[T]|TVec4[T]): TVec2[T] =
@@ -65,6 +69,15 @@ func vec4i*[T, S: SomeInteger](x: T, y: S): Vec4i = vec4i(x, y, 0, 0)
 func vec4i*[T: SomeInteger](x: T): Vec4i = vec4i(x, 0, 0, 0)
 func vec4i*(): Vec4i = vec4i(0, 0, 0, 0)
 
+# shortcuts Vec3i8
+func vec2i8*[T, S: SomeInteger](x: T, y: S): Vec2i8 = Vec2i8([int8(x), int8(y)])
+func vec2i8*[T: SomeInteger](x: T): Vec2i8 = vec2i8(x, 0)
+func vec2i8*(): Vec2i8 = vec2i8(0, 0)
+func vec3i8*[T, S, U: SomeInteger](x: T, y: S, z: U): Vec3i8 = Vec3i8([int8(x), int8(y), int8(z)])
+func vec3i8*[T, S: SomeInteger](x: T, y: S): Vec3i8 = vec3i8(x, y, 0)
+func vec3i8*[T: SomeInteger](x: T): Vec3i8 = vec3i8(x, 0, 0)
+func vec3i8*(): Vec3i8 = vec3i8(0, 0, 0)
+
 # shortcuts color
 func toVec*(value: string): Vec4f =
   assert value != ""
@@ -109,6 +122,14 @@ const
   YZi* = vec3i(0, 1, 1)
   XYZi* = vec3i(1, 1, 1)
 
+  Xi8* = vec3i8(1, 0, 0)
+  Yi8* = vec3i8(0, 1, 0)
+  Zi8* = vec3i8(0, 0, 1)
+  XYi8* = vec3i8(1, 1, 0)
+  XZi8* = vec3i8(1, 0, 1)
+  YZi8* = vec3i8(0, 1, 1)
+  XYZi8* = vec3i8(1, 1, 1)
+
 func to*[T](v: TVec1): auto = TVec1([T(v[0])])
 func to*[T](v: TVec2): auto = TVec2([T(v[0]), T(v[1])])
 func to*[T](v: TVec3): auto = TVec3([T(v[0]), T(v[1]), T(v[2])])
@@ -123,6 +144,11 @@ func i32*(v: TVec1): auto = to[int32](v)
 func i32*(v: TVec2): auto = to[int32](v)
 func i32*(v: TVec3): auto = to[int32](v)
 func i32*(v: TVec4): auto = to[int32](v)
+
+func i8*(v: TVec1): auto = to[int8](v)
+func i8*(v: TVec2): auto = to[int8](v)
+func i8*(v: TVec3): auto = to[int8](v)
+func i8*(v: TVec4): auto = to[int8](v)
 
 func toVecString[T: TVec](value: T): string =
   var items: seq[string]
@@ -233,14 +259,23 @@ func `*`*(a, b: TVec1): auto = TVec1([a[0] * b[0]])
 func `*`*(a, b: TVec2): auto = TVec2([a[0] * b[0], a[1] * b[1]])
 func `*`*(a, b: TVec3): auto = TVec3([a[0] * b[0], a[1] * b[1], a[2] * b[2]])
 func `*`*(a, b: TVec4): auto = TVec4([a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3]])
-func `/`*[T: SomeInteger](a, b: TVec1[T]): auto = TVec1([a[0] div b[0]])
+func `div`*[T: SomeInteger](a, b: TVec1[T]): auto = TVec1([a[0] div b[0]])
+func `/`*[T: SomeInteger](a, b: TVec1[T]): auto = TVec1([a[0] / b[0]])
 func `/`*[T: SomeFloat](a, b: TVec1[T]): auto = TVec1([a[0] / b[0]])
-func `/`*[T: SomeInteger](a, b: TVec2[T]): auto = TVec2([a[0] div b[0], a[1] div b[1]])
+func `div`*[T: SomeInteger](a, b: TVec2[T]): auto = TVec2([a[0] div b[0], a[1] div b[1]])
+func `/`*[T: SomeInteger](a, b: TVec2[T]): auto = TVec2([a[0] / b[0], a[1] / b[1]])
 func `/`*[T: SomeFloat](a, b: TVec2[T]): auto = TVec2([a[0] / b[0], a[1] / b[1]])
-func `/`*[T: SomeInteger](a, b: TVec3[T]): auto = TVec3([a[0] div b[0], a[1] div b[1], a[2] div b[2]])
+func `div`*[T: SomeInteger](a, b: TVec3[T]): auto = TVec3([a[0] div b[0], a[1] div b[1], a[2] div b[2]])
+func `/`*[T: SomeInteger](a, b: TVec3[T]): auto = TVec3([a[0] / b[0], a[1] / b[1], a[2] / b[2]])
 func `/`*[T: SomeFloat](a, b: TVec3[T]): auto = TVec3([a[0] / b[0], a[1] / b[1], a[2] / b[2]])
-func `/`*[T: SomeInteger](a, b: TVec4[T]): auto = TVec4([a[0] div b[0], a[1] div b[1], a[2] div b[2], a[3] div b[3]])
+func `div`*[T: SomeInteger](a, b: TVec4[T]): auto = TVec4([a[0] div b[0], a[1] div b[1], a[2] div b[2], a[3] div b[3]])
+func `/`*[T: SomeInteger](a, b: TVec4[T]): auto = TVec4([a[0] / b[0], a[1] / b[1], a[2] / b[2], a[3] / b[3]])
 func `/`*[T: SomeFloat](a, b: TVec4[T]): auto = TVec4([a[0] / b[0], a[1] / b[1], a[2] / b[2], a[3] / b[3]])
+
+func `mod`*[T: SomeInteger](a, b: TVec1[T]): auto = TVec1([a[0] mod b[0]])
+func `mod`*[T: SomeInteger](a, b: TVec2[T]): auto = TVec2([a[0] mod b[0], a[1] mod b[1]])
+func `mod`*[T: SomeInteger](a, b: TVec3[T]): auto = TVec3([a[0] mod b[0], a[1] mod b[1], a[2] mod b[2]])
+func `mod`*[T: SomeInteger](a, b: TVec4[T]): auto = TVec4([a[0] mod b[0], a[1] mod b[1], a[2] mod b[2], a[3] mod b[3]])
 
 # assignment operations, scalar
 func `+=`*(a: var TVec1, b: SomeNumber) = a = a + b
