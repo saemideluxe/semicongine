@@ -453,6 +453,14 @@ func inversed*(a: Mat4): Mat4 =
   result[3, 2] = (-a[3, 0] * s3 + a[3, 1] * s1 - a[3, 2] * s0) * invdet;
   result[3, 3] = ( a[2, 0] * s3 - a[2, 1] * s1 + a[2, 2] * s0) * invdet;
 
+func transformed*[T, S](points: openArray[S], mat: TMat4[T]): seq[S] =
+  for p in points:
+    result.add mat * p
+
+func transform*[T, S](points: var openArray[S], mat: TMat4[T]) =
+  for p in points.mitems:
+    p = mat * p
+
 func projection*(fovy, aspect, zNear, zFar: float32): Mat4 =
   let tanHalfFovy = 1 / tan(fovy / 2)
   return Mat4(data: [

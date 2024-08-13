@@ -172,6 +172,12 @@ func length*(vec: TVec3[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1
 func length*(vec: TVec4[SomeFloat]): auto = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3])
 func length*(vec: TVec4[SomeInteger]): auto = sqrt(float(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3]))
 
+
+func abs*[T](vec: TVec1[T]): auto = TVec1([abs(vec[0])])
+func abs*[T](vec: TVec2[T]): auto = TVec2([abs(vec[0]), abs(vec[1])])
+func abs*[T](vec: TVec3[T]): auto = TVec3([abs(vec[0]), abs(vec[1]), abs(vec[2])])
+func abs*[T](vec: TVec4[T]): auto = TVec4([abs(vec[0]), abs(vec[1]), abs(vec[2]), abs(vec[3])])
+
 func manhattan*(vec: TVec1): auto = abs(vec[0])
 func manhattan*(vec: TVec2): auto = abs(vec[0]) + abs(vec[1])
 func manhattan*(vec: TVec3): auto = abs(vec[0]) + abs(vec[1]) + abs(vec[2])
