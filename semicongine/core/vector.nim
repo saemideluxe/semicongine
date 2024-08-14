@@ -178,10 +178,20 @@ func abs*[T](vec: TVec2[T]): auto = TVec2([abs(vec[0]), abs(vec[1])])
 func abs*[T](vec: TVec3[T]): auto = TVec3([abs(vec[0]), abs(vec[1]), abs(vec[2])])
 func abs*[T](vec: TVec4[T]): auto = TVec4([abs(vec[0]), abs(vec[1]), abs(vec[2]), abs(vec[3])])
 
+func round*[T](vec: TVec1[T]): auto = TVec1([round(vec[0])])
+func round*[T](vec: TVec2[T]): auto = TVec2([round(vec[0]), round(vec[1])])
+func round*[T](vec: TVec3[T]): auto = TVec3([round(vec[0]), round(vec[1]), round(vec[2])])
+func round*[T](vec: TVec4[T]): auto = TVec4([round(vec[0]), round(vec[1]), round(vec[2]), round(vec[3])])
+
 func floor*[T](vec: TVec1[T]): auto = TVec1([floor(vec[0])])
 func floor*[T](vec: TVec2[T]): auto = TVec2([floor(vec[0]), floor(vec[1])])
 func floor*[T](vec: TVec3[T]): auto = TVec3([floor(vec[0]), floor(vec[1]), floor(vec[2])])
 func floor*[T](vec: TVec4[T]): auto = TVec4([floor(vec[0]), floor(vec[1]), floor(vec[2]), floor(vec[3])])
+
+func ceil*[T](vec: TVec1[T]): auto = TVec1([ceil(vec[0])])
+func ceil*[T](vec: TVec2[T]): auto = TVec2([ceil(vec[0]), ceil(vec[1])])
+func ceil*[T](vec: TVec3[T]): auto = TVec3([ceil(vec[0]), ceil(vec[1]), ceil(vec[2])])
+func ceil*[T](vec: TVec4[T]): auto = TVec4([ceil(vec[0]), ceil(vec[1]), ceil(vec[2]), ceil(vec[3])])
 
 func manhattan*(vec: TVec1): auto = abs(vec[0])
 func manhattan*(vec: TVec2): auto = abs(vec[0]) + abs(vec[1])
