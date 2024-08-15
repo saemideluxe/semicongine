@@ -338,7 +338,7 @@ proc createDescriptorSetLayouts[TShader](): array[MAX_DESCRIPTORSETS, VkDescript
     when hasCustomPragma(value, DescriptorSets):
       for descriptorSet in value.fields:
         var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-        forDescriptorFields(descriptorSet, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
+        forDescriptorFields(descriptorSet, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
           layoutbindings.add VkDescriptorSetLayoutBinding(
             binding: descriptorBindingNumber,
             descriptorType: descriptorType,

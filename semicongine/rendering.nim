@@ -48,6 +48,9 @@ when defined(linux):
   include ./rendering/platform/linux
 
 type
+  # type aliases
+  SupportedGPUType = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
+
   VulkanGlobals* = object
     # populated through InitVulkan proc
     instance*: VkInstance
@@ -95,13 +98,6 @@ type
     oldSwapchain: Swapchain
     oldSwapchainCounter: int # swaps until old swapchain will be destroyed
 
-var vulkan*: VulkanGlobals
-var fullscreen_internal: bool
-
-type
-  # type aliases
-  SupportedGPUType = float32 | float64 | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | TVec2[int32] | TVec2[int64] | TVec3[int32] | TVec3[int64] | TVec4[int32] | TVec4[int64] | TVec2[uint32] | TVec2[uint64] | TVec3[uint32] | TVec3[uint64] | TVec4[uint32] | TVec4[uint64] | TVec2[float32] | TVec2[float64] | TVec3[float32] | TVec3[float64] | TVec4[float32] | TVec4[float64] | TMat2[float32] | TMat2[float64] | TMat23[float32] | TMat23[float64] | TMat32[float32] | TMat32[float64] | TMat3[float32] | TMat3[float64] | TMat34[float32] | TMat34[float64] | TMat43[float32] | TMat43[float64] | TMat4[float32] | TMat4[float64]
-
   # shader related types
   DescriptorSet*[T: object] = object
     data*: T
@@ -114,11 +110,6 @@ type
     descriptorSetLayouts*: array[MAX_DESCRIPTORSETS, VkDescriptorSetLayout]
 
   # memory/buffer related types
-  MemoryBlock* = object
-    vk: VkDeviceMemory
-    size: uint64
-    rawPointer: pointer # if not nil, this is mapped memory
-    offsetNextFree: uint64
   BufferType* = enum
     VertexBuffer
     VertexBufferMapped
@@ -126,6 +117,11 @@ type
     IndexBufferMapped
     UniformBuffer
     UniformBufferMapped
+  MemoryBlock* = object
+    vk: VkDeviceMemory
+    size: uint64
+    rawPointer: pointer # if not nil, this is mapped memory
+    offsetNextFree: uint64
   Buffer* = object
     vk: VkBuffer
     size: uint64
@@ -151,46 +147,49 @@ type
     imageViews: seq[VkImageView]
     samplers: seq[VkSampler]
 
-template forDescriptorFields(shader: typed, fieldname, valuename, typename, countname, bindingNumber, body: untyped): untyped =
+var vulkan* = VulkanGlobals()
+var fullscreen_internal: bool
+
+proc `=copy`(dest: var VulkanGlobals; source: VulkanGlobals) {.error.}
+proc `=copy`(dest: var RenderData; source: RenderData) {.error.}
+proc `=copy`[T, S](dest: var GPUValue[T, S]; source: GPUValue[T, S]) {.error.}
+proc `=copy`[T, S](dest: var GPUArray[T, S]; source: GPUArray[T, S]) {.error.}
+proc `=copy`(dest: var MemoryBlock; source: MemoryBlock) {.error.}
+proc `=copy`[T](dest: var Pipeline[T]; source: Pipeline[T]) {.error.}
+proc `=copy`[T](dest: var DescriptorSet[T]; source: DescriptorSet[T]) {.error.}
+
+template forDescriptorFields(shader: typed, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 0'u32
-  for theFieldname, value in fieldPairs(shader):
-    when typeof(value) is Image:
+  for theFieldname, `valuename` in fieldPairs(shader):
+    when typeof(`valuename`) is Image:
       block:
-        const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         const `countname` {.inject.} = 1'u32
-        let `valuename` {.inject, hint[XDeclaredButNotUsed]: off.} = value
         body
         `bindingNumber`.inc
-    elif typeof(value) is GPUValue:
+    elif typeof(`valuename`) is GPUValue:
       block:
-        const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
         const `countname` {.inject.} = 1'u32
-        let `valuename` {.inject, hint[XDeclaredButNotUsed]: off.} = value
         body
         `bindingNumber`.inc
-    elif typeof(value) is array:
-      when elementType(value) is Image:
+    elif typeof(`valuename`) is array:
+      when elementType(`valuename`) is Image:
         block:
-          const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-          const `countname` {.inject.} = uint32(typeof(value).len)
-          let `valuename` {.inject, hint[XDeclaredButNotUsed]: off.} = value
+          const `countname` {.inject.} = uint32(typeof(`valuename`).len)
           body
           `bindingNumber`.inc
-      elif elementType(value) is GPUValue:
+      elif elementType(`valuename`) is GPUValue:
         block:
-          const `fieldname` {.inject, hint[XDeclaredButNotUsed]: off.} = theFieldname
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-          const `countname` {.inject.} = len(value).uint32
-          let `valuename` {.inject hint[XDeclaredButNotUsed]: off.} = value
+          const `countname` {.inject.} = len(`valuename`).uint32
           body
           `bindingNumber`.inc
       else:
-        {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
+        {.error: "Unsupported descriptor type: " & typetraits.name(typeof(`valuename`)).}
     else:
-      {.error: "Unsupported descriptor type: " & typetraits.name(typeof(value)).}
+      {.error: "Unsupported descriptor type: " & typetraits.name(typeof(`valuename`)).}
 
 include ./rendering/vulkan_wrappers
 include ./rendering/renderpasses

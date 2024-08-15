@@ -19,6 +19,8 @@ type
     indices: GPUArray[uint16, IndexBuffer]
     shaderdata: DescriptorSet[TextboxDescriptorSet]
 
+proc `=copy`(dest: var Textbox; source: Textbox) {.error.}
+
 func `$`*(textbox: Textbox): string =
   "\"" & $textbox.text[0 ..< min(textbox.text.len, 16)] & "\""
 

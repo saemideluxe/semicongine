@@ -91,7 +91,7 @@ proc test_02_multiple_animated(time: float32) =
     withNextFrame(framebuffer, commandbuffer):
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         withPipeline(commandbuffer, pipeline):
-          for label in labels:
+          for label in labels.litems:
             render(commandbuffer, pipeline, label)
 
       # cleanup
@@ -177,7 +177,7 @@ proc test_04_lots_of_texts(time: float32) =
       scale = rand(0.0002 .. 0.002),
       position = vec3(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
     )
-  labels = labels.sortedByIt(-it.position.z)
+  labels.sort(proc(x, y: Textbox): int = cmp(x.position.z, y.position.z), Ascending)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:

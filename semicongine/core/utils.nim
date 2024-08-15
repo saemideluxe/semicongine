@@ -51,3 +51,13 @@ template TimeAndLog*(name: string, body: untyped): untyped =
     echo name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000, "ms"
   else:
     body
+
+# allow enforcing use of iterators with lent
+iterator litems*[IX, T](a: array[IX, T]): lent T {.inline.} =
+  ## Iterates over each item of `a`.
+  when a.len > 0:
+    var i = low(IX)
+    while true:
+      yield a[i]
+      if i >= high(IX): break
+      inc(i)

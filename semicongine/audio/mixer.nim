@@ -29,6 +29,9 @@ type
     fadeTime: float
     fadeStep: float
 
+proc `=copy`(dest: var Playback; source: Playback) {.error.}
+proc `=copy`(dest: var Track; source: Track) {.error.}
+
 when defined(windows):
   include ./platform/windows
 when defined(linux):
@@ -46,11 +49,14 @@ type
     currentBuffer: int
     lastUpdate: MonoTime
 
+proc `=copy`(dest: var Mixer; source: Mixer) {.error.}
+
 proc initMixer(): Mixer =
   result = Mixer(
-    tracks: {"": Track(level: 1'f)}.toTable,
+    tracks: initTable[string, Track](),
     level: 1'f,
   )
+  result.tracks[""] = Track(level: 1)
   result.lock.initLock()
 
 proc setupDevice(mixer: var Mixer) =

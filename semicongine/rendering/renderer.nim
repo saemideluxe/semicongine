@@ -86,12 +86,12 @@ proc initDescriptorSet*(
       assert value.sampler.Valid
     elif typeof(value) is array:
       when elementType(value) is Image:
-        for t in value:
+        for t in value.litems:
           assert t.vk.Valid
           assert t.imageview.Valid
           assert t.sampler.Valid
       elif elementType(value) is GPUValue:
-        for t in value:
+        for t in value.litems:
           assert t.buffer.vk.Valid
       else:
         {.error: "Unsupported descriptor set field: '" & theName & "'".}
@@ -114,7 +114,7 @@ proc initDescriptorSet*(
   var imageWrites = newSeqOfCap[VkDescriptorImageInfo](1024)
   var bufferWrites = newSeqOfCap[VkDescriptorBufferInfo](1024)
 
-  forDescriptorFields(descriptorSet.data, fieldName, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
+  forDescriptorFields(descriptorSet.data, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
     for i in 0 ..< descriptorSet.vk.len:
       when typeof(fieldValue) is GPUValue:
         bufferWrites.add VkDescriptorBufferInfo(
@@ -150,7 +150,7 @@ proc initDescriptorSet*(
         )
       elif typeof(fieldValue) is array:
         when elementType(fieldValue) is Image:
-          for image in fieldValue:
+          for image in fieldValue.litems:
             imageWrites.add VkDescriptorImageInfo(
               sampler: image.sampler,
               imageView: image.imageView,
@@ -167,7 +167,7 @@ proc initDescriptorSet*(
             pBufferInfo: nil,
           )
         elif elementType(fieldValue) is GPUValue:
-          for entry in fieldValue:
+          for entry in fieldValue.litems:
             bufferWrites.add VkDescriptorBufferInfo(
               buffer: entry.buffer.vk,
               offset: entry.offset,
@@ -224,7 +224,7 @@ proc flushBuffer*(buffer: Buffer) =
 
 proc flushAllMemory*(renderData: RenderData) =
   var flushRegions = newSeq[VkMappedMemoryRange]()
-  for memoryBlocks in renderData.memory:
+  for memoryBlocks in renderData.memory.litems:
     for memoryBlock in memoryBlocks:
       if memoryBlock.rawPointer != nil and memoryBlock.offsetNextFree > 0:
         flushRegions.add VkMappedMemoryRange(
@@ -248,8 +248,7 @@ proc allocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   # check if there is an existing allocated memory block that is large enough to be used
   var selectedBlockI = -1
   for i in 0 ..< renderData.memory[memoryType].len:
-    let memoryBlock = renderData.memory[memoryType][i]
-    if memoryBlock.size - alignedTo(memoryBlock.offsetNextFree, memoryRequirements.alignment) >= memoryRequirements.size:
+    if renderData.memory[memoryType][i].size - alignedTo(renderData.memory[memoryType][i].offsetNextFree, memoryRequirements.alignment) >= memoryRequirements.size:
       selectedBlockI = i
       break
   # otherwise, allocate a new block of memory and use that
@@ -260,7 +259,8 @@ proc allocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
       mType = memoryType
     )
 
-  let selectedBlock = renderData.memory[memoryType][selectedBlockI]
+  template selectedBlock(): untyped = renderData.memory[memoryType][selectedBlockI]
+  # let selectedBlock = 
   renderData.memory[memoryType][selectedBlockI].offsetNextFree = alignedTo(
     selectedBlock.offsetNextFree,
     memoryRequirements.alignment,
@@ -294,7 +294,7 @@ proc updateAllGPUBuffers*[T](value: T, flush = false) =
       updateGPUBuffer(fieldvalue, flush = flush)
     when typeof(fieldvalue) is array:
       when elementType(fieldvalue) is GPUData:
-        for entry in fieldvalue:
+        for entry in fieldvalue.litems:
           updateGPUBuffer(entry, flush = flush)
 
 proc allocateGPUData(
@@ -380,7 +380,7 @@ proc destroyRenderData*(renderData: RenderData) =
   for image in renderData.images:
     vkDestroyImage(vulkan.device, image, nil)
 
-  for memoryBlocks in renderData.memory:
+  for memoryBlocks in renderData.memory.litems:
     for memory in memoryBlocks:
       vkFreeMemory(vulkan.device, memory.vk, nil)
 
@@ -480,8 +480,7 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
   # check if there is an existing allocated memory block that is large enough to be used
   var selectedBlockI = -1
   for i in 0 ..< renderData.memory[memoryType].len:
-    let memoryBlock = renderData.memory[memoryType][i]
-    if memoryBlock.size - alignedTo(memoryBlock.offsetNextFree, memoryRequirements.alignment) >= memoryRequirements.size:
+    if renderData.memory[memoryType][i].size - alignedTo(renderData.memory[memoryType][i].offsetNextFree, memoryRequirements.alignment) >= memoryRequirements.size:
       selectedBlockI = i
       break
   # otherwise, allocate a new block of memory and use that
@@ -491,7 +490,7 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
       size = max(memoryRequirements.size, MEMORY_BLOCK_ALLOCATION_SIZE),
       mType = memoryType
     )
-  let selectedBlock = renderData.memory[memoryType][selectedBlockI]
+  template selectedBlock(): untyped = renderData.memory[memoryType][selectedBlockI]
   renderData.memory[memoryType][selectedBlockI].offsetNextFree = alignedTo(
     selectedBlock.offsetNextFree,
     memoryRequirements.alignment,
@@ -763,11 +762,11 @@ proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
   );
   render(commandBuffer, pipeline, mesh, EMPTY())
 
-proc asGPUArray*[T](data: openArray[T], bufferType: static BufferType): auto =
+proc asGPUArray*[T](data: sink openArray[T], bufferType: static BufferType): auto =
   GPUArray[T, bufferType](data: @data)
 
-proc asGPUValue*[T](data: T, bufferType: static BufferType): auto =
+proc asGPUValue*[T](data: sink T, bufferType: static BufferType): auto =
   GPUValue[T, bufferType](data: data)
 
-proc asDescriptorSet*[T](data: T): auto =
+proc asDescriptorSet*[T](data: sink T): auto =
   DescriptorSet[T](data: data)

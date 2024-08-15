@@ -52,7 +52,6 @@ proc loadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
     channels_in_file = addr(c),
     desired_channels = nChannels
   )
-  # if lodepng_decode_memory(out_data = addr(data), w = addr(w), h = addr(h), in_data = cast[cstring](pngData.ToCPointer), insize = csize_t(pngData.len), colorType = pngType, bitdepth = 8) != 0:
   if data == nil:
     raise newException(Exception, "An error occured while loading PNG file")
 

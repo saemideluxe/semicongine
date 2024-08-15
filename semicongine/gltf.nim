@@ -60,6 +60,11 @@ type
     indices*: string
     material*: string
 
+proc `=copy`(dest: var GltfNode; source: GltfNode) {.error.}
+proc `=copy`(dest: var glTFHeader; source: glTFHeader) {.error.}
+proc `=copy`(dest: var glTFData; source: glTFData) {.error.}
+proc `=copy`[S, T](dest: var GltfData[S, T]; source: GltfData[S, T]) {.error.}
+
 const
   HEADER_MAGIC = 0x46546C67
   JSON_CHUNK = 0x4E4F534A

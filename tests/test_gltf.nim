@@ -136,7 +136,7 @@ void main() {
   proc drawNode(commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int, transform: Mat4) =
     let nodeTransform = gltfData.nodes[nodeId].transform * transform
     if gltfData.nodes[nodeId].mesh >= 0:
-      for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh]:
+      for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh].mitems:
         renderWithPushConstant(
           commandbuffer = commandbuffer,
           pipeline = pipeline,
