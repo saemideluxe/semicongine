@@ -31,13 +31,14 @@ const DEPTH_FORMAT* = VK_FORMAT_D32_SFLOAT
 const PUSH_CONSTANT_SIZE = 128
 
 # custom pragmas to classify shader attributes
+type DescriptorSetIndex = range[0 .. MAX_DESCRIPTORSETS - 1]
 template VertexAttribute* {.pragma.}
 template InstanceAttribute* {.pragma.}
-template PushConstantAttribute* {.pragma.}
+template PushConstant* {.pragma.}
 template Pass* {.pragma.}
 template PassFlat* {.pragma.}
 template ShaderOutput* {.pragma.}
-template DescriptorSets* {.pragma.}
+template DescriptorSet*(index: DescriptorSetIndex) {.pragma.}
 
 # there is a big, bad global vulkan object
 # believe me, this makes everything much, much easier
@@ -99,7 +100,7 @@ type
     oldSwapchainCounter: int # swaps until old swapchain will be destroyed
 
   # shader related types
-  DescriptorSet*[T: object] = object
+  DescriptorSetData*[T: object] = object
     data*: T
     vk: array[INFLIGHTFRAMES.int, VkDescriptorSet]
   Pipeline*[TShader] = object
@@ -156,7 +157,7 @@ proc `=copy`[T, S](dest: var GPUValue[T, S]; source: GPUValue[T, S]) {.error.}
 proc `=copy`[T, S](dest: var GPUArray[T, S]; source: GPUArray[T, S]) {.error.}
 proc `=copy`(dest: var MemoryBlock; source: MemoryBlock) {.error.}
 proc `=copy`[T](dest: var Pipeline[T]; source: Pipeline[T]) {.error.}
-proc `=copy`[T](dest: var DescriptorSet[T]; source: DescriptorSet[T]) {.error.}
+proc `=copy`[T](dest: var DescriptorSetData[T]; source: DescriptorSetData[T]) {.error.}
 
 template forDescriptorFields(shader: typed, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 0'u32
@@ -190,6 +191,10 @@ template forDescriptorFields(shader: typed, valuename, typename, countname, bind
         {.error: "Unsupported descriptor type: " & typetraits.name(typeof(`valuename`)).}
     else:
       {.error: "Unsupported descriptor type: " & typetraits.name(typeof(`valuename`)).}
+
+proc currentFiF*(): int =
+  assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  vulkan.swapchain.currentFiF
 
 include ./rendering/vulkan_wrappers
 include ./rendering/renderpasses
@@ -356,10 +361,6 @@ proc setFullscreen*(enable: bool) =
 proc getAspectRatio*(): float32 =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
   vulkan.swapchain.width.float32 / vulkan.swapchain.height.float32
-
-proc currentFiF*(): int =
-  assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
-  vulkan.swapchain.currentFiF
 
 proc maxFramebufferSampleCount*(maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCountFlagBits =
   let limits = svkGetPhysicalDeviceProperties().limits

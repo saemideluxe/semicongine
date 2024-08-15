@@ -17,7 +17,7 @@ type
     position: GPUArray[Vec3f, VertexBuffer]
     uv: GPUArray[Vec2f, VertexBuffer]
     indices: GPUArray[uint16, IndexBuffer]
-    shaderdata: DescriptorSet[TextboxDescriptorSet]
+    shaderdata: DescriptorSetData[TextboxDescriptorSet]
 
 proc `=copy`(dest: var Textbox; source: Textbox) {.error.}
 
@@ -176,8 +176,8 @@ proc refresh*(textbox: var Textbox) =
     textbox.dirtyGeometry = false
 
 proc render*(commandbuffer: VkCommandBuffer, pipeline: Pipeline, textbox: Textbox) =
-  withBind(commandbuffer, (textbox.shaderdata, ), pipeline):
-    render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = textbox)
+  bindDescriptorSet(commandbuffer, textbox.shaderdata, 0, pipeline)
+  render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = textbox)
 
 proc initTextbox*[T: string | seq[Rune]](
   renderdata: var RenderData,
@@ -204,7 +204,7 @@ proc initTextbox*[T: string | seq[Rune]](
     position: asGPUArray(newSeq[Vec3f](int(maxLen * 4)), VertexBuffer),
     uv: asGPUArray(newSeq[Vec2f](int(maxLen * 4)), VertexBuffer),
     indices: asGPUArray(newSeq[uint16](int(maxLen * 6)), IndexBuffer),
-    shaderdata: asDescriptorSet(
+    shaderdata: asDescriptorSetData(
       TextboxDescriptorSet(
         textbox: asGPUValue(TextboxData(
           scale: scale,

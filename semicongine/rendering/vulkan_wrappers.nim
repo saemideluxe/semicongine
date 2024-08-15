@@ -215,6 +215,18 @@ proc svkCmdBindDescriptorSets(commandBuffer: VkCommandBuffer, descriptorSets: op
     pDynamicOffsets = nil
   )
 
+proc svkCmdBindDescriptorSet(commandBuffer: VkCommandBuffer, descriptorSet: VkDescriptorSet, index: DescriptorSetIndex, layout: VkPipelineLayout) =
+  vkCmdBindDescriptorSets(
+    commandBuffer = commandBuffer,
+    pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+    layout = layout,
+    firstSet = index.uint32,
+    descriptorSetCount = 1,
+    pDescriptorSets = addr(descriptorSet),
+    dynamicOffsetCount = 0,
+    pDynamicOffsets = nil
+  )
+
 
 proc svkCreateRenderPass(
   attachments: openArray[VkAttachmentDescription],

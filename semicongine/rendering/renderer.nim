@@ -73,7 +73,7 @@ proc isMappable(memoryTypeIndex: uint32): bool =
 proc initDescriptorSet*(
   renderData: RenderData,
   layout: VkDescriptorSetLayout,
-  descriptorSet: var DescriptorSet,
+  descriptorSet: var DescriptorSetData,
 ) =
 
   # santization checks
@@ -336,7 +336,7 @@ proc assignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = tru
     when typeof(value) is GPUData:
       (value.buffer, value.offset) = allocateGPUData(renderdata, value.bufferType, value.size)
 
-    elif typeof(value) is DescriptorSet:
+    elif typeof(value) is DescriptorSetData:
       assignBuffers(renderdata, value.data, uploadData = uploadData)
 
     elif typeof(value) is array:
@@ -347,7 +347,7 @@ proc assignBuffers*[T](renderdata: var RenderData, data: var T, uploadData = tru
   if uploadData:
     updateAllGPUBuffers(data, flush = true)
 
-proc assignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSet, uploadData = true) =
+proc assignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSetData, uploadData = true) =
   assignBuffers(renderdata, descriptorSet.data, uploadData = uploadData)
 
 proc initRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
@@ -520,7 +520,7 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
   transitionImageLayout(image.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 
 
-proc uploadImages*(renderdata: var RenderData, descriptorSet: var DescriptorSet) =
+proc uploadImages*(renderdata: var RenderData, descriptorSet: var DescriptorSetData) =
   for name, value in fieldPairs(descriptorSet.data):
     when typeof(value) is Image:
       renderdata.createVulkanImage(value)
@@ -531,75 +531,17 @@ proc uploadImages*(renderdata: var RenderData, descriptorSet: var DescriptorSet)
 
 type EMPTY = object # only used for static assertions
 
-proc assertAllDescriptorsBound(A, B, C, D, TShader: typedesc) =
-  var foundDescriptorSets = false
-  for attrName, attrValue in default(TShader).fieldPairs():
-    when hasCustomPragma(attrValue, DescriptorSets):
-      assert not foundDescriptorSets, "Only one shader attribute is allowed to have the pragma 'DescriptorSets'"
-      when not (A is EMPTY): assert typeof(attrValue[0]) is A
-      when not (B is EMPTY): assert typeof(attrValue[1]) is B
-      when not (C is EMPTY): assert typeof(attrValue[2]) is C
-      when not (D is EMPTY): assert typeof(attrValue[3]) is D
+proc assertCompatibleDescriptorSet(TDescriptorSet, TShader: typedesc, index: static DescriptorSetIndex) =
+  for _, fieldvalue in default(TShader).fieldPairs:
+    when fieldvalue.hasCustomPragma(DescriptorSet):
+      when fieldvalue.getCustomPragmaVal(DescriptorSet) == index:
+        assert TDescriptorSet is typeof(fieldvalue), "Incompatible descriptor set types for set number " & $index & " in shader " & name(TShader)
 
-var hasBoundDescriptorSets {.compileTime.} = false # okay, I am not sure if this is clean, unproblematic or sane. Just trying to get some comptime-validation
-var hasDescriptorSets {.compileTime} = false
 
-template withBind*[A, B, C, D, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C], DescriptorSet[D]), pipeline: Pipeline[TShader], body: untyped): untyped =
-  static: assertAllDescriptorsBound(A, B, C, D, TShader)
-  block:
-    var descriptorSets: seq[VkDescriptorSet]
-    for dSet in sets.fields:
-      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call initDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF()]
-    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
-    static:
-      assert not hasBoundDescriptorSets, "Cannot call withBind nested"
-      hasBoundDescriptorSets = true
-    body
-    static:
-      hasBoundDescriptorSets = false
-template withBind*[A, B, C, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B], DescriptorSet[C]), pipeline: Pipeline[TShader], body: untyped): untyped =
-  static: assertAllDescriptorsBound(A, B, C, EMPTY, TShader)
-  block:
-    var descriptorSets: seq[VkDescriptorSet]
-    for dSet in sets.fields:
-      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call initDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF()]
-    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
-    static:
-      assert not hasBoundDescriptorSets, "Cannot call withBind nested"
-      hasBoundDescriptorSets = true
-    body
-    static:
-      hasBoundDescriptorSets = false
-template withBind*[A, B, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], DescriptorSet[B]), pipeline: Pipeline[TShader], body: untyped): untyped =
-  static: assertAllDescriptorsBound(A, B, EMPTY, EMPTY, TShader)
-  block:
-    var descriptorSets: seq[VkDescriptorSet]
-    for dSet in sets.fields:
-      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call initDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF()]
-    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
-    static:
-      assert not hasBoundDescriptorSets, "Cannot call withBind nested"
-      hasBoundDescriptorSets = true
-    body
-    static:
-      hasBoundDescriptorSets = false
-template withBind*[A, TShader](commandBuffer: VkCommandBuffer, sets: (DescriptorSet[A], ), pipeline: Pipeline[TShader], body: untyped): untyped =
-  static: assertAllDescriptorsBound(A, EMPTY, EMPTY, EMPTY, TShader)
-  block:
-    var descriptorSets: seq[VkDescriptorSet]
-    for dSet in sets.fields:
-      assert dSet.vk[currentFiF()].Valid, "DescriptorSet not initialized, maybe forgot to call initDescriptorSet"
-      descriptorSets.add dSet.vk[currentFiF()]
-    svkCmdBindDescriptorSets(commandBuffer, descriptorSets, pipeline.layout)
-    static:
-      assert not hasBoundDescriptorSets, "Cannot call withBind nested"
-      hasBoundDescriptorSets = true
-    body
-    static:
-      hasBoundDescriptorSets = false
+proc bindDescriptorSet*[TDescriptorSet, TShader](commandBuffer: VkCommandBuffer, descriptorSet: DescriptorSetData[TDescriptorSet], index: static DescriptorSetIndex, pipeline: Pipeline[TShader]) =
+  assert descriptorSet.vk[currentFiF()].Valid, "DescriptorSetData not initialized, maybe forgot to call initDescriptorSet"
+  static: assertCompatibleDescriptorSet(TDescriptorSet, TShader, index)
+  svkCmdBindDescriptorSet(commandBuffer, descriptorSet.vk[currentFiF()], index, pipeline.layout)
 
 proc assertCanRenderMesh(TShader, TMesh, TInstance: typedesc) =
   for attrName, attrValue in default(TShader).fieldPairs:
@@ -629,14 +571,6 @@ proc render*[TShader, TMesh, TInstance](
 ) =
 
   static: assertCanRenderMesh(TShader, TMesh, TInstance)
-  static:
-    hasDescriptorSets = false
-    for attrName, attrValue in default(TShader).fieldPairs():
-      if attrValue.hasCustomPragma(DescriptorSets):
-        hasDescriptorSets = true
-    # TODO: fix this, not working as intended, seems to depend on scope
-    # if hasDescriptorSets:
-      # assert hasBoundDescriptorSets, "Shader uses descriptor sets, but none are bound"
 
   var vertexBuffers: seq[VkBuffer]
   var vertexBuffersOffsets: seq[uint64]
@@ -722,7 +656,7 @@ proc assertValidPushConstantType(TShader, TPushConstant: typedesc) =
   assert sizeof(TPushConstant) <= PUSH_CONSTANT_SIZE, "Push constant values must be <= 128 bytes"
   var foundPushConstant = false
   for fieldname, fieldvalue in default(TShader).fieldPairs():
-    when hasCustomPragma(fieldvalue, PushConstantAttribute):
+    when hasCustomPragma(fieldvalue, PushConstant):
       assert typeof(fieldvalue) is TPushConstant, "Provided push constant has not same type as declared in shader"
       assert foundPushConstant == false, "More than on push constant found in shader"
       foundPushConstant = true
@@ -768,5 +702,5 @@ proc asGPUArray*[T](data: sink openArray[T], bufferType: static BufferType): aut
 proc asGPUValue*[T](data: sink T, bufferType: static BufferType): auto =
   GPUValue[T, bufferType](data: data)
 
-proc asDescriptorSet*[T](data: sink T): auto =
-  DescriptorSet[T](data: data)
+proc asDescriptorSetData*[T](data: sink T): auto =
+  DescriptorSetData[T](data: data)

@@ -17,7 +17,7 @@ proc test_01_triangle(time: float32) =
     Shader = object
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec3f
-      pushConstant {.PushConstantAttribute.}: PushConstant
+      pushConstant {.PushConstant.}: PushConstant
       fragmentColor {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
       # code
@@ -144,7 +144,7 @@ proc test_03_simple_descriptorset(time: float32) =
       fragmentColor {.Pass.}: Vec3f
       uv {.Pass.}: Vec2f
       outColor {.ShaderOutput.}: Vec4f
-      descriptorSets {.DescriptorSets.}: (Uniforms, )
+      descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
       vertexCode: string = """void main() {
       fragmentColor = material.baseColor;
@@ -167,13 +167,13 @@ proc test_03_simple_descriptorset(time: float32) =
       position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(-0.5, 0.5, 0), vec3(0.5, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
       indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
     )
-    uniforms1 = asDescriptorSet(
+    uniforms1 = asDescriptorSetData(
       Uniforms(
         material: asGPUValue(Material(baseColor: vec3(1, 1, 1)), UniformBuffer),
         texture1: Image[BGRA](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
       )
     )
-    uniforms2 = asDescriptorSet(
+    uniforms2 = asDescriptorSetData(
       Uniforms(
         material: asGPUValue(Material(baseColor: vec3(0.5, 0.5, 0.5)), UniformBuffer),
         texture1: Image[BGRA](width: 2, height: 2, data: @[R, G, B, W]),
@@ -201,11 +201,11 @@ proc test_03_simple_descriptorset(time: float32) =
 
         withPipeline(commandbuffer, pipeline):
 
-          withBind(commandbuffer, (uniforms1, ), pipeline):
-            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          bindDescriptorSet(commandbuffer, uniforms1, 0, pipeline)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
-          withBind(commandbuffer, (uniforms2, ), pipeline):
-            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          bindDescriptorSet(commandbuffer, uniforms2, 0, pipeline)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -240,7 +240,9 @@ proc test_04_multiple_descriptorsets(time: float32) =
       fragmentColor {.Pass.}: Vec3f
       uv {.Pass.}: Vec2f
       outColor {.ShaderOutput.}: Vec4f
-      descriptorSets {.DescriptorSets.}: (ConstSet, MainSet, OtherSet)
+      descriptorSets0 {.DescriptorSet: 0.}: ConstSet
+      descriptorSets1 {.DescriptorSet: 1.}: MainSet
+      descriptorSets2 {.DescriptorSet: 2.}: OtherSet
       # code
       vertexCode: string = """void main() {
       fragmentColor = material[objectSettings.materialIndex].baseColor * renderSettings.brigthness;
@@ -260,14 +262,14 @@ proc test_04_multiple_descriptorsets(time: float32) =
     position: asGPUArray([vec3(-0.5, -0.5), vec3(-0.5, 0.5), vec3(0.5, 0.5), vec3(0.5, -0.5)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
   )
-  var constset = asDescriptorSet(
+  var constset = asDescriptorSetData(
     ConstSet(
       constants: asGPUValue(Constants(offset: vec2(-0.3, 0.2)), UniformBuffer),
     )
   )
   let G = Gray([50'u8])
   let W = Gray([255'u8])
-  var mainset = asDescriptorSet(
+  var mainset = asDescriptorSetData(
     MainSet(
       renderSettings: asGPUValue(RenderSettings(brigthness: 0), UniformBufferMapped),
       material: [
@@ -280,12 +282,12 @@ proc test_04_multiple_descriptorsets(time: float32) =
     ],
   ),
   )
-  var otherset1 = asDescriptorSet(
+  var otherset1 = asDescriptorSetData(
     OtherSet(
       objectSettings: asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 0), UniformBufferMapped),
     )
   )
-  var otherset2 = asDescriptorSet(
+  var otherset2 = asDescriptorSetData(
     OtherSet(
       objectSettings: asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 1), UniformBufferMapped),
     )
@@ -310,16 +312,18 @@ proc test_04_multiple_descriptorsets(time: float32) =
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
 
     withNextFrame(framebuffer, commandbuffer):
+      bindDescriptorSet(commandbuffer, constset, 0, pipeline)
+      bindDescriptorSet(commandbuffer, mainset, 1, pipeline)
 
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         withPipeline(commandbuffer, pipeline):
 
-          withBind(commandbuffer, (constset, mainset, otherset1), pipeline):
-            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          bindDescriptorSet(commandbuffer, otherset1, 2, pipeline)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
-          withBind(commandbuffer, (constset, mainset, otherset2), pipeline):
-            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
+          bindDescriptorSet(commandbuffer, otherset2, 2, pipeline)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
     mainset.data.renderSettings.data.brigthness = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     otherset1.data.objectSettings.data.scale = 0.5 + ((getMonoTime() - start).inMilliseconds().int / 1000) / time
@@ -344,7 +348,7 @@ proc test_05_cube(time: float32) =
       color {.VertexAttribute.}: Vec4f
       fragmentColor {.Pass.}: Vec4f
       outColor {.ShaderOutput.}: Vec4f
-      descriptorSets {.DescriptorSets.}: (Uniforms, )
+      descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
       vertexCode = """void main() {
     fragmentColor = color;
@@ -417,7 +421,7 @@ proc test_05_cube(time: float32) =
   )
   assignBuffers(renderdata, floor)
 
-  var uniforms1 = asDescriptorSet(
+  var uniforms1 = asDescriptorSetData(
     Uniforms(
       data: asGPUValue(UniformData(mvp: Unit4), UniformBufferMapped)
     )
@@ -449,9 +453,9 @@ proc test_05_cube(time: float32) =
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
         withPipeline(commandbuffer, pipeline):
 
-          withBind(commandbuffer, (uniforms1, ), pipeline):
-            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
-            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = floor)
+          bindDescriptorSet(commandbuffer, uniforms1, 0, pipeline)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = floor)
 
     let tEndLoop = getMonoTime() - tStart
     let looptime = tEndLoop - tStartLoop
@@ -532,7 +536,7 @@ proc test_07_png_texture(time: float32) =
       uv {.VertexAttribute.}: Vec2f
       fragmentUv {.Pass.}: Vec2f
       outColor {.ShaderOutput.}: Vec4f
-      descriptorSets {.DescriptorSets.}: (Uniforms, )
+      descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
       vertexCode: string = """
 void main() {
@@ -560,7 +564,7 @@ void main() {
   renderdata.flushAllMemory()
 
   var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
-  var uniforms1 = asDescriptorSet(
+  var uniforms1 = asDescriptorSetData(
     Uniforms(
       texture1: loadImage[BGRA]("art.png"),
     )
@@ -577,8 +581,8 @@ void main() {
 
         withPipeline(commandbuffer, pipeline):
 
-          withBind(commandbuffer, (uniforms1, ), pipeline):
-            render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+          bindDescriptorSet(commandbuffer, uniforms1, 0, pipeline)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -610,7 +614,7 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
       position {.VertexAttribute.}: Vec2f
       uv {.Pass.}: Vec2f
       outColor {.ShaderOutput.}: Vec4f
-      descriptorSets {.DescriptorSets.}: (Uniforms, )
+      descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
       vertexCode: string = """void main() {
       uv = ((position + 1) * 0.5) * vec2(1, -1);
@@ -641,7 +645,7 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
     position: asGPUArray([vec2(-1, -1), vec2(-1, 1), vec2(1, 1), vec2(1, -1)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
   )
-  var uniforms1 = asDescriptorSet(
+  var uniforms1 = asDescriptorSetData(
     Uniforms(
       frameTexture: Image[BGRA](width: vulkan.swapchain.width, height: vulkan.swapchain.height, isRenderTarget: true),
     )
@@ -744,8 +748,8 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
 
         withPipeline(commandbuffer, presentPipeline):
 
-          withBind(commandbuffer, (uniforms1, ), presentPipeline):
-            render(commandbuffer = commandbuffer, pipeline = presentPipeline, mesh = quad)
+          bindDescriptorSet(commandbuffer, uniforms1, 0, presentPipeline)
+          render(commandbuffer = commandbuffer, pipeline = presentPipeline, mesh = quad)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)

@@ -137,7 +137,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
   var passLocation {.hint[XDeclaredButNotUsed]: off.} = 0
   var fsOutputLocation = 0
 
-  var sawDescriptorSets = false
+  var sawDescriptorSets: array[MAX_DESCRIPTORSETS, bool]
   for fieldname, value in fieldPairs(shader):
     # vertex shader inputs
     when hasCustomPragma(value, VertexAttribute) or hasCustomPragma(value, InstanceAttribute):
@@ -160,61 +160,56 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
     # descriptor sets
     # need to consider 4 cases: uniform block, texture, uniform block array, texture array
-    elif hasCustomPragma(value, DescriptorSets):
-      assert not sawDescriptorSets, "Only one field with pragma DescriptorSets allowed per shader"
-      assert typeof(value) is tuple, "Descriptor field '" & fieldname & "' must be of type tuple"
-      assert tupleLen(value) <= MAX_DESCRIPTORSETS, typetraits.name(TShader) & ": maximum " & $MAX_DESCRIPTORSETS & " allowed"
-      sawDescriptorSets = true
-      var descriptorSetIndex = 0
-      for descriptor in value.fields:
+    elif hasCustomPragma(value, DescriptorSet):
+      let setIndex = value.getCustomPragmaVal(DescriptorSet)
+      assert not sawDescriptorSets[setIndex], "Only one DescriptorSet per index is allowed per shader"
+      assert typeof(value) is object, "Descriptor field '" & fieldname & "' must be of type object"
+      assert setIndex < MAX_DESCRIPTORSETS, typetraits.name(TShader) & ": maximum " & $MAX_DESCRIPTORSETS & " descriptor sets allowed"
+      sawDescriptorSets[setIndex] = true
 
-        var descriptorBinding = 0
+      var descriptorBinding = 0
+      for descriptorName, descriptorValue in fieldPairs(value):
+        when typeof(descriptorValue) is Image:
+          samplers.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(descriptorValue) & " " & descriptorName & ";"
+          descriptorBinding.inc
 
-        for descriptorName, descriptorValue in fieldPairs(descriptor):
+        elif typeof(descriptorValue) is GPUValue:
 
-          when typeof(descriptorValue) is Image:
-            samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(descriptorValue) & " " & descriptorName & ";"
+          uniforms.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding & ") uniform T" & descriptorName & " {"
+          when typeof(descriptorValue.data) is object:
+
+            for blockFieldName, blockFieldValue in descriptorValue.data.fieldPairs():
+              assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
+              uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
+            uniforms.add "} " & descriptorName & ";"
+
+          else:
+            {.error: "Unsupported shader descriptor field " & descriptorName & " (must be object)".}
+          descriptorBinding.inc
+
+        elif typeof(descriptorValue) is array:
+
+          when elementType(descriptorValue) is Image:
+
+            let arrayDecl = "[" & $typeof(descriptorValue).len & "]"
+            samplers.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"
             descriptorBinding.inc
 
-          elif typeof(descriptorValue) is GPUValue:
+          elif elementType(descriptorValue) is GPUValue:
 
-            uniforms.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform T" & descriptorName & " {"
-            when typeof(descriptorValue.data) is object:
+            uniforms.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding & ") uniform T" & descriptorName & " {"
 
-              for blockFieldName, blockFieldValue in descriptorValue.data.fieldPairs():
-                assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
-                uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
-              uniforms.add "} " & descriptorName & ";"
-
-            else:
-              {.error: "Unsupported shader descriptor field " & descriptorName & " (must be object)".}
+            for blockFieldName, blockFieldValue in default(elementType(descriptorValue)).data.fieldPairs():
+              assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
+              uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
+            uniforms.add "} " & descriptorName & "[" & $descriptorValue.len & "];"
             descriptorBinding.inc
 
-          elif typeof(descriptorValue) is array:
-
-            when elementType(descriptorValue) is Image:
-
-              let arrayDecl = "[" & $typeof(descriptorValue).len & "]"
-              samplers.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"
-              descriptorBinding.inc
-
-            elif elementType(descriptorValue) is GPUValue:
-
-              uniforms.add "layout(set=" & $descriptorSetIndex & ", binding = " & $descriptorBinding & ") uniform T" & descriptorName & " {"
-
-              for blockFieldName, blockFieldValue in default(elementType(descriptorValue)).data.fieldPairs():
-                assert typeof(blockFieldValue) is SupportedGPUType, "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
-                uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
-              uniforms.add "} " & descriptorName & "[" & $descriptorValue.len & "];"
-              descriptorBinding.inc
-
-            else:
-              {.error: "Unsupported shader descriptor field " & descriptorName.}
-
-        descriptorSetIndex.inc
+          else:
+            {.error: "Unsupported shader descriptor field " & descriptorName.}
     elif fieldname in ["vertexCode", "fragmentCode"]:
       discard
-    elif hasCustomPragma(value, PushConstantAttribute):
+    elif hasCustomPragma(value, PushConstant):
       assert pushConstants.len == 0, "Only one push constant value allowed"
       assert value is object, "push constants need to be objects"
       pushConstants.add "layout( push_constant ) uniform constants"
@@ -327,37 +322,29 @@ template ForVertexDataFields(shader: typed, fieldname, valuename, isinstancename
         const `isinstancename` {.inject.} = hasCustomPragma(value, InstanceAttribute)
         body
 
-proc getDescriptorSetCount[TShader](): uint32 =
-  for _, value in fieldPairs(default(TShader)):
-    when hasCustomPragma(value, DescriptorSets):
-      return tupleLen(typeof(value)).uint32
-
 proc createDescriptorSetLayouts[TShader](): array[MAX_DESCRIPTORSETS, VkDescriptorSetLayout] =
-  var setNumber: int
   for _, value in fieldPairs(default(TShader)):
-    when hasCustomPragma(value, DescriptorSets):
-      for descriptorSet in value.fields:
-        var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-        forDescriptorFields(descriptorSet, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
-          layoutbindings.add VkDescriptorSetLayoutBinding(
-            binding: descriptorBindingNumber,
-            descriptorType: descriptorType,
-            descriptorCount: descriptorCount,
-            stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
-            pImmutableSamplers: nil,
-          )
-        var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
-          sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-          bindingCount: layoutbindings.len.uint32,
-          pBindings: layoutbindings.ToCPointer
+    when hasCustomPragma(value, DescriptorSet):
+      var layoutbindings: seq[VkDescriptorSetLayoutBinding]
+      forDescriptorFields(value, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber):
+        layoutbindings.add VkDescriptorSetLayoutBinding(
+          binding: descriptorBindingNumber,
+          descriptorType: descriptorType,
+          descriptorCount: descriptorCount,
+          stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
+          pImmutableSamplers: nil,
         )
-        checkVkResult vkCreateDescriptorSetLayout(
-          vulkan.device,
-          addr(layoutCreateInfo),
-          nil,
-          addr(result[setNumber])
-        )
-        inc setNumber
+      var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
+        sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        bindingCount: layoutbindings.len.uint32,
+        pBindings: layoutbindings.ToCPointer
+      )
+      checkVkResult vkCreateDescriptorSetLayout(
+        vulkan.device,
+        addr(layoutCreateInfo),
+        nil,
+        addr(result[value.getCustomPragmaVal(DescriptorSet)])
+      )
 
 proc createPipeline*[TShader](
   renderPass: RenderPass,
@@ -373,8 +360,11 @@ proc createPipeline*[TShader](
   const shader = default(TShader)
   (result.vertexShaderModule, result.fragmentShaderModule) = compileShader(shader)
 
-  var nSets = getDescriptorSetCount[TShader]()
   result.descriptorSetLayouts = createDescriptorSetLayouts[TShader]()
+  var layouts: seq[VkDescriptorSetLayout]
+  for l in result.descriptorSetLayouts:
+    if l.Valid:
+      layouts.add l
 
   let pushConstant = VkPushConstantRange(
     stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
@@ -384,8 +374,8 @@ proc createPipeline*[TShader](
 
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-    setLayoutCount: nSets,
-    pSetLayouts: if nSets == 0: nil else: result.descriptorSetLayouts.ToCPointer,
+    setLayoutCount: layouts.len.uint32,
+    pSetLayouts: layouts.ToCPointer,
     pushConstantRangeCount: 1,
     pPushConstantRanges: addr(pushConstant),
   )

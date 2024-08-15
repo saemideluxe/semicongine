@@ -1,6 +1,4 @@
-import std/logging
 import std/options
-import std/strformat
 import std/tables
 
 import ../../thirdparty/x11/xlib

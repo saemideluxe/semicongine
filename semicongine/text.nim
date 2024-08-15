@@ -53,7 +53,7 @@ type
     uv {.VertexAttribute.}: Vec2f # TODO: maybe we can keep the uvs in a uniform buffer and just pass an index
     fragmentUv {.Pass.}: Vec2f
     color {.ShaderOutput.}: Vec4f
-    descriptorSets {.DescriptorSets.}: (TextboxDescriptorSet, )
+    descriptorSets {.DescriptorSet: 0.}: TextboxDescriptorSet
     vertexCode* = """void main() {
   gl_Position = vec4(position * vec3(1 / textbox.aspectratio, 1, 1) * textbox.scale + textbox.position, 1.0);
   fragmentUv = uv;
