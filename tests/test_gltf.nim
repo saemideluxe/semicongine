@@ -31,7 +31,7 @@ proc test_gltf(time: float32) =
       materials: array[50, GPUValue[Material, UniformBuffer]]
       camera: GPUValue[Camera, UniformBufferMapped]
     Shader = object
-      objectData {.PushConstantAttribute.}: ObjectData
+      objectData {.PushConstant.}: ObjectData
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec4f
       normal {.VertexAttribute.}: Vec3f
@@ -39,7 +39,7 @@ proc test_gltf(time: float32) =
       fragmentColor {.Pass.}: Vec4f
       fragmentNormal {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
-      descriptors {.DescriptorSets.}: (MainDescriptors, )
+      descriptors {.DescriptorSet: 0.}: MainDescriptors
       # code
       vertexCode: string = """
 void main() {
@@ -111,7 +111,7 @@ void main() {
       emissiveFactor: "emissive",
     )
   )
-  var descriptors = asDescriptorSet(
+  var descriptors = asDescriptorSetData(
     MainDescriptors(
       camera: asGPUValue(Camera(
         view: Unit4,
@@ -185,14 +185,14 @@ void main() {
       withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
 
         withPipeline(commandbuffer, pipeline):
-          withBind(commandbuffer, (descriptors, ), pipeline):
-            for nodeId in gltfData.scenes[0]:
-              drawNode(
-                commandbuffer = commandbuffer,
-                pipeline = pipeline,
-                nodeId = nodeId,
-                transform = rotate(PI / 2, Z)
-              )
+          bindDescriptorSet(commandbuffer, descriptors, 0, pipeline)
+          for nodeId in gltfData.scenes[0]:
+            drawNode(
+              commandbuffer = commandbuffer,
+              pipeline = pipeline,
+              nodeId = nodeId,
+              transform = rotate(PI / 2, Z)
+            )
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
