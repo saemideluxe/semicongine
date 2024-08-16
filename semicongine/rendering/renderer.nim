@@ -568,8 +568,8 @@ proc render*[TShader, TMesh, TInstance](
   pipeline: Pipeline[TShader],
   mesh: TMesh,
   instances: TInstance,
+  fixedVertexCount = -1,
 ) =
-
   static: assertCanRenderMesh(TShader, TMesh, TInstance)
 
   var vertexBuffers: seq[VkBuffer]
@@ -639,7 +639,7 @@ proc render*[TShader, TMesh, TInstance](
   else:
     vkCmdDraw(
       commandBuffer = commandBuffer,
-      vertexCount = elementCount,
+      vertexCount = if fixedVertexCount < 0: elementCount else: fixedVertexCount,
       instanceCount = instanceCount,
       firstVertex = 0,
       firstInstance = 0
@@ -649,8 +649,9 @@ proc render*[TShader, TMesh](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
   mesh: TMesh,
+  fixedVertexCount = -1,
 ) =
-  render(commandBuffer, pipeline, mesh, EMPTY())
+  render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount)
 
 proc assertValidPushConstantType(TShader, TPushConstant: typedesc) =
   assert sizeof(TPushConstant) <= PUSH_CONSTANT_SIZE, "Push constant values must be <= 128 bytes"
@@ -668,6 +669,7 @@ proc renderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
   mesh: TMesh,
   instances: TInstance,
   pushConstant: TPushConstant,
+  fixedVertexCount = -1,
 ) =
   static: assertValidPushConstantType(TShader, TPushConstant)
   vkCmdPushConstants(
@@ -678,12 +680,13 @@ proc renderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
     size = PUSH_CONSTANT_SIZE,
     pValues = addr(pushConstant)
   );
-  render(commandBuffer, pipeline, mesh, instances)
+  render(commandBuffer, pipeline, mesh, instances, fixedVertexCount)
 proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
   commandBuffer: VkCommandBuffer,
   pipeline: Pipeline[TShader],
   mesh: TMesh,
   pushConstant: TPushConstant,
+  fixedVertexCount = -1,
 ) =
   static: assertValidPushConstantType(TShader, TPushConstant)
   vkCmdPushConstants(
@@ -694,7 +697,7 @@ proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
     size = PUSH_CONSTANT_SIZE,
     pValues = addr(pushConstant)
   );
-  render(commandBuffer, pipeline, mesh, EMPTY())
+  render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount)
 
 proc asGPUArray*[T](data: sink openArray[T], bufferType: static BufferType): auto =
   GPUArray[T, bufferType](data: @data)
