@@ -73,7 +73,7 @@ proc isMappable(memoryTypeIndex: uint32): bool =
 proc initDescriptorSet*(
   renderData: RenderData,
   layout: VkDescriptorSetLayout,
-  descriptorSet: var DescriptorSetData,
+  descriptorSet: DescriptorSetData,
 ) =
 
   # santization checks
@@ -556,7 +556,7 @@ proc assertCanRenderMesh(TShader, TMesh, TInstance: typedesc) =
     if hasCustomPragma(attrValue, InstanceAttribute):
       var foundAttr = false
       for instAttrName, instAttrValue in default(TInstance).fieldPairs:
-        if attrName == instAttrName:
+        when attrName == instAttrName:
           assert typeof(instAttrValue) is GPUArray, "Instance attribute '" & attrName & "' must be a GPUArray"
           assert foundAttr == false, "Attribute '" & attrName & "' is defined in Mesh and Instance, can only be one"
           assert typeof(attrValue) is elementType(instAttrValue.data), "Type of shader attribute and mesh attribute '" & attrName & "' is not the same"
@@ -569,6 +569,7 @@ proc render*[TShader, TMesh, TInstance](
   mesh: TMesh,
   instances: TInstance,
   fixedVertexCount = -1,
+  fixedInstanceCount = -1,
 ) =
   static: assertCanRenderMesh(TShader, TMesh, TInstance)
 
@@ -631,7 +632,7 @@ proc render*[TShader, TMesh, TInstance](
     vkCmdDrawIndexed(
       commandBuffer = commandBuffer,
       indexCount = elementCount,
-      instanceCount = instanceCount,
+      instanceCount = if fixedInstanceCount == -1: instanceCount else: fixedInstanceCount.uint32,
       firstIndex = 0,
       vertexOffset = 0,
       firstInstance = 0
@@ -639,8 +640,8 @@ proc render*[TShader, TMesh, TInstance](
   else:
     vkCmdDraw(
       commandBuffer = commandBuffer,
-      vertexCount = if fixedVertexCount < 0: elementCount else: fixedVertexCount,
-      instanceCount = instanceCount,
+      vertexCount = if fixedVertexCount < 0: elementCount else: fixedVertexCount.uint32,
+      instanceCount = if fixedInstanceCount == -1: instanceCount else: fixedInstanceCount.uint32,
       firstVertex = 0,
       firstInstance = 0
     )

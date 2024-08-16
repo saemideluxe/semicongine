@@ -119,7 +119,8 @@ proc loadFont*(
 ): Font =
   loadResource_intern(path, package = package).readTrueType(path.splitFile().name, charset & additional_codepoints.toSeq, lineHeightPixels)
 
-func textWidth*(text: seq[Rune]|string, font: FontObj): float32 =
+func textWidth*(theText: seq[Rune]|string, font: FontObj): float32 =
+  var text = when theText is string: theText.toRunes else: theText
   var currentWidth = 0'f32
   var lineWidths: seq[float32]
   for i in 0 ..< text.len:
