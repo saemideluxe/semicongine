@@ -357,6 +357,7 @@ proc assignBuffers*(renderdata: var RenderData, descriptorSet: var DescriptorSet
   assignBuffers(renderdata, descriptorSet.data, uploadData = uploadData)
 
 proc initRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
+  result = RenderData()
   # allocate descriptor pools
   var poolSizes = [
     VkDescriptorPoolSize(thetype: VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, descriptorCount: descriptorPoolLimit),

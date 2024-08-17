@@ -140,19 +140,20 @@ type
     offset: uint64
   GPUData* = GPUArray | GPUValue
 
-  RenderData* = object
+  RenderDataObject = object
     descriptorPool: VkDescriptorPool
     memory: array[VK_MAX_MEMORY_TYPES.int, seq[MemoryBlock]]
     buffers: array[BufferType, seq[Buffer]]
     images: seq[VkImage]
     imageViews: seq[VkImageView]
     samplers: seq[VkSampler]
+  RenderData* = ref RenderDataObject
 
 var vulkan* = VulkanGlobals()
 var fullscreen_internal: bool
 
 proc `=copy`(dest: var VulkanGlobals; source: VulkanGlobals) {.error.}
-proc `=copy`(dest: var RenderData; source: RenderData) {.error.}
+proc `=copy`(dest: var RenderDataObject; source: RenderDataObject) {.error.}
 proc `=copy`[T, S](dest: var GPUValue[T, S]; source: GPUValue[T, S]) {.error.}
 proc `=copy`[T, S](dest: var GPUArray[T, S]; source: GPUArray[T, S]) {.error.}
 proc `=copy`(dest: var MemoryBlock; source: MemoryBlock) {.error.}
