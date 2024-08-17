@@ -159,6 +159,11 @@ proc `=copy`(dest: var MemoryBlock; source: MemoryBlock) {.error.}
 proc `=copy`[T](dest: var Pipeline[T]; source: Pipeline[T]) {.error.}
 proc `=copy`[T](dest: var DescriptorSetData[T]; source: DescriptorSetData[T]) {.error.}
 
+proc `[]`*[T, S](a: GPUArray[T, S], i: int): T =
+  a.data[i]
+proc `[]=`*[T, S](a: var GPUArray[T, S], i: int, value: T) =
+  a.data[i] = value
+
 template forDescriptorFields(shader: typed, valuename, typename, countname, bindingNumber, body: untyped): untyped =
   var `bindingNumber` {.inject.} = 0'u32
   for theFieldname, `valuename` in fieldPairs(shader):

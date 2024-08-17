@@ -3,43 +3,39 @@ type
     font*: Font
     maxLen*: int                # maximum amount of characters that will be rendered
     maxWidth: float32 = 0       # if set, will cause automatic word breaks at maxWidth
-                                # properties:
+    baseScale: float32
     text: seq[Rune]
     horizontalAlignment: HorizontalAlignment = Center
     verticalAlignment: VerticalAlignment = Center
     # management/internal:
     dirtyGeometry: bool         # is true if any of the attributes changed
     dirtyShaderdata: bool       # is true if any of the attributes changed
-    processedText: seq[Rune]    # used to store processed (word-wrapper) text to preserve original
+    visibleText: seq[Rune]    # used to store processed (word-wrapper) text to preserve original
     lastRenderedText: seq[Rune] # stores the last rendered text, to prevent unnecessary updates
 
     # rendering data
     position: GPUArray[Vec3f, VertexBuffer]
     uv: GPUArray[Vec2f, VertexBuffer]
     indices: GPUArray[uint16, IndexBuffer]
-    shaderdata: DescriptorSetData[TextboxDescriptorSet]
 
 proc `=copy`(dest: var Textbox; source: Textbox) {.error.}
 
 func `$`*(textbox: Textbox): string =
   "\"" & $textbox.text[0 ..< min(textbox.text.len, 16)] & "\""
 
-proc refreshShaderdata(textbox: Textbox) =
-  textbox.shaderdata.data.textbox.updateGPUBuffer(flush = true)
-
 proc refreshGeometry(textbox: var Textbox) =
   # pre-calculate text-width
   var width = 0'f32
   var lineWidths: seq[float32]
-  for i in 0 ..< textbox.processedText.len:
-    if textbox.processedText[i] == NEWLINE:
+  for i in 0 ..< textbox.visibleText.len:
+    if textbox.visibleText[i] == NEWLINE:
       lineWidths.add width
       width = 0'f32
     else:
-      if not (i == textbox.processedText.len - 1 and textbox.processedText[i].isWhiteSpace):
-        width += textbox.font.glyphs[textbox.processedText[i]].advance
-      if i < textbox.processedText.len - 1:
-        width += textbox.font.kerning[(textbox.processedText[i], textbox.processedText[i + 1])]
+      if not (i == textbox.visibleText.len - 1 and textbox.visibleText[i].isWhiteSpace):
+        width += textbox.font.glyphs[textbox.visibleText[i]].advance
+      if i < textbox.visibleText.len - 1:
+        width += textbox.font.kerning[(textbox.visibleText[i], textbox.visibleText[i + 1])]
   lineWidths.add width
   var height = float32(lineWidths.len - 1) * textbox.font.lineAdvance + textbox.font.capHeight
   if lineWidths[^1] == 0 and lineWidths.len > 1:
@@ -61,8 +57,8 @@ proc refreshGeometry(textbox: var Textbox) =
       of Right: lineWidths[lineIndex]
   for i in 0 ..< textbox.maxLen:
     let vertexOffset = i * 4
-    if i < textbox.processedText.len:
-      if textbox.processedText[i] == Rune('\n'):
+    if i < textbox.visibleText.len:
+      if textbox.visibleText[i] == Rune('\n'):
         offsetX = 0
         offsetY -= textbox.font.lineAdvance
         textbox.position.data[vertexOffset + 0] = vec3(0, 0, 0)
@@ -76,7 +72,7 @@ proc refreshGeometry(textbox: var Textbox) =
           of Right: lineWidths[lineIndex]
       else:
         let
-          glyph = textbox.font.glyphs[textbox.processedText[i]]
+          glyph = textbox.font.glyphs[textbox.visibleText[i]]
           left = offsetX + glyph.leftOffset
           right = offsetX + glyph.leftOffset + glyph.dimension.x
           top = offsetY - glyph.topOffset
@@ -93,16 +89,11 @@ proc refreshGeometry(textbox: var Textbox) =
         textbox.uv.data[vertexOffset + 3] = glyph.uvs[3]
 
         offsetX += glyph.advance
-        if i < textbox.processedText.len - 1:
-          offsetX += textbox.font.kerning[(textbox.processedText[i], textbox.processedText[i + 1])]
-    else:
-      textbox.position.data[vertexOffset + 0] = vec3(0, 0, 0)
-      textbox.position.data[vertexOffset + 1] = vec3(0, 0, 0)
-      textbox.position.data[vertexOffset + 2] = vec3(0, 0, 0)
-      textbox.position.data[vertexOffset + 3] = vec3(0, 0, 0)
-  updateGPUBuffer(textbox.position)
-  updateGPUBuffer(textbox.uv)
-  textbox.lastRenderedText = textbox.processedText
+        if i < textbox.visibleText.len - 1:
+          offsetX += textbox.font.kerning[(textbox.visibleText[i], textbox.visibleText[i + 1])]
+  updateGPUBuffer(textbox.position, count=textbox.visibleText.len.uint64 * 4)
+  updateGPUBuffer(textbox.uv, count=textbox.visibleText.len.uint64 * 4)
+  textbox.lastRenderedText = textbox.visibleText
 
 func text*(textbox: Textbox): seq[Rune] =
   textbox.text
@@ -113,40 +104,16 @@ proc `text=`*(textbox: var Textbox, newText: seq[Rune]) =
 
   textbox.text = newText[0 ..< min(newText.len, textbox.maxLen)]
 
-  textbox.processedText = textbox.text
+  textbox.visibleText = textbox.text
   if textbox.maxWidth > 0:
-    textbox.processedText = WordWrapped(
-      textbox.processedText,
+    textbox.visibleText = WordWrapped(
+      textbox.visibleText,
       textbox.font[],
-      textbox.maxWidth / textbox.shaderdata.data.textbox.data.scale,
+      textbox.maxWidth / textbox.baseScale,
     )
 
 proc `text=`*(textbox: var Textbox, newText: string) =
   `text=`(textbox, newText.toRunes)
-
-proc color*(textbox: Textbox): Vec4f =
-  textbox.shaderdata.data.textbox.data.color
-
-proc `color=`*(textbox: var Textbox, value: Vec4f) =
-  if textbox.shaderdata.data.textbox.data.color != value:
-    textbox.dirtyShaderdata = true
-    textbox.shaderdata.data.textbox.data.color = value
-
-proc scale*(textbox: Textbox): float32 =
-  textbox.shaderdata.data.textbox.data.scale
-
-proc `scale=`*(textbox: var Textbox, value: float32) =
-  if textbox.shaderdata.data.textbox.data.scale != value:
-    textbox.dirtyShaderdata = true
-    textbox.shaderdata.data.textbox.data.scale = value
-
-proc position*(textbox: Textbox): Vec3f =
-  textbox.shaderdata.data.textbox.data.position
-
-proc `position=`*(textbox: var Textbox, value: Vec3f) =
-  if textbox.shaderdata.data.textbox.data.position != value:
-    textbox.dirtyShaderdata = true
-    textbox.shaderdata.data.textbox.data.position = value
 
 proc horizontalAlignment*(textbox: Textbox): HorizontalAlignment =
   textbox.horizontalAlignment
@@ -163,34 +130,36 @@ proc `verticalAlignment=`*(textbox: var Textbox, value: VerticalAlignment) =
     textbox.dirtyGeometry = true
 
 proc refresh*(textbox: var Textbox) =
-  if textbox.shaderdata.data.textbox.data.aspectratio != getAspectRatio():
-    textbox.dirtyShaderdata = true
-    textbox.shaderdata.data.textbox.data.aspectratio = getAspectRatio()
-
-  if textbox.dirtyShaderdata:
-    textbox.refreshShaderdata()
-    textbox.dirtyShaderdata = false
-
-  if textbox.dirtyGeometry or textbox.processedText != textbox.lastRenderedText:
+  if textbox.dirtyGeometry or textbox.visibleText != textbox.lastRenderedText:
     textbox.refreshGeometry()
     textbox.dirtyGeometry = false
 
-proc render*(commandbuffer: VkCommandBuffer, pipeline: Pipeline, textbox: Textbox) =
-  bindDescriptorSet(commandbuffer, textbox.shaderdata, 0, pipeline)
-  render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = textbox)
+proc render*(
+  commandbuffer: VkCommandBuffer,
+  pipeline: Pipeline,
+  textbox: Textbox,
+  position: Vec3f,
+  color: Vec4f,
+  scale: float32 = 1,
+) =
+  renderWithPushConstant(
+    commandbuffer = commandbuffer,
+    pipeline = pipeline,
+    mesh = textbox,
+    pushConstant = TextboxData(position: position, scale: textbox.baseScale * scale, color: color),
+    fixedVertexCount=textbox.visibleText.len * 6
+  )
 
 proc initTextbox*[T: string | seq[Rune]](
   renderdata: var RenderData,
   descriptorSetLayout: VkDescriptorSetLayout,
   font: Font,
+  baseScale: float32,
   text: T = default(T),
-  scale: float32 = 1,
-  position: Vec3f = vec3(0, 0, 0),
-  color: Vec4f = vec4(0, 0, 0, 1),
   maxLen: int = text.len,
   verticalAlignment: VerticalAlignment = Center,
   horizontalAlignment: HorizontalAlignment = Center,
-  maxWidth = 0'f32
+  maxWidth = 0'f32,
 ): Textbox =
 
   result = Textbox(
@@ -201,20 +170,10 @@ proc initTextbox*[T: string | seq[Rune]](
     horizontalAlignment: horizontalAlignment,
     verticalAlignment: verticalAlignment,
     maxWidth: maxWidth,
+    baseScale: baseScale,
     position: asGPUArray(newSeq[Vec3f](int(maxLen * 4)), VertexBuffer),
     uv: asGPUArray(newSeq[Vec2f](int(maxLen * 4)), VertexBuffer),
     indices: asGPUArray(newSeq[uint16](int(maxLen * 6)), IndexBuffer),
-    shaderdata: asDescriptorSetData(
-      TextboxDescriptorSet(
-        textbox: asGPUValue(TextboxData(
-          scale: scale,
-          position: position,
-          color: color,
-          aspectratio: 1,
-    ), UniformBufferMapped),
-    fontAtlas: font.fontAtlas
-  )
-    )
   )
 
   for i in 0 ..< maxLen:
@@ -232,9 +191,6 @@ proc initTextbox*[T: string | seq[Rune]](
     `text=`(result, text)
 
   assignBuffers(renderdata, result, uploadData = false)
-  uploadImages(renderdata, result.shaderdata)
-  initDescriptorSet(renderdata, descriptorSetLayout, result.shaderdata)
 
   result.refresh()
   updateAllGPUBuffers(result, flush = true)
-  updateAllGPUBuffers(result.shaderdata.data, flush = true)

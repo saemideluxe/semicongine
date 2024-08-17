@@ -43,19 +43,16 @@ type
     color: Vec4f
     position: Vec3f
     scale: float32
-    aspectratio: float32
-  TextboxDescriptorSet = object
-    textbox: GPUValue[TextboxData, UniformBufferMapped]
-    fontAtlas: Image[Gray]
 
-  DefaultFontShader* = object
+  DefaultFontShader*[T] = object
     position {.VertexAttribute.}: Vec3f
     uv {.VertexAttribute.}: Vec2f # TODO: maybe we can keep the uvs in a uniform buffer and just pass an index
     fragmentUv {.Pass.}: Vec2f
     color {.ShaderOutput.}: Vec4f
-    descriptorSets {.DescriptorSet: 0.}: TextboxDescriptorSet
+    textbox {.PushConstant.}: TextboxData
+    descriptorSets {.DescriptorSet: 0.}: T
     vertexCode* = """void main() {
-  gl_Position = vec4(position * vec3(1 / textbox.aspectratio, 1, 1) * textbox.scale + textbox.position, 1.0);
+  gl_Position = vec4(position * textbox.scale + textbox.position, 1.0);
   fragmentUv = uv;
 }  """
     fragmentCode* = """void main() {
@@ -66,6 +63,7 @@ type
     color = vec4(textbox.color.rgb, textbox.color.a * v);
 }"""
 
+proc `=copy`(dest: var FontObj; source: FontObj) {.error.}
 
 include ./text/font
 include ./text/textbox

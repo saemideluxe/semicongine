@@ -52,8 +52,8 @@ func needsMapping(bType: BufferType): bool =
 template needsMapping(gpuData: GPUData): untyped =
   gpuData.bufferType.needsMapping
 
-template size(gpuArray: GPUArray): uint64 =
-  (gpuArray.data.len * sizeof(elementType(gpuArray.data))).uint64
+template size(gpuArray: GPUArray, count=0'u64): uint64 =
+  (if count == 0: gpuArray.data.len.uint64 else: count).uint64 * sizeof(elementType(gpuArray.data)).uint64
 template size(gpuValue: GPUValue): uint64 =
   sizeof(gpuValue.data).uint64
 func size(image: Image): uint64 =
@@ -276,17 +276,23 @@ proc allocateNewBuffer(renderData: var RenderData, size: uint64, bufferType: Buf
   result.rawPointer = selectedBlock.rawPointer.pointerAddOffset(selectedBlock.offsetNextFree)
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
-proc updateGPUBuffer*(gpuData: GPUData, flush = false) =
-  if gpuData.size == 0:
+proc updateGPUBuffer*(gpuData: GPUData, count=0'u64, flush = false) =
+  if gpuData.size() == 0:
     return
 
   when needsMapping(gpuData):
-    copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size)
+    when gpuData is GPUArray:
+      copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size(count))
+    else:
+      copyMem(pointerAddOffset(gpuData.buffer.rawPointer, gpuData.offset), gpuData.rawPointer, gpuData.size())
     if flush:
       flushBuffer(gpuData.buffer)
   else:
     withStagingBuffer((gpuData.buffer.vk, gpuData.offset), gpuData.size, stagingPtr):
-      copyMem(stagingPtr, gpuData.rawPointer, gpuData.size)
+      when gpuData is GPUArray:
+        copyMem(stagingPtr, gpuData.rawPointer, gpuData.size(count))
+      else:
+        copyMem(stagingPtr, gpuData.rawPointer, gpuData.size())
 
 proc updateAllGPUBuffers*[T](value: T, flush = false) =
   for name, fieldvalue in value.fieldPairs():
