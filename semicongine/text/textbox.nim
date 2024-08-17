@@ -140,7 +140,7 @@ proc render*(
   textbox: Textbox,
   position: Vec3f,
   color: Vec4f,
-  scale: float32 = 1,
+  scale: Vec2f = vec2(1, 1),
 ) =
   renderWithPushConstant(
     commandbuffer = commandbuffer,

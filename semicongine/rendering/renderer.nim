@@ -685,7 +685,7 @@ proc renderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
     layout = pipeline.layout,
     stageFlags = VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
     offset = 0,
-    size = PUSH_CONSTANT_SIZE,
+    size = sizeof(pushConstant).uint32,
     pValues = addr(pushConstant)
   );
   render(commandBuffer, pipeline, mesh, instances, fixedVertexCount)
@@ -702,7 +702,7 @@ proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
     layout = pipeline.layout,
     stageFlags = VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
     offset = 0,
-    size = PUSH_CONSTANT_SIZE,
+    size = sizeof(pushConstant).uint32,
     pValues = addr(pushConstant)
   );
   render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount)

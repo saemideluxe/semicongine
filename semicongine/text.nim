@@ -42,7 +42,8 @@ type
   TextboxData = object
     color: Vec4f
     position: Vec3f
-    scale: float32
+    tmp: float32
+    scale: Vec2f
 
   DefaultFontShader*[T] = object
     position {.VertexAttribute.}: Vec3f
@@ -52,11 +53,12 @@ type
     textbox {.PushConstant.}: TextboxData
     descriptorSets {.DescriptorSet: 0.}: T
     vertexCode* = """void main() {
-  gl_Position = vec4(position * textbox.scale + textbox.position, 1.0);
+  gl_Position = vec4(position * vec3(textbox.scale, 1) + textbox.position, 1.0);
   fragmentUv = uv;
 }  """
     fragmentCode* = """void main() {
     float v = texture(fontAtlas, fragmentUv).r;
+    // CARFULL: This can lead to rough edges at times
     if(v == 0) {
       discard;
     }

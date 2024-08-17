@@ -213,11 +213,11 @@ proc test_04_lots_of_texts(time: float32) =
   var labels: seq[Textbox]
   var positions = newSeq[Vec3f](100)
   var colors = newSeq[Vec4f](100)
-  var scales = newSeq[float32](100)
+  var scales = newSeq[Vec2f](100)
   for i in 0 ..< 100:
     positions[i] = vec3(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
     colors[i] = vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0))
-    scales[i] = rand(0.5'f32 .. 1.5'f32)
+    scales[i] = vec2(rand(0.5'f32 .. 1.5'f32), rand(0.5'f32 .. 1.5'f32))
     labels.add initTextbox(
       renderdata,
       pipeline.layout(0),
