@@ -79,7 +79,8 @@ func vec3i8*[T: SomeInteger](x: T): Vec3i8 = vec3i8(x, 0, 0)
 func vec3i8*(): Vec3i8 = vec3i8(0, 0, 0)
 
 # shortcuts color
-func toVec*(value: string): Vec4f =
+func toVec*(value: string, gamma=2.2'f32): Vec4f =
+  # converts hex-string to color, also applies gamma of 2.2
   assert value != ""
   var hex = value
   if hex[0] == '#':
@@ -98,7 +99,7 @@ func toVec*(value: string): Vec4f =
     g = parseHexInt(hex[2 .. 3]).float32 / 255'f32
     b = parseHexInt(hex[4 .. 5]).float32 / 255'f32
     a = parseHexInt(hex[6 .. 7]).float32 / 255'f32
-  return vec4(r, g, b, a)
+  return vec4(pow(r, gamma), pow(g, gamma), pow(b, gamma), a)
 
 
 const
