@@ -1,3 +1,4 @@
+import std/os
 import std/locks
 import std/logging
 import std/math
@@ -7,7 +8,11 @@ import std/tables
 import std/times
 
 const NBUFFERS = 32
-const BUFFERSAMPLECOUNT = 256
+# it seems that some alsa hardware has a problem with smaller buffers than 512
+when defined(linux):
+  const BUFFERSAMPLECOUNT = 512
+else:
+  const BUFFERSAMPLECOUNT = 256
 const AUDIO_SAMPLE_RATE* = 44100
 
 type
@@ -223,6 +228,7 @@ proc updateSoundBuffer(mixer: var Mixer) =
       if track.fadeTime <= 0:
         track.level = track.targetLevel
   # mix
+  var hasData = false
   for i in 0 ..< mixer.buffers[mixer.currentBuffer].len:
     var mixedSample = [0'i16, 0'i16]
     mixer.lock.withLock():
@@ -237,6 +243,7 @@ proc updateSoundBuffer(mixer: var Mixer) =
             mixer.level * track.level * playback.levelRight,
           )
           mixedSample = mix(mixedSample, sample)
+          hasData = true
           inc playback.position
           if playback.position >= playback.sound.len:
             if playback.loop:
@@ -247,8 +254,9 @@ proc updateSoundBuffer(mixer: var Mixer) =
           track.playing.del(id)
       mixer.buffers[mixer.currentBuffer][i] = mixedSample
   # send data to sound device
-  mixer.device.WriteSoundData(mixer.currentBuffer)
-  mixer.currentBuffer = (mixer.currentBuffer + 1) mod mixer.buffers.len
+  if hasData:
+    mixer.device.WriteSoundData(mixer.currentBuffer)
+    mixer.currentBuffer = (mixer.currentBuffer + 1) mod mixer.buffers.len
 
 # DSP functions
 # TODO: finish implementation, one day
@@ -311,7 +319,3 @@ proc startMixerThread() =
   mixer[] = initMixer()
   audiothread.createThread(audioWorker)
   debug "Created audio thread"
-  when defined(windows):
-    SetThreadPriority(audiothread.handle(), THREAD_PRIORITY_TIME_CRITICAL)
-  when defined(linux):
-    discard pthread_setschedprio(Pthread(audiothread.handle()), cint(-20))
