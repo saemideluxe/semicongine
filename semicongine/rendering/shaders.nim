@@ -1,4 +1,4 @@
-func glslType[T: SupportedGPUType|Image](value: T): string =
+func glslType[T: SupportedGPUType|ImageObject](value: T): string =
   when T is float32: "float"
   elif T is float64: "double"
   elif T is int8 or T is int16 or T is int32 or T is int64: "int"
@@ -36,6 +36,7 @@ func glslType[T: SupportedGPUType|Image](value: T): string =
   elif T is TMat4[float32]: "mat4"
   elif T is TMat4[float64]: "dmat4"
   elif T is Image: "sampler2D"
+  elif T is ImageArray: "sampler2DArray"
   else:
     const n = typetraits.name(T)
     {.error: "Unsupported data type on GPU: " & n.}
@@ -86,7 +87,7 @@ func vkType[T: SupportedGPUType](value: T): VkFormat =
   else: {.error: "Unsupported data type on GPU".}
 
 
-func numberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Image](value: T): uint32 =
+func numberOfVertexInputAttributeDescriptors[T: SupportedGPUType|ImageObject](value: T): uint32 =
   when T is TMat2[float32] or T is TMat2[float64] or T is TMat23[float32] or T is TMat23[float64]:
     2
   elif T is TMat32[float32] or T is TMat32[float64] or T is TMat3[float32] or T is TMat3[float64] or T is TMat34[float32] or T is TMat34[float64]:
@@ -96,7 +97,7 @@ func numberOfVertexInputAttributeDescriptors[T: SupportedGPUType|Image](value: T
   else:
     1
 
-func nLocationSlots[T: SupportedGPUType|Image](value: T): uint32 =
+func nLocationSlots[T: SupportedGPUType|ImageObject](value: T): uint32 =
   #[
   single location:
     - any scalar
@@ -169,7 +170,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
       var descriptorBinding = 0
       for descriptorName, descriptorValue in fieldPairs(value):
-        when typeof(descriptorValue) is Image:
+        when typeof(descriptorValue) is ImageObject:
           samplers.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(descriptorValue) & " " & descriptorName & ";"
           descriptorBinding.inc
 
@@ -189,7 +190,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
 
         elif typeof(descriptorValue) is array:
 
-          when elementType(descriptorValue) is Image:
+          when elementType(descriptorValue) is ImageObject:
 
             let arrayDecl = "[" & $typeof(descriptorValue).len & "]"
             samplers.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding & ") uniform " & glslType(default(elementType(descriptorValue))) & " " & descriptorName & "" & arrayDecl & ";"

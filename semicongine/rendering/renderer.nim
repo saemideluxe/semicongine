@@ -56,7 +56,7 @@ template size(gpuArray: GPUArray, count=0'u64): uint64 =
   (if count == 0: gpuArray.data.len.uint64 else: count).uint64 * sizeof(elementType(gpuArray.data)).uint64
 template size(gpuValue: GPUValue): uint64 =
   sizeof(gpuValue.data).uint64
-func size(image: Image): uint64 =
+func size(image: ImageObject): uint64 =
   image.data.len.uint64 * sizeof(elementType(image.data)).uint64
 
 template rawPointer(gpuArray: GPUArray): pointer =
@@ -80,12 +80,12 @@ proc initDescriptorSet*(
   for theName, value in descriptorSet.data.fieldPairs:
     when typeof(value) is GPUValue:
       assert value.buffer.vk.Valid
-    elif typeof(value) is Image:
+    elif typeof(value) is ImageObject:
       assert value.vk.Valid
       assert value.imageview.Valid
       assert value.sampler.Valid
     elif typeof(value) is array:
-      when elementType(value) is Image:
+      when elementType(value) is ImageObject:
         for t in value.litems:
           assert t.vk.Valid
           assert t.imageview.Valid
@@ -132,7 +132,7 @@ proc initDescriptorSet*(
           pImageInfo: nil,
           pBufferInfo: addr(bufferWrites[^1]),
         )
-      elif typeof(fieldValue) is Image:
+      elif typeof(fieldValue) is ImageObject:
         imageWrites.add VkDescriptorImageInfo(
           sampler: fieldValue.sampler,
           imageView: fieldValue.imageView,
@@ -149,7 +149,7 @@ proc initDescriptorSet*(
           pBufferInfo: nil,
         )
       elif typeof(fieldValue) is array:
-        when elementType(fieldValue) is Image:
+        when elementType(fieldValue) is ImageObject:
           for image in fieldValue.litems:
             imageWrites.add VkDescriptorImageInfo(
               sampler: image.sampler,
@@ -465,14 +465,14 @@ proc createSampler(
   )
   checkVkResult vkCreateSampler(vulkan.device, addr(samplerInfo), nil, addr(result))
 
-proc createVulkanImage(renderData: var RenderData, image: var Image) =
+proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
   assert image.vk == VkImage(0), "Image has already been created"
   var usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
   if image.isRenderTarget:
     usage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
   let format = getVkFormat(grayscale = elementType(image.data) is Gray, usage = usage)
 
-  image.vk = svkCreate2DImage(image.width, image.height, format, usage, image.samples)
+  image.vk = svkCreate2DImage(image.width, image.height, format, usage, image.samples, image.nLayers)
   renderData.images.add image.vk
   image.sampler = createSampler(
     magFilter = image.magInterpolation,
@@ -512,7 +512,7 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
   # imageview can only be created after memory is bound
-  image.imageview = svkCreate2DImageView(image.vk, format)
+  image.imageview = svkCreate2DImageView(image.vk, format, nLayers=image.nLayers)
   renderData.imageViews.add image.imageview
 
   # data transfer and layout transition
@@ -529,10 +529,10 @@ proc createVulkanImage(renderData: var RenderData, image: var Image) =
 
 proc uploadImages*(renderdata: var RenderData, descriptorSet: var DescriptorSetData) =
   for name, value in fieldPairs(descriptorSet.data):
-    when typeof(value) is Image:
+    when typeof(value) is ImageObject:
       renderdata.createVulkanImage(value)
     elif typeof(value) is array:
-      when elementType(value) is Image:
+      when elementType(value) is ImageObject:
         for image in value.mitems:
           renderdata.createVulkanImage(image)
 

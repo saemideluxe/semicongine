@@ -374,16 +374,3 @@ proc maxFramebufferSampleCount*(maxSamples = VK_SAMPLE_COUNT_8_BIT): VkSampleCou
     limits.framebufferColorSampleCounts.uint32 and limits.framebufferDepthSampleCounts.uint32
   ).toEnums
   return min(max(available), maxSamples)
-
-
-proc `[]`*(image: Image, x, y: uint32): auto =
-  assert x < image.width, &"{x} < {image.width} is not true"
-  assert y < image.height, &"{y} < {image.height} is not true"
-
-  image.data[y * image.width + x]
-
-proc `[]=`*[T](image: var Image[T], x, y: uint32, value: T) =
-  assert x < image.width
-  assert y < image.height
-
-  image.data[y * image.width + x] = value

@@ -103,7 +103,7 @@ proc svkAllocateMemory*(size: uint64, typeIndex: uint32): VkDeviceMemory =
     addr(result),
   )
 
-proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray[VkImageUsageFlagBits], samples = VK_SAMPLE_COUNT_1_BIT): VkImage =
+proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray[VkImageUsageFlagBits], samples = VK_SAMPLE_COUNT_1_BIT, nLayers = 1'u32): VkImage =
   var imageProps: VkImageFormatProperties
   checkVkResult vkGetPhysicalDeviceImageFormatProperties(
     vulkan.physicalDevice,
@@ -120,7 +120,7 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
     imageType: VK_IMAGE_TYPE_2D,
     extent: VkExtent3D(width: width, height: height, depth: 1),
     mipLevels: min(1'u32, imageProps.maxMipLevels),
-    arrayLayers: min(1'u32, imageProps.maxArrayLayers),
+    arrayLayers: min(nLayers, imageProps.maxArrayLayers),
     format: format,
     tiling: VK_IMAGE_TILING_OPTIMAL,
     initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
@@ -130,7 +130,7 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
   )
   checkVkResult vkCreateImage(vulkan.device, addr imageInfo, nil, addr(result))
 
-proc svkCreate2DImageView*(image: VkImage, format: VkFormat, aspect = VK_IMAGE_ASPECT_COLOR_BIT): VkImageView =
+proc svkCreate2DImageView*(image: VkImage, format: VkFormat, aspect = VK_IMAGE_ASPECT_COLOR_BIT, nLayers=1'u32): VkImageView =
   var createInfo = VkImageViewCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
     image: image,
@@ -147,7 +147,7 @@ proc svkCreate2DImageView*(image: VkImage, format: VkFormat, aspect = VK_IMAGE_A
       baseMipLevel: 0,
       levelCount: 1,
       baseArrayLayer: 0,
-      layerCount: 1,
+      layerCount: nLayers,
     ),
   )
   checkVkResult vkCreateImageView(vulkan.device, addr(createInfo), nil, addr(result))

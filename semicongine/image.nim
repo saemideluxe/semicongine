@@ -22,7 +22,8 @@ type
   Gray* = TVec1[uint8]
   BGRA* = TVec4[uint8]
   PixelType* = Gray | BGRA
-  Image*[T: PixelType] = object
+
+  ImageObject*[T: PixelType, IsArray: static bool] = object
     width*: uint32
     height*: uint32
     minInterpolation*: VkFilter = VK_FILTER_LINEAR
@@ -35,7 +36,17 @@ type
     sampler*: VkSampler
     isRenderTarget*: bool = false
     samples*: VkSampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT
+    when IsArray:
+      nLayers*: uint32
+  Image*[T: PixelType] = ImageObject[T, false]
+  ImageArray*[T: PixelType] = ImageObject[T, true]
 
+template nLayers*(image: Image): untyped =
+  1
+
+proc `=copy`[S, T](dest: var ImageObject[S, T]; source: ImageObject[S, T]) {.error.}
+
+# loads single layer image
 proc loadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
   when T is Gray:
     let nChannels = 1.cint
@@ -60,9 +71,42 @@ proc loadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
   copyMem(result.data.ToCPointer, data, imagesize)
   nativeFree(data)
 
-  when T is BGRA: # converkt to BGRA
+  when T is BGRA: # convert to BGRA
     for i in 0 ..< result.data.len:
       swap(result.data[i][0], result.data[i][2])
+
+proc addImageLayer*[T: PixelType](image: var Image[T], pngData: string|seq[uint8]) =
+  when T is Gray:
+    const nChannels = 1.cint
+  elif T is BGRA:
+    const nChannels = 4.cint
+
+  var w, h, c: cint
+
+  let data = stbi_load_from_memory(
+    buffer = cast[ptr uint8](pngData.ToCPointer),
+    len = pngData.len.cint,
+    x = addr(w),
+    y = addr(h),
+    channels_in_file = addr(c),
+    desired_channels = nChannels
+  )
+  if data == nil:
+    raise newException(Exception, "An error occured while loading PNG file")
+
+  assert w == image.width, "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
+  assert h == image.height, "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
+
+  let imagesize = image.width * image.height * nChannels
+  let layerOffset = image.width * image.height * image.nLayers
+  inc image.nLayers
+  image.data.setLen(image.nLayers * image.width * image.height)
+  copyMem(addr(image.data[layerOffset]), data, imagesize)
+  nativeFree(data)
+
+  when T is BGRA: # convert to BGRA
+    for i in 0 ..< image.data.len:
+      swap(image.data[layerOffset + i][0], image.data[layerOffset + i][2])
 
 proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
   assert path.splitFile().ext.toLowerAscii == ".png", "Unsupported image type: " & path.splitFile().ext.toLowerAscii
@@ -72,6 +116,32 @@ proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T]
     let pngType = 6.cint
 
   result = loadImageData[T](loadResource_intern(path, package = package).readAll())
+
+proc `[]`*(image: Image, x, y: uint32): auto =
+  assert x < image.width, &"{x} < {image.width} is not true"
+  assert y < image.height, &"{y} < {image.height} is not true"
+
+  image.data[y * image.width + x]
+
+proc `[]=`*[T](image: var Image[T], x, y: uint32, value: T) =
+  assert x < image.width
+  assert y < image.height
+
+  image.data[y * image.width + x] = value
+
+proc `[]`*(image: ImageArray, layer, x, y: uint32): auto =
+  assert layer < image.nLayers, &"Tried to access image layer {layer}, but image has only {image.nLayers} layers"
+  assert x < image.width, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+  assert y < image.height, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+
+  image.data[layer * (image.width * image.height) + y * image.width + x]
+
+proc `[]=`*[T](image: var ImageArray[T], layer, x, y: uint32, value: T) =
+  assert layer < image.nLayers, &"Tried to access image layer {layer}, but image has only {image.nLayers} layers"
+  assert x < image.width, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+  assert y < image.height, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+
+  image.data[layer * (image.width * image.height) + y * image.width + x] = value
 
 # stb_image.h has no encoding support, maybe check stb_image_write or similar
 #
