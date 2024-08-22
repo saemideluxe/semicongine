@@ -13,10 +13,12 @@ proc test_gltf(time: float32) =
     ObjectData = object
       transform: Mat4
       materialId: int32
+
     Camera = object
       view: Mat4
       normal: Mat4
       projection: Mat4
+
     Material = object
       color: Vec4f = vec4(1, 1, 1, 1)
       # colorTexture: int32 = -1
@@ -25,11 +27,12 @@ proc test_gltf(time: float32) =
       # metallicRoughnessTexture: int32 = -1
       # normalTexture: int32 = -1
       # occlusionTexture: int32 = -1
-      emissive: Vec4f = vec4(0, 0, 0, 0)
-      # emissiveTexture: int32 = -1
+      emissive: Vec4f = vec4(0, 0, 0, 0) # emissiveTexture: int32 = -1
+
     MainDescriptors = object
       materials: array[50, GPUValue[Material, UniformBuffer]]
       camera: GPUValue[Camera, UniformBufferMapped]
+
     Shader = object
       objectData {.PushConstant.}: ObjectData
       position {.VertexAttribute.}: Vec3f
@@ -41,7 +44,8 @@ proc test_gltf(time: float32) =
       outColor {.ShaderOutput.}: Vec4f
       descriptors {.DescriptorSet: 0.}: MainDescriptors
       # code
-      vertexCode: string = """
+      vertexCode: string =
+        """
 void main() {
   mat4 modelView = objectData.transform * camera.view;
   mat3 normalMat = mat3(transpose(inverse(objectData.transform)));
@@ -51,7 +55,8 @@ void main() {
   fragmentNormal = normal * normalMat;
   gl_Position = vec4(position, 1) * (modelView * camera.projection);
 }"""
-      fragmentCode: string = """
+      fragmentCode: string =
+        """
 const vec3 lightPosition = vec3(7, 9, -12);
 const float shininess = 40;
 const vec3 ambientColor = vec3(0, 0, 0);
@@ -82,6 +87,7 @@ void main() {
 
   outColor = vec4(color, fragmentColor.a);
 }"""
+
     Mesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec4f, VertexBuffer]
@@ -109,31 +115,34 @@ void main() {
       occlusionTexture: "occlusionTexture",
       emissiveTexture: "emissiveTexture",
       emissiveFactor: "emissive",
-    )
+    ),
   )
   var descriptors = asDescriptorSetData(
     MainDescriptors(
-      camera: asGPUValue(Camera(
-        view: Unit4,
-        normal: Unit4,
-        projection: Unit4,
-      ), UniformBufferMapped)
+      camera: asGPUValue(
+        Camera(view: Unit4, normal: Unit4, projection: Unit4), UniformBufferMapped
+      )
     )
   )
   for i in 0 ..< gltfData.materials.len:
     descriptors.data.materials[i] = asGPUValue(gltfData.materials[i], UniformBuffer)
   for mesh in mitems(gltfData.meshes):
     for primitive in mitems(mesh):
-      primitive[0].color = asGPUArray(newSeqWith(primitive[0].position.data.len, vec4(1, 1, 1, 1)), VertexBuffer)
+      primitive[0].color = asGPUArray(
+        newSeqWith(primitive[0].position.data.len, vec4(1, 1, 1, 1)), VertexBuffer
+      )
       renderdata.assignBuffers(primitive[0])
   renderdata.assignBuffers(descriptors)
 
-  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, cullMode=[])
+  var pipeline =
+    createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, cullMode = [])
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
 
   renderdata.flushAllMemory()
 
-  proc drawNode(commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int, transform: Mat4) =
+  proc drawNode(
+      commandbuffer: VkCommandBuffer, pipeline: Pipeline, nodeId: int, transform: Mat4
+  ) =
     let nodeTransform = gltfData.nodes[nodeId].transform * transform
     if gltfData.nodes[nodeId].mesh >= 0:
       for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh].mitems:
@@ -141,10 +150,16 @@ void main() {
           commandbuffer = commandbuffer,
           pipeline = pipeline,
           mesh = primitive[0],
-          pushConstant = ObjectData(transform: nodeTransform, materialId: primitive[0].material)
+          pushConstant =
+            ObjectData(transform: nodeTransform, materialId: primitive[0].material),
         )
     for childNode in gltfData.nodes[nodeId].children:
-      drawNode(commandbuffer = commandbuffer, pipeline = pipeline, nodeId = childNode, transform = nodeTransform)
+      drawNode(
+        commandbuffer = commandbuffer,
+        pipeline = pipeline,
+        nodeId = childNode,
+        transform = nodeTransform,
+      )
 
   var camPos: Vec3f
   var camYaw: float32
@@ -158,15 +173,19 @@ void main() {
     let dt = ((getMonoTime() - lastT).inNanoseconds().int / 1_000_000_000).float32
     lastT = getMonoTime()
 
-    camYaw  += mouseMove().x.float32 / 1000'f32
+    camYaw += mouseMove().x.float32 / 1000'f32
     camPitch += mouseMove().y.float32 / 1000'f32
     var
       forward = 0'f32
       sideward = 0'f32
-    if keyIsDown(W): forward += 2
-    if keyIsDown(S): forward -= 2
-    if keyIsDown(A): sideward -= 2
-    if keyIsDown(D): sideward += 2
+    if keyIsDown(W):
+      forward += 2
+    if keyIsDown(S):
+      forward -= 2
+    if keyIsDown(A):
+      sideward -= 2
+    if keyIsDown(D):
+      sideward += 2
 
     let camDir = (rotate(camYaw, Y) * rotate(camPitch, X)) * Z
     let camDirSide = camDir.cross(-Y).normalized
@@ -176,14 +195,20 @@ void main() {
     let view = rotate(-camPitch, X) * rotate(-camYaw, Y) * translate(-camPos)
     descriptors.data.camera.data.view = view
     descriptors.data.camera.data.normal = view
-    descriptors.data.camera.data.projection = projection(PI / 2, aspect = getAspectRatio(), zNear = 0.01, zFar = 20)
+    descriptors.data.camera.data.projection =
+      projection(PI / 2, aspect = getAspectRatio(), zNear = 0.01, zFar = 20)
 
     updateGPUBuffer(descriptors.data.camera)
 
     withNextFrame(framebuffer, commandbuffer):
-
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
           bindDescriptorSet(commandbuffer, descriptors, 0, pipeline)
           for nodeId in gltfData.scenes[0]:
@@ -191,7 +216,7 @@ void main() {
               commandbuffer = commandbuffer,
               pipeline = pipeline,
               nodeId = nodeId,
-              transform = rotate(PI / 2, Z)
+              transform = rotate(PI / 2, Z),
             )
 
   # cleanup
@@ -203,7 +228,9 @@ when isMainModule:
   var time = 1000'f32
   initVulkan()
 
-  var renderpass = createDirectPresentationRenderPass(depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT)
+  var renderpass = createDirectPresentationRenderPass(
+    depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT
+  )
   setupSwapchain(renderpass = renderpass)
   lockMouse(true)
   # showSystemCursor(false)

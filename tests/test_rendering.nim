@@ -14,6 +14,7 @@ proc test_01_triangle(time: float32) =
   type
     PushConstant = object
       scale: float32
+
     Shader = object
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec3f
@@ -21,16 +22,22 @@ proc test_01_triangle(time: float32) =
       fragmentColor {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
       # code
-      vertexCode: string = """void main() {
+      vertexCode: string =
+        """void main() {
       fragmentColor = color;
       gl_Position = vec4(position * pushConstant.scale, 1);}"""
-      fragmentCode: string = """void main() {
+      fragmentCode: string =
+        """void main() {
       outColor = vec4(fragmentColor, 1);}"""
+
     TriangleMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec3f, VertexBuffer]
+
   var mesh = TriangleMesh(
-    position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
+    position: asGPUArray(
+      [vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer
+    ),
     color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   assignBuffers(renderdata, mesh)
@@ -40,20 +47,29 @@ proc test_01_triangle(time: float32) =
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-
     withNextFrame(framebuffer, commandbuffer):
-
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
-
-          renderWithPushConstant(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh, pushConstant = PushConstant(scale: 0.3 + ((getMonoTime() - start).inMilliseconds().int / 1000)))
+          renderWithPushConstant(
+            commandbuffer = commandbuffer,
+            pipeline = pipeline,
+            mesh = mesh,
+            pushConstant = PushConstant(
+              scale: 0.3 + ((getMonoTime() - start).inMilliseconds().int / 1000)
+            ),
+          )
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
-
 
 proc test_02_triangle_quad_instanced(time: float32) =
   var renderdata = initRenderData()
@@ -67,37 +83,50 @@ proc test_02_triangle_quad_instanced(time: float32) =
       fragmentColor {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
       # code
-      vertexCode: string = """void main() {
+      vertexCode: string =
+        """void main() {
       fragmentColor = color;
       gl_Position = vec4((position * scale) + pos, 1);}"""
-      fragmentCode: string = """void main() {
+      fragmentCode: string =
+        """void main() {
       outColor = vec4(fragmentColor, 1);}"""
+
     TriangleMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec3f, VertexBuffer]
+
     QuadMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
+
     Instances = object
       pos: GPUArray[Vec3f, VertexBuffer]
       scale: GPUArray[float32, VertexBuffer]
+
   var tri = TriangleMesh(
-    position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
+    position: asGPUArray(
+      [vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer
+    ),
     color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   var quad = QuadMesh(
-    position: asGPUArray([vec3(-0.3, -0.3, 0), vec3(-0.3, 0.3, 0), vec3(0.3, 0.3, 0), vec3(0.3, -0.3, 0)], VertexBuffer),
+    position: asGPUArray(
+      [vec3(-0.3, -0.3, 0), vec3(-0.3, 0.3, 0), vec3(0.3, 0.3, 0), vec3(0.3, -0.3, 0)],
+      VertexBuffer,
+    ),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
-    color: asGPUArray([vec3(1, 1, 1), vec3(1, 1, 1), vec3(1, 1, 1), vec3(1, 1, 1)], VertexBuffer),
+    color: asGPUArray(
+      [vec3(1, 1, 1), vec3(1, 1, 1), vec3(1, 1, 1), vec3(1, 1, 1)], VertexBuffer
+    ),
   )
 
   var instancesA: Instances
-  for n in 1..100:
+  for n in 1 .. 100:
     instancesA.pos.data.add vec3(rand(-0.8'f32 .. 0.8'f32), rand(-0.8'f32 .. 0'f32), 0)
     instancesA.scale.data.add rand(0.3'f32 .. 0.4'f32)
   var instancesB: Instances
-  for n in 1..100:
+  for n in 1 .. 100:
     instancesB.pos.data.add vec3(rand(-0.8'f32 .. 0.8'f32), rand(0'f32 .. 0.8'f32), 0)
     instancesB.scale.data.add rand(0.1'f32 .. 0.2'f32)
 
@@ -111,17 +140,40 @@ proc test_02_triangle_quad_instanced(time: float32) =
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-
     withNextFrame(framebuffer, commandbuffer):
-
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
-
-          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesA)
-          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad, instances = instancesB)
-          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesA)
-          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = tri, instances = instancesB)
+          render(
+            commandbuffer = commandbuffer,
+            pipeline = pipeline,
+            mesh = quad,
+            instances = instancesA,
+          )
+          render(
+            commandbuffer = commandbuffer,
+            pipeline = pipeline,
+            mesh = quad,
+            instances = instancesB,
+          )
+          render(
+            commandbuffer = commandbuffer,
+            pipeline = pipeline,
+            mesh = tri,
+            instances = instancesA,
+          )
+          render(
+            commandbuffer = commandbuffer,
+            pipeline = pipeline,
+            mesh = tri,
+            instances = instancesB,
+          )
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -146,14 +198,17 @@ proc test_03_simple_descriptorset(time: float32) =
       outColor {.ShaderOutput.}: Vec4f
       descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
-      vertexCode: string = """void main() {
+      vertexCode: string =
+        """void main() {
       fragmentColor = material.baseColor;
       gl_Position = vec4(position, 1);
       gl_Position.x += ((material.baseColor.b - 0.5) * 2) - 0.5;
       uv = position.xy + 0.5;
       }"""
-      fragmentCode: string = """void main() {
+      fragmentCode: string =
+        """void main() {
       outColor = vec4(fragmentColor, 1) * texture(texture1, uv);}"""
+
     QuadMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
@@ -164,20 +219,29 @@ proc test_03_simple_descriptorset(time: float32) =
   let W = BGRA([255'u8, 255'u8, 255'u8, 255'u8])
   var
     quad = QuadMesh(
-      position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(-0.5, 0.5, 0), vec3(0.5, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
+      position: asGPUArray(
+        [vec3(-0.5, -0.5, 0), vec3(-0.5, 0.5, 0), vec3(0.5, 0.5, 0), vec3(0.5, -0.5, 0)],
+        VertexBuffer,
+      ),
       indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
     )
     uniforms1 = asDescriptorSetData(
       Uniforms(
         material: asGPUValue(Material(baseColor: vec3(1, 1, 1)), UniformBuffer),
-        texture1: Image[BGRA](width: 3, height: 3, data: @[R, G, B, G, B, R, B, R, G], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
+        texture1: Image[BGRA](
+          width: 3,
+          height: 3,
+          data: @[R, G, B, G, B, R, B, R, G],
+          minInterpolation: VK_FILTER_NEAREST,
+          magInterpolation: VK_FILTER_NEAREST,
+        ),
       )
     )
     uniforms2 = asDescriptorSetData(
       Uniforms(
         material: asGPUValue(Material(baseColor: vec3(0.5, 0.5, 0.5)), UniformBuffer),
         texture1: Image[BGRA](width: 2, height: 2, data: @[R, G, B, W]),
-    )
+      )
     )
 
   assignBuffers(renderdata, quad)
@@ -194,13 +258,16 @@ proc test_03_simple_descriptorset(time: float32) =
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-
     withNextFrame(framebuffer, commandbuffer):
-
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
-
           bindDescriptorSet(commandbuffer, uniforms1, 0, pipeline)
           render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
@@ -218,20 +285,25 @@ proc test_04_multiple_descriptorsets(time: float32) =
   type
     RenderSettings = object
       brigthness: float32
+
     Material = object
       baseColor: Vec3f
+
     ObjectSettings = object
       scale: float32
       materialIndex: uint32
+
     Constants = object
       offset: Vec2f
 
     ConstSet = object
       constants: GPUValue[Constants, UniformBuffer]
+
     MainSet = object
       renderSettings: GPUValue[RenderSettings, UniformBufferMapped]
       material: array[2, GPUValue[Material, UniformBuffer]]
       texture1: array[2, Image[Gray]]
+
     OtherSet = object
       objectSettings: GPUValue[ObjectSettings, UniformBufferMapped]
 
@@ -244,28 +316,31 @@ proc test_04_multiple_descriptorsets(time: float32) =
       descriptorSets1 {.DescriptorSet: 1.}: MainSet
       descriptorSets2 {.DescriptorSet: 2.}: OtherSet
       # code
-      vertexCode: string = """void main() {
+      vertexCode: string =
+        """void main() {
       fragmentColor = material[objectSettings.materialIndex].baseColor * renderSettings.brigthness;
       gl_Position = vec4(position * objectSettings.scale, 1);
       gl_Position.xy += constants.offset.xy;
       gl_Position.x += material[objectSettings.materialIndex].baseColor.b - 0.5;
       uv = position.xy + 0.5;
       }"""
-      fragmentCode: string = """void main() {
+      fragmentCode: string =
+        """void main() {
       outColor = vec4(fragmentColor * texture(texture1[objectSettings.materialIndex], uv).rrr, 1);
       }"""
+
     QuadMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
 
   var quad = QuadMesh(
-    position: asGPUArray([vec3(-0.5, -0.5), vec3(-0.5, 0.5), vec3(0.5, 0.5), vec3(0.5, -0.5)], VertexBuffer),
+    position: asGPUArray(
+      [vec3(-0.5, -0.5), vec3(-0.5, 0.5), vec3(0.5, 0.5), vec3(0.5, -0.5)], VertexBuffer
+    ),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
   )
   var constset = asDescriptorSetData(
-    ConstSet(
-      constants: asGPUValue(Constants(offset: vec2(-0.3, 0.2)), UniformBuffer),
-    )
+    ConstSet(constants: asGPUValue(Constants(offset: vec2(-0.3, 0.2)), UniformBuffer))
   )
   let G = Gray([50'u8])
   let W = Gray([255'u8])
@@ -275,21 +350,35 @@ proc test_04_multiple_descriptorsets(time: float32) =
       material: [
         asGPUValue(Material(baseColor: vec3(1, 1, 0)), UniformBuffer),
         asGPUValue(Material(baseColor: vec3(1, 0, 1)), UniformBuffer),
-    ],
-    texture1: [
-      Image[Gray](width: 2, height: 2, data: @[W, G, G, W], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
-      Image[Gray](width: 3, height: 3, data: @[W, G, W, G, W, G, W, G, W], minInterpolation: VK_FILTER_NEAREST, magInterpolation: VK_FILTER_NEAREST),
-    ],
-  ),
+      ],
+      texture1: [
+        Image[Gray](
+          width: 2,
+          height: 2,
+          data: @[W, G, G, W],
+          minInterpolation: VK_FILTER_NEAREST,
+          magInterpolation: VK_FILTER_NEAREST,
+        ),
+        Image[Gray](
+          width: 3,
+          height: 3,
+          data: @[W, G, W, G, W, G, W, G, W],
+          minInterpolation: VK_FILTER_NEAREST,
+          magInterpolation: VK_FILTER_NEAREST,
+        ),
+      ],
+    )
   )
   var otherset1 = asDescriptorSetData(
     OtherSet(
-      objectSettings: asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 0), UniformBufferMapped),
+      objectSettings:
+        asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 0), UniformBufferMapped)
     )
   )
   var otherset2 = asDescriptorSetData(
     OtherSet(
-      objectSettings: asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 1), UniformBufferMapped),
+      objectSettings:
+        asGPUValue(ObjectSettings(scale: 1.0, materialIndex: 1), UniformBufferMapped)
     )
   )
 
@@ -310,23 +399,29 @@ proc test_04_multiple_descriptorsets(time: float32) =
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, constset, 0, pipeline)
       bindDescriptorSet(commandbuffer, mainset, 1, pipeline)
 
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
-
           bindDescriptorSet(commandbuffer, otherset1, 2, pipeline)
           render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
           bindDescriptorSet(commandbuffer, otherset2, 2, pipeline)
           render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = quad)
 
-    mainset.data.renderSettings.data.brigthness = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
-    otherset1.data.objectSettings.data.scale = 0.5 + ((getMonoTime() - start).inMilliseconds().int / 1000) / time
+    mainset.data.renderSettings.data.brigthness =
+      ((getMonoTime() - start).inMilliseconds().int / 1000) / time
+    otherset1.data.objectSettings.data.scale =
+      0.5 + ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     updateGPUBuffer(mainset.data.renderSettings)
     updateGPUBuffer(otherset1.data.objectSettings)
     renderdata.flushAllMemory()
@@ -338,11 +433,12 @@ proc test_04_multiple_descriptorsets(time: float32) =
 
 proc test_05_cube(time: float32) =
   type
-
     UniformData = object
       mvp: Mat4
+
     Uniforms = object
       data: GPUValue[UniformData, UniformBufferMapped]
+
     CubeShader = object
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec4f
@@ -350,22 +446,30 @@ proc test_05_cube(time: float32) =
       outColor {.ShaderOutput.}: Vec4f
       descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
-      vertexCode = """void main() {
+      vertexCode =
+        """void main() {
     fragmentColor = color;
     gl_Position = vec4(position, 1) * data.mvp;
 }"""
-      fragmentCode = """void main() {
+      fragmentCode =
+        """void main() {
       outColor = fragmentColor;
 }"""
+
     Mesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       normals: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec4f, VertexBuffer]
 
-  let quad = @[
-    vec3(-0.5, -0.5), vec3(-0.5, +0.5), vec3(+0.5, +0.5),
-    vec3(+0.5, +0.5), vec3(+0.5, -0.5), vec3(-0.5, -0.5),
-  ]
+  let quad =
+    @[
+      vec3(-0.5, -0.5),
+      vec3(-0.5, +0.5),
+      vec3(+0.5, +0.5),
+      vec3(+0.5, +0.5),
+      vec3(+0.5, -0.5),
+      vec3(-0.5, -0.5),
+    ]
   proc transf(data: seq[Vec3f], mat: Mat4): seq[Vec3f] =
     for v in data:
       result.add mat * v
@@ -415,16 +519,17 @@ proc test_05_cube(time: float32) =
   assignBuffers(renderdata, mesh)
 
   var floor = Mesh(
-    position: asGPUArray(quad.transf(scale(10, 10, 10) * rotate(-PI / 2, X) * translate(0, 0, 0.05)), VertexBuffer),
+    position: asGPUArray(
+      quad.transf(scale(10, 10, 10) * rotate(-PI / 2, X) * translate(0, 0, 0.05)),
+      VertexBuffer,
+    ),
     color: asGPUArray(newSeqWith(6, vec4(0.1, 0.1, 0.1, 1)), VertexBuffer),
     normals: asGPUArray(newSeqWith(6, Y), VertexBuffer),
   )
   assignBuffers(renderdata, floor)
 
   var uniforms1 = asDescriptorSetData(
-    Uniforms(
-      data: asGPUValue(UniformData(mvp: Unit4), UniformBufferMapped)
-    )
+    Uniforms(data: asGPUValue(UniformData(mvp: Unit4), UniformBufferMapped))
   )
   assignBuffers(renderdata, uniforms1)
 
@@ -441,18 +546,23 @@ proc test_05_cube(time: float32) =
     let tStartLoop = getMonoTime() - tStart
 
     uniforms1.data.data.data.mvp = (
-      projection(-PI / 2, getAspectRatio(), 0.01, 100) *
-      translate(0, 0, 2) *
-      rotate(PI / 4, X) *
-      rotate(PI * 0.1 * (tStartLoop.inMicroseconds() / 1_000_000), Y)
+      projection(-PI / 2, getAspectRatio(), 0.01, 100) * translate(0, 0, 2) *
+      rotate(PI / 4, X) * rotate(
+        PI * 0.1 * (tStartLoop.inMicroseconds() / 1_000_000), Y
+      )
     )
     updateGPUBuffer(uniforms1.data.data, flush = true)
 
     withNextFrame(framebuffer, commandbuffer):
-
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
-
           bindDescriptorSet(commandbuffer, uniforms1, 0, pipeline)
           render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
           render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = floor)
@@ -478,36 +588,67 @@ proc test_06_different_draw_modes(time: float32) =
       fragmentColor {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
       # code
-      vertexCode: string = """void main() {
+      vertexCode: string =
+        """void main() {
       gl_PointSize = 100;
       fragmentColor = color;
       gl_Position = vec4(position, 1);}"""
-      fragmentCode: string = """void main() {
+      fragmentCode: string =
+        """void main() {
       outColor = vec4(fragmentColor, 1);}"""
+
     TriangleMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec3f, VertexBuffer]
+
   var triangle = TriangleMesh(
-    position: asGPUArray([vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer),
+    position: asGPUArray(
+      [vec3(-0.5, -0.5, 0), vec3(0, 0.5, 0), vec3(0.5, -0.5, 0)], VertexBuffer
+    ),
     color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   var lines = TriangleMesh(
-    position: asGPUArray([vec3(-0.9, 0, 0), vec3(-0.05, -0.9, 0), vec3(0.05, -0.9, 0), vec3(0.9, 0, 0)], VertexBuffer),
-    color: asGPUArray([vec3(1, 1, 0), vec3(1, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0)], VertexBuffer),
+    position: asGPUArray(
+      [vec3(-0.9, 0, 0), vec3(-0.05, -0.9, 0), vec3(0.05, -0.9, 0), vec3(0.9, 0, 0)],
+      VertexBuffer,
+    ),
+    color: asGPUArray(
+      [vec3(1, 1, 0), vec3(1, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0)], VertexBuffer
+    ),
   )
   assignBuffers(renderdata, triangle)
   assignBuffers(renderdata, lines)
   renderdata.flushAllMemory()
 
-  var pipeline1 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_LINE, lineWidth = 20'f32)
-  var pipeline2 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_POINT)
-  var pipeline3 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST, lineWidth = 5)
-  var pipeline4 = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
+  var pipeline1 = createPipeline[Shader](
+    renderPass = vulkan.swapchain.renderPass,
+    polygonMode = VK_POLYGON_MODE_LINE,
+    lineWidth = 20'f32,
+  )
+  var pipeline2 = createPipeline[Shader](
+    renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_POINT
+  )
+  var pipeline3 = createPipeline[Shader](
+    renderPass = vulkan.swapchain.renderPass,
+    topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+    lineWidth = 5,
+  )
+  var pipeline4 = createPipeline[Shader](
+    renderPass = vulkan.swapchain.renderPass,
+    topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+  )
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     withNextFrame(framebuffer, commandbuffer):
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline1):
           render(commandbuffer = commandbuffer, pipeline = pipeline1, mesh = triangle)
         withPipeline(commandbuffer, pipeline2):
@@ -531,6 +672,7 @@ proc test_07_png_texture(time: float32) =
   type
     Uniforms = object
       texture1: Image[BGRA]
+
     Shader = object
       position {.VertexAttribute.}: Vec3f
       uv {.VertexAttribute.}: Vec2f
@@ -538,49 +680,59 @@ proc test_07_png_texture(time: float32) =
       outColor {.ShaderOutput.}: Vec4f
       descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
-      vertexCode: string = """
+      vertexCode: string =
+        """
 void main() {
     fragmentUv = uv;
     gl_Position = vec4(position, 1);
 }"""
-      fragmentCode: string = """
+      fragmentCode: string =
+        """
 void main() {
     outColor = texture(texture1, fragmentUv);
 }"""
+
     Quad = object
       position: GPUArray[Vec3f, VertexBuffer]
       uv: GPUArray[Vec2f, VertexBuffer]
+
   var mesh = Quad(
-    position: asGPUArray([
-      vec3(-0.8, -0.5), vec3(-0.8, 0.5), vec3(0.8, 0.5),
-      vec3(0.8, 0.5), vec3(0.8, -0.5), vec3(-0.8, -0.5),
-    ], VertexBuffer),
-    uv: asGPUArray([
-      vec2(0, 1), vec2(0, 0), vec2(1, 0),
-      vec2(1, 0), vec2(1, 1), vec2(0, 1),
-    ], VertexBuffer),
+    position: asGPUArray(
+      [
+        vec3(-0.8, -0.5),
+        vec3(-0.8, 0.5),
+        vec3(0.8, 0.5),
+        vec3(0.8, 0.5),
+        vec3(0.8, -0.5),
+        vec3(-0.8, -0.5),
+      ],
+      VertexBuffer,
+    ),
+    uv: asGPUArray(
+      [vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1)],
+      VertexBuffer,
+    ),
   )
   assignBuffers(renderdata, mesh)
   renderdata.flushAllMemory()
 
   var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
-  var uniforms1 = asDescriptorSetData(
-    Uniforms(
-      texture1: loadImage[BGRA]("art.png"),
-    )
-  )
+  var uniforms1 = asDescriptorSetData(Uniforms(texture1: loadImage[BGRA]("art.png")))
   uploadImages(renderdata, uniforms1)
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-
     withNextFrame(framebuffer, commandbuffer):
-
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
-
           bindDescriptorSet(commandbuffer, uniforms1, 0, pipeline)
           render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
 
@@ -589,8 +741,11 @@ void main() {
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleCountFlagBits) =
-  var (offscreenRP, presentRP) = createIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
+proc test_08_triangle_2pass(
+    time: float32, depthBuffer: bool, samples: VkSampleCountFlagBits
+) =
+  var (offscreenRP, presentRP) =
+    createIndirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
 
   setupSwapchain(renderpass = presentRP)
 
@@ -599,27 +754,33 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
   type
     Uniforms = object
       frameTexture: Image[BGRA]
+
     TriangleShader = object
       position {.VertexAttribute.}: Vec3f
       color {.VertexAttribute.}: Vec3f
       fragmentColor {.Pass.}: Vec3f
       outColor {.ShaderOutput.}: Vec4f
       # code
-      vertexCode: string = """void main() {
+      vertexCode: string =
+        """void main() {
       fragmentColor = color;
       gl_Position = vec4(position, 1);}"""
-      fragmentCode: string = """void main() {
+      fragmentCode: string =
+        """void main() {
       outColor = vec4(fragmentColor, 1);}"""
+
     PresentShader = object
       position {.VertexAttribute.}: Vec2f
       uv {.Pass.}: Vec2f
       outColor {.ShaderOutput.}: Vec4f
       descriptorSets {.DescriptorSet: 0.}: Uniforms
       # code
-      vertexCode: string = """void main() {
+      vertexCode: string =
+        """void main() {
       uv = ((position + 1) * 0.5) * vec2(1, -1);
       gl_Position = vec4(position, 0, 1);}"""
-      fragmentCode: string = """void main() {
+      fragmentCode: string =
+        """void main() {
       vec2 uv1 = uv + vec2(0.001, 0.001);
       vec2 uv2 = uv + vec2(0.001, -0.001);
       vec2 uv3 = uv + vec2(-0.001, 0.001);
@@ -631,23 +792,32 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
         texture(frameTexture, uv4)
       ) / 4;
       }"""
+
     TriangleMesh = object
       position: GPUArray[Vec3f, VertexBuffer]
       color: GPUArray[Vec3f, VertexBuffer]
+
     QuadMesh = object
       position: GPUArray[Vec2f, VertexBuffer]
       indices: GPUArray[uint16, IndexBuffer]
+
   var mesh = TriangleMesh(
-    position: asGPUArray([vec3(-0.5, -0.5), vec3(0, 0.5), vec3(0.5, -0.5)], VertexBuffer),
+    position:
+      asGPUArray([vec3(-0.5, -0.5), vec3(0, 0.5), vec3(0.5, -0.5)], VertexBuffer),
     color: asGPUArray([vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0)], VertexBuffer),
   )
   var quad = QuadMesh(
-    position: asGPUArray([vec2(-1, -1), vec2(-1, 1), vec2(1, 1), vec2(1, -1)], VertexBuffer),
+    position:
+      asGPUArray([vec2(-1, -1), vec2(-1, 1), vec2(1, 1), vec2(1, -1)], VertexBuffer),
     indices: asGPUArray([0'u16, 1'u16, 2'u16, 2'u16, 3'u16, 0'u16], IndexBuffer),
   )
   var uniforms1 = asDescriptorSetData(
     Uniforms(
-      frameTexture: Image[BGRA](width: vulkan.swapchain.width, height: vulkan.swapchain.height, isRenderTarget: true),
+      frameTexture: Image[BGRA](
+        width: vulkan.swapchain.width,
+        height: vulkan.swapchain.height,
+        isRenderTarget: true,
+      )
     )
   )
   assignBuffers(renderdata, mesh)
@@ -676,19 +846,11 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
     )
     let requirements = svkGetImageMemoryRequirements(depthImage)
     depthMemory = svkAllocateMemory(
-      requirements.size,
-      bestMemory(mappable = false, filter = requirements.memoryTypes)
+      requirements.size, bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
-    checkVkResult vkBindImageMemory(
-      vulkan.device,
-      depthImage,
-      depthMemory,
-      0,
-    )
+    checkVkResult vkBindImageMemory(vulkan.device, depthImage, depthMemory, 0)
     depthImageView = svkCreate2DImageView(
-      image = depthImage,
-      format = DEPTH_FORMAT,
-      aspect = VK_IMAGE_ASPECT_DEPTH_BIT
+      image = depthImage, format = DEPTH_FORMAT, aspect = VK_IMAGE_ASPECT_DEPTH_BIT
     )
 
   # create msaa images (will not use the one in the swapchain
@@ -706,15 +868,9 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
     )
     let requirements = svkGetImageMemoryRequirements(msaaImage)
     msaaMemory = svkAllocateMemory(
-      requirements.size,
-      bestMemory(mappable = false, filter = requirements.memoryTypes)
+      requirements.size, bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
-    checkVkResult vkBindImageMemory(
-      vulkan.device,
-      msaaImage,
-      msaaMemory,
-      0,
-    )
+    checkVkResult vkBindImageMemory(vulkan.device, msaaImage, msaaMemory, 0)
     msaaImageView = svkCreate2DImageView(image = msaaImage, format = SURFACE_FORMAT)
 
   var attachments: seq[VkImageView]
@@ -725,29 +881,37 @@ proc test_08_triangle_2pass(time: float32, depthBuffer: bool, samples: VkSampleC
       attachments = @[uniforms1.data.frameTexture.imageview]
   else:
     if offscreenRP.depthBuffer:
-      attachments = @[msaaImageView, depthImageView, uniforms1.data.frameTexture.imageview]
+      attachments =
+        @[msaaImageView, depthImageView, uniforms1.data.frameTexture.imageview]
     else:
       attachments = @[msaaImageView, uniforms1.data.frameTexture.imageview]
   var offscreenFB = svkCreateFramebuffer(
-    offscreenRP.vk,
-    vulkan.swapchain.width,
-    vulkan.swapchain.height,
-    attachments
+    offscreenRP.vk, vulkan.swapchain.width, vulkan.swapchain.height, attachments
   )
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-
     withNextFrame(framebuffer, commandbuffer):
-
-      withRenderPass(offscreenRP, offscreenFB, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(
+        offscreenRP,
+        offscreenFB,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, drawPipeline):
           render(commandbuffer = commandbuffer, pipeline = drawPipeline, mesh = mesh)
 
-      withRenderPass(presentRP, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
-
+      withRenderPass(
+        presentRP,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, presentPipeline):
-
           bindDescriptorSet(commandbuffer, uniforms1, 0, presentPipeline)
           render(commandbuffer = commandbuffer, pipeline = presentPipeline, mesh = quad)
 
@@ -775,16 +939,16 @@ when isMainModule:
 
   var mainRenderpass: RenderPass
   var renderPasses = [
-     (depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT),
-     (depthBuffer: false, samples: VK_SAMPLE_COUNT_4_BIT),
-     (depthBuffer: true, samples: VK_SAMPLE_COUNT_1_BIT),
-     (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
+    (depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT),
+    (depthBuffer: false, samples: VK_SAMPLE_COUNT_4_BIT),
+    (depthBuffer: true, samples: VK_SAMPLE_COUNT_1_BIT),
+    (depthBuffer: true, samples: VK_SAMPLE_COUNT_4_BIT),
   ]
-
 
   # test normal
   for i, (depthBuffer, samples) in renderPasses:
-    var renderpass = createDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
+    var renderpass =
+      createDirectPresentationRenderPass(depthBuffer = depthBuffer, samples = samples)
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format

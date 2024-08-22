@@ -4,11 +4,9 @@ import std/times
 
 import ../semicongine
 
-
 proc test1() =
   mixer[].addSound("test1", sineSoundData(1000, 2, 44100))
   mixer[].addSound("test2", sineSoundData(500, 2, 44100))
-
 
   let s1 = mixer[].play("test1", loop = true)
   let s2 = mixer[].play("test2", loop = true)
@@ -45,14 +43,8 @@ proc test2() =
 
     # song
     frerejaquesData = concat(
-      f, g, a, f,
-      f, g, a, f,
-      a, bb, c2, c2,
-      a, bb, c2, c2,
-      c2Short, d2Short, c2Short, bbShort, a, f,
-      c2Short, d2Short, c2Short, bbShort, a, f,
-      f, c, f, f,
-      f, c, f, f,
+      f, g, a, f, f, g, a, f, a, bb, c2, c2, a, bb, c2, c2, c2Short, d2Short, c2Short,
+      bbShort, a, f, c2Short, d2Short, c2Short, bbShort, a, f, f, c, f, f, f, c, f, f,
     )
 
   mixer[].addSound("frerejaques", frerejaquesData)
@@ -67,7 +59,6 @@ proc test3() =
   mixer[].addTrack("effects")
   discard mixer[].play("toccata et fugue")
 
-
 when isMainModule:
   test1()
   mixer[].stop()
@@ -78,7 +69,8 @@ when isMainModule:
   while mixer[].isPlaying():
     # on windows we re-open stdin and this will not work
     when defined(linux):
-      discard mixer[].play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
+      discard
+        mixer[].play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
       echo "Press q and enter to exit"
       if stdin.readLine() == "q":
         mixer[].stop()

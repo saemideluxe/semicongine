@@ -34,6 +34,5 @@ proc main() =
   SystemStorage.purge()
   UserStorage.purge()
 
-
 when isMainModule:
   main()

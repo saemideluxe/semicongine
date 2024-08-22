@@ -9,37 +9,35 @@ import std/random
 
 import ../semicongine
 
-type
-  FontDS = object
-    fontAtlas: Image[Gray]
+type FontDS = object
+  fontAtlas: Image[Gray]
 
 proc test_01_static_label(time: float32) =
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
-  var pipeline = createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline =
+    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas))
   uploadImages(renderdata, ds)
-  initDescriptorSet(
-    renderdata,
-    pipeline.layout(0),
-    ds,
-  )
+  initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
-  var label1 = initTextbox(
-    renderdata,
-    pipeline.layout(0),
-    font,
-    0.0005,
-    "Hello semicongine!",
-  )
+  var label1 =
+    initTextbox(renderdata, pipeline.layout(0), font, 0.0005, "Hello semicongine!")
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     label1.refresh()
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, ds, 0, pipeline)
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
           render(commandbuffer, pipeline, label1, vec3(), vec4(1, 1, 1, 1))
 
@@ -54,7 +52,8 @@ proc test_02_multiple_animated(time: float32) =
   var font3 = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline =
+    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds1 = asDescriptorSetData(FontDS(fontAtlas: font1.fontAtlas))
   uploadImages(renderdata, ds1)
@@ -69,27 +68,9 @@ proc test_02_multiple_animated(time: float32) =
   initDescriptorSet(renderdata, pipeline.layout(0), ds3)
 
   var labels = [
-    initTextbox(
-      renderdata,
-      pipeline.layout(0),
-      font1,
-      0.004,
-      "  0",
-    ),
-    initTextbox(
-      renderdata,
-      pipeline.layout(0),
-      font2,
-      0.001,
-      "  1",
-    ),
-    initTextbox(
-      renderdata,
-      pipeline.layout(0),
-      font3,
-      0.001,
-      "  2",
-    )
+    initTextbox(renderdata, pipeline.layout(0), font1, 0.004, "  0"),
+    initTextbox(renderdata, pipeline.layout(0), font2, 0.001, "  1"),
+    initTextbox(renderdata, pipeline.layout(0), font3, 0.001, "  2"),
   ]
 
   var start = getMonoTime()
@@ -101,31 +82,38 @@ proc test_02_multiple_animated(time: float32) =
       labels[i].refresh()
     inc p
     withNextFrame(framebuffer, commandbuffer):
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
           bindDescriptorSet(commandbuffer, ds1, 0, pipeline)
           render(
             commandbuffer,
             pipeline,
             labels[0],
-            position=vec3(0 / labels.len, 0.1 + progress * 0.5),
-            color=vec4(1, 1, 1, 1),
+            position = vec3(0 / labels.len, 0.1 + progress * 0.5),
+            color = vec4(1, 1, 1, 1),
           )
           bindDescriptorSet(commandbuffer, ds2, 0, pipeline)
           render(
             commandbuffer,
             pipeline,
             labels[1],
-            position=vec3(1 / labels.len, 0.1 + progress * 0.5),
-            color=vec4(1, 1, 1, 1),
+            position = vec3(1 / labels.len, 0.1 + progress * 0.5),
+            color = vec4(1, 1, 1, 1),
           )
           bindDescriptorSet(commandbuffer, ds3, 0, pipeline)
           render(
             commandbuffer,
             pipeline,
             labels[2],
-            position=vec3(2 / labels.len, 0.1 + progress * 0.5),
-            color=vec4(1, 1, 1, 1),
+            position = vec3(2 / labels.len, 0.1 + progress * 0.5),
+            color = vec4(1, 1, 1, 1),
           )
 
       # cleanup
@@ -137,15 +125,12 @@ proc test_03_layouting(time: float32) =
   var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 40)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline =
+    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas))
   uploadImages(renderdata, ds)
-  initDescriptorSet(
-    renderdata,
-    pipeline.layout(0),
-    ds,
-  )
+  initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
   var labels: seq[Textbox]
 
@@ -186,10 +171,23 @@ It should display with some space above and have a pleasing appearance overall! 
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, ds, 0, pipeline)
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
           for i in 0 ..< labels.len:
-            render(commandbuffer, pipeline, labels[i], vec3(0.5 - i.float32 * 0.1, 0.5 - i.float32 * 0.1), vec4(1, 1, 1, 1))
+            render(
+              commandbuffer,
+              pipeline,
+              labels[i],
+              vec3(0.5 - i.float32 * 0.1, 0.5 - i.float32 * 0.1),
+              vec4(1, 1, 1, 1),
+            )
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -200,15 +198,12 @@ proc test_04_lots_of_texts(time: float32) =
   var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline =
+    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas))
   uploadImages(renderdata, ds)
-  initDescriptorSet(
-    renderdata,
-    pipeline.layout(0),
-    ds,
-  )
+  initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
   var labels: seq[Textbox]
   var positions = newSeq[Vec3f](100)
@@ -216,15 +211,10 @@ proc test_04_lots_of_texts(time: float32) =
   var scales = newSeq[Vec2f](100)
   for i in 0 ..< 100:
     positions[i] = vec3(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
-    colors[i] = vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0))
+    colors[i] =
+      vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0))
     scales[i] = vec2(rand(0.5'f32 .. 1.5'f32), rand(0.5'f32 .. 1.5'f32))
-    labels.add initTextbox(
-      renderdata,
-      pipeline.layout(0),
-      font,
-      0.001,
-      $i,
-    )
+    labels.add initTextbox(renderdata, pipeline.layout(0), font, 0.001, $i)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
@@ -232,10 +222,19 @@ proc test_04_lots_of_texts(time: float32) =
       l.refresh()
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, ds, 0, pipeline)
-      withRenderPass(vulkan.swapchain.renderPass, framebuffer, commandbuffer, vulkan.swapchain.width, vulkan.swapchain.height, vec4(0, 0, 0, 0)):
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
         withPipeline(commandbuffer, pipeline):
           for i in 0 ..< labels.len:
-            render(commandbuffer, pipeline, labels[i], positions[i], colors[i], scales[i])
+            render(
+              commandbuffer, pipeline, labels[i], positions[i], colors[i], scales[i]
+            )
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
