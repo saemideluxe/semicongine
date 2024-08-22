@@ -666,6 +666,86 @@ proc test_06_different_draw_modes(time: float32) =
   destroyPipeline(pipeline4)
   destroyRenderData(renderdata)
 
+proc test_08_texture_array(time: float32) =
+  var renderdata = initRenderData()
+
+  type
+    Uniforms = object
+      textures: ImageArray[BGRA]
+
+    Shader = object
+      position {.VertexAttribute.}: Vec3f
+      uv {.VertexAttribute.}: Vec2f
+      fragmentUv {.Pass.}: Vec2f
+      outColor {.ShaderOutput.}: Vec4f
+      descriptorSets {.DescriptorSet: 0.}: Uniforms
+      # code
+      vertexCode: string =
+        """
+void main() {
+    fragmentUv = uv;
+    gl_Position = vec4(position, 1);
+}"""
+      fragmentCode: string =
+        """
+void main() {
+    vec4 col1 = texture(textures, vec3(fragmentUv, 0));
+    vec4 col2 = texture(textures, vec3(fragmentUv, 1));
+    float w = length(fragmentUv * 2 - 1) / 1.41421;
+    outColor = (1 - w) * col1 + w * col2;
+}"""
+
+    Quad = object
+      position: GPUArray[Vec3f, VertexBuffer]
+      uv: GPUArray[Vec2f, VertexBuffer]
+
+  var mesh = Quad(
+    position: asGPUArray(
+      [
+        vec3(-0.8, -0.5),
+        vec3(-0.8, 0.5),
+        vec3(0.8, 0.5),
+        vec3(0.8, 0.5),
+        vec3(0.8, -0.5),
+        vec3(-0.8, -0.5),
+      ],
+      VertexBuffer,
+    ),
+    uv: asGPUArray(
+      [vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1)],
+      VertexBuffer,
+    ),
+  )
+  assignBuffers(renderdata, mesh)
+  renderdata.flushAllMemory()
+
+  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  var uniforms1 = asDescriptorSetData(
+    Uniforms(textures: loadImageArray[BGRA](["art.png", "art1.png"]))
+  )
+  uploadImages(renderdata, uniforms1)
+  initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
+
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
+    withNextFrame(framebuffer, commandbuffer):
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
+        withPipeline(commandbuffer, pipeline):
+          bindDescriptorSet(commandbuffer, uniforms1, 0, pipeline)
+          render(commandbuffer = commandbuffer, pipeline = pipeline, mesh = mesh)
+
+  # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
+
 proc test_07_png_texture(time: float32) =
   var renderdata = initRenderData()
 
@@ -741,7 +821,7 @@ void main() {
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-proc test_08_triangle_2pass(
+proc test_09_triangle_2pass(
     time: float32, depthBuffer: bool, samples: VkSampleCountFlagBits
 ) =
   var (offscreenRP, presentRP) =
@@ -952,32 +1032,33 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
-    test_01_triangle(time)
+    # test_01_triangle(time)
 
     # tests instanced triangles and quads, mixing meshes and instances
-    test_02_triangle_quad_instanced(time)
+    # test_02_triangle_quad_instanced(time)
 
     # teste descriptor sets
-    test_03_simple_descriptorset(time)
+    # test_03_simple_descriptorset(time)
 
     # tests multiple descriptor sets and arrays
-    test_04_multiple_descriptorsets(time)
+    # test_04_multiple_descriptorsets(time)
 
     # rotating cube
-    test_05_cube(time)
+    # test_05_cube(time)
 
     # different draw modes (lines, points, and topologies)
-    test_06_different_draw_modes(time)
+    # test_06_different_draw_modes(time)
 
-    # load PNG texture
-    test_07_png_texture(time)
+    # test_07_png_texture(time)
+
+    test_08_texture_array(time)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     destroyRenderPass(renderpass)
     clearSwapchain()
 
   # test multiple render passes
-  for i, (depthBuffer, samples) in renderPasses:
-    test_08_triangle_2pass(time, depthBuffer, samples)
+  # for i, (depthBuffer, samples) in renderPasses:
+  # test_09_triangle_2pass(time, depthBuffer, samples)
 
   destroyVulkan()

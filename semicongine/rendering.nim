@@ -189,7 +189,7 @@ template forDescriptorFields(
 ): untyped =
   var `bindingNumber` {.inject.} = 0'u32
   for theFieldname, `valuename` in fieldPairs(shader):
-    when typeof(`valuename`) is Image:
+    when typeof(`valuename`) is ImageObject:
       block:
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         const `countname` {.inject.} = 1'u32
@@ -202,7 +202,7 @@ template forDescriptorFields(
         body
         `bindingNumber`.inc
     elif typeof(`valuename`) is array:
-      when elementType(`valuename`) is Image:
+      when elementType(`valuename`) is ImageObject:
         block:
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
           const `countname` {.inject.} = uint32(typeof(`valuename`).len)

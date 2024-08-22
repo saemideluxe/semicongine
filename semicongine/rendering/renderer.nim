@@ -289,7 +289,7 @@ proc allocateNewBuffer(
   template selectedBlock(): untyped =
     renderData.memory[memoryType][selectedBlockI]
 
-  # let selectedBlock = 
+  # let selectedBlock =
   renderData.memory[memoryType][selectedBlockI].offsetNextFree =
     alignedTo(selectedBlock.offsetNextFree, memoryRequirements.alignment)
   checkVkResult vkBindBufferMemory(
@@ -425,7 +425,9 @@ proc destroyRenderData*(renderData: RenderData) =
     for memory in memoryBlocks:
       vkFreeMemory(vulkan.device, memory.vk, nil)
 
-proc transitionImageLayout(image: VkImage, oldLayout, newLayout: VkImageLayout) =
+proc transitionImageLayout(
+    image: VkImage, oldLayout, newLayout: VkImageLayout, nLayers: uint32
+) =
   var
     barrier = VkImageMemoryBarrier(
       sType: VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -439,7 +441,7 @@ proc transitionImageLayout(image: VkImage, oldLayout, newLayout: VkImageLayout) 
         baseMipLevel: 0,
         levelCount: 1,
         baseArrayLayer: 0,
-        layerCount: 1,
+        layerCount: nLayers,
       ),
     )
     srcStage: VkPipelineStageFlagBits
@@ -557,16 +559,19 @@ proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
 
   # data transfer and layout transition
   transitionImageLayout(
-    image.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+    image.vk, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    image.nLayers,
   )
   if image.data.len > 0:
     withStagingBuffer(
-      (image.vk, image.width, image.height), memoryRequirements.size, stagingPtr
+      (image.vk, image.width, image.height, image.nLayers),
+      memoryRequirements.size,
+      stagingPtr,
     ):
       copyMem(stagingPtr, image.data.ToCPointer, image.size)
   transitionImageLayout(
     image.vk, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, image.nLayers,
   )
 
 proc uploadImages*(renderdata: var RenderData, descriptorSet: var DescriptorSetData) =

@@ -211,7 +211,8 @@ proc loadTexture(
 
   let bufferView =
     root["bufferViews"][root["images"][imageIndex]["bufferView"].getInt()]
-  result = loadImageData[BGRA](getBufferViewData(bufferView, mainBuffer))
+  let img = loadImageData[BGRA](getBufferViewData(bufferView, mainBuffer))
+  result = Image[BGRA](width: img.width, height: img.height, data: img.data)
 
   if textureNode.hasKey("sampler"):
     let sampler = root["samplers"][textureNode["sampler"].getInt()]

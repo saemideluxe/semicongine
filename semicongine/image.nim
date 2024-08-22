@@ -45,12 +45,14 @@ type
   ImageArray*[T: PixelType] = ImageObject[T, true]
 
 template nLayers*(image: Image): untyped =
-  1
+  1'u32
 
 proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.error.}
 
 # loads single layer image
-proc loadImageData*[T: PixelType](pngData: string | seq[uint8]): Image[T] =
+proc loadImageData*[T: PixelType](
+    pngData: string | seq[uint8]
+): tuple[width: uint32, height: uint32, data: seq[T]] =
   when T is Gray:
     let nChannels = 1.cint
   elif T is BGRA:
@@ -69,8 +71,8 @@ proc loadImageData*[T: PixelType](pngData: string | seq[uint8]): Image[T] =
   if data == nil:
     raise newException(Exception, "An error occured while loading PNG file")
 
-  let imagesize = w * h * 4
-  result = Image[T](width: w.uint32, height: h.uint32, data: newSeq[T](w * h))
+  let imagesize = w * h * nChannels
+  result = (width: w.uint32, height: h.uint32, data: newSeq[T](w * h))
   copyMem(result.data.ToCPointer, data, imagesize)
   nativeFree(data)
 
@@ -78,40 +80,18 @@ proc loadImageData*[T: PixelType](pngData: string | seq[uint8]): Image[T] =
     for i in 0 ..< result.data.len:
       swap(result.data[i][0], result.data[i][2])
 
-proc addImageLayer*[T: PixelType](image: var Image[T], pngData: string | seq[uint8]) =
-  when T is Gray:
-    const nChannels = 1.cint
-  elif T is BGRA:
-    const nChannels = 4.cint
-
-  var w, h, c: cint
-
-  let data = stbi_load_from_memory(
-    buffer = cast[ptr uint8](pngData.ToCPointer),
-    len = pngData.len.cint,
-    x = addr(w),
-    y = addr(h),
-    channels_in_file = addr(c),
-    desired_channels = nChannels,
-  )
-  if data == nil:
-    raise newException(Exception, "An error occured while loading PNG file")
+proc addImageLayer*[T: PixelType](
+    image: var ImageArray[T], pngData: string | seq[uint8]
+) =
+  let (w, h, data) = loadImageData[T](pngData)
 
   assert w == image.width,
     "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
   assert h == image.height,
     "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
 
-  let imagesize = image.width * image.height * nChannels
-  let layerOffset = image.width * image.height * image.nLayers
   inc image.nLayers
-  image.data.setLen(image.nLayers * image.width * image.height)
-  copyMem(addr(image.data[layerOffset]), data, imagesize)
-  nativeFree(data)
-
-  when T is BGRA: # convert to BGRA
-    for i in 0 ..< image.data.len:
-      swap(image.data[layerOffset + i][0], image.data[layerOffset + i][2])
+  image.data.add data
 
 proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
   assert path.splitFile().ext.toLowerAscii == ".png",
@@ -121,7 +101,27 @@ proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T]
   elif T is BGRA:
     let pngType = 6.cint
 
-  result = loadImageData[T](loadResource_intern(path, package = package).readAll())
+  let (width, height, data) =
+    loadImageData[T](loadResource_intern(path, package = package).readAll())
+  result = Image[T](width: width, height: height, data: data)
+
+proc loadImageArray*[T: PixelType](
+    paths: openArray[string], package = DEFAULT_PACKAGE
+): ImageArray[T] =
+  assert paths.len > 0, "Image array cannot contain 0 images"
+  for path in paths:
+    assert path.splitFile().ext.toLowerAscii == ".png",
+      "Unsupported image type: " & path.splitFile().ext.toLowerAscii
+  when T is Gray:
+    let pngType = 0.cint
+  elif T is BGRA:
+    let pngType = 6.cint
+
+  let (width, height, data) =
+    loadImageData[T](loadResource_intern(paths[0], package = package).readAll())
+  result = ImageArray[T](width: width, height: height, data: data, nLayers: 1)
+  for path in paths[1 .. ^1]:
+    result.addImageLayer(loadResource_intern(path, package = package).readAll())
 
 proc `[]`*(image: Image, x, y: uint32): auto =
   assert x < image.width, &"{x} < {image.width} is not true"

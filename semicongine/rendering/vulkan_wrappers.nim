@@ -128,7 +128,7 @@ proc svkCreate2DImage*(
     imageType: VK_IMAGE_TYPE_2D,
     extent: VkExtent3D(width: width, height: height, depth: 1),
     mipLevels: min(1'u32, imageProps.maxMipLevels),
-    arrayLayers: min(nLayers, imageProps.maxArrayLayers),
+    arrayLayers: nLayers,
     format: format,
     tiling: VK_IMAGE_TILING_OPTIMAL,
     initialLayout: VK_IMAGE_LAYOUT_UNDEFINED,
@@ -147,7 +147,7 @@ proc svkCreate2DImageView*(
   var createInfo = VkImageViewCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
     image: image,
-    viewType: VK_IMAGE_VIEW_TYPE_2D,
+    viewType: if nLayers == 1: VK_IMAGE_VIEW_TYPE_2D else: VK_IMAGE_VIEW_TYPE_2D_ARRAY,
     format: format,
     components: VkComponentMapping(
       r: VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -363,7 +363,7 @@ template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
     vkDestroyFence(vulkan.device, fence, nil)
     vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
 
-template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32)](
+template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32, uint32)](
     target: T, bufferSize: uint64, dataPointer, body: untyped
 ): untyped =
   var `dataPointer` {.inject.}: pointer
@@ -419,7 +419,7 @@ template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32)](
         regionCount = 1,
         pRegions = addr(copyRegion),
       )
-    elif T is (VkImage, uint32, uint32):
+    elif T is (VkImage, uint32, uint32, uint32):
       let region = VkBufferImageCopy(
         bufferOffset: 0,
         bufferRowLength: 0,
@@ -428,7 +428,7 @@ template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32)](
           aspectMask: toBits [VK_IMAGE_ASPECT_COLOR_BIT],
           mipLevel: 0,
           baseArrayLayer: 0,
-          layerCount: 1,
+          layerCount: target[3],
         ),
         imageOffset: VkOffset3D(x: 0, y: 0, z: 0),
         imageExtent: VkExtent3D(width: target[1], height: target[2], depth: 1),
