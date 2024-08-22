@@ -1,5 +1,11 @@
-import zippy/adler32, zippy/common, zippy/crc, zippy/deflate,
-    zippy/gzip, zippy/inflate, zippy/internal
+import
+  zippy/adler32,
+  zippy/common,
+  zippy/crc,
+  zippy/deflate,
+  zippy/gzip,
+  zippy/inflate,
+  zippy/internal
 
 when (NimMajor, NimMinor, NimPatch) >= (1, 6, 0):
   import std/sysrand
@@ -9,15 +15,12 @@ else:
 export common
 
 proc compress*(
-  src: pointer,
-  len: int,
-  level = DefaultCompression,
-  dataFormat = dfGzip
+    src: pointer, len: int, level = DefaultCompression, dataFormat = dfGzip
 ): string {.raises: [ZippyError].} =
   ## Compresses src and returns the compressed data.
   let src = cast[ptr UncheckedArray[uint8]](src)
 
-  case dataFormat:
+  case dataFormat
   of dfGzip:
     result.setLen(10)
     result[0] = 31.char
@@ -56,7 +59,6 @@ proc compress*(
     result.add(((isize shr 8) and 255).char)
     result.add(((isize shr 16) and 255).char)
     result.add(((isize shr 24) and 255).char)
-
   of dfZlib:
     const
       cm = 8.uint8
@@ -76,57 +78,44 @@ proc compress*(
     result.add(((checksum shr 16) and 255).char)
     result.add(((checksum shr 8) and 255).char)
     result.add(((checksum shr 0) and 255).char)
-
   of dfDeflate:
     deflate(result, src, len, level)
-
   else:
     raise newException(ZippyError, "Invalid data format " & $dfDetect)
 
 proc compress*(
-  src: string,
-  level = DefaultCompression,
-  dataFormat = dfGzip
+    src: string, level = DefaultCompression, dataFormat = dfGzip
 ): string {.raises: [ZippyError].} =
   compress(src.cstring, src.len, level, dataFormat)
 
 proc compress*(
-  src: seq[uint8],
-  level = DefaultCompression,
-  dataFormat = dfGzip
+    src: seq[uint8], level = DefaultCompression, dataFormat = dfGzip
 ): seq[uint8] {.raises: [ZippyError].} =
   cast[seq[uint8]](compress(cast[string](src).cstring, src.len, level, dataFormat))
 
 proc uncompress*(
-  src: pointer,
-  len: int,
-  dataFormat = dfDetect
+    src: pointer, len: int, dataFormat = dfDetect
 ): string {.raises: [ZippyError].} =
   ## Uncompresses src and returns the uncompressed data.
   let src = cast[ptr UncheckedArray[uint8]](src)
 
-  case dataFormat:
+  case dataFormat
   of dfDetect:
     if (
-      len > 18 and
-      src[0].uint8 == 31 and src[1].uint8 == 139 and src[2].uint8 == 8 and
+      len > 18 and src[0].uint8 == 31 and src[1].uint8 == 139 and src[2].uint8 == 8 and
       (src[3].uint8 and 0b11100000) == 0
     ):
       return uncompress(src, len, dfGzip)
 
     if (
-      len > 6 and
-      (src[0].uint8 and 0b00001111) == 8 and
-      (src[0].uint8 shr 4) <= 7 and
+      len > 6 and (src[0].uint8 and 0b00001111) == 8 and (src[0].uint8 shr 4) <= 7 and
       ((src[0].uint16 * 256) + src[1].uint8) mod 31 == 0
     ):
       return uncompress(src, len, dfZlib)
 
     raise newException(ZippyError, "Unable to detect compressed data format")
-
   of dfGzip:
     uncompressGzip(result, src, len)
-
   of dfZlib:
     if len < 6:
       failUncompress()
@@ -152,26 +141,19 @@ proc uncompress*(
     inflate(result, src, len, 2)
 
     let checksum = (
-      src[len - 4].uint32 shl 24 or
-      src[len - 3].uint32 shl 16 or
-      src[len - 2].uint32 shl 8 or
-      src[len - 1].uint32
+      src[len - 4].uint32 shl 24 or src[len - 3].uint32 shl 16 or
+      src[len - 2].uint32 shl 8 or src[len - 1].uint32
     )
 
     if checksum != adler32(result):
       raise newException(ZippyError, "Checksum verification failed")
-
   of dfDeflate:
     inflate(result, src, len, 0)
 
-proc uncompress*(
-  src: string,
-  dataFormat = dfDetect
-): string {.raises: [ZippyError].} =
+proc uncompress*(src: string, dataFormat = dfDetect): string {.raises: [ZippyError].} =
   uncompress(src.cstring, src.len, dataFormat)
 
 proc uncompress*(
-  src: seq[uint8],
-  dataFormat = dfDetect
+    src: seq[uint8], dataFormat = dfDetect
 ): seq[uint8] {.raises: [ZippyError].} =
   cast[seq[uint8]](uncompress(cast[string](src).cstring, src.len, dataFormat))

@@ -13,14 +13,17 @@ type
   OLD_LARGE_INTEGER* {.pure.} = object
     LowPart*: ULONG
     HighPart*: LONG
+
   POLD_LARGE_INTEGER* = ptr OLD_LARGE_INTEGER
   LOGON_HOURS* {.pure.} = object
     UnitsPerWeek*: USHORT
     LogonHours*: PUCHAR
+
   PLOGON_HOURS* = ptr LOGON_HOURS
   SR_SECURITY_DESCRIPTOR* {.pure.} = object
     Length*: ULONG
     SecurityDescriptor*: PUCHAR
+
   PSR_SECURITY_DESCRIPTOR* = ptr SR_SECURITY_DESCRIPTOR
   USER_ALL_INFORMATION* {.pure, packed.} = object
     LastLogon*: LARGE_INTEGER
@@ -56,21 +59,25 @@ type
     NtPasswordPresent*: BOOLEAN
     PasswordExpired*: BOOLEAN
     PrivateDataSensitive*: BOOLEAN
+
   PUSER_ALL_INFORMATION* = ptr USER_ALL_INFORMATION
-const
-  CLEAR_BLOCK_LENGTH* = 8
+
+const CLEAR_BLOCK_LENGTH* = 8
 type
   CLEAR_BLOCK* {.pure.} = object
     data*: array[CLEAR_BLOCK_LENGTH, CHAR]
+
   PCLEAR_BLOCK* = ptr CLEAR_BLOCK
-const
-  CYPHER_BLOCK_LENGTH* = 8
+
+const CYPHER_BLOCK_LENGTH* = 8
 type
   CYPHER_BLOCK* {.pure.} = object
     data*: array[CYPHER_BLOCK_LENGTH, CHAR]
+
   PCYPHER_BLOCK* = ptr CYPHER_BLOCK
   LM_OWF_PASSWORD* {.pure.} = object
     data*: array[2, CYPHER_BLOCK]
+
   PLM_OWF_PASSWORD* = ptr LM_OWF_PASSWORD
   LM_CHALLENGE* = CLEAR_BLOCK
   PLM_CHALLENGE* = ptr LM_CHALLENGE
@@ -80,6 +87,7 @@ type
   PNT_CHALLENGE* = ptr NT_CHALLENGE
   USER_SESSION_KEY* {.pure.} = object
     data*: array[2, CYPHER_BLOCK]
+
   PUSER_SESSION_KEY* = ptr USER_SESSION_KEY
   NETLOGON_LOGON_IDENTITY_INFO* {.pure.} = object
     LogonDomainName*: UNICODE_STRING
@@ -87,28 +95,33 @@ type
     LogonId*: OLD_LARGE_INTEGER
     UserName*: UNICODE_STRING
     Workstation*: UNICODE_STRING
+
   PNETLOGON_LOGON_IDENTITY_INFO* = ptr NETLOGON_LOGON_IDENTITY_INFO
   NETLOGON_INTERACTIVE_INFO* {.pure.} = object
     Identity*: NETLOGON_LOGON_IDENTITY_INFO
     LmOwfPassword*: LM_OWF_PASSWORD
     NtOwfPassword*: NT_OWF_PASSWORD
+
   PNETLOGON_INTERACTIVE_INFO* = ptr NETLOGON_INTERACTIVE_INFO
   NETLOGON_SERVICE_INFO* {.pure.} = object
     Identity*: NETLOGON_LOGON_IDENTITY_INFO
     LmOwfPassword*: LM_OWF_PASSWORD
     NtOwfPassword*: NT_OWF_PASSWORD
+
   PNETLOGON_SERVICE_INFO* = ptr NETLOGON_SERVICE_INFO
   NETLOGON_NETWORK_INFO* {.pure.} = object
     Identity*: NETLOGON_LOGON_IDENTITY_INFO
     LmChallenge*: LM_CHALLENGE
     NtChallengeResponse*: STRING
     LmChallengeResponse*: STRING
+
   PNETLOGON_NETWORK_INFO* = ptr NETLOGON_NETWORK_INFO
   NETLOGON_GENERIC_INFO* {.pure.} = object
     Identity*: NETLOGON_LOGON_IDENTITY_INFO
     PackageName*: UNICODE_STRING
     DataLength*: ULONG
     LogonData*: PUCHAR
+
   PNETLOGON_GENERIC_INFO* = ptr NETLOGON_GENERIC_INFO
   MSV1_0_VALIDATION_INFO* {.pure.} = object
     LogoffTime*: LARGE_INTEGER
@@ -120,7 +133,9 @@ type
     UserFlags*: ULONG
     WhichFields*: ULONG
     UserId*: ULONG
+
   PMSV1_0_VALIDATION_INFO* = ptr MSV1_0_VALIDATION_INFO
+
 const
   USER_ACCOUNT_DISABLED* = 0x00000001
   USER_HOME_DIRECTORY_REQUIRED* = 0x00000002
@@ -143,14 +158,18 @@ const
   USER_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION* = 0x00040000
   USER_NO_AUTH_DATA_REQUIRED* = 0x00080000
   NEXT_FREE_ACCOUNT_CONTROL_BIT* = USER_NO_AUTH_DATA_REQUIRED shl 1
-  USER_MACHINE_ACCOUNT_MASK* = USER_INTERDOMAIN_TRUST_ACCOUNT or USER_WORKSTATION_TRUST_ACCOUNT or USER_SERVER_TRUST_ACCOUNT
-  USER_ACCOUNT_TYPE_MASK* = USER_TEMP_DUPLICATE_ACCOUNT or USER_NORMAL_ACCOUNT or USER_MACHINE_ACCOUNT_MASK
-  USER_COMPUTED_ACCOUNT_CONTROL_BITS* = USER_ACCOUNT_AUTO_LOCKED or USER_PASSWORD_EXPIRED
+  USER_MACHINE_ACCOUNT_MASK* =
+    USER_INTERDOMAIN_TRUST_ACCOUNT or USER_WORKSTATION_TRUST_ACCOUNT or
+    USER_SERVER_TRUST_ACCOUNT
+  USER_ACCOUNT_TYPE_MASK* =
+    USER_TEMP_DUPLICATE_ACCOUNT or USER_NORMAL_ACCOUNT or USER_MACHINE_ACCOUNT_MASK
+  USER_COMPUTED_ACCOUNT_CONTROL_BITS* =
+    USER_ACCOUNT_AUTO_LOCKED or USER_PASSWORD_EXPIRED
   SAM_DAYS_PER_WEEK* = 7
-  SAM_HOURS_PER_WEEK* = 24*SAM_DAYS_PER_WEEK
-  SAM_MINUTES_PER_WEEK* = 60*SAM_HOURS_PER_WEEK
+  SAM_HOURS_PER_WEEK* = 24 * SAM_DAYS_PER_WEEK
+  SAM_MINUTES_PER_WEEK* = 60 * SAM_HOURS_PER_WEEK
   USER_ALL_PARAMETERS* = 0x00200000
-  USER_SESSION_KEY_LENGTH* = CYPHER_BLOCK_LENGTH*2
+  USER_SESSION_KEY_LENGTH* = CYPHER_BLOCK_LENGTH * 2
   netlogonInteractiveInformation* = 1
   netlogonNetworkInformation* = 2
   netlogonServiceInformation* = 3
@@ -176,7 +195,40 @@ const
   MSV1_0_SUBAUTH_ACCOUNT_TYPE* = 0x00000040
   MSV1_0_SUBAUTH_LOCKOUT* = 0x00000080
 type
-  Msv1_0SubAuthenticationRoutine* = proc (LogonLevel: NETLOGON_LOGON_INFO_CLASS, LogonInformation: PVOID, Flags: ULONG, UserAll: PUSER_ALL_INFORMATION, WhichFields: PULONG, UserFlags: PULONG, Authoritative: PBOOLEAN, LogoffTime: PLARGE_INTEGER, KickoffTime: PLARGE_INTEGER): NTSTATUS {.stdcall.}
-  Msv1_0SubAuthenticationRoutineEx* = proc (LogonLevel: NETLOGON_LOGON_INFO_CLASS, LogonInformation: PVOID, Flags: ULONG, UserAll: PUSER_ALL_INFORMATION, UserHandle: SAM_HANDLE, ValidationInfo: PMSV1_0_VALIDATION_INFO, ActionsPerformed: PULONG): NTSTATUS {.stdcall.}
-  Msv1_0SubAuthenticationRoutineGeneric* = proc (SubmitBuffer: PVOID, SubmitBufferLength: ULONG, ReturnBufferLength: PULONG, ReturnBuffer: ptr PVOID): NTSTATUS {.stdcall.}
-  Msv1_0SubAuthenticationFilter* = proc (LogonLevel: NETLOGON_LOGON_INFO_CLASS, LogonInformation: PVOID, Flags: ULONG, UserAll: PUSER_ALL_INFORMATION, WhichFields: PULONG, UserFlags: PULONG, Authoritative: PBOOLEAN, LogoffTime: PLARGE_INTEGER, KickoffTime: PLARGE_INTEGER): NTSTATUS {.stdcall.}
+  Msv1_0SubAuthenticationRoutine* = proc(
+    LogonLevel: NETLOGON_LOGON_INFO_CLASS,
+    LogonInformation: PVOID,
+    Flags: ULONG,
+    UserAll: PUSER_ALL_INFORMATION,
+    WhichFields: PULONG,
+    UserFlags: PULONG,
+    Authoritative: PBOOLEAN,
+    LogoffTime: PLARGE_INTEGER,
+    KickoffTime: PLARGE_INTEGER,
+  ): NTSTATUS {.stdcall.}
+  Msv1_0SubAuthenticationRoutineEx* = proc(
+    LogonLevel: NETLOGON_LOGON_INFO_CLASS,
+    LogonInformation: PVOID,
+    Flags: ULONG,
+    UserAll: PUSER_ALL_INFORMATION,
+    UserHandle: SAM_HANDLE,
+    ValidationInfo: PMSV1_0_VALIDATION_INFO,
+    ActionsPerformed: PULONG,
+  ): NTSTATUS {.stdcall.}
+  Msv1_0SubAuthenticationRoutineGeneric* = proc(
+    SubmitBuffer: PVOID,
+    SubmitBufferLength: ULONG,
+    ReturnBufferLength: PULONG,
+    ReturnBuffer: ptr PVOID,
+  ): NTSTATUS {.stdcall.}
+  Msv1_0SubAuthenticationFilter* = proc(
+    LogonLevel: NETLOGON_LOGON_INFO_CLASS,
+    LogonInformation: PVOID,
+    Flags: ULONG,
+    UserAll: PUSER_ALL_INFORMATION,
+    WhichFields: PULONG,
+    UserFlags: PULONG,
+    Authoritative: PBOOLEAN,
+    LogoffTime: PLARGE_INTEGER,
+    KickoffTime: PLARGE_INTEGER,
+  ): NTSTATUS {.stdcall.}

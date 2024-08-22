@@ -17,8 +17,10 @@ type
     wSecond*: WORD
     wMilliseconds*: WORD
     wResult*: WORD
+
   PDSKTLSYSTEMTIME* = ptr DSKTLSYSTEMTIME
   LPDSKTLSYSTEMTIME* = ptr DSKTLSYSTEMTIME
+
 const
   REGSTR_KEY_CLASS* = "Class"
   REGSTR_KEY_CONFIG* = "Config"
@@ -45,37 +47,47 @@ const
   REGSTR_PATH_SETUP* = "Software\\Microsoft\\Windows\\CurrentVersion"
   REGSTR_PATH_DRIVERSIGN* = "Software\\Microsoft\\Driver Signing"
   REGSTR_PATH_NONDRIVERSIGN* = "Software\\Microsoft\\Non-Driver Signing"
-  REGSTR_PATH_DRIVERSIGN_POLICY* = "Software\\Policies\\Microsoft\\Windows NT\\Driver Signing"
-  REGSTR_PATH_NONDRIVERSIGN_POLICY* = "Software\\Policies\\Microsoft\\Windows NT\\Non-Driver Signing"
+  REGSTR_PATH_DRIVERSIGN_POLICY* =
+    "Software\\Policies\\Microsoft\\Windows NT\\Driver Signing"
+  REGSTR_PATH_NONDRIVERSIGN_POLICY* =
+    "Software\\Policies\\Microsoft\\Windows NT\\Non-Driver Signing"
   REGSTR_PATH_PIFCONVERT* = "Software\\Microsoft\\Windows\\CurrentVersion\\PIFConvert"
   REGSTR_PATH_MSDOSOPTS* = "Software\\Microsoft\\Windows\\CurrentVersion\\MS-DOSOptions"
   REGSTR_PATH_NOSUGGMSDOS* = "Software\\Microsoft\\Windows\\CurrentVersion\\NoMSDOSWarn"
-  REGSTR_PATH_NEWDOSBOX* = "Software\\Microsoft\\Windows\\CurrentVersion\\MS-DOSSpecialConfig"
+  REGSTR_PATH_NEWDOSBOX* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\MS-DOSSpecialConfig"
   REGSTR_PATH_RUNONCE* = "Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce"
   REGSTR_PATH_RUNONCEEX* = "Software\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx"
   REGSTR_PATH_RUN* = "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-  REGSTR_PATH_RUNSERVICESONCE* = "Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce"
+  REGSTR_PATH_RUNSERVICESONCE* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce"
   REGSTR_PATH_RUNSERVICES* = "Software\\Microsoft\\Windows\\CurrentVersion\\RunServices"
   REGSTR_PATH_EXPLORER* = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer"
-  REGSTR_PATH_PROPERTYSYSTEM* = "Software\\Microsoft\\Windows\\CurrentVersion\\PropertySystem"
+  REGSTR_PATH_PROPERTYSYSTEM* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\PropertySystem"
   REGSTR_PATH_DETECT* = "Software\\Microsoft\\Windows\\CurrentVersion\\Detect"
   REGSTR_PATH_APPPATHS* = "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths"
   REGSTR_PATH_UNINSTALL* = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
-  REGSTR_PATH_REALMODENET* = "Software\\Microsoft\\Windows\\CurrentVersion\\Network\\Real Mode Net"
-  REGSTR_PATH_NETEQUIV* = "Software\\Microsoft\\Windows\\CurrentVersion\\Network\\Equivalent"
+  REGSTR_PATH_REALMODENET* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Network\\Real Mode Net"
+  REGSTR_PATH_NETEQUIV* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Network\\Equivalent"
   REGSTR_PATH_CVNETWORK* = "Software\\Microsoft\\Windows\\CurrentVersion\\Network"
   REGSTR_PATH_WMI_SECURITY* = "System\\CurrentControlSet\\Control\\Wmi\\Security"
   REGSTR_PATH_RELIABILITY* = "Software\\Microsoft\\Windows\\CurrentVersion\\Reliability"
-  REGSTR_PATH_RELIABILITY_POLICY* = "Software\\Policies\\Microsoft\\Windows NT\\Reliability"
+  REGSTR_PATH_RELIABILITY_POLICY* =
+    "Software\\Policies\\Microsoft\\Windows NT\\Reliability"
   REGSTR_PATH_RELIABILITY_POLICY_SHUTDOWNREASONUI* = "ShutdownReasonUI"
   REGSTR_PATH_RELIABILITY_POLICY_SNAPSHOT* = "Snapshot"
   REGSTR_PATH_RELIABILITY_POLICY_REPORTSNAPSHOT* = "ReportSnapshot"
   REGSTR_PATH_REINSTALL* = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Reinstall"
   REGSTR_PATH_NT_CURRENTVERSION* = "Software\\Microsoft\\Windows NT\\CurrentVersion"
-  REGSTR_PATH_VOLUMECACHE* = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VolumeCaches"
+  REGSTR_PATH_VOLUMECACHE* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VolumeCaches"
   REGSTR_VAL_DISPLAY* = "display"
   REGSTR_PATH_IDCONFIGDB* = "System\\CurrentControlSet\\Control\\IDConfigDB"
-  REGSTR_PATH_CRITICALDEVICEDATABASE* = "System\\CurrentControlSet\\Control\\CriticalDeviceDatabase"
+  REGSTR_PATH_CRITICALDEVICEDATABASE* =
+    "System\\CurrentControlSet\\Control\\CriticalDeviceDatabase"
   REGSTR_PATH_CLASS* = "System\\CurrentControlSet\\Services\\Class"
   REGSTR_PATH_DISPLAYSETTINGS* = "Display\\Settings"
   REGSTR_PATH_FONTS* = "Display\\Fonts"
@@ -84,12 +96,16 @@ const
   REGSTR_PATH_CURRENTCONTROLSET* = "System\\CurrentControlSet"
   REGSTR_PATH_SYSTEMENUM* = "System\\CurrentControlSet\\Enum"
   REGSTR_PATH_HWPROFILES* = "System\\CurrentControlSet\\Hardware Profiles"
-  REGSTR_PATH_HWPROFILESCURRENT* = "System\\CurrentControlSet\\Hardware Profiles\\Current"
+  REGSTR_PATH_HWPROFILESCURRENT* =
+    "System\\CurrentControlSet\\Hardware Profiles\\Current"
   REGSTR_PATH_CLASS_NT* = "System\\CurrentControlSet\\Control\\Class"
-  REGSTR_PATH_PER_HW_ID_STORAGE* = "Software\\Microsoft\\Windows NT\\CurrentVersion\\PerHwIdStorage"
+  REGSTR_PATH_PER_HW_ID_STORAGE* =
+    "Software\\Microsoft\\Windows NT\\CurrentVersion\\PerHwIdStorage"
   REGSTR_PATH_DEVICE_CLASSES* = "System\\CurrentControlSet\\Control\\DeviceClasses"
-  REGSTR_PATH_CODEVICEINSTALLERS* = "System\\CurrentControlSet\\Control\\CoDeviceInstallers"
-  REGSTR_PATH_BUSINFORMATION* = "System\\CurrentControlSet\\Control\\PnP\\BusInformation"
+  REGSTR_PATH_CODEVICEINSTALLERS* =
+    "System\\CurrentControlSet\\Control\\CoDeviceInstallers"
+  REGSTR_PATH_BUSINFORMATION* =
+    "System\\CurrentControlSet\\Control\\PnP\\BusInformation"
   REGSTR_PATH_SERVICES* = "System\\CurrentControlSet\\Services"
   REGSTR_PATH_VXD* = "System\\CurrentControlSet\\Services\\VxD"
   REGSTR_PATH_IOS* = "System\\CurrentControlSet\\Services\\VxD\\IOS"
@@ -105,7 +121,8 @@ const
   REGSTR_PATH_IRQARB* = "System\\CurrentControlSet\\Services\\Arbitrators\\IRQArb"
   REGSTR_PATH_CODEPAGE* = "System\\CurrentControlSet\\Control\\Nls\\Codepage"
   REGSTR_PATH_FILESYSTEM* = "System\\CurrentControlSet\\Control\\FileSystem"
-  REGSTR_PATH_FILESYSTEM_NOVOLTRACK* = "System\\CurrentControlSet\\Control\\FileSystem\\NoVolTrack"
+  REGSTR_PATH_FILESYSTEM_NOVOLTRACK* =
+    "System\\CurrentControlSet\\Control\\FileSystem\\NoVolTrack"
   REGSTR_PATH_CDFS* = "System\\CurrentControlSet\\Control\\FileSystem\\CDFS"
   REGSTR_PATH_WINBOOT* = "System\\CurrentControlSet\\Control\\WinBoot"
   REGSTR_PATH_INSTALLEDFILES* = "System\\CurrentControlSet\\Control\\InstalledFiles"
@@ -167,7 +184,8 @@ const
   REGSTR_VAL_REFRESHRATE* = "RefreshRate"
   REGSTR_VAL_DISPLAYFLAGS* = "DisplayFlags"
   REGSTR_PATH_CONTROLPANEL* = "Control Panel"
-  REGSTR_PATH_CONTROLSFOLDER* = "Software\\Microsoft\\Windows\\CurrentVersion\\Controls Folder"
+  REGSTR_PATH_CONTROLSFOLDER* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Controls Folder"
   REGSTR_VAL_DOSCP* = "OEMCP"
   REGSTR_VAL_WINCP* = "ACP"
   REGSTR_PATH_DYNA_ENUM* = "Config Manager\\Enum"
@@ -448,7 +466,8 @@ const
   REGDF_NOTDETMEM* = 0x00000002
   REGDF_NOTDETIRQ* = 0x00000004
   REGDF_NOTDETDMA* = 0x00000008
-  REGDF_NOTDETALL* = REGDF_NOTDETIO or REGDF_NOTDETMEM or REGDF_NOTDETIRQ or REGDF_NOTDETDMA
+  REGDF_NOTDETALL* =
+    REGDF_NOTDETIO or REGDF_NOTDETMEM or REGDF_NOTDETIRQ or REGDF_NOTDETDMA
   REGDF_NEEDFULLCONFIG* = 0x00000010
   REGDF_GENFORCEDCONFIG* = 0x00000020
   REGDF_NODETCONFIG* = 0x00008000
@@ -456,7 +475,8 @@ const
   REGDF_CONFLICTMEM* = 0x00020000
   REGDF_CONFLICTIRQ* = 0x00040000
   REGDF_CONFLICTDMA* = 0x00080000
-  REGDF_CONFLICTALL* = REGDF_CONFLICTIO or REGDF_CONFLICTMEM or REGDF_CONFLICTIRQ or REGDF_CONFLICTDMA
+  REGDF_CONFLICTALL* =
+    REGDF_CONFLICTIO or REGDF_CONFLICTMEM or REGDF_CONFLICTIRQ or REGDF_CONFLICTDMA
   REGDF_MAPIRQ2TO9* = 0x00100000
   REGDF_NOTVERIFIED* = 0x80000000'i32
   REGSTR_VAL_APMBIOSVER* = "APMBiosVer"
@@ -668,7 +688,8 @@ const
   REGSTR_VALUE_LOWPOWERACTIVE* = "ScreenSaveLowPowerActive"
   REGSTR_VALUE_POWEROFFACTIVE* = "ScreenSavePowerOffActive"
   REGSTR_PATH_WINDOWSAPPLETS* = "Software\\Microsoft\\Windows\\CurrentVersion\\Applets"
-  REGSTR_PATH_SYSTRAY* = "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\SysTray"
+  REGSTR_PATH_SYSTRAY* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\SysTray"
   REGSTR_VAL_SYSTRAYSVCS* = "Services"
   REGSTR_VAL_SYSTRAYBATFLAGS* = "PowerFlags"
   REGSTR_VAL_SYSTRAYPCCARDFLAGS* = "PCMCIAFlags"
@@ -780,25 +801,39 @@ const
   REGSTR_VAL_TZNOCHANGESTART* = "NoChangeStart"
   REGSTR_VAL_TZNOCHANGEEND* = "NoChangeEnd"
   REGSTR_VAL_TZNOAUTOTIME* = "DisableAutoDaylightTimeSet"
-  REGSTR_PATH_FLOATINGPOINTPROCESSOR* = "HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor"
-  REGSTR_PATH_FLOATINGPOINTPROCESSOR0* = "HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor\\0"
-  REGSTR_PATH_COMPUTRNAME* = "System\\CurrentControlSet\\Control\\ComputerName\\ComputerName"
+  REGSTR_PATH_FLOATINGPOINTPROCESSOR* =
+    "HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor"
+  REGSTR_PATH_FLOATINGPOINTPROCESSOR0* =
+    "HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor\\0"
+  REGSTR_PATH_COMPUTRNAME* =
+    "System\\CurrentControlSet\\Control\\ComputerName\\ComputerName"
   REGSTR_VAL_COMPUTRNAME* = "ComputerName"
   REGSTR_PATH_SHUTDOWN* = "System\\CurrentControlSet\\Control\\Shutdown"
   REGSTR_VAL_FORCEREBOOT* = "ForceReboot"
   REGSTR_VAL_SETUPPROGRAMRAN* = "SetupProgramRan"
   REGSTR_VAL_DOES_POLLING* = "PollingSupportNeeded"
-  REGSTR_PATH_KNOWNDLLS* = "System\\CurrentControlSet\\Control\\SessionManager\\KnownDLLs"
-  REGSTR_PATH_KNOWN16DLLS* = "System\\CurrentControlSet\\Control\\SessionManager\\Known16DLLs"
-  REGSTR_PATH_CHECKVERDLLS* = "System\\CurrentControlSet\\Control\\SessionManager\\CheckVerDLLs"
-  REGSTR_PATH_WARNVERDLLS* = "System\\CurrentControlSet\\Control\\SessionManager\\WarnVerDLLs"
-  REGSTR_PATH_HACKINIFILE* = "System\\CurrentControlSet\\Control\\SessionManager\\HackIniFiles"
-  REGSTR_PATH_CHECKBADAPPS* = "System\\CurrentControlSet\\Control\\SessionManager\\CheckBadApps"
-  REGSTR_PATH_APPPATCH* = "System\\CurrentControlSet\\Control\\SessionManager\\AppPatches"
-  REGSTR_PATH_CHECKBADAPPS400* = "System\\CurrentControlSet\\Control\\SessionManager\\CheckBadApps400"
-  REGSTR_PATH_SHELLSERVICEOBJECT* = "Software\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObject"
-  REGSTR_PATH_SHELLSERVICEOBJECTDELAYED* = "Software\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObjectDelayLoad"
-  REGSTR_PATH_KNOWNVXDS* = "System\\CurrentControlSet\\Control\\SessionManager\\KnownVxDs"
+  REGSTR_PATH_KNOWNDLLS* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\KnownDLLs"
+  REGSTR_PATH_KNOWN16DLLS* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\Known16DLLs"
+  REGSTR_PATH_CHECKVERDLLS* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\CheckVerDLLs"
+  REGSTR_PATH_WARNVERDLLS* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\WarnVerDLLs"
+  REGSTR_PATH_HACKINIFILE* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\HackIniFiles"
+  REGSTR_PATH_CHECKBADAPPS* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\CheckBadApps"
+  REGSTR_PATH_APPPATCH* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\AppPatches"
+  REGSTR_PATH_CHECKBADAPPS400* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\CheckBadApps400"
+  REGSTR_PATH_SHELLSERVICEOBJECT* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObject"
+  REGSTR_PATH_SHELLSERVICEOBJECTDELAYED* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObjectDelayLoad"
+  REGSTR_PATH_KNOWNVXDS* =
+    "System\\CurrentControlSet\\Control\\SessionManager\\KnownVxDs"
   REGSTR_VAL_UNINSTALLER_DISPLAYNAME* = "DisplayName"
   REGSTR_VAL_UNINSTALLER_COMMANDLINE* = "UninstallString"
   REGSTR_VAL_REINSTALL_DISPLAYNAME* = "DisplayName"
@@ -812,7 +847,8 @@ const
   REGSTR_PATH_METRICS* = "Control Panel\\Desktop\\WindowMetrics"
   REGSTR_PATH_ICONS* = "Control Panel\\Icons"
   REGSTR_PATH_CURSORS* = "Control Panel\\Cursors"
-  REGSTR_PATH_CHECKDISK* = "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Check Drive"
+  REGSTR_PATH_CHECKDISK* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Check Drive"
   REGSTR_PATH_CHECKDISKSET* = "Settings"
   REGSTR_PATH_CHECKDISKUDRVS* = "NoUnknownDDErrDrvs"
   REGSTR_PATH_FAULT* = "Software\\Microsoft\\Windows\\CurrentVersion\\Fault"
@@ -822,11 +858,16 @@ const
   REGSTR_VAL_AEDEBUG_AUTO* = "Auto"
   REGSTR_PATH_GRPCONV* = "Software\\Microsoft\\Windows\\CurrentVersion\\GrpConv"
   REGSTR_VAL_REGITEMDELETEMESSAGE* = "Removal Message"
-  REGSTR_PATH_LASTCHECK* = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LastCheck"
-  REGSTR_PATH_LASTOPTIMIZE* = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LastOptimize"
-  REGSTR_PATH_LASTBACKUP* = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LastBackup"
-  REGSTR_PATH_CHKLASTCHECK* = "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Check Drive\\LastCheck"
-  REGSTR_PATH_CHKLASTSURFAN* = "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Check Drive\\LastSurfaceAnalysis"
+  REGSTR_PATH_LASTCHECK* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LastCheck"
+  REGSTR_PATH_LASTOPTIMIZE* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LastOptimize"
+  REGSTR_PATH_LASTBACKUP* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LastBackup"
+  REGSTR_PATH_CHKLASTCHECK* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Check Drive\\LastCheck"
+  REGSTR_PATH_CHKLASTSURFAN* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Check Drive\\LastSurfaceAnalysis"
   DTRESULTOK* = 0
   DTRESULTFIX* = 1
   DTRESULTPROB* = 2
@@ -900,7 +941,8 @@ const
   REGSTR_VAL_JOYOEMCAL12* = "OEMCal12"
   REGSTR_VAL_AUDIO_BITMAP* = "bitmap"
   REGSTR_VAL_AUDIO_ICON* = "icon"
-  REGSTR_PATH_DEVICEINSTALLER* = "Software\\Microsoft\\Windows\\CurrentVersion\\Device Installer"
+  REGSTR_PATH_DEVICEINSTALLER* =
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Device Installer"
   REGSTR_PATH_DIFX* = "Software\\Microsoft\\Windows\\CurrentVersion\\DIFX"
   REGSTR_VAL_SEARCHOPTIONS* = "SearchOptions"
   REGSTR_PATH_BIOSINFO* = "System\\CurrentControlSet\\Control\\BiosInfo"

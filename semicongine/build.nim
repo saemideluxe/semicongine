@@ -6,13 +6,17 @@ import std/strutils
 
 include ./core/globals
 
-const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath("tools/blender_gltf_converter.py")
-const STEAMCMD_ZIP = currentSourcePath().parentDir().parentDir().joinPath("tools/steamcmd.zip")
+const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath(
+    "tools/blender_gltf_converter.py"
+  )
+const STEAMCMD_ZIP =
+  currentSourcePath().parentDir().parentDir().joinPath("tools/steamcmd.zip")
 const STEAMBUILD_DIR_NAME = "steam"
 
 var STEAMLIB: string
 if defined(linux):
-  STEAMLIB = currentSourcePath().parentDir().parentDir().joinPath("libs/libsteam_api.so")
+  STEAMLIB =
+    currentSourcePath().parentDir().parentDir().joinPath("libs/libsteam_api.so")
 elif defined(windows):
   STEAMLIB = currentSourcePath().parentDir().parentDir().joinPath("libs/steam_api.dll")
 else:
@@ -44,9 +48,12 @@ proc semicongine_build_switches*(buildname: string, builddir = "./build") =
     raise newException(Exception, "Unsupported platform")
 
   switch("outdir", semicongine_builddir(buildname, builddir = builddir))
-  switch("passL", "-Wl,-rpath,'$ORIGIN'") # adds directory of executable to dynlib search path
+  switch("passL", "-Wl,-rpath,'$ORIGIN'")
+    # adds directory of executable to dynlib search path
 
-proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string, withSteam: bool) =
+proc semicongine_pack*(
+    outdir: string, bundleType: string, resourceRoot: string, withSteam: bool
+) =
   switch("define", "PACKAGETYPE=" & bundleType)
 
   assert resourceRoot.dirExists, &"Resource root '{resourceRoot}' does not exists"
@@ -54,7 +61,8 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
   outdir.rmDir()
   outdir.mkDir()
 
-  echo "BUILD: Packing assets from '" & resourceRoot & "' into directory '" & outdir & "'"
+  echo "BUILD: Packing assets from '" & resourceRoot & "' into directory '" & outdir &
+    "'"
   let outdir_resources = joinPath(outdir, RESOURCEROOT)
   if bundleType == "dir":
     cpDir(resourceRoot, outdir_resources)
@@ -72,7 +80,8 @@ proc semicongine_pack*(outdir: string, bundleType: string, resourceRoot: string,
         else:
           raise newException(Exception, "Unsupported platform")
   elif bundleType == "exe":
-    switch("define", "BUILD_RESOURCEROOT=" & joinPath(getCurrentDir(), resourceRoot)) # required for in-exe packing of resources, must be absolute
+    switch("define", "BUILD_RESOURCEROOT=" & joinPath(getCurrentDir(), resourceRoot))
+      # required for in-exe packing of resources, must be absolute
   if withSteam:
     STEAMLIB.cpFile(outdir.joinPath(STEAMLIB.extractFilename))
 
@@ -88,7 +97,6 @@ proc semicongine_zip*(dir: string) =
     else:
       raise newException(Exception, "Unsupported platform")
 
-
 # need this because fileNewer from std/os does not work in Nim VM
 proc fileNewerStatic(file1, file2: string): bool =
   assert file1.fileExists
@@ -98,7 +106,7 @@ proc fileNewerStatic(file1, file2: string): bool =
     let ex = gorgeEx(command)
     return ex.exitCode == 0
   elif defined(window):
-    {.error "Resource imports not supported on windows for now".}
+    {.error, "Resource imports not supported on windows for now".}
 
 proc import_meshes*(files: seq[(string, string)]) =
   if files.len == 0:
@@ -113,12 +121,16 @@ proc import_meshes*(files: seq[(string, string)]) =
 
 proc import_audio*(files: seq[(string, string)]) =
   for (input, output) in files:
-    let command = "ffmpeg " & ["-y", "-i", input, "-ar", $AUDIO_SAMPLE_RATE, output].join(" ")
+    let command =
+      "ffmpeg " & ["-y", "-i", input, "-ar", $AUDIO_SAMPLE_RATE, output].join(" ")
     exec(command)
 
 proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)]) =
   when not defined(linux):
-    {.warning: "Resource files can only be imported on linux, please make sure that the required files are created by runing the build on a linux machine.".}
+    {.
+      warning:
+        "Resource files can only be imported on linux, please make sure that the required files are created by runing the build on a linux machine."
+    .}
     return
   var meshfiles: seq[(string, string)]
   var audiofiles: seq[(string, string)]
@@ -141,7 +153,6 @@ proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)])
       echo &"{target} is up-to-date"
   import_meshes meshfiles
   import_audio audiofiles
-
 
 # for steam-buildscript docs see https://partner.steamgames.com/doc/sdk/uploading
 proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
@@ -173,7 +184,11 @@ proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
   exec &"./{steamcmd} +login \"{steamaccount}\" \"{password}\" +run_app_build {scriptPath} +quit"
 
 proc semicongine_sign_executable*(file: string) =
-  const SIGNTOOL_EXE = "C:/Program Files (x86)/Windows Kits/10/App Certification Kit/signtool.exe"
+  const SIGNTOOL_EXE =
+    "C:/Program Files (x86)/Windows Kits/10/App Certification Kit/signtool.exe"
   if not SIGNTOOL_EXE.fileExists:
-    raise newException(Exception, &"signtool.exe not found at ({SIGNTOOL_EXE}), please install the Windows SDK")
+    raise newException(
+      Exception,
+      &"signtool.exe not found at ({SIGNTOOL_EXE}), please install the Windows SDK",
+    )
   exec &"\"{SIGNTOOL_EXE}\" sign /a /tr http://timestamp.globalsign.com/tsa/r6advanced1 /fd SHA256 /td SHA256 {file}"

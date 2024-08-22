@@ -42,22 +42,20 @@ type
   HSTMT* = HANDLE
   TSQLDOUBLE* = float64
   TSQLFLOAT* = float64
+
 when winimCpu64:
-  type
-    TSQLULEN* = UINT64
+  type TSQLULEN* = UINT64
 when winimCpu32:
-  type
-    TSQLULEN* = TSQLUINTEGER
+  type TSQLULEN* = TSQLUINTEGER
 type
   TSQLROWCOUNT* = TSQLULEN
   TSQLROWSETSIZE* = TSQLULEN
   TSQLTRANSID* = TSQLULEN
+
 when winimCpu64:
-  type
-    TSQLLEN* = INT64
+  type TSQLLEN* = INT64
 when winimCpu32:
-  type
-    TSQLLEN* = TSQLINTEGER
+  type TSQLLEN* = TSQLINTEGER
 type
   TSQLROWOFFSET* = TSQLLEN
   TSQLREAL* = float32
@@ -75,11 +73,13 @@ type
     year*: TSQLSMALLINT
     month*: TSQLUSMALLINT
     day*: TSQLUSMALLINT
+
   TSQL_DATE_STRUCT* = DATE_STRUCT
   TIME_STRUCT* {.pure.} = object
     hour*: TSQLUSMALLINT
     minute*: TSQLUSMALLINT
     second*: TSQLUSMALLINT
+
   TSQL_TIME_STRUCT* = TIME_STRUCT
   TIMESTAMP_STRUCT* {.pure.} = object
     year*: TSQLSMALLINT
@@ -89,6 +89,7 @@ type
     minute*: TSQLUSMALLINT
     second*: TSQLUSMALLINT
     fraction*: TSQLUINTEGER
+
   TSQL_TIMESTAMP_STRUCT* = TIMESTAMP_STRUCT
   TSQLBIGINT* = ODBCINT64
   TSQLGUID* = GUID
@@ -96,16 +97,20 @@ type
   ODBC_VS_ARGS_UNION1* {.pure, union.} = object
     wszArg*: ptr WCHAR
     szArg*: ptr CHAR
+
   ODBC_VS_ARGS_UNION2* {.pure, union.} = object
     wszCorrelation*: ptr WCHAR
     szCorrelation*: ptr CHAR
+
   ODBC_VS_ARGS* {.pure.} = object
     pguidEvent*: ptr GUID
     dwFlags*: DWORD
     union1*: ODBC_VS_ARGS_UNION1
     union2*: ODBC_VS_ARGS_UNION2
     RetCode*: RETCODE
+
   PODBC_VS_ARGS* = ptr ODBC_VS_ARGS
+
 const
   ODBCVER* = 0x0351
   SQL_IS_YEAR* = 1
@@ -668,19 +673,19 @@ const
   SQL_CODE_HOUR_TO_MINUTE* = 11
   SQL_CODE_HOUR_TO_SECOND* = 12
   SQL_CODE_MINUTE_TO_SECOND* = 13
-  SQL_INTERVAL_YEAR* = 100+SQL_CODE_YEAR
-  SQL_INTERVAL_MONTH* = 100+SQL_CODE_MONTH
-  SQL_INTERVAL_DAY* = 100+SQL_CODE_DAY
-  SQL_INTERVAL_HOUR* = 100+SQL_CODE_HOUR
-  SQL_INTERVAL_MINUTE* = 100+SQL_CODE_MINUTE
-  SQL_INTERVAL_SECOND* = 100+SQL_CODE_SECOND
-  SQL_INTERVAL_YEAR_TO_MONTH* = 100+SQL_CODE_YEAR_TO_MONTH
-  SQL_INTERVAL_DAY_TO_HOUR* = 100+SQL_CODE_DAY_TO_HOUR
-  SQL_INTERVAL_DAY_TO_MINUTE* = 100+SQL_CODE_DAY_TO_MINUTE
-  SQL_INTERVAL_DAY_TO_SECOND* = 100+SQL_CODE_DAY_TO_SECOND
-  SQL_INTERVAL_HOUR_TO_MINUTE* = 100+SQL_CODE_HOUR_TO_MINUTE
-  SQL_INTERVAL_HOUR_TO_SECOND* = 100+SQL_CODE_HOUR_TO_SECOND
-  SQL_INTERVAL_MINUTE_TO_SECOND* = 100+SQL_CODE_MINUTE_TO_SECOND
+  SQL_INTERVAL_YEAR* = 100 + SQL_CODE_YEAR
+  SQL_INTERVAL_MONTH* = 100 + SQL_CODE_MONTH
+  SQL_INTERVAL_DAY* = 100 + SQL_CODE_DAY
+  SQL_INTERVAL_HOUR* = 100 + SQL_CODE_HOUR
+  SQL_INTERVAL_MINUTE* = 100 + SQL_CODE_MINUTE
+  SQL_INTERVAL_SECOND* = 100 + SQL_CODE_SECOND
+  SQL_INTERVAL_YEAR_TO_MONTH* = 100 + SQL_CODE_YEAR_TO_MONTH
+  SQL_INTERVAL_DAY_TO_HOUR* = 100 + SQL_CODE_DAY_TO_HOUR
+  SQL_INTERVAL_DAY_TO_MINUTE* = 100 + SQL_CODE_DAY_TO_MINUTE
+  SQL_INTERVAL_DAY_TO_SECOND* = 100 + SQL_CODE_DAY_TO_SECOND
+  SQL_INTERVAL_HOUR_TO_MINUTE* = 100 + SQL_CODE_HOUR_TO_MINUTE
+  SQL_INTERVAL_HOUR_TO_SECOND* = 100 + SQL_CODE_HOUR_TO_SECOND
+  SQL_INTERVAL_MINUTE_TO_SECOND* = 100 + SQL_CODE_MINUTE_TO_SECOND
   SQL_WCHAR* = -8
   SQL_UNICODE* = SQL_WCHAR
   SQL_WVARCHAR* = -9
@@ -718,15 +723,15 @@ const
   SQL_C_INTERVAL_MINUTE_TO_SECOND* = SQL_INTERVAL_MINUTE_TO_SECOND
   SQL_C_BINARY* = SQL_BINARY
   SQL_C_BIT* = SQL_BIT
-  SQL_C_SBIGINT* = SQL_BIGINT+SQL_SIGNED_OFFSET
-  SQL_C_UBIGINT* = SQL_BIGINT+SQL_UNSIGNED_OFFSET
+  SQL_C_SBIGINT* = SQL_BIGINT + SQL_SIGNED_OFFSET
+  SQL_C_UBIGINT* = SQL_BIGINT + SQL_UNSIGNED_OFFSET
   SQL_C_TINYINT* = SQL_TINYINT
-  SQL_C_SLONG* = SQL_C_LONG+SQL_SIGNED_OFFSET
-  SQL_C_SSHORT* = SQL_C_SHORT+SQL_SIGNED_OFFSET
-  SQL_C_STINYINT* = SQL_TINYINT+SQL_SIGNED_OFFSET
-  SQL_C_ULONG* = SQL_C_LONG+SQL_UNSIGNED_OFFSET
-  SQL_C_USHORT* = SQL_C_SHORT+SQL_UNSIGNED_OFFSET
-  SQL_C_UTINYINT* = SQL_TINYINT+SQL_UNSIGNED_OFFSET
+  SQL_C_SLONG* = SQL_C_LONG + SQL_SIGNED_OFFSET
+  SQL_C_SSHORT* = SQL_C_SHORT + SQL_SIGNED_OFFSET
+  SQL_C_STINYINT* = SQL_TINYINT + SQL_SIGNED_OFFSET
+  SQL_C_ULONG* = SQL_C_LONG + SQL_UNSIGNED_OFFSET
+  SQL_C_USHORT* = SQL_C_SHORT + SQL_UNSIGNED_OFFSET
+  SQL_C_UTINYINT* = SQL_TINYINT + SQL_UNSIGNED_OFFSET
   SQL_C_GUID* = SQL_GUID
   SQL_TYPE_NULL* = 0
   SQL_C_VARBOOKMARK* = SQL_C_BINARY
@@ -1100,7 +1105,9 @@ const
   SQL_CA2_MAX_ROWS_DELETE* = 0x00000200
   SQL_CA2_MAX_ROWS_UPDATE* = 0x00000400
   SQL_CA2_MAX_ROWS_CATALOG* = 0x00000800
-  SQL_CA2_MAX_ROWS_AFFECTS_ALL* = SQL_CA2_MAX_ROWS_SELECT or SQL_CA2_MAX_ROWS_INSERT or SQL_CA2_MAX_ROWS_DELETE or SQL_CA2_MAX_ROWS_UPDATE or SQL_CA2_MAX_ROWS_CATALOG
+  SQL_CA2_MAX_ROWS_AFFECTS_ALL* =
+    SQL_CA2_MAX_ROWS_SELECT or SQL_CA2_MAX_ROWS_INSERT or SQL_CA2_MAX_ROWS_DELETE or
+    SQL_CA2_MAX_ROWS_UPDATE or SQL_CA2_MAX_ROWS_CATALOG
   SQL_CA2_CRC_EXACT* = 0x00001000
   SQL_CA2_CRC_APPROXIMATE* = 0x00002000
   SQL_CA2_SIMULATE_NON_UNIQUE* = 0x00004000
@@ -1542,329 +1549,2151 @@ const
   ODBC_ERROR_REMOVE_DSN_FAILED* = 20
   ODBC_ERROR_OUT_OF_MEM* = 21
   ODBC_ERROR_OUTPUT_STRING_TRUNCATED* = 22
-  SQL_ODBC_KEYWORDS* = "ABSOLUTE,ACTION,ADA,ADD,ALL,ALLOCATE,ALTER,AND,ANY,ARE,AS,ASC,ASSERTION,AT,AUTHORIZATION,AVG,BEGIN,BETWEEN,BIT,BIT_LENGTH,BOTH,BY,CASCADE,CASCADED,CASE,CAST,CATALOG,CHAR,CHAR_LENGTH,CHARACTER,CHARACTER_LENGTH,CHECK,CLOSE,COALESCE,COLLATE,COLLATION,COLUMN,COMMIT,CONNECT,CONNECTION,CONSTRAINT,CONSTRAINTS,CONTINUE,CONVERT,CORRESPONDING,COUNT,CREATE,CROSS,CURRENT,CURRENT_DATE,CURRENT_TIME,CURRENT_TIMESTAMP,CURRENT_USER,CURSOR,DATE,DAY,DEALLOCATE,DEC,DECIMAL,DECLARE,DEFAULT,DEFERRABLE,DEFERRED,DELETE,DESC,DESCRIBE,DESCRIPTOR,DIAGNOSTICS,DISCONNECT,DISTINCT,DOMAIN,DOUBLE,DROP,ELSE,END,END-EXEC,ESCAPE,EXCEPT,EXCEPTION,EXEC,EXECUTE,EXISTS,EXTERNAL,EXTRACT,FALSE,FETCH,FIRST,FLOAT,FOR,FOREIGN,FORTRAN,FOUND,FROM,FULL,GET,GLOBAL,GO,GOTO,GRANT,GROUP,HAVING,HOUR,IDENTITY,IMMEDIATE,IN,INCLUDE,INDEX,INDICATOR,INITIALLY,INNER,INPUT,INSENSITIVE,INSERT,INT,INTEGER,INTERSECT,INTERVAL,INTO,IS,ISOLATION,JOIN,KEY,LANGUAGE,LAST,LEADING,LEFT,LEVEL,LIKE,LOCAL,LOWER,MATCH,MAX,MIN,MINUTE,MODULE,MONTH,NAMES,NATIONAL,NATURAL,NCHAR,NEXT,NO,NONE,NOT,NULL,NULLIF,NUMERIC,OCTET_LENGTH,OF,ON,ONLY,OPEN,OPTION,OR,ORDER,OUTER,OUTPUT,OVERLAPS,PAD,PARTIAL,PASCAL,PLI,POSITION,PRECISION,PREPARE,PRESERVE,PRIMARY,PRIOR,PRIVILEGES,PROCEDURE,PUBLIC,READ,REAL,REFERENCES,RELATIVE,RESTRICT,REVOKE,RIGHT,ROLLBACK,ROWSSCHEMA,SCROLL,SECOND,SECTION,SELECT,SESSION,SESSION_USER,SET,SIZE,SMALLINT,SOME,SPACE,SQL,SQLCA,SQLCODE,SQLERROR,SQLSTATE,SQLWARNING,SUBSTRING,SUM,SYSTEM_USER,TABLE,TEMPORARY,THEN,TIME,TIMESTAMP,TIMEZONE_HOUR,TIMEZONE_MINUTE,TO,TRAILING,TRANSACTION,TRANSLATE,TRANSLATION,TRIM,TRUE,UNION,UNIQUE,UNKNOWN,UPDATE,UPPER,USAGE,USER,USING,VALUE,VALUES,VARCHAR,VARYING,VIEW,WHEN,WHENEVER,WHERE,WITH,WORK,WRITE,YEAR,ZONE"
+  SQL_ODBC_KEYWORDS* =
+    "ABSOLUTE,ACTION,ADA,ADD,ALL,ALLOCATE,ALTER,AND,ANY,ARE,AS,ASC,ASSERTION,AT,AUTHORIZATION,AVG,BEGIN,BETWEEN,BIT,BIT_LENGTH,BOTH,BY,CASCADE,CASCADED,CASE,CAST,CATALOG,CHAR,CHAR_LENGTH,CHARACTER,CHARACTER_LENGTH,CHECK,CLOSE,COALESCE,COLLATE,COLLATION,COLUMN,COMMIT,CONNECT,CONNECTION,CONSTRAINT,CONSTRAINTS,CONTINUE,CONVERT,CORRESPONDING,COUNT,CREATE,CROSS,CURRENT,CURRENT_DATE,CURRENT_TIME,CURRENT_TIMESTAMP,CURRENT_USER,CURSOR,DATE,DAY,DEALLOCATE,DEC,DECIMAL,DECLARE,DEFAULT,DEFERRABLE,DEFERRED,DELETE,DESC,DESCRIBE,DESCRIPTOR,DIAGNOSTICS,DISCONNECT,DISTINCT,DOMAIN,DOUBLE,DROP,ELSE,END,END-EXEC,ESCAPE,EXCEPT,EXCEPTION,EXEC,EXECUTE,EXISTS,EXTERNAL,EXTRACT,FALSE,FETCH,FIRST,FLOAT,FOR,FOREIGN,FORTRAN,FOUND,FROM,FULL,GET,GLOBAL,GO,GOTO,GRANT,GROUP,HAVING,HOUR,IDENTITY,IMMEDIATE,IN,INCLUDE,INDEX,INDICATOR,INITIALLY,INNER,INPUT,INSENSITIVE,INSERT,INT,INTEGER,INTERSECT,INTERVAL,INTO,IS,ISOLATION,JOIN,KEY,LANGUAGE,LAST,LEADING,LEFT,LEVEL,LIKE,LOCAL,LOWER,MATCH,MAX,MIN,MINUTE,MODULE,MONTH,NAMES,NATIONAL,NATURAL,NCHAR,NEXT,NO,NONE,NOT,NULL,NULLIF,NUMERIC,OCTET_LENGTH,OF,ON,ONLY,OPEN,OPTION,OR,ORDER,OUTER,OUTPUT,OVERLAPS,PAD,PARTIAL,PASCAL,PLI,POSITION,PRECISION,PREPARE,PRESERVE,PRIMARY,PRIOR,PRIVILEGES,PROCEDURE,PUBLIC,READ,REAL,REFERENCES,RELATIVE,RESTRICT,REVOKE,RIGHT,ROLLBACK,ROWSSCHEMA,SCROLL,SECOND,SECTION,SELECT,SESSION,SESSION_USER,SET,SIZE,SMALLINT,SOME,SPACE,SQL,SQLCA,SQLCODE,SQLERROR,SQLSTATE,SQLWARNING,SUBSTRING,SUM,SYSTEM_USER,TABLE,TEMPORARY,THEN,TIME,TIMESTAMP,TIMEZONE_HOUR,TIMEZONE_MINUTE,TO,TRAILING,TRANSACTION,TRANSLATE,TRANSLATION,TRIM,TRUE,UNION,UNIQUE,UNKNOWN,UPDATE,UPPER,USAGE,USER,USING,VALUE,VALUES,VARCHAR,VARYING,VIEW,WHEN,WHENEVER,WHERE,WITH,WORK,WRITE,YEAR,ZONE"
 type
   TSQL_YEAR_MONTH_STRUCT* {.pure.} = object
     year*: TSQLUINTEGER
     month*: TSQLUINTEGER
+
   TSQL_DAY_SECOND_STRUCT* {.pure.} = object
     day*: TSQLUINTEGER
     hour*: TSQLUINTEGER
     minute*: TSQLUINTEGER
     second*: TSQLUINTEGER
     fraction*: TSQLUINTEGER
+
   SQL_INTERVAL_STRUCT_intval* {.pure, union.} = object
     year_month*: TSQL_YEAR_MONTH_STRUCT
     day_second*: TSQL_DAY_SECOND_STRUCT
+
   TSQL_INTERVAL_STRUCT* {.pure.} = object
     interval_type*: TSQLINTERVAL
     interval_sign*: TSQLSMALLINT
     intval*: SQL_INTERVAL_STRUCT_intval
+
   TSQL_NUMERIC_STRUCT* {.pure.} = object
     precision*: TSQLCHAR
     scale*: TSQLSCHAR
     sign*: TSQLCHAR
     val*: array[SQL_MAX_NUMERIC_LEN, TSQLCHAR]
-proc SQLAllocConnect*(EnvironmentHandle: TSQLHENV, ConnectionHandle: ptr TSQLHDBC): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLAllocEnv*(EnvironmentHandle: ptr TSQLHENV): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLAllocHandle*(HandleType: TSQLSMALLINT, InputHandle: TSQLHANDLE, OutputHandle: ptr TSQLHANDLE): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLAllocStmt*(ConnectionHandle: TSQLHDBC, StatementHandle: ptr TSQLHSTMT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLBindCol*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, TargetType: TSQLSMALLINT, TargetValue: TSQLPOINTER, BufferLength: TSQLLEN, StrLen_or_Ind: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLBindParam*(StatementHandle: TSQLHSTMT, ParameterNumber: TSQLUSMALLINT, ValueType: TSQLSMALLINT, ParameterType: TSQLSMALLINT, LengthPrecision: TSQLULEN, ParameterScale: TSQLSMALLINT, ParameterValue: TSQLPOINTER, StrLen_or_Ind: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLCancel*(StatementHandle: TSQLHSTMT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLCloseCursor*(StatementHandle: TSQLHSTMT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLCopyDesc*(SourceDescHandle: TSQLHDESC, TargetDescHandle: TSQLHDESC): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDisconnect*(ConnectionHandle: TSQLHDBC): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLEndTran*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, CompletionType: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLExecute*(StatementHandle: TSQLHSTMT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLFetch*(StatementHandle: TSQLHSTMT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLFetchScroll*(StatementHandle: TSQLHSTMT, FetchOrientation: TSQLSMALLINT, FetchOffset: TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLFreeConnect*(ConnectionHandle: TSQLHDBC): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLFreeEnv*(EnvironmentHandle: TSQLHENV): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLFreeHandle*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLFreeStmt*(StatementHandle: TSQLHSTMT, Option: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetData*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, TargetType: TSQLSMALLINT, TargetValue: TSQLPOINTER, BufferLength: TSQLLEN, StrLen_or_Ind: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetEnvAttr*(EnvironmentHandle: TSQLHENV, Attribute: TSQLINTEGER, Value: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLength: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetFunctions*(ConnectionHandle: TSQLHDBC, FunctionId: TSQLUSMALLINT, Supported: ptr TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetStmtOption*(StatementHandle: TSQLHSTMT, Option: TSQLUSMALLINT, Value: TSQLPOINTER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLNumResultCols*(StatementHandle: TSQLHSTMT, ColumnCount: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLParamData*(StatementHandle: TSQLHSTMT, Value: ptr TSQLPOINTER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLPutData*(StatementHandle: TSQLHSTMT, Data: TSQLPOINTER, StrLen_or_Ind: TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLRowCount*(StatementHandle: TSQLHSTMT, RowCount: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetDescRec*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, Type: TSQLSMALLINT, SubType: TSQLSMALLINT, Length: TSQLLEN, Precision: TSQLSMALLINT, Scale: TSQLSMALLINT, Data: TSQLPOINTER, StringLength: ptr TSQLLEN, Indicator: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetEnvAttr*(EnvironmentHandle: TSQLHENV, Attribute: TSQLINTEGER, Value: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetParam*(StatementHandle: TSQLHSTMT, ParameterNumber: TSQLUSMALLINT, ValueType: TSQLSMALLINT, ParameterType: TSQLSMALLINT, LengthPrecision: TSQLULEN, ParameterScale: TSQLSMALLINT, ParameterValue: TSQLPOINTER, StrLen_or_Ind: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetStmtOption*(StatementHandle: TSQLHSTMT, Option: TSQLUSMALLINT, Value: TSQLULEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLTransact*(EnvironmentHandle: TSQLHENV, ConnectionHandle: TSQLHDBC, CompletionType: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLBulkOperations*(StatementHandle: TSQLHSTMT, Operation: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDescribeParam*(StatementHandle: TSQLHSTMT, ParameterNumber: TSQLUSMALLINT, DataTypePtr: ptr TSQLSMALLINT, ParameterSizePtr: ptr TSQLULEN, DecimalDigitsPtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLExtendedFetch*(StatementHandle: TSQLHSTMT, FetchOrientation: TSQLUSMALLINT, FetchOffset: TSQLLEN, RowCountPtr: ptr TSQLULEN, RowStatusArray: ptr TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLMoreResults*(StatementHandle: TSQLHSTMT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLNumParams*(StatementHandle: TSQLHSTMT, ParameterCountPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLParamOptions*(hstmt: TSQLHSTMT, crow: TSQLULEN, pirow: ptr TSQLULEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLAllocConnect*(
+  EnvironmentHandle: TSQLHENV, ConnectionHandle: ptr TSQLHDBC
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLAllocEnv*(
+  EnvironmentHandle: ptr TSQLHENV
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLAllocHandle*(
+  HandleType: TSQLSMALLINT, InputHandle: TSQLHANDLE, OutputHandle: ptr TSQLHANDLE
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLAllocStmt*(
+  ConnectionHandle: TSQLHDBC, StatementHandle: ptr TSQLHSTMT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLBindCol*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLUSMALLINT,
+  TargetType: TSQLSMALLINT,
+  TargetValue: TSQLPOINTER,
+  BufferLength: TSQLLEN,
+  StrLen_or_Ind: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLBindParam*(
+  StatementHandle: TSQLHSTMT,
+  ParameterNumber: TSQLUSMALLINT,
+  ValueType: TSQLSMALLINT,
+  ParameterType: TSQLSMALLINT,
+  LengthPrecision: TSQLULEN,
+  ParameterScale: TSQLSMALLINT,
+  ParameterValue: TSQLPOINTER,
+  StrLen_or_Ind: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLCancel*(
+  StatementHandle: TSQLHSTMT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLCloseCursor*(
+  StatementHandle: TSQLHSTMT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLCopyDesc*(
+  SourceDescHandle: TSQLHDESC, TargetDescHandle: TSQLHDESC
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDisconnect*(
+  ConnectionHandle: TSQLHDBC
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLEndTran*(
+  HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, CompletionType: TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLExecute*(
+  StatementHandle: TSQLHSTMT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLFetch*(
+  StatementHandle: TSQLHSTMT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLFetchScroll*(
+  StatementHandle: TSQLHSTMT, FetchOrientation: TSQLSMALLINT, FetchOffset: TSQLLEN
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLFreeConnect*(
+  ConnectionHandle: TSQLHDBC
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLFreeEnv*(
+  EnvironmentHandle: TSQLHENV
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLFreeHandle*(
+  HandleType: TSQLSMALLINT, Handle: TSQLHANDLE
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLFreeStmt*(
+  StatementHandle: TSQLHSTMT, Option: TSQLUSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetData*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLUSMALLINT,
+  TargetType: TSQLSMALLINT,
+  TargetValue: TSQLPOINTER,
+  BufferLength: TSQLLEN,
+  StrLen_or_Ind: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetEnvAttr*(
+  EnvironmentHandle: TSQLHENV,
+  Attribute: TSQLINTEGER,
+  Value: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+  StringLength: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetFunctions*(
+  ConnectionHandle: TSQLHDBC, FunctionId: TSQLUSMALLINT, Supported: ptr TSQLUSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetStmtOption*(
+  StatementHandle: TSQLHSTMT, Option: TSQLUSMALLINT, Value: TSQLPOINTER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLNumResultCols*(
+  StatementHandle: TSQLHSTMT, ColumnCount: ptr TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLParamData*(
+  StatementHandle: TSQLHSTMT, Value: ptr TSQLPOINTER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLPutData*(
+  StatementHandle: TSQLHSTMT, Data: TSQLPOINTER, StrLen_or_Ind: TSQLLEN
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLRowCount*(
+  StatementHandle: TSQLHSTMT, RowCount: ptr TSQLLEN
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetDescRec*(
+  DescriptorHandle: TSQLHDESC,
+  RecNumber: TSQLSMALLINT,
+  Type: TSQLSMALLINT,
+  SubType: TSQLSMALLINT,
+  Length: TSQLLEN,
+  Precision: TSQLSMALLINT,
+  Scale: TSQLSMALLINT,
+  Data: TSQLPOINTER,
+  StringLength: ptr TSQLLEN,
+  Indicator: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetEnvAttr*(
+  EnvironmentHandle: TSQLHENV,
+  Attribute: TSQLINTEGER,
+  Value: TSQLPOINTER,
+  StringLength: TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetParam*(
+  StatementHandle: TSQLHSTMT,
+  ParameterNumber: TSQLUSMALLINT,
+  ValueType: TSQLSMALLINT,
+  ParameterType: TSQLSMALLINT,
+  LengthPrecision: TSQLULEN,
+  ParameterScale: TSQLSMALLINT,
+  ParameterValue: TSQLPOINTER,
+  StrLen_or_Ind: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetStmtOption*(
+  StatementHandle: TSQLHSTMT, Option: TSQLUSMALLINT, Value: TSQLULEN
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLTransact*(
+  EnvironmentHandle: TSQLHENV, ConnectionHandle: TSQLHDBC, CompletionType: TSQLUSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLBulkOperations*(
+  StatementHandle: TSQLHSTMT, Operation: TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDescribeParam*(
+  StatementHandle: TSQLHSTMT,
+  ParameterNumber: TSQLUSMALLINT,
+  DataTypePtr: ptr TSQLSMALLINT,
+  ParameterSizePtr: ptr TSQLULEN,
+  DecimalDigitsPtr: ptr TSQLSMALLINT,
+  NullablePtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLExtendedFetch*(
+  StatementHandle: TSQLHSTMT,
+  FetchOrientation: TSQLUSMALLINT,
+  FetchOffset: TSQLLEN,
+  RowCountPtr: ptr TSQLULEN,
+  RowStatusArray: ptr TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLMoreResults*(
+  StatementHandle: TSQLHSTMT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLNumParams*(
+  StatementHandle: TSQLHSTMT, ParameterCountPtr: ptr TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLParamOptions*(
+  hstmt: TSQLHSTMT, crow: TSQLULEN, pirow: ptr TSQLULEN
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
 when winimCpu64:
-  type
-    TSQLSETPOSIROW* = UINT64
+  type TSQLSETPOSIROW* = UINT64
 when winimCpu32:
-  type
-    TSQLSETPOSIROW* = TSQLUSMALLINT
-proc SQLSetPos*(StatementHandle: TSQLHSTMT, RowNumber: TSQLSETPOSIROW, Operation: TSQLUSMALLINT, LockType: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLBindParameter*(StatementHandle: TSQLHSTMT, ParameterNumber: TSQLUSMALLINT, InputOutputType: TSQLSMALLINT, ValueType: TSQLSMALLINT, ParameterType: TSQLSMALLINT, ColumnSize: TSQLULEN, DecimalDigits: TSQLSMALLINT, ParameterValuePtr: TSQLPOINTER, BufferLength: TSQLLEN, StrLen_or_IndPtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLAllocHandleStd*(fHandleType: TSQLSMALLINT, hInput: TSQLHANDLE, phOutput: ptr TSQLHANDLE): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetScrollOptions*(hstmt: TSQLHSTMT, fConcurrency: TSQLUSMALLINT, crowKeyset: TSQLLEN, crowRowset: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc TraceOpenLogFile*(P1: LPWSTR, P2: LPWSTR, P3: DWORD): RETCODE {.winapi, stdcall, dynlib: "odbctrac", importc.}
+  type TSQLSETPOSIROW* = TSQLUSMALLINT
+proc SQLSetPos*(
+  StatementHandle: TSQLHSTMT,
+  RowNumber: TSQLSETPOSIROW,
+  Operation: TSQLUSMALLINT,
+  LockType: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLBindParameter*(
+  StatementHandle: TSQLHSTMT,
+  ParameterNumber: TSQLUSMALLINT,
+  InputOutputType: TSQLSMALLINT,
+  ValueType: TSQLSMALLINT,
+  ParameterType: TSQLSMALLINT,
+  ColumnSize: TSQLULEN,
+  DecimalDigits: TSQLSMALLINT,
+  ParameterValuePtr: TSQLPOINTER,
+  BufferLength: TSQLLEN,
+  StrLen_or_IndPtr: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLAllocHandleStd*(
+  fHandleType: TSQLSMALLINT, hInput: TSQLHANDLE, phOutput: ptr TSQLHANDLE
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetScrollOptions*(
+  hstmt: TSQLHSTMT,
+  fConcurrency: TSQLUSMALLINT,
+  crowKeyset: TSQLLEN,
+  crowRowset: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc TraceOpenLogFile*(
+  P1: LPWSTR, P2: LPWSTR, P3: DWORD
+): RETCODE {.winapi, stdcall, dynlib: "odbctrac", importc.}
+
 proc TraceCloseLogFile*(): RETCODE {.winapi, stdcall, dynlib: "odbctrac", importc.}
-proc TraceReturn*(P1: RETCODE, P2: RETCODE): VOID {.winapi, stdcall, dynlib: "odbctrac", importc.}
+proc TraceReturn*(
+  P1: RETCODE, P2: RETCODE
+): VOID {.winapi, stdcall, dynlib: "odbctrac", importc.}
+
 proc TraceVersion*(): DWORD {.winapi, stdcall, dynlib: "odbctrac", importc.}
-proc TraceVSControl*(P1: DWORD): RETCODE {.winapi, stdcall, dynlib: "odbctrac", importc.}
-proc ODBCSetTryWaitValue*(dwValue: DWORD): WINBOOL {.winapi, stdcall, dynlib: "odbc32", importc.}
+proc TraceVSControl*(
+  P1: DWORD
+): RETCODE {.winapi, stdcall, dynlib: "odbctrac", importc.}
+
+proc ODBCSetTryWaitValue*(
+  dwValue: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbc32", importc.}
+
 proc ODBCGetTryWaitValue*(): DWORD {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColAttributeW*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, FieldIdentifier: TSQLUSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColAttributesW*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, FieldIdentifier: TSQLUSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLConnectW*(ConnectionHandle: TSQLHDBC, ServerName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, UserName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, Authentication: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDescribeColW*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, ColumnName: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT, DataTypePtr: ptr TSQLSMALLINT, ColumnSizePtr: ptr TSQLULEN, DecimalDigitsPtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLErrorW*(EnvironmentHandle: TSQLHENV, ConnectionHandle: TSQLHDBC, StatementHandle: TSQLHSTMT, Sqlstate: ptr TSQLWCHAR, NativeError: ptr TSQLINTEGER, MessageText: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, TextLength: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLExecDirectW*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetConnectAttrW*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetCursorNameW*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetDescFieldW*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, Value: TSQLPOINTER, BufferLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDescFieldW*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDescRecW*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, Name: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, TypePtr: ptr TSQLSMALLINT, SubTypePtr: ptr TSQLSMALLINT, LengthPtr: ptr TSQLLEN, PrecisionPtr: ptr TSQLSMALLINT, ScalePtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDiagFieldW*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, DiagIdentifier: TSQLSMALLINT, DiagInfoPtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDiagRecW*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, SQLState: ptr TSQLWCHAR, NativeErrorPtr: ptr TSQLINTEGER, MessageText: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, TextLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLPrepareW*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetConnectAttrW*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetCursorNameW*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLWCHAR, NameLength: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColumnsW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetConnectOptionW*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetInfoW*(ConnectionHandle: TSQLHDBC, InfoType: TSQLUSMALLINT, InfoValuePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetTypeInfoW*(StatementHandle: TSQLHSTMT, DataType: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetConnectOptionW*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSpecialColumnsW*(StatementHandle: TSQLHSTMT, IdentifierType: TSQLUSMALLINT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, Scope: TSQLUSMALLINT, Nullable: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLStatisticsW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, Unique: TSQLUSMALLINT, Reserved: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLTablesW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, TableType: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDataSourcesW*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, ServerName: ptr TSQLWCHAR, BufferLength1: TSQLSMALLINT, NameLength1Ptr: ptr TSQLSMALLINT, Description: ptr TSQLWCHAR, BufferLength2: TSQLSMALLINT, NameLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDriverConnectW*(ConnectionHandle: TSQLHDBC, WindowHandle: TSQLHWND, InConnectionString: ptr TSQLWCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT, DriverCompletion: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLBrowseConnectW*(ConnectionHandle: TSQLHDBC, InConnectionString: ptr TSQLWCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColumnPrivilegesW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetStmtAttrW*(StatementHandle: TSQLHSTMT, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetStmtAttrW*(StatementHandle: TSQLHSTMT, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLForeignKeysW*(StatementHandle: TSQLHSTMT, PKCatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, PKSchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, PKTableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, FKCatalogName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT, FKSchemaName: ptr TSQLWCHAR, NameLength5: TSQLSMALLINT, FKTableName: ptr TSQLWCHAR, NameLength6: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLNativeSqlW*(ConnectionHandle: TSQLHDBC, InStatementText: ptr TSQLWCHAR, TextLength1: TSQLINTEGER, OutStatementText: ptr TSQLWCHAR, BufferLength: TSQLINTEGER, TextLength2Ptr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLPrimaryKeysW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLProcedureColumnsW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLProceduresW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLTablePrivilegesW*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDriversW*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, DriverDescription: ptr TSQLWCHAR, BufferLength1: TSQLSMALLINT, DescriptionLengthPtr: ptr TSQLSMALLINT, DriverAttributes: ptr TSQLWCHAR, BufferLength2: TSQLSMALLINT, AttributesLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColAttributeA*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColAttributesA*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, FieldIdentifier: TSQLUSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLConnectA*(ConnectionHandle: TSQLHDBC, ServerName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, UserName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, Authentication: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDescribeColA*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, ColumnName: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT, DataTypePtr: ptr TSQLSMALLINT, ColumnSizePtr: ptr TSQLUINTEGER, DecimalDigitsPtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLErrorA*(EnvironmentHandle: TSQLHENV, ConnectionHandle: TSQLHDBC, StatementHandle: TSQLHSTMT, Sqlstate: ptr TSQLCHAR, NativeError: ptr TSQLINTEGER, MessageText: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, TextLength: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLExecDirectA*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetConnectAttrA*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetCursorNameA*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDescFieldA*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDescRecA*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, Name: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, TypePtr: ptr TSQLSMALLINT, SubTypePtr: ptr TSQLSMALLINT, LengthPtr: ptr TSQLINTEGER, PrecisionPtr: ptr TSQLSMALLINT, ScalePtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDiagFieldA*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, DiagIdentifier: TSQLSMALLINT, DiagInfoPtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetDiagRecA*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, SQLState: ptr TSQLCHAR, NativeErrorPtr: ptr TSQLINTEGER, MessageText: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, TextLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetStmtAttrA*(StatementHandle: TSQLHSTMT, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetTypeInfoA*(StatementHandle: TSQLHSTMT, DataTyoe: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLPrepareA*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetConnectAttrA*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetCursorNameA*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLCHAR, NameLength: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColumnsA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetConnectOptionA*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLGetInfoA*(ConnectionHandle: TSQLHDBC, InfoType: TSQLUSMALLINT, InfoValuePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSetConnectOptionA*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLSpecialColumnsA*(StatementHandle: TSQLHSTMT, IdentifierType: TSQLUSMALLINT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, Scope: TSQLUSMALLINT, Nullable: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLStatisticsA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, Unique: TSQLUSMALLINT, Reserved: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLTablesA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, TableType: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDataSourcesA*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, ServerName: ptr TSQLCHAR, BufferLength1: TSQLSMALLINT, NameLength1Ptr: ptr TSQLSMALLINT, Description: ptr TSQLCHAR, BufferLength2: TSQLSMALLINT, NameLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDriverConnectA*(ConnectionHandle: TSQLHDBC, WindowHandle: TSQLHWND, InConnectionString: ptr TSQLCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT, DriverCompletion: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLBrowseConnectA*(ConnectionHandle: TSQLHDBC, InConnectionString: ptr TSQLCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLColumnPrivilegesA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLForeignKeysA*(StatementHandle: TSQLHSTMT, PKCatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, PKSchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, PKTableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, FKCatalogName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT, FKSchemaName: ptr TSQLCHAR, NameLength5: TSQLSMALLINT, FKTableName: ptr TSQLCHAR, NameLength6: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLNativeSqlA*(ConnectionHandle: TSQLHDBC, InStatementText: ptr TSQLCHAR, TextLength1: TSQLINTEGER, OutStatementText: ptr TSQLCHAR, BufferLength: TSQLINTEGER, TextLength2Ptr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLPrimaryKeysA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLProcedureColumnsA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLProceduresA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLTablePrivilegesA*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLDriversA*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, DriverDescription: ptr TSQLCHAR, BufferLength1: TSQLSMALLINT, DescriptionLengthPtr: ptr TSQLSMALLINT, DriverAttributes: ptr TSQLCHAR, BufferLength2: TSQLSMALLINT, AttributesLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
-proc SQLInstallODBC*(hwndParent: HWND, lpszInfFile: LPCSTR, lpszSrcPath: LPCSTR, lpszDrivers: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLManageDataSources*(hwndParent: HWND): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLCreateDataSource*(hwndParent: HWND, lpszDSN: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetTranslator*(hwnd: HWND, lpszName: LPSTR, cbNameMax: WORD, pcbNameOut: ptr WORD, lpszPath: LPSTR, cbPathMax: WORD, pcbPathOut: ptr WORD, pvOption: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallDriver*(lpszInfFile: LPCSTR, lpszDriver: LPCSTR, lpszPath: LPSTR, cbPathMax: WORD, pcbPathOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallDriverManager*(lpszPath: LPSTR, cbPathMax: WORD, pcbPathOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetInstalledDrivers*(lpszBuf: LPSTR, cbBufMax: WORD, pcbBufOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetAvailableDrivers*(lpszInfFile: LPCSTR, lpszBuf: LPSTR, cbBufMax: WORD, pcbBufOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLConfigDataSource*(hwndParent: HWND, fRequest: WORD, lpszDriver: LPCSTR, lpszAttributes: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveDefaultDataSource*(): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLWriteDSNToIni*(lpszDSN: LPCSTR, lpszDriver: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveDSNFromIni*(lpszDSN: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLValidDSN*(lpszDSN: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLWritePrivateProfileString*(lpszSection: LPCSTR, lpszEntry: LPCSTR, lpszString: LPCSTR, lpszFilename: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetPrivateProfileString*(lpszSection: LPCSTR, lpszEntry: LPCSTR, lpszDefault: LPCSTR, lpszRetBuffer: LPSTR, cbRetBuffer: int32, lpszFilename: LPCSTR): int32 {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveDriverManager*(lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallTranslator*(lpszInfFile: LPCSTR, lpszTranslator: LPCSTR, lpszPathIn: LPCSTR, lpszPathOut: LPSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveTranslator*(lpszTranslator: LPCSTR, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveDriver*(lpszDriver: LPCSTR, fRemoveDSN: WINBOOL, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLConfigDriver*(hwndParent: HWND, fRequest: WORD, lpszDriver: LPCSTR, lpszArgs: LPCSTR, lpszMsg: LPSTR, cbMsgMax: WORD, pcbMsgOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallerError*(iError: WORD, pfErrorCode: ptr DWORD, lpszErrorMsg: LPSTR, cbErrorMsgMax: WORD, pcbErrorMsg: ptr WORD): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLPostInstallerError*(dwErrorCode: DWORD, lpszErrMsg: LPCSTR): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLWriteFileDSN*(lpszFileName: LPCSTR, lpszAppName: LPCSTR, lpszKeyName: LPCSTR, lpszString: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLReadFileDSN*(lpszFileName: LPCSTR, lpszAppName: LPCSTR, lpszKeyName: LPCSTR, lpszString: LPSTR, cbString: WORD, pcbString: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallDriverEx*(lpszDriver: LPCSTR, lpszPathIn: LPCSTR, lpszPathOut: LPSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallTranslatorEx*(lpszTranslator: LPCSTR, lpszPathIn: LPCSTR, lpszPathOut: LPSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetConfigMode*(pwConfigMode: ptr UWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLSetConfigMode*(wConfigMode: UWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallODBCW*(hwndParent: HWND, lpszInfFile: LPCWSTR, lpszSrcPath: LPCWSTR, lpszDrivers: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLCreateDataSourceW*(hwndParent: HWND, lpszDSN: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetTranslatorW*(hwnd: HWND, lpszName: LPWSTR, cbNameMax: WORD, pcbNameOut: ptr WORD, lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD, pvOption: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallDriverW*(lpszInfFile: LPCWSTR, lpszDriver: LPCWSTR, lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallDriverManagerW*(lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetInstalledDriversW*(lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetAvailableDriversW*(lpszInfFile: LPCWSTR, lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLConfigDataSourceW*(hwndParent: HWND, fRequest: WORD, lpszDriver: LPCWSTR, lpszAttributes: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLWriteDSNToIniW*(lpszDSN: LPCWSTR, lpszDriver: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveDSNFromIniW*(lpszDSN: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLValidDSNW*(lpszDSN: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLWritePrivateProfileStringW*(lpszSection: LPCWSTR, lpszEntry: LPCWSTR, lpszString: LPCWSTR, lpszFilename: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLGetPrivateProfileStringW*(lpszSection: LPCWSTR, lpszEntry: LPCWSTR, lpszDefault: LPCWSTR, lpszRetBuffer: LPWSTR, cbRetBuffer: int32, lpszFilename: LPCWSTR): int32 {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallTranslatorW*(lpszInfFile: LPCWSTR, lpszTranslator: LPCWSTR, lpszPathIn: LPCWSTR, lpszPathOut: LPWSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveTranslatorW*(lpszTranslator: LPCWSTR, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLRemoveDriverW*(lpszDriver: LPCWSTR, fRemoveDSN: WINBOOL, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLConfigDriverW*(hwndParent: HWND, fRequest: WORD, lpszDriver: LPCWSTR, lpszArgs: LPCWSTR, lpszMsg: LPWSTR, cbMsgMax: WORD, pcbMsgOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallerErrorW*(iError: WORD, pfErrorCode: ptr DWORD, lpszErrorMsg: LPWSTR, cbErrorMsgMax: WORD, pcbErrorMsg: ptr WORD): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLPostInstallerErrorW*(dwErrorCode: DWORD, lpszErrorMsg: LPCWSTR): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLWriteFileDSNW*(lpszFileName: LPCWSTR, lpszAppName: LPCWSTR, lpszKeyName: LPCWSTR, lpszString: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLReadFileDSNW*(lpszFileName: LPCWSTR, lpszAppName: LPCWSTR, lpszKeyName: LPCWSTR, lpszString: LPWSTR, cbString: WORD, pcbString: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallDriverExW*(lpszDriver: LPCWSTR, lpszPathIn: LPCWSTR, lpszPathOut: LPWSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLInstallTranslatorExW*(lpszTranslator: LPCWSTR, lpszPathIn: LPCWSTR, lpszPathOut: LPWSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
-proc SQLAllocHandle*(fHandleType: TSQLSMALLINT, hInput: TSQLHANDLE, phOutput: ptr TSQLHANDLE): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLAllocHandleStd".}
-proc `wszArg=`*(self: var ODBC_VS_ARGS, x: ptr WCHAR) {.inline.} = self.union1.wszArg = x
-proc wszArg*(self: ODBC_VS_ARGS): ptr WCHAR {.inline.} = self.union1.wszArg
-proc wszArg*(self: var ODBC_VS_ARGS): var ptr WCHAR {.inline.} = self.union1.wszArg
-proc `szArg=`*(self: var ODBC_VS_ARGS, x: ptr CHAR) {.inline.} = self.union1.szArg = x
-proc szArg*(self: ODBC_VS_ARGS): ptr CHAR {.inline.} = self.union1.szArg
-proc szArg*(self: var ODBC_VS_ARGS): var ptr CHAR {.inline.} = self.union1.szArg
-proc `wszCorrelation=`*(self: var ODBC_VS_ARGS, x: ptr WCHAR) {.inline.} = self.union2.wszCorrelation = x
-proc wszCorrelation*(self: ODBC_VS_ARGS): ptr WCHAR {.inline.} = self.union2.wszCorrelation
-proc wszCorrelation*(self: var ODBC_VS_ARGS): var ptr WCHAR {.inline.} = self.union2.wszCorrelation
-proc `szCorrelation=`*(self: var ODBC_VS_ARGS, x: ptr CHAR) {.inline.} = self.union2.szCorrelation = x
-proc szCorrelation*(self: ODBC_VS_ARGS): ptr CHAR {.inline.} = self.union2.szCorrelation
-proc szCorrelation*(self: var ODBC_VS_ARGS): var ptr CHAR {.inline.} = self.union2.szCorrelation
+proc SQLColAttributeW*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLUSMALLINT,
+  FieldIdentifier: TSQLUSMALLINT,
+  CharacterAttributePtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+  NumericAttributePtr: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLColAttributesW*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLUSMALLINT,
+  FieldIdentifier: TSQLUSMALLINT,
+  CharacterAttributePtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+  NumericAttributePtr: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLConnectW*(
+  ConnectionHandle: TSQLHDBC,
+  ServerName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  UserName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  Authentication: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDescribeColW*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLUSMALLINT,
+  ColumnName: ptr TSQLWCHAR,
+  BufferLength: TSQLSMALLINT,
+  NameLengthPtr: ptr TSQLSMALLINT,
+  DataTypePtr: ptr TSQLSMALLINT,
+  ColumnSizePtr: ptr TSQLULEN,
+  DecimalDigitsPtr: ptr TSQLSMALLINT,
+  NullablePtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLErrorW*(
+  EnvironmentHandle: TSQLHENV,
+  ConnectionHandle: TSQLHDBC,
+  StatementHandle: TSQLHSTMT,
+  Sqlstate: ptr TSQLWCHAR,
+  NativeError: ptr TSQLINTEGER,
+  MessageText: ptr TSQLWCHAR,
+  BufferLength: TSQLSMALLINT,
+  TextLength: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLExecDirectW*(
+  StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetConnectAttrW*(
+  ConnectionHandle: TSQLHDBC,
+  Attribute: TSQLINTEGER,
+  ValuePtr: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+  StringLengthPtr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetCursorNameW*(
+  StatementHandle: TSQLHSTMT,
+  CursorName: ptr TSQLWCHAR,
+  BufferLength: TSQLSMALLINT,
+  NameLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetDescFieldW*(
+  DescriptorHandle: TSQLHDESC,
+  RecNumber: TSQLSMALLINT,
+  FieldIdentifier: TSQLSMALLINT,
+  Value: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDescFieldW*(
+  DescriptorHandle: TSQLHDESC,
+  RecNumber: TSQLSMALLINT,
+  FieldIdentifier: TSQLSMALLINT,
+  ValuePtr: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+  StringLengthPtr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDescRecW*(
+  DescriptorHandle: TSQLHDESC,
+  RecNumber: TSQLSMALLINT,
+  Name: ptr TSQLWCHAR,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+  TypePtr: ptr TSQLSMALLINT,
+  SubTypePtr: ptr TSQLSMALLINT,
+  LengthPtr: ptr TSQLLEN,
+  PrecisionPtr: ptr TSQLSMALLINT,
+  ScalePtr: ptr TSQLSMALLINT,
+  NullablePtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDiagFieldW*(
+  HandleType: TSQLSMALLINT,
+  Handle: TSQLHANDLE,
+  RecNumber: TSQLSMALLINT,
+  DiagIdentifier: TSQLSMALLINT,
+  DiagInfoPtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDiagRecW*(
+  HandleType: TSQLSMALLINT,
+  Handle: TSQLHANDLE,
+  RecNumber: TSQLSMALLINT,
+  SQLState: ptr TSQLWCHAR,
+  NativeErrorPtr: ptr TSQLINTEGER,
+  MessageText: ptr TSQLWCHAR,
+  BufferLength: TSQLSMALLINT,
+  TextLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLPrepareW*(
+  StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetConnectAttrW*(
+  ConnectionHandle: TSQLHDBC,
+  Attribute: TSQLINTEGER,
+  ValuePtr: TSQLPOINTER,
+  StringLength: TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetCursorNameW*(
+  StatementHandle: TSQLHSTMT, CursorName: ptr TSQLWCHAR, NameLength: TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLColumnsW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+  ColumnName: ptr TSQLWCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetConnectOptionW*(
+  ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetInfoW*(
+  ConnectionHandle: TSQLHDBC,
+  InfoType: TSQLUSMALLINT,
+  InfoValuePtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetTypeInfoW*(
+  StatementHandle: TSQLHSTMT, DataType: TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetConnectOptionW*(
+  ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSpecialColumnsW*(
+  StatementHandle: TSQLHSTMT,
+  IdentifierType: TSQLUSMALLINT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+  Scope: TSQLUSMALLINT,
+  Nullable: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLStatisticsW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+  Unique: TSQLUSMALLINT,
+  Reserved: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLTablesW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+  TableType: ptr TSQLWCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDataSourcesW*(
+  EnvironmentHandle: TSQLHENV,
+  Direction: TSQLUSMALLINT,
+  ServerName: ptr TSQLWCHAR,
+  BufferLength1: TSQLSMALLINT,
+  NameLength1Ptr: ptr TSQLSMALLINT,
+  Description: ptr TSQLWCHAR,
+  BufferLength2: TSQLSMALLINT,
+  NameLength2Ptr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDriverConnectW*(
+  ConnectionHandle: TSQLHDBC,
+  WindowHandle: TSQLHWND,
+  InConnectionString: ptr TSQLWCHAR,
+  StringLength1: TSQLSMALLINT,
+  OutConnectionString: ptr TSQLWCHAR,
+  BufferLength: TSQLSMALLINT,
+  StringLength2Ptr: ptr TSQLSMALLINT,
+  DriverCompletion: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLBrowseConnectW*(
+  ConnectionHandle: TSQLHDBC,
+  InConnectionString: ptr TSQLWCHAR,
+  StringLength1: TSQLSMALLINT,
+  OutConnectionString: ptr TSQLWCHAR,
+  BufferLength: TSQLSMALLINT,
+  StringLength2Ptr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLColumnPrivilegesW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+  ColumnName: ptr TSQLWCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetStmtAttrW*(
+  StatementHandle: TSQLHSTMT,
+  Attribute: TSQLINTEGER,
+  ValuePtr: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+  StringLengthPtr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetStmtAttrW*(
+  StatementHandle: TSQLHSTMT,
+  Attribute: TSQLINTEGER,
+  ValuePtr: TSQLPOINTER,
+  StringLength: TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLForeignKeysW*(
+  StatementHandle: TSQLHSTMT,
+  PKCatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  PKSchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  PKTableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+  FKCatalogName: ptr TSQLWCHAR,
+  NameLength4: TSQLSMALLINT,
+  FKSchemaName: ptr TSQLWCHAR,
+  NameLength5: TSQLSMALLINT,
+  FKTableName: ptr TSQLWCHAR,
+  NameLength6: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLNativeSqlW*(
+  ConnectionHandle: TSQLHDBC,
+  InStatementText: ptr TSQLWCHAR,
+  TextLength1: TSQLINTEGER,
+  OutStatementText: ptr TSQLWCHAR,
+  BufferLength: TSQLINTEGER,
+  TextLength2Ptr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLPrimaryKeysW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLProcedureColumnsW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  ProcName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+  ColumnName: ptr TSQLWCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLProceduresW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  ProcName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLTablePrivilegesW*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLWCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLWCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLWCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDriversW*(
+  EnvironmentHandle: TSQLHENV,
+  Direction: TSQLUSMALLINT,
+  DriverDescription: ptr TSQLWCHAR,
+  BufferLength1: TSQLSMALLINT,
+  DescriptionLengthPtr: ptr TSQLSMALLINT,
+  DriverAttributes: ptr TSQLWCHAR,
+  BufferLength2: TSQLSMALLINT,
+  AttributesLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLColAttributeA*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLSMALLINT,
+  FieldIdentifier: TSQLSMALLINT,
+  CharacterAttributePtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+  NumericAttributePtr: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLColAttributesA*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLUSMALLINT,
+  FieldIdentifier: TSQLUSMALLINT,
+  CharacterAttributePtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+  NumericAttributePtr: ptr TSQLLEN,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLConnectA*(
+  ConnectionHandle: TSQLHDBC,
+  ServerName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  UserName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  Authentication: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDescribeColA*(
+  StatementHandle: TSQLHSTMT,
+  ColumnNumber: TSQLUSMALLINT,
+  ColumnName: ptr TSQLCHAR,
+  BufferLength: TSQLSMALLINT,
+  NameLengthPtr: ptr TSQLSMALLINT,
+  DataTypePtr: ptr TSQLSMALLINT,
+  ColumnSizePtr: ptr TSQLUINTEGER,
+  DecimalDigitsPtr: ptr TSQLSMALLINT,
+  NullablePtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLErrorA*(
+  EnvironmentHandle: TSQLHENV,
+  ConnectionHandle: TSQLHDBC,
+  StatementHandle: TSQLHSTMT,
+  Sqlstate: ptr TSQLCHAR,
+  NativeError: ptr TSQLINTEGER,
+  MessageText: ptr TSQLCHAR,
+  BufferLength: TSQLSMALLINT,
+  TextLength: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLExecDirectA*(
+  StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetConnectAttrA*(
+  ConnectionHandle: TSQLHDBC,
+  Attribute: TSQLINTEGER,
+  ValuePtr: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+  StringLengthPtr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetCursorNameA*(
+  StatementHandle: TSQLHSTMT,
+  CursorName: ptr TSQLCHAR,
+  BufferLength: TSQLSMALLINT,
+  NameLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDescFieldA*(
+  DescriptorHandle: TSQLHDESC,
+  RecNumber: TSQLSMALLINT,
+  FieldIdentifier: TSQLSMALLINT,
+  ValuePtr: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+  StringLengthPtr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDescRecA*(
+  DescriptorHandle: TSQLHDESC,
+  RecNumber: TSQLSMALLINT,
+  Name: ptr TSQLCHAR,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+  TypePtr: ptr TSQLSMALLINT,
+  SubTypePtr: ptr TSQLSMALLINT,
+  LengthPtr: ptr TSQLINTEGER,
+  PrecisionPtr: ptr TSQLSMALLINT,
+  ScalePtr: ptr TSQLSMALLINT,
+  NullablePtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDiagFieldA*(
+  HandleType: TSQLSMALLINT,
+  Handle: TSQLHANDLE,
+  RecNumber: TSQLSMALLINT,
+  DiagIdentifier: TSQLSMALLINT,
+  DiagInfoPtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetDiagRecA*(
+  HandleType: TSQLSMALLINT,
+  Handle: TSQLHANDLE,
+  RecNumber: TSQLSMALLINT,
+  SQLState: ptr TSQLCHAR,
+  NativeErrorPtr: ptr TSQLINTEGER,
+  MessageText: ptr TSQLCHAR,
+  BufferLength: TSQLSMALLINT,
+  TextLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetStmtAttrA*(
+  StatementHandle: TSQLHSTMT,
+  Attribute: TSQLINTEGER,
+  ValuePtr: TSQLPOINTER,
+  BufferLength: TSQLINTEGER,
+  StringLengthPtr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetTypeInfoA*(
+  StatementHandle: TSQLHSTMT, DataTyoe: TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLPrepareA*(
+  StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetConnectAttrA*(
+  ConnectionHandle: TSQLHDBC,
+  Attribute: TSQLINTEGER,
+  ValuePtr: TSQLPOINTER,
+  StringLength: TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetCursorNameA*(
+  StatementHandle: TSQLHSTMT, CursorName: ptr TSQLCHAR, NameLength: TSQLSMALLINT
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLColumnsA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+  ColumnName: ptr TSQLCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetConnectOptionA*(
+  ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLGetInfoA*(
+  ConnectionHandle: TSQLHDBC,
+  InfoType: TSQLUSMALLINT,
+  InfoValuePtr: TSQLPOINTER,
+  BufferLength: TSQLSMALLINT,
+  StringLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSetConnectOptionA*(
+  ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLSpecialColumnsA*(
+  StatementHandle: TSQLHSTMT,
+  IdentifierType: TSQLUSMALLINT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+  Scope: TSQLUSMALLINT,
+  Nullable: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLStatisticsA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+  Unique: TSQLUSMALLINT,
+  Reserved: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLTablesA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+  TableType: ptr TSQLCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDataSourcesA*(
+  EnvironmentHandle: TSQLHENV,
+  Direction: TSQLUSMALLINT,
+  ServerName: ptr TSQLCHAR,
+  BufferLength1: TSQLSMALLINT,
+  NameLength1Ptr: ptr TSQLSMALLINT,
+  Description: ptr TSQLCHAR,
+  BufferLength2: TSQLSMALLINT,
+  NameLength2Ptr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDriverConnectA*(
+  ConnectionHandle: TSQLHDBC,
+  WindowHandle: TSQLHWND,
+  InConnectionString: ptr TSQLCHAR,
+  StringLength1: TSQLSMALLINT,
+  OutConnectionString: ptr TSQLCHAR,
+  BufferLength: TSQLSMALLINT,
+  StringLength2Ptr: ptr TSQLSMALLINT,
+  DriverCompletion: TSQLUSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLBrowseConnectA*(
+  ConnectionHandle: TSQLHDBC,
+  InConnectionString: ptr TSQLCHAR,
+  StringLength1: TSQLSMALLINT,
+  OutConnectionString: ptr TSQLCHAR,
+  BufferLength: TSQLSMALLINT,
+  StringLength2Ptr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLColumnPrivilegesA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+  ColumnName: ptr TSQLCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLForeignKeysA*(
+  StatementHandle: TSQLHSTMT,
+  PKCatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  PKSchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  PKTableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+  FKCatalogName: ptr TSQLCHAR,
+  NameLength4: TSQLSMALLINT,
+  FKSchemaName: ptr TSQLCHAR,
+  NameLength5: TSQLSMALLINT,
+  FKTableName: ptr TSQLCHAR,
+  NameLength6: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLNativeSqlA*(
+  ConnectionHandle: TSQLHDBC,
+  InStatementText: ptr TSQLCHAR,
+  TextLength1: TSQLINTEGER,
+  OutStatementText: ptr TSQLCHAR,
+  BufferLength: TSQLINTEGER,
+  TextLength2Ptr: ptr TSQLINTEGER,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLPrimaryKeysA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLProcedureColumnsA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  ProcName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+  ColumnName: ptr TSQLCHAR,
+  NameLength4: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLProceduresA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  ProcName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLTablePrivilegesA*(
+  StatementHandle: TSQLHSTMT,
+  CatalogName: ptr TSQLCHAR,
+  NameLength1: TSQLSMALLINT,
+  SchemaName: ptr TSQLCHAR,
+  NameLength2: TSQLSMALLINT,
+  TableName: ptr TSQLCHAR,
+  NameLength3: TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLDriversA*(
+  EnvironmentHandle: TSQLHENV,
+  Direction: TSQLUSMALLINT,
+  DriverDescription: ptr TSQLCHAR,
+  BufferLength1: TSQLSMALLINT,
+  DescriptionLengthPtr: ptr TSQLSMALLINT,
+  DriverAttributes: ptr TSQLCHAR,
+  BufferLength2: TSQLSMALLINT,
+  AttributesLengthPtr: ptr TSQLSMALLINT,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc.}
+
+proc SQLInstallODBC*(
+  hwndParent: HWND, lpszInfFile: LPCSTR, lpszSrcPath: LPCSTR, lpszDrivers: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLManageDataSources*(
+  hwndParent: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLCreateDataSource*(
+  hwndParent: HWND, lpszDSN: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetTranslator*(
+  hwnd: HWND,
+  lpszName: LPSTR,
+  cbNameMax: WORD,
+  pcbNameOut: ptr WORD,
+  lpszPath: LPSTR,
+  cbPathMax: WORD,
+  pcbPathOut: ptr WORD,
+  pvOption: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallDriver*(
+  lpszInfFile: LPCSTR,
+  lpszDriver: LPCSTR,
+  lpszPath: LPSTR,
+  cbPathMax: WORD,
+  pcbPathOut: ptr WORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallDriverManager*(
+  lpszPath: LPSTR, cbPathMax: WORD, pcbPathOut: ptr WORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetInstalledDrivers*(
+  lpszBuf: LPSTR, cbBufMax: WORD, pcbBufOut: ptr WORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetAvailableDrivers*(
+  lpszInfFile: LPCSTR, lpszBuf: LPSTR, cbBufMax: WORD, pcbBufOut: ptr WORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLConfigDataSource*(
+  hwndParent: HWND, fRequest: WORD, lpszDriver: LPCSTR, lpszAttributes: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveDefaultDataSource*(): WINBOOL {.
+  winapi, stdcall, dynlib: "odbccp32", importc
+.}
+
+proc SQLWriteDSNToIni*(
+  lpszDSN: LPCSTR, lpszDriver: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveDSNFromIni*(
+  lpszDSN: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLValidDSN*(
+  lpszDSN: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLWritePrivateProfileString*(
+  lpszSection: LPCSTR, lpszEntry: LPCSTR, lpszString: LPCSTR, lpszFilename: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetPrivateProfileString*(
+  lpszSection: LPCSTR,
+  lpszEntry: LPCSTR,
+  lpszDefault: LPCSTR,
+  lpszRetBuffer: LPSTR,
+  cbRetBuffer: int32,
+  lpszFilename: LPCSTR,
+): int32 {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveDriverManager*(
+  lpdwUsageCount: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallTranslator*(
+  lpszInfFile: LPCSTR,
+  lpszTranslator: LPCSTR,
+  lpszPathIn: LPCSTR,
+  lpszPathOut: LPSTR,
+  cbPathOutMax: WORD,
+  pcbPathOut: ptr WORD,
+  fRequest: WORD,
+  lpdwUsageCount: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveTranslator*(
+  lpszTranslator: LPCSTR, lpdwUsageCount: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveDriver*(
+  lpszDriver: LPCSTR, fRemoveDSN: WINBOOL, lpdwUsageCount: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLConfigDriver*(
+  hwndParent: HWND,
+  fRequest: WORD,
+  lpszDriver: LPCSTR,
+  lpszArgs: LPCSTR,
+  lpszMsg: LPSTR,
+  cbMsgMax: WORD,
+  pcbMsgOut: ptr WORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallerError*(
+  iError: WORD,
+  pfErrorCode: ptr DWORD,
+  lpszErrorMsg: LPSTR,
+  cbErrorMsgMax: WORD,
+  pcbErrorMsg: ptr WORD,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLPostInstallerError*(
+  dwErrorCode: DWORD, lpszErrMsg: LPCSTR
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLWriteFileDSN*(
+  lpszFileName: LPCSTR, lpszAppName: LPCSTR, lpszKeyName: LPCSTR, lpszString: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLReadFileDSN*(
+  lpszFileName: LPCSTR,
+  lpszAppName: LPCSTR,
+  lpszKeyName: LPCSTR,
+  lpszString: LPSTR,
+  cbString: WORD,
+  pcbString: ptr WORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallDriverEx*(
+  lpszDriver: LPCSTR,
+  lpszPathIn: LPCSTR,
+  lpszPathOut: LPSTR,
+  cbPathOutMax: WORD,
+  pcbPathOut: ptr WORD,
+  fRequest: WORD,
+  lpdwUsageCount: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallTranslatorEx*(
+  lpszTranslator: LPCSTR,
+  lpszPathIn: LPCSTR,
+  lpszPathOut: LPSTR,
+  cbPathOutMax: WORD,
+  pcbPathOut: ptr WORD,
+  fRequest: WORD,
+  lpdwUsageCount: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetConfigMode*(
+  pwConfigMode: ptr UWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLSetConfigMode*(
+  wConfigMode: UWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallODBCW*(
+  hwndParent: HWND, lpszInfFile: LPCWSTR, lpszSrcPath: LPCWSTR, lpszDrivers: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLCreateDataSourceW*(
+  hwndParent: HWND, lpszDSN: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetTranslatorW*(
+  hwnd: HWND,
+  lpszName: LPWSTR,
+  cbNameMax: WORD,
+  pcbNameOut: ptr WORD,
+  lpszPath: LPWSTR,
+  cbPathMax: WORD,
+  pcbPathOut: ptr WORD,
+  pvOption: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallDriverW*(
+  lpszInfFile: LPCWSTR,
+  lpszDriver: LPCWSTR,
+  lpszPath: LPWSTR,
+  cbPathMax: WORD,
+  pcbPathOut: ptr WORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallDriverManagerW*(
+  lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetInstalledDriversW*(
+  lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetAvailableDriversW*(
+  lpszInfFile: LPCWSTR, lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLConfigDataSourceW*(
+  hwndParent: HWND, fRequest: WORD, lpszDriver: LPCWSTR, lpszAttributes: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLWriteDSNToIniW*(
+  lpszDSN: LPCWSTR, lpszDriver: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveDSNFromIniW*(
+  lpszDSN: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLValidDSNW*(
+  lpszDSN: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLWritePrivateProfileStringW*(
+  lpszSection: LPCWSTR, lpszEntry: LPCWSTR, lpszString: LPCWSTR, lpszFilename: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLGetPrivateProfileStringW*(
+  lpszSection: LPCWSTR,
+  lpszEntry: LPCWSTR,
+  lpszDefault: LPCWSTR,
+  lpszRetBuffer: LPWSTR,
+  cbRetBuffer: int32,
+  lpszFilename: LPCWSTR,
+): int32 {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallTranslatorW*(
+  lpszInfFile: LPCWSTR,
+  lpszTranslator: LPCWSTR,
+  lpszPathIn: LPCWSTR,
+  lpszPathOut: LPWSTR,
+  cbPathOutMax: WORD,
+  pcbPathOut: ptr WORD,
+  fRequest: WORD,
+  lpdwUsageCount: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveTranslatorW*(
+  lpszTranslator: LPCWSTR, lpdwUsageCount: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLRemoveDriverW*(
+  lpszDriver: LPCWSTR, fRemoveDSN: WINBOOL, lpdwUsageCount: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLConfigDriverW*(
+  hwndParent: HWND,
+  fRequest: WORD,
+  lpszDriver: LPCWSTR,
+  lpszArgs: LPCWSTR,
+  lpszMsg: LPWSTR,
+  cbMsgMax: WORD,
+  pcbMsgOut: ptr WORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallerErrorW*(
+  iError: WORD,
+  pfErrorCode: ptr DWORD,
+  lpszErrorMsg: LPWSTR,
+  cbErrorMsgMax: WORD,
+  pcbErrorMsg: ptr WORD,
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLPostInstallerErrorW*(
+  dwErrorCode: DWORD, lpszErrorMsg: LPCWSTR
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLWriteFileDSNW*(
+  lpszFileName: LPCWSTR, lpszAppName: LPCWSTR, lpszKeyName: LPCWSTR, lpszString: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLReadFileDSNW*(
+  lpszFileName: LPCWSTR,
+  lpszAppName: LPCWSTR,
+  lpszKeyName: LPCWSTR,
+  lpszString: LPWSTR,
+  cbString: WORD,
+  pcbString: ptr WORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallDriverExW*(
+  lpszDriver: LPCWSTR,
+  lpszPathIn: LPCWSTR,
+  lpszPathOut: LPWSTR,
+  cbPathOutMax: WORD,
+  pcbPathOut: ptr WORD,
+  fRequest: WORD,
+  lpdwUsageCount: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLInstallTranslatorExW*(
+  lpszTranslator: LPCWSTR,
+  lpszPathIn: LPCWSTR,
+  lpszPathOut: LPWSTR,
+  cbPathOutMax: WORD,
+  pcbPathOut: ptr WORD,
+  fRequest: WORD,
+  lpdwUsageCount: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc.}
+
+proc SQLAllocHandle*(
+  fHandleType: TSQLSMALLINT, hInput: TSQLHANDLE, phOutput: ptr TSQLHANDLE
+): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLAllocHandleStd".}
+
+proc `wszArg=`*(self: var ODBC_VS_ARGS, x: ptr WCHAR) {.inline.} =
+  self.union1.wszArg = x
+
+proc wszArg*(self: ODBC_VS_ARGS): ptr WCHAR {.inline.} =
+  self.union1.wszArg
+
+proc wszArg*(self: var ODBC_VS_ARGS): var ptr WCHAR {.inline.} =
+  self.union1.wszArg
+
+proc `szArg=`*(self: var ODBC_VS_ARGS, x: ptr CHAR) {.inline.} =
+  self.union1.szArg = x
+
+proc szArg*(self: ODBC_VS_ARGS): ptr CHAR {.inline.} =
+  self.union1.szArg
+
+proc szArg*(self: var ODBC_VS_ARGS): var ptr CHAR {.inline.} =
+  self.union1.szArg
+
+proc `wszCorrelation=`*(self: var ODBC_VS_ARGS, x: ptr WCHAR) {.inline.} =
+  self.union2.wszCorrelation = x
+
+proc wszCorrelation*(self: ODBC_VS_ARGS): ptr WCHAR {.inline.} =
+  self.union2.wszCorrelation
+
+proc wszCorrelation*(self: var ODBC_VS_ARGS): var ptr WCHAR {.inline.} =
+  self.union2.wszCorrelation
+
+proc `szCorrelation=`*(self: var ODBC_VS_ARGS, x: ptr CHAR) {.inline.} =
+  self.union2.szCorrelation = x
+
+proc szCorrelation*(self: ODBC_VS_ARGS): ptr CHAR {.inline.} =
+  self.union2.szCorrelation
+
+proc szCorrelation*(self: var ODBC_VS_ARGS): var ptr CHAR {.inline.} =
+  self.union2.szCorrelation
+
 when winimUnicode:
-  type
-    TSQLTCHAR* = TSQLWCHAR
-  const
-    SQL_C_TCHAR* = SQL_C_WCHAR
-  proc SQLColAttribute*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, FieldIdentifier: TSQLUSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributeW".}
-  proc SQLColAttributes*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, FieldIdentifier: TSQLUSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributesW".}
-  proc SQLConnect*(ConnectionHandle: TSQLHDBC, ServerName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, UserName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, Authentication: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLConnectW".}
-  proc SQLDescribeCol*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, ColumnName: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT, DataTypePtr: ptr TSQLSMALLINT, ColumnSizePtr: ptr TSQLULEN, DecimalDigitsPtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDescribeColW".}
-  proc SQLError*(EnvironmentHandle: TSQLHENV, ConnectionHandle: TSQLHDBC, StatementHandle: TSQLHSTMT, Sqlstate: ptr TSQLWCHAR, NativeError: ptr TSQLINTEGER, MessageText: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, TextLength: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLErrorW".}
-  proc SQLExecDirect*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLExecDirectW".}
-  proc SQLGetConnectAttr*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectAttrW".}
-  proc SQLGetCursorName*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetCursorNameW".}
-  proc SQLGetDescField*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescFieldW".}
-  proc SQLGetDescRec*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, Name: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, TypePtr: ptr TSQLSMALLINT, SubTypePtr: ptr TSQLSMALLINT, LengthPtr: ptr TSQLLEN, PrecisionPtr: ptr TSQLSMALLINT, ScalePtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescRecW".}
-  proc SQLGetDiagField*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, DiagIdentifier: TSQLSMALLINT, DiagInfoPtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagFieldW".}
-  proc SQLGetDiagRec*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, SQLState: ptr TSQLWCHAR, NativeErrorPtr: ptr TSQLINTEGER, MessageText: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, TextLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagRecW".}
-  proc SQLPrepare*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrepareW".}
-  proc SQLSetConnectAttr*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectAttrW".}
-  proc SQLSetCursorName*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLWCHAR, NameLength: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetCursorNameW".}
-  proc SQLSetDescField*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, Value: TSQLPOINTER, BufferLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetDescFieldW".}
-  proc SQLSetStmtAttr*(StatementHandle: TSQLHSTMT, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetStmtAttrW".}
-  proc SQLGetStmtAttr*(StatementHandle: TSQLHSTMT, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetStmtAttrW".}
-  proc SQLColumns*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnsW".}
-  proc SQLGetConnectOption*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectOptionW".}
-  proc SQLGetInfo*(ConnectionHandle: TSQLHDBC, InfoType: TSQLUSMALLINT, InfoValuePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetInfoW".}
-  proc SQLGetTypeInfo*(StatementHandle: TSQLHSTMT, DataType: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetTypeInfoW".}
-  proc SQLSetConnectOption*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectOptionW".}
-  proc SQLSpecialColumns*(StatementHandle: TSQLHSTMT, IdentifierType: TSQLUSMALLINT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, Scope: TSQLUSMALLINT, Nullable: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSpecialColumnsW".}
-  proc SQLStatistics*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, Unique: TSQLUSMALLINT, Reserved: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLStatisticsW".}
-  proc SQLTables*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, TableType: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablesW".}
-  proc SQLDataSources*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, ServerName: ptr TSQLWCHAR, BufferLength1: TSQLSMALLINT, NameLength1Ptr: ptr TSQLSMALLINT, Description: ptr TSQLWCHAR, BufferLength2: TSQLSMALLINT, NameLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDataSourcesW".}
-  proc SQLDriverConnect*(ConnectionHandle: TSQLHDBC, WindowHandle: TSQLHWND, InConnectionString: ptr TSQLWCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT, DriverCompletion: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriverConnectW".}
-  proc SQLBrowseConnect*(ConnectionHandle: TSQLHDBC, InConnectionString: ptr TSQLWCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLWCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLBrowseConnectW".}
-  proc SQLColumnPrivileges*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnPrivilegesW".}
-  proc SQLForeignKeys*(StatementHandle: TSQLHSTMT, PKCatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, PKSchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, PKTableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, FKCatalogName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT, FKSchemaName: ptr TSQLWCHAR, NameLength5: TSQLSMALLINT, FKTableName: ptr TSQLWCHAR, NameLength6: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLForeignKeysW".}
-  proc SQLNativeSql*(ConnectionHandle: TSQLHDBC, InStatementText: ptr TSQLWCHAR, TextLength1: TSQLINTEGER, OutStatementText: ptr TSQLWCHAR, BufferLength: TSQLINTEGER, TextLength2Ptr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLNativeSqlW".}
-  proc SQLPrimaryKeys*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrimaryKeysW".}
-  proc SQLProcedureColumns*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLWCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProcedureColumnsW".}
-  proc SQLProcedures*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProceduresW".}
-  proc SQLTablePrivileges*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLWCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLWCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLWCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablePrivilegesW".}
-  proc SQLDrivers*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, DriverDescription: ptr TSQLWCHAR, BufferLength1: TSQLSMALLINT, DescriptionLengthPtr: ptr TSQLSMALLINT, DriverAttributes: ptr TSQLWCHAR, BufferLength2: TSQLSMALLINT, AttributesLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriversW".}
-  proc SQLInstallODBC*(hwndParent: HWND, lpszInfFile: LPCWSTR, lpszSrcPath: LPCWSTR, lpszDrivers: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallODBCW".}
-  proc SQLCreateDataSource*(hwndParent: HWND, lpszDSN: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLCreateDataSourceW".}
-  proc SQLGetTranslator*(hwnd: HWND, lpszName: LPWSTR, cbNameMax: WORD, pcbNameOut: ptr WORD, lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD, pvOption: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetTranslatorW".}
-  proc SQLInstallDriver*(lpszInfFile: LPCWSTR, lpszDriver: LPCWSTR, lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallDriverW".}
-  proc SQLInstallDriverManager*(lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallDriverManagerW".}
-  proc SQLGetInstalledDrivers*(lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetInstalledDriversW".}
-  proc SQLGetAvailableDrivers*(lpszInfFile: LPCWSTR, lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetAvailableDriversW".}
-  proc SQLConfigDataSource*(hwndParent: HWND, fRequest: WORD, lpszDriver: LPCWSTR, lpszAttributes: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLConfigDataSourceW".}
-  proc SQLWriteDSNToIni*(lpszDSN: LPCWSTR, lpszDriver: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLWriteDSNToIniW".}
-  proc SQLRemoveDSNFromIni*(lpszDSN: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLRemoveDSNFromIniW".}
-  proc SQLValidDSN*(lpszDSN: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLValidDSNW".}
-  proc SQLWritePrivateProfileString*(lpszSection: LPCWSTR, lpszEntry: LPCWSTR, lpszString: LPCWSTR, lpszFilename: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLWritePrivateProfileStringW".}
-  proc SQLGetPrivateProfileString*(lpszSection: LPCWSTR, lpszEntry: LPCWSTR, lpszDefault: LPCWSTR, lpszRetBuffer: LPWSTR, cbRetBuffer: int32, lpszFilename: LPCWSTR): int32 {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetPrivateProfileStringW".}
-  proc SQLInstallTranslator*(lpszInfFile: LPCWSTR, lpszTranslator: LPCWSTR, lpszPathIn: LPCWSTR, lpszPathOut: LPWSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallTranslatorW".}
-  proc SQLRemoveTranslator*(lpszTranslator: LPCWSTR, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLRemoveTranslatorW".}
-  proc SQLRemoveDriver*(lpszDriver: LPCWSTR, fRemoveDSN: WINBOOL, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLRemoveDriverW".}
-  proc SQLConfigDriver*(hwndParent: HWND, fRequest: WORD, lpszDriver: LPCWSTR, lpszArgs: LPCWSTR, lpszMsg: LPWSTR, cbMsgMax: WORD, pcbMsgOut: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLConfigDriverW".}
-  proc SQLInstallerError*(iError: WORD, pfErrorCode: ptr DWORD, lpszErrorMsg: LPWSTR, cbErrorMsgMax: WORD, pcbErrorMsg: ptr WORD): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallerErrorW".}
-  proc SQLPostInstallerError*(dwErrorCode: DWORD, lpszErrorMsg: LPCWSTR): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLPostInstallerErrorW".}
-  proc SQLReadFileDSN*(lpszFileName: LPCWSTR, lpszAppName: LPCWSTR, lpszKeyName: LPCWSTR, lpszString: LPWSTR, cbString: WORD, pcbString: ptr WORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLReadFileDSNW".}
-  proc SQLWriteFileDSN*(lpszFileName: LPCWSTR, lpszAppName: LPCWSTR, lpszKeyName: LPCWSTR, lpszString: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLWriteFileDSNW".}
-  proc SQLInstallDriverEx*(lpszDriver: LPCWSTR, lpszPathIn: LPCWSTR, lpszPathOut: LPWSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallDriverExW".}
-  proc SQLInstallTranslatorEx*(lpszTranslator: LPCWSTR, lpszPathIn: LPCWSTR, lpszPathOut: LPWSTR, cbPathOutMax: WORD, pcbPathOut: ptr WORD, fRequest: WORD, lpdwUsageCount: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallTranslatorExW".}
+  type TSQLTCHAR* = TSQLWCHAR
+  const SQL_C_TCHAR* = SQL_C_WCHAR
+  proc SQLColAttribute*(
+    StatementHandle: TSQLHSTMT,
+    ColumnNumber: TSQLUSMALLINT,
+    FieldIdentifier: TSQLUSMALLINT,
+    CharacterAttributePtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+    NumericAttributePtr: ptr TSQLLEN,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributeW".}
+
+  proc SQLColAttributes*(
+    StatementHandle: TSQLHSTMT,
+    ColumnNumber: TSQLUSMALLINT,
+    FieldIdentifier: TSQLUSMALLINT,
+    CharacterAttributePtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+    NumericAttributePtr: ptr TSQLLEN,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributesW".}
+
+  proc SQLConnect*(
+    ConnectionHandle: TSQLHDBC,
+    ServerName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    UserName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    Authentication: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLConnectW".}
+
+  proc SQLDescribeCol*(
+    StatementHandle: TSQLHSTMT,
+    ColumnNumber: TSQLUSMALLINT,
+    ColumnName: ptr TSQLWCHAR,
+    BufferLength: TSQLSMALLINT,
+    NameLengthPtr: ptr TSQLSMALLINT,
+    DataTypePtr: ptr TSQLSMALLINT,
+    ColumnSizePtr: ptr TSQLULEN,
+    DecimalDigitsPtr: ptr TSQLSMALLINT,
+    NullablePtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDescribeColW".}
+
+  proc SQLError*(
+    EnvironmentHandle: TSQLHENV,
+    ConnectionHandle: TSQLHDBC,
+    StatementHandle: TSQLHSTMT,
+    Sqlstate: ptr TSQLWCHAR,
+    NativeError: ptr TSQLINTEGER,
+    MessageText: ptr TSQLWCHAR,
+    BufferLength: TSQLSMALLINT,
+    TextLength: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLErrorW".}
+
+  proc SQLExecDirect*(
+    StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLExecDirectW".}
+
+  proc SQLGetConnectAttr*(
+    ConnectionHandle: TSQLHDBC,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+    StringLengthPtr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectAttrW".}
+
+  proc SQLGetCursorName*(
+    StatementHandle: TSQLHSTMT,
+    CursorName: ptr TSQLWCHAR,
+    BufferLength: TSQLSMALLINT,
+    NameLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetCursorNameW".}
+
+  proc SQLGetDescField*(
+    DescriptorHandle: TSQLHDESC,
+    RecNumber: TSQLSMALLINT,
+    FieldIdentifier: TSQLSMALLINT,
+    ValuePtr: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+    StringLengthPtr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescFieldW".}
+
+  proc SQLGetDescRec*(
+    DescriptorHandle: TSQLHDESC,
+    RecNumber: TSQLSMALLINT,
+    Name: ptr TSQLWCHAR,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+    TypePtr: ptr TSQLSMALLINT,
+    SubTypePtr: ptr TSQLSMALLINT,
+    LengthPtr: ptr TSQLLEN,
+    PrecisionPtr: ptr TSQLSMALLINT,
+    ScalePtr: ptr TSQLSMALLINT,
+    NullablePtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescRecW".}
+
+  proc SQLGetDiagField*(
+    HandleType: TSQLSMALLINT,
+    Handle: TSQLHANDLE,
+    RecNumber: TSQLSMALLINT,
+    DiagIdentifier: TSQLSMALLINT,
+    DiagInfoPtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagFieldW".}
+
+  proc SQLGetDiagRec*(
+    HandleType: TSQLSMALLINT,
+    Handle: TSQLHANDLE,
+    RecNumber: TSQLSMALLINT,
+    SQLState: ptr TSQLWCHAR,
+    NativeErrorPtr: ptr TSQLINTEGER,
+    MessageText: ptr TSQLWCHAR,
+    BufferLength: TSQLSMALLINT,
+    TextLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagRecW".}
+
+  proc SQLPrepare*(
+    StatementHandle: TSQLHSTMT, StatementText: ptr TSQLWCHAR, TextLength: TSQLINTEGER
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrepareW".}
+
+  proc SQLSetConnectAttr*(
+    ConnectionHandle: TSQLHDBC,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    StringLength: TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectAttrW".}
+
+  proc SQLSetCursorName*(
+    StatementHandle: TSQLHSTMT, CursorName: ptr TSQLWCHAR, NameLength: TSQLSMALLINT
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetCursorNameW".}
+
+  proc SQLSetDescField*(
+    DescriptorHandle: TSQLHDESC,
+    RecNumber: TSQLSMALLINT,
+    FieldIdentifier: TSQLSMALLINT,
+    Value: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetDescFieldW".}
+
+  proc SQLSetStmtAttr*(
+    StatementHandle: TSQLHSTMT,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    StringLength: TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetStmtAttrW".}
+
+  proc SQLGetStmtAttr*(
+    StatementHandle: TSQLHSTMT,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+    StringLengthPtr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetStmtAttrW".}
+
+  proc SQLColumns*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+    ColumnName: ptr TSQLWCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnsW".}
+
+  proc SQLGetConnectOption*(
+    ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectOptionW".}
+
+  proc SQLGetInfo*(
+    ConnectionHandle: TSQLHDBC,
+    InfoType: TSQLUSMALLINT,
+    InfoValuePtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetInfoW".}
+
+  proc SQLGetTypeInfo*(
+    StatementHandle: TSQLHSTMT, DataType: TSQLSMALLINT
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetTypeInfoW".}
+
+  proc SQLSetConnectOption*(
+    ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectOptionW".}
+
+  proc SQLSpecialColumns*(
+    StatementHandle: TSQLHSTMT,
+    IdentifierType: TSQLUSMALLINT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+    Scope: TSQLUSMALLINT,
+    Nullable: TSQLUSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSpecialColumnsW".}
+
+  proc SQLStatistics*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+    Unique: TSQLUSMALLINT,
+    Reserved: TSQLUSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLStatisticsW".}
+
+  proc SQLTables*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+    TableType: ptr TSQLWCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablesW".}
+
+  proc SQLDataSources*(
+    EnvironmentHandle: TSQLHENV,
+    Direction: TSQLUSMALLINT,
+    ServerName: ptr TSQLWCHAR,
+    BufferLength1: TSQLSMALLINT,
+    NameLength1Ptr: ptr TSQLSMALLINT,
+    Description: ptr TSQLWCHAR,
+    BufferLength2: TSQLSMALLINT,
+    NameLength2Ptr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDataSourcesW".}
+
+  proc SQLDriverConnect*(
+    ConnectionHandle: TSQLHDBC,
+    WindowHandle: TSQLHWND,
+    InConnectionString: ptr TSQLWCHAR,
+    StringLength1: TSQLSMALLINT,
+    OutConnectionString: ptr TSQLWCHAR,
+    BufferLength: TSQLSMALLINT,
+    StringLength2Ptr: ptr TSQLSMALLINT,
+    DriverCompletion: TSQLUSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriverConnectW".}
+
+  proc SQLBrowseConnect*(
+    ConnectionHandle: TSQLHDBC,
+    InConnectionString: ptr TSQLWCHAR,
+    StringLength1: TSQLSMALLINT,
+    OutConnectionString: ptr TSQLWCHAR,
+    BufferLength: TSQLSMALLINT,
+    StringLength2Ptr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLBrowseConnectW".}
+
+  proc SQLColumnPrivileges*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+    ColumnName: ptr TSQLWCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnPrivilegesW".}
+
+  proc SQLForeignKeys*(
+    StatementHandle: TSQLHSTMT,
+    PKCatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    PKSchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    PKTableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+    FKCatalogName: ptr TSQLWCHAR,
+    NameLength4: TSQLSMALLINT,
+    FKSchemaName: ptr TSQLWCHAR,
+    NameLength5: TSQLSMALLINT,
+    FKTableName: ptr TSQLWCHAR,
+    NameLength6: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLForeignKeysW".}
+
+  proc SQLNativeSql*(
+    ConnectionHandle: TSQLHDBC,
+    InStatementText: ptr TSQLWCHAR,
+    TextLength1: TSQLINTEGER,
+    OutStatementText: ptr TSQLWCHAR,
+    BufferLength: TSQLINTEGER,
+    TextLength2Ptr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLNativeSqlW".}
+
+  proc SQLPrimaryKeys*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrimaryKeysW".}
+
+  proc SQLProcedureColumns*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    ProcName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+    ColumnName: ptr TSQLWCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProcedureColumnsW".}
+
+  proc SQLProcedures*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    ProcName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProceduresW".}
+
+  proc SQLTablePrivileges*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLWCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLWCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLWCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablePrivilegesW".}
+
+  proc SQLDrivers*(
+    EnvironmentHandle: TSQLHENV,
+    Direction: TSQLUSMALLINT,
+    DriverDescription: ptr TSQLWCHAR,
+    BufferLength1: TSQLSMALLINT,
+    DescriptionLengthPtr: ptr TSQLSMALLINT,
+    DriverAttributes: ptr TSQLWCHAR,
+    BufferLength2: TSQLSMALLINT,
+    AttributesLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriversW".}
+
+  proc SQLInstallODBC*(
+    hwndParent: HWND, lpszInfFile: LPCWSTR, lpszSrcPath: LPCWSTR, lpszDrivers: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallODBCW".}
+
+  proc SQLCreateDataSource*(
+    hwndParent: HWND, lpszDSN: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLCreateDataSourceW".}
+
+  proc SQLGetTranslator*(
+    hwnd: HWND,
+    lpszName: LPWSTR,
+    cbNameMax: WORD,
+    pcbNameOut: ptr WORD,
+    lpszPath: LPWSTR,
+    cbPathMax: WORD,
+    pcbPathOut: ptr WORD,
+    pvOption: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetTranslatorW".}
+
+  proc SQLInstallDriver*(
+    lpszInfFile: LPCWSTR,
+    lpszDriver: LPCWSTR,
+    lpszPath: LPWSTR,
+    cbPathMax: WORD,
+    pcbPathOut: ptr WORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallDriverW".}
+
+  proc SQLInstallDriverManager*(
+    lpszPath: LPWSTR, cbPathMax: WORD, pcbPathOut: ptr WORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallDriverManagerW"
+  .}
+
+  proc SQLGetInstalledDrivers*(
+    lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetInstalledDriversW".}
+
+  proc SQLGetAvailableDrivers*(
+    lpszInfFile: LPCWSTR, lpszBuf: LPWSTR, cbBufMax: WORD, pcbBufOut: ptr WORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetAvailableDriversW".}
+
+  proc SQLConfigDataSource*(
+    hwndParent: HWND, fRequest: WORD, lpszDriver: LPCWSTR, lpszAttributes: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLConfigDataSourceW".}
+
+  proc SQLWriteDSNToIni*(
+    lpszDSN: LPCWSTR, lpszDriver: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLWriteDSNToIniW".}
+
+  proc SQLRemoveDSNFromIni*(
+    lpszDSN: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLRemoveDSNFromIniW".}
+
+  proc SQLValidDSN*(
+    lpszDSN: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLValidDSNW".}
+
+  proc SQLWritePrivateProfileString*(
+    lpszSection: LPCWSTR, lpszEntry: LPCWSTR, lpszString: LPCWSTR, lpszFilename: LPCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "odbccp32", importc: "SQLWritePrivateProfileStringW"
+  .}
+
+  proc SQLGetPrivateProfileString*(
+    lpszSection: LPCWSTR,
+    lpszEntry: LPCWSTR,
+    lpszDefault: LPCWSTR,
+    lpszRetBuffer: LPWSTR,
+    cbRetBuffer: int32,
+    lpszFilename: LPCWSTR,
+  ): int32 {.
+    winapi, stdcall, dynlib: "odbccp32", importc: "SQLGetPrivateProfileStringW"
+  .}
+
+  proc SQLInstallTranslator*(
+    lpszInfFile: LPCWSTR,
+    lpszTranslator: LPCWSTR,
+    lpszPathIn: LPCWSTR,
+    lpszPathOut: LPWSTR,
+    cbPathOutMax: WORD,
+    pcbPathOut: ptr WORD,
+    fRequest: WORD,
+    lpdwUsageCount: LPDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallTranslatorW".}
+
+  proc SQLRemoveTranslator*(
+    lpszTranslator: LPCWSTR, lpdwUsageCount: LPDWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLRemoveTranslatorW".}
+
+  proc SQLRemoveDriver*(
+    lpszDriver: LPCWSTR, fRemoveDSN: WINBOOL, lpdwUsageCount: LPDWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLRemoveDriverW".}
+
+  proc SQLConfigDriver*(
+    hwndParent: HWND,
+    fRequest: WORD,
+    lpszDriver: LPCWSTR,
+    lpszArgs: LPCWSTR,
+    lpszMsg: LPWSTR,
+    cbMsgMax: WORD,
+    pcbMsgOut: ptr WORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLConfigDriverW".}
+
+  proc SQLInstallerError*(
+    iError: WORD,
+    pfErrorCode: ptr DWORD,
+    lpszErrorMsg: LPWSTR,
+    cbErrorMsgMax: WORD,
+    pcbErrorMsg: ptr WORD,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallerErrorW".}
+
+  proc SQLPostInstallerError*(
+    dwErrorCode: DWORD, lpszErrorMsg: LPCWSTR
+  ): TSQLRETURN {.
+    winapi, stdcall, dynlib: "odbccp32", importc: "SQLPostInstallerErrorW"
+  .}
+
+  proc SQLReadFileDSN*(
+    lpszFileName: LPCWSTR,
+    lpszAppName: LPCWSTR,
+    lpszKeyName: LPCWSTR,
+    lpszString: LPWSTR,
+    cbString: WORD,
+    pcbString: ptr WORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLReadFileDSNW".}
+
+  proc SQLWriteFileDSN*(
+    lpszFileName: LPCWSTR,
+    lpszAppName: LPCWSTR,
+    lpszKeyName: LPCWSTR,
+    lpszString: LPCWSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLWriteFileDSNW".}
+
+  proc SQLInstallDriverEx*(
+    lpszDriver: LPCWSTR,
+    lpszPathIn: LPCWSTR,
+    lpszPathOut: LPWSTR,
+    cbPathOutMax: WORD,
+    pcbPathOut: ptr WORD,
+    fRequest: WORD,
+    lpdwUsageCount: LPDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallDriverExW".}
+
+  proc SQLInstallTranslatorEx*(
+    lpszTranslator: LPCWSTR,
+    lpszPathIn: LPCWSTR,
+    lpszPathOut: LPWSTR,
+    cbPathOutMax: WORD,
+    pcbPathOut: ptr WORD,
+    fRequest: WORD,
+    lpdwUsageCount: LPDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "odbccp32", importc: "SQLInstallTranslatorExW".}
+
 when winimAnsi:
-  type
-    TSQLTCHAR* = TSQLCHAR
-  const
-    SQL_C_TCHAR* = SQL_C_CHAR
-  proc SQLColAttribute*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, FieldIdentifier: TSQLUSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributeA".}
-  proc SQLColumns*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnsA".}
-  proc SQLConnect*(ConnectionHandle: TSQLHDBC, ServerName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, UserName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, Authentication: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLConnectA".}
-  proc SQLDataSources*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, ServerName: ptr TSQLCHAR, BufferLength1: TSQLSMALLINT, NameLength1Ptr: ptr TSQLSMALLINT, Description: ptr TSQLCHAR, BufferLength2: TSQLSMALLINT, NameLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDataSourcesA".}
-  proc SQLDescribeCol*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, ColumnName: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT, DataTypePtr: ptr TSQLSMALLINT, ColumnSizePtr: ptr TSQLULEN, DecimalDigitsPtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDescribeColA".}
-  proc SQLError*(EnvironmentHandle: TSQLHENV, ConnectionHandle: TSQLHDBC, StatementHandle: TSQLHSTMT, Sqlstate: ptr TSQLCHAR, NativeError: ptr TSQLINTEGER, MessageText: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, TextLength: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLErrorA".}
-  proc SQLExecDirect*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLExecDirectA".}
-  proc SQLGetConnectAttr*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectAttrA".}
-  proc SQLGetConnectOption*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectOptionA".}
-  proc SQLGetCursorName*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, NameLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetCursorNameA".}
-  proc SQLGetDescField*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescFieldA".}
-  proc SQLGetDescRec*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, Name: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, TypePtr: ptr TSQLSMALLINT, SubTypePtr: ptr TSQLSMALLINT, LengthPtr: ptr TSQLLEN, PrecisionPtr: ptr TSQLSMALLINT, ScalePtr: ptr TSQLSMALLINT, NullablePtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescRecA".}
-  proc SQLGetDiagField*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, DiagIdentifier: TSQLSMALLINT, DiagInfoPtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagFieldA".}
-  proc SQLGetDiagRec*(HandleType: TSQLSMALLINT, Handle: TSQLHANDLE, RecNumber: TSQLSMALLINT, SQLState: ptr TSQLCHAR, NativeErrorPtr: ptr TSQLINTEGER, MessageText: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, TextLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagRecA".}
-  proc SQLGetInfo*(ConnectionHandle: TSQLHDBC, InfoType: TSQLUSMALLINT, InfoValuePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetInfoA".}
-  proc SQLGetStmtAttr*(StatementHandle: TSQLHSTMT, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, BufferLength: TSQLINTEGER, StringLengthPtr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetStmtAttrA".}
-  proc SQLGetTypeInfo*(StatementHandle: TSQLHSTMT, DataType: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetTypeInfoA".}
-  proc SQLPrepare*(StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrepareA".}
-  proc SQLSetConnectAttr*(ConnectionHandle: TSQLHDBC, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectAttrA".}
-  proc SQLSetConnectOption*(ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectOptionA".}
-  proc SQLSetCursorName*(StatementHandle: TSQLHSTMT, CursorName: ptr TSQLCHAR, NameLength: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetCursorNameA".}
-  proc SQLSetDescField*(DescriptorHandle: TSQLHDESC, RecNumber: TSQLSMALLINT, FieldIdentifier: TSQLSMALLINT, Value: TSQLPOINTER, BufferLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetDescFieldA".}
-  proc SQLSetStmtAttr*(StatementHandle: TSQLHSTMT, Attribute: TSQLINTEGER, ValuePtr: TSQLPOINTER, StringLength: TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetStmtAttrA".}
-  proc SQLSpecialColumns*(StatementHandle: TSQLHSTMT, IdentifierType: TSQLUSMALLINT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, Scope: TSQLUSMALLINT, Nullable: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSpecialColumnsA".}
-  proc SQLStatistics*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, Unique: TSQLUSMALLINT, Reserved: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLStatisticsA".}
-  proc SQLTables*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, TableType: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablesA".}
-  proc SQLDriverConnect*(ConnectionHandle: TSQLHDBC, WindowHandle: TSQLHWND, InConnectionString: ptr TSQLCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT, DriverCompletion: TSQLUSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriverConnectA".}
-  proc SQLBrowseConnect*(ConnectionHandle: TSQLHDBC, InConnectionString: ptr TSQLCHAR, StringLength1: TSQLSMALLINT, OutConnectionString: ptr TSQLCHAR, BufferLength: TSQLSMALLINT, StringLength2Ptr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLBrowseConnectA".}
-  proc SQLColAttributes*(StatementHandle: TSQLHSTMT, ColumnNumber: TSQLUSMALLINT, FieldIdentifier: TSQLUSMALLINT, CharacterAttributePtr: TSQLPOINTER, BufferLength: TSQLSMALLINT, StringLengthPtr: ptr TSQLSMALLINT, NumericAttributePtr: ptr TSQLLEN): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributesA".}
-  proc SQLColumnPrivileges*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnPrivilegesA".}
-  proc SQLForeignKeys*(StatementHandle: TSQLHSTMT, PKCatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, PKSchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, PKTableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, FKCatalogName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT, FKSchemaName: ptr TSQLCHAR, NameLength5: TSQLSMALLINT, FKTableName: ptr TSQLCHAR, NameLength6: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLForeignKeysA".}
-  proc SQLNativeSql*(ConnectionHandle: TSQLHDBC, InStatementText: ptr TSQLCHAR, TextLength1: TSQLINTEGER, OutStatementText: ptr TSQLCHAR, BufferLength: TSQLINTEGER, TextLength2Ptr: ptr TSQLINTEGER): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLNativeSqlA".}
-  proc SQLPrimaryKeys*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrimaryKeysA".}
-  proc SQLProcedureColumns*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT, ColumnName: ptr TSQLCHAR, NameLength4: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProcedureColumnsA".}
-  proc SQLProcedures*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, ProcName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProceduresA".}
-  proc SQLTablePrivileges*(StatementHandle: TSQLHSTMT, CatalogName: ptr TSQLCHAR, NameLength1: TSQLSMALLINT, SchemaName: ptr TSQLCHAR, NameLength2: TSQLSMALLINT, TableName: ptr TSQLCHAR, NameLength3: TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablePrivilegesA".}
-  proc SQLDrivers*(EnvironmentHandle: TSQLHENV, Direction: TSQLUSMALLINT, DriverDescription: ptr TSQLCHAR, BufferLength1: TSQLSMALLINT, DescriptionLengthPtr: ptr TSQLSMALLINT, DriverAttributes: ptr TSQLCHAR, BufferLength2: TSQLSMALLINT, AttributesLengthPtr: ptr TSQLSMALLINT): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriversA".}
+  type TSQLTCHAR* = TSQLCHAR
+  const SQL_C_TCHAR* = SQL_C_CHAR
+  proc SQLColAttribute*(
+    StatementHandle: TSQLHSTMT,
+    ColumnNumber: TSQLUSMALLINT,
+    FieldIdentifier: TSQLUSMALLINT,
+    CharacterAttributePtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+    NumericAttributePtr: ptr TSQLLEN,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributeA".}
+
+  proc SQLColumns*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+    ColumnName: ptr TSQLCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnsA".}
+
+  proc SQLConnect*(
+    ConnectionHandle: TSQLHDBC,
+    ServerName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    UserName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    Authentication: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLConnectA".}
+
+  proc SQLDataSources*(
+    EnvironmentHandle: TSQLHENV,
+    Direction: TSQLUSMALLINT,
+    ServerName: ptr TSQLCHAR,
+    BufferLength1: TSQLSMALLINT,
+    NameLength1Ptr: ptr TSQLSMALLINT,
+    Description: ptr TSQLCHAR,
+    BufferLength2: TSQLSMALLINT,
+    NameLength2Ptr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDataSourcesA".}
+
+  proc SQLDescribeCol*(
+    StatementHandle: TSQLHSTMT,
+    ColumnNumber: TSQLUSMALLINT,
+    ColumnName: ptr TSQLCHAR,
+    BufferLength: TSQLSMALLINT,
+    NameLengthPtr: ptr TSQLSMALLINT,
+    DataTypePtr: ptr TSQLSMALLINT,
+    ColumnSizePtr: ptr TSQLULEN,
+    DecimalDigitsPtr: ptr TSQLSMALLINT,
+    NullablePtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDescribeColA".}
+
+  proc SQLError*(
+    EnvironmentHandle: TSQLHENV,
+    ConnectionHandle: TSQLHDBC,
+    StatementHandle: TSQLHSTMT,
+    Sqlstate: ptr TSQLCHAR,
+    NativeError: ptr TSQLINTEGER,
+    MessageText: ptr TSQLCHAR,
+    BufferLength: TSQLSMALLINT,
+    TextLength: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLErrorA".}
+
+  proc SQLExecDirect*(
+    StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLExecDirectA".}
+
+  proc SQLGetConnectAttr*(
+    ConnectionHandle: TSQLHDBC,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+    StringLengthPtr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectAttrA".}
+
+  proc SQLGetConnectOption*(
+    ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLPOINTER
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetConnectOptionA".}
+
+  proc SQLGetCursorName*(
+    StatementHandle: TSQLHSTMT,
+    CursorName: ptr TSQLCHAR,
+    BufferLength: TSQLSMALLINT,
+    NameLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetCursorNameA".}
+
+  proc SQLGetDescField*(
+    DescriptorHandle: TSQLHDESC,
+    RecNumber: TSQLSMALLINT,
+    FieldIdentifier: TSQLSMALLINT,
+    ValuePtr: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+    StringLengthPtr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescFieldA".}
+
+  proc SQLGetDescRec*(
+    DescriptorHandle: TSQLHDESC,
+    RecNumber: TSQLSMALLINT,
+    Name: ptr TSQLCHAR,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+    TypePtr: ptr TSQLSMALLINT,
+    SubTypePtr: ptr TSQLSMALLINT,
+    LengthPtr: ptr TSQLLEN,
+    PrecisionPtr: ptr TSQLSMALLINT,
+    ScalePtr: ptr TSQLSMALLINT,
+    NullablePtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDescRecA".}
+
+  proc SQLGetDiagField*(
+    HandleType: TSQLSMALLINT,
+    Handle: TSQLHANDLE,
+    RecNumber: TSQLSMALLINT,
+    DiagIdentifier: TSQLSMALLINT,
+    DiagInfoPtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagFieldA".}
+
+  proc SQLGetDiagRec*(
+    HandleType: TSQLSMALLINT,
+    Handle: TSQLHANDLE,
+    RecNumber: TSQLSMALLINT,
+    SQLState: ptr TSQLCHAR,
+    NativeErrorPtr: ptr TSQLINTEGER,
+    MessageText: ptr TSQLCHAR,
+    BufferLength: TSQLSMALLINT,
+    TextLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetDiagRecA".}
+
+  proc SQLGetInfo*(
+    ConnectionHandle: TSQLHDBC,
+    InfoType: TSQLUSMALLINT,
+    InfoValuePtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetInfoA".}
+
+  proc SQLGetStmtAttr*(
+    StatementHandle: TSQLHSTMT,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+    StringLengthPtr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetStmtAttrA".}
+
+  proc SQLGetTypeInfo*(
+    StatementHandle: TSQLHSTMT, DataType: TSQLSMALLINT
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLGetTypeInfoA".}
+
+  proc SQLPrepare*(
+    StatementHandle: TSQLHSTMT, StatementText: ptr TSQLCHAR, TextLength: TSQLINTEGER
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrepareA".}
+
+  proc SQLSetConnectAttr*(
+    ConnectionHandle: TSQLHDBC,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    StringLength: TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectAttrA".}
+
+  proc SQLSetConnectOption*(
+    ConnectionHandle: TSQLHDBC, Option: TSQLUSMALLINT, Value: TSQLULEN
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetConnectOptionA".}
+
+  proc SQLSetCursorName*(
+    StatementHandle: TSQLHSTMT, CursorName: ptr TSQLCHAR, NameLength: TSQLSMALLINT
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetCursorNameA".}
+
+  proc SQLSetDescField*(
+    DescriptorHandle: TSQLHDESC,
+    RecNumber: TSQLSMALLINT,
+    FieldIdentifier: TSQLSMALLINT,
+    Value: TSQLPOINTER,
+    BufferLength: TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetDescFieldA".}
+
+  proc SQLSetStmtAttr*(
+    StatementHandle: TSQLHSTMT,
+    Attribute: TSQLINTEGER,
+    ValuePtr: TSQLPOINTER,
+    StringLength: TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSetStmtAttrA".}
+
+  proc SQLSpecialColumns*(
+    StatementHandle: TSQLHSTMT,
+    IdentifierType: TSQLUSMALLINT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+    Scope: TSQLUSMALLINT,
+    Nullable: TSQLUSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLSpecialColumnsA".}
+
+  proc SQLStatistics*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+    Unique: TSQLUSMALLINT,
+    Reserved: TSQLUSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLStatisticsA".}
+
+  proc SQLTables*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+    TableType: ptr TSQLCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablesA".}
+
+  proc SQLDriverConnect*(
+    ConnectionHandle: TSQLHDBC,
+    WindowHandle: TSQLHWND,
+    InConnectionString: ptr TSQLCHAR,
+    StringLength1: TSQLSMALLINT,
+    OutConnectionString: ptr TSQLCHAR,
+    BufferLength: TSQLSMALLINT,
+    StringLength2Ptr: ptr TSQLSMALLINT,
+    DriverCompletion: TSQLUSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriverConnectA".}
+
+  proc SQLBrowseConnect*(
+    ConnectionHandle: TSQLHDBC,
+    InConnectionString: ptr TSQLCHAR,
+    StringLength1: TSQLSMALLINT,
+    OutConnectionString: ptr TSQLCHAR,
+    BufferLength: TSQLSMALLINT,
+    StringLength2Ptr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLBrowseConnectA".}
+
+  proc SQLColAttributes*(
+    StatementHandle: TSQLHSTMT,
+    ColumnNumber: TSQLUSMALLINT,
+    FieldIdentifier: TSQLUSMALLINT,
+    CharacterAttributePtr: TSQLPOINTER,
+    BufferLength: TSQLSMALLINT,
+    StringLengthPtr: ptr TSQLSMALLINT,
+    NumericAttributePtr: ptr TSQLLEN,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColAttributesA".}
+
+  proc SQLColumnPrivileges*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+    ColumnName: ptr TSQLCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLColumnPrivilegesA".}
+
+  proc SQLForeignKeys*(
+    StatementHandle: TSQLHSTMT,
+    PKCatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    PKSchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    PKTableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+    FKCatalogName: ptr TSQLCHAR,
+    NameLength4: TSQLSMALLINT,
+    FKSchemaName: ptr TSQLCHAR,
+    NameLength5: TSQLSMALLINT,
+    FKTableName: ptr TSQLCHAR,
+    NameLength6: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLForeignKeysA".}
+
+  proc SQLNativeSql*(
+    ConnectionHandle: TSQLHDBC,
+    InStatementText: ptr TSQLCHAR,
+    TextLength1: TSQLINTEGER,
+    OutStatementText: ptr TSQLCHAR,
+    BufferLength: TSQLINTEGER,
+    TextLength2Ptr: ptr TSQLINTEGER,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLNativeSqlA".}
+
+  proc SQLPrimaryKeys*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLPrimaryKeysA".}
+
+  proc SQLProcedureColumns*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    ProcName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+    ColumnName: ptr TSQLCHAR,
+    NameLength4: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProcedureColumnsA".}
+
+  proc SQLProcedures*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    ProcName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLProceduresA".}
+
+  proc SQLTablePrivileges*(
+    StatementHandle: TSQLHSTMT,
+    CatalogName: ptr TSQLCHAR,
+    NameLength1: TSQLSMALLINT,
+    SchemaName: ptr TSQLCHAR,
+    NameLength2: TSQLSMALLINT,
+    TableName: ptr TSQLCHAR,
+    NameLength3: TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLTablePrivilegesA".}
+
+  proc SQLDrivers*(
+    EnvironmentHandle: TSQLHENV,
+    Direction: TSQLUSMALLINT,
+    DriverDescription: ptr TSQLCHAR,
+    BufferLength1: TSQLSMALLINT,
+    DescriptionLengthPtr: ptr TSQLSMALLINT,
+    DriverAttributes: ptr TSQLCHAR,
+    BufferLength2: TSQLSMALLINT,
+    AttributesLengthPtr: ptr TSQLSMALLINT,
+  ): TSQLRETURN {.winapi, stdcall, dynlib: "odbc32", importc: "SQLDriversA".}
+
 when winimCpu64:
-  const
-    SQL_C_BOOKMARK* = SQL_C_UBIGINT
+  const SQL_C_BOOKMARK* = SQL_C_UBIGINT
 when winimCpu32:
-  const
-    SQL_C_BOOKMARK* = SQL_C_ULONG
+  const SQL_C_BOOKMARK* = SQL_C_ULONG

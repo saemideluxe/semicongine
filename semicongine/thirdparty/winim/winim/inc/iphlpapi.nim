@@ -252,36 +252,41 @@ type
   NDIS_SWITCH_NIC_INDEX* = USHORT
   PNDIS_SWITCH_NIC_INDEX* = ptr USHORT
   NL_INTERFACE_OFFLOAD_ROD* {.pure.} = object
-    NlChecksumSupported* {.bitsize:1.}: BOOLEAN
-    NlOptionsSupported* {.bitsize:1.}: BOOLEAN
-    TlDatagramChecksumSupported* {.bitsize:1.}: BOOLEAN
-    TlStreamChecksumSupported* {.bitsize:1.}: BOOLEAN
-    TlStreamOptionsSupported* {.bitsize:1.}: BOOLEAN
-    FastPathCompatible* {.bitsize:1.}: BOOLEAN
-    TlLargeSendOffloadSupported* {.bitsize:1.}: BOOLEAN
-    TlGiantSendOffloadSupported* {.bitsize:1.}: BOOLEAN
+    NlChecksumSupported* {.bitsize: 1.}: BOOLEAN
+    NlOptionsSupported* {.bitsize: 1.}: BOOLEAN
+    TlDatagramChecksumSupported* {.bitsize: 1.}: BOOLEAN
+    TlStreamChecksumSupported* {.bitsize: 1.}: BOOLEAN
+    TlStreamOptionsSupported* {.bitsize: 1.}: BOOLEAN
+    FastPathCompatible* {.bitsize: 1.}: BOOLEAN
+    TlLargeSendOffloadSupported* {.bitsize: 1.}: BOOLEAN
+    TlGiantSendOffloadSupported* {.bitsize: 1.}: BOOLEAN
+
   PNL_INTERFACE_OFFLOAD_ROD* = ptr NL_INTERFACE_OFFLOAD_ROD
   NL_PATH_BANDWIDTH_ROD* {.pure.} = object
     Bandwidth*: ULONG64
     Instability*: ULONG64
     BandwidthPeaked*: BOOLEAN
+
   PNL_PATH_BANDWIDTH_ROD* = ptr NL_PATH_BANDWIDTH_ROD
   NL_BANDWIDTH_INFORMATION* {.pure.} = object
     Bandwidth*: ULONG64
     Instability*: ULONG64
     BandwidthPeaked*: BOOLEAN
+
   PNL_BANDWIDTH_INFORMATION* = ptr NL_BANDWIDTH_INFORMATION
   MIB_UDP6ROW* {.pure.} = object
     dwLocalAddr*: IN6_ADDR
     dwLocalScopeId*: DWORD
     dwLocalPort*: DWORD
+
   PMIB_UDP6ROW* = ptr MIB_UDP6ROW
-const
-  ANY_SIZE* = 1
+
+const ANY_SIZE* = 1
 type
   MIB_UDP6TABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_UDP6ROW]
+
   PMIB_UDP6TABLE* = ptr MIB_UDP6TABLE
   MIB_TCP6ROW* {.pure.} = object
     State*: MIB_TCP_STATE
@@ -291,10 +296,12 @@ type
     RemoteAddr*: IN6_ADDR
     dwRemoteScopeId*: DWORD
     dwRemotePort*: DWORD
+
   PMIB_TCP6ROW* = ptr MIB_TCP6ROW
   MIB_TCP6TABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCP6ROW]
+
   PMIB_TCP6TABLE* = ptr MIB_TCP6TABLE
   MIB_TCP6ROW2* {.pure.} = object
     LocalAddr*: IN6_ADDR
@@ -306,10 +313,12 @@ type
     State*: MIB_TCP_STATE
     dwOwningPid*: DWORD
     dwOffloadState*: TCP_CONNECTION_OFFLOAD_STATE
+
   PMIB_TCP6ROW2* = ptr MIB_TCP6ROW2
   MIB_TCP6TABLE2* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCP6ROW2]
+
   PMIB_TCP6TABLE2* = ptr MIB_TCP6TABLE2
   MIB_TCPROW2* {.pure.} = object
     dwState*: DWORD
@@ -319,18 +328,23 @@ type
     dwRemotePort*: DWORD
     dwOwningPid*: DWORD
     dwOffloadState*: TCP_CONNECTION_OFFLOAD_STATE
+
   PMIB_TCPROW2* = ptr MIB_TCPROW2
   MIB_TCPTABLE2* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCPROW2]
+
   PMIB_TCPTABLE2* = ptr MIB_TCPTABLE2
   MIB_OPAQUE_QUERY* {.pure.} = object
     dwVarId*: DWORD
     rgdwVarIndex*: array[ANY_SIZE, DWORD]
+
   PMIB_OPAQUE_QUERY* = ptr MIB_OPAQUE_QUERY
   MIB_IFNUMBER* {.pure.} = object
     dwValue*: DWORD
+
   PMIB_IFNUMBER* = ptr MIB_IFNUMBER
+
 const
   MAXLEN_PHYSADDR* = 8
   MAXLEN_IFDESCR* = 256
@@ -360,10 +374,12 @@ type
     dwOutQLen*: DWORD
     dwDescrLen*: DWORD
     bDescr*: array[MAXLEN_IFDESCR, BYTE]
+
   PMIB_IFROW* = ptr MIB_IFROW
   MIB_IFTABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IFROW]
+
   PMIB_IFTABLE* = ptr MIB_IFTABLE
   MIBICMPSTATS* {.pure.} = object
     dwMsgs*: DWORD
@@ -379,21 +395,26 @@ type
     dwTimestampReps*: DWORD
     dwAddrMasks*: DWORD
     dwAddrMaskReps*: DWORD
+
   PMIBICMPSTATS* = ptr MIBICMPSTATS
   MIBICMPINFO* {.pure.} = object
     icmpInStats*: MIBICMPSTATS
     icmpOutStats*: MIBICMPSTATS
+
   MIB_ICMP* {.pure.} = object
     stats*: MIBICMPINFO
+
   PMIB_ICMP* = ptr MIB_ICMP
   MIBICMPSTATS_EX* {.pure.} = object
     dwMsgs*: DWORD
     dwErrors*: DWORD
     rgdwTypeCount*: array[256, DWORD]
+
   PMIBICMPSTATS_EX* = ptr MIBICMPSTATS_EX
   MIB_ICMP_EX* {.pure.} = object
     icmpInStats*: MIBICMPSTATS_EX
     icmpOutStats*: MIBICMPSTATS_EX
+
   PMIB_ICMP_EX* = ptr MIB_ICMP_EX
   MIB_UDPSTATS* {.pure.} = object
     dwInDatagrams*: DWORD
@@ -401,10 +422,12 @@ type
     dwInErrors*: DWORD
     dwOutDatagrams*: DWORD
     dwNumAddrs*: DWORD
+
   PMIB_UDPSTATS* = ptr MIB_UDPSTATS
   MIB_UDPROW* {.pure.} = object
     dwLocalAddr*: DWORD
     dwLocalPort*: DWORD
+
   PMIB_UDPROW* = ptr MIB_UDPROW
   MIB_UDPROW_BASIC* = MIB_UDPROW
   PMIB_UDPROW_BASIC* = ptr MIB_UDPROW
@@ -412,14 +435,16 @@ type
     dwLocalAddr*: DWORD
     dwLocalPort*: DWORD
     dwOwningPid*: DWORD
+
   PMIB_UDPROW_OWNER_PID* = ptr MIB_UDPROW_OWNER_PID
   MIB_UDPROW_OWNER_MODULE_UNION1_STRUCT1* {.pure.} = object
-    SpecificPortBind* {.bitsize:1.}: DWORD
+    SpecificPortBind* {.bitsize: 1.}: DWORD
+
   MIB_UDPROW_OWNER_MODULE_UNION1* {.pure, union.} = object
     struct1*: MIB_UDPROW_OWNER_MODULE_UNION1_STRUCT1
     dwFlags*: DWORD
-const
-  TCPIP_OWNING_MODULE_SIZE* = 16
+
+const TCPIP_OWNING_MODULE_SIZE* = 16
 type
   MIB_UDPROW_OWNER_MODULE* {.pure.} = object
     dwLocalAddr*: DWORD
@@ -428,18 +453,22 @@ type
     liCreateTimestamp*: LARGE_INTEGER
     union1*: MIB_UDPROW_OWNER_MODULE_UNION1
     OwningModuleInfo*: array[TCPIP_OWNING_MODULE_SIZE, ULONGLONG]
+
   PMIB_UDPROW_OWNER_MODULE* = ptr MIB_UDPROW_OWNER_MODULE
   MIB_UDP6ROW_OWNER_PID* {.pure.} = object
     ucLocalAddr*: array[16, UCHAR]
     dwLocalScopeId*: DWORD
     dwLocalPort*: DWORD
     dwOwningPid*: DWORD
+
   PMIB_UDP6ROW_OWNER_PID* = ptr MIB_UDP6ROW_OWNER_PID
   MIB_UDP6ROW_OWNER_MODULE_UNION1_STRUCT1* {.pure.} = object
-    SpecificPortBind* {.bitsize:1.}: DWORD
+    SpecificPortBind* {.bitsize: 1.}: DWORD
+
   MIB_UDP6ROW_OWNER_MODULE_UNION1* {.pure, union.} = object
     struct1*: MIB_UDP6ROW_OWNER_MODULE_UNION1_STRUCT1
     dwFlags*: DWORD
+
   MIB_UDP6ROW_OWNER_MODULE* {.pure.} = object
     ucLocalAddr*: array[16, UCHAR]
     dwLocalScopeId*: DWORD
@@ -448,28 +477,34 @@ type
     liCreateTimestamp*: LARGE_INTEGER
     union1*: MIB_UDP6ROW_OWNER_MODULE_UNION1
     OwningModuleInfo*: array[TCPIP_OWNING_MODULE_SIZE, ULONGLONG]
+
   PMIB_UDP6ROW_OWNER_MODULE* = ptr MIB_UDP6ROW_OWNER_MODULE
   MIB_UDPTABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_UDPROW]
+
   PMIB_UDPTABLE* = ptr MIB_UDPTABLE
   MIB_UDPTABLE_BASIC* = MIB_UDPTABLE
   PMIB_UDPTABLE_BASIC* = ptr MIB_UDPTABLE
   MIB_UDPTABLE_OWNER_PID* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_UDPROW_OWNER_PID]
+
   PMIB_UDPTABLE_OWNER_PID* = ptr MIB_UDPTABLE_OWNER_PID
   MIB_UDPTABLE_OWNER_MODULE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_UDPROW_OWNER_MODULE]
+
   PMIB_UDPTABLE_OWNER_MODULE* = ptr MIB_UDPTABLE_OWNER_MODULE
   MIB_UDP6TABLE_OWNER_PID* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_UDP6ROW_OWNER_PID]
+
   PMIB_UDP6TABLE_OWNER_PID* = ptr MIB_UDP6TABLE_OWNER_PID
   MIB_UDP6TABLE_OWNER_MODULE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_UDP6ROW_OWNER_MODULE]
+
   PMIB_UDP6TABLE_OWNER_MODULE* = ptr MIB_UDP6TABLE_OWNER_MODULE
   MIB_TCPSTATS* {.pure.} = object
     dwRtoAlgorithm*: DWORD
@@ -487,6 +522,7 @@ type
     dwInErrs*: DWORD
     dwOutRsts*: DWORD
     dwNumConns*: DWORD
+
   PMIB_TCPSTATS* = ptr MIB_TCPSTATS
   MIB_TCPROW* {.pure.} = object
     dwState*: DWORD
@@ -494,6 +530,7 @@ type
     dwLocalPort*: DWORD
     dwRemoteAddr*: DWORD
     dwRemotePort*: DWORD
+
   PMIB_TCPROW* = ptr MIB_TCPROW
   MIB_TCPROW_BASIC* = MIB_TCPROW
   PMIB_TCPROW_BASIC* = ptr MIB_TCPROW
@@ -504,6 +541,7 @@ type
     dwRemoteAddr*: DWORD
     dwRemotePort*: DWORD
     dwOwningPid*: DWORD
+
   PMIB_TCPROW_OWNER_PID* = ptr MIB_TCPROW_OWNER_PID
   MIB_TCPROW_OWNER_MODULE* {.pure.} = object
     dwState*: DWORD
@@ -514,6 +552,7 @@ type
     dwOwningPid*: DWORD
     liCreateTimestamp*: LARGE_INTEGER
     OwningModuleInfo*: array[TCPIP_OWNING_MODULE_SIZE, ULONGLONG]
+
   PMIB_TCPROW_OWNER_MODULE* = ptr MIB_TCPROW_OWNER_MODULE
   MIB_TCP6ROW_OWNER_PID* {.pure.} = object
     ucLocalAddr*: array[16, UCHAR]
@@ -524,6 +563,7 @@ type
     dwRemotePort*: DWORD
     dwState*: DWORD
     dwOwningPid*: DWORD
+
   PMIB_TCP6ROW_OWNER_PID* = ptr MIB_TCP6ROW_OWNER_PID
   MIB_TCP6ROW_OWNER_MODULE* {.pure.} = object
     ucLocalAddr*: array[16, UCHAR]
@@ -536,28 +576,34 @@ type
     dwOwningPid*: DWORD
     liCreateTimestamp*: LARGE_INTEGER
     OwningModuleInfo*: array[TCPIP_OWNING_MODULE_SIZE, ULONGLONG]
+
   PMIB_TCP6ROW_OWNER_MODULE* = ptr MIB_TCP6ROW_OWNER_MODULE
   MIB_TCPTABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCPROW]
+
   PMIB_TCPTABLE* = ptr MIB_TCPTABLE
   MIB_TCPTABLE_BASIC* = MIB_TCPTABLE
   PMIB_TCPTABLE_BASIC* = ptr MIB_TCPTABLE
   MIB_TCPTABLE_OWNER_PID* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCPROW_OWNER_PID]
+
   PMIB_TCPTABLE_OWNER_PID* = ptr MIB_TCPTABLE_OWNER_PID
   MIB_TCPTABLE_OWNER_MODULE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCPROW_OWNER_MODULE]
+
   PMIB_TCPTABLE_OWNER_MODULE* = ptr MIB_TCPTABLE_OWNER_MODULE
   MIB_TCP6TABLE_OWNER_PID* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCP6ROW_OWNER_PID]
+
   PMIB_TCP6TABLE_OWNER_PID* = ptr MIB_TCP6TABLE_OWNER_PID
   MIB_TCP6TABLE_OWNER_MODULE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_TCP6ROW_OWNER_MODULE]
+
   PMIB_TCP6TABLE_OWNER_MODULE* = ptr MIB_TCP6TABLE_OWNER_MODULE
   MIB_IPSTATS* {.pure.} = object
     dwForwarding*: DWORD
@@ -583,6 +629,7 @@ type
     dwNumIf*: DWORD
     dwNumAddr*: DWORD
     dwNumRoutes*: DWORD
+
   PMIB_IPSTATS* = ptr MIB_IPSTATS
   MIB_IPADDRROW* {.pure.} = object
     dwAddr*: DWORD
@@ -592,13 +639,16 @@ type
     dwReasmSize*: DWORD
     unused1*: uint16
     wType*: uint16
+
   PMIB_IPADDRROW* = ptr MIB_IPADDRROW
   MIB_IPADDRTABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPADDRROW]
+
   PMIB_IPADDRTABLE* = ptr MIB_IPADDRTABLE
   MIB_IPFORWARDNUMBER* {.pure.} = object
     dwValue*: DWORD
+
   PMIB_IPFORWARDNUMBER* = ptr MIB_IPFORWARDNUMBER
   MIB_IPFORWARDROW* {.pure.} = object
     dwForwardDest*: DWORD
@@ -615,10 +665,12 @@ type
     dwForwardMetric3*: DWORD
     dwForwardMetric4*: DWORD
     dwForwardMetric5*: DWORD
+
   PMIB_IPFORWARDROW* = ptr MIB_IPFORWARDROW
   MIB_IPFORWARDTABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPFORWARDROW]
+
   PMIB_IPFORWARDTABLE* = ptr MIB_IPFORWARDTABLE
   MIB_IPNETROW* {.pure.} = object
     dwIndex*: DWORD
@@ -626,16 +678,19 @@ type
     bPhysAddr*: array[MAXLEN_PHYSADDR, BYTE]
     dwAddr*: DWORD
     dwType*: DWORD
+
   PMIB_IPNETROW* = ptr MIB_IPNETROW
   MIB_IPNETTABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPNETROW]
+
   PMIB_IPNETTABLE* = ptr MIB_IPNETTABLE
   MIB_IPMCAST_OIF* {.pure.} = object
     dwOutIfIndex*: DWORD
     dwNextHopAddr*: DWORD
     dwReserved*: DWORD
     dwReserved1*: DWORD
+
   PMIB_IPMCAST_OIF* = ptr MIB_IPMCAST_OIF
   MIB_IPMCAST_MFE* {.pure.} = object
     dwGroup*: DWORD
@@ -654,10 +709,12 @@ type
     fFlags*: DWORD
     dwReserved*: DWORD
     rgmioOutInfo*: array[ANY_SIZE, MIB_IPMCAST_OIF]
+
   PMIB_IPMCAST_MFE* = ptr MIB_IPMCAST_MFE
   MIB_MFE_TABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPMCAST_MFE]
+
   PMIB_MFE_TABLE* = ptr MIB_MFE_TABLE
   MIB_IPMCAST_OIF_STATS* {.pure.} = object
     dwOutIfIndex*: DWORD
@@ -667,6 +724,7 @@ type
     ulFragNeeded*: ULONG
     ulOutPackets*: ULONG
     ulOutDiscards*: ULONG
+
   PMIB_IPMCAST_OIF_STATS* = ptr MIB_IPMCAST_OIF_STATS
   MIB_IPMCAST_MFE_STATS* {.pure.} = object
     dwGroup*: DWORD
@@ -686,10 +744,12 @@ type
     ulPktsDifferentIf*: ULONG
     ulQueueOverflow*: ULONG
     rgmiosOutStats*: array[ANY_SIZE, MIB_IPMCAST_OIF_STATS]
+
   PMIB_IPMCAST_MFE_STATS* = ptr MIB_IPMCAST_MFE_STATS
   MIB_MFE_STATS_TABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPMCAST_MFE_STATS]
+
   PMIB_MFE_STATS_TABLE* = ptr MIB_MFE_STATS_TABLE
   MIB_IPMCAST_MFE_STATS_EX* {.pure.} = object
     dwGroup*: DWORD
@@ -714,13 +774,16 @@ type
     ulInHdrErrors*: ULONG
     ulTotalOutPackets*: ULONG
     rgmiosOutStats*: array[ANY_SIZE, MIB_IPMCAST_OIF_STATS]
+
   PMIB_IPMCAST_MFE_STATS_EX* = ptr MIB_IPMCAST_MFE_STATS_EX
   MIB_MFE_STATS_TABLE_EX* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPMCAST_MFE_STATS_EX]
+
   PMIB_MFE_STATS_TABLE_EX* = ptr MIB_MFE_STATS_TABLE_EX
   MIB_IPMCAST_GLOBAL* {.pure.} = object
     dwEnable*: DWORD
+
   PMIB_IPMCAST_GLOBAL* = ptr MIB_IPMCAST_GLOBAL
   MIB_IPMCAST_IF_ENTRY* {.pure.} = object
     dwIfIndex*: DWORD
@@ -729,57 +792,68 @@ type
     dwRateLimit*: DWORD
     ulInMcastOctets*: ULONG
     ulOutMcastOctets*: ULONG
+
   PMIB_IPMCAST_IF_ENTRY* = ptr MIB_IPMCAST_IF_ENTRY
   MIB_IPMCAST_IF_TABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPMCAST_IF_ENTRY]
+
   PMIB_IPMCAST_IF_TABLE* = ptr MIB_IPMCAST_IF_TABLE
   MIB_IPMCAST_BOUNDARY* {.pure.} = object
     dwIfIndex*: DWORD
     dwGroupAddress*: DWORD
     dwGroupMask*: DWORD
     dwStatus*: DWORD
+
   PMIB_IPMCAST_BOUNDARY* = ptr MIB_IPMCAST_BOUNDARY
   MIB_IPMCAST_BOUNDARY_TABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPMCAST_BOUNDARY]
+
   PMIB_IPMCAST_BOUNDARY_TABLE* = ptr MIB_IPMCAST_BOUNDARY_TABLE
   MIB_BOUNDARYROW* {.pure.} = object
     dwGroupAddress*: DWORD
     dwGroupMask*: DWORD
+
   PMIB_BOUNDARYROW* = ptr MIB_BOUNDARYROW
   MIB_MCAST_LIMIT_ROW* {.pure.} = object
     dwTtl*: DWORD
     dwRateLimit*: DWORD
+
   PMIB_MCAST_LIMIT_ROW* = ptr MIB_MCAST_LIMIT_ROW
-const
-  MAX_SCOPE_NAME_LEN* = 255
+
+const MAX_SCOPE_NAME_LEN* = 255
 type
-  SCOPE_NAME_BUFFER* = array[MAX_SCOPE_NAME_LEN+1, SN_CHAR]
+  SCOPE_NAME_BUFFER* = array[MAX_SCOPE_NAME_LEN + 1, SN_CHAR]
   SCOPE_NAME* = ptr SN_CHAR
   MIB_IPMCAST_SCOPE* {.pure.} = object
     dwGroupAddress*: DWORD
     dwGroupMask*: DWORD
     snNameBuffer*: SCOPE_NAME_BUFFER
     dwStatus*: DWORD
+
   PMIB_IPMCAST_SCOPE* = ptr MIB_IPMCAST_SCOPE
   MIB_IPDESTROW* {.pure.} = object
     ForwardRow*: MIB_IPFORWARDROW
     dwForwardPreference*: DWORD
     dwForwardViewSet*: DWORD
+
   PMIB_IPDESTROW* = ptr MIB_IPDESTROW
   MIB_IPDESTTABLE* {.pure.} = object
     dwNumEntries*: DWORD
     table*: array[ANY_SIZE, MIB_IPDESTROW]
+
   PMIB_IPDESTTABLE* = ptr MIB_IPDESTTABLE
   MIB_BEST_IF* {.pure.} = object
     dwDestAddr*: DWORD
     dwIfIndex*: DWORD
+
   PMIB_BEST_IF* = ptr MIB_BEST_IF
   MIB_PROXYARP* {.pure.} = object
     dwAddress*: DWORD
     dwMask*: DWORD
     dwIfIndex*: DWORD
+
   PMIB_PROXYARP* = ptr MIB_PROXYARP
   MIB_IFSTATUS* {.pure.} = object
     dwIfIndex*: DWORD
@@ -787,20 +861,25 @@ type
     dwOperationalStatus*: DWORD
     bMHbeatActive*: WINBOOL
     bMHbeatAlive*: WINBOOL
+
   PMIB_IFSTATUS* = ptr MIB_IFSTATUS
   MIB_ROUTESTATE* {.pure.} = object
     bRoutesSetToStack*: WINBOOL
+
   PMIB_ROUTESTATE* = ptr MIB_ROUTESTATE
   MIB_OPAQUE_INFO_UNION1* {.pure, union.} = object
     ullAlign*: ULONGLONG
     rgbyData*: array[1, BYTE]
+
   MIB_OPAQUE_INFO* {.pure.} = object
     dwId*: DWORD
     union1*: MIB_OPAQUE_INFO_UNION1
+
   PMIB_OPAQUE_INFO* = ptr MIB_OPAQUE_INFO
   TCPIP_OWNER_MODULE_BASIC_INFO* {.pure.} = object
     pModuleName*: PWCHAR
     pModulePath*: PWCHAR
+
   PTCPIP_OWNER_MODULE_BASIC_INFO* = ptr TCPIP_OWNER_MODULE_BASIC_INFO
   IP_OPTION_INFORMATION* {.pure.} = object
     Ttl*: UCHAR
@@ -808,6 +887,7 @@ type
     Flags*: UCHAR
     OptionsSize*: UCHAR
     OptionsData*: PUCHAR
+
   PIP_OPTION_INFORMATION* = ptr IP_OPTION_INFORMATION
   ICMP_ECHO_REPLY* {.pure.} = object
     Address*: IPAddr
@@ -817,45 +897,54 @@ type
     Reserved*: USHORT
     Data*: PVOID
     Options*: IP_OPTION_INFORMATION
+
   PICMP_ECHO_REPLY* = ptr ICMP_ECHO_REPLY
   ARP_SEND_REPLY* {.pure.} = object
     DestAddress*: IPAddr
     SrcAddress*: IPAddr
+
   PARP_SEND_REPLY* = ptr ARP_SEND_REPLY
   TCP_RESERVE_PORT_RANGE* {.pure.} = object
     UpperRange*: USHORT
     LowerRange*: USHORT
+
   PTCP_RESERVE_PORT_RANGE* = ptr TCP_RESERVE_PORT_RANGE
-const
-  MAX_ADAPTER_NAME* = 128
+
+const MAX_ADAPTER_NAME* = 128
 type
   IP_ADAPTER_INDEX_MAP* {.pure.} = object
     Index*: ULONG
     Name*: array[MAX_ADAPTER_NAME, WCHAR]
+
   PIP_ADAPTER_INDEX_MAP* = ptr IP_ADAPTER_INDEX_MAP
   IP_INTERFACE_INFO* {.pure.} = object
     NumAdapters*: LONG
     Adapter*: array[1, IP_ADAPTER_INDEX_MAP]
+
   PIP_INTERFACE_INFO* = ptr IP_INTERFACE_INFO
   IP_UNIDIRECTIONAL_ADAPTER_ADDRESS* {.pure.} = object
     NumAdapters*: ULONG
     Address*: array[1, IPAddr]
+
   PIP_UNIDIRECTIONAL_ADAPTER_ADDRESS* = ptr IP_UNIDIRECTIONAL_ADAPTER_ADDRESS
   IP_ADAPTER_ORDER_MAP* {.pure.} = object
     NumAdapters*: ULONG
     AdapterOrder*: array[1, ULONG]
+
   PIP_ADAPTER_ORDER_MAP* = ptr IP_ADAPTER_ORDER_MAP
   IP_MCAST_COUNTER_INFO* {.pure.} = object
     InMcastOctets*: ULONG64
     OutMcastOctets*: ULONG64
     InMcastPkts*: ULONG64
     OutMcastPkts*: ULONG64
+
   PIP_MCAST_COUNTER_INFO* = ptr IP_MCAST_COUNTER_INFO
   IPV6_ADDRESS_EX* {.pure.} = object
     sin6_port*: USHORT
     sin6_flowinfo*: ULONG
     sin6_addr*: array[8, USHORT]
     sin6_scope_id*: ULONG
+
   PIPV6_ADDRESS_EX* = ptr IPV6_ADDRESS_EX
   NET_IF_COMPARTMENT_ID* = UINT32
   PNET_IF_COMPARTMENT_ID* = ptr UINT32
@@ -865,35 +954,40 @@ type
   PIF_INDEX* = ptr NET_IFINDEX
   NET_IF_NETWORK_GUID* = GUID
   NET_LUID_Info* {.pure.} = object
-    Reserved* {.bitsize:24.}: ULONG64
-    NetLuidIndex* {.bitsize:24.}: ULONG64
-    IfType* {.bitsize:16.}: ULONG64
+    Reserved* {.bitsize: 24.}: ULONG64
+    NetLuidIndex* {.bitsize: 24.}: ULONG64
+    IfType* {.bitsize: 16.}: ULONG64
+
   NET_LUID* {.pure, union.} = object
     Value*: ULONG64
     Info*: NET_LUID_Info
+
   PNET_LUID* = ptr NET_LUID
   IF_LUID* = NET_LUID
   PIF_LUID* = ptr NET_LUID
-const
-  IF_MAX_STRING_SIZE* = 256
+
+const IF_MAX_STRING_SIZE* = 256
 type
   IF_COUNTED_STRING_LH* {.pure.} = object
     Length*: USHORT
     String*: array[IF_MAX_STRING_SIZE + 1, WCHAR]
+
   PIF_COUNTED_STRING_LH* = ptr IF_COUNTED_STRING_LH
   IF_COUNTED_STRING* = IF_COUNTED_STRING_LH
   PIF_COUNTED_STRING* = ptr IF_COUNTED_STRING
-const
-  IF_MAX_PHYS_ADDRESS_LENGTH* = 32
+
+const IF_MAX_PHYS_ADDRESS_LENGTH* = 32
 type
   IF_PHYSICAL_ADDRESS_LH* {.pure.} = object
     Length*: USHORT
     Address*: array[IF_MAX_PHYS_ADDRESS_LENGTH, UCHAR]
+
   PIF_PHYSICAL_ADDRESS_LH* = ptr IF_PHYSICAL_ADDRESS_LH
   IF_PHYSICAL_ADDRESS* = IF_PHYSICAL_ADDRESS_LH
   PIF_PHYSICAL_ADDRESS* = ptr IF_PHYSICAL_ADDRESS
   IP_ADDRESS_STRING* {.pure.} = object
-    String*: array[4*4, char]
+    String*: array[4 * 4, char]
+
   PIP_ADDRESS_STRING* = ptr IP_ADDRESS_STRING
   IP_MASK_STRING* = IP_ADDRESS_STRING
   PIP_MASK_STRING* = ptr IP_ADDRESS_STRING
@@ -902,7 +996,9 @@ type
     IpAddress*: IP_ADDRESS_STRING
     IpMask*: IP_MASK_STRING
     Context*: DWORD
+
   PIP_ADDR_STRING* = ptr IP_ADDR_STRING
+
 const
   MAX_ADAPTER_NAME_LENGTH* = 256
   MAX_ADAPTER_DESCRIPTION_LENGTH* = 128
@@ -927,6 +1023,7 @@ type
     SecondaryWinsServer*: IP_ADDR_STRING
     LeaseObtained*: int
     LeaseExpires*: int
+
   PIP_ADAPTER_INFO* = ptr IP_ADAPTER_INFO
   IP_PREFIX_ORIGIN* = NL_PREFIX_ORIGIN
   IP_SUFFIX_ORIGIN* = NL_SUFFIX_ORIGIN
@@ -934,9 +1031,11 @@ type
   IP_ADAPTER_UNICAST_ADDRESS_XP_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Flags*: DWORD
+
   IP_ADAPTER_UNICAST_ADDRESS_XP_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_UNICAST_ADDRESS_XP_UNION1_STRUCT1
+
   IP_ADAPTER_UNICAST_ADDRESS_XP* {.pure.} = object
     union1*: IP_ADAPTER_UNICAST_ADDRESS_XP_UNION1
     Next*: ptr IP_ADAPTER_UNICAST_ADDRESS_XP
@@ -947,13 +1046,16 @@ type
     ValidLifetime*: ULONG
     PreferredLifetime*: ULONG
     LeaseLifetime*: ULONG
+
   PIP_ADAPTER_UNICAST_ADDRESS_XP* = ptr IP_ADAPTER_UNICAST_ADDRESS_XP
   IP_ADAPTER_UNICAST_ADDRESS_LH_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Flags*: DWORD
+
   IP_ADAPTER_UNICAST_ADDRESS_LH_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_UNICAST_ADDRESS_LH_UNION1_STRUCT1
+
   IP_ADAPTER_UNICAST_ADDRESS_LH* {.pure.} = object
     union1*: IP_ADAPTER_UNICAST_ADDRESS_LH_UNION1
     Next*: ptr IP_ADAPTER_UNICAST_ADDRESS_LH
@@ -965,117 +1067,140 @@ type
     PreferredLifetime*: ULONG
     LeaseLifetime*: ULONG
     OnLinkPrefixLength*: UINT8
+
   PIP_ADAPTER_UNICAST_ADDRESS_LH* = ptr IP_ADAPTER_UNICAST_ADDRESS_LH
   IP_ADAPTER_UNICAST_ADDRESS* = IP_ADAPTER_UNICAST_ADDRESS_XP
   PIP_ADAPTER_UNICAST_ADDRESS* = ptr IP_ADAPTER_UNICAST_ADDRESS_XP
   IP_ADAPTER_ANYCAST_ADDRESS_XP_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Flags*: DWORD
+
   IP_ADAPTER_ANYCAST_ADDRESS_XP_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_ANYCAST_ADDRESS_XP_UNION1_STRUCT1
+
   IP_ADAPTER_ANYCAST_ADDRESS_XP* {.pure.} = object
     union1*: IP_ADAPTER_ANYCAST_ADDRESS_XP_UNION1
     Next*: ptr IP_ADAPTER_ANYCAST_ADDRESS_XP
     Address*: SOCKET_ADDRESS
+
   PIP_ADAPTER_ANYCAST_ADDRESS_XP* = ptr IP_ADAPTER_ANYCAST_ADDRESS_XP
   IP_ADAPTER_ANYCAST_ADDRESS* = IP_ADAPTER_ANYCAST_ADDRESS_XP
   PIP_ADAPTER_ANYCAST_ADDRESS* = ptr IP_ADAPTER_ANYCAST_ADDRESS_XP
   IP_ADAPTER_MULTICAST_ADDRESS_XP_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Flags*: DWORD
+
   IP_ADAPTER_MULTICAST_ADDRESS_XP_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_MULTICAST_ADDRESS_XP_UNION1_STRUCT1
+
   IP_ADAPTER_MULTICAST_ADDRESS_XP* {.pure.} = object
     union1*: IP_ADAPTER_MULTICAST_ADDRESS_XP_UNION1
     Next*: ptr IP_ADAPTER_MULTICAST_ADDRESS_XP
     Address*: SOCKET_ADDRESS
+
   PIP_ADAPTER_MULTICAST_ADDRESS_XP* = ptr IP_ADAPTER_MULTICAST_ADDRESS_XP
   IP_ADAPTER_MULTICAST_ADDRESS* = IP_ADAPTER_MULTICAST_ADDRESS_XP
   PIP_ADAPTER_MULTICAST_ADDRESS* = ptr IP_ADAPTER_MULTICAST_ADDRESS_XP
   IP_ADAPTER_DNS_SERVER_ADDRESS_XP_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Reserved*: DWORD
+
   IP_ADAPTER_DNS_SERVER_ADDRESS_XP_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_DNS_SERVER_ADDRESS_XP_UNION1_STRUCT1
+
   IP_ADAPTER_DNS_SERVER_ADDRESS_XP* {.pure.} = object
     union1*: IP_ADAPTER_DNS_SERVER_ADDRESS_XP_UNION1
     Next*: ptr IP_ADAPTER_DNS_SERVER_ADDRESS_XP
     Address*: SOCKET_ADDRESS
+
   PIP_ADAPTER_DNS_SERVER_ADDRESS_XP* = ptr IP_ADAPTER_DNS_SERVER_ADDRESS_XP
   IP_ADAPTER_DNS_SERVER_ADDRESS* = IP_ADAPTER_DNS_SERVER_ADDRESS_XP
   PIP_ADAPTER_DNS_SERVER_ADDRESS* = ptr IP_ADAPTER_DNS_SERVER_ADDRESS_XP
   IP_ADAPTER_PREFIX_XP_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Flags*: DWORD
+
   IP_ADAPTER_PREFIX_XP_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_PREFIX_XP_UNION1_STRUCT1
+
   IP_ADAPTER_PREFIX_XP* {.pure.} = object
     union1*: IP_ADAPTER_PREFIX_XP_UNION1
     Next*: ptr IP_ADAPTER_PREFIX_XP
     Address*: SOCKET_ADDRESS
     PrefixLength*: ULONG
+
   PIP_ADAPTER_PREFIX_XP* = ptr IP_ADAPTER_PREFIX_XP
   IP_ADAPTER_PREFIX* = IP_ADAPTER_PREFIX_XP
   PIP_ADAPTER_PREFIX* = ptr IP_ADAPTER_PREFIX_XP
   IP_ADAPTER_WINS_SERVER_ADDRESS_LH_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Reserved*: DWORD
+
   IP_ADAPTER_WINS_SERVER_ADDRESS_LH_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_WINS_SERVER_ADDRESS_LH_UNION1_STRUCT1
+
   IP_ADAPTER_WINS_SERVER_ADDRESS_LH* {.pure.} = object
     union1*: IP_ADAPTER_WINS_SERVER_ADDRESS_LH_UNION1
     Next*: ptr IP_ADAPTER_WINS_SERVER_ADDRESS_LH
     Address*: SOCKET_ADDRESS
+
   PIP_ADAPTER_WINS_SERVER_ADDRESS_LH* = ptr IP_ADAPTER_WINS_SERVER_ADDRESS_LH
   IP_ADAPTER_WINS_SERVER_ADDRESS* = IP_ADAPTER_WINS_SERVER_ADDRESS_LH
   PIP_ADAPTER_WINS_SERVER_ADDRESS* = ptr IP_ADAPTER_WINS_SERVER_ADDRESS_LH
   IP_ADAPTER_GATEWAY_ADDRESS_LH_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     Reserved*: DWORD
+
   IP_ADAPTER_GATEWAY_ADDRESS_LH_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_GATEWAY_ADDRESS_LH_UNION1_STRUCT1
+
   IP_ADAPTER_GATEWAY_ADDRESS_LH* {.pure.} = object
     union1*: IP_ADAPTER_GATEWAY_ADDRESS_LH_UNION1
     Next*: ptr IP_ADAPTER_GATEWAY_ADDRESS_LH
     Address*: SOCKET_ADDRESS
+
   PIP_ADAPTER_GATEWAY_ADDRESS_LH* = ptr IP_ADAPTER_GATEWAY_ADDRESS_LH
   IP_ADAPTER_GATEWAY_ADDRESS* = IP_ADAPTER_GATEWAY_ADDRESS_LH
   PIP_ADAPTER_GATEWAY_ADDRESS* = ptr IP_ADAPTER_GATEWAY_ADDRESS_LH
-const
-  MAX_DNS_SUFFIX_STRING_LENGTH* = 256
+
+const MAX_DNS_SUFFIX_STRING_LENGTH* = 256
 type
   IP_ADAPTER_DNS_SUFFIX* {.pure.} = object
     Next*: ptr IP_ADAPTER_DNS_SUFFIX
     String*: array[MAX_DNS_SUFFIX_STRING_LENGTH, WCHAR]
+
   PIP_ADAPTER_DNS_SUFFIX* = ptr IP_ADAPTER_DNS_SUFFIX
   IP_ADAPTER_ADDRESSES_LH_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     IfIndex*: IF_INDEX
+
   IP_ADAPTER_ADDRESSES_LH_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_ADDRESSES_LH_UNION1_STRUCT1
+
   IP_ADAPTER_ADDRESSES_LH_UNION2_STRUCT1* {.pure.} = object
-    DdnsEnabled* {.bitsize:1.}: ULONG
-    RegisterAdapterSuffix* {.bitsize:1.}: ULONG
-    Dhcpv4Enabled* {.bitsize:1.}: ULONG
-    ReceiveOnly* {.bitsize:1.}: ULONG
-    NoMulticast* {.bitsize:1.}: ULONG
-    Ipv6OtherStatefulConfig* {.bitsize:1.}: ULONG
-    NetbiosOverTcpipEnabled* {.bitsize:1.}: ULONG
-    Ipv4Enabled* {.bitsize:1.}: ULONG
-    Ipv6Enabled* {.bitsize:1.}: ULONG
-    Ipv6ManagedAddressConfigurationSupported* {.bitsize:1.}: ULONG
+    DdnsEnabled* {.bitsize: 1.}: ULONG
+    RegisterAdapterSuffix* {.bitsize: 1.}: ULONG
+    Dhcpv4Enabled* {.bitsize: 1.}: ULONG
+    ReceiveOnly* {.bitsize: 1.}: ULONG
+    NoMulticast* {.bitsize: 1.}: ULONG
+    Ipv6OtherStatefulConfig* {.bitsize: 1.}: ULONG
+    NetbiosOverTcpipEnabled* {.bitsize: 1.}: ULONG
+    Ipv4Enabled* {.bitsize: 1.}: ULONG
+    Ipv6Enabled* {.bitsize: 1.}: ULONG
+    Ipv6ManagedAddressConfigurationSupported* {.bitsize: 1.}: ULONG
+
   IP_ADAPTER_ADDRESSES_LH_UNION2* {.pure, union.} = object
     Flags*: ULONG
     struct1*: IP_ADAPTER_ADDRESSES_LH_UNION2_STRUCT1
-const
-  MAX_DHCPV6_DUID_LENGTH* = 130
+
+const MAX_DHCPV6_DUID_LENGTH* = 130
 type
   IP_ADAPTER_ADDRESSES_LH* {.pure.} = object
     union1*: IP_ADAPTER_ADDRESSES_LH_UNION1
@@ -1114,13 +1239,16 @@ type
     Dhcpv6ClientDuidLength*: ULONG
     Dhcpv6Iaid*: ULONG
     FirstDnsSuffix*: PIP_ADAPTER_DNS_SUFFIX
+
   PIP_ADAPTER_ADDRESSES_LH* = ptr IP_ADAPTER_ADDRESSES_LH
   IP_ADAPTER_ADDRESSES_XP_UNION1_STRUCT1* {.pure.} = object
     Length*: ULONG
     IfIndex*: DWORD
+
   IP_ADAPTER_ADDRESSES_XP_UNION1* {.pure, union.} = object
     Alignment*: ULONGLONG
     struct1*: IP_ADAPTER_ADDRESSES_XP_UNION1_STRUCT1
+
   IP_ADAPTER_ADDRESSES_XP* {.pure.} = object
     union1*: IP_ADAPTER_ADDRESSES_XP_UNION1
     Next*: ptr IP_ADAPTER_ADDRESSES_XP
@@ -1141,6 +1269,7 @@ type
     Ipv6IfIndex*: DWORD
     ZoneIndices*: array[16, DWORD]
     FirstPrefix*: PIP_ADAPTER_PREFIX_XP
+
   PIP_ADAPTER_ADDRESSES_XP* = ptr IP_ADAPTER_ADDRESSES_XP
   IP_ADAPTER_ADDRESSES* = IP_ADAPTER_ADDRESSES_XP
   PIP_ADAPTER_ADDRESSES* = ptr IP_ADAPTER_ADDRESSES_XP
@@ -1149,7 +1278,9 @@ type
     AutoconfigActive*: UINT
     CurrentDnsServer*: PIP_ADDR_STRING
     DnsServerList*: IP_ADDR_STRING
+
   PIP_PER_ADAPTER_INFO* = ptr IP_PER_ADAPTER_INFO
+
 const
   MAX_HOSTNAME_LEN* = 128
   MAX_DOMAIN_NAME_LEN* = 128
@@ -1165,6 +1296,7 @@ type
     EnableRouting*: UINT
     EnableProxy*: UINT
     EnableDns*: UINT
+
   PFIXED_INFO* = ptr FIXED_INFO
   IP_INTERFACE_NAME_INFO* {.pure.} = object
     Index*: ULONG
@@ -1173,6 +1305,7 @@ type
     AccessType*: UCHAR
     DeviceGuid*: GUID
     InterfaceGuid*: GUID
+
   PIP_INTERFACE_NAME_INFO* = ptr IP_INTERFACE_NAME_INFO
   TCP_ESTATS_BANDWIDTH_ROD_v0* {.pure.} = object
     OutboundBandwidth*: ULONG64
@@ -1181,10 +1314,12 @@ type
     InboundInstability*: ULONG64
     OutboundBandwidthPeaked*: BOOLEAN
     InboundBandwidthPeaked*: BOOLEAN
+
   PTCP_ESTATS_BANDWIDTH_ROD_v0* = ptr TCP_ESTATS_BANDWIDTH_ROD_v0
   TCP_ESTATS_BANDWIDTH_RW_v0* {.pure.} = object
     EnableCollectionOutbound*: TCP_BOOLEAN_OPTIONAL
     EnableCollectionInbound*: TCP_BOOLEAN_OPTIONAL
+
   PTCP_ESTATS_BANDWIDTH_RW_v0* = ptr TCP_ESTATS_BANDWIDTH_RW_v0
   TCP_ESTATS_DATA_ROD_v0* {.pure.} = object
     DataBytesOut*: ULONG64
@@ -1201,27 +1336,33 @@ type
     ThruBytesAcked*: ULONG64
     RcvNxt*: ULONG
     ThruBytesReceived*: ULONG64
+
   PTCP_ESTATS_DATA_ROD_v0* = ptr TCP_ESTATS_DATA_ROD_v0
   TCP_ESTATS_DATA_RW_v0* {.pure.} = object
     EnableCollection*: BOOLEAN
+
   PTCP_ESTATS_DATA_RW_v0* = ptr TCP_ESTATS_DATA_RW_v0
   TCP_ESTATS_FINE_RTT_ROD_v0* {.pure.} = object
     RttVar*: ULONG
     MaxRtt*: ULONG
     MinRtt*: ULONG
     SumRtt*: ULONG
+
   PTCP_ESTATS_FINE_RTT_ROD_v0* = ptr TCP_ESTATS_FINE_RTT_ROD_v0
   TCP_ESTATS_FINE_RTT_RW_v0* {.pure.} = object
     EnableCollection*: BOOLEAN
+
   PTCP_ESTATS_FINE_RTT_RW_v0* = ptr TCP_ESTATS_FINE_RTT_RW_v0
   TCP_ESTATS_OBS_REC_ROD_v0* {.pure.} = object
     CurRwinRcvd*: ULONG
     MaxRwinRcvd*: ULONG
     MinRwinRcvd*: ULONG
     WinScaleRcvd*: UCHAR
+
   PTCP_ESTATS_OBS_REC_ROD_v0* = ptr TCP_ESTATS_OBS_REC_ROD_v0
   TCP_ESTATS_OBS_REC_RW_v0* {.pure.} = object
     EnableCollection*: BOOLEAN
+
   PTCP_ESTATS_OBS_REC_RW_v0* = ptr TCP_ESTATS_OBS_REC_RW_v0
   TCP_ESTATS_PATH_ROD_v0* {.pure.} = object
     FastRetran*: ULONG
@@ -1264,9 +1405,11 @@ type
     MaxMss*: ULONG
     MinMss*: ULONG
     SpuriousRtoDetections*: ULONG
+
   PTCP_ESTATS_PATH_ROD_v0* = ptr TCP_ESTATS_PATH_ROD_v0
   TCP_ESTATS_PATH_RW_v0* {.pure.} = object
     EnableCollection*: BOOLEAN
+
   PTCP_ESTATS_PATH_RW_v0* = ptr TCP_ESTATS_PATH_RW_v0
   TCP_ESTATS_REC_ROD_v0* {.pure.} = object
     CurRwinSent*: ULONG
@@ -1283,18 +1426,22 @@ type
     CurAppRQueue*: SIZE_T
     MaxAppRQueue*: SIZE_T
     WinScaleSent*: UCHAR
+
   PTCP_ESTATS_REC_ROD_v0* = ptr TCP_ESTATS_REC_ROD_v0
   TCP_ESTATS_REC_RW_v0* {.pure.} = object
     EnableCollection*: BOOLEAN
+
   PTCP_ESTATS_REC_RW_v0* = ptr TCP_ESTATS_REC_RW_v0
   TCP_ESTATS_SEND_BUFF_ROD_v0* {.pure.} = object
     CurRetxQueue*: SIZE_T
     MaxRetxQueue*: SIZE_T
     CurAppWQueue*: SIZE_T
     MaxAppWQueue*: SIZE_T
+
   PTCP_ESTATS_SEND_BUFF_ROD_v0* = ptr TCP_ESTATS_SEND_BUFF_ROD_v0
   TCP_ESTATS_SEND_BUFF_RW_v0* {.pure.} = object
     EnableCollection*: BOOLEAN
+
   PTCP_ESTATS_SEND_BUFF_RW_v0* = ptr TCP_ESTATS_SEND_BUFF_RW_v0
   TCP_ESTATS_SND_CONG_ROD_v0* {.pure.} = object
     SndLimTransRwin*: ULONG
@@ -1315,55 +1462,69 @@ type
     CurSsthresh*: ULONG
     MaxSsthresh*: ULONG
     MinSsthresh*: ULONG
+
   PTCP_ESTATS_SND_CONG_ROD_v0* = ptr TCP_ESTATS_SND_CONG_ROD_v0
   TCP_ESTATS_SND_CONG_ROS_v0* {.pure.} = object
     LimCwnd*: ULONG
+
   PTCP_ESTATS_SND_CONG_ROS_v0* = ptr TCP_ESTATS_SND_CONG_ROS_v0
   TCP_ESTATS_SND_CONG_RW_v0* {.pure.} = object
     EnableCollection*: BOOLEAN
+
   PTCP_ESTATS_SND_CONG_RW_v0* = ptr TCP_ESTATS_SND_CONG_RW_v0
   TCP_ESTATS_SYN_OPTS_ROS_v0* {.pure.} = object
     ActiveOpen*: BOOLEAN
     MssRcvd*: ULONG
     MssSent*: ULONG
+
   PTCP_ESTATS_SYN_OPTS_ROS_v0* = ptr TCP_ESTATS_SYN_OPTS_ROS_v0
   NET_ADDRESS_INFO_UNION1_NamedAddress* {.pure.} = object
     Address*: array[DNS_MAX_NAME_BUFFER_LENGTH, WCHAR]
     Port*: array[6, WCHAR]
+
   NET_ADDRESS_INFO_UNION1* {.pure, union.} = object
     NamedAddress*: NET_ADDRESS_INFO_UNION1_NamedAddress
     Ipv4Address*: SOCKADDR_IN
     Ipv6Address*: SOCKADDR_IN6
     IpAddress*: SOCKADDR
+
   NET_ADDRESS_INFO* {.pure.} = object
     Format*: NET_ADDRESS_FORMAT
     union1*: NET_ADDRESS_INFO_UNION1
+
   PNET_ADDRESS_INFO* = ptr NET_ADDRESS_INFO
   IConnectionRequestCallback* {.pure.} = object
     lpVtbl*: ptr IConnectionRequestCallbackVtbl
+
   IConnectionRequestCallbackVtbl* {.pure, inheritable.} = object of IUnknownVtbl
-    OnComplete*: proc(self: ptr IConnectionRequestCallback, hrStatus: HRESULT): HRESULT {.stdcall.}
+    OnComplete*:
+      proc(self: ptr IConnectionRequestCallback, hrStatus: HRESULT): HRESULT {.stdcall.}
+
   ILocationReport* = IConnectionRequestCallback
   NDIS_STATISTICS_VALUE* {.pure.} = object
     Oid*: NDIS_OID
     DataLength*: ULONG
     Data*: array[1, UCHAR]
+
   PNDIS_STATISTICS_VALUE* = ptr NDIS_STATISTICS_VALUE
   NDIS_STATISTICS_VALUE_EX* {.pure.} = object
     Oid*: NDIS_OID
     DataLength*: ULONG
     Length*: ULONG
     Data*: array[1, UCHAR]
+
   PNDIS_STATISTICS_VALUE_EX* = ptr NDIS_STATISTICS_VALUE_EX
   NDIS_VAR_DATA_DESC* {.pure.} = object
     Length*: USHORT
     MaximumLength*: USHORT
     Offset*: ULONG_PTR
+
   PNDIS_VAR_DATA_DESC* = ptr NDIS_VAR_DATA_DESC
   NDIS_OBJECT_HEADER* {.pure.} = object
     Type*: UCHAR
     Revision*: UCHAR
     Size*: USHORT
+
   PNDIS_OBJECT_HEADER* = ptr NDIS_OBJECT_HEADER
   NDIS_STATISTICS_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -1386,6 +1547,7 @@ type
     ifHCOutUcastOctets*: ULONG64
     ifHCOutMulticastOctets*: ULONG64
     ifHCOutBroadcastOctets*: ULONG64
+
   PNDIS_STATISTICS_INFO* = ptr NDIS_STATISTICS_INFO
   NDIS_RSC_STATISTICS_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -1393,17 +1555,20 @@ type
     CoalescedOctets*: ULONG64
     CoalesceEvents*: ULONG64
     Aborts*: ULONG64
+
   PNDIS_RSC_STATISTICS_INFO* = ptr NDIS_RSC_STATISTICS_INFO
   NDIS_INTERRUPT_MODERATION_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     InterruptModeration*: NDIS_INTERRUPT_MODERATION
+
   PNDIS_INTERRUPT_MODERATION_PARAMETERS* = ptr NDIS_INTERRUPT_MODERATION_PARAMETERS
   NDIS_TIMEOUT_DPC_REQUEST_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     TimeoutArrayLength*: ULONG
     TimeoutArray*: array[1, ULONG]
+
   PNDIS_TIMEOUT_DPC_REQUEST_CAPABILITIES* = ptr NDIS_TIMEOUT_DPC_REQUEST_CAPABILITIES
   NDIS_PCI_DEVICE_CUSTOM_PROPERTIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -1419,34 +1584,41 @@ type
     PciExpressVersion*: UINT32
     InterruptType*: UINT32
     MaxInterruptMessages*: UINT32
+
   PNDIS_PCI_DEVICE_CUSTOM_PROPERTIES* = ptr NDIS_PCI_DEVICE_CUSTOM_PROPERTIES
   NDIS_802_11_MAC_ADDRESS* = array[6, UCHAR]
   NDIS_802_11_STATUS_INDICATION* {.pure.} = object
     StatusType*: NDIS_802_11_STATUS_TYPE
+
   PNDIS_802_11_STATUS_INDICATION* = ptr NDIS_802_11_STATUS_INDICATION
   NDIS_802_11_AUTHENTICATION_REQUEST* {.pure.} = object
     Length*: ULONG
     Bssid*: NDIS_802_11_MAC_ADDRESS
     Flags*: ULONG
+
   PNDIS_802_11_AUTHENTICATION_REQUEST* = ptr NDIS_802_11_AUTHENTICATION_REQUEST
   PMKID_CANDIDATE* {.pure.} = object
     BSSID*: NDIS_802_11_MAC_ADDRESS
     Flags*: ULONG
+
   PPMKID_CANDIDATE* = ptr PMKID_CANDIDATE
   NDIS_802_11_PMKID_CANDIDATE_LIST* {.pure.} = object
     Version*: ULONG
     NumCandidates*: ULONG
     CandidateList*: array[1, PMKID_CANDIDATE]
+
   PNDIS_802_11_PMKID_CANDIDATE_LIST* = ptr NDIS_802_11_PMKID_CANDIDATE_LIST
   NDIS_802_11_NETWORK_TYPE_LIST* {.pure.} = object
     NumberOfItems*: ULONG
     NetworkType*: array[1, NDIS_802_11_NETWORK_TYPE]
+
   PNDIS_802_11_NETWORK_TYPE_LIST* = ptr NDIS_802_11_NETWORK_TYPE_LIST
   NDIS_802_11_CONFIGURATION_FH* {.pure.} = object
     Length*: ULONG
     HopPattern*: ULONG
     HopSet*: ULONG
     DwellTime*: ULONG
+
   PNDIS_802_11_CONFIGURATION_FH* = ptr NDIS_802_11_CONFIGURATION_FH
   NDIS_802_11_CONFIGURATION* {.pure.} = object
     Length*: ULONG
@@ -1454,6 +1626,7 @@ type
     ATIMWindow*: ULONG
     DSConfig*: ULONG
     FHConfig*: NDIS_802_11_CONFIGURATION_FH
+
   PNDIS_802_11_CONFIGURATION* = ptr NDIS_802_11_CONFIGURATION
   NDIS_802_11_STATISTICS* {.pure.} = object
     Length*: ULONG
@@ -1481,6 +1654,7 @@ type
     WEPICVErrorCount*: LARGE_INTEGER
     DecryptSuccessCount*: LARGE_INTEGER
     DecryptFailureCount*: LARGE_INTEGER
+
   PNDIS_802_11_STATISTICS* = ptr NDIS_802_11_STATISTICS
   NDIS_802_11_KEY* {.pure.} = object
     Length*: ULONG
@@ -1489,32 +1663,32 @@ type
     BSSID*: NDIS_802_11_MAC_ADDRESS
     KeyRSC*: NDIS_802_11_KEY_RSC
     KeyMaterial*: array[1, UCHAR]
+
   PNDIS_802_11_KEY* = ptr NDIS_802_11_KEY
   NDIS_802_11_REMOVE_KEY* {.pure.} = object
     Length*: ULONG
     KeyIndex*: ULONG
     BSSID*: NDIS_802_11_MAC_ADDRESS
+
   PNDIS_802_11_REMOVE_KEY* = ptr NDIS_802_11_REMOVE_KEY
   NDIS_802_11_WEP* {.pure.} = object
     Length*: ULONG
     KeyIndex*: ULONG
     KeyLength*: ULONG
     KeyMaterial*: array[1, UCHAR]
+
   PNDIS_802_11_WEP* = ptr NDIS_802_11_WEP
-const
-  NDIS_802_11_LENGTH_RATES* = 8
-type
-  NDIS_802_11_RATES* = array[NDIS_802_11_LENGTH_RATES, UCHAR]
-const
-  NDIS_802_11_LENGTH_RATES_EX* = 16
-type
-  NDIS_802_11_RATES_EX* = array[NDIS_802_11_LENGTH_RATES_EX, UCHAR]
-const
-  NDIS_802_11_LENGTH_SSID* = 32
+
+const NDIS_802_11_LENGTH_RATES* = 8
+type NDIS_802_11_RATES* = array[NDIS_802_11_LENGTH_RATES, UCHAR]
+const NDIS_802_11_LENGTH_RATES_EX* = 16
+type NDIS_802_11_RATES_EX* = array[NDIS_802_11_LENGTH_RATES_EX, UCHAR]
+const NDIS_802_11_LENGTH_SSID* = 32
 type
   NDIS_802_11_SSID* {.pure.} = object
     SsidLength*: ULONG
     Ssid*: array[NDIS_802_11_LENGTH_SSID, UCHAR]
+
   PNDIS_802_11_SSID* = ptr NDIS_802_11_SSID
   NDIS_WLAN_BSSID* {.pure.} = object
     Length*: ULONG
@@ -1527,10 +1701,12 @@ type
     Configuration*: NDIS_802_11_CONFIGURATION
     InfrastructureMode*: NDIS_802_11_NETWORK_INFRASTRUCTURE
     SupportedRates*: NDIS_802_11_RATES
+
   PNDIS_WLAN_BSSID* = ptr NDIS_WLAN_BSSID
   NDIS_802_11_BSSID_LIST* {.pure.} = object
     NumberOfItems*: ULONG
     Bssid*: array[1, NDIS_WLAN_BSSID]
+
   PNDIS_802_11_BSSID_LIST* = ptr NDIS_802_11_BSSID_LIST
   NDIS_WLAN_BSSID_EX* {.pure.} = object
     Length*: ULONG
@@ -1545,30 +1721,36 @@ type
     SupportedRates*: NDIS_802_11_RATES_EX
     IELength*: ULONG
     IEs*: array[1, UCHAR]
+
   PNDIS_WLAN_BSSID_EX* = ptr NDIS_WLAN_BSSID_EX
   NDIS_802_11_BSSID_LIST_EX* {.pure.} = object
     NumberOfItems*: ULONG
     Bssid*: array[1, NDIS_WLAN_BSSID_EX]
+
   PNDIS_802_11_BSSID_LIST_EX* = ptr NDIS_802_11_BSSID_LIST_EX
   NDIS_802_11_FIXED_IEs* {.pure.} = object
     Timestamp*: array[8, UCHAR]
     BeaconInterval*: USHORT
     Capabilities*: USHORT
+
   PNDIS_802_11_FIXED_IEs* = ptr NDIS_802_11_FIXED_IEs
   NDIS_802_11_VARIABLE_IEs* {.pure.} = object
     ElementID*: UCHAR
     Length*: UCHAR
     data*: array[1, UCHAR]
+
   PNDIS_802_11_VARIABLE_IEs* = ptr NDIS_802_11_VARIABLE_IEs
   NDIS_802_11_AI_REQFI* {.pure.} = object
     Capabilities*: USHORT
     ListenInterval*: USHORT
     CurrentAPAddress*: NDIS_802_11_MAC_ADDRESS
+
   PNDIS_802_11_AI_REQFI* = ptr NDIS_802_11_AI_REQFI
   NDIS_802_11_AI_RESFI* {.pure.} = object
     Capabilities*: USHORT
     StatusCode*: USHORT
     AssociationId*: USHORT
+
   PNDIS_802_11_AI_RESFI* = ptr NDIS_802_11_AI_RESFI
   NDIS_802_11_ASSOCIATION_INFORMATION* {.pure.} = object
     Length*: ULONG
@@ -1580,32 +1762,39 @@ type
     ResponseFixedIEs*: NDIS_802_11_AI_RESFI
     ResponseIELength*: ULONG
     OffsetResponseIEs*: ULONG
+
   PNDIS_802_11_ASSOCIATION_INFORMATION* = ptr NDIS_802_11_ASSOCIATION_INFORMATION
   NDIS_802_11_AUTHENTICATION_EVENT* {.pure.} = object
     Status*: NDIS_802_11_STATUS_INDICATION
     Request*: array[1, NDIS_802_11_AUTHENTICATION_REQUEST]
+
   PNDIS_802_11_AUTHENTICATION_EVENT* = ptr NDIS_802_11_AUTHENTICATION_EVENT
   NDIS_802_11_TEST_UNION1* {.pure, union.} = object
     AuthenticationEvent*: NDIS_802_11_AUTHENTICATION_EVENT
     RssiTrigger*: NDIS_802_11_RSSI
+
   NDIS_802_11_TEST* {.pure.} = object
     Length*: ULONG
     Type*: ULONG
     union1*: NDIS_802_11_TEST_UNION1
+
   PNDIS_802_11_TEST* = ptr NDIS_802_11_TEST
   NDIS_802_11_PMKID_VALUE* = array[16, UCHAR]
   BSSID_INFO* {.pure.} = object
     BSSID*: NDIS_802_11_MAC_ADDRESS
     PMKID*: NDIS_802_11_PMKID_VALUE
+
   PBSSID_INFO* = ptr BSSID_INFO
   NDIS_802_11_PMKID* {.pure.} = object
     Length*: ULONG
     BSSIDInfoCount*: ULONG
     BSSIDInfo*: array[1, BSSID_INFO]
+
   PNDIS_802_11_PMKID* = ptr NDIS_802_11_PMKID
   NDIS_802_11_AUTHENTICATION_ENCRYPTION* {.pure.} = object
     AuthModeSupported*: NDIS_802_11_AUTHENTICATION_MODE
     EncryptStatusSupported*: NDIS_802_11_ENCRYPTION_STATUS
+
   PNDIS_802_11_AUTHENTICATION_ENCRYPTION* = ptr NDIS_802_11_AUTHENTICATION_ENCRYPTION
   NDIS_802_11_CAPABILITY* {.pure.} = object
     Length*: ULONG
@@ -1613,10 +1802,12 @@ type
     NoOfPMKIDs*: ULONG
     NoOfAuthEncryptPairsSupported*: ULONG
     AuthenticationEncryptionSupported*: array[1, NDIS_802_11_AUTHENTICATION_ENCRYPTION]
+
   PNDIS_802_11_CAPABILITY* = ptr NDIS_802_11_CAPABILITY
   NDIS_802_11_NON_BCAST_SSID_LIST* {.pure.} = object
     NumberOfItems*: ULONG
     Non_Bcast_Ssid*: array[1, NDIS_802_11_SSID]
+
   PNDIS_802_11_NON_BCAST_SSID_LIST* = ptr NDIS_802_11_NON_BCAST_SSID_LIST
   NDIS_CO_DEVICE_PROFILE* {.pure.} = object
     DeviceDescription*: NDIS_VAR_DATA_DESC
@@ -1647,11 +1838,13 @@ type
     ulUUIDropSize*: ULONG
     ulUUISendUserUserInfoSize*: ULONG
     ulUUICallInfoSize*: ULONG
+
   PNDIS_CO_DEVICE_PROFILE* = ptr NDIS_CO_DEVICE_PROFILE
   OFFLOAD_ALGO_INFO* {.pure.} = object
     algoIdentifier*: ULONG
     algoKeylen*: ULONG
     algoRounds*: ULONG
+
   POFFLOAD_ALGO_INFO* = ptr OFFLOAD_ALGO_INFO
   OFFLOAD_SECURITY_ASSOCIATION* {.pure.} = object
     Operation*: OFFLOAD_OPERATION_E
@@ -1659,9 +1852,10 @@ type
     IntegrityAlgo*: OFFLOAD_ALGO_INFO
     ConfAlgo*: OFFLOAD_ALGO_INFO
     Reserved*: OFFLOAD_ALGO_INFO
+
   POFFLOAD_SECURITY_ASSOCIATION* = ptr OFFLOAD_SECURITY_ASSOCIATION
-const
-  OFFLOAD_MAX_SAS* = 3
+
+const OFFLOAD_MAX_SAS* = 3
 type
   OFFLOAD_IPSEC_ADD_SA* {.pure.} = object
     SrcAddr*: IPAddr
@@ -1679,13 +1873,16 @@ type
     OffloadHandle*: HANDLE
     KeyLen*: ULONG
     KeyMat*: array[1, UCHAR]
+
   POFFLOAD_IPSEC_ADD_SA* = ptr OFFLOAD_IPSEC_ADD_SA
   OFFLOAD_IPSEC_DELETE_SA* {.pure.} = object
     OffloadHandle*: HANDLE
+
   POFFLOAD_IPSEC_DELETE_SA* = ptr OFFLOAD_IPSEC_DELETE_SA
   OFFLOAD_IPSEC_UDPESP_ENCAPTYPE_ENTRY* {.pure.} = object
     UdpEncapType*: UDP_ENCAP_TYPE
     DstEncapPort*: USHORT
+
   POFFLOAD_IPSEC_UDPESP_ENCAPTYPE_ENTRY* = ptr OFFLOAD_IPSEC_UDPESP_ENCAPTYPE_ENTRY
   OFFLOAD_IPSEC_ADD_UDPESP_SA* {.pure.} = object
     SrcAddr*: IPAddr
@@ -1705,41 +1902,50 @@ type
     EncapTypeEntryOffldHandle*: HANDLE
     KeyLen*: ULONG
     KeyMat*: array[1, UCHAR]
+
   POFFLOAD_IPSEC_ADD_UDPESP_SA* = ptr OFFLOAD_IPSEC_ADD_UDPESP_SA
   OFFLOAD_IPSEC_DELETE_UDPESP_SA* {.pure.} = object
     OffloadHandle*: HANDLE
     EncapTypeEntryOffldHandle*: HANDLE
+
   POFFLOAD_IPSEC_DELETE_UDPESP_SA* = ptr OFFLOAD_IPSEC_DELETE_UDPESP_SA
   TRANSPORT_HEADER_OFFSET* {.pure.} = object
     ProtocolType*: USHORT
     HeaderOffset*: USHORT
+
   PTRANSPORT_HEADER_OFFSET* = ptr TRANSPORT_HEADER_OFFSET
   NETWORK_ADDRESS* {.pure.} = object
     AddressLength*: USHORT
     AddressType*: USHORT
     Address*: array[1, UCHAR]
+
   PNETWORK_ADDRESS* = ptr NETWORK_ADDRESS
   NETWORK_ADDRESS_LIST* {.pure.} = object
     AddressCount*: LONG
     AddressType*: USHORT
     Address*: array[1, NETWORK_ADDRESS]
+
   PNETWORK_ADDRESS_LIST* = ptr NETWORK_ADDRESS_LIST
   NETWORK_ADDRESS_IP* {.pure.} = object
     sin_port*: USHORT
     in_addr*: ULONG
     sin_zero*: array[8, UCHAR]
+
   PNETWORK_ADDRESS_IP* = ptr NETWORK_ADDRESS_IP
   NETWORK_ADDRESS_IPX* {.pure.} = object
     NetworkAddress*: ULONG
     NodeAddress*: array[6, UCHAR]
     Socket*: USHORT
+
   PNETWORK_ADDRESS_IPX* = ptr NETWORK_ADDRESS_IPX
   GEN_GET_TIME_CAPS* {.pure.} = object
     Flags*: ULONG
     ClockPrecision*: ULONG
+
   PGEN_GET_TIME_CAPS* = ptr GEN_GET_TIME_CAPS
   GEN_GET_NETCARD_TIME* {.pure.} = object
     ReadTime*: ULONGLONG
+
   PGEN_GET_NETCARD_TIME* = ptr GEN_GET_NETCARD_TIME
   NDIS_PM_PACKET_PATTERN* {.pure.} = object
     Priority*: ULONG
@@ -1748,40 +1954,49 @@ type
     PatternOffset*: ULONG
     PatternSize*: ULONG
     PatternFlags*: ULONG
+
   PNDIS_PM_PACKET_PATTERN* = ptr NDIS_PM_PACKET_PATTERN
   NDIS_PM_WAKE_UP_CAPABILITIES* {.pure.} = object
     MinMagicPacketWakeUp*: NDIS_DEVICE_POWER_STATE
     MinPatternWakeUp*: NDIS_DEVICE_POWER_STATE
     MinLinkChangeWakeUp*: NDIS_DEVICE_POWER_STATE
+
   PNDIS_PM_WAKE_UP_CAPABILITIES* = ptr NDIS_PM_WAKE_UP_CAPABILITIES
   NDIS_PNP_CAPABILITIES* {.pure.} = object
     Flags*: ULONG
     WakeUpCapabilities*: NDIS_PM_WAKE_UP_CAPABILITIES
+
   PNDIS_PNP_CAPABILITIES* = ptr NDIS_PNP_CAPABILITIES
   NDIS_WAN_PROTOCOL_CAPS* {.pure.} = object
     Flags*: ULONG
     Reserved*: ULONG
+
   PNDIS_WAN_PROTOCOL_CAPS* = ptr NDIS_WAN_PROTOCOL_CAPS
   NDIS_CO_LINK_SPEED* {.pure.} = object
     Outbound*: ULONG
     Inbound*: ULONG
+
   PNDIS_CO_LINK_SPEED* = ptr NDIS_CO_LINK_SPEED
   NDIS_LINK_SPEED* {.pure.} = object
     XmitLinkSpeed*: ULONG64
     RcvLinkSpeed*: ULONG64
+
   PNDIS_LINK_SPEED* = ptr NDIS_LINK_SPEED
   NDIS_GUID_UNION1* {.pure, union.} = object
     Oid*: NDIS_OID
     Status*: NDIS_STATUS
+
   NDIS_GUID* {.pure.} = object
     Guid*: GUID
     union1*: NDIS_GUID_UNION1
     Size*: ULONG
     Flags*: ULONG
+
   PNDIS_GUID* = ptr NDIS_GUID
   NDIS_IRDA_PACKET_INFO* {.pure.} = object
     ExtraBOFs*: ULONG
     MinTurnAroundTime*: ULONG
+
   PNDIS_IRDA_PACKET_INFO* = ptr NDIS_IRDA_PACKET_INFO
   NDIS_IF_COUNTED_STRING* = IF_COUNTED_STRING
   PNDIS_IF_COUNTED_STRING* = ptr IF_COUNTED_STRING
@@ -1799,6 +2014,7 @@ type
     RcvLinkSpeed*: ULONG64
     PauseFunctions*: NDIS_SUPPORTED_PAUSE_FUNCTIONS
     AutoNegotiationFlags*: ULONG
+
   PNDIS_LINK_STATE* = ptr NDIS_LINK_STATE
   NDIS_LINK_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -1807,37 +2023,45 @@ type
     RcvLinkSpeed*: ULONG64
     PauseFunctions*: NDIS_SUPPORTED_PAUSE_FUNCTIONS
     AutoNegotiationFlags*: ULONG
+
   PNDIS_LINK_PARAMETERS* = ptr NDIS_LINK_PARAMETERS
   NDIS_OPER_STATE* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     OperationalStatus*: NET_IF_OPER_STATUS
     OperationalStatusFlags*: ULONG
+
   PNDIS_OPER_STATE* = ptr NDIS_OPER_STATE
   NDIS_IP_OPER_STATUS* {.pure.} = object
     AddressFamily*: ULONG
     OperationalStatus*: NET_IF_OPER_STATUS
     OperationalStatusFlags*: ULONG
+
   PNDIS_IP_OPER_STATUS* = ptr NDIS_IP_OPER_STATUS
-const
-  MAXIMUM_IP_OPER_STATUS_ADDRESS_FAMILIES_SUPPORTED* = 32
+
+const MAXIMUM_IP_OPER_STATUS_ADDRESS_FAMILIES_SUPPORTED* = 32
 type
   NDIS_IP_OPER_STATUS_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     NumberofAddressFamiliesReturned*: ULONG
-    IpOperationalStatus*: array[MAXIMUM_IP_OPER_STATUS_ADDRESS_FAMILIES_SUPPORTED, NDIS_IP_OPER_STATUS]
+    IpOperationalStatus*:
+      array[MAXIMUM_IP_OPER_STATUS_ADDRESS_FAMILIES_SUPPORTED, NDIS_IP_OPER_STATUS]
+
   PNDIS_IP_OPER_STATUS_INFO* = ptr NDIS_IP_OPER_STATUS_INFO
   NDIS_IP_OPER_STATE* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     IpOperationalStatus*: NDIS_IP_OPER_STATUS
+
   PNDIS_IP_OPER_STATE* = ptr NDIS_IP_OPER_STATE
   NDIS_OFFLOAD_PARAMETERS_STRUCT1* {.pure.} = object
     RscIPv4*: UCHAR
     RscIPv6*: UCHAR
+
   NDIS_OFFLOAD_PARAMETERS_STRUCT2* {.pure.} = object
     EncapsulatedPacketTaskOffload*: UCHAR
     EncapsulationTypes*: UCHAR
+
   NDIS_OFFLOAD_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     IPv4Checksum*: UCHAR
@@ -1856,47 +2080,55 @@ type
     IPsecV2IPv4*: UCHAR
     struct1*: NDIS_OFFLOAD_PARAMETERS_STRUCT1
     struct2*: NDIS_OFFLOAD_PARAMETERS_STRUCT2
+
   PNDIS_OFFLOAD_PARAMETERS* = ptr NDIS_OFFLOAD_PARAMETERS
   NDIS_TCP_LARGE_SEND_OFFLOAD_V1_IPv4* {.pure.} = object
     Encapsulation*: ULONG
     MaxOffLoadSize*: ULONG
     MinSegmentCount*: ULONG
-    TcpOptions* {.bitsize:2.}: ULONG
-    IpOptions* {.bitsize:2.}: ULONG
+    TcpOptions* {.bitsize: 2.}: ULONG
+    IpOptions* {.bitsize: 2.}: ULONG
+
   NDIS_TCP_LARGE_SEND_OFFLOAD_V1* {.pure.} = object
     IPv4*: NDIS_TCP_LARGE_SEND_OFFLOAD_V1_IPv4
+
   PNDIS_TCP_LARGE_SEND_OFFLOAD_V1* = ptr NDIS_TCP_LARGE_SEND_OFFLOAD_V1
   NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv4Transmit* {.pure.} = object
     Encapsulation*: ULONG
-    IpOptionsSupported* {.bitsize:2.}: ULONG
-    TcpOptionsSupported* {.bitsize:2.}: ULONG
-    TcpChecksum* {.bitsize:2.}: ULONG
-    UdpChecksum* {.bitsize:2.}: ULONG
-    IpChecksum* {.bitsize:2.}: ULONG
+    IpOptionsSupported* {.bitsize: 2.}: ULONG
+    TcpOptionsSupported* {.bitsize: 2.}: ULONG
+    TcpChecksum* {.bitsize: 2.}: ULONG
+    UdpChecksum* {.bitsize: 2.}: ULONG
+    IpChecksum* {.bitsize: 2.}: ULONG
+
   NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv4Receive* {.pure.} = object
     Encapsulation*: ULONG
-    IpOptionsSupported* {.bitsize:2.}: ULONG
-    TcpOptionsSupported* {.bitsize:2.}: ULONG
-    TcpChecksum* {.bitsize:2.}: ULONG
-    UdpChecksum* {.bitsize:2.}: ULONG
-    IpChecksum* {.bitsize:2.}: ULONG
+    IpOptionsSupported* {.bitsize: 2.}: ULONG
+    TcpOptionsSupported* {.bitsize: 2.}: ULONG
+    TcpChecksum* {.bitsize: 2.}: ULONG
+    UdpChecksum* {.bitsize: 2.}: ULONG
+    IpChecksum* {.bitsize: 2.}: ULONG
+
   NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv6Transmit* {.pure.} = object
     Encapsulation*: ULONG
-    IpExtensionHeadersSupported* {.bitsize:2.}: ULONG
-    TcpOptionsSupported* {.bitsize:2.}: ULONG
-    TcpChecksum* {.bitsize:2.}: ULONG
-    UdpChecksum* {.bitsize:2.}: ULONG
+    IpExtensionHeadersSupported* {.bitsize: 2.}: ULONG
+    TcpOptionsSupported* {.bitsize: 2.}: ULONG
+    TcpChecksum* {.bitsize: 2.}: ULONG
+    UdpChecksum* {.bitsize: 2.}: ULONG
+
   NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv6Receive* {.pure.} = object
     Encapsulation*: ULONG
-    IpExtensionHeadersSupported* {.bitsize:2.}: ULONG
-    TcpOptionsSupported* {.bitsize:2.}: ULONG
-    TcpChecksum* {.bitsize:2.}: ULONG
-    UdpChecksum* {.bitsize:2.}: ULONG
+    IpExtensionHeadersSupported* {.bitsize: 2.}: ULONG
+    TcpOptionsSupported* {.bitsize: 2.}: ULONG
+    TcpChecksum* {.bitsize: 2.}: ULONG
+    UdpChecksum* {.bitsize: 2.}: ULONG
+
   NDIS_TCP_IP_CHECKSUM_OFFLOAD* {.pure.} = object
     IPv4Transmit*: NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv4Transmit
     IPv4Receive*: NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv4Receive
     IPv6Transmit*: NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv6Transmit
     IPv6Receive*: NDIS_TCP_IP_CHECKSUM_OFFLOAD_IPv6Receive
+
   PNDIS_TCP_IP_CHECKSUM_OFFLOAD* = ptr NDIS_TCP_IP_CHECKSUM_OFFLOAD
   NDIS_IPSEC_OFFLOAD_V1_Supported* {.pure.} = object
     Encapsulation*: ULONG
@@ -1904,40 +2136,47 @@ type
     TransportTunnelCombined*: ULONG
     IPv4Options*: ULONG
     Flags*: ULONG
+
   NDIS_IPSEC_OFFLOAD_V1_IPv4AH* {.pure.} = object
-    Md5* {.bitsize:2.}: ULONG
-    Sha_1* {.bitsize:2.}: ULONG
-    Transport* {.bitsize:2.}: ULONG
-    Tunnel* {.bitsize:2.}: ULONG
-    Send* {.bitsize:2.}: ULONG
-    Receive* {.bitsize:2.}: ULONG
+    Md5* {.bitsize: 2.}: ULONG
+    Sha_1* {.bitsize: 2.}: ULONG
+    Transport* {.bitsize: 2.}: ULONG
+    Tunnel* {.bitsize: 2.}: ULONG
+    Send* {.bitsize: 2.}: ULONG
+    Receive* {.bitsize: 2.}: ULONG
+
   NDIS_IPSEC_OFFLOAD_V1_IPv4ESP* {.pure.} = object
-    Des* {.bitsize:2.}: ULONG
-    Reserved* {.bitsize:2.}: ULONG
-    TripleDes* {.bitsize:2.}: ULONG
-    NullEsp* {.bitsize:2.}: ULONG
-    Transport* {.bitsize:2.}: ULONG
-    Tunnel* {.bitsize:2.}: ULONG
-    Send* {.bitsize:2.}: ULONG
-    Receive* {.bitsize:2.}: ULONG
+    Des* {.bitsize: 2.}: ULONG
+    Reserved* {.bitsize: 2.}: ULONG
+    TripleDes* {.bitsize: 2.}: ULONG
+    NullEsp* {.bitsize: 2.}: ULONG
+    Transport* {.bitsize: 2.}: ULONG
+    Tunnel* {.bitsize: 2.}: ULONG
+    Send* {.bitsize: 2.}: ULONG
+    Receive* {.bitsize: 2.}: ULONG
+
   NDIS_IPSEC_OFFLOAD_V1* {.pure.} = object
     Supported*: NDIS_IPSEC_OFFLOAD_V1_Supported
     IPv4AH*: NDIS_IPSEC_OFFLOAD_V1_IPv4AH
     IPv4ESP*: NDIS_IPSEC_OFFLOAD_V1_IPv4ESP
+
   PNDIS_IPSEC_OFFLOAD_V1* = ptr NDIS_IPSEC_OFFLOAD_V1
   NDIS_TCP_LARGE_SEND_OFFLOAD_V2_IPv4* {.pure.} = object
     Encapsulation*: ULONG
     MaxOffLoadSize*: ULONG
     MinSegmentCount*: ULONG
+
   NDIS_TCP_LARGE_SEND_OFFLOAD_V2_IPv6* {.pure.} = object
     Encapsulation*: ULONG
     MaxOffLoadSize*: ULONG
     MinSegmentCount*: ULONG
-    IpExtensionHeadersSupported* {.bitsize:2.}: ULONG
-    TcpOptionsSupported* {.bitsize:2.}: ULONG
+    IpExtensionHeadersSupported* {.bitsize: 2.}: ULONG
+    TcpOptionsSupported* {.bitsize: 2.}: ULONG
+
   NDIS_TCP_LARGE_SEND_OFFLOAD_V2* {.pure.} = object
     IPv4*: NDIS_TCP_LARGE_SEND_OFFLOAD_V2_IPv4
     IPv6*: NDIS_TCP_LARGE_SEND_OFFLOAD_V2_IPv6
+
   PNDIS_TCP_LARGE_SEND_OFFLOAD_V2* = ptr NDIS_TCP_LARGE_SEND_OFFLOAD_V2
   NDIS_IPSEC_OFFLOAD_V2* {.pure.} = object
     Encapsulation*: ULONG
@@ -1956,22 +2195,27 @@ type
     AuthenticationAlgorithms*: ULONG
     EncryptionAlgorithms*: ULONG
     SaOffloadCapacity*: ULONG
+
   PNDIS_IPSEC_OFFLOAD_V2* = ptr NDIS_IPSEC_OFFLOAD_V2
   NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD_IPv4* {.pure.} = object
     Enabled*: BOOLEAN
+
   NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD_IPv6* {.pure.} = object
     Enabled*: BOOLEAN
+
   NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD* {.pure.} = object
     IPv4*: NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD_IPv4
     IPv6*: NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD_IPv6
+
   PNDIS_TCP_RECV_SEG_COALESCE_OFFLOAD* = ptr NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD
   NDIS_ENCAPSULATED_PACKET_TASK_OFFLOAD* {.pure.} = object
-    TransmitChecksumOffloadSupported* {.bitsize:4.}: ULONG
-    ReceiveChecksumOffloadSupported* {.bitsize:4.}: ULONG
-    LsoV2Supported* {.bitsize:4.}: ULONG
-    RssSupported* {.bitsize:4.}: ULONG
-    VmqSupported* {.bitsize:4.}: ULONG
+    TransmitChecksumOffloadSupported* {.bitsize: 4.}: ULONG
+    ReceiveChecksumOffloadSupported* {.bitsize: 4.}: ULONG
+    LsoV2Supported* {.bitsize: 4.}: ULONG
+    RssSupported* {.bitsize: 4.}: ULONG
+    VmqSupported* {.bitsize: 4.}: ULONG
     MaxHeaderSizeSupported*: ULONG
+
   PNDIS_ENCAPSULATED_PACKET_TASK_OFFLOAD* = ptr NDIS_ENCAPSULATED_PACKET_TASK_OFFLOAD
   NDIS_OFFLOAD* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -1983,6 +2227,7 @@ type
     IPsecV2*: NDIS_IPSEC_OFFLOAD_V2
     Rsc*: NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD
     EncapsulatedPacketTaskOffloadGre*: NDIS_ENCAPSULATED_PACKET_TASK_OFFLOAD
+
   PNDIS_OFFLOAD* = ptr NDIS_OFFLOAD
   NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V1_IPv4* {.pure.} = object
     Encapsulation*: ULONG
@@ -1990,8 +2235,10 @@ type
     MinSegmentCount*: ULONG
     TcpOptions*: ULONG
     IpOptions*: ULONG
+
   NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V1* {.pure.} = object
     IPv4*: NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V1_IPv4
+
   PNDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V1* = ptr NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V1
   NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv4Transmit* {.pure.} = object
     Encapsulation*: ULONG
@@ -2000,6 +2247,7 @@ type
     TcpChecksum*: ULONG
     UdpChecksum*: ULONG
     IpChecksum*: ULONG
+
   NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv4Receive* {.pure.} = object
     Encapsulation*: ULONG
     IpOptionsSupported*: ULONG
@@ -2007,23 +2255,27 @@ type
     TcpChecksum*: ULONG
     UdpChecksum*: ULONG
     IpChecksum*: ULONG
+
   NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv6Transmit* {.pure.} = object
     Encapsulation*: ULONG
     IpExtensionHeadersSupported*: ULONG
     TcpOptionsSupported*: ULONG
     TcpChecksum*: ULONG
     UdpChecksum*: ULONG
+
   NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv6Receive* {.pure.} = object
     Encapsulation*: ULONG
     IpExtensionHeadersSupported*: ULONG
     TcpOptionsSupported*: ULONG
     TcpChecksum*: ULONG
     UdpChecksum*: ULONG
+
   NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD* {.pure.} = object
     IPv4Transmit*: NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv4Transmit
     IPv4Receive*: NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv4Receive
     IPv6Transmit*: NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv6Transmit
     IPv6Receive*: NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD_IPv6Receive
+
   PNDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD* = ptr NDIS_WMI_TCP_IP_CHECKSUM_OFFLOAD
   NDIS_WMI_IPSEC_OFFLOAD_V1_Supported* {.pure.} = object
     Encapsulation*: ULONG
@@ -2031,6 +2283,7 @@ type
     TransportTunnelCombined*: ULONG
     IPv4Options*: ULONG
     Flags*: ULONG
+
   NDIS_WMI_IPSEC_OFFLOAD_V1_IPv4AH* {.pure.} = object
     Md5*: ULONG
     Sha_1*: ULONG
@@ -2038,6 +2291,7 @@ type
     Tunnel*: ULONG
     Send*: ULONG
     Receive*: ULONG
+
   NDIS_WMI_IPSEC_OFFLOAD_V1_IPv4ESP* {.pure.} = object
     Des*: ULONG
     Reserved*: ULONG
@@ -2047,24 +2301,29 @@ type
     Tunnel*: ULONG
     Send*: ULONG
     Receive*: ULONG
+
   NDIS_WMI_IPSEC_OFFLOAD_V1* {.pure.} = object
     Supported*: NDIS_WMI_IPSEC_OFFLOAD_V1_Supported
     IPv4AH*: NDIS_WMI_IPSEC_OFFLOAD_V1_IPv4AH
     IPv4ESP*: NDIS_WMI_IPSEC_OFFLOAD_V1_IPv4ESP
+
   PNDIS_WMI_IPSEC_OFFLOAD_V1* = ptr NDIS_WMI_IPSEC_OFFLOAD_V1
   NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V2_IPv4* {.pure.} = object
     Encapsulation*: ULONG
     MaxOffLoadSize*: ULONG
     MinSegmentCount*: ULONG
+
   NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V2_IPv6* {.pure.} = object
     Encapsulation*: ULONG
     MaxOffLoadSize*: ULONG
     MinSegmentCount*: ULONG
     IpExtensionHeadersSupported*: ULONG
     TcpOptionsSupported*: ULONG
+
   NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V2* {.pure.} = object
     IPv4*: NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V2_IPv4
     IPv6*: NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V2_IPv6
+
   PNDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V2* = ptr NDIS_WMI_TCP_LARGE_SEND_OFFLOAD_V2
   NDIS_WMI_OFFLOAD* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2076,17 +2335,19 @@ type
     IPsecV2*: NDIS_IPSEC_OFFLOAD_V2
     Rsc*: NDIS_TCP_RECV_SEG_COALESCE_OFFLOAD
     EncapsulatedPacketTaskOffloadGre*: NDIS_ENCAPSULATED_PACKET_TASK_OFFLOAD
+
   PNDIS_WMI_OFFLOAD* = ptr NDIS_WMI_OFFLOAD
   NDIS_TCP_CONNECTION_OFFLOAD* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Encapsulation*: ULONG
-    SupportIPv4* {.bitsize:2.}: ULONG
-    SupportIPv6* {.bitsize:2.}: ULONG
-    SupportIPv6ExtensionHeaders* {.bitsize:2.}: ULONG
-    SupportSack* {.bitsize:2.}: ULONG
-    CongestionAlgorithm* {.bitsize:4.}: ULONG
+    SupportIPv4* {.bitsize: 2.}: ULONG
+    SupportIPv6* {.bitsize: 2.}: ULONG
+    SupportIPv6ExtensionHeaders* {.bitsize: 2.}: ULONG
+    SupportSack* {.bitsize: 2.}: ULONG
+    CongestionAlgorithm* {.bitsize: 4.}: ULONG
     TcpConnectionOffloadCapacity*: ULONG
     Flags*: ULONG
+
   PNDIS_TCP_CONNECTION_OFFLOAD* = ptr NDIS_TCP_CONNECTION_OFFLOAD
   NDIS_WMI_TCP_CONNECTION_OFFLOAD* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2097,6 +2358,7 @@ type
     SupportSack*: ULONG
     TcpConnectionOffloadCapacity*: ULONG
     Flags*: ULONG
+
   PNDIS_WMI_TCP_CONNECTION_OFFLOAD* = ptr NDIS_WMI_TCP_CONNECTION_OFFLOAD
   NDIS_PORT_CONTROLL_STATE* = NDIS_PORT_CONTROL_STATE
   PNDIS_PORT_CONTROLL_STATE* = PNDIS_PORT_CONTROL_STATE
@@ -2106,6 +2368,7 @@ type
     RcvControlState*: NDIS_PORT_CONTROL_STATE
     SendAuthorizationState*: NDIS_PORT_AUTHORIZATION_STATE
     RcvAuthorizationState*: NDIS_PORT_AUTHORIZATION_STATE
+
   PNDIS_PORT_AUTHENTICATION_PARAMETERS* = ptr NDIS_PORT_AUTHENTICATION_PARAMETERS
   NDIS_WMI_METHOD_HEADER* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2114,6 +2377,7 @@ type
     RequestId*: ULONG64
     Timeout*: ULONG
     Padding*: array[4, UCHAR]
+
   PNDIS_WMI_METHOD_HEADER* = ptr NDIS_WMI_METHOD_HEADER
   NDIS_WMI_SET_HEADER* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2122,6 +2386,7 @@ type
     RequestId*: ULONG64
     Timeout*: ULONG
     Padding*: array[4, UCHAR]
+
   PNDIS_WMI_SET_HEADER* = ptr NDIS_WMI_SET_HEADER
   NDIS_WMI_EVENT_HEADER* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2132,6 +2397,7 @@ type
     DeviceNameLength*: ULONG
     DeviceNameOffset*: ULONG
     Padding*: array[4, UCHAR]
+
   PNDIS_WMI_EVENT_HEADER* = ptr NDIS_WMI_EVENT_HEADER
   NDIS_WMI_ENUM_ADAPTER* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2139,10 +2405,12 @@ type
     NetLuid*: NET_LUID
     DeviceNameLength*: USHORT
     DeviceName*: array[1, CHAR]
+
   PNDIS_WMI_ENUM_ADAPTER* = ptr NDIS_WMI_ENUM_ADAPTER
   NDIS_HD_SPLIT_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     HDSplitCombineFlags*: ULONG
+
   PNDIS_HD_SPLIT_PARAMETERS* = ptr NDIS_HD_SPLIT_PARAMETERS
   NDIS_HD_SPLIT_CURRENT_CONFIG* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2152,19 +2420,22 @@ type
     HDSplitCombineFlags*: ULONG
     BackfillSize*: ULONG
     MaxHeaderSize*: ULONG
+
   PNDIS_HD_SPLIT_CURRENT_CONFIG* = ptr NDIS_HD_SPLIT_CURRENT_CONFIG
   NDIS_WMI_OUTPUT_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     SupportedRevision*: UCHAR
     DataOffset*: ULONG
+
   PNDIS_WMI_OUTPUT_INFO* = ptr NDIS_WMI_OUTPUT_INFO
-const
-  NDIS_PM_MAX_STRING_SIZE* = 64
+
+const NDIS_PM_MAX_STRING_SIZE* = 64
 type
   NDIS_PM_COUNTED_STRING* {.pure.} = object
     Length*: USHORT
     String*: array[NDIS_PM_MAX_STRING_SIZE + 1, WCHAR]
+
   PNDIS_PM_COUNTED_STRING* = ptr NDIS_PM_COUNTED_STRING
   NDIS_PM_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2182,6 +2453,7 @@ type
     MinLinkChangeWakeUp*: NDIS_DEVICE_POWER_STATE
     SupportedWakeUpEvents*: ULONG
     MediaSpecificWakeUpEvents*: ULONG
+
   PNDIS_PM_CAPABILITIES* = ptr NDIS_PM_CAPABILITIES
   NDIS_PM_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2189,6 +2461,7 @@ type
     EnabledProtocolOffloads*: ULONG
     WakeUpFlags*: ULONG
     MediaSpecificWakeUpEvents*: ULONG
+
   PNDIS_PM_PARAMETERS* = ptr NDIS_PM_PARAMETERS
   NDIS_PM_WOL_PATTERN_WoLPattern_IPv4TcpSynParameters* {.pure.} = object
     Flags*: ULONG
@@ -2196,25 +2469,31 @@ type
     IPv4DestAddress*: array[4, UCHAR]
     TCPSourcePortNumber*: USHORT
     TCPDestPortNumber*: USHORT
+
   NDIS_PM_WOL_PATTERN_WoLPattern_IPv6TcpSynParameters* {.pure.} = object
     Flags*: ULONG
     IPv6SourceAddress*: array[16, UCHAR]
     IPv6DestAddress*: array[16, UCHAR]
     TCPSourcePortNumber*: USHORT
     TCPDestPortNumber*: USHORT
+
   NDIS_PM_WOL_PATTERN_WoLPattern_EapolRequestIdMessageParameters* {.pure.} = object
     Flags*: ULONG
+
   NDIS_PM_WOL_PATTERN_WoLPattern_WoLBitMapPattern* {.pure.} = object
     Flags*: ULONG
     MaskOffset*: ULONG
     MaskSize*: ULONG
     PatternOffset*: ULONG
     PatternSize*: ULONG
+
   NDIS_PM_WOL_PATTERN_WoLPattern* {.pure, union.} = object
     IPv4TcpSynParameters*: NDIS_PM_WOL_PATTERN_WoLPattern_IPv4TcpSynParameters
     IPv6TcpSynParameters*: NDIS_PM_WOL_PATTERN_WoLPattern_IPv6TcpSynParameters
-    EapolRequestIdMessageParameters*: NDIS_PM_WOL_PATTERN_WoLPattern_EapolRequestIdMessageParameters
+    EapolRequestIdMessageParameters*:
+      NDIS_PM_WOL_PATTERN_WoLPattern_EapolRequestIdMessageParameters
     WoLBitMapPattern*: NDIS_PM_WOL_PATTERN_WoLPattern_WoLBitMapPattern
+
   NDIS_PM_WOL_PATTERN* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -2224,18 +2503,21 @@ type
     PatternId*: ULONG
     NextWoLPatternOffset*: ULONG
     WoLPattern*: NDIS_PM_WOL_PATTERN_WoLPattern
+
   PNDIS_PM_WOL_PATTERN* = ptr NDIS_PM_WOL_PATTERN
   NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_IPv4ARPParameters* {.pure.} = object
     Flags*: ULONG
     RemoteIPv4Address*: array[4, UCHAR]
     HostIPv4Address*: array[4, UCHAR]
     MacAddress*: array[6, UCHAR]
+
   NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_IPv6NSParameters* {.pure.} = object
     Flags*: ULONG
     RemoteIPv6Address*: array[16, UCHAR]
     SolicitedNodeIPv6Address*: array[16, UCHAR]
     MacAddress*: array[6, UCHAR]
     TargetIPv6Addresses*: array[2, array[16, UCHAR]]
+
 const
   DOT11_RSN_KCK_LENGTH* = 16
   DOT11_RSN_KEK_LENGTH* = 16
@@ -2245,10 +2527,15 @@ type
     KCK*: array[DOT11_RSN_KCK_LENGTH, UCHAR]
     KEK*: array[DOT11_RSN_KEK_LENGTH, UCHAR]
     KeyReplayCounter*: ULONGLONG
+
   NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters* {.pure, union.} = object
-    IPv4ARPParameters*: NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_IPv4ARPParameters
-    IPv6NSParameters*: NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_IPv6NSParameters
-    Dot11RSNRekeyParameters*: NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_Dot11RSNRekeyParameters
+    IPv4ARPParameters*:
+      NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_IPv4ARPParameters
+    IPv6NSParameters*:
+      NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_IPv6NSParameters
+    Dot11RSNRekeyParameters*:
+      NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters_Dot11RSNRekeyParameters
+
   NDIS_PM_PROTOCOL_OFFLOAD* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -2258,6 +2545,7 @@ type
     ProtocolOffloadId*: ULONG
     NextProtocolOffloadOffset*: ULONG
     ProtocolOffloadParameters*: NDIS_PM_PROTOCOL_OFFLOAD_ProtocolOffloadParameters
+
   PNDIS_PM_PROTOCOL_OFFLOAD* = ptr NDIS_PM_PROTOCOL_OFFLOAD
   NDIS_PM_WAKE_REASON* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2265,6 +2553,7 @@ type
     WakeReason*: NDIS_PM_WAKE_REASON_TYPE
     InfoBufferOffset*: ULONG
     InfoBufferSize*: ULONG
+
   PNDIS_PM_WAKE_REASON* = ptr NDIS_PM_WAKE_REASON
   NDIS_PM_WAKE_PACKET* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2274,6 +2563,7 @@ type
     OriginalPacketSize*: ULONG
     SavedPacketSize*: ULONG
     SavedPacketOffset*: ULONG
+
   PNDIS_PM_WAKE_PACKET* = ptr NDIS_PM_WAKE_PACKET
   NDIS_WMI_PM_ADMIN_CONFIG* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2283,6 +2573,7 @@ type
     PMARPOffload*: NDIS_PM_ADMIN_CONFIG_STATE
     PMNSOffload*: NDIS_PM_ADMIN_CONFIG_STATE
     PMWiFiRekeyOffload*: NDIS_PM_ADMIN_CONFIG_STATE
+
   PNDIS_WMI_PM_ADMIN_CONFIG* = ptr NDIS_WMI_PM_ADMIN_CONFIG
   NDIS_WMI_PM_ACTIVE_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2292,6 +2583,7 @@ type
     PMARPOffload*: NDIS_PM_CAPABILITY_STATE
     PMNSOffload*: NDIS_PM_CAPABILITY_STATE
     PMWiFiRekeyOffload*: NDIS_PM_CAPABILITY_STATE
+
   PNDIS_WMI_PM_ACTIVE_CAPABILITIES* = ptr NDIS_WMI_PM_ACTIVE_CAPABILITIES
   NDIS_RECEIVE_FILTER_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2315,6 +2607,7 @@ type
     MaxFieldTestsPerPacketCoalescingFilter*: ULONG
     MaxPacketCoalescingFilters*: ULONG
     NdisReserved*: ULONG
+
   PNDIS_RECEIVE_FILTER_CAPABILITIES* = ptr NDIS_RECEIVE_FILTER_CAPABILITIES
   NDIS_NIC_SWITCH_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2346,12 +2639,14 @@ type
     NdisReserved15*: ULONG
     NdisReserved16*: ULONG
     NdisReserved17*: ULONG
+
   PNDIS_NIC_SWITCH_CAPABILITIES* = ptr NDIS_NIC_SWITCH_CAPABILITIES
   NDIS_RECEIVE_FILTER_GLOBAL_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     EnabledFilterTypes*: ULONG
     EnabledQueueTypes*: ULONG
+
   PNDIS_RECEIVE_FILTER_GLOBAL_PARAMETERS* = ptr NDIS_RECEIVE_FILTER_GLOBAL_PARAMETERS
   NDIS_RECEIVE_FILTER_FIELD_PARAMETERS_HeaderField* {.pure, union.} = object
     MacHeaderField*: NDIS_MAC_HEADER_FIELD
@@ -2359,18 +2654,21 @@ type
     IPv4HeaderField*: NDIS_IPV4_HEADER_FIELD
     IPv6HeaderField*: NDIS_IPV6_HEADER_FIELD
     UdpHeaderField*: NDIS_UDP_HEADER_FIELD
+
   NDIS_RECEIVE_FILTER_FIELD_PARAMETERS_FieldValue* {.pure, union.} = object
     FieldByteValue*: UCHAR
     FieldShortValue*: USHORT
     FieldLongValue*: ULONG
     FieldLong64Value*: ULONG64
     FieldByteArrayValue*: array[16, UCHAR]
+
   NDIS_RECEIVE_FILTER_FIELD_PARAMETERS_ResultValue* {.pure, union.} = object
     ResultByteValue*: UCHAR
     ResultShortValue*: USHORT
     ResultLongValue*: ULONG
     ResultLong64Value*: ULONG64
     ResultByteArrayValue*: array[16, UCHAR]
+
   NDIS_RECEIVE_FILTER_FIELD_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -2379,6 +2677,7 @@ type
     HeaderField*: NDIS_RECEIVE_FILTER_FIELD_PARAMETERS_HeaderField
     FieldValue*: NDIS_RECEIVE_FILTER_FIELD_PARAMETERS_FieldValue
     ResultValue*: NDIS_RECEIVE_FILTER_FIELD_PARAMETERS_ResultValue
+
   PNDIS_RECEIVE_FILTER_FIELD_PARAMETERS* = ptr NDIS_RECEIVE_FILTER_FIELD_PARAMETERS
   NDIS_RECEIVE_FILTER_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2392,12 +2691,14 @@ type
     RequestedFilterIdBitCount*: ULONG
     MaxCoalescingDelay*: ULONG
     VPortId*: NDIS_NIC_SWITCH_VPORT_ID
+
   PNDIS_RECEIVE_FILTER_PARAMETERS* = ptr NDIS_RECEIVE_FILTER_PARAMETERS
   NDIS_RECEIVE_FILTER_CLEAR_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     QueueId*: NDIS_RECEIVE_QUEUE_ID
     FilterId*: NDIS_RECEIVE_FILTER_ID
+
   PNDIS_RECEIVE_FILTER_CLEAR_PARAMETERS* = ptr NDIS_RECEIVE_FILTER_CLEAR_PARAMETERS
   NDIS_QUEUE_NAME* = NDIS_IF_COUNTED_STRING
   PNDIS_QUEUE_NAME* = ptr NDIS_IF_COUNTED_STRING
@@ -2439,11 +2740,13 @@ type
     QueueName*: NDIS_QUEUE_NAME
     PortId*: ULONG
     InterruptCoalescingDomainId*: ULONG
+
   PNDIS_RECEIVE_QUEUE_PARAMETERS* = ptr NDIS_RECEIVE_QUEUE_PARAMETERS
   NDIS_RECEIVE_QUEUE_FREE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     QueueId*: NDIS_RECEIVE_QUEUE_ID
+
   PNDIS_RECEIVE_QUEUE_FREE_PARAMETERS* = ptr NDIS_RECEIVE_QUEUE_FREE_PARAMETERS
   NDIS_RECEIVE_QUEUE_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2460,18 +2763,21 @@ type
     QueueName*: NDIS_QUEUE_NAME
     NumFilters*: ULONG
     InterruptCoalescingDomainId*: ULONG
+
   PNDIS_RECEIVE_QUEUE_INFO* = ptr NDIS_RECEIVE_QUEUE_INFO
   NDIS_RECEIVE_QUEUE_INFO_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     FirstElementOffset*: ULONG
     NumElements*: ULONG
     ElementSize*: ULONG
+
   PNDIS_RECEIVE_QUEUE_INFO_ARRAY* = ptr NDIS_RECEIVE_QUEUE_INFO_ARRAY
   NDIS_RECEIVE_FILTER_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     FilterType*: NDIS_RECEIVE_FILTER_TYPE
     FilterId*: NDIS_RECEIVE_FILTER_ID
+
   PNDIS_RECEIVE_FILTER_INFO* = ptr NDIS_RECEIVE_FILTER_INFO
   NDIS_RECEIVE_FILTER_INFO_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2481,26 +2787,32 @@ type
     ElementSize*: ULONG
     Flags*: ULONG
     VPortId*: NDIS_NIC_SWITCH_VPORT_ID
+
   PNDIS_RECEIVE_FILTER_INFO_ARRAY* = ptr NDIS_RECEIVE_FILTER_INFO_ARRAY
   NDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     QueueId*: NDIS_RECEIVE_QUEUE_ID
     CompletionStatus*: NDIS_STATUS
-  PNDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_PARAMETERS* = ptr NDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_PARAMETERS
+
+  PNDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_PARAMETERS* =
+    ptr NDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_PARAMETERS
   NDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     FirstElementOffset*: ULONG
     NumElements*: ULONG
     ElementSize*: ULONG
-  PNDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_ARRAY* = ptr NDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_ARRAY
+
+  PNDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_ARRAY* =
+    ptr NDIS_RECEIVE_QUEUE_ALLOCATION_COMPLETE_ARRAY
   NDIS_RECEIVE_SCALE_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     CapabilitiesFlags*: ULONG
     NumberOfInterruptMessages*: ULONG
     NumberOfReceiveQueues*: ULONG
     NumberOfIndirectionTableEntries*: USHORT
+
   PNDIS_RECEIVE_SCALE_CAPABILITIES* = ptr NDIS_RECEIVE_SCALE_CAPABILITIES
   NDIS_RECEIVE_SCALE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2514,6 +2826,7 @@ type
     ProcessorMasksOffset*: ULONG
     NumberOfProcessorMasks*: ULONG
     ProcessorMasksEntrySize*: ULONG
+
   PNDIS_RECEIVE_SCALE_PARAMETERS* = ptr NDIS_RECEIVE_SCALE_PARAMETERS
   NDIS_RECEIVE_HASH_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2521,11 +2834,13 @@ type
     HashInformation*: ULONG
     HashSecretKeySize*: USHORT
     HashSecretKeyOffset*: ULONG
+
   PNDIS_RECEIVE_HASH_PARAMETERS* = ptr NDIS_RECEIVE_HASH_PARAMETERS
   NDIS_RSS_PROCESSOR* {.pure.} = object
     ProcNum*: PROCESSOR_NUMBER
     PreferenceIndex*: USHORT
     Reserved*: USHORT
+
   PNDIS_RSS_PROCESSOR* = ptr NDIS_RSS_PROCESSOR
   NDIS_RSS_PROCESSOR_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2538,6 +2853,7 @@ type
     RssProcessorEntrySize*: ULONG
     RssMaxProcessor*: PROCESSOR_NUMBER
     RssProfile*: NDIS_RSS_PROFILE
+
   PNDIS_RSS_PROCESSOR_INFO* = ptr NDIS_RSS_PROCESSOR_INFO
   NDIS_PROCESSOR_INFO_EX* {.pure.} = object
     ProcNum*: PROCESSOR_NUMBER
@@ -2546,6 +2862,7 @@ type
     HyperThreadId*: ULONG
     NodeId*: USHORT
     NodeDistance*: USHORT
+
   PNDIS_PROCESSOR_INFO_EX* = ptr NDIS_PROCESSOR_INFO_EX
   NDIS_SYSTEM_PROCESSOR_INFO_EX* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2558,16 +2875,19 @@ type
     ProcessorInfoOffset*: ULONG
     NumberOfProcessors*: ULONG
     ProcessorInfoEntrySize*: ULONG
+
   PNDIS_SYSTEM_PROCESSOR_INFO_EX* = ptr NDIS_SYSTEM_PROCESSOR_INFO_EX
   NDIS_HYPERVISOR_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     PartitionType*: NDIS_HYPERVISOR_PARTITION_TYPE
+
   PNDIS_HYPERVISOR_INFO* = ptr NDIS_HYPERVISOR_INFO
   NDIS_WMI_GROUP_AFFINITY* {.pure.} = object
     Mask*: ULONG64
     Group*: USHORT
     Reserved*: array[3, USHORT]
+
   PNDIS_WMI_GROUP_AFFINITY* = ptr NDIS_WMI_GROUP_AFFINITY
   NDIS_WMI_RECEIVE_QUEUE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2581,6 +2901,7 @@ type
     LookaheadSize*: ULONG
     VmName*: NDIS_VM_NAME
     QueueName*: NDIS_QUEUE_NAME
+
   PNDIS_WMI_RECEIVE_QUEUE_PARAMETERS* = ptr NDIS_WMI_RECEIVE_QUEUE_PARAMETERS
   NDIS_WMI_RECEIVE_QUEUE_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2595,6 +2916,7 @@ type
     LookaheadSize*: ULONG
     VmName*: NDIS_VM_NAME
     QueueName*: NDIS_QUEUE_NAME
+
   PNDIS_WMI_RECEIVE_QUEUE_INFO* = ptr NDIS_WMI_RECEIVE_QUEUE_INFO
   NDIS_NDK_PERFORMANCE_COUNTERS* {.pure.} = object
     Connect*: ULONG64
@@ -2627,10 +2949,12 @@ type
     RDMAOutOctets*: ULONG64
     RDMAInFrames*: ULONG64
     RDMAOutFrames*: ULONG64
+
   PNDIS_NDK_PERFORMANCE_COUNTERS* = ptr NDIS_NDK_PERFORMANCE_COUNTERS
   NDK_VERSION* {.pure.} = object
     Major*: USHORT
     Minor*: USHORT
+
   NDK_ADAPTER_INFO* {.pure.} = object
     Version*: NDK_VERSION
     VendorId*: UINT32
@@ -2653,6 +2977,7 @@ type
     MaxCallerData*: ULONG
     MaxCalleeData*: ULONG
     AdapterFlags*: ULONG
+
   NDIS_NDK_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -2666,6 +2991,7 @@ type
     MaxSrqCount*: ULONG
     MissingCounterMask*: ULONG64
     NdkInfo*: ptr NDK_ADAPTER_INFO
+
   PNDIS_NDK_CAPABILITIES* = ptr NDIS_NDK_CAPABILITIES
   NDK_WMI_ADAPTER_INFO* {.pure.} = object
     Version*: NDK_VERSION
@@ -2689,6 +3015,7 @@ type
     MaxCallerData*: ULONG
     MaxCalleeData*: ULONG
     AdapterFlags*: ULONG
+
   PNDK_WMI_ADAPTER_INFO* = ptr NDK_WMI_ADAPTER_INFO
   NDIS_WMI_NDK_CAPABILITIES* {.pure.} = object
     MaxQpCount*: ULONG
@@ -2701,6 +3028,7 @@ type
     MaxSrqCount*: ULONG
     MissingCounterMask*: ULONG64
     NdkInfo*: NDK_WMI_ADAPTER_INFO
+
   PNDIS_WMI_NDK_CAPABILITIES* = ptr NDIS_WMI_NDK_CAPABILITIES
   NDIS_QOS_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2708,6 +3036,7 @@ type
     MaxNumTrafficClasses*: ULONG
     MaxNumEtsCapableTrafficClasses*: ULONG
     MaxNumPfcEnabledTrafficClasses*: ULONG
+
   PNDIS_QOS_CAPABILITIES* = ptr NDIS_QOS_CAPABILITIES
   NDIS_QOS_CLASSIFICATION_ELEMENT* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2716,7 +3045,9 @@ type
     ConditionField*: USHORT
     ActionSelector*: USHORT
     ActionField*: USHORT
+
   PNDIS_QOS_CLASSIFICATION_ELEMENT* = ptr NDIS_QOS_CLASSIFICATION_ELEMENT
+
 const
   NDIS_QOS_MAXIMUM_PRIORITIES* = 8
   NDIS_QOS_MAXIMUM_TRAFFIC_CLASSES* = 8
@@ -2732,6 +3063,7 @@ type
     NumClassificationElements*: ULONG
     ClassificationElementSize*: ULONG
     FirstClassificationElementOffset*: ULONG
+
   PNDIS_QOS_PARAMETERS* = ptr NDIS_QOS_PARAMETERS
   NDIS_NIC_SWITCH_FRIENDLYNAME* = NDIS_IF_COUNTED_STRING
   PNDIS_NIC_SWITCH_FRIENDLYNAME* = ptr NDIS_IF_COUNTED_STRING
@@ -2747,12 +3079,15 @@ type
     NdisReserved1*: ULONG
     NdisReserved2*: ULONG
     NdisReserved3*: ULONG
+
   PNDIS_NIC_SWITCH_PARAMETERS* = ptr NDIS_NIC_SWITCH_PARAMETERS
   NDIS_NIC_SWITCH_DELETE_SWITCH_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     SwitchId*: NDIS_NIC_SWITCH_ID
-  PNDIS_NIC_SWITCH_DELETE_SWITCH_PARAMETERS* = ptr NDIS_NIC_SWITCH_DELETE_SWITCH_PARAMETERS
+
+  PNDIS_NIC_SWITCH_DELETE_SWITCH_PARAMETERS* =
+    ptr NDIS_NIC_SWITCH_DELETE_SWITCH_PARAMETERS
   NDIS_NIC_SWITCH_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -2769,12 +3104,14 @@ type
     NumActiveNonDefaultVPortMacAddresses*: ULONG
     NumActiveDefaultVPortVlanIds*: ULONG
     NumActiveNonDefaultVPortVlanIds*: ULONG
+
   PNDIS_NIC_SWITCH_INFO* = ptr NDIS_NIC_SWITCH_INFO
   NDIS_NIC_SWITCH_INFO_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     FirstElementOffset*: ULONG
     NumElements*: ULONG
     ElementSize*: ULONG
+
   PNDIS_NIC_SWITCH_INFO_ARRAY* = ptr NDIS_NIC_SWITCH_INFO_ARRAY
   NDIS_NIC_SWITCH_VPORT_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2788,12 +3125,15 @@ type
     VPortState*: NDIS_NIC_SWITCH_VPORT_STATE
     ProcessorAffinity*: GROUP_AFFINITY
     LookaheadSize*: ULONG
+
   PNDIS_NIC_SWITCH_VPORT_PARAMETERS* = ptr NDIS_NIC_SWITCH_VPORT_PARAMETERS
   NDIS_NIC_SWITCH_DELETE_VPORT_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     VPortId*: NDIS_NIC_SWITCH_VPORT_ID
-  PNDIS_NIC_SWITCH_DELETE_VPORT_PARAMETERS* = ptr NDIS_NIC_SWITCH_DELETE_VPORT_PARAMETERS
+
+  PNDIS_NIC_SWITCH_DELETE_VPORT_PARAMETERS* =
+    ptr NDIS_NIC_SWITCH_DELETE_VPORT_PARAMETERS
   NDIS_NIC_SWITCH_VPORT_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VPortId*: NDIS_NIC_SWITCH_VPORT_ID
@@ -2807,6 +3147,7 @@ type
     ProcessorAffinity*: GROUP_AFFINITY
     LookaheadSize*: ULONG
     NumFilters*: ULONG
+
   PNDIS_NIC_SWITCH_VPORT_INFO* = ptr NDIS_NIC_SWITCH_VPORT_INFO
   NDIS_NIC_SWITCH_VPORT_INFO_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2816,9 +3157,10 @@ type
     FirstElementOffset*: ULONG
     NumElements*: ULONG
     ElementSize*: ULONG
+
   PNDIS_NIC_SWITCH_VPORT_INFO_ARRAY* = ptr NDIS_NIC_SWITCH_VPORT_INFO_ARRAY
-const
-  NDIS_MAX_PHYS_ADDRESS_LENGTH* = IF_MAX_PHYS_ADDRESS_LENGTH
+
+const NDIS_MAX_PHYS_ADDRESS_LENGTH* = IF_MAX_PHYS_ADDRESS_LENGTH
 type
   NDIS_NIC_SWITCH_VF_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2832,11 +3174,13 @@ type
     CurrentMacAddress*: array[NDIS_MAX_PHYS_ADDRESS_LENGTH, UCHAR]
     VFId*: NDIS_SRIOV_FUNCTION_ID
     RequestorId*: NDIS_VF_RID
+
   PNDIS_NIC_SWITCH_VF_PARAMETERS* = ptr NDIS_NIC_SWITCH_VF_PARAMETERS
   NDIS_NIC_SWITCH_FREE_VF_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     VFId*: NDIS_SRIOV_FUNCTION_ID
+
   PNDIS_NIC_SWITCH_FREE_VF_PARAMETERS* = ptr NDIS_NIC_SWITCH_FREE_VF_PARAMETERS
   NDIS_NIC_SWITCH_VF_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2850,6 +3194,7 @@ type
     CurrentMacAddress*: array[NDIS_MAX_PHYS_ADDRESS_LENGTH, UCHAR]
     VFId*: NDIS_SRIOV_FUNCTION_ID
     RequestorId*: NDIS_VF_RID
+
   PNDIS_NIC_SWITCH_VF_INFO* = ptr NDIS_NIC_SWITCH_VF_INFO
   NDIS_NIC_SWITCH_VF_INFO_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2858,11 +3203,13 @@ type
     FirstElementOffset*: ULONG
     NumElements*: ULONG
     ElementSize*: ULONG
+
   PNDIS_NIC_SWITCH_VF_INFO_ARRAY* = ptr NDIS_NIC_SWITCH_VF_INFO_ARRAY
   NDIS_SRIOV_CAPABILITIES* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     SriovCapabilities*: ULONG
+
   PNDIS_SRIOV_CAPABILITIES* = ptr NDIS_SRIOV_CAPABILITIES
   NDIS_SRIOV_READ_VF_CONFIG_SPACE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2870,52 +3217,66 @@ type
     Offset*: ULONG
     Length*: ULONG
     BufferOffset*: ULONG
-  PNDIS_SRIOV_READ_VF_CONFIG_SPACE_PARAMETERS* = ptr NDIS_SRIOV_READ_VF_CONFIG_SPACE_PARAMETERS
+
+  PNDIS_SRIOV_READ_VF_CONFIG_SPACE_PARAMETERS* =
+    ptr NDIS_SRIOV_READ_VF_CONFIG_SPACE_PARAMETERS
   NDIS_SRIOV_WRITE_VF_CONFIG_SPACE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VFId*: NDIS_SRIOV_FUNCTION_ID
     Offset*: ULONG
     Length*: ULONG
     BufferOffset*: ULONG
-  PNDIS_SRIOV_WRITE_VF_CONFIG_SPACE_PARAMETERS* = ptr NDIS_SRIOV_WRITE_VF_CONFIG_SPACE_PARAMETERS
+
+  PNDIS_SRIOV_WRITE_VF_CONFIG_SPACE_PARAMETERS* =
+    ptr NDIS_SRIOV_WRITE_VF_CONFIG_SPACE_PARAMETERS
   NDIS_SRIOV_READ_VF_CONFIG_BLOCK_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VFId*: NDIS_SRIOV_FUNCTION_ID
     BlockId*: ULONG
     Length*: ULONG
     BufferOffset*: ULONG
-  PNDIS_SRIOV_READ_VF_CONFIG_BLOCK_PARAMETERS* = ptr NDIS_SRIOV_READ_VF_CONFIG_BLOCK_PARAMETERS
+
+  PNDIS_SRIOV_READ_VF_CONFIG_BLOCK_PARAMETERS* =
+    ptr NDIS_SRIOV_READ_VF_CONFIG_BLOCK_PARAMETERS
   NDIS_SRIOV_WRITE_VF_CONFIG_BLOCK_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VFId*: NDIS_SRIOV_FUNCTION_ID
     BlockId*: ULONG
     Length*: ULONG
     BufferOffset*: ULONG
-  PNDIS_SRIOV_WRITE_VF_CONFIG_BLOCK_PARAMETERS* = ptr NDIS_SRIOV_WRITE_VF_CONFIG_BLOCK_PARAMETERS
+
+  PNDIS_SRIOV_WRITE_VF_CONFIG_BLOCK_PARAMETERS* =
+    ptr NDIS_SRIOV_WRITE_VF_CONFIG_BLOCK_PARAMETERS
   NDIS_SRIOV_RESET_VF_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VFId*: NDIS_SRIOV_FUNCTION_ID
+
   PNDIS_SRIOV_RESET_VF_PARAMETERS* = ptr NDIS_SRIOV_RESET_VF_PARAMETERS
   NDIS_SRIOV_SET_VF_POWER_STATE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VFId*: NDIS_SRIOV_FUNCTION_ID
     PowerState*: NDIS_DEVICE_POWER_STATE
     WakeEnable*: BOOLEAN
-  PNDIS_SRIOV_SET_VF_POWER_STATE_PARAMETERS* = ptr NDIS_SRIOV_SET_VF_POWER_STATE_PARAMETERS
+
+  PNDIS_SRIOV_SET_VF_POWER_STATE_PARAMETERS* =
+    ptr NDIS_SRIOV_SET_VF_POWER_STATE_PARAMETERS
   NDIS_SRIOV_CONFIG_STATE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     BlockId*: ULONG
     Length*: ULONG
+
   PNDIS_SRIOV_CONFIG_STATE_PARAMETERS* = ptr NDIS_SRIOV_CONFIG_STATE_PARAMETERS
   NDIS_SRIOV_VF_VENDOR_DEVICE_ID_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VFId*: NDIS_SRIOV_FUNCTION_ID
     VendorId*: USHORT
     DeviceId*: USHORT
+
   PNDIS_SRIOV_VF_VENDOR_DEVICE_ID_INFO* = ptr NDIS_SRIOV_VF_VENDOR_DEVICE_ID_INFO
   NDIS_SRIOV_PROBED_BARS_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     BaseRegisterValuesOffset*: ULONG
+
   PNDIS_SRIOV_PROBED_BARS_INFO* = ptr NDIS_SRIOV_PROBED_BARS_INFO
   NDIS_RECEIVE_FILTER_MOVE_FILTER_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -2924,25 +3285,32 @@ type
     SourceVPortId*: NDIS_NIC_SWITCH_VPORT_ID
     DestQueueId*: NDIS_RECEIVE_QUEUE_ID
     DestVPortId*: NDIS_NIC_SWITCH_VPORT_ID
-  PNDIS_RECEIVE_FILTER_MOVE_FILTER_PARAMETERS* = ptr NDIS_RECEIVE_FILTER_MOVE_FILTER_PARAMETERS
+
+  PNDIS_RECEIVE_FILTER_MOVE_FILTER_PARAMETERS* =
+    ptr NDIS_RECEIVE_FILTER_MOVE_FILTER_PARAMETERS
   NDIS_SRIOV_BAR_RESOURCES_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     VFId*: NDIS_SRIOV_FUNCTION_ID
     BarIndex*: USHORT
     BarResourcesOffset*: ULONG
+
   PNDIS_SRIOV_BAR_RESOURCES_INFO* = ptr NDIS_SRIOV_BAR_RESOURCES_INFO
   NDIS_SRIOV_PF_LUID_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Luid*: LUID
+
   PNDIS_SRIOV_PF_LUID_INFO* = ptr NDIS_SRIOV_PF_LUID_INFO
   NDIS_SRIOV_VF_SERIAL_NUMBER_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     SerialNumber*: ULONG
+
   PNDIS_SRIOV_VF_SERIAL_NUMBER_INFO* = ptr NDIS_SRIOV_VF_SERIAL_NUMBER_INFO
   NDIS_SRIOV_VF_INVALIDATE_CONFIG_BLOCK_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     BlockMask*: ULONG64
-  PNDIS_SRIOV_VF_INVALIDATE_CONFIG_BLOCK_INFO* = ptr NDIS_SRIOV_VF_INVALIDATE_CONFIG_BLOCK_INFO
+
+  PNDIS_SRIOV_VF_INVALIDATE_CONFIG_BLOCK_INFO* =
+    ptr NDIS_SRIOV_VF_INVALIDATE_CONFIG_BLOCK_INFO
   NDIS_SWITCH_OBJECT_INSTANCE_ID* = GUID
   PNDIS_SWITCH_OBJECT_INSTANCE_ID* = ptr GUID
   NDIS_SWITCH_OBJECT_ID* = GUID
@@ -2956,33 +3324,40 @@ type
     AllowIeeePriorityTag*: BOOLEAN
     VirtualSubnetId*: UINT32
     AllowTeaming*: BOOLEAN
+
   PNDIS_SWITCH_PORT_PROPERTY_SECURITY* = ptr NDIS_SWITCH_PORT_PROPERTY_SECURITY
   NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties* {.pure.} = object
     AccessVlanId*: UINT16
     NativeVlanId*: UINT16
     PruneVlanIdArray*: array[64, UINT64]
     TrunkVlanIdArray*: array[64, UINT64]
+
   NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties_UNION1* {.pure, union.} = object
     SecondaryVlanId*: UINT16
     SecondaryVlanIdArray*: array[64, UINT64]
+
   NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties* {.pure.} = object
     PvlanMode*: NDIS_SWITCH_PORT_PVLAN_MODE
     PrimaryVlanId*: UINT16
     union1*: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties_UNION1
+
   NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1* {.pure, union.} = object
     VlanProperties*: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties
     PvlanProperties*: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties
+
   NDIS_SWITCH_PORT_PROPERTY_VLAN* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     OperationMode*: NDIS_SWITCH_PORT_VLAN_MODE
     union1*: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1
+
   PNDIS_SWITCH_PORT_PROPERTY_VLAN* = ptr NDIS_SWITCH_PORT_PROPERTY_VLAN
   NDIS_SWITCH_PORT_PROPERTY_PROFILE_PciLocation* {.pure.} = object
-    PciSegmentNumber* {.bitsize:16.}: UINT32
-    PciBusNumber* {.bitsize:8.}: UINT32
-    PciDeviceNumber* {.bitsize:5.}: UINT32
-    PciFunctionNumber* {.bitsize:3.}: UINT32
+    PciSegmentNumber* {.bitsize: 16.}: UINT32
+    PciBusNumber* {.bitsize: 8.}: UINT32
+    PciDeviceNumber* {.bitsize: 5.}: UINT32
+    PciFunctionNumber* {.bitsize: 3.}: UINT32
+
   NDIS_SWITCH_PORT_PROPERTY_PROFILE* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -2995,12 +3370,14 @@ type
     PciLocation*: NDIS_SWITCH_PORT_PROPERTY_PROFILE_PciLocation
     CdnLabelId*: UINT32
     CdnLabel*: NDIS_SWITCH_PORT_PROPERTY_PROFILE_CDN_LABEL
+
   PNDIS_SWITCH_PORT_PROPERTY_PROFILE* = ptr NDIS_SWITCH_PORT_PROPERTY_PROFILE
   NDIS_SWITCH_PORT_PROPERTY_CUSTOM* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     PropertyBufferLength*: ULONG
     PropertyBufferOffset*: ULONG
+
   PNDIS_SWITCH_PORT_PROPERTY_CUSTOM* = ptr NDIS_SWITCH_PORT_PROPERTY_CUSTOM
   NDIS_SWITCH_PORT_PROPERTY_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3014,6 +3391,7 @@ type
     PropertyBufferLength*: ULONG
     PropertyBufferOffset*: ULONG
     Reserved*: ULONG
+
   PNDIS_SWITCH_PORT_PROPERTY_PARAMETERS* = ptr NDIS_SWITCH_PORT_PROPERTY_PARAMETERS
   NDIS_SWITCH_PORT_PROPERTY_DELETE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3022,7 +3400,9 @@ type
     PropertyType*: NDIS_SWITCH_PORT_PROPERTY_TYPE
     PropertyId*: NDIS_SWITCH_OBJECT_ID
     PropertyInstanceId*: NDIS_SWITCH_OBJECT_INSTANCE_ID
-  PNDIS_SWITCH_PORT_PROPERTY_DELETE_PARAMETERS* = ptr NDIS_SWITCH_PORT_PROPERTY_DELETE_PARAMETERS
+
+  PNDIS_SWITCH_PORT_PROPERTY_DELETE_PARAMETERS* =
+    ptr NDIS_SWITCH_PORT_PROPERTY_DELETE_PARAMETERS
   NDIS_SWITCH_PORT_PROPERTY_ENUM_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -3033,7 +3413,9 @@ type
     FirstPropertyOffset*: ULONG
     NumProperties*: ULONG
     Reserved*: USHORT
-  PNDIS_SWITCH_PORT_PROPERTY_ENUM_PARAMETERS* = ptr NDIS_SWITCH_PORT_PROPERTY_ENUM_PARAMETERS
+
+  PNDIS_SWITCH_PORT_PROPERTY_ENUM_PARAMETERS* =
+    ptr NDIS_SWITCH_PORT_PROPERTY_ENUM_PARAMETERS
   NDIS_SWITCH_PORT_PROPERTY_ENUM_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
@@ -3042,6 +3424,7 @@ type
     QwordAlignedPropertyBufferLength*: ULONG
     PropertyBufferLength*: ULONG
     PropertyBufferOffset*: ULONG
+
   PNDIS_SWITCH_PORT_PROPERTY_ENUM_INFO* = ptr NDIS_SWITCH_PORT_PROPERTY_ENUM_INFO
   NDIS_SWITCH_PORT_FEATURE_STATUS_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3055,18 +3438,22 @@ type
     FeatureStatusBufferLength*: ULONG
     FeatureStatusBufferOffset*: ULONG
     Reserved*: ULONG
-  PNDIS_SWITCH_PORT_FEATURE_STATUS_PARAMETERS* = ptr NDIS_SWITCH_PORT_FEATURE_STATUS_PARAMETERS
+
+  PNDIS_SWITCH_PORT_FEATURE_STATUS_PARAMETERS* =
+    ptr NDIS_SWITCH_PORT_FEATURE_STATUS_PARAMETERS
   NDIS_SWITCH_PORT_FEATURE_STATUS_CUSTOM* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     FeatureStatusBufferLength*: ULONG
     FeatureStatusBufferOffset*: ULONG
+
   PNDIS_SWITCH_PORT_FEATURE_STATUS_CUSTOM* = ptr NDIS_SWITCH_PORT_FEATURE_STATUS_CUSTOM
   NDIS_SWITCH_PROPERTY_CUSTOM* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     PropertyBufferLength*: ULONG
     PropertyBufferOffset*: ULONG
+
   PNDIS_SWITCH_PROPERTY_CUSTOM* = ptr NDIS_SWITCH_PROPERTY_CUSTOM
   NDIS_SWITCH_PROPERTY_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3078,6 +3465,7 @@ type
     PropertyInstanceId*: NDIS_SWITCH_OBJECT_INSTANCE_ID
     PropertyBufferLength*: ULONG
     PropertyBufferOffset*: ULONG
+
   PNDIS_SWITCH_PROPERTY_PARAMETERS* = ptr NDIS_SWITCH_PROPERTY_PARAMETERS
   NDIS_SWITCH_PROPERTY_DELETE_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3085,6 +3473,7 @@ type
     PropertyType*: NDIS_SWITCH_PROPERTY_TYPE
     PropertyId*: NDIS_SWITCH_OBJECT_ID
     PropertyInstanceId*: NDIS_SWITCH_OBJECT_INSTANCE_ID
+
   PNDIS_SWITCH_PROPERTY_DELETE_PARAMETERS* = ptr NDIS_SWITCH_PROPERTY_DELETE_PARAMETERS
   NDIS_SWITCH_PROPERTY_ENUM_INFO* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3094,6 +3483,7 @@ type
     QwordAlignedPropertyBufferLength*: ULONG
     PropertyBufferLength*: ULONG
     PropertyBufferOffset*: ULONG
+
   PNDIS_SWITCH_PROPERTY_ENUM_INFO* = ptr NDIS_SWITCH_PROPERTY_ENUM_INFO
   NDIS_SWITCH_PROPERTY_ENUM_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3103,6 +3493,7 @@ type
     SerializationVersion*: NDIS_SWITCH_OBJECT_SERIALIZATION_VERSION
     FirstPropertyOffset*: ULONG
     NumProperties*: ULONG
+
   PNDIS_SWITCH_PROPERTY_ENUM_PARAMETERS* = ptr NDIS_SWITCH_PROPERTY_ENUM_PARAMETERS
   NDIS_SWITCH_FEATURE_STATUS_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3114,12 +3505,14 @@ type
     SerializationVersion*: NDIS_SWITCH_OBJECT_SERIALIZATION_VERSION
     FeatureStatusBufferOffset*: ULONG
     FeatureStatusBufferLength*: ULONG
+
   PNDIS_SWITCH_FEATURE_STATUS_PARAMETERS* = ptr NDIS_SWITCH_FEATURE_STATUS_PARAMETERS
   NDIS_SWITCH_FEATURE_STATUS_CUSTOM* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     FeatureStatusCustomBufferLength*: ULONG
     FeatureStatusCustomBufferOffset*: ULONG
+
   PNDIS_SWITCH_FEATURE_STATUS_CUSTOM* = ptr NDIS_SWITCH_FEATURE_STATUS_CUSTOM
   NDIS_SWITCH_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3128,6 +3521,7 @@ type
     SwitchFriendlyName*: NDIS_SWITCH_FRIENDLYNAME
     NumSwitchPorts*: UINT32
     IsActive*: BOOLEAN
+
   PNDIS_SWITCH_PARAMETERS* = ptr NDIS_SWITCH_PARAMETERS
   NDIS_SWITCH_PORT_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3138,6 +3532,7 @@ type
     PortType*: NDIS_SWITCH_PORT_TYPE
     IsValidationPort*: BOOLEAN
     PortState*: NDIS_SWITCH_PORT_STATE
+
   PNDIS_SWITCH_PORT_PARAMETERS* = ptr NDIS_SWITCH_PORT_PARAMETERS
   NDIS_SWITCH_PORT_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3145,6 +3540,7 @@ type
     FirstElementOffset*: USHORT
     NumElements*: ULONG
     ElementSize*: ULONG
+
   PNDIS_SWITCH_PORT_ARRAY* = ptr NDIS_SWITCH_PORT_ARRAY
   NDIS_SWITCH_NIC_PARAMETERS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3164,6 +3560,7 @@ type
     VMMacAddress*: array[NDIS_MAX_PHYS_ADDRESS_LENGTH, UCHAR]
     CurrentMacAddress*: array[NDIS_MAX_PHYS_ADDRESS_LENGTH, UCHAR]
     VFAssigned*: BOOLEAN
+
   PNDIS_SWITCH_NIC_PARAMETERS* = ptr NDIS_SWITCH_NIC_PARAMETERS
   NDIS_SWITCH_NIC_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3171,6 +3568,7 @@ type
     FirstElementOffset*: USHORT
     NumElements*: ULONG
     ElementSize*: ULONG
+
   PNDIS_SWITCH_NIC_ARRAY* = ptr NDIS_SWITCH_NIC_ARRAY
   NDIS_OID_REQUEST* {.pure.} = object
   PNDIS_OID_REQUEST* = ptr NDIS_OID_REQUEST
@@ -3182,6 +3580,7 @@ type
     DestinationPortId*: NDIS_SWITCH_PORT_ID
     DestinationNicIndex*: NDIS_SWITCH_NIC_INDEX
     OidRequest*: PNDIS_OID_REQUEST
+
   PNDIS_SWITCH_NIC_OID_REQUEST* = ptr NDIS_SWITCH_NIC_OID_REQUEST
   NDIS_SWITCH_NIC_SAVE_STATE* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3193,6 +3592,7 @@ type
     FeatureClassId*: GUID
     SaveDataSize*: USHORT
     SaveDataOffset*: USHORT
+
   PNDIS_SWITCH_NIC_SAVE_STATE* = ptr NDIS_SWITCH_NIC_SAVE_STATE
   NDIS_PORT_STATE* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3205,6 +3605,7 @@ type
     SendAuthorizationState*: NDIS_PORT_AUTHORIZATION_STATE
     RcvAuthorizationState*: NDIS_PORT_AUTHORIZATION_STATE
     Flags*: ULONG
+
   PNDIS_PORT_STATE* = ptr NDIS_PORT_STATE
   NDIS_PORT_CHARACTERISTICS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3219,6 +3620,7 @@ type
     RcvControlState*: NDIS_PORT_CONTROL_STATE
     SendAuthorizationState*: NDIS_PORT_AUTHORIZATION_STATE
     RcvAuthorizationState*: NDIS_PORT_AUTHORIZATION_STATE
+
   PNDIS_PORT_CHARACTERISTICS* = ptr NDIS_PORT_CHARACTERISTICS
   NDIS_PORT* {.pure.} = object
     Next*: PNDIS_PORT
@@ -3226,6 +3628,7 @@ type
     MiniportReserved*: PVOID
     ProtocolReserved*: PVOID
     PortCharacteristics*: NDIS_PORT_CHARACTERISTICS
+
   PNDIS_PORT* = ptr NDIS_PORT
   NDIS_PORT_ARRAY* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
@@ -3233,16 +3636,18 @@ type
     OffsetFirstPort*: ULONG
     ElementSize*: ULONG
     Ports*: array[1, NDIS_PORT_CHARACTERISTICS]
+
   PNDIS_PORT_ARRAY* = ptr NDIS_PORT_ARRAY
   MIB_IF_ROW2_InterfaceAndOperStatusFlags* {.pure.} = object
-    HardwareInterface* {.bitsize:1.}: BOOLEAN
-    FilterInterface* {.bitsize:1.}: BOOLEAN
-    ConnectorPresent* {.bitsize:1.}: BOOLEAN
-    NotAuthenticated* {.bitsize:1.}: BOOLEAN
-    NotMediaConnected* {.bitsize:1.}: BOOLEAN
-    Paused* {.bitsize:1.}: BOOLEAN
-    LowPower* {.bitsize:1.}: BOOLEAN
-    EndPointInterface* {.bitsize:1.}: BOOLEAN
+    HardwareInterface* {.bitsize: 1.}: BOOLEAN
+    FilterInterface* {.bitsize: 1.}: BOOLEAN
+    ConnectorPresent* {.bitsize: 1.}: BOOLEAN
+    NotAuthenticated* {.bitsize: 1.}: BOOLEAN
+    NotMediaConnected* {.bitsize: 1.}: BOOLEAN
+    Paused* {.bitsize: 1.}: BOOLEAN
+    LowPower* {.bitsize: 1.}: BOOLEAN
+    EndPointInterface* {.bitsize: 1.}: BOOLEAN
+
   MIB_IF_ROW2* {.pure.} = object
     InterfaceLuid*: NET_LUID
     InterfaceIndex*: NET_IFINDEX
@@ -3285,10 +3690,12 @@ type
     OutMulticastOctets*: ULONG64
     OutBroadcastOctets*: ULONG64
     OutQLen*: ULONG64
+
   PMIB_IF_ROW2* = ptr MIB_IF_ROW2
   MIB_IF_TABLE2* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_IF_ROW2]
+
   PMIB_IF_TABLE2* = ptr MIB_IF_TABLE2
   MIB_IPINTERFACE_ROW* {.pure.} = object
     Family*: ADDRESS_FAMILY
@@ -3326,31 +3733,39 @@ type
     TransmitOffload*: NL_INTERFACE_OFFLOAD_ROD
     ReceiveOffload*: NL_INTERFACE_OFFLOAD_ROD
     DisableDefaultRoutes*: BOOLEAN
+
   PMIB_IPINTERFACE_ROW* = ptr MIB_IPINTERFACE_ROW
   MIB_IPINTERFACE_TABLE* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_IPINTERFACE_ROW]
+
   PMIB_IPINTERFACE_TABLE* = ptr MIB_IPINTERFACE_TABLE
   MIB_IFSTACK_ROW* {.pure.} = object
     HigherLayerInterfaceIndex*: NET_IFINDEX
     LowerLayerInterfaceIndex*: NET_IFINDEX
+
   PMIB_IFSTACK_ROW* = ptr MIB_IFSTACK_ROW
   MIB_INVERTEDIFSTACK_ROW* {.pure.} = object
     LowerLayerInterfaceIndex*: NET_IFINDEX
     HigherLayerInterfaceIndex*: NET_IFINDEX
+
   PMIB_INVERTEDIFSTACK_ROW* = ptr MIB_INVERTEDIFSTACK_ROW
   MIB_IFSTACK_TABLE* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_IFSTACK_ROW]
+
   PMIB_IFSTACK_TABLE* = ptr MIB_IFSTACK_TABLE
   MIB_INVERTEDIFSTACK_TABLE* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_INVERTEDIFSTACK_ROW]
+
   PMIB_INVERTEDIFSTACK_TABLE* = ptr MIB_INVERTEDIFSTACK_TABLE
   MIB_IP_NETWORK_CONNECTION_BANDWIDTH_ESTIMATES* {.pure.} = object
     InboundBandwidthInformation*: NL_BANDWIDTH_INFORMATION
     OutboundBandwidthInformation*: NL_BANDWIDTH_INFORMATION
-  PMIB_IP_NETWORK_CONNECTION_BANDWIDTH_ESTIMATES* = ptr MIB_IP_NETWORK_CONNECTION_BANDWIDTH_ESTIMATES
+
+  PMIB_IP_NETWORK_CONNECTION_BANDWIDTH_ESTIMATES* =
+    ptr MIB_IP_NETWORK_CONNECTION_BANDWIDTH_ESTIMATES
   MIB_UNICASTIPADDRESS_ROW* {.pure.} = object
     Address*: SOCKADDR_INET
     InterfaceLuid*: NET_LUID
@@ -3364,34 +3779,41 @@ type
     DadState*: NL_DAD_STATE
     ScopeId*: SCOPE_ID
     CreationTimeStamp*: LARGE_INTEGER
+
   PMIB_UNICASTIPADDRESS_ROW* = ptr MIB_UNICASTIPADDRESS_ROW
   MIB_UNICASTIPADDRESS_TABLE* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_UNICASTIPADDRESS_ROW]
+
   PMIB_UNICASTIPADDRESS_TABLE* = ptr MIB_UNICASTIPADDRESS_TABLE
   MIB_ANYCASTIPADDRESS_ROW* {.pure.} = object
     Address*: SOCKADDR_INET
     InterfaceLuid*: NET_LUID
     InterfaceIndex*: NET_IFINDEX
     ScopeId*: SCOPE_ID
+
   PMIB_ANYCASTIPADDRESS_ROW* = ptr MIB_ANYCASTIPADDRESS_ROW
   MIB_ANYCASTIPADDRESS_TABLE* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_ANYCASTIPADDRESS_ROW]
+
   PMIB_ANYCASTIPADDRESS_TABLE* = ptr MIB_ANYCASTIPADDRESS_TABLE
   MIB_MULTICASTIPADDRESS_ROW* {.pure.} = object
     Address*: SOCKADDR_INET
     InterfaceIndex*: NET_IFINDEX
     InterfaceLuid*: NET_LUID
     ScopeId*: SCOPE_ID
+
   PMIB_MULTICASTIPADDRESS_ROW* = ptr MIB_MULTICASTIPADDRESS_ROW
   MIB_MULTICASTIPADDRESS_TABLE* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_MULTICASTIPADDRESS_ROW]
+
   PMIB_MULTICASTIPADDRESS_TABLE* = ptr MIB_MULTICASTIPADDRESS_TABLE
   IP_ADDRESS_PREFIX* {.pure.} = object
     Prefix*: SOCKADDR_INET
     PrefixLength*: UINT8
+
   PIP_ADDRESS_PREFIX* = ptr IP_ADDRESS_PREFIX
   MIB_IPFORWARD_ROW2* {.pure.} = object
     InterfaceLuid*: NET_LUID
@@ -3409,14 +3831,17 @@ type
     Immortal*: BOOLEAN
     Age*: ULONG
     Origin*: NL_ROUTE_ORIGIN
+
   PMIB_IPFORWARD_ROW2* = ptr MIB_IPFORWARD_ROW2
   MIB_IPFORWARD_TABLE2* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_IPFORWARD_ROW2]
+
   PMIB_IPFORWARD_TABLE2* = ptr MIB_IPFORWARD_TABLE2
   MIB_IPPATH_ROW_UNION1* {.pure, union.} = object
     LastReachable*: ULONG
     LastUnreachable*: ULONG
+
   MIB_IPPATH_ROW* {.pure.} = object
     Source*: SOCKADDR_INET
     Destination*: SOCKADDR_INET
@@ -3430,20 +3855,25 @@ type
     IsReachable*: BOOLEAN
     LinkTransmitSpeed*: ULONG64
     LinkReceiveSpeed*: ULONG64
+
   PMIB_IPPATH_ROW* = ptr MIB_IPPATH_ROW
   MIB_IPPATH_TABLE* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_IPPATH_ROW]
+
   PMIB_IPPATH_TABLE* = ptr MIB_IPPATH_TABLE
   MIB_IPNET_ROW2_UNION1_STRUCT1* {.pure.} = object
-    IsRouter* {.bitsize:1.}: BOOLEAN
-    IsUnreachable* {.bitsize:1.}: BOOLEAN
+    IsRouter* {.bitsize: 1.}: BOOLEAN
+    IsUnreachable* {.bitsize: 1.}: BOOLEAN
+
   MIB_IPNET_ROW2_UNION1* {.pure, union.} = object
     struct1*: MIB_IPNET_ROW2_UNION1_STRUCT1
     Flags*: UCHAR
+
   MIB_IPNET_ROW2_ReachabilityTime* {.pure, union.} = object
     LastReachable*: ULONG
     LastUnreachable*: ULONG
+
   MIB_IPNET_ROW2* {.pure.} = object
     Address*: SOCKADDR_INET
     InterfaceIndex*: NET_IFINDEX
@@ -3453,13 +3883,16 @@ type
     State*: NL_NEIGHBOR_STATE
     union1*: MIB_IPNET_ROW2_UNION1
     ReachabilityTime*: MIB_IPNET_ROW2_ReachabilityTime
+
   PMIB_IPNET_ROW2* = ptr MIB_IPNET_ROW2
   MIB_IPNET_TABLE2* {.pure.} = object
     NumEntries*: ULONG
     Table*: array[ANY_SIZE, MIB_IPNET_ROW2]
+
   PMIB_IPNET_TABLE2* = ptr MIB_IPNET_TABLE2
   IPv6Addr* = IN6_ADDR
   NETIO_STATUS* = NTSTATUS
+
 const
   nldsInvalid* = 0
   nldsTentative* = 1
@@ -3756,45 +4189,45 @@ const
   tcpConnectionOffloadStateMax* = 4
   IPRTRMGR_PID* = 10000
   IF_NUMBER* = 0
-  IF_TABLE* = IF_NUMBER+1
-  IF_ROW* = IF_TABLE+1
-  IP_STATS* = IF_ROW+1
-  IP_ADDRTABLE* = IP_STATS+1
-  IP_ADDRROW* = IP_ADDRTABLE+1
-  IP_FORWARDNUMBER* = IP_ADDRROW+1
-  IP_FORWARDTABLE* = IP_FORWARDNUMBER+1
-  IP_FORWARDROW* = IP_FORWARDTABLE+1
-  IP_NETTABLE* = IP_FORWARDROW+1
-  IP_NETROW* = IP_NETTABLE+1
-  ICMP_STATS* = IP_NETROW+1
-  TCP_STATS* = ICMP_STATS+1
-  TCP_TABLE* = TCP_STATS+1
-  TCP_ROW* = TCP_TABLE+1
-  UDP_STATS* = TCP_ROW+1
-  UDP_TABLE* = UDP_STATS+1
-  UDP_ROW* = UDP_TABLE+1
-  MCAST_MFE* = UDP_ROW+1
-  MCAST_MFE_STATS* = MCAST_MFE+1
-  BEST_IF* = MCAST_MFE_STATS+1
-  BEST_ROUTE* = BEST_IF+1
-  PROXY_ARP* = BEST_ROUTE+1
-  MCAST_IF_ENTRY* = PROXY_ARP+1
-  MCAST_GLOBAL* = MCAST_IF_ENTRY+1
-  IF_STATUS* = MCAST_GLOBAL+1
-  MCAST_BOUNDARY* = IF_STATUS+1
-  MCAST_SCOPE* = MCAST_BOUNDARY+1
-  DEST_MATCHING* = MCAST_SCOPE+1
-  DEST_LONGER* = DEST_MATCHING+1
-  DEST_SHORTER* = DEST_LONGER+1
-  ROUTE_MATCHING* = DEST_SHORTER+1
-  ROUTE_LONGER* = ROUTE_MATCHING+1
-  ROUTE_SHORTER* = ROUTE_LONGER+1
-  ROUTE_STATE* = ROUTE_SHORTER+1
-  MCAST_MFE_STATS_EX* = ROUTE_STATE+1
-  IP6_STATS* = MCAST_MFE_STATS_EX+1
-  UDP6_STATS* = IP6_STATS+1
-  TCP6_STATS* = UDP6_STATS+1
-  NUMBER_OF_EXPORTED_VARIABLES* = TCP6_STATS+1
+  IF_TABLE* = IF_NUMBER + 1
+  IF_ROW* = IF_TABLE + 1
+  IP_STATS* = IF_ROW + 1
+  IP_ADDRTABLE* = IP_STATS + 1
+  IP_ADDRROW* = IP_ADDRTABLE + 1
+  IP_FORWARDNUMBER* = IP_ADDRROW + 1
+  IP_FORWARDTABLE* = IP_FORWARDNUMBER + 1
+  IP_FORWARDROW* = IP_FORWARDTABLE + 1
+  IP_NETTABLE* = IP_FORWARDROW + 1
+  IP_NETROW* = IP_NETTABLE + 1
+  ICMP_STATS* = IP_NETROW + 1
+  TCP_STATS* = ICMP_STATS + 1
+  TCP_TABLE* = TCP_STATS + 1
+  TCP_ROW* = TCP_TABLE + 1
+  UDP_STATS* = TCP_ROW + 1
+  UDP_TABLE* = UDP_STATS + 1
+  UDP_ROW* = UDP_TABLE + 1
+  MCAST_MFE* = UDP_ROW + 1
+  MCAST_MFE_STATS* = MCAST_MFE + 1
+  BEST_IF* = MCAST_MFE_STATS + 1
+  BEST_ROUTE* = BEST_IF + 1
+  PROXY_ARP* = BEST_ROUTE + 1
+  MCAST_IF_ENTRY* = PROXY_ARP + 1
+  MCAST_GLOBAL* = MCAST_IF_ENTRY + 1
+  IF_STATUS* = MCAST_GLOBAL + 1
+  MCAST_BOUNDARY* = IF_STATUS + 1
+  MCAST_SCOPE* = MCAST_BOUNDARY + 1
+  DEST_MATCHING* = MCAST_SCOPE + 1
+  DEST_LONGER* = DEST_MATCHING + 1
+  DEST_SHORTER* = DEST_LONGER + 1
+  ROUTE_MATCHING* = DEST_SHORTER + 1
+  ROUTE_LONGER* = ROUTE_MATCHING + 1
+  ROUTE_SHORTER* = ROUTE_LONGER + 1
+  ROUTE_STATE* = ROUTE_SHORTER + 1
+  MCAST_MFE_STATS_EX* = ROUTE_STATE + 1
+  IP6_STATS* = MCAST_MFE_STATS_EX + 1
+  UDP6_STATS* = IP6_STATS + 1
+  TCP6_STATS* = UDP6_STATS + 1
+  NUMBER_OF_EXPORTED_VARIABLES* = TCP6_STATS + 1
   ICMP6_DST_UNREACH* = 1
   ICMP6_PACKET_TOO_BIG* = 2
   ICMP6_TIME_EXCEEDED* = 3
@@ -3892,56 +4325,56 @@ const
   IP_EXPORT_INCLUDED* = 1
   IP_STATUS_BASE* = 11000
   IP_SUCCESS* = 0
-  IP_BUF_TOO_SMALL* = IP_STATUS_BASE+1
-  IP_DEST_NET_UNREACHABLE* = IP_STATUS_BASE+2
-  IP_DEST_HOST_UNREACHABLE* = IP_STATUS_BASE+3
-  IP_DEST_PROT_UNREACHABLE* = IP_STATUS_BASE+4
-  IP_DEST_PORT_UNREACHABLE* = IP_STATUS_BASE+5
-  IP_NO_RESOURCES* = IP_STATUS_BASE+6
-  IP_BAD_OPTION* = IP_STATUS_BASE+7
-  IP_HW_ERROR* = IP_STATUS_BASE+8
-  IP_PACKET_TOO_BIG* = IP_STATUS_BASE+9
-  IP_REQ_TIMED_OUT* = IP_STATUS_BASE+10
-  IP_BAD_REQ* = IP_STATUS_BASE+11
-  IP_BAD_ROUTE* = IP_STATUS_BASE+12
-  IP_TTL_EXPIRED_TRANSIT* = IP_STATUS_BASE+13
-  IP_TTL_EXPIRED_REASSEM* = IP_STATUS_BASE+14
-  IP_PARAM_PROBLEM* = IP_STATUS_BASE+15
-  IP_SOURCE_QUENCH* = IP_STATUS_BASE+16
-  IP_OPTION_TOO_BIG* = IP_STATUS_BASE+17
-  IP_BAD_DESTINATION* = IP_STATUS_BASE+18
-  IP_DEST_NO_ROUTE* = IP_STATUS_BASE+2
-  IP_DEST_ADDR_UNREACHABLE* = IP_STATUS_BASE+3
-  IP_DEST_PROHIBITED* = IP_STATUS_BASE+4
-  IP_HOP_LIMIT_EXCEEDED* = IP_STATUS_BASE+13
-  IP_REASSEMBLY_TIME_EXCEEDED* = IP_STATUS_BASE+14
-  IP_PARAMETER_PROBLEM* = IP_STATUS_BASE+15
-  IP_DEST_UNREACHABLE* = IP_STATUS_BASE+40
-  IP_TIME_EXCEEDED* = IP_STATUS_BASE+41
-  IP_BAD_HEADER* = IP_STATUS_BASE+42
-  IP_UNRECOGNIZED_NEXT_HEADER* = IP_STATUS_BASE+43
-  IP_ICMP_ERROR* = IP_STATUS_BASE+44
-  IP_DEST_SCOPE_MISMATCH* = IP_STATUS_BASE+45
-  IP_ADDR_DELETED* = IP_STATUS_BASE+19
-  IP_SPEC_MTU_CHANGE* = IP_STATUS_BASE+20
-  IP_MTU_CHANGE* = IP_STATUS_BASE+21
-  IP_UNLOAD* = IP_STATUS_BASE+22
-  IP_ADDR_ADDED* = IP_STATUS_BASE+23
-  IP_MEDIA_CONNECT* = IP_STATUS_BASE+24
-  IP_MEDIA_DISCONNECT* = IP_STATUS_BASE+25
-  IP_BIND_ADAPTER* = IP_STATUS_BASE+26
-  IP_UNBIND_ADAPTER* = IP_STATUS_BASE+27
-  IP_DEVICE_DOES_NOT_EXIST* = IP_STATUS_BASE+28
-  IP_DUPLICATE_ADDRESS* = IP_STATUS_BASE+29
-  IP_INTERFACE_METRIC_CHANGE* = IP_STATUS_BASE+30
-  IP_RECONFIG_SECFLTR* = IP_STATUS_BASE+31
-  IP_NEGOTIATING_IPSEC* = IP_STATUS_BASE+32
-  IP_INTERFACE_WOL_CAPABILITY_CHANGE* = IP_STATUS_BASE+33
-  IP_DUPLICATE_IPADD* = IP_STATUS_BASE+34
-  IP_NO_FURTHER_SENDS* = IP_STATUS_BASE+35
-  IP_GENERAL_FAILURE* = IP_STATUS_BASE+50
+  IP_BUF_TOO_SMALL* = IP_STATUS_BASE + 1
+  IP_DEST_NET_UNREACHABLE* = IP_STATUS_BASE + 2
+  IP_DEST_HOST_UNREACHABLE* = IP_STATUS_BASE + 3
+  IP_DEST_PROT_UNREACHABLE* = IP_STATUS_BASE + 4
+  IP_DEST_PORT_UNREACHABLE* = IP_STATUS_BASE + 5
+  IP_NO_RESOURCES* = IP_STATUS_BASE + 6
+  IP_BAD_OPTION* = IP_STATUS_BASE + 7
+  IP_HW_ERROR* = IP_STATUS_BASE + 8
+  IP_PACKET_TOO_BIG* = IP_STATUS_BASE + 9
+  IP_REQ_TIMED_OUT* = IP_STATUS_BASE + 10
+  IP_BAD_REQ* = IP_STATUS_BASE + 11
+  IP_BAD_ROUTE* = IP_STATUS_BASE + 12
+  IP_TTL_EXPIRED_TRANSIT* = IP_STATUS_BASE + 13
+  IP_TTL_EXPIRED_REASSEM* = IP_STATUS_BASE + 14
+  IP_PARAM_PROBLEM* = IP_STATUS_BASE + 15
+  IP_SOURCE_QUENCH* = IP_STATUS_BASE + 16
+  IP_OPTION_TOO_BIG* = IP_STATUS_BASE + 17
+  IP_BAD_DESTINATION* = IP_STATUS_BASE + 18
+  IP_DEST_NO_ROUTE* = IP_STATUS_BASE + 2
+  IP_DEST_ADDR_UNREACHABLE* = IP_STATUS_BASE + 3
+  IP_DEST_PROHIBITED* = IP_STATUS_BASE + 4
+  IP_HOP_LIMIT_EXCEEDED* = IP_STATUS_BASE + 13
+  IP_REASSEMBLY_TIME_EXCEEDED* = IP_STATUS_BASE + 14
+  IP_PARAMETER_PROBLEM* = IP_STATUS_BASE + 15
+  IP_DEST_UNREACHABLE* = IP_STATUS_BASE + 40
+  IP_TIME_EXCEEDED* = IP_STATUS_BASE + 41
+  IP_BAD_HEADER* = IP_STATUS_BASE + 42
+  IP_UNRECOGNIZED_NEXT_HEADER* = IP_STATUS_BASE + 43
+  IP_ICMP_ERROR* = IP_STATUS_BASE + 44
+  IP_DEST_SCOPE_MISMATCH* = IP_STATUS_BASE + 45
+  IP_ADDR_DELETED* = IP_STATUS_BASE + 19
+  IP_SPEC_MTU_CHANGE* = IP_STATUS_BASE + 20
+  IP_MTU_CHANGE* = IP_STATUS_BASE + 21
+  IP_UNLOAD* = IP_STATUS_BASE + 22
+  IP_ADDR_ADDED* = IP_STATUS_BASE + 23
+  IP_MEDIA_CONNECT* = IP_STATUS_BASE + 24
+  IP_MEDIA_DISCONNECT* = IP_STATUS_BASE + 25
+  IP_BIND_ADAPTER* = IP_STATUS_BASE + 26
+  IP_UNBIND_ADAPTER* = IP_STATUS_BASE + 27
+  IP_DEVICE_DOES_NOT_EXIST* = IP_STATUS_BASE + 28
+  IP_DUPLICATE_ADDRESS* = IP_STATUS_BASE + 29
+  IP_INTERFACE_METRIC_CHANGE* = IP_STATUS_BASE + 30
+  IP_RECONFIG_SECFLTR* = IP_STATUS_BASE + 31
+  IP_NEGOTIATING_IPSEC* = IP_STATUS_BASE + 32
+  IP_INTERFACE_WOL_CAPABILITY_CHANGE* = IP_STATUS_BASE + 33
+  IP_DUPLICATE_IPADD* = IP_STATUS_BASE + 34
+  IP_NO_FURTHER_SENDS* = IP_STATUS_BASE + 35
+  IP_GENERAL_FAILURE* = IP_STATUS_BASE + 50
   MAX_IP_STATUS* = IP_GENERAL_FAILURE
-  IP_PENDING* = IP_STATUS_BASE+255
+  IP_PENDING* = IP_STATUS_BASE + 255
   IP_FLAG_DF* = 0x2
   IP_OPT_EOL* = 0
   IP_OPT_NOP* = 1
@@ -4055,14 +4488,18 @@ const
   NET_STRING_NAMED_ADDRESS* = 0x00000100
   NET_STRING_NAMED_SERVICE* = 0x00000200
   NET_STRING_IP_ADDRESS* = NET_STRING_IPV4_ADDRESS or NET_STRING_IPV6_ADDRESS
-  NET_STRING_IP_ADDRESS_NO_SCOPE* = NET_STRING_IPV4_ADDRESS or NET_STRING_IPV6_ADDRESS_NO_SCOPE
+  NET_STRING_IP_ADDRESS_NO_SCOPE* =
+    NET_STRING_IPV4_ADDRESS or NET_STRING_IPV6_ADDRESS_NO_SCOPE
   NET_STRING_IP_SERVICE* = NET_STRING_IPV4_SERVICE or NET_STRING_IPV6_SERVICE
-  NET_STRING_IP_SERVICE_NO_SCOPE* = NET_STRING_IPV4_SERVICE or NET_STRING_IPV6_SERVICE_NO_SCOPE
+  NET_STRING_IP_SERVICE_NO_SCOPE* =
+    NET_STRING_IPV4_SERVICE or NET_STRING_IPV6_SERVICE_NO_SCOPE
   NET_STRING_IP_NETWORK* = NET_STRING_IPV4_NETWORK or NET_STRING_IPV6_NETWORK
   NET_STRING_ANY_ADDRESS* = NET_STRING_NAMED_ADDRESS or NET_STRING_IP_ADDRESS
-  NET_STRING_ANY_ADDRESS_NO_SCOPE* = NET_STRING_NAMED_ADDRESS or NET_STRING_IP_ADDRESS_NO_SCOPE
+  NET_STRING_ANY_ADDRESS_NO_SCOPE* =
+    NET_STRING_NAMED_ADDRESS or NET_STRING_IP_ADDRESS_NO_SCOPE
   NET_STRING_ANY_SERVICE* = NET_STRING_NAMED_SERVICE or NET_STRING_IP_SERVICE
-  NET_STRING_ANY_SERVICE_NO_SCOPE* = NET_STRING_NAMED_SERVICE or NET_STRING_IP_SERVICE_NO_SCOPE
+  NET_STRING_ANY_SERVICE_NO_SCOPE* =
+    NET_STRING_NAMED_SERVICE or NET_STRING_IP_SERVICE_NO_SCOPE
   NET_ADDRESS_FORMAT_UNSPECIFIED* = 0
   NET_ADDRESS_DNS_NAME* = 1
   NET_ADDRESS_IPV4* = 2
@@ -4717,16 +5154,16 @@ const
   Ndis802_11PrivFilter8021xWEP* = 1
   Ndis802_11WEPEnabled* = 0
   Ndis802_11Encryption1Enabled* = Ndis802_11WEPEnabled
-  Ndis802_11WEPDisabled* = Ndis802_11WEPEnabled+1
+  Ndis802_11WEPDisabled* = Ndis802_11WEPEnabled + 1
   Ndis802_11EncryptionDisabled* = Ndis802_11WEPDisabled
-  Ndis802_11WEPKeyAbsent* = Ndis802_11WEPDisabled+1
+  Ndis802_11WEPKeyAbsent* = Ndis802_11WEPDisabled + 1
   Ndis802_11Encryption1KeyAbsent* = Ndis802_11WEPKeyAbsent
-  Ndis802_11WEPNotSupported* = Ndis802_11WEPKeyAbsent+1
+  Ndis802_11WEPNotSupported* = Ndis802_11WEPKeyAbsent + 1
   Ndis802_11EncryptionNotSupported* = Ndis802_11WEPNotSupported
-  Ndis802_11Encryption2Enabled* = Ndis802_11WEPNotSupported+1
-  Ndis802_11Encryption2KeyAbsent* = Ndis802_11WEPNotSupported+2
-  Ndis802_11Encryption3Enabled* = Ndis802_11WEPNotSupported+3
-  Ndis802_11Encryption3KeyAbsent* = Ndis802_11WEPNotSupported+4
+  Ndis802_11Encryption2Enabled* = Ndis802_11WEPNotSupported + 1
+  Ndis802_11Encryption2KeyAbsent* = Ndis802_11WEPNotSupported + 2
+  Ndis802_11Encryption3Enabled* = Ndis802_11WEPNotSupported + 3
+  Ndis802_11Encryption3KeyAbsent* = Ndis802_11WEPNotSupported + 4
   Ndis802_11ReloadWEPKeys* = 0
   Ndis802_11MediaStreamOff* = 0
   Ndis802_11MediaStreamOn* = 1
@@ -5150,22 +5587,54 @@ const
   NDIS_OFFLOAD_PARAMETERS_REVISION_2* = 2
   NDIS_OFFLOAD_PARAMETERS_REVISION_3* = 3
   NDIS_OFFLOAD_PARAMETERS_SKIP_REGISTRY_UPDATE* = 0x00000001
-proc Flags*(self: IP_ADAPTER_UNICAST_ADDRESS_XP): DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP): var DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: IP_ADAPTER_UNICAST_ADDRESS_LH): DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH): var DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: IP_ADAPTER_ANYCAST_ADDRESS_XP): DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP): var DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: IP_ADAPTER_MULTICAST_ADDRESS_XP): DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP): var DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: IP_ADAPTER_PREFIX_XP): DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: var IP_ADAPTER_PREFIX_XP): var DWORD {.inline.} = self.union1.struct1.Flags
-proc Flags*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.Flags
-proc Flags*(self: var IP_ADAPTER_ADDRESSES_LH): var ULONG {.inline.} = self.union2.Flags
-proc Flags*(self: MIB_IPNET_ROW2): UCHAR {.inline.} = self.union1.Flags
-proc Flags*(self: var MIB_IPNET_ROW2): var UCHAR {.inline.} = self.union1.Flags
-proc EncapsulationTypes*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} = self.struct2.EncapsulationTypes
-proc EncapsulationTypes*(self: var NDIS_OFFLOAD_PARAMETERS): var UCHAR {.inline.} = self.struct2.EncapsulationTypes
+proc Flags*(self: IP_ADAPTER_UNICAST_ADDRESS_XP): DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP): var DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: IP_ADAPTER_UNICAST_ADDRESS_LH): DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH): var DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: IP_ADAPTER_ANYCAST_ADDRESS_XP): DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP): var DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: IP_ADAPTER_MULTICAST_ADDRESS_XP): DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP): var DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: IP_ADAPTER_PREFIX_XP): DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: var IP_ADAPTER_PREFIX_XP): var DWORD {.inline.} =
+  self.union1.struct1.Flags
+
+proc Flags*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.Flags
+
+proc Flags*(self: var IP_ADAPTER_ADDRESSES_LH): var ULONG {.inline.} =
+  self.union2.Flags
+
+proc Flags*(self: MIB_IPNET_ROW2): UCHAR {.inline.} =
+  self.union1.Flags
+
+proc Flags*(self: var MIB_IPNET_ROW2): var UCHAR {.inline.} =
+  self.union1.Flags
+
+proc EncapsulationTypes*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} =
+  self.struct2.EncapsulationTypes
+
+proc EncapsulationTypes*(self: var NDIS_OFFLOAD_PARAMETERS): var UCHAR {.inline.} =
+  self.struct2.EncapsulationTypes
+
 const
   NDIS_OFFLOAD_NOT_SUPPORTED* = 0
   NDIS_OFFLOAD_SUPPORTED* = 1
@@ -5331,7 +5800,8 @@ const
   NDIS_RECEIVE_FILTER_VM_QUEUES_ENABLED* = 0x00000001
   NDIS_NIC_SWITCH_CAPS_VLAN_SUPPORTED* = 0x00000001
   NDIS_NIC_SWITCH_CAPS_PER_VPORT_INTERRUPT_MODERATION_SUPPORTED* = 0x00000002
-  NDIS_NIC_SWITCH_CAPS_ASYMMETRIC_QUEUE_PAIRS_FOR_NONDEFAULT_VPORT_SUPPORTED* = 0x00000004
+  NDIS_NIC_SWITCH_CAPS_ASYMMETRIC_QUEUE_PAIRS_FOR_NONDEFAULT_VPORT_SUPPORTED* =
+    0x00000004
   NDIS_NIC_SWITCH_CAPS_VF_RSS_SUPPORTED* = 0x00000008
   NDIS_NIC_SWITCH_CAPS_SINGLE_VPORT_POOL* = 0x00000010
   NDIS_DEFAULT_RECEIVE_QUEUE_ID* = 0
@@ -5506,7 +5976,7 @@ const
   ndisProcessorVendorUnknown* = 0
   ndisProcessorVendorGenuinIntel* = 1
   ndisProcessorVendorGenuineIntel* = ndisProcessorVendorGenuinIntel
-  ndisProcessorVendorAuthenticAMD* = ndisProcessorVendorGenuinIntel+1
+  ndisProcessorVendorAuthenticAMD* = ndisProcessorVendorGenuinIntel + 1
   NDIS_HYPERVISOR_INFO_FLAG_HYPERVISOR_PRESENT* = 0x00000001
   NDIS_RSS_PROCESSOR_INFO_REVISION_1* = 1
   NDIS_SYSTEM_PROCESSOR_INFO_EX_REVISION_1* = 1
@@ -5641,39 +6111,99 @@ const
   NDIS_SWITCH_NIC_OID_REQUEST_REVISION_1* = 1
   NDIS_SWITCH_FEATURE_STATUS_PARAMETERS_REVISION_1* = 1
   NDIS_SWITCH_NIC_SAVE_STATE_REVISION_1* = 1
-type
-  NDIS_NDK_STATISTICS_INFO* {.pure.} = object
-    Header*: NDIS_OBJECT_HEADER
-    Flags*: ULONG
-    CounterSet*: NDIS_NDK_PERFORMANCE_COUNTERS
-proc Length*(self: IP_ADAPTER_UNICAST_ADDRESS_XP): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_UNICAST_ADDRESS_LH): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_ANYCAST_ADDRESS_XP): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_MULTICAST_ADDRESS_XP): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_DNS_SERVER_ADDRESS_XP): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_PREFIX_XP): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_PREFIX_XP): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_WINS_SERVER_ADDRESS_LH): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_GATEWAY_ADDRESS_LH): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_ADDRESSES_LH): var ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: IP_ADAPTER_ADDRESSES_XP): ULONG {.inline.} = self.union1.struct1.Length
-proc Length*(self: var IP_ADAPTER_ADDRESSES_XP): var ULONG {.inline.} = self.union1.struct1.Length
-proc VlanProperties*(self: NDIS_SWITCH_PORT_PROPERTY_VLAN): NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties {.inline.} = self.union1.VlanProperties
-proc VlanProperties*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN): var NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties {.inline.} = self.union1.VlanProperties
-proc Reserved*(self: IP_ADAPTER_DNS_SERVER_ADDRESS_XP): DWORD {.inline.} = self.union1.struct1.Reserved
-proc Reserved*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP): var DWORD {.inline.} = self.union1.struct1.Reserved
-proc Reserved*(self: IP_ADAPTER_WINS_SERVER_ADDRESS_LH): DWORD {.inline.} = self.union1.struct1.Reserved
-proc Reserved*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH): var DWORD {.inline.} = self.union1.struct1.Reserved
-proc Reserved*(self: IP_ADAPTER_GATEWAY_ADDRESS_LH): DWORD {.inline.} = self.union1.struct1.Reserved
-proc Reserved*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH): var DWORD {.inline.} = self.union1.struct1.Reserved
+type NDIS_NDK_STATISTICS_INFO* {.pure.} = object
+  Header*: NDIS_OBJECT_HEADER
+  Flags*: ULONG
+  CounterSet*: NDIS_NDK_PERFORMANCE_COUNTERS
+
+proc Length*(self: IP_ADAPTER_UNICAST_ADDRESS_XP): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_UNICAST_ADDRESS_LH): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_ANYCAST_ADDRESS_XP): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_MULTICAST_ADDRESS_XP): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_DNS_SERVER_ADDRESS_XP): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_PREFIX_XP): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_PREFIX_XP): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_WINS_SERVER_ADDRESS_LH): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_GATEWAY_ADDRESS_LH): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_ADDRESSES_LH): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: IP_ADAPTER_ADDRESSES_XP): ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc Length*(self: var IP_ADAPTER_ADDRESSES_XP): var ULONG {.inline.} =
+  self.union1.struct1.Length
+
+proc VlanProperties*(
+    self: NDIS_SWITCH_PORT_PROPERTY_VLAN
+): NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties {.inline.} =
+  self.union1.VlanProperties
+
+proc VlanProperties*(
+    self: var NDIS_SWITCH_PORT_PROPERTY_VLAN
+): var NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties {.inline.} =
+  self.union1.VlanProperties
+
+proc Reserved*(self: IP_ADAPTER_DNS_SERVER_ADDRESS_XP): DWORD {.inline.} =
+  self.union1.struct1.Reserved
+
+proc Reserved*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP): var DWORD {.inline.} =
+  self.union1.struct1.Reserved
+
+proc Reserved*(self: IP_ADAPTER_WINS_SERVER_ADDRESS_LH): DWORD {.inline.} =
+  self.union1.struct1.Reserved
+
+proc Reserved*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH): var DWORD {.inline.} =
+  self.union1.struct1.Reserved
+
+proc Reserved*(self: IP_ADAPTER_GATEWAY_ADDRESS_LH): DWORD {.inline.} =
+  self.union1.struct1.Reserved
+
+proc Reserved*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH): var DWORD {.inline.} =
+  self.union1.struct1.Reserved
+
 const
   NDK_ADAPTER_FLAG_IN_ORDER_DMA_SUPPORTED* = 0x1
   NDK_ADAPTER_FLAG_RDMA_READ_SINK_NOT_REQUIRED* = 0x2
@@ -5753,329 +6283,1245 @@ const
   NDIS_PF_FUNCTION_ID* = not USHORT(0)
   NDIS_INVALID_VF_FUNCTION_ID* = not USHORT(0)
 type
-  PIPINTERFACE_CHANGE_CALLBACK* = proc (CallerContext: PVOID, Row: PMIB_IPINTERFACE_ROW, NotificationType: MIB_NOTIFICATION_TYPE): VOID {.stdcall.}
-  PUNICAST_IPADDRESS_CHANGE_CALLBACK* = proc (CallerContext: PVOID, Row: PMIB_UNICASTIPADDRESS_ROW, NotificationType: MIB_NOTIFICATION_TYPE): VOID {.stdcall.}
-  PSTABLE_UNICAST_IPADDRESS_TABLE_CALLBACK* = proc (CallerContext: PVOID, AddressTable: PMIB_UNICASTIPADDRESS_TABLE): VOID {.stdcall.}
-  PTEREDO_PORT_CHANGE_CALLBACK* = proc (CallerContext: PVOID, Port: USHORT, NotificationType: MIB_NOTIFICATION_TYPE): VOID {.stdcall.}
-  PIPFORWARD_CHANGE_CALLBACK* = proc (CallerContext: PVOID, Row: PMIB_IPFORWARD_ROW2, NotificationType: MIB_NOTIFICATION_TYPE): VOID {.stdcall.}
+  PIPINTERFACE_CHANGE_CALLBACK* = proc(
+    CallerContext: PVOID,
+    Row: PMIB_IPINTERFACE_ROW,
+    NotificationType: MIB_NOTIFICATION_TYPE,
+  ): VOID {.stdcall.}
+  PUNICAST_IPADDRESS_CHANGE_CALLBACK* = proc(
+    CallerContext: PVOID,
+    Row: PMIB_UNICASTIPADDRESS_ROW,
+    NotificationType: MIB_NOTIFICATION_TYPE,
+  ): VOID {.stdcall.}
+  PSTABLE_UNICAST_IPADDRESS_TABLE_CALLBACK* = proc(
+    CallerContext: PVOID, AddressTable: PMIB_UNICASTIPADDRESS_TABLE
+  ): VOID {.stdcall.}
+  PTEREDO_PORT_CHANGE_CALLBACK* = proc(
+    CallerContext: PVOID, Port: USHORT, NotificationType: MIB_NOTIFICATION_TYPE
+  ): VOID {.stdcall.}
+  PIPFORWARD_CHANGE_CALLBACK* = proc(
+    CallerContext: PVOID,
+    Row: PMIB_IPFORWARD_ROW2,
+    NotificationType: MIB_NOTIFICATION_TYPE,
+  ): VOID {.stdcall.}
   NDIS_NDK_CONNECTION_ENTRY* {.pure.} = object
     Local*: SOCKADDR_INET
     Remote*: SOCKADDR_INET
     UserModeOwner*: BOOLEAN
     OwnerPid*: ULONG
+
   NDIS_NDK_CONNECTIONS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     Count*: ULONG
     NDConnectionsMappedtoTCPConnections*: BOOLEAN
     Connections*: array[1, NDIS_NDK_CONNECTION_ENTRY]
+
   NDIS_NDK_LOCAL_ENDPOINT_ENTRY* {.pure.} = object
     Local*: SOCKADDR_INET
     UserModeOwner*: BOOLEAN
     Listener*: BOOLEAN
     OwnerPid*: ULONG
+
   NDIS_NDK_LOCAL_ENDPOINTS* {.pure.} = object
     Header*: NDIS_OBJECT_HEADER
     Flags*: ULONG
     Count*: ULONG
     NDLocalEndpointsMappedtoTCPLocalEndpoints*: BOOLEAN
     LocalEndpoints*: array[1, NDIS_NDK_LOCAL_ENDPOINT_ENTRY]
-proc GetNumberOfInterfaces*(pdwNumIf: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIfEntry*(pIfRow: PMIB_IFROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIfTable*(pIfTable: PMIB_IFTABLE, pdwSize: PULONG, bOrder: WINBOOL): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpAddrTable*(pIpAddrTable: PMIB_IPADDRTABLE, pdwSize: PULONG, bOrder: WINBOOL): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpNetTable*(IpNetTable: PMIB_IPNETTABLE, SizePointer: PULONG, Order: WINBOOL): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpForwardTable*(pIpForwardTable: PMIB_IPFORWARDTABLE, pdwSize: PULONG, bOrder: WINBOOL): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetTcpTable*(TcpTable: PMIB_TCPTABLE, SizePointer: PULONG, Order: WINBOOL): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetExtendedTcpTable*(pTcpTable: PVOID, pdwSize: PDWORD, bOrder: WINBOOL, ulAf: ULONG, TableClass: TCP_TABLE_CLASS, Reserved: ULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetOwnerModuleFromTcpEntry*(pTcpEntry: PMIB_TCPROW_OWNER_MODULE, Class: TCPIP_OWNER_MODULE_INFO_CLASS, pBuffer: PVOID, pdwSize: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetUdpTable*(UdpTable: PMIB_UDPTABLE, SizePointer: PULONG, Order: WINBOOL): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetExtendedUdpTable*(pUdpTable: PVOID, pdwSize: PDWORD, bOrder: WINBOOL, ulAf: ULONG, TableClass: UDP_TABLE_CLASS, Reserved: ULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetOwnerModuleFromUdpEntry*(pUdpEntry: PMIB_UDPROW_OWNER_MODULE, Class: TCPIP_OWNER_MODULE_INFO_CLASS, pBuffer: PVOID, pdwSize: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetTcpTable2*(TcpTable: PMIB_TCPTABLE2, SizePointer: PULONG, Order: WINBOOL): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetTcp6Table*(TcpTable: PMIB_TCP6TABLE, SizePointer: PULONG, Order: WINBOOL): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetTcp6Table2*(TcpTable: PMIB_TCP6TABLE2, SizePointer: PULONG, Order: WINBOOL): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetPerTcpConnectionEStats*(Row: PMIB_TCPROW, EstatsType: TCP_ESTATS_TYPE, Rw: PUCHAR, RwVersion: ULONG, RwSize: ULONG, Ros: PUCHAR, RosVersion: ULONG, RosSize: ULONG, Rod: PUCHAR, RodVersion: ULONG, RodSize: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetPerTcpConnectionEStats*(Row: PMIB_TCPROW, EstatsType: TCP_ESTATS_TYPE, Rw: PUCHAR, RwVersion: ULONG, RwSize: ULONG, Offset: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetPerTcp6ConnectionEStats*(Row: PMIB_TCP6ROW, EstatsType: TCP_ESTATS_TYPE, Rw: PUCHAR, RwVersion: ULONG, RwSize: ULONG, Ros: PUCHAR, RosVersion: ULONG, RosSize: ULONG, Rod: PUCHAR, RodVersion: ULONG, RodSize: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetPerTcp6ConnectionEStats*(Row: PMIB_TCP6ROW, EstatsType: TCP_ESTATS_TYPE, Rw: PUCHAR, RwVersion: ULONG, RwSize: ULONG, Offset: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetUdp6Table*(Udp6Table: PMIB_UDP6TABLE, SizePointer: PULONG, Order: WINBOOL): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetOwnerModuleFromTcp6Entry*(pTcpEntry: PMIB_TCP6ROW_OWNER_MODULE, Class: TCPIP_OWNER_MODULE_INFO_CLASS, pBuffer: PVOID, pdwSize: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetOwnerModuleFromUdp6Entry*(pUdpEntry: PMIB_UDP6ROW_OWNER_MODULE, Class: TCPIP_OWNER_MODULE_INFO_CLASS, pBuffer: PVOID, pdwSize: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetOwnerModuleFromPidAndInfo*(ulPid: ULONG, pInfo: ptr ULONGLONG, Class: TCPIP_OWNER_MODULE_INFO_CLASS, pBuffer: PVOID, pdwSize: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpStatistics*(Statistics: PMIB_IPSTATS): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIcmpStatistics*(Statistics: PMIB_ICMP): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetTcpStatistics*(Statistics: PMIB_TCPSTATS): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetUdpStatistics*(Stats: PMIB_UDPSTATS): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpStatisticsEx*(Statistics: PMIB_IPSTATS, Family: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIpStatisticsEx*(Statistics: PMIB_IPSTATS, Family: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIcmpStatisticsEx*(Statistics: PMIB_ICMP_EX, Family: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetTcpStatisticsEx*(Statistics: PMIB_TCPSTATS, Family: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetUdpStatisticsEx*(Statistics: PMIB_UDPSTATS, Family: ULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIfEntry*(pIfRow: PMIB_IFROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateIpForwardEntry*(pRoute: PMIB_IPFORWARDROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIpForwardEntry*(pRoute: PMIB_IPFORWARDROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteIpForwardEntry*(pRoute: PMIB_IPFORWARDROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIpStatistics*(pIpStats: PMIB_IPSTATS): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetNumberOfInterfaces*(
+  pdwNumIf: PDWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIfEntry*(
+  pIfRow: PMIB_IFROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIfTable*(
+  pIfTable: PMIB_IFTABLE, pdwSize: PULONG, bOrder: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpAddrTable*(
+  pIpAddrTable: PMIB_IPADDRTABLE, pdwSize: PULONG, bOrder: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpNetTable*(
+  IpNetTable: PMIB_IPNETTABLE, SizePointer: PULONG, Order: WINBOOL
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpForwardTable*(
+  pIpForwardTable: PMIB_IPFORWARDTABLE, pdwSize: PULONG, bOrder: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetTcpTable*(
+  TcpTable: PMIB_TCPTABLE, SizePointer: PULONG, Order: WINBOOL
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetExtendedTcpTable*(
+  pTcpTable: PVOID,
+  pdwSize: PDWORD,
+  bOrder: WINBOOL,
+  ulAf: ULONG,
+  TableClass: TCP_TABLE_CLASS,
+  Reserved: ULONG,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetOwnerModuleFromTcpEntry*(
+  pTcpEntry: PMIB_TCPROW_OWNER_MODULE,
+  Class: TCPIP_OWNER_MODULE_INFO_CLASS,
+  pBuffer: PVOID,
+  pdwSize: PDWORD,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetUdpTable*(
+  UdpTable: PMIB_UDPTABLE, SizePointer: PULONG, Order: WINBOOL
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetExtendedUdpTable*(
+  pUdpTable: PVOID,
+  pdwSize: PDWORD,
+  bOrder: WINBOOL,
+  ulAf: ULONG,
+  TableClass: UDP_TABLE_CLASS,
+  Reserved: ULONG,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetOwnerModuleFromUdpEntry*(
+  pUdpEntry: PMIB_UDPROW_OWNER_MODULE,
+  Class: TCPIP_OWNER_MODULE_INFO_CLASS,
+  pBuffer: PVOID,
+  pdwSize: PDWORD,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetTcpTable2*(
+  TcpTable: PMIB_TCPTABLE2, SizePointer: PULONG, Order: WINBOOL
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetTcp6Table*(
+  TcpTable: PMIB_TCP6TABLE, SizePointer: PULONG, Order: WINBOOL
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetTcp6Table2*(
+  TcpTable: PMIB_TCP6TABLE2, SizePointer: PULONG, Order: WINBOOL
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetPerTcpConnectionEStats*(
+  Row: PMIB_TCPROW,
+  EstatsType: TCP_ESTATS_TYPE,
+  Rw: PUCHAR,
+  RwVersion: ULONG,
+  RwSize: ULONG,
+  Ros: PUCHAR,
+  RosVersion: ULONG,
+  RosSize: ULONG,
+  Rod: PUCHAR,
+  RodVersion: ULONG,
+  RodSize: ULONG,
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetPerTcpConnectionEStats*(
+  Row: PMIB_TCPROW,
+  EstatsType: TCP_ESTATS_TYPE,
+  Rw: PUCHAR,
+  RwVersion: ULONG,
+  RwSize: ULONG,
+  Offset: ULONG,
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetPerTcp6ConnectionEStats*(
+  Row: PMIB_TCP6ROW,
+  EstatsType: TCP_ESTATS_TYPE,
+  Rw: PUCHAR,
+  RwVersion: ULONG,
+  RwSize: ULONG,
+  Ros: PUCHAR,
+  RosVersion: ULONG,
+  RosSize: ULONG,
+  Rod: PUCHAR,
+  RodVersion: ULONG,
+  RodSize: ULONG,
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetPerTcp6ConnectionEStats*(
+  Row: PMIB_TCP6ROW,
+  EstatsType: TCP_ESTATS_TYPE,
+  Rw: PUCHAR,
+  RwVersion: ULONG,
+  RwSize: ULONG,
+  Offset: ULONG,
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetUdp6Table*(
+  Udp6Table: PMIB_UDP6TABLE, SizePointer: PULONG, Order: WINBOOL
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetOwnerModuleFromTcp6Entry*(
+  pTcpEntry: PMIB_TCP6ROW_OWNER_MODULE,
+  Class: TCPIP_OWNER_MODULE_INFO_CLASS,
+  pBuffer: PVOID,
+  pdwSize: PDWORD,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetOwnerModuleFromUdp6Entry*(
+  pUdpEntry: PMIB_UDP6ROW_OWNER_MODULE,
+  Class: TCPIP_OWNER_MODULE_INFO_CLASS,
+  pBuffer: PVOID,
+  pdwSize: PDWORD,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetOwnerModuleFromPidAndInfo*(
+  ulPid: ULONG,
+  pInfo: ptr ULONGLONG,
+  Class: TCPIP_OWNER_MODULE_INFO_CLASS,
+  pBuffer: PVOID,
+  pdwSize: PDWORD,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpStatistics*(
+  Statistics: PMIB_IPSTATS
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIcmpStatistics*(
+  Statistics: PMIB_ICMP
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetTcpStatistics*(
+  Statistics: PMIB_TCPSTATS
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetUdpStatistics*(
+  Stats: PMIB_UDPSTATS
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpStatisticsEx*(
+  Statistics: PMIB_IPSTATS, Family: ULONG
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIpStatisticsEx*(
+  Statistics: PMIB_IPSTATS, Family: ULONG
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIcmpStatisticsEx*(
+  Statistics: PMIB_ICMP_EX, Family: ULONG
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetTcpStatisticsEx*(
+  Statistics: PMIB_TCPSTATS, Family: ULONG
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetUdpStatisticsEx*(
+  Statistics: PMIB_UDPSTATS, Family: ULONG
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIfEntry*(
+  pIfRow: PMIB_IFROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreateIpForwardEntry*(
+  pRoute: PMIB_IPFORWARDROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIpForwardEntry*(
+  pRoute: PMIB_IPFORWARDROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteIpForwardEntry*(
+  pRoute: PMIB_IPFORWARDROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIpStatistics*(
+  pIpStats: PMIB_IPSTATS
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
 proc SetIpTTL*(nTTL: UINT): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateIpNetEntry*(pArpEntry: PMIB_IPNETROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIpNetEntry*(pArpEntry: PMIB_IPNETROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteIpNetEntry*(pArpEntry: PMIB_IPNETROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc FlushIpNetTable*(dwIfIndex: DWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateProxyArpEntry*(dwAddress: DWORD, dwMask: DWORD, dwIfIndex: DWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteProxyArpEntry*(dwAddress: DWORD, dwMask: DWORD, dwIfIndex: DWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetTcpEntry*(pTcpRow: PMIB_TCPROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetInterfaceInfo*(pIfTable: PIP_INTERFACE_INFO, dwOutBufLen: PULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetUniDirectionalAdapterInfo*(pIPIfInfo: PIP_UNIDIRECTIONAL_ADAPTER_ADDRESS, dwOutBufLen: PULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NhpAllocateAndGetInterfaceInfoFromStack*(ppTable: ptr ptr IP_INTERFACE_NAME_INFO, pdwCount: PDWORD, bOrder: WINBOOL, hHeap: HANDLE, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetBestInterface*(dwDestAddr: IPAddr, pdwBestIfIndex: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetBestInterfaceEx*(pDestAddr: ptr sockaddr, pdwBestIfIndex: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetBestRoute*(dwDestAddr: DWORD, dwSourceAddr: DWORD, pBestRoute: PMIB_IPFORWARDROW): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NotifyAddrChange*(Handle: PHANDLE, overlapped: LPOVERLAPPED): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NotifyRouteChange*(Handle: PHANDLE, overlapped: LPOVERLAPPED): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CancelIPChangeNotify*(notifyOverlapped: LPOVERLAPPED): WINBOOL {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetAdapterIndex*(AdapterName: LPWSTR, IfIndex: PULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc AddIPAddress*(Address: IPAddr, IpMask: IPMask, IfIndex: DWORD, NTEContext: PULONG, NTEInstance: PULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteIPAddress*(NTEContext: ULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetNetworkParams*(pFixedInfo: PFIXED_INFO, pOutBufLen: PULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetAdaptersInfo*(AdapterInfo: PIP_ADAPTER_INFO, SizePointer: PULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetAdapterOrderMap*(): PIP_ADAPTER_ORDER_MAP {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetAdaptersAddresses*(Family: ULONG, Flags: ULONG, Reserved: PVOID, AdapterAddresses: PIP_ADAPTER_ADDRESSES, SizePointer: PULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetPerAdapterInfo*(IfIndex: ULONG, pPerAdapterInfo: PIP_PER_ADAPTER_INFO, pOutBufLen: PULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc IpReleaseAddress*(AdapterInfo: PIP_ADAPTER_INDEX_MAP): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc IpRenewAddress*(AdapterInfo: PIP_ADAPTER_INDEX_MAP): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SendARP*(DestIP: IPAddr, SrcIP: IPAddr, pMacAddr: PVOID, PhyAddrLen: PULONG): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetRTTAndHopCount*(DestIpAddress: IPAddr, HopCount: PULONG, MaxHops: ULONG, RTT: PULONG): WINBOOL {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetFriendlyIfIndex*(IfIndex: DWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc EnableRouter*(pHandle: ptr HANDLE, pOverlapped: ptr OVERLAPPED): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc UnenableRouter*(pOverlapped: ptr OVERLAPPED, lpdwEnableCount: LPDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DisableMediaSense*(pHandle: ptr HANDLE, pOverLapped: ptr OVERLAPPED): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc RestoreMediaSense*(pOverlapped: ptr OVERLAPPED, lpdwEnableCount: LPDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ParseNetworkString*(NetworkString: ptr WCHAR, Types: DWORD, AddressInfo: PNET_ADDRESS_INFO, PortNumber: ptr USHORT, PrefixLength: ptr BYTE): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpErrorString*(ErrorCode: IP_STATUS, Buffer: PWSTR, Size: PDWORD): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ResolveNeighbor*(NetworkAddress: ptr SOCKADDR, PhysicalAddress: PVOID, PhysicalAddressLength: PULONG): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreatePersistentTcpPortReservation*(StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreatePersistentUdpPortReservation*(StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeletePersistentTcpPortReservation*(StartPort: USHORT, NumberOfPorts: USHORT): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeletePersistentUdpPortReservation*(StartPort: USHORT, NumberOfPorts: USHORT): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc LookupPersistentTcpPortReservation*(StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc LookupPersistentUdpPortReservation*(StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIfEntry2*(Row: PMIB_IF_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIfTable2*(Table: ptr PMIB_IF_TABLE2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIfTable2Ex*(Level: MIB_IF_TABLE_LEVEL, Table: ptr PMIB_IF_TABLE2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIfStackTable*(Table: ptr PMIB_IFSTACK_TABLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetInvertedIfStackTable*(Table: ptr PMIB_INVERTEDIFSTACK_TABLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpInterfaceEntry*(Row: PMIB_IPINTERFACE_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpInterfaceTable*(Family: ADDRESS_FAMILY, Table: ptr PMIB_IPINTERFACE_TABLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc InitializeIpInterfaceEntry*(Row: PMIB_IPINTERFACE_ROW): VOID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NotifyIpInterfaceChange*(Family: ADDRESS_FAMILY, Callback: PIPINTERFACE_CHANGE_CALLBACK, CallerContext: PVOID, InitialNotification: BOOLEAN, NotificationHandle: ptr HANDLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIpInterfaceEntry*(Row: PMIB_IPINTERFACE_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpNetworkConnectionBandwidthEstimates*(InterfaceIndex: NET_IFINDEX, AddressFamily: ADDRESS_FAMILY, BandwidthEstimates: PMIB_IP_NETWORK_CONNECTION_BANDWIDTH_ESTIMATES): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateUnicastIpAddressEntry*(Row: ptr MIB_UNICASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteUnicastIpAddressEntry*(Row: ptr MIB_UNICASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetUnicastIpAddressEntry*(Row: PMIB_UNICASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetUnicastIpAddressTable*(Family: ADDRESS_FAMILY, Table: ptr PMIB_UNICASTIPADDRESS_TABLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc InitializeUnicastIpAddressEntry*(Row: PMIB_UNICASTIPADDRESS_ROW): VOID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NotifyUnicastIpAddressChange*(Family: ADDRESS_FAMILY, Callback: PUNICAST_IPADDRESS_CHANGE_CALLBACK, CallerContext: PVOID, InitialNotification: BOOLEAN, NotificationHandle: ptr HANDLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateAnycastIpAddressEntry*(Row: ptr MIB_ANYCASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteAnycastIpAddressEntry*(Row: ptr MIB_ANYCASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetAnycastIpAddressEntry*(Row: PMIB_ANYCASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetAnycastIpAddressTable*(Family: ADDRESS_FAMILY, Table: ptr PMIB_ANYCASTIPADDRESS_TABLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NotifyStableUnicastIpAddressTable*(Family: ADDRESS_FAMILY, Table: ptr PMIB_UNICASTIPADDRESS_TABLE, CallerCallback: PSTABLE_UNICAST_IPADDRESS_TABLE_CALLBACK, CallerContext: PVOID, NotificationHandle: ptr HANDLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetUnicastIpAddressEntry*(Row: ptr MIB_UNICASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetMulticastIpAddressEntry*(Row: PMIB_MULTICASTIPADDRESS_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetMulticastIpAddressTable*(Family: ADDRESS_FAMILY, Table: ptr PMIB_MULTICASTIPADDRESS_TABLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateIpForwardEntry2*(Row: ptr MIB_IPFORWARD_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteIpForwardEntry2*(Row: ptr MIB_IPFORWARD_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetBestRoute2*(InterfaceLuid: ptr NET_LUID, InterfaceIndex: NET_IFINDEX, SourceAddress: ptr SOCKADDR_INET, DestinationAddress: ptr SOCKADDR_INET, AddressSortOptions: ULONG, BestRoute: PMIB_IPFORWARD_ROW2, BestSourceAddress: ptr SOCKADDR_INET): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpForwardEntry2*(Row: PMIB_IPFORWARD_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpForwardTable2*(Family: ADDRESS_FAMILY, Table: ptr PMIB_IPFORWARD_TABLE2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc InitializeIpForwardEntry*(Row: PMIB_IPFORWARD_ROW2): VOID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NotifyRouteChange2*(AddressFamily: ADDRESS_FAMILY, Callback: PIPFORWARD_CHANGE_CALLBACK, CallerContext: PVOID, InitialNotification: BOOLEAN, NotificationHandle: ptr HANDLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIpForwardEntry2*(Route: ptr MIB_IPFORWARD_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc FlushIpPathTable*(Family: ADDRESS_FAMILY): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpPathEntry*(Row: PMIB_IPPATH_ROW): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpPathTable*(Family: ADDRESS_FAMILY, Table: ptr PMIB_IPPATH_TABLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateIpNetEntry2*(Row: ptr MIB_IPNET_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc DeleteIpNetEntry2*(Row: ptr MIB_IPNET_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc FlushIpNetTable2*(Family: ADDRESS_FAMILY, InterfaceIndex: NET_IFINDEX): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpNetEntry2*(Row: PMIB_IPNET_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetIpNetTable2*(Family: ADDRESS_FAMILY, Table: ptr PMIB_IPNET_TABLE2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ResolveIpNetEntry2*(Row: PMIB_IPNET_ROW2, SourceAddress: ptr SOCKADDR_INET): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetIpNetEntry2*(Row: PMIB_IPNET_ROW2): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc NotifyTeredoPortChange*(Callback: PTEREDO_PORT_CHANGE_CALLBACK, CallerContext: PVOID, InitialNotification: BOOLEAN, NotificationHandle: ptr HANDLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetTeredoPort*(Port: ptr USHORT): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CancelMibChangeNotify2*(NotificationHandle: HANDLE): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+proc CreateIpNetEntry*(
+  pArpEntry: PMIB_IPNETROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIpNetEntry*(
+  pArpEntry: PMIB_IPNETROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteIpNetEntry*(
+  pArpEntry: PMIB_IPNETROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc FlushIpNetTable*(
+  dwIfIndex: DWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreateProxyArpEntry*(
+  dwAddress: DWORD, dwMask: DWORD, dwIfIndex: DWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteProxyArpEntry*(
+  dwAddress: DWORD, dwMask: DWORD, dwIfIndex: DWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetTcpEntry*(
+  pTcpRow: PMIB_TCPROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetInterfaceInfo*(
+  pIfTable: PIP_INTERFACE_INFO, dwOutBufLen: PULONG
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetUniDirectionalAdapterInfo*(
+  pIPIfInfo: PIP_UNIDIRECTIONAL_ADAPTER_ADDRESS, dwOutBufLen: PULONG
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NhpAllocateAndGetInterfaceInfoFromStack*(
+  ppTable: ptr ptr IP_INTERFACE_NAME_INFO,
+  pdwCount: PDWORD,
+  bOrder: WINBOOL,
+  hHeap: HANDLE,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetBestInterface*(
+  dwDestAddr: IPAddr, pdwBestIfIndex: PDWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetBestInterfaceEx*(
+  pDestAddr: ptr sockaddr, pdwBestIfIndex: PDWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetBestRoute*(
+  dwDestAddr: DWORD, dwSourceAddr: DWORD, pBestRoute: PMIB_IPFORWARDROW
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NotifyAddrChange*(
+  Handle: PHANDLE, overlapped: LPOVERLAPPED
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NotifyRouteChange*(
+  Handle: PHANDLE, overlapped: LPOVERLAPPED
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CancelIPChangeNotify*(
+  notifyOverlapped: LPOVERLAPPED
+): WINBOOL {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetAdapterIndex*(
+  AdapterName: LPWSTR, IfIndex: PULONG
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc AddIPAddress*(
+  Address: IPAddr,
+  IpMask: IPMask,
+  IfIndex: DWORD,
+  NTEContext: PULONG,
+  NTEInstance: PULONG,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteIPAddress*(
+  NTEContext: ULONG
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetNetworkParams*(
+  pFixedInfo: PFIXED_INFO, pOutBufLen: PULONG
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetAdaptersInfo*(
+  AdapterInfo: PIP_ADAPTER_INFO, SizePointer: PULONG
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetAdapterOrderMap*(): PIP_ADAPTER_ORDER_MAP {.
+  winapi, stdcall, dynlib: "iphlpapi", importc
+.}
+
+proc GetAdaptersAddresses*(
+  Family: ULONG,
+  Flags: ULONG,
+  Reserved: PVOID,
+  AdapterAddresses: PIP_ADAPTER_ADDRESSES,
+  SizePointer: PULONG,
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetPerAdapterInfo*(
+  IfIndex: ULONG, pPerAdapterInfo: PIP_PER_ADAPTER_INFO, pOutBufLen: PULONG
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc IpReleaseAddress*(
+  AdapterInfo: PIP_ADAPTER_INDEX_MAP
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc IpRenewAddress*(
+  AdapterInfo: PIP_ADAPTER_INDEX_MAP
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SendARP*(
+  DestIP: IPAddr, SrcIP: IPAddr, pMacAddr: PVOID, PhyAddrLen: PULONG
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetRTTAndHopCount*(
+  DestIpAddress: IPAddr, HopCount: PULONG, MaxHops: ULONG, RTT: PULONG
+): WINBOOL {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetFriendlyIfIndex*(
+  IfIndex: DWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc EnableRouter*(
+  pHandle: ptr HANDLE, pOverlapped: ptr OVERLAPPED
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc UnenableRouter*(
+  pOverlapped: ptr OVERLAPPED, lpdwEnableCount: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DisableMediaSense*(
+  pHandle: ptr HANDLE, pOverLapped: ptr OVERLAPPED
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc RestoreMediaSense*(
+  pOverlapped: ptr OVERLAPPED, lpdwEnableCount: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ParseNetworkString*(
+  NetworkString: ptr WCHAR,
+  Types: DWORD,
+  AddressInfo: PNET_ADDRESS_INFO,
+  PortNumber: ptr USHORT,
+  PrefixLength: ptr BYTE,
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpErrorString*(
+  ErrorCode: IP_STATUS, Buffer: PWSTR, Size: PDWORD
+): DWORD {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ResolveNeighbor*(
+  NetworkAddress: ptr SOCKADDR, PhysicalAddress: PVOID, PhysicalAddressLength: PULONG
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreatePersistentTcpPortReservation*(
+  StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreatePersistentUdpPortReservation*(
+  StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeletePersistentTcpPortReservation*(
+  StartPort: USHORT, NumberOfPorts: USHORT
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeletePersistentUdpPortReservation*(
+  StartPort: USHORT, NumberOfPorts: USHORT
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc LookupPersistentTcpPortReservation*(
+  StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc LookupPersistentUdpPortReservation*(
+  StartPort: USHORT, NumberOfPorts: USHORT, Token: PULONG64
+): ULONG {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIfEntry2*(
+  Row: PMIB_IF_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIfTable2*(
+  Table: ptr PMIB_IF_TABLE2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIfTable2Ex*(
+  Level: MIB_IF_TABLE_LEVEL, Table: ptr PMIB_IF_TABLE2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIfStackTable*(
+  Table: ptr PMIB_IFSTACK_TABLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetInvertedIfStackTable*(
+  Table: ptr PMIB_INVERTEDIFSTACK_TABLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpInterfaceEntry*(
+  Row: PMIB_IPINTERFACE_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpInterfaceTable*(
+  Family: ADDRESS_FAMILY, Table: ptr PMIB_IPINTERFACE_TABLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc InitializeIpInterfaceEntry*(
+  Row: PMIB_IPINTERFACE_ROW
+): VOID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NotifyIpInterfaceChange*(
+  Family: ADDRESS_FAMILY,
+  Callback: PIPINTERFACE_CHANGE_CALLBACK,
+  CallerContext: PVOID,
+  InitialNotification: BOOLEAN,
+  NotificationHandle: ptr HANDLE,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIpInterfaceEntry*(
+  Row: PMIB_IPINTERFACE_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpNetworkConnectionBandwidthEstimates*(
+  InterfaceIndex: NET_IFINDEX,
+  AddressFamily: ADDRESS_FAMILY,
+  BandwidthEstimates: PMIB_IP_NETWORK_CONNECTION_BANDWIDTH_ESTIMATES,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreateUnicastIpAddressEntry*(
+  Row: ptr MIB_UNICASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteUnicastIpAddressEntry*(
+  Row: ptr MIB_UNICASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetUnicastIpAddressEntry*(
+  Row: PMIB_UNICASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetUnicastIpAddressTable*(
+  Family: ADDRESS_FAMILY, Table: ptr PMIB_UNICASTIPADDRESS_TABLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc InitializeUnicastIpAddressEntry*(
+  Row: PMIB_UNICASTIPADDRESS_ROW
+): VOID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NotifyUnicastIpAddressChange*(
+  Family: ADDRESS_FAMILY,
+  Callback: PUNICAST_IPADDRESS_CHANGE_CALLBACK,
+  CallerContext: PVOID,
+  InitialNotification: BOOLEAN,
+  NotificationHandle: ptr HANDLE,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreateAnycastIpAddressEntry*(
+  Row: ptr MIB_ANYCASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteAnycastIpAddressEntry*(
+  Row: ptr MIB_ANYCASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetAnycastIpAddressEntry*(
+  Row: PMIB_ANYCASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetAnycastIpAddressTable*(
+  Family: ADDRESS_FAMILY, Table: ptr PMIB_ANYCASTIPADDRESS_TABLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NotifyStableUnicastIpAddressTable*(
+  Family: ADDRESS_FAMILY,
+  Table: ptr PMIB_UNICASTIPADDRESS_TABLE,
+  CallerCallback: PSTABLE_UNICAST_IPADDRESS_TABLE_CALLBACK,
+  CallerContext: PVOID,
+  NotificationHandle: ptr HANDLE,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetUnicastIpAddressEntry*(
+  Row: ptr MIB_UNICASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetMulticastIpAddressEntry*(
+  Row: PMIB_MULTICASTIPADDRESS_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetMulticastIpAddressTable*(
+  Family: ADDRESS_FAMILY, Table: ptr PMIB_MULTICASTIPADDRESS_TABLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreateIpForwardEntry2*(
+  Row: ptr MIB_IPFORWARD_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteIpForwardEntry2*(
+  Row: ptr MIB_IPFORWARD_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetBestRoute2*(
+  InterfaceLuid: ptr NET_LUID,
+  InterfaceIndex: NET_IFINDEX,
+  SourceAddress: ptr SOCKADDR_INET,
+  DestinationAddress: ptr SOCKADDR_INET,
+  AddressSortOptions: ULONG,
+  BestRoute: PMIB_IPFORWARD_ROW2,
+  BestSourceAddress: ptr SOCKADDR_INET,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpForwardEntry2*(
+  Row: PMIB_IPFORWARD_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpForwardTable2*(
+  Family: ADDRESS_FAMILY, Table: ptr PMIB_IPFORWARD_TABLE2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc InitializeIpForwardEntry*(
+  Row: PMIB_IPFORWARD_ROW2
+): VOID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NotifyRouteChange2*(
+  AddressFamily: ADDRESS_FAMILY,
+  Callback: PIPFORWARD_CHANGE_CALLBACK,
+  CallerContext: PVOID,
+  InitialNotification: BOOLEAN,
+  NotificationHandle: ptr HANDLE,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIpForwardEntry2*(
+  Route: ptr MIB_IPFORWARD_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc FlushIpPathTable*(
+  Family: ADDRESS_FAMILY
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpPathEntry*(
+  Row: PMIB_IPPATH_ROW
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpPathTable*(
+  Family: ADDRESS_FAMILY, Table: ptr PMIB_IPPATH_TABLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CreateIpNetEntry2*(
+  Row: ptr MIB_IPNET_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc DeleteIpNetEntry2*(
+  Row: ptr MIB_IPNET_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc FlushIpNetTable2*(
+  Family: ADDRESS_FAMILY, InterfaceIndex: NET_IFINDEX
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpNetEntry2*(
+  Row: PMIB_IPNET_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetIpNetTable2*(
+  Family: ADDRESS_FAMILY, Table: ptr PMIB_IPNET_TABLE2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ResolveIpNetEntry2*(
+  Row: PMIB_IPNET_ROW2, SourceAddress: ptr SOCKADDR_INET
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetIpNetEntry2*(
+  Row: PMIB_IPNET_ROW2
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc NotifyTeredoPortChange*(
+  Callback: PTEREDO_PORT_CHANGE_CALLBACK,
+  CallerContext: PVOID,
+  InitialNotification: BOOLEAN,
+  NotificationHandle: ptr HANDLE,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetTeredoPort*(
+  Port: ptr USHORT
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc CancelMibChangeNotify2*(
+  NotificationHandle: HANDLE
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
 proc FreeMibTable*(Memory: PVOID): VOID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc CreateSortedAddressPairs*(SourceAddressList: PSOCKADDR_IN6, SourceAddressCount: ULONG, DestinationAddressList: PSOCKADDR_IN6, DestinationAddressCount: ULONG, AddressSortOptions: ULONG, SortedAddressPairList: ptr PSOCKADDR_IN6_PAIR, SortedAddressPairCount: ptr ULONG): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceNameToLuidA*(InterfaceName: ptr CHAR, InterfaceLuid: ptr NET_LUID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceNameToLuidW*(InterfaceName: ptr WCHAR, InterfaceLuid: ptr NET_LUID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceLuidToNameA*(InterfaceLuid: ptr NET_LUID, InterfaceName: PSTR, Length: SIZE_T): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceLuidToNameW*(InterfaceLuid: ptr NET_LUID, InterfaceName: PWSTR, Length: SIZE_T): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceLuidToIndex*(InterfaceLuid: ptr NET_LUID, InterfaceIndex: PNET_IFINDEX): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceIndexToLuid*(InterfaceIndex: NET_IFINDEX, InterfaceLuid: PNET_LUID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceLuidToAlias*(InterfaceLuid: ptr NET_LUID, InterfaceAlias: PWSTR, Length: SIZE_T): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceAliasToLuid*(InterfaceAlias: ptr WCHAR, InterfaceLuid: PNET_LUID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceLuidToGuid*(InterfaceLuid: ptr NET_LUID, InterfaceGuid: ptr GUID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertInterfaceGuidToLuid*(InterfaceGuid: ptr GUID, InterfaceLuid: PNET_LUID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc if_nametoindex*(InterfaceName: PCSTR): NET_IFINDEX {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc if_indextoname*(InterfaceIndex: NET_IFINDEX, InterfaceName: PCHAR): PCHAR {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetCurrentThreadCompartmentId*(): NET_IF_COMPARTMENT_ID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetCurrentThreadCompartmentId*(CompartmentId: NET_IF_COMPARTMENT_ID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetSessionCompartmentId*(SessionId: ULONG): NET_IF_COMPARTMENT_ID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetSessionCompartmentId*(SessionId: ULONG, CompartmentId: NET_IF_COMPARTMENT_ID): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc GetNetworkInformation*(NetworkGuid: ptr NET_IF_NETWORK_GUID, CompartmentId: PNET_IF_COMPARTMENT_ID, SiteId: PULONG, NetworkName: PWCHAR, Length: ULONG): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc SetNetworkInformation*(NetworkGuid: ptr NET_IF_NETWORK_GUID, CompartmentId: NET_IF_COMPARTMENT_ID, NetworkName: ptr WCHAR): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertLengthToIpv4Mask*(MaskLength: ULONG, Mask: PULONG): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc ConvertIpv4MaskToLength*(Mask: ULONG, MaskLength: PUINT8): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
-proc `SpecificPortBind=`*(self: var MIB_UDPROW_OWNER_MODULE, x: DWORD) {.inline.} = self.union1.struct1.SpecificPortBind = x
-proc SpecificPortBind*(self: MIB_UDPROW_OWNER_MODULE): DWORD {.inline.} = self.union1.struct1.SpecificPortBind
-proc `dwFlags=`*(self: var MIB_UDPROW_OWNER_MODULE, x: DWORD) {.inline.} = self.union1.dwFlags = x
-proc dwFlags*(self: MIB_UDPROW_OWNER_MODULE): DWORD {.inline.} = self.union1.dwFlags
-proc dwFlags*(self: var MIB_UDPROW_OWNER_MODULE): var DWORD {.inline.} = self.union1.dwFlags
-proc `SpecificPortBind=`*(self: var MIB_UDP6ROW_OWNER_MODULE, x: DWORD) {.inline.} = self.union1.struct1.SpecificPortBind = x
-proc SpecificPortBind*(self: MIB_UDP6ROW_OWNER_MODULE): DWORD {.inline.} = self.union1.struct1.SpecificPortBind
-proc `dwFlags=`*(self: var MIB_UDP6ROW_OWNER_MODULE, x: DWORD) {.inline.} = self.union1.dwFlags = x
-proc dwFlags*(self: MIB_UDP6ROW_OWNER_MODULE): DWORD {.inline.} = self.union1.dwFlags
-proc dwFlags*(self: var MIB_UDP6ROW_OWNER_MODULE): var DWORD {.inline.} = self.union1.dwFlags
-proc `ullAlign=`*(self: var MIB_OPAQUE_INFO, x: ULONGLONG) {.inline.} = self.union1.ullAlign = x
-proc ullAlign*(self: MIB_OPAQUE_INFO): ULONGLONG {.inline.} = self.union1.ullAlign
-proc ullAlign*(self: var MIB_OPAQUE_INFO): var ULONGLONG {.inline.} = self.union1.ullAlign
-proc `rgbyData=`*(self: var MIB_OPAQUE_INFO, x: array[1, BYTE]) {.inline.} = self.union1.rgbyData = x
-proc rgbyData*(self: MIB_OPAQUE_INFO): array[1, BYTE] {.inline.} = self.union1.rgbyData
-proc rgbyData*(self: var MIB_OPAQUE_INFO): var array[1, BYTE] {.inline.} = self.union1.rgbyData
-proc `Alignment=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_UNICAST_ADDRESS_XP): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Flags=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP, x: DWORD) {.inline.} = self.union1.struct1.Flags = x
-proc `Alignment=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_UNICAST_ADDRESS_LH): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Flags=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH, x: DWORD) {.inline.} = self.union1.struct1.Flags = x
-proc `Alignment=`*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_ANYCAST_ADDRESS_XP): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Flags=`*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP, x: DWORD) {.inline.} = self.union1.struct1.Flags = x
-proc `Alignment=`*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_MULTICAST_ADDRESS_XP): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Flags=`*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP, x: DWORD) {.inline.} = self.union1.struct1.Flags = x
-proc `Alignment=`*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_DNS_SERVER_ADDRESS_XP): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Reserved=`*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP, x: DWORD) {.inline.} = self.union1.struct1.Reserved = x
-proc `Alignment=`*(self: var IP_ADAPTER_PREFIX_XP, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_PREFIX_XP): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_PREFIX_XP): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_PREFIX_XP, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Flags=`*(self: var IP_ADAPTER_PREFIX_XP, x: DWORD) {.inline.} = self.union1.struct1.Flags = x
-proc `Alignment=`*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_WINS_SERVER_ADDRESS_LH): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Reserved=`*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH, x: DWORD) {.inline.} = self.union1.struct1.Reserved = x
-proc `Alignment=`*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_GATEWAY_ADDRESS_LH): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `Reserved=`*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH, x: DWORD) {.inline.} = self.union1.struct1.Reserved = x
-proc `Alignment=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_ADDRESSES_LH): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_ADDRESSES_LH): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `IfIndex=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: IF_INDEX) {.inline.} = self.union1.struct1.IfIndex = x
-proc ifIndex*(self: IP_ADAPTER_ADDRESSES_LH): IF_INDEX {.inline.} = self.union1.struct1.IfIndex
-proc ifIndex*(self: var IP_ADAPTER_ADDRESSES_LH): var IF_INDEX {.inline.} = self.union1.struct1.IfIndex
-proc `Flags=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.Flags = x
-proc `DdnsEnabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.DdnsEnabled = x
-proc DdnsEnabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.DdnsEnabled
-proc `RegisterAdapterSuffix=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.RegisterAdapterSuffix = x
-proc RegisterAdapterSuffix*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.RegisterAdapterSuffix
-proc `Dhcpv4Enabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.Dhcpv4Enabled = x
-proc Dhcpv4Enabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.Dhcpv4Enabled
-proc `ReceiveOnly=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.ReceiveOnly = x
-proc ReceiveOnly*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.ReceiveOnly
-proc `NoMulticast=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.NoMulticast = x
-proc NoMulticast*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.NoMulticast
-proc `Ipv6OtherStatefulConfig=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.Ipv6OtherStatefulConfig = x
-proc Ipv6OtherStatefulConfig*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.Ipv6OtherStatefulConfig
-proc `NetbiosOverTcpipEnabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.NetbiosOverTcpipEnabled = x
-proc NetbiosOverTcpipEnabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.NetbiosOverTcpipEnabled
-proc `Ipv4Enabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.Ipv4Enabled = x
-proc Ipv4Enabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.Ipv4Enabled
-proc `Ipv6Enabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.Ipv6Enabled = x
-proc Ipv6Enabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.Ipv6Enabled
-proc `Ipv6ManagedAddressConfigurationSupported=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} = self.union2.struct1.Ipv6ManagedAddressConfigurationSupported = x
-proc Ipv6ManagedAddressConfigurationSupported*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} = self.union2.struct1.Ipv6ManagedAddressConfigurationSupported
-proc `Alignment=`*(self: var IP_ADAPTER_ADDRESSES_XP, x: ULONGLONG) {.inline.} = self.union1.Alignment = x
-proc Alignment*(self: IP_ADAPTER_ADDRESSES_XP): ULONGLONG {.inline.} = self.union1.Alignment
-proc Alignment*(self: var IP_ADAPTER_ADDRESSES_XP): var ULONGLONG {.inline.} = self.union1.Alignment
-proc `Length=`*(self: var IP_ADAPTER_ADDRESSES_XP, x: ULONG) {.inline.} = self.union1.struct1.Length = x
-proc `IfIndex=`*(self: var IP_ADAPTER_ADDRESSES_XP, x: DWORD) {.inline.} = self.union1.struct1.IfIndex = x
-proc ifIndex*(self: IP_ADAPTER_ADDRESSES_XP): DWORD {.inline.} = self.union1.struct1.IfIndex
-proc ifIndex*(self: var IP_ADAPTER_ADDRESSES_XP): var DWORD {.inline.} = self.union1.struct1.IfIndex
-proc `NamedAddress=`*(self: var NET_ADDRESS_INFO, x: NET_ADDRESS_INFO_UNION1_NamedAddress) {.inline.} = self.union1.NamedAddress = x
-proc NamedAddress*(self: NET_ADDRESS_INFO): NET_ADDRESS_INFO_UNION1_NamedAddress {.inline.} = self.union1.NamedAddress
-proc NamedAddress*(self: var NET_ADDRESS_INFO): var NET_ADDRESS_INFO_UNION1_NamedAddress {.inline.} = self.union1.NamedAddress
-proc `Ipv4Address=`*(self: var NET_ADDRESS_INFO, x: SOCKADDR_IN) {.inline.} = self.union1.Ipv4Address = x
-proc ipv4Address*(self: NET_ADDRESS_INFO): SOCKADDR_IN {.inline.} = self.union1.Ipv4Address
-proc ipv4Address*(self: var NET_ADDRESS_INFO): var SOCKADDR_IN {.inline.} = self.union1.Ipv4Address
-proc `Ipv6Address=`*(self: var NET_ADDRESS_INFO, x: SOCKADDR_IN6) {.inline.} = self.union1.Ipv6Address = x
-proc ipv6Address*(self: NET_ADDRESS_INFO): SOCKADDR_IN6 {.inline.} = self.union1.Ipv6Address
-proc ipv6Address*(self: var NET_ADDRESS_INFO): var SOCKADDR_IN6 {.inline.} = self.union1.Ipv6Address
-proc `IpAddress=`*(self: var NET_ADDRESS_INFO, x: SOCKADDR) {.inline.} = self.union1.IpAddress = x
-proc ipAddress*(self: NET_ADDRESS_INFO): SOCKADDR {.inline.} = self.union1.IpAddress
-proc ipAddress*(self: var NET_ADDRESS_INFO): var SOCKADDR {.inline.} = self.union1.IpAddress
-proc `AuthenticationEvent=`*(self: var NDIS_802_11_TEST, x: NDIS_802_11_AUTHENTICATION_EVENT) {.inline.} = self.union1.AuthenticationEvent = x
-proc AuthenticationEvent*(self: NDIS_802_11_TEST): NDIS_802_11_AUTHENTICATION_EVENT {.inline.} = self.union1.AuthenticationEvent
-proc AuthenticationEvent*(self: var NDIS_802_11_TEST): var NDIS_802_11_AUTHENTICATION_EVENT {.inline.} = self.union1.AuthenticationEvent
-proc `RssiTrigger=`*(self: var NDIS_802_11_TEST, x: NDIS_802_11_RSSI) {.inline.} = self.union1.RssiTrigger = x
-proc RssiTrigger*(self: NDIS_802_11_TEST): NDIS_802_11_RSSI {.inline.} = self.union1.RssiTrigger
-proc RssiTrigger*(self: var NDIS_802_11_TEST): var NDIS_802_11_RSSI {.inline.} = self.union1.RssiTrigger
-proc `Oid=`*(self: var NDIS_GUID, x: NDIS_OID) {.inline.} = self.union1.Oid = x
-proc Oid*(self: NDIS_GUID): NDIS_OID {.inline.} = self.union1.Oid
-proc Oid*(self: var NDIS_GUID): var NDIS_OID {.inline.} = self.union1.Oid
-proc `Status=`*(self: var NDIS_GUID, x: NDIS_STATUS) {.inline.} = self.union1.Status = x
-proc Status*(self: NDIS_GUID): NDIS_STATUS {.inline.} = self.union1.Status
-proc Status*(self: var NDIS_GUID): var NDIS_STATUS {.inline.} = self.union1.Status
-proc `RscIPv4=`*(self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR) {.inline.} = self.struct1.RscIPv4 = x
-proc RscIPv4*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} = self.struct1.RscIPv4
-proc RscIPv4*(self: var NDIS_OFFLOAD_PARAMETERS): var UCHAR {.inline.} = self.struct1.RscIPv4
-proc `RscIPv6=`*(self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR) {.inline.} = self.struct1.RscIPv6 = x
-proc RscIPv6*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} = self.struct1.RscIPv6
-proc RscIPv6*(self: var NDIS_OFFLOAD_PARAMETERS): var UCHAR {.inline.} = self.struct1.RscIPv6
-proc `EncapsulatedPacketTaskOffload=`*(self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR) {.inline.} = self.struct2.EncapsulatedPacketTaskOffload = x
-proc EncapsulatedPacketTaskOffload*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} = self.struct2.EncapsulatedPacketTaskOffload
-proc EncapsulatedPacketTaskOffload*(self: var NDIS_OFFLOAD_PARAMETERS): var UCHAR {.inline.} = self.struct2.EncapsulatedPacketTaskOffload
-proc `EncapsulationTypes=`*(self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR) {.inline.} = self.struct2.EncapsulationTypes = x
-proc `VlanProperties=`*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN, x: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties) {.inline.} = self.union1.VlanProperties = x
-proc `SecondaryVlanId=`*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN, x: UINT16) {.inline.} = self.union1.PvlanProperties.union1.SecondaryVlanId = x
-proc SecondaryVlanId*(self: NDIS_SWITCH_PORT_PROPERTY_VLAN): UINT16 {.inline.} = self.union1.PvlanProperties.union1.SecondaryVlanId
-proc SecondaryVlanId*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN): var UINT16 {.inline.} = self.union1.PvlanProperties.union1.SecondaryVlanId
-proc `SecondaryVlanIdArray=`*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN, x: array[64, UINT64]) {.inline.} = self.union1.PvlanProperties.union1.SecondaryVlanIdArray = x
-proc SecondaryVlanIdArray*(self: NDIS_SWITCH_PORT_PROPERTY_VLAN): array[64, UINT64] {.inline.} = self.union1.PvlanProperties.union1.SecondaryVlanIdArray
-proc SecondaryVlanIdArray*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN): var array[64, UINT64] {.inline.} = self.union1.PvlanProperties.union1.SecondaryVlanIdArray
-proc `PvlanProperties=`*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN, x: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties) {.inline.} = self.union1.PvlanProperties = x
-proc PvlanProperties*(self: NDIS_SWITCH_PORT_PROPERTY_VLAN): NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties {.inline.} = self.union1.PvlanProperties
-proc PvlanProperties*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN): var NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties {.inline.} = self.union1.PvlanProperties
-proc `LastReachable=`*(self: var MIB_IPPATH_ROW, x: ULONG) {.inline.} = self.union1.LastReachable = x
-proc LastReachable*(self: MIB_IPPATH_ROW): ULONG {.inline.} = self.union1.LastReachable
-proc LastReachable*(self: var MIB_IPPATH_ROW): var ULONG {.inline.} = self.union1.LastReachable
-proc `LastUnreachable=`*(self: var MIB_IPPATH_ROW, x: ULONG) {.inline.} = self.union1.LastUnreachable = x
-proc LastUnreachable*(self: MIB_IPPATH_ROW): ULONG {.inline.} = self.union1.LastUnreachable
-proc LastUnreachable*(self: var MIB_IPPATH_ROW): var ULONG {.inline.} = self.union1.LastUnreachable
-proc `IsRouter=`*(self: var MIB_IPNET_ROW2, x: BOOLEAN) {.inline.} = self.union1.struct1.IsRouter = x
-proc IsRouter*(self: MIB_IPNET_ROW2): BOOLEAN {.inline.} = self.union1.struct1.IsRouter
-proc `IsUnreachable=`*(self: var MIB_IPNET_ROW2, x: BOOLEAN) {.inline.} = self.union1.struct1.IsUnreachable = x
-proc IsUnreachable*(self: MIB_IPNET_ROW2): BOOLEAN {.inline.} = self.union1.struct1.IsUnreachable
-proc `Flags=`*(self: var MIB_IPNET_ROW2, x: UCHAR) {.inline.} = self.union1.Flags = x
-proc OnComplete*(self: ptr IConnectionRequestCallback, hrStatus: HRESULT): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.OnComplete(self, hrStatus)
-converter winimConverterIConnectionRequestCallbackToIUnknown*(x: ptr IConnectionRequestCallback): ptr IUnknown = cast[ptr IUnknown](x)
+proc CreateSortedAddressPairs*(
+  SourceAddressList: PSOCKADDR_IN6,
+  SourceAddressCount: ULONG,
+  DestinationAddressList: PSOCKADDR_IN6,
+  DestinationAddressCount: ULONG,
+  AddressSortOptions: ULONG,
+  SortedAddressPairList: ptr PSOCKADDR_IN6_PAIR,
+  SortedAddressPairCount: ptr ULONG,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceNameToLuidA*(
+  InterfaceName: ptr CHAR, InterfaceLuid: ptr NET_LUID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceNameToLuidW*(
+  InterfaceName: ptr WCHAR, InterfaceLuid: ptr NET_LUID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceLuidToNameA*(
+  InterfaceLuid: ptr NET_LUID, InterfaceName: PSTR, Length: SIZE_T
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceLuidToNameW*(
+  InterfaceLuid: ptr NET_LUID, InterfaceName: PWSTR, Length: SIZE_T
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceLuidToIndex*(
+  InterfaceLuid: ptr NET_LUID, InterfaceIndex: PNET_IFINDEX
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceIndexToLuid*(
+  InterfaceIndex: NET_IFINDEX, InterfaceLuid: PNET_LUID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceLuidToAlias*(
+  InterfaceLuid: ptr NET_LUID, InterfaceAlias: PWSTR, Length: SIZE_T
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceAliasToLuid*(
+  InterfaceAlias: ptr WCHAR, InterfaceLuid: PNET_LUID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceLuidToGuid*(
+  InterfaceLuid: ptr NET_LUID, InterfaceGuid: ptr GUID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertInterfaceGuidToLuid*(
+  InterfaceGuid: ptr GUID, InterfaceLuid: PNET_LUID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc if_nametoindex*(
+  InterfaceName: PCSTR
+): NET_IFINDEX {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc if_indextoname*(
+  InterfaceIndex: NET_IFINDEX, InterfaceName: PCHAR
+): PCHAR {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetCurrentThreadCompartmentId*(): NET_IF_COMPARTMENT_ID {.
+  winapi, stdcall, dynlib: "iphlpapi", importc
+.}
+
+proc SetCurrentThreadCompartmentId*(
+  CompartmentId: NET_IF_COMPARTMENT_ID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetSessionCompartmentId*(
+  SessionId: ULONG
+): NET_IF_COMPARTMENT_ID {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetSessionCompartmentId*(
+  SessionId: ULONG, CompartmentId: NET_IF_COMPARTMENT_ID
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc GetNetworkInformation*(
+  NetworkGuid: ptr NET_IF_NETWORK_GUID,
+  CompartmentId: PNET_IF_COMPARTMENT_ID,
+  SiteId: PULONG,
+  NetworkName: PWCHAR,
+  Length: ULONG,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc SetNetworkInformation*(
+  NetworkGuid: ptr NET_IF_NETWORK_GUID,
+  CompartmentId: NET_IF_COMPARTMENT_ID,
+  NetworkName: ptr WCHAR,
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertLengthToIpv4Mask*(
+  MaskLength: ULONG, Mask: PULONG
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc ConvertIpv4MaskToLength*(
+  Mask: ULONG, MaskLength: PUINT8
+): NETIO_STATUS {.winapi, stdcall, dynlib: "iphlpapi", importc.}
+
+proc `SpecificPortBind=`*(self: var MIB_UDPROW_OWNER_MODULE, x: DWORD) {.inline.} =
+  self.union1.struct1.SpecificPortBind = x
+
+proc SpecificPortBind*(self: MIB_UDPROW_OWNER_MODULE): DWORD {.inline.} =
+  self.union1.struct1.SpecificPortBind
+
+proc `dwFlags=`*(self: var MIB_UDPROW_OWNER_MODULE, x: DWORD) {.inline.} =
+  self.union1.dwFlags = x
+
+proc dwFlags*(self: MIB_UDPROW_OWNER_MODULE): DWORD {.inline.} =
+  self.union1.dwFlags
+
+proc dwFlags*(self: var MIB_UDPROW_OWNER_MODULE): var DWORD {.inline.} =
+  self.union1.dwFlags
+
+proc `SpecificPortBind=`*(self: var MIB_UDP6ROW_OWNER_MODULE, x: DWORD) {.inline.} =
+  self.union1.struct1.SpecificPortBind = x
+
+proc SpecificPortBind*(self: MIB_UDP6ROW_OWNER_MODULE): DWORD {.inline.} =
+  self.union1.struct1.SpecificPortBind
+
+proc `dwFlags=`*(self: var MIB_UDP6ROW_OWNER_MODULE, x: DWORD) {.inline.} =
+  self.union1.dwFlags = x
+
+proc dwFlags*(self: MIB_UDP6ROW_OWNER_MODULE): DWORD {.inline.} =
+  self.union1.dwFlags
+
+proc dwFlags*(self: var MIB_UDP6ROW_OWNER_MODULE): var DWORD {.inline.} =
+  self.union1.dwFlags
+
+proc `ullAlign=`*(self: var MIB_OPAQUE_INFO, x: ULONGLONG) {.inline.} =
+  self.union1.ullAlign = x
+
+proc ullAlign*(self: MIB_OPAQUE_INFO): ULONGLONG {.inline.} =
+  self.union1.ullAlign
+
+proc ullAlign*(self: var MIB_OPAQUE_INFO): var ULONGLONG {.inline.} =
+  self.union1.ullAlign
+
+proc `rgbyData=`*(self: var MIB_OPAQUE_INFO, x: array[1, BYTE]) {.inline.} =
+  self.union1.rgbyData = x
+
+proc rgbyData*(self: MIB_OPAQUE_INFO): array[1, BYTE] {.inline.} =
+  self.union1.rgbyData
+
+proc rgbyData*(self: var MIB_OPAQUE_INFO): var array[1, BYTE] {.inline.} =
+  self.union1.rgbyData
+
+proc `Alignment=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_UNICAST_ADDRESS_XP): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Flags=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_XP, x: DWORD) {.inline.} =
+  self.union1.struct1.Flags = x
+
+proc `Alignment=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_UNICAST_ADDRESS_LH): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Flags=`*(self: var IP_ADAPTER_UNICAST_ADDRESS_LH, x: DWORD) {.inline.} =
+  self.union1.struct1.Flags = x
+
+proc `Alignment=`*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_ANYCAST_ADDRESS_XP): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Flags=`*(self: var IP_ADAPTER_ANYCAST_ADDRESS_XP, x: DWORD) {.inline.} =
+  self.union1.struct1.Flags = x
+
+proc `Alignment=`*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_MULTICAST_ADDRESS_XP): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Flags=`*(self: var IP_ADAPTER_MULTICAST_ADDRESS_XP, x: DWORD) {.inline.} =
+  self.union1.struct1.Flags = x
+
+proc `Alignment=`*(
+    self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP, x: ULONGLONG
+) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_DNS_SERVER_ADDRESS_XP): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Reserved=`*(self: var IP_ADAPTER_DNS_SERVER_ADDRESS_XP, x: DWORD) {.inline.} =
+  self.union1.struct1.Reserved = x
+
+proc `Alignment=`*(self: var IP_ADAPTER_PREFIX_XP, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_PREFIX_XP): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_PREFIX_XP): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_PREFIX_XP, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Flags=`*(self: var IP_ADAPTER_PREFIX_XP, x: DWORD) {.inline.} =
+  self.union1.struct1.Flags = x
+
+proc `Alignment=`*(
+    self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH, x: ULONGLONG
+) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_WINS_SERVER_ADDRESS_LH): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Reserved=`*(self: var IP_ADAPTER_WINS_SERVER_ADDRESS_LH, x: DWORD) {.inline.} =
+  self.union1.struct1.Reserved = x
+
+proc `Alignment=`*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_GATEWAY_ADDRESS_LH): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `Reserved=`*(self: var IP_ADAPTER_GATEWAY_ADDRESS_LH, x: DWORD) {.inline.} =
+  self.union1.struct1.Reserved = x
+
+proc `Alignment=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_ADDRESSES_LH): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_ADDRESSES_LH): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `IfIndex=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: IF_INDEX) {.inline.} =
+  self.union1.struct1.IfIndex = x
+
+proc ifIndex*(self: IP_ADAPTER_ADDRESSES_LH): IF_INDEX {.inline.} =
+  self.union1.struct1.IfIndex
+
+proc ifIndex*(self: var IP_ADAPTER_ADDRESSES_LH): var IF_INDEX {.inline.} =
+  self.union1.struct1.IfIndex
+
+proc `Flags=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.Flags = x
+
+proc `DdnsEnabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.struct1.DdnsEnabled = x
+
+proc DdnsEnabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.DdnsEnabled
+
+proc `RegisterAdapterSuffix=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.struct1.RegisterAdapterSuffix = x
+
+proc RegisterAdapterSuffix*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.RegisterAdapterSuffix
+
+proc `Dhcpv4Enabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.struct1.Dhcpv4Enabled = x
+
+proc Dhcpv4Enabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.Dhcpv4Enabled
+
+proc `ReceiveOnly=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.struct1.ReceiveOnly = x
+
+proc ReceiveOnly*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.ReceiveOnly
+
+proc `NoMulticast=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.struct1.NoMulticast = x
+
+proc NoMulticast*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.NoMulticast
+
+proc `Ipv6OtherStatefulConfig=`*(
+    self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG
+) {.inline.} =
+  self.union2.struct1.Ipv6OtherStatefulConfig = x
+
+proc Ipv6OtherStatefulConfig*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.Ipv6OtherStatefulConfig
+
+proc `NetbiosOverTcpipEnabled=`*(
+    self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG
+) {.inline.} =
+  self.union2.struct1.NetbiosOverTcpipEnabled = x
+
+proc NetbiosOverTcpipEnabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.NetbiosOverTcpipEnabled
+
+proc `Ipv4Enabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.struct1.Ipv4Enabled = x
+
+proc Ipv4Enabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.Ipv4Enabled
+
+proc `Ipv6Enabled=`*(self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG) {.inline.} =
+  self.union2.struct1.Ipv6Enabled = x
+
+proc Ipv6Enabled*(self: IP_ADAPTER_ADDRESSES_LH): ULONG {.inline.} =
+  self.union2.struct1.Ipv6Enabled
+
+proc `Ipv6ManagedAddressConfigurationSupported=`*(
+    self: var IP_ADAPTER_ADDRESSES_LH, x: ULONG
+) {.inline.} =
+  self.union2.struct1.Ipv6ManagedAddressConfigurationSupported = x
+
+proc Ipv6ManagedAddressConfigurationSupported*(
+    self: IP_ADAPTER_ADDRESSES_LH
+): ULONG {.inline.} =
+  self.union2.struct1.Ipv6ManagedAddressConfigurationSupported
+
+proc `Alignment=`*(self: var IP_ADAPTER_ADDRESSES_XP, x: ULONGLONG) {.inline.} =
+  self.union1.Alignment = x
+
+proc Alignment*(self: IP_ADAPTER_ADDRESSES_XP): ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc Alignment*(self: var IP_ADAPTER_ADDRESSES_XP): var ULONGLONG {.inline.} =
+  self.union1.Alignment
+
+proc `Length=`*(self: var IP_ADAPTER_ADDRESSES_XP, x: ULONG) {.inline.} =
+  self.union1.struct1.Length = x
+
+proc `IfIndex=`*(self: var IP_ADAPTER_ADDRESSES_XP, x: DWORD) {.inline.} =
+  self.union1.struct1.IfIndex = x
+
+proc ifIndex*(self: IP_ADAPTER_ADDRESSES_XP): DWORD {.inline.} =
+  self.union1.struct1.IfIndex
+
+proc ifIndex*(self: var IP_ADAPTER_ADDRESSES_XP): var DWORD {.inline.} =
+  self.union1.struct1.IfIndex
+
+proc `NamedAddress=`*(
+    self: var NET_ADDRESS_INFO, x: NET_ADDRESS_INFO_UNION1_NamedAddress
+) {.inline.} =
+  self.union1.NamedAddress = x
+
+proc NamedAddress*(
+    self: NET_ADDRESS_INFO
+): NET_ADDRESS_INFO_UNION1_NamedAddress {.inline.} =
+  self.union1.NamedAddress
+
+proc NamedAddress*(
+    self: var NET_ADDRESS_INFO
+): var NET_ADDRESS_INFO_UNION1_NamedAddress {.inline.} =
+  self.union1.NamedAddress
+
+proc `Ipv4Address=`*(self: var NET_ADDRESS_INFO, x: SOCKADDR_IN) {.inline.} =
+  self.union1.Ipv4Address = x
+
+proc ipv4Address*(self: NET_ADDRESS_INFO): SOCKADDR_IN {.inline.} =
+  self.union1.Ipv4Address
+
+proc ipv4Address*(self: var NET_ADDRESS_INFO): var SOCKADDR_IN {.inline.} =
+  self.union1.Ipv4Address
+
+proc `Ipv6Address=`*(self: var NET_ADDRESS_INFO, x: SOCKADDR_IN6) {.inline.} =
+  self.union1.Ipv6Address = x
+
+proc ipv6Address*(self: NET_ADDRESS_INFO): SOCKADDR_IN6 {.inline.} =
+  self.union1.Ipv6Address
+
+proc ipv6Address*(self: var NET_ADDRESS_INFO): var SOCKADDR_IN6 {.inline.} =
+  self.union1.Ipv6Address
+
+proc `IpAddress=`*(self: var NET_ADDRESS_INFO, x: SOCKADDR) {.inline.} =
+  self.union1.IpAddress = x
+
+proc ipAddress*(self: NET_ADDRESS_INFO): SOCKADDR {.inline.} =
+  self.union1.IpAddress
+
+proc ipAddress*(self: var NET_ADDRESS_INFO): var SOCKADDR {.inline.} =
+  self.union1.IpAddress
+
+proc `AuthenticationEvent=`*(
+    self: var NDIS_802_11_TEST, x: NDIS_802_11_AUTHENTICATION_EVENT
+) {.inline.} =
+  self.union1.AuthenticationEvent = x
+
+proc AuthenticationEvent*(
+    self: NDIS_802_11_TEST
+): NDIS_802_11_AUTHENTICATION_EVENT {.inline.} =
+  self.union1.AuthenticationEvent
+
+proc AuthenticationEvent*(
+    self: var NDIS_802_11_TEST
+): var NDIS_802_11_AUTHENTICATION_EVENT {.inline.} =
+  self.union1.AuthenticationEvent
+
+proc `RssiTrigger=`*(self: var NDIS_802_11_TEST, x: NDIS_802_11_RSSI) {.inline.} =
+  self.union1.RssiTrigger = x
+
+proc RssiTrigger*(self: NDIS_802_11_TEST): NDIS_802_11_RSSI {.inline.} =
+  self.union1.RssiTrigger
+
+proc RssiTrigger*(self: var NDIS_802_11_TEST): var NDIS_802_11_RSSI {.inline.} =
+  self.union1.RssiTrigger
+
+proc `Oid=`*(self: var NDIS_GUID, x: NDIS_OID) {.inline.} =
+  self.union1.Oid = x
+
+proc Oid*(self: NDIS_GUID): NDIS_OID {.inline.} =
+  self.union1.Oid
+
+proc Oid*(self: var NDIS_GUID): var NDIS_OID {.inline.} =
+  self.union1.Oid
+
+proc `Status=`*(self: var NDIS_GUID, x: NDIS_STATUS) {.inline.} =
+  self.union1.Status = x
+
+proc Status*(self: NDIS_GUID): NDIS_STATUS {.inline.} =
+  self.union1.Status
+
+proc Status*(self: var NDIS_GUID): var NDIS_STATUS {.inline.} =
+  self.union1.Status
+
+proc `RscIPv4=`*(self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR) {.inline.} =
+  self.struct1.RscIPv4 = x
+
+proc RscIPv4*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} =
+  self.struct1.RscIPv4
+
+proc RscIPv4*(self: var NDIS_OFFLOAD_PARAMETERS): var UCHAR {.inline.} =
+  self.struct1.RscIPv4
+
+proc `RscIPv6=`*(self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR) {.inline.} =
+  self.struct1.RscIPv6 = x
+
+proc RscIPv6*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} =
+  self.struct1.RscIPv6
+
+proc RscIPv6*(self: var NDIS_OFFLOAD_PARAMETERS): var UCHAR {.inline.} =
+  self.struct1.RscIPv6
+
+proc `EncapsulatedPacketTaskOffload=`*(
+    self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR
+) {.inline.} =
+  self.struct2.EncapsulatedPacketTaskOffload = x
+
+proc EncapsulatedPacketTaskOffload*(self: NDIS_OFFLOAD_PARAMETERS): UCHAR {.inline.} =
+  self.struct2.EncapsulatedPacketTaskOffload
+
+proc EncapsulatedPacketTaskOffload*(
+    self: var NDIS_OFFLOAD_PARAMETERS
+): var UCHAR {.inline.} =
+  self.struct2.EncapsulatedPacketTaskOffload
+
+proc `EncapsulationTypes=`*(self: var NDIS_OFFLOAD_PARAMETERS, x: UCHAR) {.inline.} =
+  self.struct2.EncapsulationTypes = x
+
+proc `VlanProperties=`*(
+    self: var NDIS_SWITCH_PORT_PROPERTY_VLAN,
+    x: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_VlanProperties,
+) {.inline.} =
+  self.union1.VlanProperties = x
+
+proc `SecondaryVlanId=`*(
+    self: var NDIS_SWITCH_PORT_PROPERTY_VLAN, x: UINT16
+) {.inline.} =
+  self.union1.PvlanProperties.union1.SecondaryVlanId = x
+
+proc SecondaryVlanId*(self: NDIS_SWITCH_PORT_PROPERTY_VLAN): UINT16 {.inline.} =
+  self.union1.PvlanProperties.union1.SecondaryVlanId
+
+proc SecondaryVlanId*(self: var NDIS_SWITCH_PORT_PROPERTY_VLAN): var UINT16 {.inline.} =
+  self.union1.PvlanProperties.union1.SecondaryVlanId
+
+proc `SecondaryVlanIdArray=`*(
+    self: var NDIS_SWITCH_PORT_PROPERTY_VLAN, x: array[64, UINT64]
+) {.inline.} =
+  self.union1.PvlanProperties.union1.SecondaryVlanIdArray = x
+
+proc SecondaryVlanIdArray*(
+    self: NDIS_SWITCH_PORT_PROPERTY_VLAN
+): array[64, UINT64] {.inline.} =
+  self.union1.PvlanProperties.union1.SecondaryVlanIdArray
+
+proc SecondaryVlanIdArray*(
+    self: var NDIS_SWITCH_PORT_PROPERTY_VLAN
+): var array[64, UINT64] {.inline.} =
+  self.union1.PvlanProperties.union1.SecondaryVlanIdArray
+
+proc `PvlanProperties=`*(
+    self: var NDIS_SWITCH_PORT_PROPERTY_VLAN,
+    x: NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties,
+) {.inline.} =
+  self.union1.PvlanProperties = x
+
+proc PvlanProperties*(
+    self: NDIS_SWITCH_PORT_PROPERTY_VLAN
+): NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties {.inline.} =
+  self.union1.PvlanProperties
+
+proc PvlanProperties*(
+    self: var NDIS_SWITCH_PORT_PROPERTY_VLAN
+): var NDIS_SWITCH_PORT_PROPERTY_VLAN_UNION1_PvlanProperties {.inline.} =
+  self.union1.PvlanProperties
+
+proc `LastReachable=`*(self: var MIB_IPPATH_ROW, x: ULONG) {.inline.} =
+  self.union1.LastReachable = x
+
+proc LastReachable*(self: MIB_IPPATH_ROW): ULONG {.inline.} =
+  self.union1.LastReachable
+
+proc LastReachable*(self: var MIB_IPPATH_ROW): var ULONG {.inline.} =
+  self.union1.LastReachable
+
+proc `LastUnreachable=`*(self: var MIB_IPPATH_ROW, x: ULONG) {.inline.} =
+  self.union1.LastUnreachable = x
+
+proc LastUnreachable*(self: MIB_IPPATH_ROW): ULONG {.inline.} =
+  self.union1.LastUnreachable
+
+proc LastUnreachable*(self: var MIB_IPPATH_ROW): var ULONG {.inline.} =
+  self.union1.LastUnreachable
+
+proc `IsRouter=`*(self: var MIB_IPNET_ROW2, x: BOOLEAN) {.inline.} =
+  self.union1.struct1.IsRouter = x
+
+proc IsRouter*(self: MIB_IPNET_ROW2): BOOLEAN {.inline.} =
+  self.union1.struct1.IsRouter
+
+proc `IsUnreachable=`*(self: var MIB_IPNET_ROW2, x: BOOLEAN) {.inline.} =
+  self.union1.struct1.IsUnreachable = x
+
+proc IsUnreachable*(self: MIB_IPNET_ROW2): BOOLEAN {.inline.} =
+  self.union1.struct1.IsUnreachable
+
+proc `Flags=`*(self: var MIB_IPNET_ROW2, x: UCHAR) {.inline.} =
+  self.union1.Flags = x
+
+proc OnComplete*(
+    self: ptr IConnectionRequestCallback, hrStatus: HRESULT
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.OnComplete(self, hrStatus)
+
+converter winimConverterIConnectionRequestCallbackToIUnknown*(
+    x: ptr IConnectionRequestCallback
+): ptr IUnknown =
+  cast[ptr IUnknown](x)
+
 when winimCpu64:
   type
     IP_OPTION_INFORMATION32* {.pure.} = object
@@ -6084,6 +7530,7 @@ when winimCpu64:
       Flags*: UCHAR
       OptionsSize*: UCHAR
       OptionsData*: ptr UCHAR
+
     PIP_OPTION_INFORMATION32* = ptr IP_OPTION_INFORMATION32
     ICMP_ECHO_REPLY32* {.pure.} = object
       Address*: IPAddr
@@ -6093,4 +7540,5 @@ when winimCpu64:
       Reserved*: USHORT
       Data*: pointer
       Options*: IP_OPTION_INFORMATION32
+
     PICMP_ECHO_REPLY32* = ptr ICMP_ECHO_REPLY32

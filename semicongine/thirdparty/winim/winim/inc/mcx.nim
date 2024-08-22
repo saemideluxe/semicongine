@@ -28,6 +28,7 @@ type
     dwMaxDTERate*: DWORD
     dwMaxDCERate*: DWORD
     abVariablePortion*: array[1, BYTE]
+
   PMODEMDEVCAPS* = ptr MODEMDEVCAPS
   LPMODEMDEVCAPS* = ptr MODEMDEVCAPS
   MODEMSETTINGS* {.pure.} = object
@@ -43,8 +44,10 @@ type
     dwNegotiatedModemOptions*: DWORD
     dwNegotiatedDCERate*: DWORD
     abVariablePortion*: array[1, BYTE]
+
   PMODEMSETTINGS* = ptr MODEMSETTINGS
   LPMODEMSETTINGS* = ptr MODEMSETTINGS
+
 const
   DIALOPTION_BILLING* = 0x00000040
   DIALOPTION_QUIET* = 0x00000080

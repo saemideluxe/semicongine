@@ -87,44 +87,171 @@ const
   VIF_BUFFTOOSMALL* = 0x00040000
   VIF_CANNOTLOADLZ32* = 0x00080000
   VIF_CANNOTLOADCABINET* = 0x00100000
-type
-  VS_FIXEDFILEINFO* {.pure.} = object
-    dwSignature*: DWORD
-    dwStrucVersion*: DWORD
-    dwFileVersionMS*: DWORD
-    dwFileVersionLS*: DWORD
-    dwProductVersionMS*: DWORD
-    dwProductVersionLS*: DWORD
-    dwFileFlagsMask*: DWORD
-    dwFileFlags*: DWORD
-    dwFileOS*: DWORD
-    dwFileType*: DWORD
-    dwFileSubtype*: DWORD
-    dwFileDateMS*: DWORD
-    dwFileDateLS*: DWORD
-proc VerFindFileA*(uFlags: DWORD, szFileName: LPSTR, szWinDir: LPSTR, szAppDir: LPSTR, szCurDir: LPSTR, lpuCurDirLen: PUINT, szDestDir: LPSTR, lpuDestDirLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc VerFindFileW*(uFlags: DWORD, szFileName: LPWSTR, szWinDir: LPWSTR, szAppDir: LPWSTR, szCurDir: LPWSTR, lpuCurDirLen: PUINT, szDestDir: LPWSTR, lpuDestDirLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc VerInstallFileA*(uFlags: DWORD, szSrcFileName: LPSTR, szDestFileName: LPSTR, szSrcDir: LPSTR, szDestDir: LPSTR, szCurDir: LPSTR, szTmpFile: LPSTR, lpuTmpFileLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc VerInstallFileW*(uFlags: DWORD, szSrcFileName: LPWSTR, szDestFileName: LPWSTR, szSrcDir: LPWSTR, szDestDir: LPWSTR, szCurDir: LPWSTR, szTmpFile: LPWSTR, lpuTmpFileLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc GetFileVersionInfoSizeA*(lptstrFilename: LPCSTR, lpdwHandle: LPDWORD): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc GetFileVersionInfoSizeW*(lptstrFilename: LPCWSTR, lpdwHandle: LPDWORD): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc GetFileVersionInfoA*(lptstrFilename: LPCSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
-proc GetFileVersionInfoW*(lptstrFilename: LPCWSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
-proc VerLanguageNameA*(wLang: DWORD, szLang: LPSTR, nSize: DWORD): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc VerLanguageNameW*(wLang: DWORD, szLang: LPWSTR, nSize: DWORD): DWORD {.winapi, stdcall, dynlib: "version", importc.}
-proc VerQueryValueA*(pBlock: LPVOID, lpSubBlock: LPCSTR, lplpBuffer: ptr LPVOID, puLen: PUINT): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
-proc VerQueryValueW*(pBlock: LPVOID, lpSubBlock: LPCWSTR, lplpBuffer: ptr LPVOID, puLen: PUINT): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
+type VS_FIXEDFILEINFO* {.pure.} = object
+  dwSignature*: DWORD
+  dwStrucVersion*: DWORD
+  dwFileVersionMS*: DWORD
+  dwFileVersionLS*: DWORD
+  dwProductVersionMS*: DWORD
+  dwProductVersionLS*: DWORD
+  dwFileFlagsMask*: DWORD
+  dwFileFlags*: DWORD
+  dwFileOS*: DWORD
+  dwFileType*: DWORD
+  dwFileSubtype*: DWORD
+  dwFileDateMS*: DWORD
+  dwFileDateLS*: DWORD
+
+proc VerFindFileA*(
+  uFlags: DWORD,
+  szFileName: LPSTR,
+  szWinDir: LPSTR,
+  szAppDir: LPSTR,
+  szCurDir: LPSTR,
+  lpuCurDirLen: PUINT,
+  szDestDir: LPSTR,
+  lpuDestDirLen: PUINT,
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc VerFindFileW*(
+  uFlags: DWORD,
+  szFileName: LPWSTR,
+  szWinDir: LPWSTR,
+  szAppDir: LPWSTR,
+  szCurDir: LPWSTR,
+  lpuCurDirLen: PUINT,
+  szDestDir: LPWSTR,
+  lpuDestDirLen: PUINT,
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc VerInstallFileA*(
+  uFlags: DWORD,
+  szSrcFileName: LPSTR,
+  szDestFileName: LPSTR,
+  szSrcDir: LPSTR,
+  szDestDir: LPSTR,
+  szCurDir: LPSTR,
+  szTmpFile: LPSTR,
+  lpuTmpFileLen: PUINT,
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc VerInstallFileW*(
+  uFlags: DWORD,
+  szSrcFileName: LPWSTR,
+  szDestFileName: LPWSTR,
+  szSrcDir: LPWSTR,
+  szDestDir: LPWSTR,
+  szCurDir: LPWSTR,
+  szTmpFile: LPWSTR,
+  lpuTmpFileLen: PUINT,
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc GetFileVersionInfoSizeA*(
+  lptstrFilename: LPCSTR, lpdwHandle: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc GetFileVersionInfoSizeW*(
+  lptstrFilename: LPCWSTR, lpdwHandle: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc GetFileVersionInfoA*(
+  lptstrFilename: LPCSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID
+): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
+
+proc GetFileVersionInfoW*(
+  lptstrFilename: LPCWSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID
+): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
+
+proc VerLanguageNameA*(
+  wLang: DWORD, szLang: LPSTR, nSize: DWORD
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc VerLanguageNameW*(
+  wLang: DWORD, szLang: LPWSTR, nSize: DWORD
+): DWORD {.winapi, stdcall, dynlib: "version", importc.}
+
+proc VerQueryValueA*(
+  pBlock: LPVOID, lpSubBlock: LPCSTR, lplpBuffer: ptr LPVOID, puLen: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
+
+proc VerQueryValueW*(
+  pBlock: LPVOID, lpSubBlock: LPCWSTR, lplpBuffer: ptr LPVOID, puLen: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "version", importc.}
+
 when winimUnicode:
-  proc VerFindFile*(uFlags: DWORD, szFileName: LPWSTR, szWinDir: LPWSTR, szAppDir: LPWSTR, szCurDir: LPWSTR, lpuCurDirLen: PUINT, szDestDir: LPWSTR, lpuDestDirLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerFindFileW".}
-  proc VerInstallFile*(uFlags: DWORD, szSrcFileName: LPWSTR, szDestFileName: LPWSTR, szSrcDir: LPWSTR, szDestDir: LPWSTR, szCurDir: LPWSTR, szTmpFile: LPWSTR, lpuTmpFileLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerInstallFileW".}
-  proc GetFileVersionInfoSize*(lptstrFilename: LPCWSTR, lpdwHandle: LPDWORD): DWORD {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoSizeW".}
-  proc GetFileVersionInfo*(lptstrFilename: LPCWSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoW".}
-  proc VerLanguageName*(wLang: DWORD, szLang: LPWSTR, nSize: DWORD): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerLanguageNameW".}
-  proc VerQueryValue*(pBlock: LPVOID, lpSubBlock: LPCWSTR, lplpBuffer: ptr LPVOID, puLen: PUINT): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "VerQueryValueW".}
+  proc VerFindFile*(
+    uFlags: DWORD,
+    szFileName: LPWSTR,
+    szWinDir: LPWSTR,
+    szAppDir: LPWSTR,
+    szCurDir: LPWSTR,
+    lpuCurDirLen: PUINT,
+    szDestDir: LPWSTR,
+    lpuDestDirLen: PUINT,
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerFindFileW".}
+
+  proc VerInstallFile*(
+    uFlags: DWORD,
+    szSrcFileName: LPWSTR,
+    szDestFileName: LPWSTR,
+    szSrcDir: LPWSTR,
+    szDestDir: LPWSTR,
+    szCurDir: LPWSTR,
+    szTmpFile: LPWSTR,
+    lpuTmpFileLen: PUINT,
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerInstallFileW".}
+
+  proc GetFileVersionInfoSize*(
+    lptstrFilename: LPCWSTR, lpdwHandle: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoSizeW".}
+
+  proc GetFileVersionInfo*(
+    lptstrFilename: LPCWSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoW".}
+
+  proc VerLanguageName*(
+    wLang: DWORD, szLang: LPWSTR, nSize: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerLanguageNameW".}
+
+  proc VerQueryValue*(
+    pBlock: LPVOID, lpSubBlock: LPCWSTR, lplpBuffer: ptr LPVOID, puLen: PUINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "VerQueryValueW".}
+
 when winimAnsi:
-  proc VerFindFile*(uFlags: DWORD, szFileName: LPSTR, szWinDir: LPSTR, szAppDir: LPSTR, szCurDir: LPSTR, lpuCurDirLen: PUINT, szDestDir: LPSTR, lpuDestDirLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerFindFileA".}
-  proc VerInstallFile*(uFlags: DWORD, szSrcFileName: LPSTR, szDestFileName: LPSTR, szSrcDir: LPSTR, szDestDir: LPSTR, szCurDir: LPSTR, szTmpFile: LPSTR, lpuTmpFileLen: PUINT): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerInstallFileA".}
-  proc GetFileVersionInfoSize*(lptstrFilename: LPCSTR, lpdwHandle: LPDWORD): DWORD {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoSizeA".}
-  proc GetFileVersionInfo*(lptstrFilename: LPCSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoA".}
-  proc VerLanguageName*(wLang: DWORD, szLang: LPSTR, nSize: DWORD): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerLanguageNameA".}
-  proc VerQueryValue*(pBlock: LPVOID, lpSubBlock: LPCSTR, lplpBuffer: ptr LPVOID, puLen: PUINT): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "VerQueryValueA".}
+  proc VerFindFile*(
+    uFlags: DWORD,
+    szFileName: LPSTR,
+    szWinDir: LPSTR,
+    szAppDir: LPSTR,
+    szCurDir: LPSTR,
+    lpuCurDirLen: PUINT,
+    szDestDir: LPSTR,
+    lpuDestDirLen: PUINT,
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerFindFileA".}
+
+  proc VerInstallFile*(
+    uFlags: DWORD,
+    szSrcFileName: LPSTR,
+    szDestFileName: LPSTR,
+    szSrcDir: LPSTR,
+    szDestDir: LPSTR,
+    szCurDir: LPSTR,
+    szTmpFile: LPSTR,
+    lpuTmpFileLen: PUINT,
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerInstallFileA".}
+
+  proc GetFileVersionInfoSize*(
+    lptstrFilename: LPCSTR, lpdwHandle: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoSizeA".}
+
+  proc GetFileVersionInfo*(
+    lptstrFilename: LPCSTR, dwHandle: DWORD, dwLen: DWORD, lpData: LPVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "GetFileVersionInfoA".}
+
+  proc VerLanguageName*(
+    wLang: DWORD, szLang: LPSTR, nSize: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "version", importc: "VerLanguageNameA".}
+
+  proc VerQueryValue*(
+    pBlock: LPVOID, lpSubBlock: LPCSTR, lplpBuffer: ptr LPVOID, puLen: PUINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "version", importc: "VerQueryValueA".}

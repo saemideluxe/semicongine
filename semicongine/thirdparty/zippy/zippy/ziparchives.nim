@@ -1,5 +1,16 @@
-import common, crc, internal, std/memfiles, std/os, std/strutils, std/tables,
-    std/times, std/unicode, ziparchives_v1, ../zippy, std/sequtils
+import
+  common,
+  crc,
+  internal,
+  std/memfiles,
+  std/os,
+  std/strutils,
+  std/tables,
+  std/times,
+  std/unicode,
+  ziparchives_v1,
+  ../zippy,
+  std/sequtils
 
 export common, ziparchives_v1
 
@@ -14,7 +25,8 @@ const
 
 type
   ZipArchiveRecordKind = enum
-    FileRecord, DirectoryRecord
+    FileRecord
+    DirectoryRecord
 
   ZipArchiveRecord = object
     kind: ZipArchiveRecordKind
@@ -37,9 +49,8 @@ iterator walkFiles*(reader: ZipArchiveReader): string =
       yield record.path
 
 proc extractFile*(
-  reader: ZipArchiveReader, path: string
+    reader: ZipArchiveReader, path: string
 ): string {.raises: [ZippyError].} =
-
   template failNoFileRecord() =
     raise newException(ZippyError, "No file record found for " & path)
 
@@ -76,7 +87,7 @@ proc extractFile*(
   if pos + record.compressedSize > reader.memFile.size:
     failArchiveEOF()
 
-  case record.kind:
+  case record.kind
   of FileRecord:
     if compressionMethod == 0: # No compression
       if record.compressedSize > 0:
@@ -105,41 +116,154 @@ proc parseMsDosDateTime(time, date: uint16): Time =
     years = ((date shr 9) and 0b0000000001111111).int
   if seconds <= 59 and minutes <= 59 and hours <= 23:
     result = initDateTime(
-      days.MonthdayRange,
-      months.Month,
-      years + 1980,
-      hours.HourRange,
-      minutes.MinuteRange,
-      seconds.SecondRange,
-      local()
-    ).toTime()
+        days.MonthdayRange,
+        months.Month,
+        years + 1980,
+        hours.HourRange,
+        minutes.MinuteRange,
+        seconds.SecondRange,
+        local(),
+      )
+      .toTime()
 
 proc utf8ify(fileName: string): string =
   const cp437AfterAscii = [
     # 0x80 - 0x8f
-    0x00c7.uint32, 0x00fc, 0x00e9, 0x00e2, 0x00e4, 0x00e0, 0x00e5, 0x00e7,
-    0x00ea, 0x00eb, 0x00e8, 0x00ef, 0x00ee, 0x00ec, 0x00c4, 0x00c5,
+    0x00c7.uint32,
+    0x00fc,
+    0x00e9,
+    0x00e2,
+    0x00e4,
+    0x00e0,
+    0x00e5,
+    0x00e7,
+    0x00ea,
+    0x00eb,
+    0x00e8,
+    0x00ef,
+    0x00ee,
+    0x00ec,
+    0x00c4,
+    0x00c5,
     # 0x90 - 0x9f
-    0x00c9, 0x00e6, 0x00c6, 0x00f4, 0x00f6, 0x00f2, 0x00fb, 0x00f9,
-    0x00ff, 0x00d6, 0x00dc, 0x00a2, 0x00a3, 0x00a5, 0x20a7, 0x0192,
+    0x00c9,
+    0x00e6,
+    0x00c6,
+    0x00f4,
+    0x00f6,
+    0x00f2,
+    0x00fb,
+    0x00f9,
+    0x00ff,
+    0x00d6,
+    0x00dc,
+    0x00a2,
+    0x00a3,
+    0x00a5,
+    0x20a7,
+    0x0192,
     # 0xa0 - 0xaf
-    0x00e1, 0x00ed, 0x00f3, 0x00fa, 0x00f1, 0x00d1, 0x00aa, 0x00ba,
-    0x00bf, 0x2310, 0x00ac, 0x00bd, 0x00bc, 0x00a1, 0x00ab, 0x00bb,
+    0x00e1,
+    0x00ed,
+    0x00f3,
+    0x00fa,
+    0x00f1,
+    0x00d1,
+    0x00aa,
+    0x00ba,
+    0x00bf,
+    0x2310,
+    0x00ac,
+    0x00bd,
+    0x00bc,
+    0x00a1,
+    0x00ab,
+    0x00bb,
     # 0xb0 - 0xbf
-    0x2591, 0x2592, 0x2593, 0x2502, 0x2524, 0x2561, 0x2562, 0x2556,
-    0x2555, 0x2563, 0x2551, 0x2557, 0x255d, 0x255c, 0x255b, 0x2510,
+    0x2591,
+    0x2592,
+    0x2593,
+    0x2502,
+    0x2524,
+    0x2561,
+    0x2562,
+    0x2556,
+    0x2555,
+    0x2563,
+    0x2551,
+    0x2557,
+    0x255d,
+    0x255c,
+    0x255b,
+    0x2510,
     # 0xc0 - 0xcf
-    0x2514, 0x2534, 0x252c, 0x251c, 0x2500, 0x253c, 0x255e, 0x255f,
-    0x255a, 0x2554, 0x2569, 0x2566, 0x2560, 0x2550, 0x256c, 0x2567,
+    0x2514,
+    0x2534,
+    0x252c,
+    0x251c,
+    0x2500,
+    0x253c,
+    0x255e,
+    0x255f,
+    0x255a,
+    0x2554,
+    0x2569,
+    0x2566,
+    0x2560,
+    0x2550,
+    0x256c,
+    0x2567,
     # 0xd0 - 0xdf
-    0x2568, 0x2564, 0x2565, 0x2559, 0x2558, 0x2552, 0x2553, 0x256b,
-    0x256a, 0x2518, 0x250c, 0x2588, 0x2584, 0x258c, 0x2590, 0x2580,
+    0x2568,
+    0x2564,
+    0x2565,
+    0x2559,
+    0x2558,
+    0x2552,
+    0x2553,
+    0x256b,
+    0x256a,
+    0x2518,
+    0x250c,
+    0x2588,
+    0x2584,
+    0x258c,
+    0x2590,
+    0x2580,
     # 0xd0 - 0xdf
-    0x03b1, 0x00df, 0x0393, 0x03c0, 0x03a3, 0x03c3, 0x00b5, 0x03c4,
-    0x03a6, 0x0398, 0x03a9, 0x03b4, 0x221e, 0x03c6, 0x03b5, 0x2229,
+    0x03b1,
+    0x00df,
+    0x0393,
+    0x03c0,
+    0x03a3,
+    0x03c3,
+    0x00b5,
+    0x03c4,
+    0x03a6,
+    0x0398,
+    0x03a9,
+    0x03b4,
+    0x221e,
+    0x03c6,
+    0x03b5,
+    0x2229,
     # 0xf0 - 0xff
-    0x2261, 0x00b1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00f7, 0x2248,
-    0x00b0, 0x2219, 0x00b7, 0x221a, 0x207f, 0x00b2, 0x25a0, 0x00a0
+    0x2261,
+    0x00b1,
+    0x2265,
+    0x2264,
+    0x2320,
+    0x2321,
+    0x00f7,
+    0x2248,
+    0x00b0,
+    0x2219,
+    0x00b7,
+    0x221a,
+    0x207f,
+    0x00b2,
+    0x25a0,
+    0x00a0,
   ]
 
   if validateUtf8(fileName) == -1:
@@ -167,8 +291,7 @@ proc findEndOfCentralDirectory(reader: ZipArchiveReader): int =
       dec result
 
 proc findStartOfCentralDirectory(
-  reader: ZipArchiveReader,
-  start, numRecordEntries: int
+    reader: ZipArchiveReader, start, numRecordEntries: int
 ): int =
   let src = cast[ptr UncheckedArray[uint8]](reader.memFile.mem)
 
@@ -184,7 +307,7 @@ proc findStartOfCentralDirectory(
     dec result
 
 proc openZipArchive*(
-  zipPath: string
+    zipPath: string
 ): ZipArchiveReader {.raises: [IOError, OSError, ZippyError].} =
   result = ZipArchiveReader()
   result.memFile = memfiles.open(zipPath)
@@ -224,9 +347,9 @@ proc openZipArchive*(
         raise newException(ZippyError, "Invalid central directory file header")
 
       # let
-        # endOfCentralDirectorySize = read64(src, pos + 4).int
-        # versionMadeBy = read16(src, pos + 12)
-        # minVersionToExtract = read16(src, pos + 14)
+      # endOfCentralDirectorySize = read64(src, pos + 4).int
+      # versionMadeBy = read16(src, pos + 12)
+      # minVersionToExtract = read16(src, pos + 14)
       diskNumber = read32(src, pos + 16).int
       startDisk = read32(src, pos + 20).int
       numRecordsOnDisk = read64(src, pos + 24).int
@@ -383,7 +506,7 @@ proc openZipArchive*(
         compressedSize: compressedSize,
         uncompressedSize: uncompressedSize,
         uncompressedCrc32: uncompressedCrc32,
-        filePermissions: parseFilePermissions(externalFileAttr.int shr 16)
+        filePermissions: parseFilePermissions(externalFileAttr.int shr 16),
       )
   except IOError as e:
     result.close()
@@ -395,9 +518,7 @@ proc openZipArchive*(
     result.close()
     raise e
 
-proc extractAll*(
-  zipPath, dest: string
-) {.raises: [IOError, OSError, ZippyError].} =
+proc extractAll*(zipPath, dest: string) {.raises: [IOError, OSError, ZippyError].} =
   ## Extracts the files stored in archive to the destination directory.
   ## The path to the destination directory must exist.
   ## The destination directory itself must not exist (it is not overwitten).
@@ -421,7 +542,7 @@ proc extractAll*(
   try:
     # Create the directories and write the extracted files
     for _, record in reader.records:
-      case record.kind:
+      case record.kind
       of DirectoryRecord:
         createDir(dest / record.path)
       of FileRecord:
@@ -455,9 +576,8 @@ proc extractAll*(
 when (NimMajor, NimMinor, NimPatch) >= (1, 6, 0):
   # For some reason `sink Table | OrderedTable` does not work, so work around:
   template createZipArchiveImpl(
-    entries: var Table[string, string] | var OrderedTable[string, string]
+      entries: var Table[string, string] | var OrderedTable[string, string]
   ) =
-
     proc add16(dst: var string, v: int16 | uint16) =
       dst.setLen(dst.len + 2)
       var tmp = v
@@ -527,13 +647,18 @@ when (NimMajor, NimMinor, NimPatch) >= (1, 6, 0):
           compressed = compress(contents, BestSpeed, dfDeflate)
           compressionMethod = 8
 
-      records.add((fileName, ArchiveEntry(
-        fileHeaderOffset: result.len,
-        uncompressedLen: uncompressedLen,
-        compressedLen: compressed.len,
-        compressionMethod: compressionMethod,
-        uncompressedCrc32: uncompressedCrc32
-      )))
+      records.add(
+        (
+          fileName,
+          ArchiveEntry(
+            fileHeaderOffset: result.len,
+            uncompressedLen: uncompressedLen,
+            compressedLen: compressed.len,
+            compressionMethod: compressionMethod,
+            uncompressedCrc32: uncompressedCrc32,
+          ),
+        )
+      )
 
       result.add32(fileHeaderSignature)
       result.add16(45) # Min version to extract
@@ -558,9 +683,7 @@ when (NimMajor, NimMinor, NimPatch) >= (1, 6, 0):
       if compressed != "":
         result.setLen(result.len + compressed.len)
         copyMem(
-          result[result.len - compressed.len].addr,
-          compressed.cstring,
-          compressed.len
+          result[result.len - compressed.len].addr, compressed.cstring, compressed.len
         )
 
     let centralDirectoryStart = result.len
@@ -583,7 +706,8 @@ when (NimMajor, NimMinor, NimPatch) >= (1, 6, 0):
       result.add16(0) # Disk number where file starts
       result.add16(0) # Internal file attributes
       result.add32(0) # External file attributes
-      result.add32(uint32.high) # Relative offset of local file header (or 0xffffffff for ZIP64)
+      result.add32(uint32.high)
+        # Relative offset of local file header (or 0xffffffff for ZIP64)
 
       result.add(records[i][0])
 
@@ -614,18 +738,22 @@ when (NimMajor, NimMinor, NimPatch) >= (1, 6, 0):
     result.add32(endOfCentralDirectorySignature)
     result.add16(0) # Number of this disk
     result.add16(0) # Disk where central directory starts
-    result.add16(uint16.high) # Number of central directory records on this disk (or 0xffff for ZIP64)
-    result.add16(uint16.high) # Total number of central directory records (or 0xffff for ZIP64)
-    result.add32(uint32.high) # Size of central directory (bytes) (or 0xffffffff for ZIP64)
-    result.add32(uint32.high) # Offset of start of central directory, relative to start of archive (or 0xffffffff for ZIP64)
+    result.add16(uint16.high)
+      # Number of central directory records on this disk (or 0xffff for ZIP64)
+    result.add16(uint16.high)
+      # Total number of central directory records (or 0xffff for ZIP64)
+    result.add32(uint32.high)
+      # Size of central directory (bytes) (or 0xffffffff for ZIP64)
+    result.add32(uint32.high)
+      # Offset of start of central directory, relative to start of archive (or 0xffffffff for ZIP64)
     result.add16(0)
 
   proc createZipArchive*(
-    entries: sink Table[string, string]
+      entries: sink Table[string, string]
   ): string {.raises: [ZippyError].} =
     createZipArchiveImpl(entries)
 
   proc createZipArchive*(
-    entries: sink OrderedTable[string, string]
+      entries: sink OrderedTable[string, string]
   ): string {.raises: [ZippyError].} =
     createZipArchiveImpl(entries)

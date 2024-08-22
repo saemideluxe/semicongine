@@ -4,8 +4,7 @@
 # Do not change!  Changing this file implies a protocol change!
 #
 
-import
-  x
+import x
 
 const
   XA_PRIMARY* = Atom(1)

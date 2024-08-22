@@ -18,6 +18,7 @@ type
     stream*: ptr BYTE
     length*: UINT
     dynamic*: WINBOOL
+
   AsnBits* = AsnOctetString
   AsnSequence* = AsnOctetString
   AsnImplicitSequence* = AsnOctetString
@@ -28,6 +29,7 @@ type
   AsnObjectIdentifier* {.pure, packed.} = object
     idLength*: UINT
     ids*: ptr UINT
+
   AsnObjectName* = AsnObjectIdentifier
   AsnAny_asnValue* {.pure, union.} = object
     number*: AsnInteger32
@@ -42,22 +44,27 @@ type
     gauge*: AsnGauge32
     ticks*: AsnTimeticks
     arbitrary*: AsnOpaque
+
   AsnAny* {.pure, packed.} = object
     asnType*: BYTE
     padding*: array[3, byte]
     asnValue*: AsnAny_asnValue
+
   AsnObjectSyntax* = AsnAny
   SnmpVarBind* {.pure.} = object
     name*: AsnObjectName
     value*: AsnObjectSyntax
+
   SnmpVarBindList* {.pure, packed.} = object
     list*: ptr SnmpVarBind
     len*: UINT
+
   RFC1157VarBindList* = SnmpVarBindList
   RFC1157VarBind* = SnmpVarBind
   AsnInteger* = AsnInteger32
   AsnCounter* = AsnCounter32
   AsnGauge* = AsnGauge32
+
 const
   asnUNIVERSAL* = 0x00
   asnAPPLICATION* = 0x40
@@ -174,59 +181,228 @@ const
   asnPRIMATIVE* = asnPRIMITIVE
   asnUNSIGNED32* = asnUINTEGER32
 type
-  SnmpExtensionInit* = proc (dwUptimeReference: DWORD, phSubagentTrapEvent: ptr HANDLE, pFirstSupportedRegion: ptr AsnObjectIdentifier): WINBOOL {.stdcall.}
-  SnmpExtensionInitEx* = proc (pNextSupportedRegion: ptr AsnObjectIdentifier): WINBOOL {.stdcall.}
-  SnmpExtensionMonitor* = proc (pAgentMgmtData: LPVOID): WINBOOL {.stdcall.}
-  SnmpExtensionQuery* = proc (bPduType: BYTE, pVarBindList: ptr SnmpVarBindList, pErrorStatus: ptr AsnInteger32, pErrorIndex: ptr AsnInteger32): WINBOOL {.stdcall.}
-  SnmpExtensionQueryEx* = proc (nRequestType: UINT, nTransactionId: UINT, pVarBindList: ptr SnmpVarBindList, pContextInfo: ptr AsnOctetString, pErrorStatus: ptr AsnInteger32, pErrorIndex: ptr AsnInteger32): WINBOOL {.stdcall.}
-  SnmpExtensionTrap* = proc (pEnterpriseOid: ptr AsnObjectIdentifier, pGenericTrapId: ptr AsnInteger32, pSpecificTrapId: ptr AsnInteger32, pTimeStamp: ptr AsnTimeticks, pVarBindList: ptr SnmpVarBindList): WINBOOL {.stdcall.}
-  SnmpExtensionClose* = proc (): VOID {.stdcall.}
-  PFNSNMPEXTENSIONINIT* = proc (dwUpTimeReference: DWORD, phSubagentTrapEvent: ptr HANDLE, pFirstSupportedRegion: ptr AsnObjectIdentifier): WINBOOL {.stdcall.}
-  PFNSNMPEXTENSIONINITEX* = proc (pNextSupportedRegion: ptr AsnObjectIdentifier): WINBOOL {.stdcall.}
-  PFNSNMPEXTENSIONMONITOR* = proc (pAgentMgmtData: LPVOID): WINBOOL {.stdcall.}
-  PFNSNMPEXTENSIONQUERY* = proc (bPduType: BYTE, pVarBindList: ptr SnmpVarBindList, pErrorStatus: ptr AsnInteger32, pErrorIndex: ptr AsnInteger32): WINBOOL {.stdcall.}
-  PFNSNMPEXTENSIONQUERYEX* = proc (nRequestType: UINT, nTransactionId: UINT, pVarBindList: ptr SnmpVarBindList, pContextInfo: ptr AsnOctetString, pErrorStatus: ptr AsnInteger32, pErrorIndex: ptr AsnInteger32): WINBOOL {.stdcall.}
-  PFNSNMPEXTENSIONTRAP* = proc (pEnterpriseOid: ptr AsnObjectIdentifier, pGenericTrapId: ptr AsnInteger32, pSpecificTrapId: ptr AsnInteger32, pTimeStamp: ptr AsnTimeticks, pVarBindList: ptr SnmpVarBindList): WINBOOL {.stdcall.}
-  PFNSNMPEXTENSIONCLOSE* = proc (): VOID {.stdcall.}
-proc SnmpUtilOidCpy*(pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOidAppend*(pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOidNCmp*(pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier, nSubIds: UINT): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOidCmp*(pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOidFree*(pOid: ptr AsnObjectIdentifier): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOctetsCmp*(pOctets1: ptr AsnOctetString, pOctets2: ptr AsnOctetString): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOctetsNCmp*(pOctets1: ptr AsnOctetString, pOctets2: ptr AsnOctetString, nChars: UINT): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOctetsCpy*(pOctetsDst: ptr AsnOctetString, pOctetsSrc: ptr AsnOctetString): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOctetsFree*(pOctets: ptr AsnOctetString): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilAsnAnyCpy*(pAnyDst: ptr AsnAny, pAnySrc: ptr AsnAny): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilAsnAnyFree*(pAny: ptr AsnAny): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilVarBindCpy*(pVbDst: ptr SnmpVarBind, pVbSrc: ptr SnmpVarBind): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilVarBindFree*(pVb: ptr SnmpVarBind): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilVarBindListCpy*(pVblDst: ptr SnmpVarBindList, pVblSrc: ptr SnmpVarBindList): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilVarBindListFree*(pVbl: ptr SnmpVarBindList): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilMemFree*(pMem: LPVOID): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilMemAlloc*(nBytes: UINT): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilMemReAlloc*(pMem: LPVOID, nBytes: UINT): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilOidToA*(Oid: ptr AsnObjectIdentifier): LPSTR {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilIdsToA*(Ids: ptr UINT, IdLength: UINT): LPSTR {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilPrintOid*(Oid: ptr AsnObjectIdentifier): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilPrintAsnAny*(pAny: ptr AsnAny): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+  SnmpExtensionInit* = proc(
+    dwUptimeReference: DWORD,
+    phSubagentTrapEvent: ptr HANDLE,
+    pFirstSupportedRegion: ptr AsnObjectIdentifier,
+  ): WINBOOL {.stdcall.}
+  SnmpExtensionInitEx* =
+    proc(pNextSupportedRegion: ptr AsnObjectIdentifier): WINBOOL {.stdcall.}
+  SnmpExtensionMonitor* = proc(pAgentMgmtData: LPVOID): WINBOOL {.stdcall.}
+  SnmpExtensionQuery* = proc(
+    bPduType: BYTE,
+    pVarBindList: ptr SnmpVarBindList,
+    pErrorStatus: ptr AsnInteger32,
+    pErrorIndex: ptr AsnInteger32,
+  ): WINBOOL {.stdcall.}
+  SnmpExtensionQueryEx* = proc(
+    nRequestType: UINT,
+    nTransactionId: UINT,
+    pVarBindList: ptr SnmpVarBindList,
+    pContextInfo: ptr AsnOctetString,
+    pErrorStatus: ptr AsnInteger32,
+    pErrorIndex: ptr AsnInteger32,
+  ): WINBOOL {.stdcall.}
+  SnmpExtensionTrap* = proc(
+    pEnterpriseOid: ptr AsnObjectIdentifier,
+    pGenericTrapId: ptr AsnInteger32,
+    pSpecificTrapId: ptr AsnInteger32,
+    pTimeStamp: ptr AsnTimeticks,
+    pVarBindList: ptr SnmpVarBindList,
+  ): WINBOOL {.stdcall.}
+  SnmpExtensionClose* = proc(): VOID {.stdcall.}
+  PFNSNMPEXTENSIONINIT* = proc(
+    dwUpTimeReference: DWORD,
+    phSubagentTrapEvent: ptr HANDLE,
+    pFirstSupportedRegion: ptr AsnObjectIdentifier,
+  ): WINBOOL {.stdcall.}
+  PFNSNMPEXTENSIONINITEX* =
+    proc(pNextSupportedRegion: ptr AsnObjectIdentifier): WINBOOL {.stdcall.}
+  PFNSNMPEXTENSIONMONITOR* = proc(pAgentMgmtData: LPVOID): WINBOOL {.stdcall.}
+  PFNSNMPEXTENSIONQUERY* = proc(
+    bPduType: BYTE,
+    pVarBindList: ptr SnmpVarBindList,
+    pErrorStatus: ptr AsnInteger32,
+    pErrorIndex: ptr AsnInteger32,
+  ): WINBOOL {.stdcall.}
+  PFNSNMPEXTENSIONQUERYEX* = proc(
+    nRequestType: UINT,
+    nTransactionId: UINT,
+    pVarBindList: ptr SnmpVarBindList,
+    pContextInfo: ptr AsnOctetString,
+    pErrorStatus: ptr AsnInteger32,
+    pErrorIndex: ptr AsnInteger32,
+  ): WINBOOL {.stdcall.}
+  PFNSNMPEXTENSIONTRAP* = proc(
+    pEnterpriseOid: ptr AsnObjectIdentifier,
+    pGenericTrapId: ptr AsnInteger32,
+    pSpecificTrapId: ptr AsnInteger32,
+    pTimeStamp: ptr AsnTimeticks,
+    pVarBindList: ptr SnmpVarBindList,
+  ): WINBOOL {.stdcall.}
+  PFNSNMPEXTENSIONCLOSE* = proc(): VOID {.stdcall.}
+
+proc SnmpUtilOidCpy*(
+  pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOidAppend*(
+  pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOidNCmp*(
+  pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier, nSubIds: UINT
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOidCmp*(
+  pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOidFree*(
+  pOid: ptr AsnObjectIdentifier
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOctetsCmp*(
+  pOctets1: ptr AsnOctetString, pOctets2: ptr AsnOctetString
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOctetsNCmp*(
+  pOctets1: ptr AsnOctetString, pOctets2: ptr AsnOctetString, nChars: UINT
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOctetsCpy*(
+  pOctetsDst: ptr AsnOctetString, pOctetsSrc: ptr AsnOctetString
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOctetsFree*(
+  pOctets: ptr AsnOctetString
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilAsnAnyCpy*(
+  pAnyDst: ptr AsnAny, pAnySrc: ptr AsnAny
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilAsnAnyFree*(
+  pAny: ptr AsnAny
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilVarBindCpy*(
+  pVbDst: ptr SnmpVarBind, pVbSrc: ptr SnmpVarBind
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilVarBindFree*(
+  pVb: ptr SnmpVarBind
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilVarBindListCpy*(
+  pVblDst: ptr SnmpVarBindList, pVblSrc: ptr SnmpVarBindList
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilVarBindListFree*(
+  pVbl: ptr SnmpVarBindList
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilMemFree*(
+  pMem: LPVOID
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilMemAlloc*(
+  nBytes: UINT
+): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilMemReAlloc*(
+  pMem: LPVOID, nBytes: UINT
+): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilOidToA*(
+  Oid: ptr AsnObjectIdentifier
+): LPSTR {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilIdsToA*(
+  Ids: ptr UINT, IdLength: UINT
+): LPSTR {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilPrintOid*(
+  Oid: ptr AsnObjectIdentifier
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilPrintAsnAny*(
+  pAny: ptr AsnAny
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
 proc SnmpSvcGetUptime*(): DWORD {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpSvcSetLogLevel*(nLogLevel: INT): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpSvcSetLogType*(nLogType: INT): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
-proc SnmpUtilDbgPrint*(nLogLevel: INT, szFormat: LPSTR): VOID {.winapi, cdecl, varargs, dynlib: "snmpapi", importc.}
-proc SNMP_oidcpy*(pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidCpy".}
-proc SNMP_oidappend*(pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidAppend".}
-proc SNMP_oidncmp*(pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier, nSubIds: UINT): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidNCmp".}
-proc SNMP_oidcmp*(pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidCmp".}
-proc SNMP_oidfree*(pOid: ptr AsnObjectIdentifier): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidFree".}
-proc SNMP_CopyVarBindList*(pVblDst: ptr SnmpVarBindList, pVblSrc: ptr SnmpVarBindList): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindListCpy".}
-proc SNMP_FreeVarBindList*(pVbl: ptr SnmpVarBindList): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindListFree".}
-proc SNMP_CopyVarBind*(pVbDst: ptr SnmpVarBind, pVbSrc: ptr SnmpVarBind): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindCpy".}
-proc SNMP_FreeVarBind*(pVb: ptr SnmpVarBind): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindFree".}
-proc SNMP_printany*(pAny: ptr AsnAny): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilPrintAsnAny".}
-proc SNMP_free*(pMem: LPVOID): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemFree".}
-proc SNMP_malloc*(nBytes: UINT): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemAlloc".}
-proc SNMP_realloc*(pMem: LPVOID, nBytes: UINT): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemReAlloc".}
-proc SNMP_DBG_free*(pMem: LPVOID): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemFree".}
-proc SNMP_DBG_malloc*(nBytes: UINT): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemAlloc".}
-proc SNMP_DBG_realloc*(pMem: LPVOID, nBytes: UINT): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemReAlloc".}
+proc SnmpSvcSetLogLevel*(
+  nLogLevel: INT
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpSvcSetLogType*(
+  nLogType: INT
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc.}
+
+proc SnmpUtilDbgPrint*(
+  nLogLevel: INT, szFormat: LPSTR
+): VOID {.winapi, cdecl, varargs, dynlib: "snmpapi", importc.}
+
+proc SNMP_oidcpy*(
+  pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidCpy".}
+
+proc SNMP_oidappend*(
+  pOidDst: ptr AsnObjectIdentifier, pOidSrc: ptr AsnObjectIdentifier
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidAppend".}
+
+proc SNMP_oidncmp*(
+  pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier, nSubIds: UINT
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidNCmp".}
+
+proc SNMP_oidcmp*(
+  pOid1: ptr AsnObjectIdentifier, pOid2: ptr AsnObjectIdentifier
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidCmp".}
+
+proc SNMP_oidfree*(
+  pOid: ptr AsnObjectIdentifier
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilOidFree".}
+
+proc SNMP_CopyVarBindList*(
+  pVblDst: ptr SnmpVarBindList, pVblSrc: ptr SnmpVarBindList
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindListCpy".}
+
+proc SNMP_FreeVarBindList*(
+  pVbl: ptr SnmpVarBindList
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindListFree".}
+
+proc SNMP_CopyVarBind*(
+  pVbDst: ptr SnmpVarBind, pVbSrc: ptr SnmpVarBind
+): INT {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindCpy".}
+
+proc SNMP_FreeVarBind*(
+  pVb: ptr SnmpVarBind
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilVarBindFree".}
+
+proc SNMP_printany*(
+  pAny: ptr AsnAny
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilPrintAsnAny".}
+
+proc SNMP_free*(
+  pMem: LPVOID
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemFree".}
+
+proc SNMP_malloc*(
+  nBytes: UINT
+): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemAlloc".}
+
+proc SNMP_realloc*(
+  pMem: LPVOID, nBytes: UINT
+): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemReAlloc".}
+
+proc SNMP_DBG_free*(
+  pMem: LPVOID
+): VOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemFree".}
+
+proc SNMP_DBG_malloc*(
+  nBytes: UINT
+): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemAlloc".}
+
+proc SNMP_DBG_realloc*(
+  pMem: LPVOID, nBytes: UINT
+): LPVOID {.winapi, stdcall, dynlib: "snmpapi", importc: "SnmpUtilMemReAlloc".}

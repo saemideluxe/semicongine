@@ -59,8 +59,7 @@
 #        2004/10/03 - Conversion from C header to Pascal unit.
 #
 
-const
-  libXi* = "libXi.so(|.6)"
+const libXi* = "libXi.so(|.6)"
 
 const
   sz_xGetExtensionVersionReq* = 8
@@ -121,8 +120,7 @@ const
   sz_xChangeDeviceControlReq* = 8
   sz_xChangeDeviceControlReply* = 32
 
-const
-  INAME* = "XInputExtension"
+const INAME* = "XInputExtension"
 
 const
   XI_KEYBOARD* = "KEYBOARD"
@@ -171,11 +169,9 @@ const
   XI_Add_XChangeDeviceControl_Major* = 1
   XI_Add_XChangeDeviceControl_Minor* = 3
 
-const
-  DEVICE_RESOLUTION* = 1
+const DEVICE_RESOLUTION* = 1
 
-const
-  NoSuchExtension* = 1
+const NoSuchExtension* = 1
 
 const
   COUNT* = 0
@@ -189,8 +185,7 @@ const
   XPOINTER* = 0
   XKEYBOARD* = 1
 
-const
-  UseXKeyboard* = 0x000000FF
+const UseXKeyboard* = 0x000000FF
 
 const
   IsXPointer* = 0
@@ -224,16 +219,14 @@ const
   DvKey* = int(1) shl 6
   DvAutoRepeatMode* = 1 shl 7
 
-const
-  DvString* = int(1) shl 0
+const DvString* = int(1) shl 0
 
-const
-  DvInteger* = int(1) shl 0
+const DvInteger* = int(1) shl 0
 
 const
   DeviceMode* = int(1) shl 0
   Relative* = 0
-  Absolute* = 1            # Merged from Metrolink tree for XINPUT stuff
+  Absolute* = 1 # Merged from Metrolink tree for XINPUT stuff
   TS_Raw* = 57
   TS_Scaled* = 58
   SendCoreEvents* = 59
@@ -282,17 +275,16 @@ const
   XI_BadEvent* = 1
   XI_BadMode* = 2
   XI_DeviceBusy* = 3
-  XI_BadClass* = 4 # Make XEventClass be a CARD32 for 64 bit servers.  Don't affect client
-                   #  definition of XEventClass since that would be a library interface change.
-                   #  See the top of X.h for more _XSERVER64 magic.
-                   #
+  XI_BadClass* = 4
+    # Make XEventClass be a CARD32 for 64 bit servers.  Don't affect client
+    #  definition of XEventClass since that would be a library interface change.
+    #  See the top of X.h for more _XSERVER64 magic.
+    #
 
 when defined(XSERVER64):
-  type
-    XEventClass* = CARD32
+  type XEventClass* = CARD32
 else:
-  type
-    XEventClass* = int32
+  type XEventClass* = int32
 #******************************************************************
 # *
 # * Extension version structure.
@@ -301,7 +293,7 @@ else:
 
 type
   PXExtensionVersion* = ptr XExtensionVersion
-  XExtensionVersion*{.final.} = object
+  XExtensionVersion* {.final.} = object
     present*: int16
     major_version*: int16
     minor_version*: int16

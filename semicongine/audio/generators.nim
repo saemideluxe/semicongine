@@ -1,6 +1,7 @@
 proc sinewave(f: float): proc(x: float): float =
   proc ret(x: float): float =
     sin(x * 2 * Pi * f)
+
   result = ret
 
 proc sineSoundData*(f: float, len: float, rate: int, amplitude = 0.5'f32): SoundData =

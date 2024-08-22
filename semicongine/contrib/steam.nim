@@ -12,10 +12,8 @@ elif defined(windows):
   steam_api = "steam_api".loadLib()
   # TODO: maybe should get some error reporting on windows too?
 
-
 # required to store reference, when calling certain APIs
-type
-  SteamUserStatsRef = ptr object
+type SteamUserStatsRef = ptr object
 var userStats: SteamUserStatsRef
 
 # load function pointers for steam API
@@ -23,13 +21,16 @@ var
   Shutdown*: proc() {.stdcall.}
   Init: proc(msg: ptr array[1024, char]): cint {.stdcall.}
   SteamUserStats: proc(): SteamUserStatsRef {.stdcall.}
-  RequestCurrentStats: proc(self: SteamUserStatsRef): bool {.stdcall.} # needs to be called before the achievment-stuff
+  RequestCurrentStats: proc(self: SteamUserStatsRef): bool {.stdcall.}
+    # needs to be called before the achievment-stuff
   ClearAchievement: proc(self: SteamUserStatsRef, pchName: cstring): bool {.stdcall.}
   SetAchievement: proc(self: SteamUserStatsRef, pchName: cstring): bool {.stdcall.}
-  StoreStats: proc(self: SteamUserStatsRef): bool {.stdcall.}          # needs to be called in order for achievments to be saved
-                                                                       # dynlib-helper function
+  StoreStats: proc(self: SteamUserStatsRef): bool {.stdcall.}
+    # needs to be called in order for achievments to be saved
+    # dynlib-helper function
 proc loadFunc[T](nimFunc: var T, dllFuncName: string) =
   nimFunc = cast[T](steam_api.checkedSymAddr(dllFuncName))
+
 if steam_api != nil:
   loadFunc(Init, "SteamAPI_InitFlat")
   loadFunc(Shutdown, "SteamAPI_Shutdown")
@@ -38,7 +39,6 @@ if steam_api != nil:
   loadFunc(ClearAchievement, "SteamAPI_ISteamUserStats_ClearAchievement")
   loadFunc(SetAchievement, "SteamAPI_ISteamUserStats_SetAchievement")
   loadFunc(StoreStats, "SteamAPI_ISteamUserStats_StoreStats")
-
 
 # nice wrappers for steam API
 
@@ -56,7 +56,6 @@ proc SteamStoreStats*(): bool =
 
 proc SteamShutdown*() =
   Shutdown()
-
 
 # helper funcs
 proc SteamAvailable*(): bool =

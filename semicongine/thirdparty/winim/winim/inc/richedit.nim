@@ -26,43 +26,109 @@ type
     dvaspect*: DWORD
     dwFlags*: DWORD
     dwUser*: DWORD
+
   CHARRANGE* {.pure.} = object
     cpMin*: LONG
     cpMax*: LONG
+
   IRichEditOle* {.pure.} = object
     lpVtbl*: ptr IRichEditOleVtbl
+
   IRichEditOleVtbl* {.pure, inheritable.} = object of IUnknownVtbl
-    GetClientSite*: proc(self: ptr IRichEditOle, lplpolesite: ptr LPOLECLIENTSITE): HRESULT {.stdcall.}
+    GetClientSite*: proc(
+      self: ptr IRichEditOle, lplpolesite: ptr LPOLECLIENTSITE
+    ): HRESULT {.stdcall.}
     GetObjectCount*: proc(self: ptr IRichEditOle): LONG {.stdcall.}
     GetLinkCount*: proc(self: ptr IRichEditOle): LONG {.stdcall.}
-    GetObject*: proc(self: ptr IRichEditOle, iob: LONG, lpreobject: ptr REOBJECT, dwFlags: DWORD): HRESULT {.stdcall.}
-    InsertObject*: proc(self: ptr IRichEditOle, lpreobject: ptr REOBJECT): HRESULT {.stdcall.}
-    ConvertObject*: proc(self: ptr IRichEditOle, iob: LONG, rclsidNew: REFCLSID, lpstrUserTypeNew: LPCSTR): HRESULT {.stdcall.}
-    ActivateAs*: proc(self: ptr IRichEditOle, rclsid: REFCLSID, rclsidAs: REFCLSID): HRESULT {.stdcall.}
-    SetHostNames*: proc(self: ptr IRichEditOle, lpstrContainerApp: LPCSTR, lpstrContainerObj: LPCSTR): HRESULT {.stdcall.}
-    SetLinkAvailable*: proc(self: ptr IRichEditOle, iob: LONG, fAvailable: WINBOOL): HRESULT {.stdcall.}
-    SetDvaspect*: proc(self: ptr IRichEditOle, iob: LONG, dvaspect: DWORD): HRESULT {.stdcall.}
+    GetObject*: proc(
+      self: ptr IRichEditOle, iob: LONG, lpreobject: ptr REOBJECT, dwFlags: DWORD
+    ): HRESULT {.stdcall.}
+    InsertObject*:
+      proc(self: ptr IRichEditOle, lpreobject: ptr REOBJECT): HRESULT {.stdcall.}
+    ConvertObject*: proc(
+      self: ptr IRichEditOle, iob: LONG, rclsidNew: REFCLSID, lpstrUserTypeNew: LPCSTR
+    ): HRESULT {.stdcall.}
+    ActivateAs*: proc(
+      self: ptr IRichEditOle, rclsid: REFCLSID, rclsidAs: REFCLSID
+    ): HRESULT {.stdcall.}
+    SetHostNames*: proc(
+      self: ptr IRichEditOle, lpstrContainerApp: LPCSTR, lpstrContainerObj: LPCSTR
+    ): HRESULT {.stdcall.}
+    SetLinkAvailable*:
+      proc(self: ptr IRichEditOle, iob: LONG, fAvailable: WINBOOL): HRESULT {.stdcall.}
+    SetDvaspect*:
+      proc(self: ptr IRichEditOle, iob: LONG, dvaspect: DWORD): HRESULT {.stdcall.}
     HandsOffStorage*: proc(self: ptr IRichEditOle, iob: LONG): HRESULT {.stdcall.}
-    SaveCompleted*: proc(self: ptr IRichEditOle, iob: LONG, lpstg: LPSTORAGE): HRESULT {.stdcall.}
+    SaveCompleted*:
+      proc(self: ptr IRichEditOle, iob: LONG, lpstg: LPSTORAGE): HRESULT {.stdcall.}
     InPlaceDeactivate*: proc(self: ptr IRichEditOle): HRESULT {.stdcall.}
-    ContextSensitiveHelp*: proc(self: ptr IRichEditOle, fEnterMode: WINBOOL): HRESULT {.stdcall.}
-    GetClipboardData*: proc(self: ptr IRichEditOle, lpchrg: ptr CHARRANGE, reco: DWORD, lplpdataobj: ptr LPDATAOBJECT): HRESULT {.stdcall.}
-    ImportDataObject*: proc(self: ptr IRichEditOle, lpdataobj: LPDATAOBJECT, cf: CLIPFORMAT, hMetaPict: HGLOBAL): HRESULT {.stdcall.}
+    ContextSensitiveHelp*:
+      proc(self: ptr IRichEditOle, fEnterMode: WINBOOL): HRESULT {.stdcall.}
+    GetClipboardData*: proc(
+      self: ptr IRichEditOle,
+      lpchrg: ptr CHARRANGE,
+      reco: DWORD,
+      lplpdataobj: ptr LPDATAOBJECT,
+    ): HRESULT {.stdcall.}
+    ImportDataObject*: proc(
+      self: ptr IRichEditOle,
+      lpdataobj: LPDATAOBJECT,
+      cf: CLIPFORMAT,
+      hMetaPict: HGLOBAL,
+    ): HRESULT {.stdcall.}
+
   LPRICHEDITOLE* = ptr IRichEditOle
   IRichEditOleCallback* {.pure.} = object
     lpVtbl*: ptr IRichEditOleCallbackVtbl
+
   IRichEditOleCallbackVtbl* {.pure, inheritable.} = object of IUnknownVtbl
-    GetNewStorage*: proc(self: ptr IRichEditOleCallback, lplpstg: ptr LPSTORAGE): HRESULT {.stdcall.}
-    GetInPlaceContext*: proc(self: ptr IRichEditOleCallback, lplpFrame: ptr LPOLEINPLACEFRAME, lplpDoc: ptr LPOLEINPLACEUIWINDOW, lpFrameInfo: LPOLEINPLACEFRAMEINFO): HRESULT {.stdcall.}
-    ShowContainerUI*: proc(self: ptr IRichEditOleCallback, fShow: WINBOOL): HRESULT {.stdcall.}
-    QueryInsertObject*: proc(self: ptr IRichEditOleCallback, lpclsid: LPCLSID, lpstg: LPSTORAGE, cp: LONG): HRESULT {.stdcall.}
-    DeleteObject*: proc(self: ptr IRichEditOleCallback, lpoleobj: LPOLEOBJECT): HRESULT {.stdcall.}
-    QueryAcceptData*: proc(self: ptr IRichEditOleCallback, lpdataobj: LPDATAOBJECT, lpcfFormat: ptr CLIPFORMAT, reco: DWORD, fReally: WINBOOL, hMetaPict: HGLOBAL): HRESULT {.stdcall.}
-    ContextSensitiveHelp*: proc(self: ptr IRichEditOleCallback, fEnterMode: WINBOOL): HRESULT {.stdcall.}
-    GetClipboardData*: proc(self: ptr IRichEditOleCallback, lpchrg: ptr CHARRANGE, reco: DWORD, lplpdataobj: ptr LPDATAOBJECT): HRESULT {.stdcall.}
-    GetDragDropEffect*: proc(self: ptr IRichEditOleCallback, fDrag: WINBOOL, grfKeyState: DWORD, pdwEffect: LPDWORD): HRESULT {.stdcall.}
-    GetContextMenu*: proc(self: ptr IRichEditOleCallback, seltype: WORD, lpoleobj: LPOLEOBJECT, lpchrg: ptr CHARRANGE, lphmenu: ptr HMENU): HRESULT {.stdcall.}
+    GetNewStorage*:
+      proc(self: ptr IRichEditOleCallback, lplpstg: ptr LPSTORAGE): HRESULT {.stdcall.}
+    GetInPlaceContext*: proc(
+      self: ptr IRichEditOleCallback,
+      lplpFrame: ptr LPOLEINPLACEFRAME,
+      lplpDoc: ptr LPOLEINPLACEUIWINDOW,
+      lpFrameInfo: LPOLEINPLACEFRAMEINFO,
+    ): HRESULT {.stdcall.}
+    ShowContainerUI*:
+      proc(self: ptr IRichEditOleCallback, fShow: WINBOOL): HRESULT {.stdcall.}
+    QueryInsertObject*: proc(
+      self: ptr IRichEditOleCallback, lpclsid: LPCLSID, lpstg: LPSTORAGE, cp: LONG
+    ): HRESULT {.stdcall.}
+    DeleteObject*:
+      proc(self: ptr IRichEditOleCallback, lpoleobj: LPOLEOBJECT): HRESULT {.stdcall.}
+    QueryAcceptData*: proc(
+      self: ptr IRichEditOleCallback,
+      lpdataobj: LPDATAOBJECT,
+      lpcfFormat: ptr CLIPFORMAT,
+      reco: DWORD,
+      fReally: WINBOOL,
+      hMetaPict: HGLOBAL,
+    ): HRESULT {.stdcall.}
+    ContextSensitiveHelp*:
+      proc(self: ptr IRichEditOleCallback, fEnterMode: WINBOOL): HRESULT {.stdcall.}
+    GetClipboardData*: proc(
+      self: ptr IRichEditOleCallback,
+      lpchrg: ptr CHARRANGE,
+      reco: DWORD,
+      lplpdataobj: ptr LPDATAOBJECT,
+    ): HRESULT {.stdcall.}
+    GetDragDropEffect*: proc(
+      self: ptr IRichEditOleCallback,
+      fDrag: WINBOOL,
+      grfKeyState: DWORD,
+      pdwEffect: LPDWORD,
+    ): HRESULT {.stdcall.}
+    GetContextMenu*: proc(
+      self: ptr IRichEditOleCallback,
+      seltype: WORD,
+      lpoleobj: LPOLEOBJECT,
+      lpchrg: ptr CHARRANGE,
+      lphmenu: ptr HMENU,
+    ): HRESULT {.stdcall.}
+
   LPRICHEDITOLECALLBACK* = ptr IRichEditOleCallback
+
 const
   RICHEDIT_VER* = 0x0800
   cchTextLimitDefault* = 32767
@@ -72,88 +138,88 @@ const
   RICHEDIT_CLASSA* = "RichEdit20A"
   RICHEDIT_CLASS10A* = "RICHEDIT"
   RICHEDIT_CLASSW* = "RichEdit20W"
-  EM_CANPASTE* = WM_USER+50
-  EM_DISPLAYBAND* = WM_USER+51
-  EM_EXGETSEL* = WM_USER+52
-  EM_EXLIMITTEXT* = WM_USER+53
-  EM_EXLINEFROMCHAR* = WM_USER+54
-  EM_EXSETSEL* = WM_USER+55
-  EM_FINDTEXT* = WM_USER+56
-  EM_FORMATRANGE* = WM_USER+57
-  EM_GETCHARFORMAT* = WM_USER+58
-  EM_GETEVENTMASK* = WM_USER+59
-  EM_GETOLEINTERFACE* = WM_USER+60
-  EM_GETPARAFORMAT* = WM_USER+61
-  EM_GETSELTEXT* = WM_USER+62
-  EM_HIDESELECTION* = WM_USER+63
-  EM_PASTESPECIAL* = WM_USER+64
-  EM_REQUESTRESIZE* = WM_USER+65
-  EM_SELECTIONTYPE* = WM_USER+66
-  EM_SETBKGNDCOLOR* = WM_USER+67
-  EM_SETCHARFORMAT* = WM_USER+68
-  EM_SETEVENTMASK* = WM_USER+69
-  EM_SETOLECALLBACK* = WM_USER+70
-  EM_SETPARAFORMAT* = WM_USER+71
-  EM_SETTARGETDEVICE* = WM_USER+72
-  EM_STREAMIN* = WM_USER+73
-  EM_STREAMOUT* = WM_USER+74
-  EM_GETTEXTRANGE* = WM_USER+75
-  EM_FINDWORDBREAK* = WM_USER+76
-  EM_SETOPTIONS* = WM_USER+77
-  EM_GETOPTIONS* = WM_USER+78
-  EM_FINDTEXTEX* = WM_USER+79
-  EM_GETWORDBREAKPROCEX* = WM_USER+80
-  EM_SETWORDBREAKPROCEX* = WM_USER+81
-  EM_SETUNDOLIMIT* = WM_USER+82
-  EM_REDO* = WM_USER+84
-  EM_CANREDO* = WM_USER+85
-  EM_GETUNDONAME* = WM_USER+86
-  EM_GETREDONAME* = WM_USER+87
-  EM_STOPGROUPTYPING* = WM_USER+88
-  EM_SETTEXTMODE* = WM_USER+89
-  EM_GETTEXTMODE* = WM_USER+90
+  EM_CANPASTE* = WM_USER + 50
+  EM_DISPLAYBAND* = WM_USER + 51
+  EM_EXGETSEL* = WM_USER + 52
+  EM_EXLIMITTEXT* = WM_USER + 53
+  EM_EXLINEFROMCHAR* = WM_USER + 54
+  EM_EXSETSEL* = WM_USER + 55
+  EM_FINDTEXT* = WM_USER + 56
+  EM_FORMATRANGE* = WM_USER + 57
+  EM_GETCHARFORMAT* = WM_USER + 58
+  EM_GETEVENTMASK* = WM_USER + 59
+  EM_GETOLEINTERFACE* = WM_USER + 60
+  EM_GETPARAFORMAT* = WM_USER + 61
+  EM_GETSELTEXT* = WM_USER + 62
+  EM_HIDESELECTION* = WM_USER + 63
+  EM_PASTESPECIAL* = WM_USER + 64
+  EM_REQUESTRESIZE* = WM_USER + 65
+  EM_SELECTIONTYPE* = WM_USER + 66
+  EM_SETBKGNDCOLOR* = WM_USER + 67
+  EM_SETCHARFORMAT* = WM_USER + 68
+  EM_SETEVENTMASK* = WM_USER + 69
+  EM_SETOLECALLBACK* = WM_USER + 70
+  EM_SETPARAFORMAT* = WM_USER + 71
+  EM_SETTARGETDEVICE* = WM_USER + 72
+  EM_STREAMIN* = WM_USER + 73
+  EM_STREAMOUT* = WM_USER + 74
+  EM_GETTEXTRANGE* = WM_USER + 75
+  EM_FINDWORDBREAK* = WM_USER + 76
+  EM_SETOPTIONS* = WM_USER + 77
+  EM_GETOPTIONS* = WM_USER + 78
+  EM_FINDTEXTEX* = WM_USER + 79
+  EM_GETWORDBREAKPROCEX* = WM_USER + 80
+  EM_SETWORDBREAKPROCEX* = WM_USER + 81
+  EM_SETUNDOLIMIT* = WM_USER + 82
+  EM_REDO* = WM_USER + 84
+  EM_CANREDO* = WM_USER + 85
+  EM_GETUNDONAME* = WM_USER + 86
+  EM_GETREDONAME* = WM_USER + 87
+  EM_STOPGROUPTYPING* = WM_USER + 88
+  EM_SETTEXTMODE* = WM_USER + 89
+  EM_GETTEXTMODE* = WM_USER + 90
   TM_PLAINTEXT* = 1
   TM_RICHTEXT* = 2
   TM_SINGLELEVELUNDO* = 4
   TM_MULTILEVELUNDO* = 8
   TM_SINGLECODEPAGE* = 16
   TM_MULTICODEPAGE* = 32
-  EM_AUTOURLDETECT* = WM_USER+91
+  EM_AUTOURLDETECT* = WM_USER + 91
   AURL_ENABLEURL* = 1
   AURL_ENABLEEMAILADDR* = 2
   AURL_ENABLETELNO* = 4
   AURL_ENABLEEAURLS* = 8
   AURL_ENABLEDRIVELETTERS* = 16
   AURL_DISABLEMIXEDLGC* = 32
-  EM_GETAUTOURLDETECT* = WM_USER+92
-  EM_SETPALETTE* = WM_USER+93
-  EM_GETTEXTEX* = WM_USER+94
-  EM_GETTEXTLENGTHEX* = WM_USER+95
-  EM_SHOWSCROLLBAR* = WM_USER+96
-  EM_SETTEXTEX* = WM_USER+97
-  EM_SETPUNCTUATION* = WM_USER+100
-  EM_GETPUNCTUATION* = WM_USER+101
-  EM_SETWORDWRAPMODE* = WM_USER+102
-  EM_GETWORDWRAPMODE* = WM_USER+103
-  EM_SETIMECOLOR* = WM_USER+104
-  EM_GETIMECOLOR* = WM_USER+105
-  EM_SETIMEOPTIONS* = WM_USER+106
-  EM_GETIMEOPTIONS* = WM_USER+107
-  EM_CONVPOSITION* = WM_USER+108
-  EM_SETLANGOPTIONS* = WM_USER+120
-  EM_GETLANGOPTIONS* = WM_USER+121
-  EM_GETIMECOMPMODE* = WM_USER+122
-  EM_FINDTEXTW* = WM_USER+123
-  EM_FINDTEXTEXW* = WM_USER+124
-  EM_RECONVERSION* = WM_USER+125
-  EM_SETIMEMODEBIAS* = WM_USER+126
-  EM_GETIMEMODEBIAS* = WM_USER+127
-  EM_SETBIDIOPTIONS* = WM_USER+200
-  EM_GETBIDIOPTIONS* = WM_USER+201
-  EM_SETTYPOGRAPHYOPTIONS* = WM_USER+202
-  EM_GETTYPOGRAPHYOPTIONS* = WM_USER+203
-  EM_SETEDITSTYLE* = WM_USER+204
-  EM_GETEDITSTYLE* = WM_USER+205
+  EM_GETAUTOURLDETECT* = WM_USER + 92
+  EM_SETPALETTE* = WM_USER + 93
+  EM_GETTEXTEX* = WM_USER + 94
+  EM_GETTEXTLENGTHEX* = WM_USER + 95
+  EM_SHOWSCROLLBAR* = WM_USER + 96
+  EM_SETTEXTEX* = WM_USER + 97
+  EM_SETPUNCTUATION* = WM_USER + 100
+  EM_GETPUNCTUATION* = WM_USER + 101
+  EM_SETWORDWRAPMODE* = WM_USER + 102
+  EM_GETWORDWRAPMODE* = WM_USER + 103
+  EM_SETIMECOLOR* = WM_USER + 104
+  EM_GETIMECOLOR* = WM_USER + 105
+  EM_SETIMEOPTIONS* = WM_USER + 106
+  EM_GETIMEOPTIONS* = WM_USER + 107
+  EM_CONVPOSITION* = WM_USER + 108
+  EM_SETLANGOPTIONS* = WM_USER + 120
+  EM_GETLANGOPTIONS* = WM_USER + 121
+  EM_GETIMECOMPMODE* = WM_USER + 122
+  EM_FINDTEXTW* = WM_USER + 123
+  EM_FINDTEXTEXW* = WM_USER + 124
+  EM_RECONVERSION* = WM_USER + 125
+  EM_SETIMEMODEBIAS* = WM_USER + 126
+  EM_GETIMEMODEBIAS* = WM_USER + 127
+  EM_SETBIDIOPTIONS* = WM_USER + 200
+  EM_GETBIDIOPTIONS* = WM_USER + 201
+  EM_SETTYPOGRAPHYOPTIONS* = WM_USER + 202
+  EM_GETTYPOGRAPHYOPTIONS* = WM_USER + 203
+  EM_SETEDITSTYLE* = WM_USER + 204
+  EM_GETEDITSTYLE* = WM_USER + 205
   SES_EMULATESYSEDIT* = 1
   SES_BEEPONMAXTEXT* = 2
   SES_EXTENDBACKCOLOR* = 4
@@ -209,29 +275,29 @@ const
   TO_SIMPLELINEBREAK* = 0x0002
   TO_DISABLECUSTOMTEXTOUT* = 0x0004
   TO_ADVANCEDLAYOUT* = 0x0008
-  EM_OUTLINE* = WM_USER+220
-  EM_GETSCROLLPOS* = WM_USER+221
-  EM_SETSCROLLPOS* = WM_USER+222
-  EM_SETFONTSIZE* = WM_USER+223
-  EM_GETZOOM* = WM_USER+224
-  EM_SETZOOM* = WM_USER+225
-  EM_GETVIEWKIND* = WM_USER+226
-  EM_SETVIEWKIND* = WM_USER+227
-  EM_GETPAGE* = WM_USER+228
-  EM_SETPAGE* = WM_USER+229
-  EM_GETHYPHENATEINFO* = WM_USER+230
-  EM_SETHYPHENATEINFO* = WM_USER+231
-  EM_GETPAGEROTATE* = WM_USER+235
-  EM_SETPAGEROTATE* = WM_USER+236
-  EM_GETCTFMODEBIAS* = WM_USER+237
-  EM_SETCTFMODEBIAS* = WM_USER+238
-  EM_GETCTFOPENSTATUS* = WM_USER+240
-  EM_SETCTFOPENSTATUS* = WM_USER+241
-  EM_GETIMECOMPTEXT* = WM_USER+242
-  EM_ISIME* = WM_USER+243
-  EM_GETIMEPROPERTY* = WM_USER+244
-  EM_GETQUERYRTFOBJ* = WM_USER+269
-  EM_SETQUERYRTFOBJ* = WM_USER+270
+  EM_OUTLINE* = WM_USER + 220
+  EM_GETSCROLLPOS* = WM_USER + 221
+  EM_SETSCROLLPOS* = WM_USER + 222
+  EM_SETFONTSIZE* = WM_USER + 223
+  EM_GETZOOM* = WM_USER + 224
+  EM_SETZOOM* = WM_USER + 225
+  EM_GETVIEWKIND* = WM_USER + 226
+  EM_SETVIEWKIND* = WM_USER + 227
+  EM_GETPAGE* = WM_USER + 228
+  EM_SETPAGE* = WM_USER + 229
+  EM_GETHYPHENATEINFO* = WM_USER + 230
+  EM_SETHYPHENATEINFO* = WM_USER + 231
+  EM_GETPAGEROTATE* = WM_USER + 235
+  EM_SETPAGEROTATE* = WM_USER + 236
+  EM_GETCTFMODEBIAS* = WM_USER + 237
+  EM_SETCTFMODEBIAS* = WM_USER + 238
+  EM_GETCTFOPENSTATUS* = WM_USER + 240
+  EM_SETCTFOPENSTATUS* = WM_USER + 241
+  EM_GETIMECOMPTEXT* = WM_USER + 242
+  EM_ISIME* = WM_USER + 243
+  EM_GETIMEPROPERTY* = WM_USER + 244
+  EM_GETQUERYRTFOBJ* = WM_USER + 269
+  EM_SETQUERYRTFOBJ* = WM_USER + 270
   EPR_0* = 0
   EPR_270* = 1
   EPR_180* = 2
@@ -264,17 +330,17 @@ const
   VM_NORMAL* = 4
   VM_OUTLINE* = 2
   VM_PAGE* = 9
-  EM_INSERTTABLE* = WM_USER+232
-  EM_GETAUTOCORRECTPROC* = WM_USER+233
-  EM_SETAUTOCORRECTPROC* = WM_USER+234
-  EM_CALLAUTOCORRECTPROC* = WM_USER+255
+  EM_INSERTTABLE* = WM_USER + 232
+  EM_GETAUTOCORRECTPROC* = WM_USER + 233
+  EM_SETAUTOCORRECTPROC* = WM_USER + 234
+  EM_CALLAUTOCORRECTPROC* = WM_USER + 255
   ATP_NOCHANGE* = 0
   ATP_CHANGE* = 1
   ATP_NODELIMITER* = 2
   ATP_REPLACEALLTEXT* = 4
-  EM_GETTABLEPARMS* = WM_USER+265
-  EM_SETEDITSTYLEEX* = WM_USER+275
-  EM_GETEDITSTYLEEX* = WM_USER+276
+  EM_GETTABLEPARMS* = WM_USER + 265
+  EM_SETEDITSTYLEEX* = WM_USER + 275
+  EM_GETEDITSTYLEEX* = WM_USER + 276
   SES_EX_NOTABLE* = 0x00000004
   SES_EX_HANDLEFRIENDLYURL* = 0x00000100
   SES_EX_NOTHEMING* = 0x00080000
@@ -283,20 +349,20 @@ const
   SES_EX_MULTITOUCH* = 0x08000000
   SES_EX_HIDETEMPFORMAT* = 0x10000000
   SES_EX_USEMOUSEWPARAM* = 0x20000000
-  EM_GETSTORYTYPE* = WM_USER+290
-  EM_SETSTORYTYPE* = WM_USER+291
-  EM_GETELLIPSISMODE* = WM_USER+305
-  EM_SETELLIPSISMODE* = WM_USER+306
+  EM_GETSTORYTYPE* = WM_USER + 290
+  EM_SETSTORYTYPE* = WM_USER + 291
+  EM_GETELLIPSISMODE* = WM_USER + 305
+  EM_SETELLIPSISMODE* = WM_USER + 306
   ELLIPSIS_MASK* = 0x00000003
   ELLIPSIS_NONE* = 0x00000000
   ELLIPSIS_END* = 0x00000001
   ELLIPSIS_WORD* = 0x00000003
-  EM_SETTABLEPARMS* = WM_USER+307
-  EM_GETTOUCHOPTIONS* = WM_USER+310
-  EM_SETTOUCHOPTIONS* = WM_USER+311
-  EM_INSERTIMAGE* = WM_USER+314
-  EM_SETUIANAME* = WM_USER+320
-  EM_GETELLIPSISSTATE* = WM_USER+322
+  EM_SETTABLEPARMS* = WM_USER + 307
+  EM_GETTOUCHOPTIONS* = WM_USER + 310
+  EM_SETTOUCHOPTIONS* = WM_USER + 311
+  EM_INSERTIMAGE* = WM_USER + 314
+  EM_SETUIANAME* = WM_USER + 320
+  EM_GETELLIPSISSTATE* = WM_USER + 322
   RTO_SHOWHANDLES* = 1
   RTO_DISABLEHANDLES* = 2
   RTO_READINGMODE* = 3
@@ -443,10 +509,18 @@ const
   CFM_BACKCOLOR* = 0x04000000
   CFM_SUBSCRIPT* = CFE_SUBSCRIPT or CFE_SUPERSCRIPT
   CFM_SUPERSCRIPT* = CFM_SUBSCRIPT
-  CFM_EFFECTS* = CFM_BOLD or CFM_ITALIC or CFM_UNDERLINE or CFM_COLOR or CFM_STRIKEOUT or CFE_PROTECTED or CFM_LINK
+  CFM_EFFECTS* =
+    CFM_BOLD or CFM_ITALIC or CFM_UNDERLINE or CFM_COLOR or CFM_STRIKEOUT or
+    CFE_PROTECTED or CFM_LINK
   CFM_ALL* = CFM_EFFECTS or CFM_SIZE or CFM_FACE or CFM_OFFSET or CFM_CHARSET
-  CFM_EFFECTS2* = CFM_EFFECTS or CFM_DISABLED or CFM_SMALLCAPS or CFM_ALLCAPS or CFM_HIDDEN or CFM_OUTLINE or CFM_SHADOW or CFM_EMBOSS or CFM_IMPRINT or CFM_REVISED or CFM_SUBSCRIPT or CFM_SUPERSCRIPT or CFM_BACKCOLOR
-  CFM_ALL2* = CFM_ALL or CFM_EFFECTS2 or CFM_BACKCOLOR or CFM_LCID or CFM_UNDERLINETYPE or CFM_WEIGHT or CFM_REVAUTHOR or CFM_SPACING or CFM_KERNING or CFM_STYLE or CFM_ANIMATION or CFM_COOKIE
+  CFM_EFFECTS2* =
+    CFM_EFFECTS or CFM_DISABLED or CFM_SMALLCAPS or CFM_ALLCAPS or CFM_HIDDEN or
+    CFM_OUTLINE or CFM_SHADOW or CFM_EMBOSS or CFM_IMPRINT or CFM_REVISED or
+    CFM_SUBSCRIPT or CFM_SUPERSCRIPT or CFM_BACKCOLOR
+  CFM_ALL2* =
+    CFM_ALL or CFM_EFFECTS2 or CFM_BACKCOLOR or CFM_LCID or CFM_UNDERLINETYPE or
+    CFM_WEIGHT or CFM_REVAUTHOR or CFM_SPACING or CFM_KERNING or CFM_STYLE or
+    CFM_ANIMATION or CFM_COOKIE
   CFE_SMALLCAPS* = CFM_SMALLCAPS
   CFE_ALLCAPS* = CFM_ALLCAPS
   CFE_HIDDEN* = CFM_HIDDEN
@@ -463,7 +537,9 @@ const
   CFM_MATHNOBUILDUP* = 0x08000000
   CFM_MATH* = 0x10000000
   CFM_MATHORDINARY* = 0x20000000
-  CFM_ALLEFFECTS* = CFM_EFFECTS2 or CFM_FONTBOUND or CFM_EXTENDED or CFM_MATHNOBUILDUP or CFM_MATH or CFM_MATHORDINARY
+  CFM_ALLEFFECTS* =
+    CFM_EFFECTS2 or CFM_FONTBOUND or CFM_EXTENDED or CFM_MATHNOBUILDUP or CFM_MATH or
+    CFM_MATHORDINARY
   CFE_FONTBOUND* = 0x00100000
   CFE_LINKPROTECTED* = 0x00800000
   CFE_EXTENDED* = 0x02000000
@@ -552,9 +628,17 @@ const
   PFM_TABLEROWDELIMITER* = 0x10000000
   PFM_TEXTWRAPPINGBREAK* = 0x20000000
   PFM_TABLE* = 0x40000000
-  PFM_ALL* = PFM_STARTINDENT or PFM_RIGHTINDENT or PFM_OFFSET or PFM_ALIGNMENT or PFM_TABSTOPS or PFM_NUMBERING or PFM_OFFSETINDENT or PFM_RTLPARA
-  PFM_EFFECTS* = PFM_RTLPARA or PFM_KEEP or PFM_KEEPNEXT or PFM_TABLE or PFM_PAGEBREAKBEFORE or PFM_NOLINENUMBER or PFM_NOWIDOWCONTROL or PFM_DONOTHYPHEN or PFM_SIDEBYSIDE or PFM_TABLE or PFM_TABLEROWDELIMITER
-  PFM_ALL2* = PFM_ALL or PFM_EFFECTS or PFM_SPACEBEFORE or PFM_SPACEAFTER or PFM_LINESPACING or PFM_STYLE or PFM_SHADING or PFM_BORDER or PFM_NUMBERINGTAB or PFM_NUMBERINGSTART or PFM_NUMBERINGSTYLE
+  PFM_ALL* =
+    PFM_STARTINDENT or PFM_RIGHTINDENT or PFM_OFFSET or PFM_ALIGNMENT or PFM_TABSTOPS or
+    PFM_NUMBERING or PFM_OFFSETINDENT or PFM_RTLPARA
+  PFM_EFFECTS* =
+    PFM_RTLPARA or PFM_KEEP or PFM_KEEPNEXT or PFM_TABLE or PFM_PAGEBREAKBEFORE or
+    PFM_NOLINENUMBER or PFM_NOWIDOWCONTROL or PFM_DONOTHYPHEN or PFM_SIDEBYSIDE or
+    PFM_TABLE or PFM_TABLEROWDELIMITER
+  PFM_ALL2* =
+    PFM_ALL or PFM_EFFECTS or PFM_SPACEBEFORE or PFM_SPACEAFTER or PFM_LINESPACING or
+    PFM_STYLE or PFM_SHADING or PFM_BORDER or PFM_NUMBERINGTAB or PFM_NUMBERINGSTART or
+    PFM_NUMBERINGSTYLE
   PFE_RTLPARA* = PFM_RTLPARA shr 16
   PFE_KEEP* = PFM_KEEP shr 16
   PFE_KEEPNEXT* = PFM_KEEPNEXT shr 16
@@ -690,12 +774,23 @@ const
   IID_IRichEditOle* = DEFINE_GUID("00020d00-0000-0000-c000-000000000046")
   IID_IRichEditOleCallback* = DEFINE_GUID("00020d03-0000-0000-c000-000000000046")
 type
-  AutoCorrectProc* = proc (langid: LANGID, pszBefore: ptr WCHAR, pszAfter: ptr WCHAR, cchAfter: LONG, pcchReplaced: ptr LONG): int32 {.stdcall.}
-  EDITWORDBREAKPROCEX* = proc (pchText: ptr char, cchText: LONG, bCharSet: BYTE, action: INT): LONG {.stdcall.}
-  EDITSTREAMCALLBACK* = proc (dwCookie: DWORD_PTR, pbBuff: LPBYTE, cb: LONG, pcb: ptr LONG): DWORD {.stdcall.}
+  AutoCorrectProc* = proc(
+    langid: LANGID,
+    pszBefore: ptr WCHAR,
+    pszAfter: ptr WCHAR,
+    cchAfter: LONG,
+    pcchReplaced: ptr LONG,
+  ): int32 {.stdcall.}
+  EDITWORDBREAKPROCEX* = proc(
+    pchText: ptr char, cchText: LONG, bCharSet: BYTE, action: INT
+  ): LONG {.stdcall.}
+  EDITSTREAMCALLBACK* = proc(
+    dwCookie: DWORD_PTR, pbBuff: LPBYTE, cb: LONG, pcb: ptr LONG
+  ): DWORD {.stdcall.}
   IMECOMPTEXT* {.pure.} = object
     cb*: LONG
     flags*: DWORD
+
   TABLEROWPARMS* {.pure.} = object
     cbRow*: BYTE
     cbCell*: BYTE
@@ -704,23 +799,24 @@ type
     dxCellMargin*: LONG
     dxIndent*: LONG
     dyHeight*: LONG
-    nAlignment* {.bitsize:3.}: DWORD
-    fRTL* {.bitsize:1.}: DWORD
-    fKeep* {.bitsize:1.}: DWORD
-    fKeepFollow* {.bitsize:1.}: DWORD
-    fWrap* {.bitsize:1.}: DWORD
-    fIdentCells* {.bitsize:1.}: DWORD
+    nAlignment* {.bitsize: 3.}: DWORD
+    fRTL* {.bitsize: 1.}: DWORD
+    fKeep* {.bitsize: 1.}: DWORD
+    fKeepFollow* {.bitsize: 1.}: DWORD
+    fWrap* {.bitsize: 1.}: DWORD
+    fIdentCells* {.bitsize: 1.}: DWORD
     cpStartRow*: LONG
     bTableLevel*: BYTE
     iCell*: BYTE
+
   TABLECELLPARMS* {.pure.} = object
     dxWidth*: LONG
-    nVertAlign* {.bitsize:2.}: WORD
-    fMergeTop* {.bitsize:1.}: WORD
-    fMergePrev* {.bitsize:1.}: WORD
-    fVertical* {.bitsize:1.}: WORD
-    fMergeStart* {.bitsize:1.}: WORD
-    fMergeCont* {.bitsize:1.}: WORD
+    nVertAlign* {.bitsize: 2.}: WORD
+    fMergeTop* {.bitsize: 1.}: WORD
+    fMergePrev* {.bitsize: 1.}: WORD
+    fVertical* {.bitsize: 1.}: WORD
+    fMergeStart* {.bitsize: 1.}: WORD
+    fMergeCont* {.bitsize: 1.}: WORD
     wShading*: WORD
     dxBrdrLeft*: SHORT
     dyBrdrTop*: SHORT
@@ -732,6 +828,7 @@ type
     crBrdrBottom*: COLORREF
     crBackPat*: COLORREF
     crForePat*: COLORREF
+
   RICHEDIT_IMAGE_PARAMETERS* {.pure.} = object
     xWidth*: LONG
     yHeight*: LONG
@@ -739,9 +836,11 @@ type
     Type*: LONG
     pwszAlternateText*: LPCWSTR
     pIStream*: ptr IStream
+
   ENDCOMPOSITIONNOTIFY* {.pure, packed.} = object
     nmhdr*: NMHDR
     dwCode*: DWORD
+
   CHARFORMATA* {.pure.} = object
     cbSize*: UINT
     dwMask*: DWORD
@@ -752,6 +851,7 @@ type
     bCharSet*: BYTE
     bPitchAndFamily*: BYTE
     szFaceName*: array[LF_FACESIZE, char]
+
   CHARFORMATW* {.pure.} = object
     cbSize*: UINT
     dwMask*: DWORD
@@ -762,9 +862,11 @@ type
     bCharSet*: BYTE
     bPitchAndFamily*: BYTE
     szFaceName*: array[LF_FACESIZE, WCHAR]
+
   CHARFORMAT2W_UNION1* {.pure, union.} = object
     dwReserved*: DWORD
     dwCookie*: DWORD
+
   CHARFORMAT2W* {.pure.} = object
     cbSize*: UINT
     dwMask*: DWORD
@@ -786,9 +888,11 @@ type
     bAnimation*: BYTE
     bRevAuthor*: BYTE
     bUnderlineColor*: BYTE
+
   CHARFORMAT2A_UNION1* {.pure, union.} = object
     dwReserved*: DWORD
     dwCookie*: DWORD
+
   CHARFORMAT2A* {.pure.} = object
     cbSize*: UINT
     dwMask*: DWORD
@@ -810,39 +914,49 @@ type
     bAnimation*: BYTE
     bRevAuthor*: BYTE
     bUnderlineColor*: BYTE
+
   TEXTRANGEA* {.pure.} = object
     chrg*: CHARRANGE
     lpstrText*: LPSTR
+
   TEXTRANGEW* {.pure.} = object
     chrg*: CHARRANGE
     lpstrText*: LPWSTR
+
   EDITSTREAM* {.pure, packed.} = object
     dwCookie*: DWORD_PTR
     dwError*: DWORD
     pfnCallback*: EDITSTREAMCALLBACK
+
   TFINDTEXTA* {.pure.} = object
     chrg*: CHARRANGE
     lpstrText*: LPCSTR
+
   TFINDTEXTW* {.pure.} = object
     chrg*: CHARRANGE
     lpstrText*: LPCWSTR
+
   FINDTEXTEXA* {.pure.} = object
     chrg*: CHARRANGE
     lpstrText*: LPCSTR
     chrgText*: CHARRANGE
+
   FINDTEXTEXW* {.pure.} = object
     chrg*: CHARRANGE
     lpstrText*: LPCWSTR
     chrgText*: CHARRANGE
+
   FORMATRANGE* {.pure.} = object
     hdc*: HDC
     hdcTarget*: HDC
     rc*: RECT
     rcPage*: RECT
     chrg*: CHARRANGE
+
   PARAFORMAT_UNION1* {.pure, union.} = object
     wReserved*: WORD
     wEffects*: WORD
+
   PARAFORMAT* {.pure.} = object
     cbSize*: UINT
     dwMask*: DWORD
@@ -854,9 +968,11 @@ type
     wAlignment*: WORD
     cTabCount*: SHORT
     rgxTabs*: array[MAX_TAB_STOPS, LONG]
+
   PARAFORMAT2_UNION1* {.pure, union.} = object
     wReserved*: WORD
     wEffects*: WORD
+
   PARAFORMAT2* {.pure.} = object
     cbSize*: UINT
     dwMask*: DWORD
@@ -882,155 +998,377 @@ type
     wBorderSpace*: WORD
     wBorderWidth*: WORD
     wBorders*: WORD
+
   MSGFILTER* {.pure, packed.} = object
     nmhdr*: NMHDR
     msg*: UINT
     wParam*: WPARAM
     lParam*: LPARAM
+
   REQRESIZE* {.pure.} = object
     nmhdr*: NMHDR
     rc*: RECT
+
   SELCHANGE* {.pure, packed.} = object
     nmhdr*: NMHDR
     chrg*: CHARRANGE
     seltyp*: WORD
     padding*: array[2, byte]
+
   GROUPTYPINGCHANGE* {.pure, packed.} = object
     nmhdr*: NMHDR
     fGroupTyping*: WINBOOL
+
   CLIPBOARDFORMAT* {.pure, packed.} = object
     nmhdr*: NMHDR
     cf*: CLIPFORMAT
     padding*: array[2, byte]
+
   GETCONTEXTMENUEX* {.pure, packed.} = object
     chrg*: CHARRANGE
     dwFlags*: DWORD
     pt*: POINT
     pvReserved*: pointer
+
   TENDROPFILES* {.pure.} = object
     nmhdr*: NMHDR
     hDrop*: HANDLE
     cp*: LONG
     fProtected*: WINBOOL
+
   TENPROTECTED* {.pure, packed.} = object
     nmhdr*: NMHDR
     msg*: UINT
     wParam*: WPARAM
     lParam*: LPARAM
     chrg*: CHARRANGE
+
   TENSAVECLIPBOARD* {.pure.} = object
     nmhdr*: NMHDR
     cObjectCount*: LONG
     cch*: LONG
+
   TENOLEOPFAILED* {.pure, packed.} = object
     nmhdr*: NMHDR
     iob*: LONG
     lOper*: LONG
     hr*: HRESULT
+
   OBJECTPOSITIONS* {.pure, packed.} = object
     nmhdr*: NMHDR
     cObjectCount*: LONG
     pcpPositions*: ptr LONG
+
   TENLINK* {.pure, packed.} = object
     nmhdr*: NMHDR
     msg*: UINT
     wParam*: WPARAM
     lParam*: LPARAM
     chrg*: CHARRANGE
+
   TENLOWFIRTF* {.pure.} = object
     nmhdr*: NMHDR
     szControl*: ptr char
+
   TENCORRECTTEXT* {.pure, packed.} = object
     nmhdr*: NMHDR
     chrg*: CHARRANGE
     seltyp*: WORD
     padding*: array[2, byte]
+
   PUNCTUATION* {.pure, packed.} = object
     iSize*: UINT
     szPunctuation*: LPSTR
+
   COMPCOLOR* {.pure.} = object
     crText*: COLORREF
     crBackground*: COLORREF
     dwEffects*: DWORD
+
   REPASTESPECIAL* {.pure, packed.} = object
     dwAspect*: DWORD
     dwParam*: DWORD_PTR
+
   SETTEXTEX* {.pure.} = object
     flags*: DWORD
     codepage*: UINT
+
   GETTEXTEX* {.pure, packed.} = object
     cb*: DWORD
     flags*: DWORD
     codepage*: UINT
     lpDefaultChar*: LPCSTR
     lpUsedDefChar*: LPBOOL
+
   GETTEXTLENGTHEX* {.pure.} = object
     flags*: DWORD
     codepage*: UINT
+
   BIDIOPTIONS* {.pure.} = object
     cbSize*: UINT
     wMask*: WORD
     wEffects*: WORD
+
   HYPHRESULT* {.pure.} = object
     khyph*: KHYPH
     ichHyph*: int32
     chHyph*: WCHAR
+
   HYPHENATEINFO* {.pure, packed.} = object
     cbSize*: SHORT
     dxHyphenateZone*: SHORT
-    pfnHyphenate*: proc(P1: ptr WCHAR, P2: LANGID, P3: int32, P4: ptr HYPHRESULT): void {.stdcall.}
-proc `dwReserved=`*(self: var CHARFORMAT2W, x: DWORD) {.inline.} = self.union1.dwReserved = x
-proc dwReserved*(self: CHARFORMAT2W): DWORD {.inline.} = self.union1.dwReserved
-proc dwReserved*(self: var CHARFORMAT2W): var DWORD {.inline.} = self.union1.dwReserved
-proc `dwCookie=`*(self: var CHARFORMAT2W, x: DWORD) {.inline.} = self.union1.dwCookie = x
-proc dwCookie*(self: CHARFORMAT2W): DWORD {.inline.} = self.union1.dwCookie
-proc dwCookie*(self: var CHARFORMAT2W): var DWORD {.inline.} = self.union1.dwCookie
-proc `dwReserved=`*(self: var CHARFORMAT2A, x: DWORD) {.inline.} = self.union1.dwReserved = x
-proc dwReserved*(self: CHARFORMAT2A): DWORD {.inline.} = self.union1.dwReserved
-proc dwReserved*(self: var CHARFORMAT2A): var DWORD {.inline.} = self.union1.dwReserved
-proc `dwCookie=`*(self: var CHARFORMAT2A, x: DWORD) {.inline.} = self.union1.dwCookie = x
-proc dwCookie*(self: CHARFORMAT2A): DWORD {.inline.} = self.union1.dwCookie
-proc dwCookie*(self: var CHARFORMAT2A): var DWORD {.inline.} = self.union1.dwCookie
-proc `wReserved=`*(self: var PARAFORMAT, x: WORD) {.inline.} = self.union1.wReserved = x
-proc wReserved*(self: PARAFORMAT): WORD {.inline.} = self.union1.wReserved
-proc wReserved*(self: var PARAFORMAT): var WORD {.inline.} = self.union1.wReserved
-proc `wEffects=`*(self: var PARAFORMAT, x: WORD) {.inline.} = self.union1.wEffects = x
-proc wEffects*(self: PARAFORMAT): WORD {.inline.} = self.union1.wEffects
-proc wEffects*(self: var PARAFORMAT): var WORD {.inline.} = self.union1.wEffects
-proc `wReserved=`*(self: var PARAFORMAT2, x: WORD) {.inline.} = self.union1.wReserved = x
-proc wReserved*(self: PARAFORMAT2): WORD {.inline.} = self.union1.wReserved
-proc wReserved*(self: var PARAFORMAT2): var WORD {.inline.} = self.union1.wReserved
-proc `wEffects=`*(self: var PARAFORMAT2, x: WORD) {.inline.} = self.union1.wEffects = x
-proc wEffects*(self: PARAFORMAT2): WORD {.inline.} = self.union1.wEffects
-proc wEffects*(self: var PARAFORMAT2): var WORD {.inline.} = self.union1.wEffects
-proc GetClientSite*(self: ptr IRichEditOle, lplpolesite: ptr LPOLECLIENTSITE): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetClientSite(self, lplpolesite)
-proc GetObjectCount*(self: ptr IRichEditOle): LONG {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetObjectCount(self)
-proc GetLinkCount*(self: ptr IRichEditOle): LONG {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetLinkCount(self)
-proc GetObject*(self: ptr IRichEditOle, iob: LONG, lpreobject: ptr REOBJECT, dwFlags: DWORD): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetObject(self, iob, lpreobject, dwFlags)
-proc InsertObject*(self: ptr IRichEditOle, lpreobject: ptr REOBJECT): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.InsertObject(self, lpreobject)
-proc ConvertObject*(self: ptr IRichEditOle, iob: LONG, rclsidNew: REFCLSID, lpstrUserTypeNew: LPCSTR): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.ConvertObject(self, iob, rclsidNew, lpstrUserTypeNew)
-proc ActivateAs*(self: ptr IRichEditOle, rclsid: REFCLSID, rclsidAs: REFCLSID): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.ActivateAs(self, rclsid, rclsidAs)
-proc SetHostNames*(self: ptr IRichEditOle, lpstrContainerApp: LPCSTR, lpstrContainerObj: LPCSTR): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.SetHostNames(self, lpstrContainerApp, lpstrContainerObj)
-proc SetLinkAvailable*(self: ptr IRichEditOle, iob: LONG, fAvailable: WINBOOL): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.SetLinkAvailable(self, iob, fAvailable)
-proc SetDvaspect*(self: ptr IRichEditOle, iob: LONG, dvaspect: DWORD): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.SetDvaspect(self, iob, dvaspect)
-proc HandsOffStorage*(self: ptr IRichEditOle, iob: LONG): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.HandsOffStorage(self, iob)
-proc SaveCompleted*(self: ptr IRichEditOle, iob: LONG, lpstg: LPSTORAGE): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.SaveCompleted(self, iob, lpstg)
-proc InPlaceDeactivate*(self: ptr IRichEditOle): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.InPlaceDeactivate(self)
-proc ContextSensitiveHelp*(self: ptr IRichEditOle, fEnterMode: WINBOOL): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.ContextSensitiveHelp(self, fEnterMode)
-proc GetClipboardData*(self: ptr IRichEditOle, lpchrg: ptr CHARRANGE, reco: DWORD, lplpdataobj: ptr LPDATAOBJECT): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetClipboardData(self, lpchrg, reco, lplpdataobj)
-proc ImportDataObject*(self: ptr IRichEditOle, lpdataobj: LPDATAOBJECT, cf: CLIPFORMAT, hMetaPict: HGLOBAL): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.ImportDataObject(self, lpdataobj, cf, hMetaPict)
-proc GetNewStorage*(self: ptr IRichEditOleCallback, lplpstg: ptr LPSTORAGE): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetNewStorage(self, lplpstg)
-proc GetInPlaceContext*(self: ptr IRichEditOleCallback, lplpFrame: ptr LPOLEINPLACEFRAME, lplpDoc: ptr LPOLEINPLACEUIWINDOW, lpFrameInfo: LPOLEINPLACEFRAMEINFO): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetInPlaceContext(self, lplpFrame, lplpDoc, lpFrameInfo)
-proc ShowContainerUI*(self: ptr IRichEditOleCallback, fShow: WINBOOL): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.ShowContainerUI(self, fShow)
-proc QueryInsertObject*(self: ptr IRichEditOleCallback, lpclsid: LPCLSID, lpstg: LPSTORAGE, cp: LONG): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.QueryInsertObject(self, lpclsid, lpstg, cp)
-proc DeleteObject*(self: ptr IRichEditOleCallback, lpoleobj: LPOLEOBJECT): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.DeleteObject(self, lpoleobj)
-proc QueryAcceptData*(self: ptr IRichEditOleCallback, lpdataobj: LPDATAOBJECT, lpcfFormat: ptr CLIPFORMAT, reco: DWORD, fReally: WINBOOL, hMetaPict: HGLOBAL): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.QueryAcceptData(self, lpdataobj, lpcfFormat, reco, fReally, hMetaPict)
-proc ContextSensitiveHelp*(self: ptr IRichEditOleCallback, fEnterMode: WINBOOL): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.ContextSensitiveHelp(self, fEnterMode)
-proc GetClipboardData*(self: ptr IRichEditOleCallback, lpchrg: ptr CHARRANGE, reco: DWORD, lplpdataobj: ptr LPDATAOBJECT): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetClipboardData(self, lpchrg, reco, lplpdataobj)
-proc GetDragDropEffect*(self: ptr IRichEditOleCallback, fDrag: WINBOOL, grfKeyState: DWORD, pdwEffect: LPDWORD): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetDragDropEffect(self, fDrag, grfKeyState, pdwEffect)
-proc GetContextMenu*(self: ptr IRichEditOleCallback, seltype: WORD, lpoleobj: LPOLEOBJECT, lpchrg: ptr CHARRANGE, lphmenu: ptr HMENU): HRESULT {.winapi, inline.} = {.gcsafe.}: self.lpVtbl.GetContextMenu(self, seltype, lpoleobj, lpchrg, lphmenu)
-converter winimConverterIRichEditOleToIUnknown*(x: ptr IRichEditOle): ptr IUnknown = cast[ptr IUnknown](x)
-converter winimConverterIRichEditOleCallbackToIUnknown*(x: ptr IRichEditOleCallback): ptr IUnknown = cast[ptr IUnknown](x)
+    pfnHyphenate*:
+      proc(P1: ptr WCHAR, P2: LANGID, P3: int32, P4: ptr HYPHRESULT): void {.stdcall.}
+
+proc `dwReserved=`*(self: var CHARFORMAT2W, x: DWORD) {.inline.} =
+  self.union1.dwReserved = x
+
+proc dwReserved*(self: CHARFORMAT2W): DWORD {.inline.} =
+  self.union1.dwReserved
+
+proc dwReserved*(self: var CHARFORMAT2W): var DWORD {.inline.} =
+  self.union1.dwReserved
+
+proc `dwCookie=`*(self: var CHARFORMAT2W, x: DWORD) {.inline.} =
+  self.union1.dwCookie = x
+
+proc dwCookie*(self: CHARFORMAT2W): DWORD {.inline.} =
+  self.union1.dwCookie
+
+proc dwCookie*(self: var CHARFORMAT2W): var DWORD {.inline.} =
+  self.union1.dwCookie
+
+proc `dwReserved=`*(self: var CHARFORMAT2A, x: DWORD) {.inline.} =
+  self.union1.dwReserved = x
+
+proc dwReserved*(self: CHARFORMAT2A): DWORD {.inline.} =
+  self.union1.dwReserved
+
+proc dwReserved*(self: var CHARFORMAT2A): var DWORD {.inline.} =
+  self.union1.dwReserved
+
+proc `dwCookie=`*(self: var CHARFORMAT2A, x: DWORD) {.inline.} =
+  self.union1.dwCookie = x
+
+proc dwCookie*(self: CHARFORMAT2A): DWORD {.inline.} =
+  self.union1.dwCookie
+
+proc dwCookie*(self: var CHARFORMAT2A): var DWORD {.inline.} =
+  self.union1.dwCookie
+
+proc `wReserved=`*(self: var PARAFORMAT, x: WORD) {.inline.} =
+  self.union1.wReserved = x
+
+proc wReserved*(self: PARAFORMAT): WORD {.inline.} =
+  self.union1.wReserved
+
+proc wReserved*(self: var PARAFORMAT): var WORD {.inline.} =
+  self.union1.wReserved
+
+proc `wEffects=`*(self: var PARAFORMAT, x: WORD) {.inline.} =
+  self.union1.wEffects = x
+
+proc wEffects*(self: PARAFORMAT): WORD {.inline.} =
+  self.union1.wEffects
+
+proc wEffects*(self: var PARAFORMAT): var WORD {.inline.} =
+  self.union1.wEffects
+
+proc `wReserved=`*(self: var PARAFORMAT2, x: WORD) {.inline.} =
+  self.union1.wReserved = x
+
+proc wReserved*(self: PARAFORMAT2): WORD {.inline.} =
+  self.union1.wReserved
+
+proc wReserved*(self: var PARAFORMAT2): var WORD {.inline.} =
+  self.union1.wReserved
+
+proc `wEffects=`*(self: var PARAFORMAT2, x: WORD) {.inline.} =
+  self.union1.wEffects = x
+
+proc wEffects*(self: PARAFORMAT2): WORD {.inline.} =
+  self.union1.wEffects
+
+proc wEffects*(self: var PARAFORMAT2): var WORD {.inline.} =
+  self.union1.wEffects
+
+proc GetClientSite*(
+    self: ptr IRichEditOle, lplpolesite: ptr LPOLECLIENTSITE
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetClientSite(self, lplpolesite)
+
+proc GetObjectCount*(self: ptr IRichEditOle): LONG {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetObjectCount(self)
+
+proc GetLinkCount*(self: ptr IRichEditOle): LONG {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetLinkCount(self)
+
+proc GetObject*(
+    self: ptr IRichEditOle, iob: LONG, lpreobject: ptr REOBJECT, dwFlags: DWORD
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetObject(self, iob, lpreobject, dwFlags)
+
+proc InsertObject*(
+    self: ptr IRichEditOle, lpreobject: ptr REOBJECT
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.InsertObject(self, lpreobject)
+
+proc ConvertObject*(
+    self: ptr IRichEditOle, iob: LONG, rclsidNew: REFCLSID, lpstrUserTypeNew: LPCSTR
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.ConvertObject(self, iob, rclsidNew, lpstrUserTypeNew)
+
+proc ActivateAs*(
+    self: ptr IRichEditOle, rclsid: REFCLSID, rclsidAs: REFCLSID
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.ActivateAs(self, rclsid, rclsidAs)
+
+proc SetHostNames*(
+    self: ptr IRichEditOle, lpstrContainerApp: LPCSTR, lpstrContainerObj: LPCSTR
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.SetHostNames(self, lpstrContainerApp, lpstrContainerObj)
+
+proc SetLinkAvailable*(
+    self: ptr IRichEditOle, iob: LONG, fAvailable: WINBOOL
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.SetLinkAvailable(self, iob, fAvailable)
+
+proc SetDvaspect*(
+    self: ptr IRichEditOle, iob: LONG, dvaspect: DWORD
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.SetDvaspect(self, iob, dvaspect)
+
+proc HandsOffStorage*(self: ptr IRichEditOle, iob: LONG): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.HandsOffStorage(self, iob)
+
+proc SaveCompleted*(
+    self: ptr IRichEditOle, iob: LONG, lpstg: LPSTORAGE
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.SaveCompleted(self, iob, lpstg)
+
+proc InPlaceDeactivate*(self: ptr IRichEditOle): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.InPlaceDeactivate(self)
+
+proc ContextSensitiveHelp*(
+    self: ptr IRichEditOle, fEnterMode: WINBOOL
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.ContextSensitiveHelp(self, fEnterMode)
+
+proc GetClipboardData*(
+    self: ptr IRichEditOle,
+    lpchrg: ptr CHARRANGE,
+    reco: DWORD,
+    lplpdataobj: ptr LPDATAOBJECT,
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetClipboardData(self, lpchrg, reco, lplpdataobj)
+
+proc ImportDataObject*(
+    self: ptr IRichEditOle, lpdataobj: LPDATAOBJECT, cf: CLIPFORMAT, hMetaPict: HGLOBAL
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.ImportDataObject(self, lpdataobj, cf, hMetaPict)
+
+proc GetNewStorage*(
+    self: ptr IRichEditOleCallback, lplpstg: ptr LPSTORAGE
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetNewStorage(self, lplpstg)
+
+proc GetInPlaceContext*(
+    self: ptr IRichEditOleCallback,
+    lplpFrame: ptr LPOLEINPLACEFRAME,
+    lplpDoc: ptr LPOLEINPLACEUIWINDOW,
+    lpFrameInfo: LPOLEINPLACEFRAMEINFO,
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetInPlaceContext(self, lplpFrame, lplpDoc, lpFrameInfo)
+
+proc ShowContainerUI*(
+    self: ptr IRichEditOleCallback, fShow: WINBOOL
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.ShowContainerUI(self, fShow)
+
+proc QueryInsertObject*(
+    self: ptr IRichEditOleCallback, lpclsid: LPCLSID, lpstg: LPSTORAGE, cp: LONG
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.QueryInsertObject(self, lpclsid, lpstg, cp)
+
+proc DeleteObject*(
+    self: ptr IRichEditOleCallback, lpoleobj: LPOLEOBJECT
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.DeleteObject(self, lpoleobj)
+
+proc QueryAcceptData*(
+    self: ptr IRichEditOleCallback,
+    lpdataobj: LPDATAOBJECT,
+    lpcfFormat: ptr CLIPFORMAT,
+    reco: DWORD,
+    fReally: WINBOOL,
+    hMetaPict: HGLOBAL,
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.QueryAcceptData(self, lpdataobj, lpcfFormat, reco, fReally, hMetaPict)
+
+proc ContextSensitiveHelp*(
+    self: ptr IRichEditOleCallback, fEnterMode: WINBOOL
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.ContextSensitiveHelp(self, fEnterMode)
+
+proc GetClipboardData*(
+    self: ptr IRichEditOleCallback,
+    lpchrg: ptr CHARRANGE,
+    reco: DWORD,
+    lplpdataobj: ptr LPDATAOBJECT,
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetClipboardData(self, lpchrg, reco, lplpdataobj)
+
+proc GetDragDropEffect*(
+    self: ptr IRichEditOleCallback,
+    fDrag: WINBOOL,
+    grfKeyState: DWORD,
+    pdwEffect: LPDWORD,
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetDragDropEffect(self, fDrag, grfKeyState, pdwEffect)
+
+proc GetContextMenu*(
+    self: ptr IRichEditOleCallback,
+    seltype: WORD,
+    lpoleobj: LPOLEOBJECT,
+    lpchrg: ptr CHARRANGE,
+    lphmenu: ptr HMENU,
+): HRESULT {.winapi, inline.} =
+  {.gcsafe.}:
+    self.lpVtbl.GetContextMenu(self, seltype, lpoleobj, lpchrg, lphmenu)
+
+converter winimConverterIRichEditOleToIUnknown*(x: ptr IRichEditOle): ptr IUnknown =
+  cast[ptr IUnknown](x)
+
+converter winimConverterIRichEditOleCallbackToIUnknown*(
+    x: ptr IRichEditOleCallback
+): ptr IUnknown =
+  cast[ptr IUnknown](x)
+
 when winimUnicode:
   type
     CHARFORMAT* = CHARFORMATW
@@ -1038,8 +1376,8 @@ when winimUnicode:
     TEXTRANGE* = TEXTRANGEW
     TFINDTEXT* = TFINDTEXTW
     FINDTEXTEX* = FINDTEXTEXW
-  const
-    RICHEDIT_CLASS* = RICHEDIT_CLASSW
+
+  const RICHEDIT_CLASS* = RICHEDIT_CLASSW
 when winimAnsi:
   type
     CHARFORMAT* = CHARFORMATA
@@ -1047,5 +1385,5 @@ when winimAnsi:
     TEXTRANGE* = TEXTRANGEA
     TFINDTEXT* = TFINDTEXTA
     FINDTEXTEX* = FINDTEXTEXA
-  const
-    RICHEDIT_CLASS* = RICHEDIT_CLASSA
+
+  const RICHEDIT_CLASS* = RICHEDIT_CLASSA

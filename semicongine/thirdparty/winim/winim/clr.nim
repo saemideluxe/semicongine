@@ -35,7 +35,8 @@ runnableExamples:
 
   proc example3() =
     ## Compile some code and run it
-    var code = """
+    var code =
+      """
 
     using System;
     public class Test {
@@ -60,15 +61,12 @@ const
   CSharpCodeProvider* = "Microsoft.CSharp.CSharpCodeProvider"
 
 type
-  CLRError* = object of CatchableError
-    ## Raised if a CLR error occurred.
+  CLRError* = object of CatchableError ## Raised if a CLR error occurred.
     hresult*: HRESULT
 
-  CLRVariant* = distinct variant
-    ## `distinct variant` to represent CLR object or value.
+  CLRVariant* = distinct variant ## `distinct variant` to represent CLR object or value.
 
-  CLRType* = distinct variant
-    ## `distinct variant` to represent CLR Type object.
+  CLRType* = distinct variant ## `distinct variant` to represent CLR Type object.
 
   CLRInterface* = object
     ## Represent CLR object with specified interface.
@@ -84,13 +82,12 @@ var
   hresult {.threadvar.}: HRESULT
   CurrentAssembly {.threadvar.}: CLRVariant
 
-converter voidpp_converter(x: ptr ptr object): ptr pointer {.used.} = cast[ptr pointer](x)
+converter voidpp_converter(x: ptr ptr object): ptr pointer {.used.} =
+  cast[ptr pointer](x)
 
-proc isNil*(x: CLRVariant): bool {.borrow.}
-  ## Check if `CLRVariant` is nil or not.
+proc isNil*(x: CLRVariant): bool {.borrow.} ## Check if `CLRVariant` is nil or not.
 
-proc isNil*(x: CLRType): bool {.borrow.}
-  ## Check if `CLRType` is nil or not.
+proc isNil*(x: CLRType): bool {.borrow.} ## Check if `CLRType` is nil or not.
 
 proc isNull*(x: CLRVariant): bool {.borrow.}
   ## Check if `CLRVariant` is C# null or VB nothing.
@@ -112,7 +109,9 @@ proc toCLRVariant*[T](x: T): CLRVariant {.inline.} =
   else:
     result = CLRVariant toVariant(x)
 
-proc toCLRVariant*[T](x: openArray[T], vt: VARENUM = VT_VARIANT): CLRVariant {.inline.} =
+proc toCLRVariant*[T](
+    x: openArray[T], vt: VARENUM = VT_VARIANT
+): CLRVariant {.inline.} =
   ## Converts any supported openArray types into a `CLRVariant`.
   result = CLRVariant toVariant(x, vt)
 
@@ -125,86 +124,113 @@ proc fromCLRVariant*[T](x: CLRVariant): T {.inline.} =
   ## Converts a `CLRVariant` into any supported types.
   result = fromVariant[T](variant x)
 
-converter clrVariantToVariant*(x: CLRVariant): variant = variant x
+converter clrVariantToVariant*(x: CLRVariant): variant =
   ## Converts `CLRVariant` into `variant` automatically.
+  variant x
 
-converter clrVariantToString*(x: CLRVariant): string = fromCLRVariant[string](x)
+converter clrVariantToString*(x: CLRVariant): string =
   ## Converts `CLRVariant` into `string` automatically.
+  fromCLRVariant[string](x)
 
-converter clrVariantToCString*(x: CLRVariant): cstring = fromCLRVariant[cstring](x)
+converter clrVariantToCString*(x: CLRVariant): cstring =
   ## Converts `CLRVariant` into `cstring` automatically.
+  fromCLRVariant[cstring](x)
 
-converter clrVariantToMString*(x: CLRVariant): mstring = fromCLRVariant[mstring](x)
+converter clrVariantToMString*(x: CLRVariant): mstring =
   ## Converts `CLRVariant` into `mstring` automatically.
+  fromCLRVariant[mstring](x)
 
-converter clrVariantToWString*(x: CLRVariant): wstring = fromCLRVariant[wstring](x)
+converter clrVariantToWString*(x: CLRVariant): wstring =
   ## Converts `CLRVariant` into `wstring` automatically.
+  fromCLRVariant[wstring](x)
 
-converter clrVariantToChar*(x: CLRVariant): char = fromCLRVariant[char](x)
+converter clrVariantToChar*(x: CLRVariant): char =
   ## Converts `CLRVariant` into `char` automatically.
+  fromCLRVariant[char](x)
 
-converter clrVariantToBool*(x: CLRVariant): bool = fromCLRVariant[bool](x)
+converter clrVariantToBool*(x: CLRVariant): bool =
   ## Converts `CLRVariant` into `bool` automatically.
+  fromCLRVariant[bool](x)
 
-converter clrVariantToPtrIDispatch*(x: CLRVariant): ptr IDispatch = fromCLRVariant[ptr IDispatch](x)
+converter clrVariantToPtrIDispatch*(x: CLRVariant): ptr IDispatch =
   ## Converts `CLRVariant` into `ptr IDispatch` automatically.
+  fromCLRVariant[ptr IDispatch](x)
 
-converter clrVariantToPtrIUnknown*(x: CLRVariant): ptr IUnknown = fromCLRVariant[ptr IUnknown](x)
+converter clrVariantToPtrIUnknown*(x: CLRVariant): ptr IUnknown =
   ## Converts `CLRVariant` into `ptr IUnknown` automatically.
+  fromCLRVariant[ptr IUnknown](x)
 
-converter clrVariantToPointer*(x: CLRVariant): pointer = fromCLRVariant[pointer](x)
+converter clrVariantToPointer*(x: CLRVariant): pointer =
   ## Converts `CLRVariant` into `ptr IUnknown` automatically.
+  fromCLRVariant[pointer](x)
 
-converter clrVariantToInt*(x: CLRVariant): int = fromCLRVariant[int](x)
+converter clrVariantToInt*(x: CLRVariant): int =
   ## Converts `CLRVariant` into `int` automatically.
+  fromCLRVariant[int](x)
 
-converter clrVariantToUint*(x: CLRVariant): uint = fromCLRVariant[uint](x)
+converter clrVariantToUint*(x: CLRVariant): uint =
   ## Converts `CLRVariant` into `uint` automatically.
+  fromCLRVariant[uint](x)
 
-converter clrVariantToInt8*(x: CLRVariant): int8 = fromCLRVariant[int8](x)
+converter clrVariantToInt8*(x: CLRVariant): int8 =
   ## Converts `CLRVariant` into `int8` automatically.
+  fromCLRVariant[int8](x)
 
-converter clrVariantToUint8*(x: CLRVariant): uint8 = fromCLRVariant[uint8](x)
+converter clrVariantToUint8*(x: CLRVariant): uint8 =
   ## Converts `CLRVariant` into `uint8` automatically.
+  fromCLRVariant[uint8](x)
 
-converter clrVariantToInt16*(x: CLRVariant): int16 = fromCLRVariant[int16](x)
+converter clrVariantToInt16*(x: CLRVariant): int16 =
   ## Converts `CLRVariant` into `int16` automatically.
+  fromCLRVariant[int16](x)
 
-converter clrVariantToUInt16*(x: CLRVariant): uint16 = fromCLRVariant[uint16](x)
+converter clrVariantToUInt16*(x: CLRVariant): uint16 =
   ## Converts `CLRVariant` into `uint16` automatically.
+  fromCLRVariant[uint16](x)
 
-converter clrVariantToInt32*(x: CLRVariant): int32 = fromCLRVariant[int32](x)
+converter clrVariantToInt32*(x: CLRVariant): int32 =
   ## Converts `CLRVariant` into `int32` automatically.
+  fromCLRVariant[int32](x)
 
-converter clrVariantToUInt32*(x: CLRVariant): uint32 = fromCLRVariant[uint32](x)
+converter clrVariantToUInt32*(x: CLRVariant): uint32 =
   ## Converts `CLRVariant` into `uint32` automatically.
+  fromCLRVariant[uint32](x)
 
-converter clrVariantToInt64*(x: CLRVariant): int64 = fromCLRVariant[int64](x)
+converter clrVariantToInt64*(x: CLRVariant): int64 =
   ## Converts `CLRVariant` into `int64` automatically.
+  fromCLRVariant[int64](x)
 
-converter clrVariantToUInt64*(x: CLRVariant): uint64 = fromCLRVariant[uint64](x)
+converter clrVariantToUInt64*(x: CLRVariant): uint64 =
   ## Converts `CLRVariant` into `uint64` automatically.
+  fromCLRVariant[uint64](x)
 
-converter clrVariantToFloat32*(x: CLRVariant): float32 = fromCLRVariant[float32](x)
+converter clrVariantToFloat32*(x: CLRVariant): float32 =
   ## Converts `CLRVariant` into `float32` automatically.
+  fromCLRVariant[float32](x)
 
-converter clrVariantToFloat64*(x: CLRVariant): float64 = fromCLRVariant[float64](x)
+converter clrVariantToFloat64*(x: CLRVariant): float64 =
   ## Converts `CLRVariant` into `float64` automatically.
+  fromCLRVariant[float64](x)
 
-converter clrVariantToVARIANTRaw*(x: CLRVariant): VARIANT = fromCLRVariant[VARIANT](x)
+converter clrVariantToVARIANTRaw*(x: CLRVariant): VARIANT =
   ## Converts `CLRVariant` into `VARIANT` automatically.
+  fromCLRVariant[VARIANT](x)
 
-converter clrVariantToCOMArray1D*(x: CLRVariant): COMArray1D = fromCLRVariant[COMArray1D](x)
+converter clrVariantToCOMArray1D*(x: CLRVariant): COMArray1D =
   ## Converts `CLRVariant` into `COMArray1D` automatically.
+  fromCLRVariant[COMArray1D](x)
 
-converter clrVariantToCOMArray2D*(x: CLRVariant): COMArray2D = fromCLRVariant[COMArray2D](x)
+converter clrVariantToCOMArray2D*(x: CLRVariant): COMArray2D =
   ## Converts `CLRVariant` into `COMArray2D` automatically.
+  fromCLRVariant[COMArray2D](x)
 
-converter clrVariantToCOMArray3D*(x: CLRVariant): COMArray3D = fromCLRVariant[COMArray3D](x)
+converter clrVariantToCOMArray3D*(x: CLRVariant): COMArray3D =
   ## Converts `CLRVariant` into `COMArray3D` automatically.
+  fromCLRVariant[COMArray3D](x)
 
-converter clrVariantToCOMBinary*(x: CLRVariant): COMBinary = fromCLRVariant[COMBinary](x)
+converter clrVariantToCOMBinary*(x: CLRVariant): COMBinary =
   ## Converts `CLRVariant` into `COMBinary` automatically.
+  fromCLRVariant[COMBinary](x)
 
 template ERR(x: HRESULT): bool =
   hresult = x
@@ -212,8 +238,10 @@ template ERR(x: HRESULT): bool =
 
 proc clrError(msg: string, hr: HRESULT = 0) =
   var hr = hr
-  if hr == 0: hr = hresult
-  if hr == 0: hr = E_FAIL
+  if hr == 0:
+    hr = hresult
+  if hr == 0:
+    hr = E_FAIL
 
   var e = newException(CLRError, fmt"{msg} (0x{hr.tohex})")
   e.hresult = hr
@@ -223,10 +251,8 @@ template to(v: CLRVariant, T: typedesc): untyped =
   var ret: ptr T
   if v.unwrap.vt == VT_UNKNOWN:
     hresult = v.unwrap.punkVal.QueryInterface(&(`IID T`), &ret)
-
   elif v.unwrap.vt == VT_DISPATCH:
     hresult = v.unwrap.pdispVal.QueryInterface(&(`IID T`), &ret)
-
   else:
     hresult = E_NOINTERFACE
 
@@ -264,9 +290,13 @@ proc com*(v: CLRVariant): com =
 
   result = newCom(cast[ptr IDispatch](v.unwrap.punkVal))
 
-proc invoke(typ: ptr IType, self: VARIANT, name: string, flags: int,
-    vargs: varargs[CLRVariant, toCLRVariant]): CLRVariant {.discardable.} =
-
+proc invoke(
+    typ: ptr IType,
+    self: VARIANT,
+    name: string,
+    flags: int,
+    vargs: varargs[CLRVariant, toCLRVariant],
+): CLRVariant {.discardable.} =
   var
     bstr = SysAllocString(name)
     retVal: VARIANT
@@ -286,8 +316,9 @@ proc invoke(typ: ptr IType, self: VARIANT, name: string, flags: int,
 
   result = CLRVariant wrap(retVal)
 
-proc invoke*(v: CLRVariant, name: string, flags: int,
-    vargs: varargs[CLRVariant, toCLRVariant]): CLRVariant {.discardable.} =
+proc invoke*(
+    v: CLRVariant, name: string, flags: int, vargs: varargs[CLRVariant, toCLRVariant]
+): CLRVariant {.discardable.} =
   ## Low level `invoke` for `CLRVariant`. Equal to `CLRVariant.GetType().InvokeMember(...)`
   if v.isNil:
     clrError("variant is nil", E_POINTER)
@@ -298,8 +329,10 @@ proc invoke*(v: CLRVariant, name: string, flags: int,
     self: VARIANT
 
   defer:
-    if not obj.isNil: obj.Release()
-    if not typ.isNil: typ.Release()
+    if not obj.isNil:
+      obj.Release()
+    if not typ.isNil:
+      typ.Release()
 
   obj = v.to(IObject)
   if obj.isNil:
@@ -315,8 +348,9 @@ proc invoke*(v: CLRVariant, name: string, flags: int,
 
   result = invoke(typ, self, name, flags, vargs)
 
-proc invoke*(v: CLRType, name: string, flags: int,
-    vargs: varargs[CLRVariant, toCLRVariant]): CLRVariant {.discardable.} =
+proc invoke*(
+    v: CLRType, name: string, flags: int, vargs: varargs[CLRVariant, toCLRVariant]
+): CLRVariant {.discardable.} =
   ## Low level `invoke` for `CLRType`. Equal to `CLRType.InvokeMember(...)`
   let v = CLRVariant v
   if v.isNil:
@@ -327,7 +361,8 @@ proc invoke*(v: CLRType, name: string, flags: int,
     self: VARIANT
 
   defer:
-    if not typ.isNil: typ.Release()
+    if not typ.isNil:
+      typ.Release()
 
   typ = v.to(IType)
   if typ.isNil:
@@ -335,8 +370,9 @@ proc invoke*(v: CLRType, name: string, flags: int,
 
   result = invoke(typ, self, name, flags, vargs)
 
-proc invoke*(v: CLRInterface, name: string, flags: int,
-    vargs: varargs[CLRVariant, toCLRVariant]): CLRVariant {.discardable.} =
+proc invoke*(
+    v: CLRInterface, name: string, flags: int, vargs: varargs[CLRVariant, toCLRVariant]
+): CLRVariant {.discardable.} =
   ## Low level `invoke` for `CLRInterface`.
   if v.obj.isNil or v.intf.isNil:
     clrError("invalid interface", E_POINTER)
@@ -347,8 +383,10 @@ proc invoke*(v: CLRInterface, name: string, flags: int,
     self: VARIANT
 
   defer:
-    if not obj.isNil: obj.Release()
-    if not typ.isNil: typ.Release()
+    if not obj.isNil:
+      obj.Release()
+    if not typ.isNil:
+      typ.Release()
 
   obj = v.obj.to(IObject)
   if obj.isNil:
@@ -367,51 +405,88 @@ proc invoke*(v: CLRInterface, name: string, flags: int,
 
 macro `.`*(v: CLRVariant, name: untyped, vargs: varargs[untyped]): untyped =
   ## Dot operator for `CLRVariant`. Invoke a method, get a property, or get a field.
-  result = newCall("invoke", v, newStrLitNode($name),
-    newIntLitNode(BindingFlags_InvokeMethod or BindingFlags_GetProperty or
-      BindingFlags_GetField or BindingFlags_OptionalParamBinding))
+  result = newCall(
+    "invoke",
+    v,
+    newStrLitNode($name),
+    newIntLitNode(
+      BindingFlags_InvokeMethod or BindingFlags_GetProperty or BindingFlags_GetField or
+        BindingFlags_OptionalParamBinding
+    ),
+  )
 
-  for i in vargs: result.add i
+  for i in vargs:
+    result.add i
 
 macro `.=`*(v: CLRVariant, name: untyped, vargs: varargs[untyped]): untyped =
   ## Dot assignment operator for `CLRVariant`. Set a property or field.
-  result = newCall("invoke", v, newStrLitNode($name),
-    newIntLitNode(BindingFlags_SetProperty or BindingFlags_SetField))
+  result = newCall(
+    "invoke",
+    v,
+    newStrLitNode($name),
+    newIntLitNode(BindingFlags_SetProperty or BindingFlags_SetField),
+  )
 
-  for i in vargs: result.add i
+  for i in vargs:
+    result.add i
 
 macro `.`*(v: CLRType, name: untyped, vargs: varargs[untyped]): untyped =
   ## Dot operator for `CLRType`. Invoke a static method, get a static property, or get a static field.
-  result = newCall("invoke", v, newStrLitNode($name),
-    newIntLitNode(BindingFlags_InvokeMethod or BindingFlags_GetProperty or
-      BindingFlags_GetField or BindingFlags_FlattenHierarchy or BindingFlags_Static or
-      BindingFlags_Public or BindingFlags_NonPublic or BindingFlags_OptionalParamBinding))
+  result = newCall(
+    "invoke",
+    v,
+    newStrLitNode($name),
+    newIntLitNode(
+      BindingFlags_InvokeMethod or BindingFlags_GetProperty or BindingFlags_GetField or
+        BindingFlags_FlattenHierarchy or BindingFlags_Static or BindingFlags_Public or
+        BindingFlags_NonPublic or BindingFlags_OptionalParamBinding
+    ),
+  )
 
-  for i in vargs: result.add i
+  for i in vargs:
+    result.add i
 
 macro `.=`*(v: CLRType, name: untyped, vargs: varargs[untyped]): untyped =
   ## Dot assignment operator for `CLRType`. Set a static property or field.
-  result = newCall("invoke", v, newStrLitNode($name),
-    newIntLitNode(BindingFlags_SetProperty or BindingFlags_SetField or
-      BindingFlags_FlattenHierarchy or BindingFlags_Static or BindingFlags_Public or
-      BindingFlags_NonPublic))
+  result = newCall(
+    "invoke",
+    v,
+    newStrLitNode($name),
+    newIntLitNode(
+      BindingFlags_SetProperty or BindingFlags_SetField or BindingFlags_FlattenHierarchy or
+        BindingFlags_Static or BindingFlags_Public or BindingFlags_NonPublic
+    ),
+  )
 
-  for i in vargs: result.add i
+  for i in vargs:
+    result.add i
 
 macro `.`*(v: CLRInterface, name: untyped, vargs: varargs[untyped]): untyped =
   ## Dot operator for `CLRInterface`.
-  result = newCall("invoke", v, newStrLitNode($name),
-    newIntLitNode(BindingFlags_InvokeMethod or BindingFlags_GetProperty or
-      BindingFlags_GetField or BindingFlags_OptionalParamBinding))
+  result = newCall(
+    "invoke",
+    v,
+    newStrLitNode($name),
+    newIntLitNode(
+      BindingFlags_InvokeMethod or BindingFlags_GetProperty or BindingFlags_GetField or
+        BindingFlags_OptionalParamBinding
+    ),
+  )
 
-  for i in vargs: result.add i
+  for i in vargs:
+    result.add i
 
 macro `.=`*(v: CLRInterface, name: untyped, vargs: varargs[untyped]): untyped =
   ## Dot assignment operator for `CLRInterface`.
-  result = newCall("invoke", v, newStrLitNode($name),
-    newIntLitNode(BindingFlags_SetProperty or BindingFlags_SetField))
+  result = newCall(
+    "invoke",
+    v,
+    newStrLitNode($name),
+    newIntLitNode(BindingFlags_SetProperty or BindingFlags_SetField),
+  )
 
-  for i in vargs: result.add i
+  for i in vargs:
+    result.add i
 
 proc reformatAsgn(n: NimNode): NimNode =
   # reformat code:
@@ -425,7 +500,7 @@ proc reformatAsgn(n: NimNode): NimNode =
   params.insert(1, newIntLitNode(BindingFlags_SetProperty or BindingFlags_SetField))
   params.insert(1, dots.last.toStrLit)
   params.add(n.last)
-  dots.del(dots.len-1)
+  dots.del(dots.len - 1)
   dots.add(newIdentNode("invoke"))
   result = n[0]
 
@@ -435,9 +510,8 @@ proc clrReformat(n: NimNode): NimNode =
   if n.kind == nnkAsgn and n[0].kind == nnkCall and n[0][0].kind == nnkDotExpr:
     # deal with a.b(c) = d
     result = clrReformat(reformatAsgn(n))
-
   elif n.len != 0:
-    for i in 0..<n.len:
+    for i in 0 ..< n.len:
       n[i] = clrReformat(n[i])
 
 macro clrScript*(x: untyped): untyped =
@@ -499,18 +573,15 @@ proc `$`*(v: CLRVariant): string =
   ## `$` operator for CLRVariant.
   try:
     result = string v
-
   except VariantConversionError:
     if v.isObject:
       result = $v.ToString()
-
     elif v.isStruct:
       var parts = newSeq[string]()
       for key, val in v.fieldPairs:
         parts.add key & ": " & $val
 
       result = '(' & parts.join(", ") & ')'
-
     else:
       result = v.rawTypeDesc
 
@@ -518,18 +589,15 @@ proc repr*(v: CLRVariant): string =
   ## `repr` operator for CLRVariant.
   try:
     result = string v
-
   except VariantConversionError:
     if v.isObject:
       result = $v.ToString()
-
     elif v.isStruct:
       var parts = newSeq[string]()
       for key, val in v.fieldPairs:
         parts.add key & ": " & $val
 
       result = '(' & parts.join(", ") & ')'
-
     else:
       result = repr v.unwrap
 
@@ -542,8 +610,10 @@ iterator clrVersions*(): string =
     runtimeInfo: ptr ICLRRuntimeInfo
 
   defer:
-    if not metahost.isNil: metahost.Release()
-    if not enumUnknown.isNil: enumUnknown.Release()
+    if not metahost.isNil:
+      metahost.Release()
+    if not enumUnknown.isNil:
+      enumUnknown.Release()
 
   if CLRCreateInstance(&CLSID_CLRMetaHost, &IID_ICLRMetaHost, &metahost).ERR:
     clrError("unable to create metahost instance")
@@ -552,9 +622,11 @@ iterator clrVersions*(): string =
     clrError("unable to enumerate installed runtimes")
 
   while enumUnknown.Next(1, &enumRuntime, nil) == S_OK:
-    defer: enumRuntime.Release()
+    defer:
+      enumRuntime.Release()
     if enumRuntime.QueryInterface(&IID_ICLRRuntimeInfo, &runtimeInfo) == S_OK:
-      defer: runtimeInfo.Release()
+      defer:
+        runtimeInfo.Release()
       var
         size = DWORD 1024
         buffer = newWString(size)
@@ -582,10 +654,14 @@ proc clrStart*(version = ""): CLRVariant {.discardable.} =
     loadable: BOOL
 
   defer:
-    if not metahost.isNil: metahost.Release()
-    if not runtimeInfo.isNil: runtimeInfo.Release()
-    if not clrRuntimeHost.isNil: clrRuntimeHost.Release()
-    if not corRuntimeHost.isNil: corRuntimeHost.Release()
+    if not metahost.isNil:
+      metahost.Release()
+    if not runtimeInfo.isNil:
+      runtimeInfo.Release()
+    if not clrRuntimeHost.isNil:
+      clrRuntimeHost.Release()
+    if not corRuntimeHost.isNil:
+      corRuntimeHost.Release()
 
   if CLRCreateInstance(&CLSID_CLRMetaHost, &IID_ICLRMetaHost, &metahost).ERR:
     clrError("unable to create metahost instance")
@@ -596,16 +672,20 @@ proc clrStart*(version = ""): CLRVariant {.discardable.} =
   if runtimeInfo.IsLoadable(&loadable).ERR or not bool(loadable):
     clrError("specified runtime is not loadable")
 
-  if runtimeInfo.GetInterface(&CLSID_CLRRuntimeHost, &IID_ICLRRuntimeHost, &clrRuntimeHost).ERR:
+  if runtimeInfo.GetInterface(
+    &CLSID_CLRRuntimeHost, &IID_ICLRRuntimeHost, &clrRuntimeHost
+  ).ERR:
     clrError("unable to get interface of CLRRuntimeHost")
 
-  if runtimeInfo.GetInterface(&CLSID_CorRuntimeHost, &IID_ICorRuntimeHost, &corRuntimeHost).ERR or
-      corRuntimeHost.GetDefaultDomain(&retVal.punkVal).ERR:
-
+  if runtimeInfo.GetInterface(
+    &CLSID_CorRuntimeHost, &IID_ICorRuntimeHost, &corRuntimeHost
+  ).ERR or corRuntimeHost.GetDefaultDomain(&retVal.punkVal).ERR:
     if clrRuntimeHost.Start().ERR:
       clrError("unable to start CLRRuntimeHost")
 
-    if runtimeInfo.GetInterface(&CLSID_CorRuntimeHost, &IID_ICorRuntimeHost, &corRuntimeHost).ERR:
+    if runtimeInfo.GetInterface(
+      &CLSID_CorRuntimeHost, &IID_ICorRuntimeHost, &corRuntimeHost
+    ).ERR:
       clrError("unable to get interface of CorRuntimeHost")
 
     if corRuntimeHost.Start().ERR:
@@ -625,7 +705,6 @@ proc load*(name: string): CLRVariant {.discardable.} =
 
   try:
     result = @CurrentAssembly.LoadFrom(name)
-
   except CLRError:
     result = @CurrentAssembly.LoadWithPartialName(name)
 
@@ -643,7 +722,9 @@ proc load*(data: openArray[byte]): CLRVariant {.discardable.} =
 
   result = @CurrentAssembly.Load(toCLRVariant(data, VT_UI1))
 
-proc new*(assembly: CLRVariant, name: string, vargs: varargs[CLRVariant, toCLRVariant]): CLRVariant {.discardable.} =
+proc new*(
+    assembly: CLRVariant, name: string, vargs: varargs[CLRVariant, toCLRVariant]
+): CLRVariant {.discardable.} =
   ## Create an instance from this assembly by name (case-sensitive).
   if assembly.isNil:
     clrError("variant is nil", E_POINTER)
@@ -654,7 +735,9 @@ proc new*(assembly: CLRVariant, name: string, vargs: varargs[CLRVariant, toCLRVa
     let arr = toCLRVariant(vargs)
     result = assembly.CreateInstance(name, false, nil, nil, arr, nil, nil)
 
-proc new*(typ: CLRType, vargs: varargs[CLRVariant, toCLRVariant]): CLRVariant {.discardable.} =
+proc new*(
+    typ: CLRType, vargs: varargs[CLRVariant, toCLRVariant]
+): CLRVariant {.discardable.} =
   ## Create an instance of this type
   if typ.isNil:
     clrError("variant is nil", E_POINTER)
@@ -666,8 +749,14 @@ proc new*(typ: CLRType, vargs: varargs[CLRVariant, toCLRVariant]): CLRVariant {.
   let arr = toCLRVariant(vargs)
   result = @Activator.CreateInstance(CLRVariant typ, arr)
 
-proc compile*(code: string, references: openArray[string] = ["System.dll"], filename = "",
-    compilerOptions = "", provider = CSharpCodeProvider, debug = false): CLRVariant {.discardable.} =
+proc compile*(
+    code: string,
+    references: openArray[string] = ["System.dll"],
+    filename = "",
+    compilerOptions = "",
+    provider = CSharpCodeProvider,
+    debug = false,
+): CLRVariant {.discardable.} =
   ## Compiles the specified code. Returns the `CompilerResults` object.
   var
     sys = load("System")
@@ -694,7 +783,8 @@ proc reclaim*() =
 
 proc getRuntimeHelp(): CLRVariant =
   # Use runtime compiled assembly to support different runtime version.
-  const code = """
+  const code =
+    """
   using System;using System.Drawing;using System.Runtime.InteropServices;abstract class RuntimeHelper{public static IntPtr wrapIntPtr(Int64 i){return Marshal.GetIUnknownForObject((IntPtr)i);}
   public static IntPtr wrapIntPtr(Int32 i){return Marshal.GetIUnknownForObject((IntPtr)i);}
   public static IntPtr wrapAny(Object o){return Marshal.GetIUnknownForObject(o);}
@@ -732,7 +822,7 @@ proc toObjectRaw(iunknown: CLRVariant): CLRVariant =
     v.punkVal.Release()
   result = toCLRVariant(v)
 
-proc toObject*(x: pointer|proc): CLRVariant =
+proc toObject*(x: pointer | proc): CLRVariant =
   ## Converts `pointer` or `proc` into a `System.IntPtr` object.
   var RuntimeHelp = getRuntimeHelp()
   toObjectRaw(@RuntimeHelp.wrapIntPtr(cast[int64](x)))
@@ -752,7 +842,7 @@ proc toObject*[T](x: T, typ: CLRVariant): CLRVariant =
   var RuntimeHelp = getRuntimeHelp()
   toObjectRaw(@RuntimeHelp.wrapAny(x, typ))
 
-proc `[]`*[T: variant|SomeNumber|string|proc|array|seq](x: T): CLRVariant =
+proc `[]`*[T: variant | SomeNumber | string | proc | array | seq](x: T): CLRVariant =
   ## Syntax sugar for x.toObject().
   toObject(x)
 
@@ -773,7 +863,8 @@ proc item(v: CLRVariant, i: int): CLRVariant =
   if not v.isObject:
     v = v.toObject()
 
-  let iList = CLRInterface(obj: v, intf: v.GetType.GetInterface("System.Collections.IList"))
+  let iList =
+    CLRInterface(obj: v, intf: v.GetType.GetInterface("System.Collections.IList"))
   result = iList.Item(i)
 
 proc `[]`*(v: CLRVariant, i: SomeOrdinal): CLRVariant =
@@ -797,18 +888,20 @@ iterator pairs*(v: CLRVariant): (int, CLRVariant) =
     except CLRError:
       clrError("variant is not enumerable")
 
-  proc ok(i: CLRInterface): bool {.inline.} = (not i.intf.isNil) and (not i.intf.isNull)
+  proc ok(i: CLRInterface): bool {.inline.} =
+    (not i.intf.isNil) and (not i.intf.isNull)
 
   let
     vtype = v.GetType
-    iCollection = CLRInterface(obj: v, intf: vtype.GetInterface("System.Collections.ICollection"))
+    iCollection =
+      CLRInterface(obj: v, intf: vtype.GetInterface("System.Collections.ICollection"))
     iList = CLRInterface(obj: v, intf: vtype.GetInterface("System.Collections.IList"))
-    iEnumerable = CLRInterface(obj: v, intf: vtype.GetInterface("System.Collections.IEnumerable"))
+    iEnumerable =
+      CLRInterface(obj: v, intf: vtype.GetInterface("System.Collections.IEnumerable"))
 
   if iCollection.ok and iList.ok:
     for i in 0 ..< iCollection.Count:
       yield (i, iList.Item(i))
-
   elif iEnumerable.ok:
     var
       enumerator: CLRVariant
@@ -822,7 +915,6 @@ iterator pairs*(v: CLRVariant): (int, CLRVariant) =
     while enumerator.MoveNext:
       yield (i, enumerator.Current)
       i.inc
-
   else:
     clrError("variant is not enumerable")
 

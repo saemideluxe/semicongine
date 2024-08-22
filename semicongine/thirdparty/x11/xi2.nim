@@ -5,8 +5,7 @@
 from xi import libXi
 export libXi
 
-const
-  XInput_2_0* = 7
+const XInput_2_0* = 7
 
 ##  DO NOT ADD TO THIS LIST. These are libXi-specific defines.
 ##    See commit libXi-1.4.2-21-ge8531dd
@@ -31,8 +30,7 @@ const
 
 ##  Special property type used for XIGetProperty
 
-const
-  XIAnyPropertyType* = 0
+const XIAnyPropertyType* = 0
 
 ##  Enter/Leave and Focus In/Out modes
 
@@ -174,13 +172,11 @@ const
 ##  Device event flags (common)
 ##  Device event flags (key events only)
 
-const
-  XIKeyRepeat* = (1 shl 16)
+const XIKeyRepeat* = (1 shl 16)
 
 ##  Device event flags (pointer events only)
 
-const
-  XIPointerEmulated* = (1 shl 16)
+const XIPointerEmulated* = (1 shl 16)
 
 ##  Device event flags (touch events only)
 
@@ -204,12 +200,16 @@ const
 type XIMask = ptr UncheckedArray[uint8]
 
 template XISetMask*(mask: pointer, event: untyped): untyped =
-  ((cast[XIMask]((mask)))[(event) shr 3] = (cast[XIMask]((mask)))[
-      (event) shr 3] or (1 shl ((event) and 7)))
+  (
+    (cast[XIMask]((mask)))[(event) shr 3] =
+      (cast[XIMask]((mask)))[(event) shr 3] or (1 shl ((event) and 7))
+  )
 
 template XIClearMask*(mask: pointer, event: untyped): untyped =
-  ((cast[XIMask]((mask)))[(event) shr 3] = (cast[XIMask]((mask)))[
-      (event) shr 3] and not (1 shl ((event) and 7)))
+  (
+    (cast[XIMask]((mask)))[(event) shr 3] =
+      (cast[XIMask]((mask)))[(event) shr 3] and not (1 shl ((event) and 7))
+  )
 
 template XIMaskIsSet*(mask: pointer, event: untyped): untyped =
   ((cast[XIMask]((mask)))[(event) shr 3].int and (1 shl ((event) and 7)))

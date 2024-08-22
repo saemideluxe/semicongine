@@ -2,7 +2,10 @@ type
   ZippyError* = object of CatchableError ## Raised if an operation fails.
 
   CompressedDataFormat* = enum ## Supported compressed data formats
-    dfDetect, dfZlib, dfGzip, dfDeflate
+    dfDetect
+    dfZlib
+    dfGzip
+    dfDeflate
 
 const
   NoCompression* = 0

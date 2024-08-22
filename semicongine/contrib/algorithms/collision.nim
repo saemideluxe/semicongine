@@ -7,20 +7,23 @@ const MAX_COLLISON_POINT_CALCULATION_ITERATIONS = 20
 
 type
   ColliderType* = enum
-    Box, Sphere, Points
+    Box
+    Sphere
+    Points
+
   Collider* = object
     transform*: Mat4 = Unit4F32
     case theType*: ColliderType
-      of Box: discard
-      of Sphere: radius*: float32
-      of Points: points*: seq[Vec3f]
+    of Box: discard
+    of Sphere: radius*: float32
+    of Points: points*: seq[Vec3f]
 
 func between(value, b1, b2: float32): bool =
   min(b1, b2) <= value and value <= max(b1, b2)
 
 func contains*(collider: Collider, x: Vec3f): bool =
   # from https://math.stackexchange.com/questions/1472049/check-if-a-point-is-inside-a-rectangular-shaped-area-3d
-  case collider.theType:
+  case collider.theType
   of Box:
     let
       P1 = collider.transform * vec3(0, 0, 0) # origin
@@ -70,7 +73,7 @@ func findFurthestPoint(transform: Mat4, direction: Vec3f): Vec3f =
       transform * (Y + Z),
       transform * (X + Y + Z),
     ],
-    direction
+    direction,
   )
 func findFurthestPoint(collider: Collider, direction: Vec3f): Vec3f =
   case collider.theType
@@ -93,7 +96,7 @@ func line(simplex: var seq[Vec3f], direction: var Vec3f): bool =
     a = simplex[0]
     b = simplex[1]
     ab = b - a
-    ao = - a
+    ao = -a
 
   if sameDirection(ab, ao):
     direction = cross(cross(ab, ao), ab)
@@ -103,14 +106,16 @@ func line(simplex: var seq[Vec3f], direction: var Vec3f): bool =
 
   return false
 
-func triangle(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional = false): bool =
+func triangle(
+    simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional = false
+): bool =
   let
     a = simplex[0]
     b = simplex[1]
     c = simplex[2]
     ab = b - a
     ac = c - a
-    ao = - a
+    ao = -a
     abc = ab.cross(ac)
 
   if sameDirection(abc.cross(ac), ao):
@@ -144,7 +149,7 @@ func tetrahedron(simplex: var seq[Vec3f], direction: var Vec3f): bool =
     ab = b - a
     ac = c - a
     ad = d - a
-    ao = - a
+    ao = -a
     abc = ab.cross(ac)
     acd = ac.cross(ad)
     adb = ad.cross(ab)
@@ -195,28 +200,32 @@ func addIfUniqueEdge(edges: var seq[(int, int)], faces: seq[int], a: int, b: int
   else:
     edges.add (faces[a], faces[b])
 
-func nextSimplex(simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional = false): bool =
+func nextSimplex(
+    simplex: var seq[Vec3f], direction: var Vec3f, twoDimensional = false
+): bool =
   case simplex.len
-  of 2: simplex.line(direction)
-  of 3: simplex.triangle(direction, twoDimensional)
-  of 4: simplex.tetrahedron(direction)
-  else: raise newException(Exception, "Error in simplex")
+  of 2:
+    simplex.line(direction)
+  of 3:
+    simplex.triangle(direction, twoDimensional)
+  of 4:
+    simplex.tetrahedron(direction)
+  else:
+    raise newException(Exception, "Error in simplex")
 
-func collisionPoint3D(simplex: var seq[Vec3f], a, b: Collider): tuple[normal: Vec3f, penetrationDepth: float32] =
+func collisionPoint3D(
+    simplex: var seq[Vec3f], a, b: Collider
+): tuple[normal: Vec3f, penetrationDepth: float32] =
   var
     polytope = simplex
-    faces = @[
-      0, 1, 2,
-      0, 3, 1,
-      0, 2, 3,
-      1, 3, 2
-    ]
+    faces = @[0, 1, 2, 0, 3, 1, 0, 2, 3, 1, 3, 2]
     (normals, minFace) = getFaceNormals(polytope, faces)
     minNormal: Vec3f
     minDistance = high(float32)
     iterCount = 0
 
-  while minDistance == high(float32) and iterCount < MAX_COLLISON_POINT_CALCULATION_ITERATIONS:
+  while minDistance == high(float32) and
+      iterCount < MAX_COLLISON_POINT_CALCULATION_ITERATIONS:
     minNormal = normals[minFace].xyz
     minDistance = normals[minFace].w
     var
@@ -273,8 +282,9 @@ func collisionPoint3D(simplex: var seq[Vec3f], a, b: Collider): tuple[normal: Ve
 
   result = (normal: minNormal, penetrationDepth: minDistance + 0.001'f32)
 
-
-func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec3f, penetrationDepth: float32] =
+func collisionPoint2D(
+    polytopeIn: seq[Vec3f], a, b: Collider
+): tuple[normal: Vec3f, penetrationDepth: float32] =
   var
     polytope = polytopeIn
     minIndex = 0
@@ -282,7 +292,8 @@ func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec
     iterCount = 0
     minNormal: Vec2f
 
-  while minDistance == high(float32) and iterCount < MAX_COLLISON_POINT_CALCULATION_ITERATIONS:
+  while minDistance == high(float32) and
+      iterCount < MAX_COLLISON_POINT_CALCULATION_ITERATIONS:
     for i in 0 ..< polytope.len:
       let
         j = (i + 1) mod polytope.len
@@ -306,16 +317,19 @@ func collisionPoint2D(polytopeIn: seq[Vec3f], a, b: Collider): tuple[normal: Vec
       support = supportPoint(a, b, minNormal.ToVec3)
       sDistance = minNormal.dot(support)
 
-    if(abs(sDistance - minDistance) > 0.001):
+    if (abs(sDistance - minDistance) > 0.001):
       minDistance = high(float32)
       polytope.insert(support, minIndex)
     inc iterCount
 
-  result = (normal: vec3(minNormal.x, minNormal.y, 0), penetrationDepth: minDistance + 0.001'f32)
+  result = (
+    normal: vec3(minNormal.x, minNormal.y, 0), penetrationDepth: minDistance + 0.001'f32
+  )
 
 func intersects*(a, b: Collider, as2D = false): bool =
   var
-    support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
+    support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786))
+      # just random initial vector
     simplex = newSeq[Vec3f]()
     direction = -support
     n = 0
@@ -332,9 +346,12 @@ func intersects*(a, b: Collider, as2D = false): bool =
       direction[0] = 0.0001
     inc n
 
-func collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
+func collision*(
+    a, b: Collider, as2D = false
+): tuple[hasCollision: bool, normal: Vec3f, penetrationDepth: float32] =
   var
-    support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786)) # just random initial vector
+    support = supportPoint(a, b, vec3(0.8153, -0.4239, if as2D: 0.0 else: 0.5786))
+      # just random initial vector
     simplex = newSeq[Vec3f]()
     direction = -support
     n = 0
@@ -345,7 +362,11 @@ func collision*(a, b: Collider, as2D = false): tuple[hasCollision: bool, normal:
       return result
     simplex.insert(support, 0)
     if nextSimplex(simplex, direction, twoDimensional = as2D):
-      let (normal, depth) = if as2D: collisionPoint2D(simplex, a, b) else: collisionPoint3D(simplex, a, b)
+      let (normal, depth) =
+        if as2D:
+          collisionPoint2D(simplex, a, b)
+        else:
+          collisionPoint3D(simplex, a, b)
       return (true, normal, depth)
     # prevent numeric instability
     if direction == vec3(0, 0, 0):
@@ -380,7 +401,10 @@ func calculateCollider*(points: openArray[Vec3f], theType: ColliderType): Collid
   if theType == Points:
     result = Collider(theType: Points, points: @points)
   else:
-    result = Collider(theType: theType, transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ))
+    result = Collider(
+      theType: theType,
+      transform: translate(minX, minY, minZ) * scale(scaleX, scaleY, scaleZ),
+    )
 
     if theType == Sphere:
       result.transform = translate(center)

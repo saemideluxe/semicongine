@@ -64,15 +64,17 @@ type
     Flags*: USHORT
     Level*: USHORT
     AccessMask*: ACCESS_MASK
+
   PSE_ADT_OBJECT_TYPE* = ptr SE_ADT_OBJECT_TYPE
   SE_ADT_PARAMETER_ARRAY_ENTRY* {.pure.} = object
     Type*: SE_ADT_PARAMETER_TYPE
     Length*: ULONG
     Data*: array[2, ULONG_PTR]
     Address*: PVOID
+
   PSE_ADT_PARAMETER_ARRAY_ENTRY* = ptr SE_ADT_PARAMETER_ARRAY_ENTRY
-const
-  SE_MAX_AUDIT_PARAMETERS* = 32
+
+const SE_MAX_AUDIT_PARAMETERS* = 32
 type
   SE_ADT_PARAMETER_ARRAY* {.pure.} = object
     CategoryId*: ULONG
@@ -81,7 +83,8 @@ type
     Length*: ULONG
     Type*: USHORT
     Flags*: ULONG
-    Parameters*: array[SE_MAX_AUDIT_PARAMETERS , SE_ADT_PARAMETER_ARRAY_ENTRY]
+    Parameters*: array[SE_MAX_AUDIT_PARAMETERS, SE_ADT_PARAMETER_ARRAY_ENTRY]
+
   PSE_ADT_PARAMETER_ARRAY* = ptr SE_ADT_PARAMETER_ARRAY
   LSA_UNICODE_STRING* = UNICODE_STRING
   PLSA_UNICODE_STRING* = ptr UNICODE_STRING
@@ -92,26 +95,31 @@ type
   LSA_TRUST_INFORMATION* {.pure.} = object
     Name*: LSA_UNICODE_STRING
     Sid*: PSID
+
   PLSA_TRUST_INFORMATION* = ptr LSA_TRUST_INFORMATION
   LSA_REFERENCED_DOMAIN_LIST* {.pure.} = object
     Entries*: ULONG
     Domains*: PLSA_TRUST_INFORMATION
+
   PLSA_REFERENCED_DOMAIN_LIST* = ptr LSA_REFERENCED_DOMAIN_LIST
   LSA_TRANSLATED_SID* {.pure.} = object
     Use*: SID_NAME_USE
     RelativeId*: ULONG
     DomainIndex*: LONG
+
   PLSA_TRANSLATED_SID* = ptr LSA_TRANSLATED_SID
   LSA_TRANSLATED_SID2* {.pure.} = object
     Use*: SID_NAME_USE
     Sid*: PSID
     DomainIndex*: LONG
     Flags*: ULONG
+
   PLSA_TRANSLATED_SID2* = ptr LSA_TRANSLATED_SID2
   LSA_TRANSLATED_NAME* {.pure.} = object
     Use*: SID_NAME_USE
     Name*: LSA_UNICODE_STRING
     DomainIndex*: LONG
+
   PLSA_TRANSLATED_NAME* = ptr LSA_TRANSLATED_NAME
   POLICY_AUDIT_LOG_INFO* {.pure.} = object
     AuditLogPercentFull*: ULONG
@@ -120,19 +128,23 @@ type
     AuditLogFullShutdownInProgress*: BOOLEAN
     TimeToShutdown*: LARGE_INTEGER
     NextAuditRecordId*: ULONG
+
   PPOLICY_AUDIT_LOG_INFO* = ptr POLICY_AUDIT_LOG_INFO
   POLICY_AUDIT_EVENTS_INFO* {.pure.} = object
     AuditingMode*: BOOLEAN
     EventAuditingOptions*: PPOLICY_AUDIT_EVENT_OPTIONS
     MaximumAuditEventCount*: ULONG
+
   PPOLICY_AUDIT_EVENTS_INFO* = ptr POLICY_AUDIT_EVENTS_INFO
   POLICY_ACCOUNT_DOMAIN_INFO* {.pure.} = object
     DomainName*: LSA_UNICODE_STRING
     DomainSid*: PSID
+
   PPOLICY_ACCOUNT_DOMAIN_INFO* = ptr POLICY_ACCOUNT_DOMAIN_INFO
   POLICY_PRIMARY_DOMAIN_INFO* {.pure.} = object
     Name*: LSA_UNICODE_STRING
     Sid*: PSID
+
   PPOLICY_PRIMARY_DOMAIN_INFO* = ptr POLICY_PRIMARY_DOMAIN_INFO
   POLICY_DNS_DOMAIN_INFO* {.pure.} = object
     Name*: LSA_UNICODE_STRING
@@ -140,34 +152,43 @@ type
     DnsForestName*: LSA_UNICODE_STRING
     DomainGuid*: GUID
     Sid*: PSID
+
   PPOLICY_DNS_DOMAIN_INFO* = ptr POLICY_DNS_DOMAIN_INFO
   POLICY_PD_ACCOUNT_INFO* {.pure.} = object
     Name*: LSA_UNICODE_STRING
+
   PPOLICY_PD_ACCOUNT_INFO* = ptr POLICY_PD_ACCOUNT_INFO
   POLICY_LSA_SERVER_ROLE_INFO* {.pure.} = object
     LsaServerRole*: POLICY_LSA_SERVER_ROLE
+
   PPOLICY_LSA_SERVER_ROLE_INFO* = ptr POLICY_LSA_SERVER_ROLE_INFO
   POLICY_REPLICA_SOURCE_INFO* {.pure.} = object
     ReplicaSource*: LSA_UNICODE_STRING
     ReplicaAccountName*: LSA_UNICODE_STRING
+
   PPOLICY_REPLICA_SOURCE_INFO* = ptr POLICY_REPLICA_SOURCE_INFO
   POLICY_DEFAULT_QUOTA_INFO* {.pure.} = object
     QuotaLimits*: QUOTA_LIMITS
+
   PPOLICY_DEFAULT_QUOTA_INFO* = ptr POLICY_DEFAULT_QUOTA_INFO
   POLICY_MODIFICATION_INFO* {.pure.} = object
     ModifiedId*: LARGE_INTEGER
     DatabaseCreationTime*: LARGE_INTEGER
+
   PPOLICY_MODIFICATION_INFO* = ptr POLICY_MODIFICATION_INFO
   POLICY_AUDIT_FULL_SET_INFO* {.pure.} = object
     ShutDownOnFull*: BOOLEAN
+
   PPOLICY_AUDIT_FULL_SET_INFO* = ptr POLICY_AUDIT_FULL_SET_INFO
   POLICY_AUDIT_FULL_QUERY_INFO* {.pure.} = object
     ShutDownOnFull*: BOOLEAN
     LogIsFull*: BOOLEAN
+
   PPOLICY_AUDIT_FULL_QUERY_INFO* = ptr POLICY_AUDIT_FULL_QUERY_INFO
   POLICY_DOMAIN_EFS_INFO* {.pure.} = object
     InfoLength*: ULONG
     EfsBlob*: PUCHAR
+
   PPOLICY_DOMAIN_EFS_INFO* = ptr POLICY_DOMAIN_EFS_INFO
   POLICY_DOMAIN_KERBEROS_TICKET_INFO* {.pure.} = object
     AuthenticationOptions*: ULONG
@@ -176,20 +197,25 @@ type
     MaxRenewAge*: LARGE_INTEGER
     MaxClockSkew*: LARGE_INTEGER
     Reserved*: LARGE_INTEGER
+
   PPOLICY_DOMAIN_KERBEROS_TICKET_INFO* = ptr POLICY_DOMAIN_KERBEROS_TICKET_INFO
   TRUSTED_DOMAIN_NAME_INFO* {.pure.} = object
     Name*: LSA_UNICODE_STRING
+
   PTRUSTED_DOMAIN_NAME_INFO* = ptr TRUSTED_DOMAIN_NAME_INFO
   TRUSTED_CONTROLLERS_INFO* {.pure.} = object
     Entries*: ULONG
     Names*: PLSA_UNICODE_STRING
+
   PTRUSTED_CONTROLLERS_INFO* = ptr TRUSTED_CONTROLLERS_INFO
   TRUSTED_POSIX_OFFSET_INFO* {.pure.} = object
     Offset*: ULONG
+
   PTRUSTED_POSIX_OFFSET_INFO* = ptr TRUSTED_POSIX_OFFSET_INFO
   TRUSTED_PASSWORD_INFO* {.pure.} = object
     Password*: LSA_UNICODE_STRING
     OldPassword*: LSA_UNICODE_STRING
+
   PTRUSTED_PASSWORD_INFO* = ptr TRUSTED_PASSWORD_INFO
   TRUSTED_DOMAIN_INFORMATION_BASIC* = LSA_TRUST_INFORMATION
   PTRUSTED_DOMAIN_INFORMATION_BASIC* = PLSA_TRUST_INFORMATION
@@ -200,6 +226,7 @@ type
     TrustDirection*: ULONG
     TrustType*: ULONG
     TrustAttributes*: ULONG
+
   PTRUSTED_DOMAIN_INFORMATION_EX* = ptr TRUSTED_DOMAIN_INFORMATION_EX
   TRUSTED_DOMAIN_INFORMATION_EX2* {.pure.} = object
     Name*: LSA_UNICODE_STRING
@@ -210,12 +237,14 @@ type
     TrustAttributes*: ULONG
     ForestTrustLength*: ULONG
     ForestTrustInfo*: PUCHAR
+
   PTRUSTED_DOMAIN_INFORMATION_EX2* = ptr TRUSTED_DOMAIN_INFORMATION_EX2
   LSA_AUTH_INFORMATION* {.pure.} = object
     LastUpdateTime*: LARGE_INTEGER
     AuthType*: ULONG
     AuthInfoLength*: ULONG
     AuthInfo*: PUCHAR
+
   PLSA_AUTH_INFORMATION* = ptr LSA_AUTH_INFORMATION
   TRUSTED_DOMAIN_AUTH_INFORMATION* {.pure.} = object
     IncomingAuthInfos*: ULONG
@@ -224,57 +253,69 @@ type
     OutgoingAuthInfos*: ULONG
     OutgoingAuthenticationInformation*: PLSA_AUTH_INFORMATION
     OutgoingPreviousAuthenticationInformation*: PLSA_AUTH_INFORMATION
+
   PTRUSTED_DOMAIN_AUTH_INFORMATION* = ptr TRUSTED_DOMAIN_AUTH_INFORMATION
   TRUSTED_DOMAIN_FULL_INFORMATION* {.pure.} = object
     Information*: TRUSTED_DOMAIN_INFORMATION_EX
     PosixOffset*: TRUSTED_POSIX_OFFSET_INFO
     AuthInformation*: TRUSTED_DOMAIN_AUTH_INFORMATION
+
   PTRUSTED_DOMAIN_FULL_INFORMATION* = ptr TRUSTED_DOMAIN_FULL_INFORMATION
   TRUSTED_DOMAIN_FULL_INFORMATION2* {.pure.} = object
     Information*: TRUSTED_DOMAIN_INFORMATION_EX2
     PosixOffset*: TRUSTED_POSIX_OFFSET_INFO
     AuthInformation*: TRUSTED_DOMAIN_AUTH_INFORMATION
+
   PTRUSTED_DOMAIN_FULL_INFORMATION2* = ptr TRUSTED_DOMAIN_FULL_INFORMATION2
   LSA_FOREST_TRUST_DOMAIN_INFO* {.pure.} = object
     Sid*: PSID
     DnsName*: LSA_UNICODE_STRING
     NetbiosName*: LSA_UNICODE_STRING
+
   PLSA_FOREST_TRUST_DOMAIN_INFO* = ptr LSA_FOREST_TRUST_DOMAIN_INFO
   LSA_FOREST_TRUST_BINARY_DATA* {.pure.} = object
     Length*: ULONG
     Buffer*: PUCHAR
+
   PLSA_FOREST_TRUST_BINARY_DATA* = ptr LSA_FOREST_TRUST_BINARY_DATA
   LSA_FOREST_TRUST_RECORD_ForestTrustData* {.pure, union.} = object
     TopLevelName*: LSA_UNICODE_STRING
     DomainInfo*: LSA_FOREST_TRUST_DOMAIN_INFO
     Data*: LSA_FOREST_TRUST_BINARY_DATA
+
   LSA_FOREST_TRUST_RECORD* {.pure.} = object
     Flags*: ULONG
     ForestTrustType*: LSA_FOREST_TRUST_RECORD_TYPE
     Time*: LARGE_INTEGER
     ForestTrustData*: LSA_FOREST_TRUST_RECORD_ForestTrustData
+
   PLSA_FOREST_TRUST_RECORD* = ptr LSA_FOREST_TRUST_RECORD
   LSA_FOREST_TRUST_INFORMATION* {.pure.} = object
     RecordCount*: ULONG
     Entries*: ptr PLSA_FOREST_TRUST_RECORD
+
   PLSA_FOREST_TRUST_INFORMATION* = ptr LSA_FOREST_TRUST_INFORMATION
   LSA_FOREST_TRUST_COLLISION_RECORD* {.pure.} = object
     Index*: ULONG
     Type*: LSA_FOREST_TRUST_COLLISION_RECORD_TYPE
     Flags*: ULONG
     Name*: LSA_UNICODE_STRING
+
   PLSA_FOREST_TRUST_COLLISION_RECORD* = ptr LSA_FOREST_TRUST_COLLISION_RECORD
   LSA_FOREST_TRUST_COLLISION_INFORMATION* {.pure.} = object
     RecordCount*: ULONG
     Entries*: ptr PLSA_FOREST_TRUST_COLLISION_RECORD
+
   PLSA_FOREST_TRUST_COLLISION_INFORMATION* = ptr LSA_FOREST_TRUST_COLLISION_INFORMATION
   LSA_ENUMERATION_INFORMATION* {.pure.} = object
     Sid*: PSID
+
   PLSA_ENUMERATION_INFORMATION* = ptr LSA_ENUMERATION_INFORMATION
   LSA_LAST_INTER_LOGON_INFO* {.pure.} = object
     LastSuccessfulLogon*: LARGE_INTEGER
     LastFailedLogon*: LARGE_INTEGER
     FailedAttemptCountSinceLastSuccessfulLogon*: ULONG
+
   PLSA_LAST_INTER_LOGON_INFO* = ptr LSA_LAST_INTER_LOGON_INFO
   SECURITY_LOGON_SESSION_DATA* {.pure.} = object
     Size*: ULONG
@@ -300,30 +341,35 @@ type
     PasswordLastSet*: LARGE_INTEGER
     PasswordCanChange*: LARGE_INTEGER
     PasswordMustChange*: LARGE_INTEGER
+
   PSECURITY_LOGON_SESSION_DATA* = ptr SECURITY_LOGON_SESSION_DATA
-const
-  NEGOTIATE_MAX_PREFIX* = 32
+
+const NEGOTIATE_MAX_PREFIX* = 32
 type
   NEGOTIATE_PACKAGE_PREFIX* {.pure.} = object
     PackageId*: ULONG_PTR
     PackageDataA*: PVOID
     PackageDataW*: PVOID
     PrefixLen*: ULONG_PTR
-    Prefix*: array[NEGOTIATE_MAX_PREFIX , UCHAR]
+    Prefix*: array[NEGOTIATE_MAX_PREFIX, UCHAR]
+
   PNEGOTIATE_PACKAGE_PREFIX* = ptr NEGOTIATE_PACKAGE_PREFIX
   NEGOTIATE_PACKAGE_PREFIXES* {.pure.} = object
     MessageType*: ULONG
     PrefixCount*: ULONG
     Offset*: ULONG
     Pad*: ULONG
+
   PNEGOTIATE_PACKAGE_PREFIXES* = ptr NEGOTIATE_PACKAGE_PREFIXES
   NEGOTIATE_CALLER_NAME_REQUEST* {.pure.} = object
     MessageType*: ULONG
     LogonId*: LUID
+
   PNEGOTIATE_CALLER_NAME_REQUEST* = ptr NEGOTIATE_CALLER_NAME_REQUEST
   NEGOTIATE_CALLER_NAME_RESPONSE* {.pure.} = object
     MessageType*: ULONG
     CallerName*: PWSTR
+
   PNEGOTIATE_CALLER_NAME_RESPONSE* = ptr NEGOTIATE_CALLER_NAME_RESPONSE
   DOMAIN_PASSWORD_INFORMATION* {.pure.} = object
     MinPasswordLength*: USHORT
@@ -331,12 +377,14 @@ type
     PasswordProperties*: ULONG
     MaxPasswordAge*: LARGE_INTEGER
     MinPasswordAge*: LARGE_INTEGER
+
   PDOMAIN_PASSWORD_INFORMATION* = ptr DOMAIN_PASSWORD_INFORMATION
   TMSV1_0_INTERACTIVE_LOGON* {.pure.} = object
     MessageType*: MSV1_0_LOGON_SUBMIT_TYPE
     LogonDomainName*: UNICODE_STRING
     UserName*: UNICODE_STRING
     Password*: UNICODE_STRING
+
   PMSV1_0_INTERACTIVE_LOGON* = ptr TMSV1_0_INTERACTIVE_LOGON
   TMSV1_0_INTERACTIVE_PROFILE* {.pure.} = object
     MessageType*: MSV1_0_PROFILE_BUFFER_TYPE
@@ -355,9 +403,10 @@ type
     HomeDirectoryDrive*: UNICODE_STRING
     LogonServer*: UNICODE_STRING
     UserFlags*: ULONG
+
   PMSV1_0_INTERACTIVE_PROFILE* = ptr TMSV1_0_INTERACTIVE_PROFILE
-const
-  MSV1_0_CHALLENGE_LENGTH* = 8
+
+const MSV1_0_CHALLENGE_LENGTH* = 8
 type
   TMSV1_0_LM20_LOGON* {.pure.} = object
     MessageType*: MSV1_0_LOGON_SUBMIT_TYPE
@@ -368,6 +417,7 @@ type
     CaseSensitiveChallengeResponse*: STRING
     CaseInsensitiveChallengeResponse*: STRING
     ParameterControl*: ULONG
+
   PMSV1_0_LM20_LOGON* = ptr TMSV1_0_LM20_LOGON
   TMSV1_0_SUBAUTH_LOGON* {.pure.} = object
     MessageType*: MSV1_0_LOGON_SUBMIT_TYPE
@@ -379,7 +429,9 @@ type
     AuthenticationInfo2*: STRING
     ParameterControl*: ULONG
     SubAuthPackageId*: ULONG
+
   PMSV1_0_SUBAUTH_LOGON* = ptr TMSV1_0_SUBAUTH_LOGON
+
 const
   MSV1_0_USER_SESSION_KEY_LENGTH* = 16
   MSV1_0_LANMAN_SESSION_KEY_LENGTH* = 8
@@ -394,18 +446,20 @@ type
     LanmanSessionKey*: array[MSV1_0_LANMAN_SESSION_KEY_LENGTH, UCHAR]
     LogonServer*: UNICODE_STRING
     UserParameters*: UNICODE_STRING
+
   PMSV1_0_LM20_LOGON_PROFILE* = ptr TMSV1_0_LM20_LOGON_PROFILE
-const
-  MSV1_0_OWF_PASSWORD_LENGTH* = 16
+
+const MSV1_0_OWF_PASSWORD_LENGTH* = 16
 type
   MSV1_0_SUPPLEMENTAL_CREDENTIAL* {.pure.} = object
     Version*: ULONG
     Flags*: ULONG
     LmPassword*: array[MSV1_0_OWF_PASSWORD_LENGTH, UCHAR]
     NtPassword*: array[MSV1_0_OWF_PASSWORD_LENGTH, UCHAR]
+
   PMSV1_0_SUPPLEMENTAL_CREDENTIAL* = ptr MSV1_0_SUPPLEMENTAL_CREDENTIAL
-const
-  MSV1_0_NTLM3_RESPONSE_LENGTH* = 16
+
+const MSV1_0_NTLM3_RESPONSE_LENGTH* = 16
 type
   MSV1_0_NTLM3_RESPONSE* {.pure.} = object
     Response*: array[MSV1_0_NTLM3_RESPONSE_LENGTH, UCHAR]
@@ -417,10 +471,12 @@ type
     ChallengeFromClient*: array[MSV1_0_CHALLENGE_LENGTH, UCHAR]
     AvPairsOff*: ULONG
     Buffer*: array[1, UCHAR]
+
   PMSV1_0_NTLM3_RESPONSE* = ptr MSV1_0_NTLM3_RESPONSE
   MSV1_0_AV_PAIR* {.pure.} = object
     AvId*: USHORT
     AvLen*: USHORT
+
   PMSV1_0_AV_PAIR* = ptr MSV1_0_AV_PAIR
   MSV1_0_CHANGEPASSWORD_REQUEST* {.pure.} = object
     MessageType*: MSV1_0_PROTOCOL_MESSAGE_TYPE
@@ -429,11 +485,13 @@ type
     OldPassword*: UNICODE_STRING
     NewPassword*: UNICODE_STRING
     Impersonating*: BOOLEAN
+
   PMSV1_0_CHANGEPASSWORD_REQUEST* = ptr MSV1_0_CHANGEPASSWORD_REQUEST
   MSV1_0_CHANGEPASSWORD_RESPONSE* {.pure.} = object
     MessageType*: MSV1_0_PROTOCOL_MESSAGE_TYPE
     PasswordInfoValid*: BOOLEAN
     DomainPasswordInfo*: DOMAIN_PASSWORD_INFORMATION
+
   PMSV1_0_CHANGEPASSWORD_RESPONSE* = ptr MSV1_0_CHANGEPASSWORD_RESPONSE
   MSV1_0_PASSTHROUGH_REQUEST* {.pure.} = object
     MessageType*: MSV1_0_PROTOCOL_MESSAGE_TYPE
@@ -442,43 +500,51 @@ type
     DataLength*: ULONG
     LogonData*: PUCHAR
     Pad*: ULONG
+
   PMSV1_0_PASSTHROUGH_REQUEST* = ptr MSV1_0_PASSTHROUGH_REQUEST
   MSV1_0_PASSTHROUGH_RESPONSE* {.pure.} = object
     MessageType*: MSV1_0_PROTOCOL_MESSAGE_TYPE
     Pad*: ULONG
     DataLength*: ULONG
     ValidationData*: PUCHAR
+
   PMSV1_0_PASSTHROUGH_RESPONSE* = ptr MSV1_0_PASSTHROUGH_RESPONSE
   MSV1_0_SUBAUTH_REQUEST* {.pure.} = object
     MessageType*: MSV1_0_PROTOCOL_MESSAGE_TYPE
     SubAuthPackageId*: ULONG
     SubAuthInfoLength*: ULONG
     SubAuthSubmitBuffer*: PUCHAR
+
   PMSV1_0_SUBAUTH_REQUEST* = ptr MSV1_0_SUBAUTH_REQUEST
   MSV1_0_SUBAUTH_RESPONSE* {.pure.} = object
     MessageType*: MSV1_0_PROTOCOL_MESSAGE_TYPE
     SubAuthInfoLength*: ULONG
     SubAuthReturnBuffer*: PUCHAR
+
   PMSV1_0_SUBAUTH_RESPONSE* = ptr MSV1_0_SUBAUTH_RESPONSE
   KERB_INTERACTIVE_LOGON* {.pure.} = object
     MessageType*: KERB_LOGON_SUBMIT_TYPE
     LogonDomainName*: UNICODE_STRING
     UserName*: UNICODE_STRING
     Password*: UNICODE_STRING
+
   PKERB_INTERACTIVE_LOGON* = ptr KERB_INTERACTIVE_LOGON
   KERB_INTERACTIVE_UNLOCK_LOGON* {.pure.} = object
     Logon*: KERB_INTERACTIVE_LOGON
     LogonId*: LUID
+
   PKERB_INTERACTIVE_UNLOCK_LOGON* = ptr KERB_INTERACTIVE_UNLOCK_LOGON
   KERB_SMART_CARD_LOGON* {.pure.} = object
     MessageType*: KERB_LOGON_SUBMIT_TYPE
     Pin*: UNICODE_STRING
     CspDataLength*: ULONG
     CspData*: PUCHAR
+
   PKERB_SMART_CARD_LOGON* = ptr KERB_SMART_CARD_LOGON
   KERB_SMART_CARD_UNLOCK_LOGON* {.pure.} = object
     Logon*: KERB_SMART_CARD_LOGON
     LogonId*: LUID
+
   PKERB_SMART_CARD_UNLOCK_LOGON* = ptr KERB_SMART_CARD_UNLOCK_LOGON
   KERB_TICKET_LOGON* {.pure.} = object
     MessageType*: KERB_LOGON_SUBMIT_TYPE
@@ -487,16 +553,19 @@ type
     TicketGrantingTicketLength*: ULONG
     ServiceTicket*: PUCHAR
     TicketGrantingTicket*: PUCHAR
+
   PKERB_TICKET_LOGON* = ptr KERB_TICKET_LOGON
   KERB_TICKET_UNLOCK_LOGON* {.pure.} = object
     Logon*: KERB_TICKET_LOGON
     LogonId*: LUID
+
   PKERB_TICKET_UNLOCK_LOGON* = ptr KERB_TICKET_UNLOCK_LOGON
   KERB_S4U_LOGON* {.pure.} = object
     MessageType*: KERB_LOGON_SUBMIT_TYPE
     Flags*: ULONG
     ClientUpn*: UNICODE_STRING
     ClientRealm*: UNICODE_STRING
+
   PKERB_S4U_LOGON* = ptr KERB_S4U_LOGON
   KERB_INTERACTIVE_PROFILE* {.pure.} = object
     MessageType*: KERB_PROFILE_BUFFER_TYPE
@@ -515,24 +584,29 @@ type
     HomeDirectoryDrive*: UNICODE_STRING
     LogonServer*: UNICODE_STRING
     UserFlags*: ULONG
+
   PKERB_INTERACTIVE_PROFILE* = ptr KERB_INTERACTIVE_PROFILE
   KERB_SMART_CARD_PROFILE* {.pure.} = object
     Profile*: KERB_INTERACTIVE_PROFILE
     CertificateSize*: ULONG
     CertificateData*: PUCHAR
+
   PKERB_SMART_CARD_PROFILE* = ptr KERB_SMART_CARD_PROFILE
   KERB_CRYPTO_KEY* {.pure.} = object
     KeyType*: LONG
     Length*: ULONG
     Value*: PUCHAR
+
   PKERB_CRYPTO_KEY* = ptr KERB_CRYPTO_KEY
   KERB_TICKET_PROFILE* {.pure.} = object
     Profile*: KERB_INTERACTIVE_PROFILE
     SessionKey*: KERB_CRYPTO_KEY
+
   PKERB_TICKET_PROFILE* = ptr KERB_TICKET_PROFILE
   KERB_QUERY_TKT_CACHE_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     LogonId*: LUID
+
   PKERB_QUERY_TKT_CACHE_REQUEST* = ptr KERB_QUERY_TKT_CACHE_REQUEST
   KERB_TICKET_CACHE_INFO* {.pure.} = object
     ServerName*: UNICODE_STRING
@@ -542,6 +616,7 @@ type
     RenewTime*: LARGE_INTEGER
     EncryptionType*: LONG
     TicketFlags*: ULONG
+
   PKERB_TICKET_CACHE_INFO* = ptr KERB_TICKET_CACHE_INFO
   KERB_TICKET_CACHE_INFO_EX* {.pure.} = object
     ClientName*: UNICODE_STRING
@@ -553,6 +628,7 @@ type
     RenewTime*: LARGE_INTEGER
     EncryptionType*: LONG
     TicketFlags*: ULONG
+
   PKERB_TICKET_CACHE_INFO_EX* = ptr KERB_TICKET_CACHE_INFO_EX
   KERB_TICKET_CACHE_INFO_EX2* {.pure.} = object
     ClientName*: UNICODE_STRING
@@ -565,44 +641,53 @@ type
     EncryptionType*: LONG
     TicketFlags*: ULONG
     SessionKeyType*: ULONG
+
   PKERB_TICKET_CACHE_INFO_EX2* = ptr KERB_TICKET_CACHE_INFO_EX2
   KERB_QUERY_TKT_CACHE_RESPONSE* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     CountOfTickets*: ULONG
     Tickets*: array[ANYSIZE_ARRAY, KERB_TICKET_CACHE_INFO]
+
   PKERB_QUERY_TKT_CACHE_RESPONSE* = ptr KERB_QUERY_TKT_CACHE_RESPONSE
   KERB_QUERY_TKT_CACHE_EX_RESPONSE* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     CountOfTickets*: ULONG
     Tickets*: array[ANYSIZE_ARRAY, KERB_TICKET_CACHE_INFO_EX]
+
   PKERB_QUERY_TKT_CACHE_EX_RESPONSE* = ptr KERB_QUERY_TKT_CACHE_EX_RESPONSE
   KERB_QUERY_TKT_CACHE_EX2_RESPONSE* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     CountOfTickets*: ULONG
     Tickets*: array[ANYSIZE_ARRAY, KERB_TICKET_CACHE_INFO_EX2]
+
   PKERB_QUERY_TKT_CACHE_EX2_RESPONSE* = ptr KERB_QUERY_TKT_CACHE_EX2_RESPONSE
   SecHandle* {.pure.} = object
     dwLower*: ULONG_PTR
     dwUpper*: ULONG_PTR
+
   PSecHandle* = ptr SecHandle
   KERB_AUTH_DATA* {.pure.} = object
     Type*: ULONG
     Length*: ULONG
     Data*: PUCHAR
+
   PKERB_AUTH_DATA* = ptr KERB_AUTH_DATA
   KERB_NET_ADDRESS* {.pure.} = object
     Family*: ULONG
     Length*: ULONG
     Address*: PCHAR
+
   PKERB_NET_ADDRESS* = ptr KERB_NET_ADDRESS
   KERB_NET_ADDRESSES* {.pure.} = object
     Number*: ULONG
     Addresses*: array[ANYSIZE_ARRAY, KERB_NET_ADDRESS]
+
   PKERB_NET_ADDRESSES* = ptr KERB_NET_ADDRESSES
   KERB_EXTERNAL_NAME* {.pure.} = object
     NameType*: SHORT
     NameCount*: USHORT
     Names*: array[ANYSIZE_ARRAY, UNICODE_STRING]
+
   PKERB_EXTERNAL_NAME* = ptr KERB_EXTERNAL_NAME
   KERB_EXTERNAL_TICKET* {.pure.} = object
     ServiceName*: PKERB_EXTERNAL_NAME
@@ -621,6 +706,7 @@ type
     TimeSkew*: LARGE_INTEGER
     EncodedTicketSize*: ULONG
     EncodedTicket*: PUCHAR
+
   PKERB_EXTERNAL_TICKET* = ptr KERB_EXTERNAL_TICKET
   KERB_RETRIEVE_TKT_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
@@ -630,21 +716,25 @@ type
     CacheOptions*: ULONG
     EncryptionType*: LONG
     CredentialsHandle*: SecHandle
+
   PKERB_RETRIEVE_TKT_REQUEST* = ptr KERB_RETRIEVE_TKT_REQUEST
   KERB_RETRIEVE_TKT_RESPONSE* {.pure.} = object
     Ticket*: KERB_EXTERNAL_TICKET
+
   PKERB_RETRIEVE_TKT_RESPONSE* = ptr KERB_RETRIEVE_TKT_RESPONSE
   KERB_PURGE_TKT_CACHE_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     LogonId*: LUID
     ServerName*: UNICODE_STRING
     RealmName*: UNICODE_STRING
+
   PKERB_PURGE_TKT_CACHE_REQUEST* = ptr KERB_PURGE_TKT_CACHE_REQUEST
   KERB_PURGE_TKT_CACHE_EX_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     LogonId*: LUID
     Flags*: ULONG
     TicketTemplate*: KERB_TICKET_CACHE_INFO_EX
+
   PKERB_PURGE_TKT_CACHE_EX_REQUEST* = ptr KERB_PURGE_TKT_CACHE_EX_REQUEST
   KERB_CHANGEPASSWORD_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
@@ -653,6 +743,7 @@ type
     OldPassword*: UNICODE_STRING
     NewPassword*: UNICODE_STRING
     Impersonating*: BOOLEAN
+
   PKERB_CHANGEPASSWORD_REQUEST* = ptr KERB_CHANGEPASSWORD_REQUEST
   KERB_SETPASSWORD_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
@@ -662,6 +753,7 @@ type
     DomainName*: UNICODE_STRING
     AccountName*: UNICODE_STRING
     Password*: UNICODE_STRING
+
   PKERB_SETPASSWORD_REQUEST* = ptr KERB_SETPASSWORD_REQUEST
   KERB_SETPASSWORD_EX_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
@@ -676,6 +768,7 @@ type
     Impersonating*: BOOLEAN
     KdcAddress*: UNICODE_STRING
     KdcAddressType*: ULONG
+
   PKERB_SETPASSWORD_EX_REQUEST* = ptr KERB_SETPASSWORD_EX_REQUEST
   KERB_DECRYPT_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
@@ -688,21 +781,25 @@ type
     InitialVectorSize*: ULONG
     InitialVector*: PUCHAR
     EncryptedData*: PUCHAR
+
   PKERB_DECRYPT_REQUEST* = ptr KERB_DECRYPT_REQUEST
   KERB_DECRYPT_RESPONSE* {.pure.} = object
     DecryptedData*: array[ANYSIZE_ARRAY, UCHAR]
+
   PKERB_DECRYPT_RESPONSE* = ptr KERB_DECRYPT_RESPONSE
   KERB_ADD_BINDING_CACHE_ENTRY_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     RealmName*: UNICODE_STRING
     KdcAddress*: UNICODE_STRING
     AddressType*: ULONG
+
   PKERB_ADD_BINDING_CACHE_ENTRY_REQUEST* = ptr KERB_ADD_BINDING_CACHE_ENTRY_REQUEST
   KERB_REFRESH_SCCRED_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     CredentialBlob*: UNICODE_STRING
     LogonId*: LUID
     Flags*: ULONG
+
   PKERB_REFRESH_SCCRED_REQUEST* = ptr KERB_REFRESH_SCCRED_REQUEST
   KERB_ADD_CREDENTIALS_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
@@ -711,22 +808,26 @@ type
     Password*: UNICODE_STRING
     LogonId*: LUID
     Flags*: ULONG
+
   PKERB_ADD_CREDENTIALS_REQUEST* = ptr KERB_ADD_CREDENTIALS_REQUEST
   KERB_TRANSFER_CRED_REQUEST* {.pure.} = object
     MessageType*: KERB_PROTOCOL_MESSAGE_TYPE
     OriginLogonId*: LUID
     DestinationLogonId*: LUID
     Flags*: ULONG
+
   PKERB_TRANSFER_CRED_REQUEST* = ptr KERB_TRANSFER_CRED_REQUEST
   AUDIT_POLICY_INFORMATION* {.pure.} = object
     AuditSubCategoryGuid*: GUID
     AuditingInformation*: ULONG
     AuditCategoryGuid*: GUID
+
   PAUDIT_POLICY_INFORMATION* = ptr AUDIT_POLICY_INFORMATION
   PCAUDIT_POLICY_INFORMATION* = ptr AUDIT_POLICY_INFORMATION
   POLICY_AUDIT_SID_ARRAY* {.pure.} = object
     UsersCount*: ULONG
     UserSidArray*: ptr PSID
+
   PPOLICY_AUDIT_SID_ARRAY* = ptr POLICY_AUDIT_SID_ARRAY
   KERB_CERTIFICATE_LOGON* {.pure.} = object
     MessageType*: KERB_LOGON_SUBMIT_TYPE
@@ -736,14 +837,17 @@ type
     Flags*: ULONG
     CspDataLength*: ULONG
     CspData*: PUCHAR
+
   PKERB_CERTIFICATE_LOGON* = ptr KERB_CERTIFICATE_LOGON
   KERB_CERTIFICATE_UNLOCK_LOGON* {.pure.} = object
     Logon*: KERB_CERTIFICATE_LOGON
     LogonId*: LUID
+
   PKERB_CERTIFICATE_UNLOCK_LOGON* = ptr KERB_CERTIFICATE_UNLOCK_LOGON
   KERB_SMARTCARD_CSP_INFO_UNION1* {.pure, union.} = object
     ContextInformation*: PVOID
     SpaceHolderForWow64*: ULONG64
+
   KERB_SMARTCARD_CSP_INFO* {.pure.} = object
     dwCspInfoLen*: DWORD
     MessageType*: DWORD
@@ -755,6 +859,7 @@ type
     nContainerNameOffset*: ULONG
     nCSPNameOffset*: ULONG
     bBuffer*: TCHAR
+
   PKERB_SMARTCARD_CSP_INFO* = ptr KERB_SMARTCARD_CSP_INFO
   CredHandle* = SecHandle
   PCredHandle* = PSecHandle
@@ -772,6 +877,7 @@ type
     cbMaxToken*: int32
     Name*: ptr SEC_WCHAR
     Comment*: ptr SEC_WCHAR
+
   PSecPkgInfoW* = ptr SecPkgInfoW
   SecPkgInfoA* {.pure.} = object
     fCapabilities*: int32
@@ -780,22 +886,26 @@ type
     cbMaxToken*: int32
     Name*: ptr SEC_CHAR
     Comment*: ptr SEC_CHAR
+
   PSecPkgInfoA* = ptr SecPkgInfoA
   SecBuffer* {.pure.} = object
     cbBuffer*: int32
     BufferType*: int32
     pvBuffer*: pointer
+
   PSecBuffer* = ptr SecBuffer
   SecBufferDesc* {.pure.} = object
     ulVersion*: int32
     cBuffers*: int32
     pBuffers*: PSecBuffer
+
   PSecBufferDesc* = ptr SecBufferDesc
   SEC_NEGOTIATION_INFO* {.pure.} = object
     Size*: int32
     NameLength*: int32
     Name*: ptr SEC_WCHAR
     Reserved*: pointer
+
   PSEC_NEGOTIATION_INFO* = ptr SEC_NEGOTIATION_INFO
   SEC_CHANNEL_BINDINGS* {.pure.} = object
     dwInitiatorAddrType*: int32
@@ -806,28 +916,34 @@ type
     dwAcceptorOffset*: int32
     cbApplicationDataLength*: int32
     dwApplicationDataOffset*: int32
+
   PSEC_CHANNEL_BINDINGS* = ptr SEC_CHANNEL_BINDINGS
   SecPkgCredentials_NamesW* {.pure.} = object
     sUserName*: ptr SEC_WCHAR
+
   PSecPkgCredentials_NamesW* = ptr SecPkgCredentials_NamesW
   SecPkgCredentials_NamesA* {.pure.} = object
     sUserName*: ptr SEC_CHAR
+
   PSecPkgCredentials_NamesA* = ptr SecPkgCredentials_NamesA
   SecPkgCredentials_SSIProviderW* {.pure.} = object
     sProviderName*: ptr SEC_WCHAR
     ProviderInfoLength*: int32
     ProviderInfo*: ptr char
+
   PSecPkgCredentials_SSIProviderW* = ptr SecPkgCredentials_SSIProviderW
   SecPkgCredentials_SSIProviderA* {.pure.} = object
     sProviderName*: ptr SEC_CHAR
     ProviderInfoLength*: int32
     ProviderInfo*: ptr char
+
   PSecPkgCredentials_SSIProviderA* = ptr SecPkgCredentials_SSIProviderA
   SecPkgContext_Sizes* {.pure.} = object
     cbMaxToken*: int32
     cbMaxSignature*: int32
     cbBlockSize*: int32
     cbSecurityTrailer*: int32
+
   PSecPkgContext_Sizes* = ptr SecPkgContext_Sizes
   SecPkgContext_StreamSizes* {.pure.} = object
     cbHeader*: int32
@@ -835,20 +951,25 @@ type
     cbMaximumMessage*: int32
     cBuffers*: int32
     cbBlockSize*: int32
+
   PSecPkgContext_StreamSizes* = ptr SecPkgContext_StreamSizes
   SecPkgContext_NamesW* {.pure.} = object
     sUserName*: ptr SEC_WCHAR
+
   PSecPkgContext_NamesW* = ptr SecPkgContext_NamesW
   SecPkgContext_NamesA* {.pure.} = object
     sUserName*: ptr SEC_CHAR
+
   PSecPkgContext_NamesA* = ptr SecPkgContext_NamesA
   SecPkgContext_Lifespan* {.pure.} = object
     tsStart*: TimeStamp
     tsExpiry*: TimeStamp
+
   PSecPkgContext_Lifespan* = ptr SecPkgContext_Lifespan
   SecPkgContext_DceInfo* {.pure.} = object
     AuthzSvc*: int32
     pPac*: pointer
+
   PSecPkgContext_DceInfo* = ptr SecPkgContext_DceInfo
   SecPkgContext_KeyInfoA* {.pure.} = object
     sSignatureAlgorithmName*: ptr SEC_CHAR
@@ -856,6 +977,7 @@ type
     KeySize*: int32
     SignatureAlgorithm*: int32
     EncryptAlgorithm*: int32
+
   PSecPkgContext_KeyInfoA* = ptr SecPkgContext_KeyInfoA
   SecPkgContext_KeyInfoW* {.pure.} = object
     sSignatureAlgorithmName*: ptr SEC_WCHAR
@@ -863,109 +985,202 @@ type
     KeySize*: int32
     SignatureAlgorithm*: int32
     EncryptAlgorithm*: int32
+
   PSecPkgContext_KeyInfoW* = ptr SecPkgContext_KeyInfoW
   SecPkgContext_AuthorityA* {.pure.} = object
     sAuthorityName*: ptr SEC_CHAR
+
   PSecPkgContext_AuthorityA* = ptr SecPkgContext_AuthorityA
   SecPkgContext_AuthorityW* {.pure.} = object
     sAuthorityName*: ptr SEC_WCHAR
+
   PSecPkgContext_AuthorityW* = ptr SecPkgContext_AuthorityW
   SecPkgContext_ProtoInfoA* {.pure.} = object
     sProtocolName*: ptr SEC_CHAR
     majorVersion*: int32
     minorVersion*: int32
+
   PSecPkgContext_ProtoInfoA* = ptr SecPkgContext_ProtoInfoA
   SecPkgContext_ProtoInfoW* {.pure.} = object
     sProtocolName*: ptr SEC_WCHAR
     majorVersion*: int32
     minorVersion*: int32
+
   PSecPkgContext_ProtoInfoW* = ptr SecPkgContext_ProtoInfoW
   SecPkgContext_PasswordExpiry* {.pure.} = object
     tsPasswordExpires*: TimeStamp
+
   PSecPkgContext_PasswordExpiry* = ptr SecPkgContext_PasswordExpiry
   SecPkgContext_LogoffTime* {.pure.} = object
     tsLogoffTime*: TimeStamp
+
   PSecPkgContext_LogoffTime* = ptr SecPkgContext_LogoffTime
   SecPkgContext_SessionKey* {.pure.} = object
     SessionKeyLength*: int32
     SessionKey*: ptr uint8
+
   PSecPkgContext_SessionKey* = ptr SecPkgContext_SessionKey
   SecPkgContext_PackageInfoW* {.pure.} = object
     PackageInfo*: PSecPkgInfoW
+
   PSecPkgContext_PackageInfoW* = ptr SecPkgContext_PackageInfoW
   SecPkgContext_PackageInfoA* {.pure.} = object
     PackageInfo*: PSecPkgInfoA
+
   PSecPkgContext_PackageInfoA* = ptr SecPkgContext_PackageInfoA
   SecPkgContext_UserFlags* {.pure.} = object
     UserFlags*: int32
+
   PSecPkgContext_UserFlags* = ptr SecPkgContext_UserFlags
   SecPkgContext_Flags* {.pure.} = object
     Flags*: int32
+
   PSecPkgContext_Flags* = ptr SecPkgContext_Flags
   SecPkgContext_NegotiationInfoA* {.pure.} = object
     PackageInfo*: PSecPkgInfoA
     NegotiationState*: int32
+
   PSecPkgContext_NegotiationInfoA* = ptr SecPkgContext_NegotiationInfoA
   SecPkgContext_NegotiationInfoW* {.pure.} = object
     PackageInfo*: PSecPkgInfoW
     NegotiationState*: int32
+
   PSecPkgContext_NegotiationInfoW* = ptr SecPkgContext_NegotiationInfoW
   SecPkgContext_NativeNamesW* {.pure.} = object
     sClientName*: ptr SEC_WCHAR
     sServerName*: ptr SEC_WCHAR
+
   PSecPkgContext_NativeNamesW* = ptr SecPkgContext_NativeNamesW
   SecPkgContext_NativeNamesA* {.pure.} = object
     sClientName*: ptr SEC_CHAR
     sServerName*: ptr SEC_CHAR
+
   PSecPkgContext_NativeNamesA* = ptr SecPkgContext_NativeNamesA
   SecPkgContext_CredentialNameW* {.pure.} = object
     CredentialType*: int32
     sCredentialName*: ptr SEC_WCHAR
+
   PSecPkgContext_CredentialNameW* = ptr SecPkgContext_CredentialNameW
   SecPkgContext_CredentialNameA* {.pure.} = object
     CredentialType*: int32
     sCredentialName*: ptr SEC_CHAR
+
   PSecPkgContext_CredentialNameA* = ptr SecPkgContext_CredentialNameA
   SecPkgContext_AccessToken* {.pure.} = object
     AccessToken*: pointer
+
   PSecPkgContext_AccessToken* = ptr SecPkgContext_AccessToken
   SecPkgContext_TargetInformation* {.pure.} = object
     MarshalledTargetInfoLength*: int32
     MarshalledTargetInfo*: ptr uint8
+
   PSecPkgContext_TargetInformation* = ptr SecPkgContext_TargetInformation
   SecPkgContext_AuthzID* {.pure.} = object
     AuthzIDLength*: int32
     AuthzID*: ptr char
+
   PSecPkgContext_AuthzID* = ptr SecPkgContext_AuthzID
   SecPkgContext_Target* {.pure.} = object
     TargetLength*: int32
     Target*: ptr char
+
   PSecPkgContext_Target* = ptr SecPkgContext_Target
-  ENUMERATE_SECURITY_PACKAGES_FN_W* = proc (P1: ptr int32, P2: ptr PSecPkgInfoW): SECURITY_STATUS {.stdcall.}
-  QUERY_CREDENTIALS_ATTRIBUTES_FN_W* = proc (P1: PCredHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
-  SEC_GET_KEY_FN* = proc (Arg: pointer, Principal: pointer, KeyVer: int32, Key: ptr pointer, Status: ptr SECURITY_STATUS): void {.stdcall.}
-  ACQUIRE_CREDENTIALS_HANDLE_FN_W* = proc (P1: ptr SEC_WCHAR, P2: ptr SEC_WCHAR, P3: int32, P4: pointer, P5: pointer, P6: SEC_GET_KEY_FN, P7: pointer, P8: PCredHandle, P9: PTimeStamp): SECURITY_STATUS {.stdcall.}
-  FREE_CREDENTIALS_HANDLE_FN* = proc (P1: PCredHandle): SECURITY_STATUS {.stdcall.}
-  INITIALIZE_SECURITY_CONTEXT_FN_W* = proc (P1: PCredHandle, P2: PCtxtHandle, P3: ptr SEC_WCHAR, P4: int32, P5: int32, P6: int32, P7: PSecBufferDesc, P8: int32, P9: PCtxtHandle, P10: PSecBufferDesc, P11: ptr int32, P12: PTimeStamp): SECURITY_STATUS {.stdcall.}
-  ACCEPT_SECURITY_CONTEXT_FN* = proc (P1: PCredHandle, P2: PCtxtHandle, P3: PSecBufferDesc, P4: int32, P5: int32, P6: PCtxtHandle, P7: PSecBufferDesc, P8: ptr int32, P9: PTimeStamp): SECURITY_STATUS {.stdcall.}
-  COMPLETE_AUTH_TOKEN_FN* = proc (P1: PCtxtHandle, P2: PSecBufferDesc): SECURITY_STATUS {.stdcall.}
-  DELETE_SECURITY_CONTEXT_FN* = proc (P1: PCtxtHandle): SECURITY_STATUS {.stdcall.}
-  APPLY_CONTROL_TOKEN_FN* = proc (P1: PCtxtHandle, P2: PSecBufferDesc): SECURITY_STATUS {.stdcall.}
-  QUERY_CONTEXT_ATTRIBUTES_FN_W* = proc (P1: PCtxtHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
-  IMPERSONATE_SECURITY_CONTEXT_FN* = proc (P1: PCtxtHandle): SECURITY_STATUS {.stdcall.}
-  REVERT_SECURITY_CONTEXT_FN* = proc (P1: PCtxtHandle): SECURITY_STATUS {.stdcall.}
-  MAKE_SIGNATURE_FN* = proc (P1: PCtxtHandle, P2: int32, P3: PSecBufferDesc, P4: int32): SECURITY_STATUS {.stdcall.}
-  VERIFY_SIGNATURE_FN* = proc (P1: PCtxtHandle, P2: PSecBufferDesc, P3: int32, P4: ptr int32): SECURITY_STATUS {.stdcall.}
-  FREE_CONTEXT_BUFFER_FN* = proc (P1: pointer): SECURITY_STATUS {.stdcall.}
-  QUERY_SECURITY_PACKAGE_INFO_FN_W* = proc (P1: ptr SEC_WCHAR, P2: ptr PSecPkgInfoW): SECURITY_STATUS {.stdcall.}
-  EXPORT_SECURITY_CONTEXT_FN* = proc (P1: PCtxtHandle, P2: ULONG, P3: PSecBuffer, P4: ptr pointer): SECURITY_STATUS {.stdcall.}
-  IMPORT_SECURITY_CONTEXT_FN_W* = proc (P1: ptr SEC_WCHAR, P2: PSecBuffer, P3: pointer, P4: PCtxtHandle): SECURITY_STATUS {.stdcall.}
-  ADD_CREDENTIALS_FN_W* = proc (P1: PCredHandle, P2: ptr SEC_WCHAR, P3: ptr SEC_WCHAR, P4: int32, P5: pointer, P6: SEC_GET_KEY_FN, P7: pointer, P8: PTimeStamp): SECURITY_STATUS {.stdcall.}
-  QUERY_SECURITY_CONTEXT_TOKEN_FN* = proc (P1: PCtxtHandle, P2: ptr HANDLE): SECURITY_STATUS {.stdcall.}
-  ENCRYPT_MESSAGE_FN* = proc (P1: PCtxtHandle, P2: int32, P3: PSecBufferDesc, P4: int32): SECURITY_STATUS {.stdcall.}
-  DECRYPT_MESSAGE_FN* = proc (P1: PCtxtHandle, P2: PSecBufferDesc, P3: int32, P4: ptr int32): SECURITY_STATUS {.stdcall.}
-  SET_CONTEXT_ATTRIBUTES_FN_W* = proc (P1: PCtxtHandle, P2: int32, P3: pointer, P4: int32): SECURITY_STATUS {.stdcall.}
-  SET_CREDENTIALS_ATTRIBUTES_FN_W* = proc (P1: PCredHandle, P2: int32, P3: pointer, P4: int32): SECURITY_STATUS {.stdcall.}
+  ENUMERATE_SECURITY_PACKAGES_FN_W* =
+    proc(P1: ptr int32, P2: ptr PSecPkgInfoW): SECURITY_STATUS {.stdcall.}
+  QUERY_CREDENTIALS_ATTRIBUTES_FN_W* =
+    proc(P1: PCredHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
+  SEC_GET_KEY_FN* = proc(
+    Arg: pointer,
+    Principal: pointer,
+    KeyVer: int32,
+    Key: ptr pointer,
+    Status: ptr SECURITY_STATUS,
+  ): void {.stdcall.}
+  ACQUIRE_CREDENTIALS_HANDLE_FN_W* = proc(
+    P1: ptr SEC_WCHAR,
+    P2: ptr SEC_WCHAR,
+    P3: int32,
+    P4: pointer,
+    P5: pointer,
+    P6: SEC_GET_KEY_FN,
+    P7: pointer,
+    P8: PCredHandle,
+    P9: PTimeStamp,
+  ): SECURITY_STATUS {.stdcall.}
+  FREE_CREDENTIALS_HANDLE_FN* = proc(P1: PCredHandle): SECURITY_STATUS {.stdcall.}
+  INITIALIZE_SECURITY_CONTEXT_FN_W* = proc(
+    P1: PCredHandle,
+    P2: PCtxtHandle,
+    P3: ptr SEC_WCHAR,
+    P4: int32,
+    P5: int32,
+    P6: int32,
+    P7: PSecBufferDesc,
+    P8: int32,
+    P9: PCtxtHandle,
+    P10: PSecBufferDesc,
+    P11: ptr int32,
+    P12: PTimeStamp,
+  ): SECURITY_STATUS {.stdcall.}
+  ACCEPT_SECURITY_CONTEXT_FN* = proc(
+    P1: PCredHandle,
+    P2: PCtxtHandle,
+    P3: PSecBufferDesc,
+    P4: int32,
+    P5: int32,
+    P6: PCtxtHandle,
+    P7: PSecBufferDesc,
+    P8: ptr int32,
+    P9: PTimeStamp,
+  ): SECURITY_STATUS {.stdcall.}
+  COMPLETE_AUTH_TOKEN_FN* =
+    proc(P1: PCtxtHandle, P2: PSecBufferDesc): SECURITY_STATUS {.stdcall.}
+  DELETE_SECURITY_CONTEXT_FN* = proc(P1: PCtxtHandle): SECURITY_STATUS {.stdcall.}
+  APPLY_CONTROL_TOKEN_FN* =
+    proc(P1: PCtxtHandle, P2: PSecBufferDesc): SECURITY_STATUS {.stdcall.}
+  QUERY_CONTEXT_ATTRIBUTES_FN_W* =
+    proc(P1: PCtxtHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
+  IMPERSONATE_SECURITY_CONTEXT_FN* = proc(P1: PCtxtHandle): SECURITY_STATUS {.stdcall.}
+  REVERT_SECURITY_CONTEXT_FN* = proc(P1: PCtxtHandle): SECURITY_STATUS {.stdcall.}
+  MAKE_SIGNATURE_FN* = proc(
+    P1: PCtxtHandle, P2: int32, P3: PSecBufferDesc, P4: int32
+  ): SECURITY_STATUS {.stdcall.}
+  VERIFY_SIGNATURE_FN* = proc(
+    P1: PCtxtHandle, P2: PSecBufferDesc, P3: int32, P4: ptr int32
+  ): SECURITY_STATUS {.stdcall.}
+  FREE_CONTEXT_BUFFER_FN* = proc(P1: pointer): SECURITY_STATUS {.stdcall.}
+  QUERY_SECURITY_PACKAGE_INFO_FN_W* =
+    proc(P1: ptr SEC_WCHAR, P2: ptr PSecPkgInfoW): SECURITY_STATUS {.stdcall.}
+  EXPORT_SECURITY_CONTEXT_FN* = proc(
+    P1: PCtxtHandle, P2: ULONG, P3: PSecBuffer, P4: ptr pointer
+  ): SECURITY_STATUS {.stdcall.}
+  IMPORT_SECURITY_CONTEXT_FN_W* = proc(
+    P1: ptr SEC_WCHAR, P2: PSecBuffer, P3: pointer, P4: PCtxtHandle
+  ): SECURITY_STATUS {.stdcall.}
+  ADD_CREDENTIALS_FN_W* = proc(
+    P1: PCredHandle,
+    P2: ptr SEC_WCHAR,
+    P3: ptr SEC_WCHAR,
+    P4: int32,
+    P5: pointer,
+    P6: SEC_GET_KEY_FN,
+    P7: pointer,
+    P8: PTimeStamp,
+  ): SECURITY_STATUS {.stdcall.}
+  QUERY_SECURITY_CONTEXT_TOKEN_FN* =
+    proc(P1: PCtxtHandle, P2: ptr HANDLE): SECURITY_STATUS {.stdcall.}
+  ENCRYPT_MESSAGE_FN* = proc(
+    P1: PCtxtHandle, P2: int32, P3: PSecBufferDesc, P4: int32
+  ): SECURITY_STATUS {.stdcall.}
+  DECRYPT_MESSAGE_FN* = proc(
+    P1: PCtxtHandle, P2: PSecBufferDesc, P3: int32, P4: ptr int32
+  ): SECURITY_STATUS {.stdcall.}
+  SET_CONTEXT_ATTRIBUTES_FN_W* = proc(
+    P1: PCtxtHandle, P2: int32, P3: pointer, P4: int32
+  ): SECURITY_STATUS {.stdcall.}
+  SET_CREDENTIALS_ATTRIBUTES_FN_W* = proc(
+    P1: PCredHandle, P2: int32, P3: pointer, P4: int32
+  ): SECURITY_STATUS {.stdcall.}
   SecurityFunctionTableW* {.pure.} = object
     dwVersion*: int32
     EnumerateSecurityPackagesW*: ENUMERATE_SECURITY_PACKAGES_FN_W
@@ -996,17 +1211,60 @@ type
     DecryptMessage*: DECRYPT_MESSAGE_FN
     SetContextAttributesW*: SET_CONTEXT_ATTRIBUTES_FN_W
     SetCredentialsAttributesW*: SET_CREDENTIALS_ATTRIBUTES_FN_W
+
   PSecurityFunctionTableW* = ptr SecurityFunctionTableW
-  ENUMERATE_SECURITY_PACKAGES_FN_A* = proc (P1: ptr int32, P2: ptr PSecPkgInfoA): SECURITY_STATUS {.stdcall.}
-  QUERY_CREDENTIALS_ATTRIBUTES_FN_A* = proc (P1: PCredHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
-  ACQUIRE_CREDENTIALS_HANDLE_FN_A* = proc (P1: ptr SEC_CHAR, P2: ptr SEC_CHAR, P3: int32, P4: pointer, P5: pointer, P6: SEC_GET_KEY_FN, P7: pointer, P8: PCredHandle, P9: PTimeStamp): SECURITY_STATUS {.stdcall.}
-  INITIALIZE_SECURITY_CONTEXT_FN_A* = proc (P1: PCredHandle, P2: PCtxtHandle, P3: ptr SEC_CHAR, P4: int32, P5: int32, P6: int32, P7: PSecBufferDesc, P8: int32, P9: PCtxtHandle, P10: PSecBufferDesc, P11: ptr int32, P12: PTimeStamp): SECURITY_STATUS {.stdcall.}
-  QUERY_CONTEXT_ATTRIBUTES_FN_A* = proc (P1: PCtxtHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
-  QUERY_SECURITY_PACKAGE_INFO_FN_A* = proc (P1: ptr SEC_CHAR, P2: ptr PSecPkgInfoA): SECURITY_STATUS {.stdcall.}
-  IMPORT_SECURITY_CONTEXT_FN_A* = proc (P1: ptr SEC_CHAR, P2: PSecBuffer, P3: pointer, P4: PCtxtHandle): SECURITY_STATUS {.stdcall.}
-  ADD_CREDENTIALS_FN_A* = proc (P1: PCredHandle, P2: ptr SEC_CHAR, P3: ptr SEC_CHAR, P4: int32, P5: pointer, P6: SEC_GET_KEY_FN, P7: pointer, P8: PTimeStamp): SECURITY_STATUS {.stdcall.}
-  SET_CONTEXT_ATTRIBUTES_FN_A* = proc (P1: PCtxtHandle, P2: int32, P3: pointer, P4: int32): SECURITY_STATUS {.stdcall.}
-  SET_CREDENTIALS_ATTRIBUTES_FN_A* = proc (P1: PCredHandle, P2: int32, P3: pointer, P4: int32): SECURITY_STATUS {.stdcall.}
+  ENUMERATE_SECURITY_PACKAGES_FN_A* =
+    proc(P1: ptr int32, P2: ptr PSecPkgInfoA): SECURITY_STATUS {.stdcall.}
+  QUERY_CREDENTIALS_ATTRIBUTES_FN_A* =
+    proc(P1: PCredHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
+  ACQUIRE_CREDENTIALS_HANDLE_FN_A* = proc(
+    P1: ptr SEC_CHAR,
+    P2: ptr SEC_CHAR,
+    P3: int32,
+    P4: pointer,
+    P5: pointer,
+    P6: SEC_GET_KEY_FN,
+    P7: pointer,
+    P8: PCredHandle,
+    P9: PTimeStamp,
+  ): SECURITY_STATUS {.stdcall.}
+  INITIALIZE_SECURITY_CONTEXT_FN_A* = proc(
+    P1: PCredHandle,
+    P2: PCtxtHandle,
+    P3: ptr SEC_CHAR,
+    P4: int32,
+    P5: int32,
+    P6: int32,
+    P7: PSecBufferDesc,
+    P8: int32,
+    P9: PCtxtHandle,
+    P10: PSecBufferDesc,
+    P11: ptr int32,
+    P12: PTimeStamp,
+  ): SECURITY_STATUS {.stdcall.}
+  QUERY_CONTEXT_ATTRIBUTES_FN_A* =
+    proc(P1: PCtxtHandle, P2: int32, P3: pointer): SECURITY_STATUS {.stdcall.}
+  QUERY_SECURITY_PACKAGE_INFO_FN_A* =
+    proc(P1: ptr SEC_CHAR, P2: ptr PSecPkgInfoA): SECURITY_STATUS {.stdcall.}
+  IMPORT_SECURITY_CONTEXT_FN_A* = proc(
+    P1: ptr SEC_CHAR, P2: PSecBuffer, P3: pointer, P4: PCtxtHandle
+  ): SECURITY_STATUS {.stdcall.}
+  ADD_CREDENTIALS_FN_A* = proc(
+    P1: PCredHandle,
+    P2: ptr SEC_CHAR,
+    P3: ptr SEC_CHAR,
+    P4: int32,
+    P5: pointer,
+    P6: SEC_GET_KEY_FN,
+    P7: pointer,
+    P8: PTimeStamp,
+  ): SECURITY_STATUS {.stdcall.}
+  SET_CONTEXT_ATTRIBUTES_FN_A* = proc(
+    P1: PCtxtHandle, P2: int32, P3: pointer, P4: int32
+  ): SECURITY_STATUS {.stdcall.}
+  SET_CREDENTIALS_ATTRIBUTES_FN_A* = proc(
+    P1: PCredHandle, P2: int32, P3: pointer, P4: int32
+  ): SECURITY_STATUS {.stdcall.}
   SecurityFunctionTableA* {.pure.} = object
     dwVersion*: int32
     EnumerateSecurityPackagesA*: ENUMERATE_SECURITY_PACKAGES_FN_A
@@ -1037,6 +1295,7 @@ type
     DecryptMessage*: DECRYPT_MESSAGE_FN
     SetContextAttributesA*: SET_CONTEXT_ATTRIBUTES_FN_A
     SetCredentialsAttributesA*: SET_CREDENTIALS_ATTRIBUTES_FN_A
+
   PSecurityFunctionTableA* = ptr SecurityFunctionTableA
   SEC_WINNT_AUTH_IDENTITY_W* {.pure.} = object
     User*: ptr uint16
@@ -1046,6 +1305,7 @@ type
     Password*: ptr uint16
     PasswordLength*: int32
     Flags*: int32
+
   PSEC_WINNT_AUTH_IDENTITY_W* = ptr SEC_WINNT_AUTH_IDENTITY_W
   SEC_WINNT_AUTH_IDENTITY_A* {.pure.} = object
     User*: ptr uint8
@@ -1055,6 +1315,7 @@ type
     Password*: ptr uint8
     PasswordLength*: int32
     Flags*: int32
+
   PSEC_WINNT_AUTH_IDENTITY_A* = ptr SEC_WINNT_AUTH_IDENTITY_A
   SEC_WINNT_AUTH_IDENTITY_EXW* {.pure.} = object
     Version*: int32
@@ -1068,6 +1329,7 @@ type
     Flags*: int32
     PackageList*: ptr uint16
     PackageListLength*: int32
+
   PSEC_WINNT_AUTH_IDENTITY_EXW* = ptr SEC_WINNT_AUTH_IDENTITY_EXW
   SEC_WINNT_AUTH_IDENTITY_EXA* {.pure.} = object
     Version*: int32
@@ -1081,6 +1343,7 @@ type
     Flags*: int32
     PackageList*: ptr uint8
     PackageListLength*: int32
+
   PSEC_WINNT_AUTH_IDENTITY_EXA* = ptr SEC_WINNT_AUTH_IDENTITY_EXA
   SECURITY_PACKAGE_OPTIONS* {.pure.} = object
     Size*: int32
@@ -1088,6 +1351,7 @@ type
     Flags*: int32
     SignatureSize*: int32
     Signature*: pointer
+
   PSECURITY_PACKAGE_OPTIONS* = ptr SECURITY_PACKAGE_OPTIONS
   CREDUIWIN_MARSHALED_CONTEXT* {.pure.} = object
     StructureType*: GUID
@@ -1096,8 +1360,10 @@ type
     MarshaledDataType*: GUID
     MarshaledDataOffset*: ULONG
     MarshaledDataLength*: USHORT
+
   PCREDUIWIN_MARSHALED_CONTEXT* = ptr CREDUIWIN_MARSHALED_CONTEXT
   PSECURITY_INTEGER* = ptr LARGE_INTEGER
+
 const
   NTLMSP_NAME_A* = "NTLM"
   NTLMSP_NAME* = "NTLM"
@@ -1161,7 +1427,9 @@ const
   POLICY_AUDIT_EVENT_SUCCESS* = 0x00000001
   POLICY_AUDIT_EVENT_FAILURE* = 0x00000002
   POLICY_AUDIT_EVENT_NONE* = 0x00000004
-  POLICY_AUDIT_EVENT_MASK* = POLICY_AUDIT_EVENT_SUCCESS or POLICY_AUDIT_EVENT_FAILURE or POLICY_AUDIT_EVENT_UNCHANGED or POLICY_AUDIT_EVENT_NONE
+  POLICY_AUDIT_EVENT_MASK* =
+    POLICY_AUDIT_EVENT_SUCCESS or POLICY_AUDIT_EVENT_FAILURE or
+    POLICY_AUDIT_EVENT_UNCHANGED or POLICY_AUDIT_EVENT_NONE
   POLICY_VIEW_LOCAL_INFORMATION* = 0x00000001
   POLICY_VIEW_AUDIT_INFORMATION* = 0x00000002
   POLICY_GET_PRIVATE_INFORMATION* = 0x00000004
@@ -1175,10 +1443,21 @@ const
   POLICY_SERVER_ADMIN* = 0x00000400
   POLICY_LOOKUP_NAMES* = 0x00000800
   POLICY_NOTIFICATION* = 0x00001000
-  POLICY_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or POLICY_VIEW_LOCAL_INFORMATION or POLICY_VIEW_AUDIT_INFORMATION or POLICY_GET_PRIVATE_INFORMATION or POLICY_TRUST_ADMIN or POLICY_CREATE_ACCOUNT or POLICY_CREATE_SECRET or POLICY_CREATE_PRIVILEGE or POLICY_SET_DEFAULT_QUOTA_LIMITS or POLICY_SET_AUDIT_REQUIREMENTS or POLICY_AUDIT_LOG_ADMIN or POLICY_SERVER_ADMIN or POLICY_LOOKUP_NAMES
-  POLICY_READ* = STANDARD_RIGHTS_READ or POLICY_VIEW_AUDIT_INFORMATION or POLICY_GET_PRIVATE_INFORMATION
-  POLICY_WRITE* = STANDARD_RIGHTS_WRITE or POLICY_TRUST_ADMIN or POLICY_CREATE_ACCOUNT or POLICY_CREATE_SECRET or POLICY_CREATE_PRIVILEGE or POLICY_SET_DEFAULT_QUOTA_LIMITS or POLICY_SET_AUDIT_REQUIREMENTS or POLICY_AUDIT_LOG_ADMIN or POLICY_SERVER_ADMIN
-  POLICY_EXECUTE* = STANDARD_RIGHTS_EXECUTE or POLICY_VIEW_LOCAL_INFORMATION or POLICY_LOOKUP_NAMES
+  POLICY_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or POLICY_VIEW_LOCAL_INFORMATION or
+    POLICY_VIEW_AUDIT_INFORMATION or POLICY_GET_PRIVATE_INFORMATION or POLICY_TRUST_ADMIN or
+    POLICY_CREATE_ACCOUNT or POLICY_CREATE_SECRET or POLICY_CREATE_PRIVILEGE or
+    POLICY_SET_DEFAULT_QUOTA_LIMITS or POLICY_SET_AUDIT_REQUIREMENTS or
+    POLICY_AUDIT_LOG_ADMIN or POLICY_SERVER_ADMIN or POLICY_LOOKUP_NAMES
+  POLICY_READ* =
+    STANDARD_RIGHTS_READ or POLICY_VIEW_AUDIT_INFORMATION or
+    POLICY_GET_PRIVATE_INFORMATION
+  POLICY_WRITE* =
+    STANDARD_RIGHTS_WRITE or POLICY_TRUST_ADMIN or POLICY_CREATE_ACCOUNT or
+    POLICY_CREATE_SECRET or POLICY_CREATE_PRIVILEGE or POLICY_SET_DEFAULT_QUOTA_LIMITS or
+    POLICY_SET_AUDIT_REQUIREMENTS or POLICY_AUDIT_LOG_ADMIN or POLICY_SERVER_ADMIN
+  POLICY_EXECUTE* =
+    STANDARD_RIGHTS_EXECUTE or POLICY_VIEW_LOCAL_INFORMATION or POLICY_LOOKUP_NAMES
   policyServerRoleBackup* = 2
   policyServerRolePrimary* = 3
   policyAuditLogInformation* = 1
@@ -1249,7 +1528,7 @@ const
   LSA_SID_DISABLED_CONFLICT* = 0x00000002
   LSA_NB_DISABLED_ADMIN* = 0x00000004
   LSA_NB_DISABLED_CONFLICT* = 0x00000008
-  MAX_FOREST_TRUST_BINARY_DATA_SIZE* = 128*1024
+  MAX_FOREST_TRUST_BINARY_DATA_SIZE* = 128 * 1024
   MAX_RECORDS_IN_FOREST_TRUST_INFO* = 4000
   collisionTdo* = 0
   collisionXref* = 1
@@ -1416,7 +1695,9 @@ const
   AUTH_REQ_PREAUTH_REQUIRED* = 0x00000200
   AUTH_REQ_TRANSITIVE_TRUST* = 0x00000400
   AUTH_REQ_ALLOW_S4U_DELEGATE* = 0x00000800
-  AUTH_REQ_PER_USER_FLAGS* = AUTH_REQ_ALLOW_FORWARDABLE or AUTH_REQ_ALLOW_PROXIABLE or AUTH_REQ_ALLOW_POSTDATE or AUTH_REQ_ALLOW_RENEWABLE or AUTH_REQ_ALLOW_VALIDATE
+  AUTH_REQ_PER_USER_FLAGS* =
+    AUTH_REQ_ALLOW_FORWARDABLE or AUTH_REQ_ALLOW_PROXIABLE or AUTH_REQ_ALLOW_POSTDATE or
+    AUTH_REQ_ALLOW_RENEWABLE or AUTH_REQ_ALLOW_VALIDATE
   KERB_TICKET_FLAGS_reserved* = 0x80000000'i32
   KERB_TICKET_FLAGS_forwardable* = 0x40000000
   KERB_TICKET_FLAGS_forwarded* = 0x20000000
@@ -1718,138 +1999,738 @@ const
   MSV1_0_NTLM3_INPUT_LENGTH* = 0x00000020
   MSV1_0_NTLM3_MIN_NT_RESPONSE_LENGTH* = 0x0000002C
   MICROSOFT_KERBEROS_NAME* = "Kerberos"
-  MSV1_0_PACKAGE_NAMEW_LENGTH* = (len(MSV1_0_PACKAGE_NAMEW)+1)-sizeof(WCHAR)
+  MSV1_0_PACKAGE_NAMEW_LENGTH* = (len(MSV1_0_PACKAGE_NAMEW) + 1) - sizeof(WCHAR)
 type
-  PSAM_PASSWORD_NOTIFICATION_ROUTINE* = proc (UserName: PUNICODE_STRING, RelativeId: ULONG, NewPassword: PUNICODE_STRING): NTSTATUS {.stdcall.}
-  PSAM_INIT_NOTIFICATION_ROUTINE* = proc (): BOOLEAN {.stdcall.}
-  PSAM_PASSWORD_FILTER_ROUTINE* = proc (AccountName: PUNICODE_STRING, FullName: PUNICODE_STRING, Password: PUNICODE_STRING, SetOperation: BOOLEAN): BOOLEAN {.stdcall.}
-proc LsaRegisterLogonProcess*(LogonProcessName: PLSA_STRING, LsaHandle: PHANDLE, SecurityMode: PLSA_OPERATIONAL_MODE): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaLogonUser*(LsaHandle: HANDLE, OriginName: PLSA_STRING, LogonType: SECURITY_LOGON_TYPE, AuthenticationPackage: ULONG, AuthenticationInformation: PVOID, AuthenticationInformationLength: ULONG, LocalGroups: PTOKEN_GROUPS, SourceContext: PTOKEN_SOURCE, ProfileBuffer: ptr PVOID, ProfileBufferLength: PULONG, LogonId: PLUID, Token: PHANDLE, Quotas: PQUOTA_LIMITS, SubStatus: PNTSTATUS): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaLookupAuthenticationPackage*(LsaHandle: HANDLE, PackageName: PLSA_STRING, AuthenticationPackage: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaFreeReturnBuffer*(Buffer: PVOID): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaCallAuthenticationPackage*(LsaHandle: HANDLE, AuthenticationPackage: ULONG, ProtocolSubmitBuffer: PVOID, SubmitBufferLength: ULONG, ProtocolReturnBuffer: ptr PVOID, ReturnBufferLength: PULONG, ProtocolStatus: PNTSTATUS): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaDeregisterLogonProcess*(LsaHandle: HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaConnectUntrusted*(LsaHandle: PHANDLE): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaFreeMemory*(Buffer: PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaClose*(ObjectHandle: LSA_HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaEnumerateLogonSessions*(LogonSessionCount: PULONG, LogonSessionList: ptr PLUID): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaGetLogonSessionData*(LogonId: PLUID, ppLogonSessionData: ptr PSECURITY_LOGON_SESSION_DATA): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaOpenPolicy*(SystemName: PLSA_UNICODE_STRING, ObjectAttributes: PLSA_OBJECT_ATTRIBUTES, DesiredAccess: ACCESS_MASK, PolicyHandle: PLSA_HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaQueryInformationPolicy*(PolicyHandle: LSA_HANDLE, InformationClass: POLICY_INFORMATION_CLASS, Buffer: ptr PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaSetInformationPolicy*(PolicyHandle: LSA_HANDLE, InformationClass: POLICY_INFORMATION_CLASS, Buffer: PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaQueryDomainInformationPolicy*(PolicyHandle: LSA_HANDLE, InformationClass: POLICY_DOMAIN_INFORMATION_CLASS, Buffer: ptr PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaSetDomainInformationPolicy*(PolicyHandle: LSA_HANDLE, InformationClass: POLICY_DOMAIN_INFORMATION_CLASS, Buffer: PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaRegisterPolicyChangeNotification*(InformationClass: POLICY_NOTIFICATION_INFORMATION_CLASS, NotificationEventHandle: HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaUnregisterPolicyChangeNotification*(InformationClass: POLICY_NOTIFICATION_INFORMATION_CLASS, NotificationEventHandle: HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc LsaEnumerateTrustedDomains*(PolicyHandle: LSA_HANDLE, EnumerationContext: PLSA_ENUMERATION_HANDLE, Buffer: ptr PVOID, PreferedMaximumLength: ULONG, CountReturned: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaLookupNames*(PolicyHandle: LSA_HANDLE, Count: ULONG, Names: PLSA_UNICODE_STRING, ReferencedDomains: ptr PLSA_REFERENCED_DOMAIN_LIST, Sids: ptr PLSA_TRANSLATED_SID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaLookupNames2*(PolicyHandle: LSA_HANDLE, Flags: ULONG, Count: ULONG, Names: PLSA_UNICODE_STRING, ReferencedDomains: ptr PLSA_REFERENCED_DOMAIN_LIST, Sids: ptr PLSA_TRANSLATED_SID2): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaLookupSids*(PolicyHandle: LSA_HANDLE, Count: ULONG, Sids: ptr PSID, ReferencedDomains: ptr PLSA_REFERENCED_DOMAIN_LIST, Names: ptr PLSA_TRANSLATED_NAME): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaEnumerateAccountsWithUserRight*(PolicyHandle: LSA_HANDLE, UserRight: PLSA_UNICODE_STRING, Buffer: ptr PVOID, CountReturned: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaEnumerateAccountRights*(PolicyHandle: LSA_HANDLE, AccountSid: PSID, UserRights: ptr PLSA_UNICODE_STRING, CountOfRights: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaAddAccountRights*(PolicyHandle: LSA_HANDLE, AccountSid: PSID, UserRights: PLSA_UNICODE_STRING, CountOfRights: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaRemoveAccountRights*(PolicyHandle: LSA_HANDLE, AccountSid: PSID, AllRights: BOOLEAN, UserRights: PLSA_UNICODE_STRING, CountOfRights: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaOpenTrustedDomainByName*(PolicyHandle: LSA_HANDLE, TrustedDomainName: PLSA_UNICODE_STRING, DesiredAccess: ACCESS_MASK, TrustedDomainHandle: PLSA_HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaQueryTrustedDomainInfo*(PolicyHandle: LSA_HANDLE, TrustedDomainSid: PSID, InformationClass: TRUSTED_INFORMATION_CLASS, Buffer: ptr PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaSetTrustedDomainInformation*(PolicyHandle: LSA_HANDLE, TrustedDomainSid: PSID, InformationClass: TRUSTED_INFORMATION_CLASS, Buffer: PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaDeleteTrustedDomain*(PolicyHandle: LSA_HANDLE, TrustedDomainSid: PSID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaQueryTrustedDomainInfoByName*(PolicyHandle: LSA_HANDLE, TrustedDomainName: PLSA_UNICODE_STRING, InformationClass: TRUSTED_INFORMATION_CLASS, Buffer: ptr PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaSetTrustedDomainInfoByName*(PolicyHandle: LSA_HANDLE, TrustedDomainName: PLSA_UNICODE_STRING, InformationClass: TRUSTED_INFORMATION_CLASS, Buffer: PVOID): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaEnumerateTrustedDomainsEx*(PolicyHandle: LSA_HANDLE, EnumerationContext: PLSA_ENUMERATION_HANDLE, Buffer: ptr PVOID, PreferedMaximumLength: ULONG, CountReturned: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaCreateTrustedDomainEx*(PolicyHandle: LSA_HANDLE, TrustedDomainInformation: PTRUSTED_DOMAIN_INFORMATION_EX, AuthenticationInformation: PTRUSTED_DOMAIN_AUTH_INFORMATION, DesiredAccess: ACCESS_MASK, TrustedDomainHandle: PLSA_HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaQueryForestTrustInformation*(PolicyHandle: LSA_HANDLE, TrustedDomainName: PLSA_UNICODE_STRING, ForestTrustInfo: ptr PLSA_FOREST_TRUST_INFORMATION): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaSetForestTrustInformation*(PolicyHandle: LSA_HANDLE, TrustedDomainName: PLSA_UNICODE_STRING, ForestTrustInfo: PLSA_FOREST_TRUST_INFORMATION, CheckOnly: BOOLEAN, CollisionInfo: ptr PLSA_FOREST_TRUST_COLLISION_INFORMATION): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaStorePrivateData*(PolicyHandle: LSA_HANDLE, KeyName: PLSA_UNICODE_STRING, PrivateData: PLSA_UNICODE_STRING): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaRetrievePrivateData*(PolicyHandle: LSA_HANDLE, KeyName: PLSA_UNICODE_STRING, PrivateData: ptr PLSA_UNICODE_STRING): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc LsaNtStatusToWinError*(Status: NTSTATUS): ULONG {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc SystemFunction036*(RandomBuffer: PVOID, RandomBufferLength: ULONG): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc SystemFunction040*(Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc SystemFunction041*(Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditComputeEffectivePolicyBySid*(pSid: PSID, pSubCategoryGuids: ptr GUID, PolicyCount: ULONG, ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+  PSAM_PASSWORD_NOTIFICATION_ROUTINE* = proc(
+    UserName: PUNICODE_STRING, RelativeId: ULONG, NewPassword: PUNICODE_STRING
+  ): NTSTATUS {.stdcall.}
+  PSAM_INIT_NOTIFICATION_ROUTINE* = proc(): BOOLEAN {.stdcall.}
+  PSAM_PASSWORD_FILTER_ROUTINE* = proc(
+    AccountName: PUNICODE_STRING,
+    FullName: PUNICODE_STRING,
+    Password: PUNICODE_STRING,
+    SetOperation: BOOLEAN,
+  ): BOOLEAN {.stdcall.}
+
+proc LsaRegisterLogonProcess*(
+  LogonProcessName: PLSA_STRING, LsaHandle: PHANDLE, SecurityMode: PLSA_OPERATIONAL_MODE
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaLogonUser*(
+  LsaHandle: HANDLE,
+  OriginName: PLSA_STRING,
+  LogonType: SECURITY_LOGON_TYPE,
+  AuthenticationPackage: ULONG,
+  AuthenticationInformation: PVOID,
+  AuthenticationInformationLength: ULONG,
+  LocalGroups: PTOKEN_GROUPS,
+  SourceContext: PTOKEN_SOURCE,
+  ProfileBuffer: ptr PVOID,
+  ProfileBufferLength: PULONG,
+  LogonId: PLUID,
+  Token: PHANDLE,
+  Quotas: PQUOTA_LIMITS,
+  SubStatus: PNTSTATUS,
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaLookupAuthenticationPackage*(
+  LsaHandle: HANDLE, PackageName: PLSA_STRING, AuthenticationPackage: PULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaFreeReturnBuffer*(
+  Buffer: PVOID
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaCallAuthenticationPackage*(
+  LsaHandle: HANDLE,
+  AuthenticationPackage: ULONG,
+  ProtocolSubmitBuffer: PVOID,
+  SubmitBufferLength: ULONG,
+  ProtocolReturnBuffer: ptr PVOID,
+  ReturnBufferLength: PULONG,
+  ProtocolStatus: PNTSTATUS,
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaDeregisterLogonProcess*(
+  LsaHandle: HANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaConnectUntrusted*(
+  LsaHandle: PHANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaFreeMemory*(
+  Buffer: PVOID
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaClose*(
+  ObjectHandle: LSA_HANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaEnumerateLogonSessions*(
+  LogonSessionCount: PULONG, LogonSessionList: ptr PLUID
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaGetLogonSessionData*(
+  LogonId: PLUID, ppLogonSessionData: ptr PSECURITY_LOGON_SESSION_DATA
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaOpenPolicy*(
+  SystemName: PLSA_UNICODE_STRING,
+  ObjectAttributes: PLSA_OBJECT_ATTRIBUTES,
+  DesiredAccess: ACCESS_MASK,
+  PolicyHandle: PLSA_HANDLE,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaQueryInformationPolicy*(
+  PolicyHandle: LSA_HANDLE,
+  InformationClass: POLICY_INFORMATION_CLASS,
+  Buffer: ptr PVOID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaSetInformationPolicy*(
+  PolicyHandle: LSA_HANDLE, InformationClass: POLICY_INFORMATION_CLASS, Buffer: PVOID
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaQueryDomainInformationPolicy*(
+  PolicyHandle: LSA_HANDLE,
+  InformationClass: POLICY_DOMAIN_INFORMATION_CLASS,
+  Buffer: ptr PVOID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaSetDomainInformationPolicy*(
+  PolicyHandle: LSA_HANDLE,
+  InformationClass: POLICY_DOMAIN_INFORMATION_CLASS,
+  Buffer: PVOID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaRegisterPolicyChangeNotification*(
+  InformationClass: POLICY_NOTIFICATION_INFORMATION_CLASS,
+  NotificationEventHandle: HANDLE,
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaUnregisterPolicyChangeNotification*(
+  InformationClass: POLICY_NOTIFICATION_INFORMATION_CLASS,
+  NotificationEventHandle: HANDLE,
+): NTSTATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc LsaEnumerateTrustedDomains*(
+  PolicyHandle: LSA_HANDLE,
+  EnumerationContext: PLSA_ENUMERATION_HANDLE,
+  Buffer: ptr PVOID,
+  PreferedMaximumLength: ULONG,
+  CountReturned: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaLookupNames*(
+  PolicyHandle: LSA_HANDLE,
+  Count: ULONG,
+  Names: PLSA_UNICODE_STRING,
+  ReferencedDomains: ptr PLSA_REFERENCED_DOMAIN_LIST,
+  Sids: ptr PLSA_TRANSLATED_SID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaLookupNames2*(
+  PolicyHandle: LSA_HANDLE,
+  Flags: ULONG,
+  Count: ULONG,
+  Names: PLSA_UNICODE_STRING,
+  ReferencedDomains: ptr PLSA_REFERENCED_DOMAIN_LIST,
+  Sids: ptr PLSA_TRANSLATED_SID2,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaLookupSids*(
+  PolicyHandle: LSA_HANDLE,
+  Count: ULONG,
+  Sids: ptr PSID,
+  ReferencedDomains: ptr PLSA_REFERENCED_DOMAIN_LIST,
+  Names: ptr PLSA_TRANSLATED_NAME,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaEnumerateAccountsWithUserRight*(
+  PolicyHandle: LSA_HANDLE,
+  UserRight: PLSA_UNICODE_STRING,
+  Buffer: ptr PVOID,
+  CountReturned: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaEnumerateAccountRights*(
+  PolicyHandle: LSA_HANDLE,
+  AccountSid: PSID,
+  UserRights: ptr PLSA_UNICODE_STRING,
+  CountOfRights: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaAddAccountRights*(
+  PolicyHandle: LSA_HANDLE,
+  AccountSid: PSID,
+  UserRights: PLSA_UNICODE_STRING,
+  CountOfRights: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaRemoveAccountRights*(
+  PolicyHandle: LSA_HANDLE,
+  AccountSid: PSID,
+  AllRights: BOOLEAN,
+  UserRights: PLSA_UNICODE_STRING,
+  CountOfRights: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaOpenTrustedDomainByName*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainName: PLSA_UNICODE_STRING,
+  DesiredAccess: ACCESS_MASK,
+  TrustedDomainHandle: PLSA_HANDLE,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaQueryTrustedDomainInfo*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainSid: PSID,
+  InformationClass: TRUSTED_INFORMATION_CLASS,
+  Buffer: ptr PVOID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaSetTrustedDomainInformation*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainSid: PSID,
+  InformationClass: TRUSTED_INFORMATION_CLASS,
+  Buffer: PVOID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaDeleteTrustedDomain*(
+  PolicyHandle: LSA_HANDLE, TrustedDomainSid: PSID
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaQueryTrustedDomainInfoByName*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainName: PLSA_UNICODE_STRING,
+  InformationClass: TRUSTED_INFORMATION_CLASS,
+  Buffer: ptr PVOID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaSetTrustedDomainInfoByName*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainName: PLSA_UNICODE_STRING,
+  InformationClass: TRUSTED_INFORMATION_CLASS,
+  Buffer: PVOID,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaEnumerateTrustedDomainsEx*(
+  PolicyHandle: LSA_HANDLE,
+  EnumerationContext: PLSA_ENUMERATION_HANDLE,
+  Buffer: ptr PVOID,
+  PreferedMaximumLength: ULONG,
+  CountReturned: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaCreateTrustedDomainEx*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainInformation: PTRUSTED_DOMAIN_INFORMATION_EX,
+  AuthenticationInformation: PTRUSTED_DOMAIN_AUTH_INFORMATION,
+  DesiredAccess: ACCESS_MASK,
+  TrustedDomainHandle: PLSA_HANDLE,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaQueryForestTrustInformation*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainName: PLSA_UNICODE_STRING,
+  ForestTrustInfo: ptr PLSA_FOREST_TRUST_INFORMATION,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaSetForestTrustInformation*(
+  PolicyHandle: LSA_HANDLE,
+  TrustedDomainName: PLSA_UNICODE_STRING,
+  ForestTrustInfo: PLSA_FOREST_TRUST_INFORMATION,
+  CheckOnly: BOOLEAN,
+  CollisionInfo: ptr PLSA_FOREST_TRUST_COLLISION_INFORMATION,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaStorePrivateData*(
+  PolicyHandle: LSA_HANDLE,
+  KeyName: PLSA_UNICODE_STRING,
+  PrivateData: PLSA_UNICODE_STRING,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaRetrievePrivateData*(
+  PolicyHandle: LSA_HANDLE,
+  KeyName: PLSA_UNICODE_STRING,
+  PrivateData: ptr PLSA_UNICODE_STRING,
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc LsaNtStatusToWinError*(
+  Status: NTSTATUS
+): ULONG {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc SystemFunction036*(
+  RandomBuffer: PVOID, RandomBufferLength: ULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc SystemFunction040*(
+  Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc SystemFunction041*(
+  Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditComputeEffectivePolicyBySid*(
+  pSid: PSID,
+  pSubCategoryGuids: ptr GUID,
+  PolicyCount: ULONG,
+  ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION,
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
 proc AuditFree*(Buffer: PVOID): VOID {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditSetSystemPolicy*(pAuditPolicy: PCAUDIT_POLICY_INFORMATION, PolicyCount: ULONG): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditQuerySystemPolicy*(pSubCategoryGuids: ptr GUID, PolicyCount: ULONG, ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditSetPerUserPolicy*(pSid: PSID, pAuditPolicy: PCAUDIT_POLICY_INFORMATION, PolicyCount: ULONG): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditQueryPerUserPolicy*(pSid: PSID, pSubCategoryGuids: ptr GUID, PolicyCount: ULONG, ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditComputeEffectivePolicyByToken*(hTokenHandle: HANDLE, pSubCategoryGuids: ptr GUID, PolicyCount: ULONG, ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditEnumerateCategories*(ppAuditCategoriesArray: ptr ptr GUID, pCountReturned: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditEnumeratePerUserPolicy*(ppAuditSidArray: ptr PPOLICY_AUDIT_SID_ARRAY): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditEnumerateSubCategories*(pAuditCategoryGuid: ptr GUID, bRetrieveAllSubCategories: BOOLEAN, ppAuditSubCategoriesArray: ptr ptr GUID, pCountReturned: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditLookupCategoryGuidFromCategoryId*(AuditCategoryId: POLICY_AUDIT_EVENT_TYPE, pAuditCategoryGuid: ptr GUID): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditQuerySecurity*(SecurityInformation: SECURITY_INFORMATION, ppSecurityDescriptor: ptr PSECURITY_DESCRIPTOR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditLookupSubCategoryNameA*(pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditLookupSubCategoryNameW*(pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPWSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditLookupCategoryNameA*(pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditLookupCategoryNameW*(pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPWSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditLookupCategoryIdFromCategoryGuid*(pAuditCategoryGuid: ptr GUID, pAuditCategoryId: PPOLICY_AUDIT_EVENT_TYPE): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AuditSetSecurity*(SecurityInformation: SECURITY_INFORMATION, pSecurityDescriptor: PSECURITY_DESCRIPTOR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc AcquireCredentialsHandleW*(pszPrincipal: ptr SEC_WCHAR, pszPackage: ptr SEC_WCHAR, fCredentialUse: int32, pvLogonId: pointer, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, phCredential: PCredHandle, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc AcquireCredentialsHandleA*(pszPrincipal: ptr SEC_CHAR, pszPackage: ptr SEC_CHAR, fCredentialUse: int32, pvLogonId: pointer, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, phCredential: PCredHandle, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc FreeCredentialsHandle*(phCredential: PCredHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc AddCredentialsW*(hCredentials: PCredHandle, pszPrincipal: ptr SEC_WCHAR, pszPackage: ptr SEC_WCHAR, fCredentialUse: int32, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc AddCredentialsA*(hCredentials: PCredHandle, pszPrincipal: ptr SEC_CHAR, pszPackage: ptr SEC_CHAR, fCredentialUse: int32, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc InitializeSecurityContextW*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: ptr SEC_WCHAR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc InitializeSecurityContextA*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: ptr SEC_CHAR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc AcceptSecurityContext*(phCredential: PCredHandle, phContext: PCtxtHandle, pInput: PSecBufferDesc, fContextReq: int32, TargetDataRep: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc CompleteAuthToken*(phContext: PCtxtHandle, pToken: PSecBufferDesc): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc ImpersonateSecurityContext*(phContext: PCtxtHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc RevertSecurityContext*(phContext: PCtxtHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc QuerySecurityContextToken*(phContext: PCtxtHandle, Token: ptr HANDLE): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc DeleteSecurityContext*(phContext: PCtxtHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc ApplyControlToken*(phContext: PCtxtHandle, pInput: PSecBufferDesc): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc QueryContextAttributesW*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc QueryContextAttributesA*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SetContextAttributesW*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SetContextAttributesA*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc QueryCredentialsAttributesW*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc QueryCredentialsAttributesA*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SetCredentialsAttributesW*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SetCredentialsAttributesA*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc FreeContextBuffer*(pvContextBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc MakeSignature*(phContext: PCtxtHandle, fQOP: int32, pMessage: PSecBufferDesc, MessageSeqNo: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc VerifySignature*(phContext: PCtxtHandle, pMessage: PSecBufferDesc, MessageSeqNo: int32, pfQOP: ptr int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc EncryptMessage*(phContext: PCtxtHandle, fQOP: int32, pMessage: PSecBufferDesc, MessageSeqNo: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc DecryptMessage*(phContext: PCtxtHandle, pMessage: PSecBufferDesc, MessageSeqNo: int32, pfQOP: ptr int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc EnumerateSecurityPackagesW*(pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "sspicli", importc.}
-proc EnumerateSecurityPackagesA*(pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "sspicli", importc.}
-proc QuerySecurityPackageInfoW*(pszPackageName: ptr SEC_WCHAR, ppPackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc QuerySecurityPackageInfoA*(pszPackageName: ptr SEC_CHAR, ppPackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc ExportSecurityContext*(phContext: PCtxtHandle, fFlags: ULONG, pPackedContext: PSecBuffer, pToken: ptr pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc ImportSecurityContextW*(pszPackage: ptr SEC_WCHAR, pPackedContext: PSecBuffer, Token: pointer, phContext: PCtxtHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc ImportSecurityContextA*(pszPackage: ptr SEC_CHAR, pPackedContext: PSecBuffer, Token: pointer, phContext: PCtxtHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc FreeCredentialHandle*(phCredential: PCredHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "FreeCredentialsHandle".}
-proc InitSecurityInterfaceA*(): PSecurityFunctionTableA {.winapi, stdcall, dynlib: "secur32", importc.}
-proc InitSecurityInterfaceW*(): PSecurityFunctionTableW {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslEnumerateProfilesA*(ProfileList: ptr LPSTR, ProfileCount: ptr ULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslEnumerateProfilesW*(ProfileList: ptr LPWSTR, ProfileCount: ptr ULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslGetProfilePackageA*(ProfileName: LPSTR, PackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslGetProfilePackageW*(ProfileName: LPWSTR, PackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslIdentifyPackageA*(pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslIdentifyPackageW*(pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslInitializeSecurityContextW*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: LPWSTR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslInitializeSecurityContextA*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: LPSTR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslAcceptSecurityContext*(phCredential: PCredHandle, phContext: PCtxtHandle, pInput: PSecBufferDesc, fContextReq: int32, TargetDataRep: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslSetContextOption*(ContextHandle: PCtxtHandle, Option: ULONG, Value: PVOID, Size: ULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc SaslGetContextOption*(ContextHandle: PCtxtHandle, Option: ULONG, Value: PVOID, Size: ULONG, Needed: PULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc AddSecurityPackageA*(pszPackageName: LPSTR, pOptions: PSECURITY_PACKAGE_OPTIONS): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc AddSecurityPackageW*(pszPackageName: LPWSTR, pOptions: PSECURITY_PACKAGE_OPTIONS): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc DeleteSecurityPackageA*(pszPackageName: ptr SEC_CHAR): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc DeleteSecurityPackageW*(pszPackageName: ptr SEC_WCHAR): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
-proc GetUserNameExA*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
-proc GetUserNameExW*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
-proc GetComputerObjectNameA*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
-proc GetComputerObjectNameW*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
-proc TranslateNameA*(lpAccountName: LPCSTR, AccountNameFormat: EXTENDED_NAME_FORMAT, DesiredNameFormat: EXTENDED_NAME_FORMAT, lpTranslatedName: LPSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
-proc TranslateNameW*(lpAccountName: LPCWSTR, AccountNameFormat: EXTENDED_NAME_FORMAT, DesiredNameFormat: EXTENDED_NAME_FORMAT, lpTranslatedName: LPWSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
-proc RtlGenRandom*(RandomBuffer: PVOID, RandomBufferLength: ULONG): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc: "SystemFunction036".}
-proc RtlEncryptMemory*(Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc: "SystemFunction040".}
-proc RtlDecryptMemory*(Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc: "SystemFunction041".}
-proc `ContextInformation=`*(self: var KERB_SMARTCARD_CSP_INFO, x: PVOID) {.inline.} = self.union1.ContextInformation = x
-proc ContextInformation*(self: KERB_SMARTCARD_CSP_INFO): PVOID {.inline.} = self.union1.ContextInformation
-proc ContextInformation*(self: var KERB_SMARTCARD_CSP_INFO): var PVOID {.inline.} = self.union1.ContextInformation
-proc `SpaceHolderForWow64=`*(self: var KERB_SMARTCARD_CSP_INFO, x: ULONG64) {.inline.} = self.union1.SpaceHolderForWow64 = x
-proc SpaceHolderForWow64*(self: KERB_SMARTCARD_CSP_INFO): ULONG64 {.inline.} = self.union1.SpaceHolderForWow64
-proc SpaceHolderForWow64*(self: var KERB_SMARTCARD_CSP_INFO): var ULONG64 {.inline.} = self.union1.SpaceHolderForWow64
+proc AuditSetSystemPolicy*(
+  pAuditPolicy: PCAUDIT_POLICY_INFORMATION, PolicyCount: ULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditQuerySystemPolicy*(
+  pSubCategoryGuids: ptr GUID,
+  PolicyCount: ULONG,
+  ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION,
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditSetPerUserPolicy*(
+  pSid: PSID, pAuditPolicy: PCAUDIT_POLICY_INFORMATION, PolicyCount: ULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditQueryPerUserPolicy*(
+  pSid: PSID,
+  pSubCategoryGuids: ptr GUID,
+  PolicyCount: ULONG,
+  ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION,
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditComputeEffectivePolicyByToken*(
+  hTokenHandle: HANDLE,
+  pSubCategoryGuids: ptr GUID,
+  PolicyCount: ULONG,
+  ppAuditPolicy: ptr PAUDIT_POLICY_INFORMATION,
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditEnumerateCategories*(
+  ppAuditCategoriesArray: ptr ptr GUID, pCountReturned: PULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditEnumeratePerUserPolicy*(
+  ppAuditSidArray: ptr PPOLICY_AUDIT_SID_ARRAY
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditEnumerateSubCategories*(
+  pAuditCategoryGuid: ptr GUID,
+  bRetrieveAllSubCategories: BOOLEAN,
+  ppAuditSubCategoriesArray: ptr ptr GUID,
+  pCountReturned: PULONG,
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditLookupCategoryGuidFromCategoryId*(
+  AuditCategoryId: POLICY_AUDIT_EVENT_TYPE, pAuditCategoryGuid: ptr GUID
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditQuerySecurity*(
+  SecurityInformation: SECURITY_INFORMATION,
+  ppSecurityDescriptor: ptr PSECURITY_DESCRIPTOR,
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditLookupSubCategoryNameA*(
+  pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPSTR
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditLookupSubCategoryNameW*(
+  pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPWSTR
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditLookupCategoryNameA*(
+  pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPSTR
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditLookupCategoryNameW*(
+  pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPWSTR
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditLookupCategoryIdFromCategoryGuid*(
+  pAuditCategoryGuid: ptr GUID, pAuditCategoryId: PPOLICY_AUDIT_EVENT_TYPE
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AuditSetSecurity*(
+  SecurityInformation: SECURITY_INFORMATION, pSecurityDescriptor: PSECURITY_DESCRIPTOR
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc AcquireCredentialsHandleW*(
+  pszPrincipal: ptr SEC_WCHAR,
+  pszPackage: ptr SEC_WCHAR,
+  fCredentialUse: int32,
+  pvLogonId: pointer,
+  pAuthData: pointer,
+  pGetKeyFn: SEC_GET_KEY_FN,
+  pvGetKeyArgument: pointer,
+  phCredential: PCredHandle,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc AcquireCredentialsHandleA*(
+  pszPrincipal: ptr SEC_CHAR,
+  pszPackage: ptr SEC_CHAR,
+  fCredentialUse: int32,
+  pvLogonId: pointer,
+  pAuthData: pointer,
+  pGetKeyFn: SEC_GET_KEY_FN,
+  pvGetKeyArgument: pointer,
+  phCredential: PCredHandle,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc FreeCredentialsHandle*(
+  phCredential: PCredHandle
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc AddCredentialsW*(
+  hCredentials: PCredHandle,
+  pszPrincipal: ptr SEC_WCHAR,
+  pszPackage: ptr SEC_WCHAR,
+  fCredentialUse: int32,
+  pAuthData: pointer,
+  pGetKeyFn: SEC_GET_KEY_FN,
+  pvGetKeyArgument: pointer,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc AddCredentialsA*(
+  hCredentials: PCredHandle,
+  pszPrincipal: ptr SEC_CHAR,
+  pszPackage: ptr SEC_CHAR,
+  fCredentialUse: int32,
+  pAuthData: pointer,
+  pGetKeyFn: SEC_GET_KEY_FN,
+  pvGetKeyArgument: pointer,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc InitializeSecurityContextW*(
+  phCredential: PCredHandle,
+  phContext: PCtxtHandle,
+  pszTargetName: ptr SEC_WCHAR,
+  fContextReq: int32,
+  Reserved1: int32,
+  TargetDataRep: int32,
+  pInput: PSecBufferDesc,
+  Reserved2: int32,
+  phNewContext: PCtxtHandle,
+  pOutput: PSecBufferDesc,
+  pfContextAttr: ptr int32,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc InitializeSecurityContextA*(
+  phCredential: PCredHandle,
+  phContext: PCtxtHandle,
+  pszTargetName: ptr SEC_CHAR,
+  fContextReq: int32,
+  Reserved1: int32,
+  TargetDataRep: int32,
+  pInput: PSecBufferDesc,
+  Reserved2: int32,
+  phNewContext: PCtxtHandle,
+  pOutput: PSecBufferDesc,
+  pfContextAttr: ptr int32,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc AcceptSecurityContext*(
+  phCredential: PCredHandle,
+  phContext: PCtxtHandle,
+  pInput: PSecBufferDesc,
+  fContextReq: int32,
+  TargetDataRep: int32,
+  phNewContext: PCtxtHandle,
+  pOutput: PSecBufferDesc,
+  pfContextAttr: ptr int32,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc CompleteAuthToken*(
+  phContext: PCtxtHandle, pToken: PSecBufferDesc
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc ImpersonateSecurityContext*(
+  phContext: PCtxtHandle
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc RevertSecurityContext*(
+  phContext: PCtxtHandle
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc QuerySecurityContextToken*(
+  phContext: PCtxtHandle, Token: ptr HANDLE
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc DeleteSecurityContext*(
+  phContext: PCtxtHandle
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc ApplyControlToken*(
+  phContext: PCtxtHandle, pInput: PSecBufferDesc
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc QueryContextAttributesW*(
+  phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc QueryContextAttributesA*(
+  phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SetContextAttributesW*(
+  phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SetContextAttributesA*(
+  phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc QueryCredentialsAttributesW*(
+  phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc QueryCredentialsAttributesA*(
+  phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SetCredentialsAttributesW*(
+  phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SetCredentialsAttributesA*(
+  phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc FreeContextBuffer*(
+  pvContextBuffer: pointer
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc MakeSignature*(
+  phContext: PCtxtHandle, fQOP: int32, pMessage: PSecBufferDesc, MessageSeqNo: int32
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc VerifySignature*(
+  phContext: PCtxtHandle,
+  pMessage: PSecBufferDesc,
+  MessageSeqNo: int32,
+  pfQOP: ptr int32,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc EncryptMessage*(
+  phContext: PCtxtHandle, fQOP: int32, pMessage: PSecBufferDesc, MessageSeqNo: int32
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc DecryptMessage*(
+  phContext: PCtxtHandle,
+  pMessage: PSecBufferDesc,
+  MessageSeqNo: int32,
+  pfQOP: ptr int32,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc EnumerateSecurityPackagesW*(
+  pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoW
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "sspicli", importc.}
+
+proc EnumerateSecurityPackagesA*(
+  pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoA
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "sspicli", importc.}
+
+proc QuerySecurityPackageInfoW*(
+  pszPackageName: ptr SEC_WCHAR, ppPackageInfo: ptr PSecPkgInfoW
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc QuerySecurityPackageInfoA*(
+  pszPackageName: ptr SEC_CHAR, ppPackageInfo: ptr PSecPkgInfoA
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc ExportSecurityContext*(
+  phContext: PCtxtHandle, fFlags: ULONG, pPackedContext: PSecBuffer, pToken: ptr pointer
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc ImportSecurityContextW*(
+  pszPackage: ptr SEC_WCHAR,
+  pPackedContext: PSecBuffer,
+  Token: pointer,
+  phContext: PCtxtHandle,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc ImportSecurityContextA*(
+  pszPackage: ptr SEC_CHAR,
+  pPackedContext: PSecBuffer,
+  Token: pointer,
+  phContext: PCtxtHandle,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc FreeCredentialHandle*(
+  phCredential: PCredHandle
+): SECURITY_STATUS {.
+  winapi, stdcall, dynlib: "secur32", importc: "FreeCredentialsHandle"
+.}
+
+proc InitSecurityInterfaceA*(): PSecurityFunctionTableA {.
+  winapi, stdcall, dynlib: "secur32", importc
+.}
+
+proc InitSecurityInterfaceW*(): PSecurityFunctionTableW {.
+  winapi, stdcall, dynlib: "secur32", importc
+.}
+
+proc SaslEnumerateProfilesA*(
+  ProfileList: ptr LPSTR, ProfileCount: ptr ULONG
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslEnumerateProfilesW*(
+  ProfileList: ptr LPWSTR, ProfileCount: ptr ULONG
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslGetProfilePackageA*(
+  ProfileName: LPSTR, PackageInfo: ptr PSecPkgInfoA
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslGetProfilePackageW*(
+  ProfileName: LPWSTR, PackageInfo: ptr PSecPkgInfoW
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslIdentifyPackageA*(
+  pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoA
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslIdentifyPackageW*(
+  pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoW
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslInitializeSecurityContextW*(
+  phCredential: PCredHandle,
+  phContext: PCtxtHandle,
+  pszTargetName: LPWSTR,
+  fContextReq: int32,
+  Reserved1: int32,
+  TargetDataRep: int32,
+  pInput: PSecBufferDesc,
+  Reserved2: int32,
+  phNewContext: PCtxtHandle,
+  pOutput: PSecBufferDesc,
+  pfContextAttr: ptr int32,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslInitializeSecurityContextA*(
+  phCredential: PCredHandle,
+  phContext: PCtxtHandle,
+  pszTargetName: LPSTR,
+  fContextReq: int32,
+  Reserved1: int32,
+  TargetDataRep: int32,
+  pInput: PSecBufferDesc,
+  Reserved2: int32,
+  phNewContext: PCtxtHandle,
+  pOutput: PSecBufferDesc,
+  pfContextAttr: ptr int32,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslAcceptSecurityContext*(
+  phCredential: PCredHandle,
+  phContext: PCtxtHandle,
+  pInput: PSecBufferDesc,
+  fContextReq: int32,
+  TargetDataRep: int32,
+  phNewContext: PCtxtHandle,
+  pOutput: PSecBufferDesc,
+  pfContextAttr: ptr int32,
+  ptsExpiry: PTimeStamp,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslSetContextOption*(
+  ContextHandle: PCtxtHandle, Option: ULONG, Value: PVOID, Size: ULONG
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc SaslGetContextOption*(
+  ContextHandle: PCtxtHandle, Option: ULONG, Value: PVOID, Size: ULONG, Needed: PULONG
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc AddSecurityPackageA*(
+  pszPackageName: LPSTR, pOptions: PSECURITY_PACKAGE_OPTIONS
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc AddSecurityPackageW*(
+  pszPackageName: LPWSTR, pOptions: PSECURITY_PACKAGE_OPTIONS
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc DeleteSecurityPackageA*(
+  pszPackageName: ptr SEC_CHAR
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc DeleteSecurityPackageW*(
+  pszPackageName: ptr SEC_WCHAR
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc GetUserNameExA*(
+  NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc GetUserNameExW*(
+  NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc GetComputerObjectNameA*(
+  NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc GetComputerObjectNameW*(
+  NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc TranslateNameA*(
+  lpAccountName: LPCSTR,
+  AccountNameFormat: EXTENDED_NAME_FORMAT,
+  DesiredNameFormat: EXTENDED_NAME_FORMAT,
+  lpTranslatedName: LPSTR,
+  nSize: PULONG,
+): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc TranslateNameW*(
+  lpAccountName: LPCWSTR,
+  AccountNameFormat: EXTENDED_NAME_FORMAT,
+  DesiredNameFormat: EXTENDED_NAME_FORMAT,
+  lpTranslatedName: LPWSTR,
+  nSize: PULONG,
+): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc.}
+
+proc RtlGenRandom*(
+  RandomBuffer: PVOID, RandomBufferLength: ULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc: "SystemFunction036".}
+
+proc RtlEncryptMemory*(
+  Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc: "SystemFunction040".}
+
+proc RtlDecryptMemory*(
+  Memory: PVOID, MemorySize: ULONG, OptionFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "advapi32", importc: "SystemFunction041".}
+
+proc `ContextInformation=`*(self: var KERB_SMARTCARD_CSP_INFO, x: PVOID) {.inline.} =
+  self.union1.ContextInformation = x
+
+proc ContextInformation*(self: KERB_SMARTCARD_CSP_INFO): PVOID {.inline.} =
+  self.union1.ContextInformation
+
+proc ContextInformation*(self: var KERB_SMARTCARD_CSP_INFO): var PVOID {.inline.} =
+  self.union1.ContextInformation
+
+proc `SpaceHolderForWow64=`*(self: var KERB_SMARTCARD_CSP_INFO, x: ULONG64) {.inline.} =
+  self.union1.SpaceHolderForWow64 = x
+
+proc SpaceHolderForWow64*(self: KERB_SMARTCARD_CSP_INFO): ULONG64 {.inline.} =
+  self.union1.SpaceHolderForWow64
+
+proc SpaceHolderForWow64*(self: var KERB_SMARTCARD_CSP_INFO): var ULONG64 {.inline.} =
+  self.union1.SpaceHolderForWow64
+
 when winimUnicode:
   type
     SECURITY_PSTR* = ptr SEC_WCHAR
@@ -1892,32 +2773,177 @@ when winimUnicode:
     PSEC_WINNT_AUTH_IDENTITY* = PSEC_WINNT_AUTH_IDENTITY_W
     SEC_WINNT_AUTH_IDENTITY_EX* = SEC_WINNT_AUTH_IDENTITY_EXW
     PSEC_WINNT_AUTH_IDENTITY_EX* = PSEC_WINNT_AUTH_IDENTITY_EXW
+
   const
     NEGOSSP_NAME* = NEGOSSP_NAME_W
     SECURITY_ENTRYPOINT* = SECURITY_ENTRYPOINTW
     SECURITY_ENTRYPOINT_ANSI* = SECURITY_ENTRYPOINT_ANSIW
-  proc AuditLookupSubCategoryName*(pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPWSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupSubCategoryNameW".}
-  proc AuditLookupCategoryName*(pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPWSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupCategoryNameW".}
-  proc AcquireCredentialsHandle*(pszPrincipal: ptr SEC_WCHAR, pszPackage: ptr SEC_WCHAR, fCredentialUse: int32, pvLogonId: pointer, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, phCredential: PCredHandle, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AcquireCredentialsHandleW".}
-  proc AddCredentials*(hCredentials: PCredHandle, pszPrincipal: ptr SEC_WCHAR, pszPackage: ptr SEC_WCHAR, fCredentialUse: int32, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AddCredentialsW".}
-  proc InitializeSecurityContext*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: ptr SEC_WCHAR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "InitializeSecurityContextW".}
-  proc QueryContextAttributes*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "QueryContextAttributesW".}
-  proc SetContextAttributes*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SetContextAttributesW".}
-  proc QueryCredentialsAttributes*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "QueryCredentialsAttributesW".}
-  proc SetCredentialsAttributes*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SetCredentialsAttributesW".}
-  proc EnumerateSecurityPackages*(pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "sspicli", importc: "EnumerateSecurityPackagesW".}
-  proc QuerySecurityPackageInfo*(pszPackageName: ptr SEC_WCHAR, ppPackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "QuerySecurityPackageInfoW".}
-  proc ImportSecurityContext*(pszPackage: ptr SEC_WCHAR, pPackedContext: PSecBuffer, Token: pointer, phContext: PCtxtHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "ImportSecurityContextW".}
-  proc InitSecurityInterface*(): PSecurityFunctionTableW {.winapi, stdcall, dynlib: "secur32", importc: "InitSecurityInterfaceW".}
-  proc SaslEnumerateProfiles*(ProfileList: ptr LPWSTR, ProfileCount: ptr ULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslEnumerateProfilesW".}
-  proc SaslGetProfilePackage*(ProfileName: LPWSTR, PackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslGetProfilePackageW".}
-  proc SaslIdentifyPackage*(pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoW): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslIdentifyPackageW".}
-  proc SaslInitializeSecurityContext*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: LPWSTR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslInitializeSecurityContextW".}
-  proc AddSecurityPackage*(pszPackageName: LPWSTR, pOptions: PSECURITY_PACKAGE_OPTIONS): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AddSecurityPackageW".}
-  proc DeleteSecurityPackage*(pszPackageName: ptr SEC_WCHAR): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "DeleteSecurityPackageW".}
-  proc GetUserNameEx*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetUserNameExW".}
-  proc GetComputerObjectName*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetComputerObjectNameW".}
-  proc TranslateName*(lpAccountName: LPCWSTR, AccountNameFormat: EXTENDED_NAME_FORMAT, DesiredNameFormat: EXTENDED_NAME_FORMAT, lpTranslatedName: LPWSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "TranslateNameW".}
+  proc AuditLookupSubCategoryName*(
+    pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPWSTR
+  ): BOOLEAN {.
+    winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupSubCategoryNameW"
+  .}
+
+  proc AuditLookupCategoryName*(
+    pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPWSTR
+  ): BOOLEAN {.
+    winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupCategoryNameW"
+  .}
+
+  proc AcquireCredentialsHandle*(
+    pszPrincipal: ptr SEC_WCHAR,
+    pszPackage: ptr SEC_WCHAR,
+    fCredentialUse: int32,
+    pvLogonId: pointer,
+    pAuthData: pointer,
+    pGetKeyFn: SEC_GET_KEY_FN,
+    pvGetKeyArgument: pointer,
+    phCredential: PCredHandle,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "AcquireCredentialsHandleW"
+  .}
+
+  proc AddCredentials*(
+    hCredentials: PCredHandle,
+    pszPrincipal: ptr SEC_WCHAR,
+    pszPackage: ptr SEC_WCHAR,
+    fCredentialUse: int32,
+    pAuthData: pointer,
+    pGetKeyFn: SEC_GET_KEY_FN,
+    pvGetKeyArgument: pointer,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AddCredentialsW".}
+
+  proc InitializeSecurityContext*(
+    phCredential: PCredHandle,
+    phContext: PCtxtHandle,
+    pszTargetName: ptr SEC_WCHAR,
+    fContextReq: int32,
+    Reserved1: int32,
+    TargetDataRep: int32,
+    pInput: PSecBufferDesc,
+    Reserved2: int32,
+    phNewContext: PCtxtHandle,
+    pOutput: PSecBufferDesc,
+    pfContextAttr: ptr int32,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "InitializeSecurityContextW"
+  .}
+
+  proc QueryContextAttributes*(
+    phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "QueryContextAttributesW"
+  .}
+
+  proc SetContextAttributes*(
+    phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SetContextAttributesW"
+  .}
+
+  proc QueryCredentialsAttributes*(
+    phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "QueryCredentialsAttributesW"
+  .}
+
+  proc SetCredentialsAttributes*(
+    phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SetCredentialsAttributesW"
+  .}
+
+  proc EnumerateSecurityPackages*(
+    pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoW
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "sspicli", importc: "EnumerateSecurityPackagesW"
+  .}
+
+  proc QuerySecurityPackageInfo*(
+    pszPackageName: ptr SEC_WCHAR, ppPackageInfo: ptr PSecPkgInfoW
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "QuerySecurityPackageInfoW"
+  .}
+
+  proc ImportSecurityContext*(
+    pszPackage: ptr SEC_WCHAR,
+    pPackedContext: PSecBuffer,
+    Token: pointer,
+    phContext: PCtxtHandle,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "ImportSecurityContextW"
+  .}
+
+  proc InitSecurityInterface*(): PSecurityFunctionTableW {.
+    winapi, stdcall, dynlib: "secur32", importc: "InitSecurityInterfaceW"
+  .}
+
+  proc SaslEnumerateProfiles*(
+    ProfileList: ptr LPWSTR, ProfileCount: ptr ULONG
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslEnumerateProfilesW"
+  .}
+
+  proc SaslGetProfilePackage*(
+    ProfileName: LPWSTR, PackageInfo: ptr PSecPkgInfoW
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslGetProfilePackageW"
+  .}
+
+  proc SaslIdentifyPackage*(
+    pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoW
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslIdentifyPackageW"
+  .}
+
+  proc SaslInitializeSecurityContext*(
+    phCredential: PCredHandle,
+    phContext: PCtxtHandle,
+    pszTargetName: LPWSTR,
+    fContextReq: int32,
+    Reserved1: int32,
+    TargetDataRep: int32,
+    pInput: PSecBufferDesc,
+    Reserved2: int32,
+    phNewContext: PCtxtHandle,
+    pOutput: PSecBufferDesc,
+    pfContextAttr: ptr int32,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslInitializeSecurityContextW"
+  .}
+
+  proc AddSecurityPackage*(
+    pszPackageName: LPWSTR, pOptions: PSECURITY_PACKAGE_OPTIONS
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "AddSecurityPackageW"
+  .}
+
+  proc DeleteSecurityPackage*(
+    pszPackageName: ptr SEC_WCHAR
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "DeleteSecurityPackageW"
+  .}
+
+  proc GetUserNameEx*(
+    NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG
+  ): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetUserNameExW".}
+
+  proc GetComputerObjectName*(
+    NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPWSTR, nSize: PULONG
+  ): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetComputerObjectNameW".}
+
+  proc TranslateName*(
+    lpAccountName: LPCWSTR,
+    AccountNameFormat: EXTENDED_NAME_FORMAT,
+    DesiredNameFormat: EXTENDED_NAME_FORMAT,
+    lpTranslatedName: LPWSTR,
+    nSize: PULONG,
+  ): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "TranslateNameW".}
+
 when winimAnsi:
   type
     SECURITY_PSTR* = ptr SEC_CHAR
@@ -1960,29 +2986,173 @@ when winimAnsi:
     PSEC_WINNT_AUTH_IDENTITY* = PSEC_WINNT_AUTH_IDENTITY_A
     SEC_WINNT_AUTH_IDENTITY_EX* = SEC_WINNT_AUTH_IDENTITY_EXA
     PSEC_WINNT_AUTH_IDENTITY_EX* = PSEC_WINNT_AUTH_IDENTITY_EXA
+
   const
     NEGOSSP_NAME* = NEGOSSP_NAME_A
     SECURITY_ENTRYPOINT* = SECURITY_ENTRYPOINTA
     SECURITY_ENTRYPOINT_ANSI* = SECURITY_ENTRYPOINT_ANSIA
-  proc AuditLookupSubCategoryName*(pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupSubCategoryNameA".}
-  proc AuditLookupCategoryName*(pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPSTR): BOOLEAN {.winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupCategoryNameA".}
-  proc AcquireCredentialsHandle*(pszPrincipal: ptr SEC_CHAR, pszPackage: ptr SEC_CHAR, fCredentialUse: int32, pvLogonId: pointer, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, phCredential: PCredHandle, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AcquireCredentialsHandleA".}
-  proc AddCredentials*(hCredentials: PCredHandle, pszPrincipal: ptr SEC_CHAR, pszPackage: ptr SEC_CHAR, fCredentialUse: int32, pAuthData: pointer, pGetKeyFn: SEC_GET_KEY_FN, pvGetKeyArgument: pointer, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AddCredentialsA".}
-  proc InitializeSecurityContext*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: ptr SEC_CHAR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "InitializeSecurityContextA".}
-  proc QueryContextAttributes*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "QueryContextAttributesA".}
-  proc SetContextAttributes*(phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SetContextAttributesA".}
-  proc QueryCredentialsAttributes*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "QueryCredentialsAttributesA".}
-  proc SetCredentialsAttributes*(phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SetCredentialsAttributesA".}
-  proc EnumerateSecurityPackages*(pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "sspicli", importc: "EnumerateSecurityPackagesA".}
-  proc QuerySecurityPackageInfo*(pszPackageName: ptr SEC_CHAR, ppPackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "QuerySecurityPackageInfoA".}
-  proc ImportSecurityContext*(pszPackage: ptr SEC_CHAR, pPackedContext: PSecBuffer, Token: pointer, phContext: PCtxtHandle): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "ImportSecurityContextA".}
-  proc InitSecurityInterface*(): PSecurityFunctionTableA {.winapi, stdcall, dynlib: "secur32", importc: "InitSecurityInterfaceA".}
-  proc SaslEnumerateProfiles*(ProfileList: ptr LPSTR, ProfileCount: ptr ULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslEnumerateProfilesA".}
-  proc SaslGetProfilePackage*(ProfileName: LPSTR, PackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslGetProfilePackageA".}
-  proc SaslIdentifyPackage*(pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoA): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslIdentifyPackageA".}
-  proc SaslInitializeSecurityContext*(phCredential: PCredHandle, phContext: PCtxtHandle, pszTargetName: LPSTR, fContextReq: int32, Reserved1: int32, TargetDataRep: int32, pInput: PSecBufferDesc, Reserved2: int32, phNewContext: PCtxtHandle, pOutput: PSecBufferDesc, pfContextAttr: ptr int32, ptsExpiry: PTimeStamp): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "SaslInitializeSecurityContextA".}
-  proc AddSecurityPackage*(pszPackageName: LPSTR, pOptions: PSECURITY_PACKAGE_OPTIONS): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AddSecurityPackageA".}
-  proc DeleteSecurityPackage*(pszPackageName: ptr SEC_CHAR): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "DeleteSecurityPackageA".}
-  proc GetUserNameEx*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetUserNameExA".}
-  proc GetComputerObjectName*(NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetComputerObjectNameA".}
-  proc TranslateName*(lpAccountName: LPCSTR, AccountNameFormat: EXTENDED_NAME_FORMAT, DesiredNameFormat: EXTENDED_NAME_FORMAT, lpTranslatedName: LPSTR, nSize: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "TranslateNameA".}
+  proc AuditLookupSubCategoryName*(
+    pAuditSubCategoryGuid: ptr GUID, ppszSubCategoryName: ptr LPSTR
+  ): BOOLEAN {.
+    winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupSubCategoryNameA"
+  .}
+
+  proc AuditLookupCategoryName*(
+    pAuditCategoryGuid: ptr GUID, ppszCategoryName: ptr LPSTR
+  ): BOOLEAN {.
+    winapi, stdcall, dynlib: "advapi32", importc: "AuditLookupCategoryNameA"
+  .}
+
+  proc AcquireCredentialsHandle*(
+    pszPrincipal: ptr SEC_CHAR,
+    pszPackage: ptr SEC_CHAR,
+    fCredentialUse: int32,
+    pvLogonId: pointer,
+    pAuthData: pointer,
+    pGetKeyFn: SEC_GET_KEY_FN,
+    pvGetKeyArgument: pointer,
+    phCredential: PCredHandle,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "AcquireCredentialsHandleA"
+  .}
+
+  proc AddCredentials*(
+    hCredentials: PCredHandle,
+    pszPrincipal: ptr SEC_CHAR,
+    pszPackage: ptr SEC_CHAR,
+    fCredentialUse: int32,
+    pAuthData: pointer,
+    pGetKeyFn: SEC_GET_KEY_FN,
+    pvGetKeyArgument: pointer,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.winapi, stdcall, dynlib: "secur32", importc: "AddCredentialsA".}
+
+  proc InitializeSecurityContext*(
+    phCredential: PCredHandle,
+    phContext: PCtxtHandle,
+    pszTargetName: ptr SEC_CHAR,
+    fContextReq: int32,
+    Reserved1: int32,
+    TargetDataRep: int32,
+    pInput: PSecBufferDesc,
+    Reserved2: int32,
+    phNewContext: PCtxtHandle,
+    pOutput: PSecBufferDesc,
+    pfContextAttr: ptr int32,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "InitializeSecurityContextA"
+  .}
+
+  proc QueryContextAttributes*(
+    phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "QueryContextAttributesA"
+  .}
+
+  proc SetContextAttributes*(
+    phContext: PCtxtHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SetContextAttributesA"
+  .}
+
+  proc QueryCredentialsAttributes*(
+    phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "QueryCredentialsAttributesA"
+  .}
+
+  proc SetCredentialsAttributes*(
+    phCredential: PCredHandle, ulAttribute: int32, pBuffer: pointer, cbBuffer: int32
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SetCredentialsAttributesA"
+  .}
+
+  proc EnumerateSecurityPackages*(
+    pcPackages: ptr int32, ppPackageInfo: ptr PSecPkgInfoA
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "sspicli", importc: "EnumerateSecurityPackagesA"
+  .}
+
+  proc QuerySecurityPackageInfo*(
+    pszPackageName: ptr SEC_CHAR, ppPackageInfo: ptr PSecPkgInfoA
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "QuerySecurityPackageInfoA"
+  .}
+
+  proc ImportSecurityContext*(
+    pszPackage: ptr SEC_CHAR,
+    pPackedContext: PSecBuffer,
+    Token: pointer,
+    phContext: PCtxtHandle,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "ImportSecurityContextA"
+  .}
+
+  proc InitSecurityInterface*(): PSecurityFunctionTableA {.
+    winapi, stdcall, dynlib: "secur32", importc: "InitSecurityInterfaceA"
+  .}
+
+  proc SaslEnumerateProfiles*(
+    ProfileList: ptr LPSTR, ProfileCount: ptr ULONG
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslEnumerateProfilesA"
+  .}
+
+  proc SaslGetProfilePackage*(
+    ProfileName: LPSTR, PackageInfo: ptr PSecPkgInfoA
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslGetProfilePackageA"
+  .}
+
+  proc SaslIdentifyPackage*(
+    pInput: PSecBufferDesc, PackageInfo: ptr PSecPkgInfoA
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslIdentifyPackageA"
+  .}
+
+  proc SaslInitializeSecurityContext*(
+    phCredential: PCredHandle,
+    phContext: PCtxtHandle,
+    pszTargetName: LPSTR,
+    fContextReq: int32,
+    Reserved1: int32,
+    TargetDataRep: int32,
+    pInput: PSecBufferDesc,
+    Reserved2: int32,
+    phNewContext: PCtxtHandle,
+    pOutput: PSecBufferDesc,
+    pfContextAttr: ptr int32,
+    ptsExpiry: PTimeStamp,
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "SaslInitializeSecurityContextA"
+  .}
+
+  proc AddSecurityPackage*(
+    pszPackageName: LPSTR, pOptions: PSECURITY_PACKAGE_OPTIONS
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "AddSecurityPackageA"
+  .}
+
+  proc DeleteSecurityPackage*(
+    pszPackageName: ptr SEC_CHAR
+  ): SECURITY_STATUS {.
+    winapi, stdcall, dynlib: "secur32", importc: "DeleteSecurityPackageA"
+  .}
+
+  proc GetUserNameEx*(
+    NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG
+  ): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetUserNameExA".}
+
+  proc GetComputerObjectName*(
+    NameFormat: EXTENDED_NAME_FORMAT, lpNameBuffer: LPSTR, nSize: PULONG
+  ): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "GetComputerObjectNameA".}
+
+  proc TranslateName*(
+    lpAccountName: LPCSTR,
+    AccountNameFormat: EXTENDED_NAME_FORMAT,
+    DesiredNameFormat: EXTENDED_NAME_FORMAT,
+    lpTranslatedName: LPSTR,
+    nSize: PULONG,
+  ): BOOLEAN {.winapi, stdcall, dynlib: "secur32", importc: "TranslateNameA".}

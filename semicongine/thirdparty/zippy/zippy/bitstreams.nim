@@ -48,9 +48,7 @@ proc fillBitBuffer*(b: var BitStreamReader) {.inline.} =
   b.bitsBuffered += 8 * bytesAdded
 
 proc readBits*(
-  b: var BitStreamReader,
-  bits: int,
-  fillBitBuffer: static[bool] = true
+    b: var BitStreamReader, bits: int, fillBitBuffer: static[bool] = true
 ): uint16 {.inline.} =
   assert bits >= 0 and bits <= 16
 
@@ -85,12 +83,7 @@ proc incPos(b: var BitStreamWriter, bits: int) {.inline.} =
   b.pos += (bits + b.bitPos) shr 3
   b.bitPos = (bits + b.bitPos) and 7
 
-proc addBits*(
-  b: var BitStreamWriter,
-  dst: var string,
-  value: uint32,
-  bitLen: int
-) =
+proc addBits*(b: var BitStreamWriter, dst: var string, value: uint32, bitLen: int) =
   assert bitLen >= 0 and bitLen <= 32
 
   if b.pos + 8 > dst.len:
@@ -104,10 +97,10 @@ proc addBits*(
   b.incPos(bitLen)
 
 proc addBytes*(
-  b: var BitStreamWriter,
-  dst: var string,
-  src: ptr UncheckedArray[uint8],
-  srcPos, len: int
+    b: var BitStreamWriter,
+    dst: var string,
+    src: ptr UncheckedArray[uint8],
+    srcPos, len: int,
 ) =
   if b.bitPos != 0:
     raise newException(ZippyError, "Must be at a byte boundary")

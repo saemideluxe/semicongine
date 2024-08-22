@@ -23,27 +23,29 @@ type
   LCSCSTYPE* = LONG
   LCSGAMUTMATCH* = LONG
   COLOR16* = USHORT
+
 when winimUnicode:
-  type
-    BCHAR* = WCHAR
+  type BCHAR* = WCHAR
 when winimAnsi:
-  type
-    BCHAR* = BYTE
+  type BCHAR* = BYTE
 type
   DRAWPATRECT* {.pure.} = object
     ptPosition*: POINT
     ptSize*: POINT
     wStyle*: WORD
     wPattern*: WORD
+
   PDRAWPATRECT* = ptr DRAWPATRECT
   PSINJECTDATA* {.pure.} = object
     DataBytes*: DWORD
     InjectionPoint*: WORD
     PageNumber*: WORD
+
   PPSINJECTDATA* = ptr PSINJECTDATA
   PSFEATURE_OUTPUT* {.pure.} = object
     bPageIndependent*: WINBOOL
     bSetPageDevice*: WINBOOL
+
   PPSFEATURE_OUTPUT* = ptr PSFEATURE_OUTPUT
   PSFEATURE_CUSTPAPER* {.pure.} = object
     lOrientation*: LONG
@@ -51,6 +53,7 @@ type
     lHeight*: LONG
     lWidthOffset*: LONG
     lHeightOffset*: LONG
+
   PPSFEATURE_CUSTPAPER* = ptr PSFEATURE_CUSTPAPER
   XFORM* {.pure.} = object
     eM11*: FLOAT
@@ -59,6 +62,7 @@ type
     eM22*: FLOAT
     eDx*: FLOAT
     eDy*: FLOAT
+
   PXFORM* = ptr XFORM
   LPXFORM* = ptr XFORM
   BITMAP* {.pure.} = object
@@ -69,6 +73,7 @@ type
     bmPlanes*: WORD
     bmBitsPixel*: WORD
     bmBits*: LPVOID
+
   PBITMAP* = ptr BITMAP
   NPBITMAP* = ptr BITMAP
   LPBITMAP* = ptr BITMAP
@@ -77,16 +82,19 @@ type
     rgbGreen*: BYTE
     rgbRed*: BYTE
     rgbReserved*: BYTE
+
   LPRGBQUAD* = ptr RGBQUAD
   CIEXYZ* {.pure.} = object
     ciexyzX*: FXPT2DOT30
     ciexyzY*: FXPT2DOT30
     ciexyzZ*: FXPT2DOT30
+
   LPCIEXYZ* = ptr CIEXYZ
   CIEXYZTRIPLE* {.pure.} = object
     ciexyzRed*: CIEXYZ
     ciexyzGreen*: CIEXYZ
     ciexyzBlue*: CIEXYZ
+
   LPCIEXYZTRIPLE* = ptr CIEXYZTRIPLE
   LOGCOLORSPACEA* {.pure.} = object
     lcsSignature*: DWORD
@@ -99,6 +107,7 @@ type
     lcsGammaGreen*: DWORD
     lcsGammaBlue*: DWORD
     lcsFilename*: array[MAX_PATH, CHAR]
+
   LPLOGCOLORSPACEA* = ptr LOGCOLORSPACEA
   LOGCOLORSPACEW* {.pure.} = object
     lcsSignature*: DWORD
@@ -111,6 +120,7 @@ type
     lcsGammaGreen*: DWORD
     lcsGammaBlue*: DWORD
     lcsFilename*: array[MAX_PATH, WCHAR]
+
   LPLOGCOLORSPACEW* = ptr LOGCOLORSPACEW
   BITMAPCOREHEADER* {.pure.} = object
     bcSize*: DWORD
@@ -118,6 +128,7 @@ type
     bcHeight*: WORD
     bcPlanes*: WORD
     bcBitCount*: WORD
+
   LPBITMAPCOREHEADER* = ptr BITMAPCOREHEADER
   PBITMAPCOREHEADER* = ptr BITMAPCOREHEADER
   BITMAPINFOHEADER* {.pure.} = object
@@ -132,6 +143,7 @@ type
     biYPelsPerMeter*: LONG
     biClrUsed*: DWORD
     biClrImportant*: DWORD
+
   LPBITMAPINFOHEADER* = ptr BITMAPINFOHEADER
   PBITMAPINFOHEADER* = ptr BITMAPINFOHEADER
   BITMAPV4HEADER* {.pure.} = object
@@ -155,6 +167,7 @@ type
     bV4GammaRed*: DWORD
     bV4GammaGreen*: DWORD
     bV4GammaBlue*: DWORD
+
   LPBITMAPV4HEADER* = ptr BITMAPV4HEADER
   PBITMAPV4HEADER* = ptr BITMAPV4HEADER
   BITMAPV5HEADER* {.pure.} = object
@@ -182,20 +195,24 @@ type
     bV5ProfileData*: DWORD
     bV5ProfileSize*: DWORD
     bV5Reserved*: DWORD
+
   LPBITMAPV5HEADER* = ptr BITMAPV5HEADER
   PBITMAPV5HEADER* = ptr BITMAPV5HEADER
   BITMAPINFO* {.pure.} = object
     bmiHeader*: BITMAPINFOHEADER
     bmiColors*: array[1, RGBQUAD]
+
   LPBITMAPINFO* = ptr BITMAPINFO
   PBITMAPINFO* = ptr BITMAPINFO
   RGBTRIPLE* {.pure.} = object
     rgbtBlue*: BYTE
     rgbtGreen*: BYTE
     rgbtRed*: BYTE
+
   BITMAPCOREINFO* {.pure.} = object
     bmciHeader*: BITMAPCOREHEADER
     bmciColors*: array[1, RGBTRIPLE]
+
   LPBITMAPCOREINFO* = ptr BITMAPCOREINFO
   PBITMAPCOREINFO* = ptr BITMAPCOREINFO
   BITMAPFILEHEADER* {.pure, packed.} = object
@@ -204,17 +221,20 @@ type
     bfReserved1*: WORD
     bfReserved2*: WORD
     bfOffBits*: DWORD
+
   LPBITMAPFILEHEADER* = ptr BITMAPFILEHEADER
   PBITMAPFILEHEADER* = ptr BITMAPFILEHEADER
   FONTSIGNATURE* {.pure.} = object
     fsUsb*: array[4, DWORD]
     fsCsb*: array[2, DWORD]
+
   PFONTSIGNATURE* = ptr FONTSIGNATURE
   LPFONTSIGNATURE* = ptr FONTSIGNATURE
   CHARSETINFO* {.pure.} = object
     ciCharset*: UINT
     ciACP*: UINT
     fs*: FONTSIGNATURE
+
   PCHARSETINFO* = ptr CHARSETINFO
   NPCHARSETINFO* = ptr CHARSETINFO
   LPCHARSETINFO* = ptr CHARSETINFO
@@ -222,16 +242,19 @@ type
     lsUsb*: array[4, DWORD]
     lsCsbDefault*: array[2, DWORD]
     lsCsbSupported*: array[2, DWORD]
+
   PLOCALESIGNATURE* = ptr LOCALESIGNATURE
   LPLOCALESIGNATURE* = ptr LOCALESIGNATURE
   HANDLETABLE* {.pure.} = object
     objectHandle*: array[1, HGDIOBJ]
+
   PHANDLETABLE* = ptr HANDLETABLE
   LPHANDLETABLE* = ptr HANDLETABLE
   METARECORD* {.pure.} = object
     rdSize*: DWORD
     rdFunction*: WORD
     rdParm*: array[1, WORD]
+
   PMETARECORD* = ptr METARECORD
   LPMETARECORD* = ptr METARECORD
   METAFILEPICT* {.pure.} = object
@@ -239,6 +262,7 @@ type
     xExt*: LONG
     yExt*: LONG
     hMF*: HMETAFILE
+
   LPMETAFILEPICT* = ptr METAFILEPICT
   METAHEADER* {.pure, packed.} = object
     mtType*: WORD
@@ -248,12 +272,14 @@ type
     mtNoObjects*: WORD
     mtMaxRecord*: DWORD
     mtNoParameters*: WORD
+
   PMETAHEADER* = ptr METAHEADER
   LPMETAHEADER* = ptr METAHEADER
   ENHMETARECORD* {.pure.} = object
     iType*: DWORD
     nSize*: DWORD
     dParm*: array[1, DWORD]
+
   PENHMETARECORD* = ptr ENHMETARECORD
   LPENHMETARECORD* = ptr ENHMETARECORD
   ENHMETAHEADER* {.pure.} = object
@@ -276,6 +302,7 @@ type
     offPixelFormat*: DWORD
     bOpenGL*: DWORD
     szlMicrometers*: SIZEL
+
   PENHMETAHEADER* = ptr ENHMETAHEADER
   LPENHMETAHEADER* = ptr ENHMETAHEADER
   TEXTMETRICA* {.pure.} = object
@@ -299,6 +326,7 @@ type
     tmStruckOut*: BYTE
     tmPitchAndFamily*: BYTE
     tmCharSet*: BYTE
+
   PTEXTMETRICA* = ptr TEXTMETRICA
   NPTEXTMETRICA* = ptr TEXTMETRICA
   LPTEXTMETRICA* = ptr TEXTMETRICA
@@ -323,6 +351,7 @@ type
     tmStruckOut*: BYTE
     tmPitchAndFamily*: BYTE
     tmCharSet*: BYTE
+
   PTEXTMETRICW* = ptr TEXTMETRICW
   NPTEXTMETRICW* = ptr TEXTMETRICW
   LPTEXTMETRICW* = ptr TEXTMETRICW
@@ -351,6 +380,7 @@ type
     ntmSizeEM*: UINT
     ntmCellHeight*: UINT
     ntmAvgWidth*: UINT
+
   PNEWTEXTMETRICA* = ptr NEWTEXTMETRICA
   NPNEWTEXTMETRICA* = ptr NEWTEXTMETRICA
   LPNEWTEXTMETRICA* = ptr NEWTEXTMETRICA
@@ -379,6 +409,7 @@ type
     ntmSizeEM*: UINT
     ntmCellHeight*: UINT
     ntmAvgWidth*: UINT
+
   PNEWTEXTMETRICW* = ptr NEWTEXTMETRICW
   NPNEWTEXTMETRICW* = ptr NEWTEXTMETRICW
   LPNEWTEXTMETRICW* = ptr NEWTEXTMETRICW
@@ -388,6 +419,7 @@ type
     paXExt*: LONG
     paYExt*: LONG
     paRGBs*: BYTE
+
   PPELARRAY* = ptr PELARRAY
   NPPELARRAY* = ptr PELARRAY
   LPPELARRAY* = ptr PELARRAY
@@ -395,6 +427,7 @@ type
     lbStyle*: UINT
     lbColor*: COLORREF
     lbHatch*: ULONG_PTR
+
   PLOGBRUSH* = ptr LOGBRUSH
   NPLOGBRUSH* = ptr LOGBRUSH
   LPLOGBRUSH* = ptr LOGBRUSH
@@ -402,6 +435,7 @@ type
     lbStyle*: UINT
     lbColor*: COLORREF
     lbHatch*: ULONG
+
   PLOGBRUSH32* = ptr LOGBRUSH32
   NPLOGBRUSH32* = ptr LOGBRUSH32
   LPLOGBRUSH32* = ptr LOGBRUSH32
@@ -413,6 +447,7 @@ type
     lopnStyle*: UINT
     lopnWidth*: POINT
     lopnColor*: COLORREF
+
   PLOGPEN* = ptr LOGPEN
   NPLOGPEN* = ptr LOGPEN
   LPLOGPEN* = ptr LOGPEN
@@ -424,6 +459,7 @@ type
     elpHatch*: ULONG_PTR
     elpNumEntries*: DWORD
     elpStyleEntry*: array[1, DWORD]
+
   PEXTLOGPEN* = ptr EXTLOGPEN
   NPEXTLOGPEN* = ptr EXTLOGPEN
   LPEXTLOGPEN* = ptr EXTLOGPEN
@@ -435,6 +471,7 @@ type
     elpHatch*: ULONG
     elpNumEntries*: DWORD
     elpStyleEntry*: array[1, DWORD]
+
   PEXTLOGPEN32* = ptr EXTLOGPEN32
   NPEXTLOGPEN32* = ptr EXTLOGPEN32
   LPEXTLOGPEN32* = ptr EXTLOGPEN32
@@ -443,17 +480,19 @@ type
     peGreen*: BYTE
     peBlue*: BYTE
     peFlags*: BYTE
+
   PPALETTEENTRY* = ptr PALETTEENTRY
   LPPALETTEENTRY* = ptr PALETTEENTRY
   LOGPALETTE* {.pure.} = object
     palVersion*: WORD
     palNumEntries*: WORD
     palPalEntry*: array[1, PALETTEENTRY]
+
   PLOGPALETTE* = ptr LOGPALETTE
   NPLOGPALETTE* = ptr LOGPALETTE
   LPLOGPALETTE* = ptr LOGPALETTE
-const
-  LF_FACESIZE* = 32
+
+const LF_FACESIZE* = 32
 type
   LOGFONTA* {.pure.} = object
     lfHeight*: LONG
@@ -470,6 +509,7 @@ type
     lfQuality*: BYTE
     lfPitchAndFamily*: BYTE
     lfFaceName*: array[LF_FACESIZE, CHAR]
+
   PLOGFONTA* = ptr LOGFONTA
   NPLOGFONTA* = ptr LOGFONTA
   LPLOGFONTA* = ptr LOGFONTA
@@ -488,33 +528,38 @@ type
     lfQuality*: BYTE
     lfPitchAndFamily*: BYTE
     lfFaceName*: array[LF_FACESIZE, WCHAR]
+
   PLOGFONTW* = ptr LOGFONTW
   NPLOGFONTW* = ptr LOGFONTW
   LPLOGFONTW* = ptr LOGFONTW
-const
-  LF_FULLFACESIZE* = 64
+
+const LF_FULLFACESIZE* = 64
 type
   ENUMLOGFONTA* {.pure.} = object
     elfLogFont*: LOGFONTA
     elfFullName*: array[LF_FULLFACESIZE, BYTE]
     elfStyle*: array[LF_FACESIZE, BYTE]
+
   LPENUMLOGFONTA* = ptr ENUMLOGFONTA
   ENUMLOGFONTW* {.pure.} = object
     elfLogFont*: LOGFONTW
     elfFullName*: array[LF_FULLFACESIZE, WCHAR]
     elfStyle*: array[LF_FACESIZE, WCHAR]
+
   LPENUMLOGFONTW* = ptr ENUMLOGFONTW
   ENUMLOGFONTEXA* {.pure.} = object
     elfLogFont*: LOGFONTA
     elfFullName*: array[LF_FULLFACESIZE, BYTE]
     elfStyle*: array[LF_FACESIZE, BYTE]
     elfScript*: array[LF_FACESIZE, BYTE]
+
   LPENUMLOGFONTEXA* = ptr ENUMLOGFONTEXA
   ENUMLOGFONTEXW* {.pure.} = object
     elfLogFont*: LOGFONTW
     elfFullName*: array[LF_FULLFACESIZE, WCHAR]
     elfStyle*: array[LF_FACESIZE, WCHAR]
     elfScript*: array[LF_FACESIZE, WCHAR]
+
   LPENUMLOGFONTEXW* = ptr ENUMLOGFONTEXW
   PANOSE* {.pure.} = object
     bFamilyType*: BYTE
@@ -527,9 +572,10 @@ type
     bLetterform*: BYTE
     bMidline*: BYTE
     bXHeight*: BYTE
+
   LPPANOSE* = ptr PANOSE
-const
-  ELF_VENDOR_SIZE* = 4
+
+const ELF_VENDOR_SIZE* = 4
 type
   EXTLOGFONTA* {.pure.} = object
     elfLogFont*: LOGFONTA
@@ -542,6 +588,7 @@ type
     elfVendorId*: array[ELF_VENDOR_SIZE, BYTE]
     elfCulture*: DWORD
     elfPanose*: PANOSE
+
   PEXTLOGFONTA* = ptr EXTLOGFONTA
   NPEXTLOGFONTA* = ptr EXTLOGFONTA
   LPEXTLOGFONTA* = ptr EXTLOGFONTA
@@ -556,11 +603,12 @@ type
     elfVendorId*: array[ELF_VENDOR_SIZE, BYTE]
     elfCulture*: DWORD
     elfPanose*: PANOSE
+
   PEXTLOGFONTW* = ptr EXTLOGFONTW
   NPEXTLOGFONTW* = ptr EXTLOGFONTW
   LPEXTLOGFONTW* = ptr EXTLOGFONTW
-const
-  CCHDEVICENAME* = 32
+
+const CCHDEVICENAME* = 32
 type
   DEVMODEA_UNION1_STRUCT1* {.pure.} = object
     dmOrientation*: int16
@@ -571,19 +619,22 @@ type
     dmCopies*: int16
     dmDefaultSource*: int16
     dmPrintQuality*: int16
+
   DEVMODEA_UNION1_STRUCT2* {.pure.} = object
     dmPosition*: POINTL
     dmDisplayOrientation*: DWORD
     dmDisplayFixedOutput*: DWORD
+
   DEVMODEA_UNION1* {.pure, union.} = object
     struct1*: DEVMODEA_UNION1_STRUCT1
     struct2*: DEVMODEA_UNION1_STRUCT2
-const
-  CCHFORMNAME* = 32
+
+const CCHFORMNAME* = 32
 type
   DEVMODEA_UNION2* {.pure, union.} = object
     dmDisplayFlags*: DWORD
     dmNup*: DWORD
+
   DEVMODEA* {.pure.} = object
     dmDeviceName*: array[CCHDEVICENAME, BYTE]
     dmSpecVersion*: WORD
@@ -612,6 +663,7 @@ type
     dmReserved2*: DWORD
     dmPanningWidth*: DWORD
     dmPanningHeight*: DWORD
+
   PDEVMODEA* = ptr DEVMODEA
   NPDEVMODEA* = ptr DEVMODEA
   LPDEVMODEA* = ptr DEVMODEA
@@ -624,16 +676,20 @@ type
     dmCopies*: int16
     dmDefaultSource*: int16
     dmPrintQuality*: int16
+
   DEVMODEW_UNION1_STRUCT2* {.pure.} = object
     dmPosition*: POINTL
     dmDisplayOrientation*: DWORD
     dmDisplayFixedOutput*: DWORD
+
   DEVMODEW_UNION1* {.pure, union.} = object
     struct1*: DEVMODEW_UNION1_STRUCT1
     struct2*: DEVMODEW_UNION1_STRUCT2
+
   DEVMODEW_UNION2* {.pure, union.} = object
     dmDisplayFlags*: DWORD
     dmNup*: DWORD
+
   DEVMODEW* {.pure.} = object
     dmDeviceName*: array[CCHDEVICENAME, WCHAR]
     dmSpecVersion*: WORD
@@ -662,6 +718,7 @@ type
     dmReserved2*: DWORD
     dmPanningWidth*: DWORD
     dmPanningHeight*: DWORD
+
   PDEVMODEW* = ptr DEVMODEW
   NPDEVMODEW* = ptr DEVMODEW
   LPDEVMODEW* = ptr DEVMODEW
@@ -672,6 +729,7 @@ type
     StateFlags*: DWORD
     DeviceID*: array[128, CHAR]
     DeviceKey*: array[128, CHAR]
+
   PDISPLAY_DEVICEA* = ptr DISPLAY_DEVICEA
   LPDISPLAY_DEVICEA* = ptr DISPLAY_DEVICEA
   DISPLAY_DEVICEW* {.pure.} = object
@@ -681,6 +739,7 @@ type
     StateFlags*: DWORD
     DeviceID*: array[128, WCHAR]
     DeviceKey*: array[128, WCHAR]
+
   PDISPLAY_DEVICEW* = ptr DISPLAY_DEVICEW
   LPDISPLAY_DEVICEW* = ptr DISPLAY_DEVICEW
   RGNDATAHEADER* {.pure.} = object
@@ -689,10 +748,12 @@ type
     nCount*: DWORD
     nRgnSize*: DWORD
     rcBound*: RECT
+
   PRGNDATAHEADER* = ptr RGNDATAHEADER
   RGNDATA* {.pure.} = object
     rdh*: RGNDATAHEADER
     Buffer*: array[1, char]
+
   PRGNDATA* = ptr RGNDATA
   NPRGNDATA* = ptr RGNDATA
   LPRGNDATA* = ptr RGNDATA
@@ -700,6 +761,7 @@ type
     abcA*: int32
     abcB*: UINT
     abcC*: int32
+
   PABC* = ptr ABC
   NPABC* = ptr ABC
   LPABC* = ptr ABC
@@ -707,6 +769,7 @@ type
     abcfA*: FLOAT
     abcfB*: FLOAT
     abcfC*: FLOAT
+
   PABCFLOAT* = ptr ABCFLOAT
   NPABCFLOAT* = ptr ABCFLOAT
   LPABCFLOAT* = ptr ABCFLOAT
@@ -743,6 +806,7 @@ type
     otmpFaceName*: PSTR
     otmpStyleName*: PSTR
     otmpFullName*: PSTR
+
   POUTLINETEXTMETRICA* = ptr OUTLINETEXTMETRICA
   NPOUTLINETEXTMETRICA* = ptr OUTLINETEXTMETRICA
   LPOUTLINETEXTMETRICA* = ptr OUTLINETEXTMETRICA
@@ -779,6 +843,7 @@ type
     otmpFaceName*: PSTR
     otmpStyleName*: PSTR
     otmpFullName*: PSTR
+
   POUTLINETEXTMETRICW* = ptr OUTLINETEXTMETRICW
   NPOUTLINETEXTMETRICW* = ptr OUTLINETEXTMETRICW
   LPOUTLINETEXTMETRICW* = ptr OUTLINETEXTMETRICW
@@ -790,6 +855,7 @@ type
     uiFlags*: UINT
     rcl*: RECT
     pdx*: ptr int32
+
   PPOLYTEXTA* = ptr POLYTEXTA
   NPPOLYTEXTA* = ptr POLYTEXTA
   LPPOLYTEXTA* = ptr POLYTEXTA
@@ -801,17 +867,20 @@ type
     uiFlags*: UINT
     rcl*: RECT
     pdx*: ptr int32
+
   PPOLYTEXTW* = ptr POLYTEXTW
   NPPOLYTEXTW* = ptr POLYTEXTW
   LPPOLYTEXTW* = ptr POLYTEXTW
   FIXED* {.pure.} = object
     fract*: WORD
     value*: int16
+
   MAT2* {.pure.} = object
     eM11*: FIXED
     eM12*: FIXED
     eM21*: FIXED
     eM22*: FIXED
+
   LPMAT2* = ptr MAT2
   GLYPHMETRICS* {.pure.} = object
     gmBlackBoxX*: UINT
@@ -819,20 +888,24 @@ type
     gmptGlyphOrigin*: POINT
     gmCellIncX*: int16
     gmCellIncY*: int16
+
   LPGLYPHMETRICS* = ptr GLYPHMETRICS
   POINTFX* {.pure.} = object
     x*: FIXED
     y*: FIXED
+
   LPPOINTFX* = ptr POINTFX
   TTPOLYCURVE* {.pure.} = object
     wType*: WORD
     cpfx*: WORD
     apfx*: array[1, POINTFX]
+
   LPTTPOLYCURVE* = ptr TTPOLYCURVE
   TTPOLYGONHEADER* {.pure.} = object
     cb*: DWORD
     dwType*: DWORD
     pfxStart*: POINTFX
+
   LPTTPOLYGONHEADER* = ptr TTPOLYGONHEADER
   GCP_RESULTSA* {.pure.} = object
     lStructSize*: DWORD
@@ -844,6 +917,7 @@ type
     lpGlyphs*: LPWSTR
     nGlyphs*: UINT
     nMaxFit*: int32
+
   LPGCP_RESULTSA* = ptr GCP_RESULTSA
   GCP_RESULTSW* {.pure.} = object
     lStructSize*: DWORD
@@ -855,11 +929,13 @@ type
     lpGlyphs*: LPWSTR
     nGlyphs*: UINT
     nMaxFit*: int32
+
   LPGCP_RESULTSW* = ptr GCP_RESULTSW
   RASTERIZER_STATUS* {.pure.} = object
     nSize*: int16
     wFlags*: int16
     nLanguageID*: int16
+
   LPRASTERIZER_STATUS* = ptr RASTERIZER_STATUS
   PIXELFORMATDESCRIPTOR* {.pure.} = object
     nSize*: WORD
@@ -888,15 +964,21 @@ type
     dwLayerMask*: DWORD
     dwVisibleMask*: DWORD
     dwDamageMask*: DWORD
+
   PPIXELFORMATDESCRIPTOR* = ptr PIXELFORMATDESCRIPTOR
   LPPIXELFORMATDESCRIPTOR* = ptr PIXELFORMATDESCRIPTOR
-  OLDFONTENUMPROCA* = proc (P1: ptr LOGFONTA, P2: ptr TEXTMETRICA, P3: DWORD, P4: LPARAM): int32 {.stdcall.}
+  OLDFONTENUMPROCA* = proc(
+    P1: ptr LOGFONTA, P2: ptr TEXTMETRICA, P3: DWORD, P4: LPARAM
+  ): int32 {.stdcall.}
   FONTENUMPROCA* = OLDFONTENUMPROCA
-  OLDFONTENUMPROCW* = proc (P1: ptr LOGFONTW, P2: ptr TEXTMETRICW, P3: DWORD, P4: LPARAM): int32 {.stdcall.}
+  OLDFONTENUMPROCW* = proc(
+    P1: ptr LOGFONTW, P2: ptr TEXTMETRICW, P3: DWORD, P4: LPARAM
+  ): int32 {.stdcall.}
   FONTENUMPROCW* = OLDFONTENUMPROCW
   WCRANGE* {.pure.} = object
     wcLow*: WCHAR
     cGlyphs*: USHORT
+
   PWCRANGE* = ptr WCRANGE
   LPWCRANGE* = ptr WCRANGE
   GLYPHSET* {.pure.} = object
@@ -905,79 +987,94 @@ type
     cGlyphsSupported*: DWORD
     cRanges*: DWORD
     ranges*: array[1, WCRANGE]
+
   PGLYPHSET* = ptr GLYPHSET
   LPGLYPHSET* = ptr GLYPHSET
-const
-  MM_MAX_NUMAXES* = 16
+
+const MM_MAX_NUMAXES* = 16
 type
   DESIGNVECTOR* {.pure.} = object
     dvReserved*: DWORD
     dvNumAxes*: DWORD
     dvValues*: array[MM_MAX_NUMAXES, LONG]
+
   PDESIGNVECTOR* = ptr DESIGNVECTOR
   LPDESIGNVECTOR* = ptr DESIGNVECTOR
-const
-  MM_MAX_AXES_NAMELEN* = 16
+
+const MM_MAX_AXES_NAMELEN* = 16
 type
   AXISINFOA* {.pure.} = object
     axMinValue*: LONG
     axMaxValue*: LONG
     axAxisName*: array[MM_MAX_AXES_NAMELEN, BYTE]
+
   PAXISINFOA* = ptr AXISINFOA
   LPAXISINFOA* = ptr AXISINFOA
   AXISINFOW* {.pure.} = object
     axMinValue*: LONG
     axMaxValue*: LONG
     axAxisName*: array[MM_MAX_AXES_NAMELEN, WCHAR]
+
   PAXISINFOW* = ptr AXISINFOW
   LPAXISINFOW* = ptr AXISINFOW
   AXESLISTA* {.pure.} = object
     axlReserved*: DWORD
     axlNumAxes*: DWORD
     axlAxisInfo*: array[MM_MAX_NUMAXES, AXISINFOA]
+
   PAXESLISTA* = ptr AXESLISTA
   LPAXESLISTA* = ptr AXESLISTA
   AXESLISTW* {.pure.} = object
     axlReserved*: DWORD
     axlNumAxes*: DWORD
     axlAxisInfo*: array[MM_MAX_NUMAXES, AXISINFOW]
+
   PAXESLISTW* = ptr AXESLISTW
   LPAXESLISTW* = ptr AXESLISTW
   ENUMLOGFONTEXDVA* {.pure.} = object
     elfEnumLogfontEx*: ENUMLOGFONTEXA
     elfDesignVector*: DESIGNVECTOR
+
   PENUMLOGFONTEXDVA* = ptr ENUMLOGFONTEXDVA
   LPENUMLOGFONTEXDVA* = ptr ENUMLOGFONTEXDVA
   ENUMLOGFONTEXDVW* {.pure.} = object
     elfEnumLogfontEx*: ENUMLOGFONTEXW
     elfDesignVector*: DESIGNVECTOR
+
   PENUMLOGFONTEXDVW* = ptr ENUMLOGFONTEXDVW
   LPENUMLOGFONTEXDVW* = ptr ENUMLOGFONTEXDVW
   NEWTEXTMETRICEXA* {.pure.} = object
     ntmTm*: NEWTEXTMETRICA
     ntmFontSig*: FONTSIGNATURE
+
   ENUMTEXTMETRICA* {.pure.} = object
     etmNewTextMetricEx*: NEWTEXTMETRICEXA
     etmAxesList*: AXESLISTA
+
   PENUMTEXTMETRICA* = ptr ENUMTEXTMETRICA
   LPENUMTEXTMETRICA* = ptr ENUMTEXTMETRICA
   NEWTEXTMETRICEXW* {.pure.} = object
     ntmTm*: NEWTEXTMETRICW
     ntmFontSig*: FONTSIGNATURE
+
   ENUMTEXTMETRICW* {.pure.} = object
     etmNewTextMetricEx*: NEWTEXTMETRICEXW
     etmAxesList*: AXESLISTW
+
   PENUMTEXTMETRICW* = ptr ENUMTEXTMETRICW
   LPENUMTEXTMETRICW* = ptr ENUMTEXTMETRICW
-  DDRAWMARSHCALLBACKMARSHAL* = proc (hGdiObj: HGDIOBJ, pGdiRef: LPVOID, ppDDrawRef: ptr LPVOID): HRESULT {.stdcall.}
-  DDRAWMARSHCALLBACKUNMARSHAL* = proc (pData: LPVOID, phdc: ptr HDC, ppDDrawRef: ptr LPVOID): HRESULT {.stdcall.}
-  DDRAWMARSHCALLBACKRELEASE* = proc (pDDrawRef: LPVOID): HRESULT {.stdcall.}
+  DDRAWMARSHCALLBACKMARSHAL* =
+    proc(hGdiObj: HGDIOBJ, pGdiRef: LPVOID, ppDDrawRef: ptr LPVOID): HRESULT {.stdcall.}
+  DDRAWMARSHCALLBACKUNMARSHAL* =
+    proc(pData: LPVOID, phdc: ptr HDC, ppDDrawRef: ptr LPVOID): HRESULT {.stdcall.}
+  DDRAWMARSHCALLBACKRELEASE* = proc(pDDrawRef: LPVOID): HRESULT {.stdcall.}
   GDIREGISTERDDRAWPACKET* {.pure.} = object
     dwSize*: DWORD
     dwVersion*: DWORD
     pfnDdMarshal*: DDRAWMARSHCALLBACKMARSHAL
     pfnDdUnmarshal*: DDRAWMARSHCALLBACKUNMARSHAL
     pfnDdRelease*: DDRAWMARSHCALLBACKRELEASE
+
   PGDIREGISTERDDRAWPACKET* = ptr GDIREGISTERDDRAWPACKET
   TRIVERTEX* {.pure.} = object
     x*: LONG
@@ -986,17 +1083,20 @@ type
     Green*: COLOR16
     Blue*: COLOR16
     Alpha*: COLOR16
+
   PTRIVERTEX* = ptr TRIVERTEX
   LPTRIVERTEX* = ptr TRIVERTEX
   GRADIENT_TRIANGLE* {.pure.} = object
     Vertex1*: ULONG
     Vertex2*: ULONG
     Vertex3*: ULONG
+
   PGRADIENT_TRIANGLE* = ptr GRADIENT_TRIANGLE
   LPGRADIENT_TRIANGLE* = ptr GRADIENT_TRIANGLE
   GRADIENT_RECT* {.pure.} = object
     UpperLeft*: ULONG
     LowerRight*: ULONG
+
   PGRADIENT_RECT* = ptr GRADIENT_RECT
   LPGRADIENT_RECT* = ptr GRADIENT_RECT
   BLENDFUNCTION* {.pure.} = object
@@ -1004,6 +1104,7 @@ type
     BlendFlags*: BYTE
     SourceConstantAlpha*: BYTE
     AlphaFormat*: BYTE
+
   PBLENDFUNCTION* = ptr BLENDFUNCTION
   DIBSECTION* {.pure.} = object
     dsBm*: BITMAP
@@ -1011,6 +1112,7 @@ type
     dsBitfields*: array[3, DWORD]
     dshSection*: HANDLE
     dsOffset*: DWORD
+
   LPDIBSECTION* = ptr DIBSECTION
   PDIBSECTION* = ptr DIBSECTION
   COLORADJUSTMENT* {.pure.} = object
@@ -1026,6 +1128,7 @@ type
     caBrightness*: SHORT
     caColorfulness*: SHORT
     caRedGreenTint*: SHORT
+
   PCOLORADJUSTMENT* = ptr COLORADJUSTMENT
   LPCOLORADJUSTMENT* = ptr COLORADJUSTMENT
   DOCINFOA* {.pure.} = object
@@ -1034,6 +1137,7 @@ type
     lpszOutput*: LPCSTR
     lpszDatatype*: LPCSTR
     fwType*: DWORD
+
   LPDOCINFOA* = ptr DOCINFOA
   DOCINFOW* {.pure.} = object
     cbSize*: int32
@@ -1041,15 +1145,18 @@ type
     lpszOutput*: LPCWSTR
     lpszDatatype*: LPCWSTR
     fwType*: DWORD
+
   LPDOCINFOW* = ptr DOCINFOW
   KERNINGPAIR* {.pure.} = object
     wFirst*: WORD
     wSecond*: WORD
     iKernAmount*: int32
+
   LPKERNINGPAIR* = ptr KERNINGPAIR
   EMR* {.pure.} = object
     iType*: DWORD
     nSize*: DWORD
+
   PEMR* = ptr EMR
   EMRTEXT* {.pure.} = object
     ptlReference*: POINTL
@@ -1058,9 +1165,11 @@ type
     fOptions*: DWORD
     rcl*: RECTL
     offDx*: DWORD
+
   PEMRTEXT* = ptr EMRTEXT
   EMRABORTPATH* {.pure.} = object
     emr*: EMR
+
   PEMRABORTPATH* = ptr EMRABORTPATH
   EMRBEGINPATH* = EMRABORTPATH
   PEMRBEGINPATH* = ptr EMRABORTPATH
@@ -1081,6 +1190,7 @@ type
   EMRSELECTCLIPPATH* {.pure.} = object
     emr*: EMR
     iMode*: DWORD
+
   PEMRSELECTCLIPPATH* = ptr EMRSELECTCLIPPATH
   EMRSETBKMODE* = EMRSELECTCLIPPATH
   PEMRSETBKMODE* = ptr EMRSELECTCLIPPATH
@@ -1101,39 +1211,47 @@ type
   EMRSETMITERLIMIT* {.pure.} = object
     emr*: EMR
     eMiterLimit*: FLOAT
+
   PEMRSETMITERLIMIT* = ptr EMRSETMITERLIMIT
   EMRRESTOREDC* {.pure.} = object
     emr*: EMR
     iRelative*: LONG
+
   PEMRRESTOREDC* = ptr EMRRESTOREDC
   EMRSETARCDIRECTION* {.pure.} = object
     emr*: EMR
     iArcDirection*: DWORD
+
   PEMRSETARCDIRECTION* = ptr EMRSETARCDIRECTION
   EMRSETMAPPERFLAGS* {.pure.} = object
     emr*: EMR
     dwFlags*: DWORD
+
   PEMRSETMAPPERFLAGS* = ptr EMRSETMAPPERFLAGS
   EMRSETBKCOLOR* {.pure.} = object
     emr*: EMR
     crColor*: COLORREF
+
   PEMRSETBKCOLOR* = ptr EMRSETBKCOLOR
   EMRSETTEXTCOLOR* = EMRSETBKCOLOR
   PEMRSETTEXTCOLOR* = ptr EMRSETBKCOLOR
   EMRSELECTOBJECT* {.pure.} = object
     emr*: EMR
     ihObject*: DWORD
+
   PEMRSELECTOBJECT* = ptr EMRSELECTOBJECT
   EMRDELETEOBJECT* = EMRSELECTOBJECT
   PEMRDELETEOBJECT* = ptr EMRSELECTOBJECT
   EMRSELECTPALETTE* {.pure.} = object
     emr*: EMR
     ihPal*: DWORD
+
   PEMRSELECTPALETTE* = ptr EMRSELECTPALETTE
   EMRRESIZEPALETTE* {.pure.} = object
     emr*: EMR
     ihPal*: DWORD
     cEntries*: DWORD
+
   PEMRRESIZEPALETTE* = ptr EMRRESIZEPALETTE
   EMRSETPALETTEENTRIES* {.pure.} = object
     emr*: EMR
@@ -1141,35 +1259,42 @@ type
     iStart*: DWORD
     cEntries*: DWORD
     aPalEntries*: array[1, PALETTEENTRY]
+
   PEMRSETPALETTEENTRIES* = ptr EMRSETPALETTEENTRIES
   EMRSETCOLORADJUSTMENT* {.pure.} = object
     emr*: EMR
     ColorAdjustment*: COLORADJUSTMENT
+
   PEMRSETCOLORADJUSTMENT* = ptr EMRSETCOLORADJUSTMENT
   EMRGDICOMMENT* {.pure.} = object
     emr*: EMR
     cbData*: DWORD
     Data*: array[1, BYTE]
+
   PEMRGDICOMMENT* = ptr EMRGDICOMMENT
   EMREOF* {.pure.} = object
     emr*: EMR
     nPalEntries*: DWORD
     offPalEntries*: DWORD
     nSizeLast*: DWORD
+
   PEMREOF* = ptr EMREOF
   EMRLINETO* {.pure.} = object
     emr*: EMR
     ptl*: POINTL
+
   PEMRLINETO* = ptr EMRLINETO
   EMRMOVETOEX* = EMRLINETO
   PEMRMOVETOEX* = ptr EMRLINETO
   EMROFFSETCLIPRGN* {.pure.} = object
     emr*: EMR
     ptlOffset*: POINTL
+
   PEMROFFSETCLIPRGN* = ptr EMROFFSETCLIPRGN
   EMRFILLPATH* {.pure.} = object
     emr*: EMR
     rclBounds*: RECTL
+
   PEMRFILLPATH* = ptr EMRFILLPATH
   EMRSTROKEANDFILLPATH* = EMRFILLPATH
   PEMRSTROKEANDFILLPATH* = ptr EMRFILLPATH
@@ -1178,12 +1303,14 @@ type
   EMREXCLUDECLIPRECT* {.pure.} = object
     emr*: EMR
     rclClip*: RECTL
+
   PEMREXCLUDECLIPRECT* = ptr EMREXCLUDECLIPRECT
   EMRINTERSECTCLIPRECT* = EMREXCLUDECLIPRECT
   PEMRINTERSECTCLIPRECT* = ptr EMREXCLUDECLIPRECT
   EMRSETVIEWPORTORGEX* {.pure.} = object
     emr*: EMR
     ptlOrigin*: POINTL
+
   PEMRSETVIEWPORTORGEX* = ptr EMRSETVIEWPORTORGEX
   EMRSETWINDOWORGEX* = EMRSETVIEWPORTORGEX
   PEMRSETWINDOWORGEX* = ptr EMRSETVIEWPORTORGEX
@@ -1192,6 +1319,7 @@ type
   EMRSETVIEWPORTEXTEX* {.pure.} = object
     emr*: EMR
     szlExtent*: SIZEL
+
   PEMRSETVIEWPORTEXTEX* = ptr EMRSETVIEWPORTEXTEX
   EMRSETWINDOWEXTEX* = EMRSETVIEWPORTEXTEX
   PEMRSETWINDOWEXTEX* = ptr EMRSETVIEWPORTEXTEX
@@ -1201,32 +1329,38 @@ type
     xDenom*: LONG
     yNum*: LONG
     yDenom*: LONG
+
   PEMRSCALEVIEWPORTEXTEX* = ptr EMRSCALEVIEWPORTEXTEX
   EMRSCALEWINDOWEXTEX* = EMRSCALEVIEWPORTEXTEX
   PEMRSCALEWINDOWEXTEX* = ptr EMRSCALEVIEWPORTEXTEX
   EMRSETWORLDTRANSFORM* {.pure.} = object
     emr*: EMR
     xform*: XFORM
+
   PEMRSETWORLDTRANSFORM* = ptr EMRSETWORLDTRANSFORM
   EMRMODIFYWORLDTRANSFORM* {.pure.} = object
     emr*: EMR
     xform*: XFORM
     iMode*: DWORD
+
   PEMRMODIFYWORLDTRANSFORM* = ptr EMRMODIFYWORLDTRANSFORM
   EMRSETPIXELV* {.pure.} = object
     emr*: EMR
     ptlPixel*: POINTL
     crColor*: COLORREF
+
   PEMRSETPIXELV* = ptr EMRSETPIXELV
   EMREXTFLOODFILL* {.pure.} = object
     emr*: EMR
     ptlStart*: POINTL
     crColor*: COLORREF
     iMode*: DWORD
+
   PEMREXTFLOODFILL* = ptr EMREXTFLOODFILL
   EMRELLIPSE* {.pure.} = object
     emr*: EMR
     rclBox*: RECTL
+
   PEMRELLIPSE* = ptr EMRELLIPSE
   EMRRECTANGLE* = EMRELLIPSE
   PEMRRECTANGLE* = ptr EMRELLIPSE
@@ -1234,12 +1368,14 @@ type
     emr*: EMR
     rclBox*: RECTL
     szlCorner*: SIZEL
+
   PEMRROUNDRECT* = ptr EMRROUNDRECT
   EMRARC* {.pure.} = object
     emr*: EMR
     rclBox*: RECTL
     ptlStart*: POINTL
     ptlEnd*: POINTL
+
   PEMRARC* = ptr EMRARC
   EMRARCTO* = EMRARC
   PEMRARCTO* = ptr EMRARC
@@ -1253,12 +1389,14 @@ type
     nRadius*: DWORD
     eStartAngle*: FLOAT
     eSweepAngle*: FLOAT
+
   PEMRANGLEARC* = ptr EMRANGLEARC
   EMRPOLYLINE* {.pure.} = object
     emr*: EMR
     rclBounds*: RECTL
     cptl*: DWORD
     aptl*: array[1, POINTL]
+
   PEMRPOLYLINE* = ptr EMRPOLYLINE
   EMRPOLYBEZIER* = EMRPOLYLINE
   PEMRPOLYBEZIER* = ptr EMRPOLYLINE
@@ -1273,6 +1411,7 @@ type
     rclBounds*: RECTL
     cpts*: DWORD
     apts*: array[1, POINTS]
+
   PEMRPOLYLINE16* = ptr EMRPOLYLINE16
   EMRPOLYBEZIER16* = EMRPOLYLINE16
   PEMRPOLYBEZIER16* = ptr EMRPOLYLINE16
@@ -1288,6 +1427,7 @@ type
     cptl*: DWORD
     aptl*: array[1, POINTL]
     abTypes*: array[1, BYTE]
+
   PEMRPOLYDRAW* = ptr EMRPOLYDRAW
   EMRPOLYDRAW16* {.pure.} = object
     emr*: EMR
@@ -1295,6 +1435,7 @@ type
     cpts*: DWORD
     apts*: array[1, POINTS]
     abTypes*: array[1, BYTE]
+
   PEMRPOLYDRAW16* = ptr EMRPOLYDRAW16
   EMRPOLYPOLYLINE* {.pure.} = object
     emr*: EMR
@@ -1303,6 +1444,7 @@ type
     cptl*: DWORD
     aPolyCounts*: array[1, DWORD]
     aptl*: array[1, POINTL]
+
   PEMRPOLYPOLYLINE* = ptr EMRPOLYPOLYLINE
   EMRPOLYPOLYGON* = EMRPOLYPOLYLINE
   PEMRPOLYPOLYGON* = ptr EMRPOLYPOLYLINE
@@ -1313,6 +1455,7 @@ type
     cpts*: DWORD
     aPolyCounts*: array[1, DWORD]
     apts*: array[1, POINTS]
+
   PEMRPOLYPOLYLINE16* = ptr EMRPOLYPOLYLINE16
   EMRPOLYPOLYGON16* = EMRPOLYPOLYLINE16
   PEMRPOLYPOLYGON16* = ptr EMRPOLYPOLYLINE16
@@ -1321,6 +1464,7 @@ type
     rclBounds*: RECTL
     cbRgnData*: DWORD
     RgnData*: array[1, BYTE]
+
   PEMRINVERTRGN* = ptr EMRINVERTRGN
   EMRPAINTRGN* = EMRINVERTRGN
   PEMRPAINTRGN* = ptr EMRINVERTRGN
@@ -1330,6 +1474,7 @@ type
     cbRgnData*: DWORD
     ihBrush*: DWORD
     RgnData*: array[1, BYTE]
+
   PEMRFILLRGN* = ptr EMRFILLRGN
   EMRFRAMERGN* {.pure.} = object
     emr*: EMR
@@ -1338,12 +1483,14 @@ type
     ihBrush*: DWORD
     szlStroke*: SIZEL
     RgnData*: array[1, BYTE]
+
   PEMRFRAMERGN* = ptr EMRFRAMERGN
   EMREXTSELECTCLIPRGN* {.pure.} = object
     emr*: EMR
     cbRgnData*: DWORD
     iMode*: DWORD
     RgnData*: array[1, BYTE]
+
   PEMREXTSELECTCLIPRGN* = ptr EMREXTSELECTCLIPRGN
   EMREXTTEXTOUTA* {.pure.} = object
     emr*: EMR
@@ -1352,6 +1499,7 @@ type
     exScale*: FLOAT
     eyScale*: FLOAT
     emrtext*: EMRTEXT
+
   PEMREXTTEXTOUTA* = ptr EMREXTTEXTOUTA
   EMREXTTEXTOUTW* = EMREXTTEXTOUTA
   PEMREXTTEXTOUTW* = ptr EMREXTTEXTOUTA
@@ -1363,6 +1511,7 @@ type
     eyScale*: FLOAT
     cStrings*: LONG
     aemrtext*: array[1, EMRTEXT]
+
   PEMRPOLYTEXTOUTA* = ptr EMRPOLYTEXTOUTA
   EMRPOLYTEXTOUTW* = EMRPOLYTEXTOUTA
   PEMRPOLYTEXTOUTW* = ptr EMRPOLYTEXTOUTA
@@ -1383,6 +1532,7 @@ type
     cbBmiSrc*: DWORD
     offBitsSrc*: DWORD
     cbBitsSrc*: DWORD
+
   PEMRBITBLT* = ptr EMRBITBLT
   EMRSTRETCHBLT* {.pure.} = object
     emr*: EMR
@@ -1403,6 +1553,7 @@ type
     cbBitsSrc*: DWORD
     cxSrc*: LONG
     cySrc*: LONG
+
   PEMRSTRETCHBLT* = ptr EMRSTRETCHBLT
   EMRMASKBLT* {.pure.} = object
     emr*: EMR
@@ -1428,6 +1579,7 @@ type
     cbBmiMask*: DWORD
     offBitsMask*: DWORD
     cbBitsMask*: DWORD
+
   PEMRMASKBLT* = ptr EMRMASKBLT
   EMRPLGBLT* {.pure.} = object
     emr*: EMR
@@ -1451,6 +1603,7 @@ type
     cbBmiMask*: DWORD
     offBitsMask*: DWORD
     cbBitsMask*: DWORD
+
   PEMRPLGBLT* = ptr EMRPLGBLT
   EMRSETDIBITSTODEVICE* {.pure.} = object
     emr*: EMR
@@ -1468,6 +1621,7 @@ type
     iUsageSrc*: DWORD
     iStartScan*: DWORD
     cScans*: DWORD
+
   PEMRSETDIBITSTODEVICE* = ptr EMRSETDIBITSTODEVICE
   EMRSTRETCHDIBITS* {.pure.} = object
     emr*: EMR
@@ -1486,21 +1640,25 @@ type
     dwRop*: DWORD
     cxDest*: LONG
     cyDest*: LONG
+
   PEMRSTRETCHDIBITS* = ptr EMRSTRETCHDIBITS
   EMREXTCREATEFONTINDIRECTW* {.pure.} = object
     emr*: EMR
     ihFont*: DWORD
     elfw*: EXTLOGFONTW
+
   PEMREXTCREATEFONTINDIRECTW* = ptr EMREXTCREATEFONTINDIRECTW
   EMRCREATEPALETTE* {.pure.} = object
     emr*: EMR
     ihPal*: DWORD
     lgpl*: LOGPALETTE
+
   PEMRCREATEPALETTE* = ptr EMRCREATEPALETTE
   EMRCREATEPEN* {.pure.} = object
     emr*: EMR
     ihPen*: DWORD
     lopn*: LOGPEN
+
   PEMRCREATEPEN* = ptr EMRCREATEPEN
   EMREXTCREATEPEN* {.pure.} = object
     emr*: EMR
@@ -1510,11 +1668,13 @@ type
     offBits*: DWORD
     cbBits*: DWORD
     elp*: EXTLOGPEN
+
   PEMREXTCREATEPEN* = ptr EMREXTCREATEPEN
   EMRCREATEBRUSHINDIRECT* {.pure.} = object
     emr*: EMR
     ihBrush*: DWORD
     lb*: LOGBRUSH32
+
   PEMRCREATEBRUSHINDIRECT* = ptr EMRCREATEBRUSHINDIRECT
   EMRCREATEMONOBRUSH* {.pure.} = object
     emr*: EMR
@@ -1524,6 +1684,7 @@ type
     cbBmi*: DWORD
     offBits*: DWORD
     cbBits*: DWORD
+
   PEMRCREATEMONOBRUSH* = ptr EMRCREATEMONOBRUSH
   EMRCREATEDIBPATTERNBRUSHPT* {.pure.} = object
     emr*: EMR
@@ -1533,36 +1694,43 @@ type
     cbBmi*: DWORD
     offBits*: DWORD
     cbBits*: DWORD
+
   PEMRCREATEDIBPATTERNBRUSHPT* = ptr EMRCREATEDIBPATTERNBRUSHPT
   EMRFORMAT* {.pure.} = object
     dSignature*: DWORD
     nVersion*: DWORD
     cbData*: DWORD
     offData*: DWORD
+
   PEMRFORMAT* = ptr EMRFORMAT
   EMRGLSRECORD* {.pure.} = object
     emr*: EMR
     cbData*: DWORD
     Data*: array[1, BYTE]
+
   PEMRGLSRECORD* = ptr EMRGLSRECORD
   EMRGLSBOUNDEDRECORD* {.pure.} = object
     emr*: EMR
     rclBounds*: RECTL
     cbData*: DWORD
     Data*: array[1, BYTE]
+
   PEMRGLSBOUNDEDRECORD* = ptr EMRGLSBOUNDEDRECORD
   EMRPIXELFORMAT* {.pure.} = object
     emr*: EMR
     pfd*: PIXELFORMATDESCRIPTOR
+
   PEMRPIXELFORMAT* = ptr EMRPIXELFORMAT
   EMRCREATECOLORSPACE* {.pure.} = object
     emr*: EMR
     ihCS*: DWORD
     lcs*: LOGCOLORSPACEA
+
   PEMRCREATECOLORSPACE* = ptr EMRCREATECOLORSPACE
   EMRSETCOLORSPACE* {.pure.} = object
     emr*: EMR
     ihCS*: DWORD
+
   PEMRSETCOLORSPACE* = ptr EMRSETCOLORSPACE
   EMRSELECTCOLORSPACE* = EMRSETCOLORSPACE
   PEMRSELECTCOLORSPACE* = ptr EMRSETCOLORSPACE
@@ -1573,6 +1741,7 @@ type
     iEscape*: INT
     cbEscData*: INT
     EscData*: array[1, BYTE]
+
   PEMREXTESCAPE* = ptr EMREXTESCAPE
   EMRDRAWESCAPE* = EMREXTESCAPE
   PEMRDRAWESCAPE* = ptr EMREXTESCAPE
@@ -1582,6 +1751,7 @@ type
     cbDriver*: INT
     cbEscData*: INT
     EscData*: array[1, BYTE]
+
   PEMRNAMEDESCAPE* = ptr EMRNAMEDESCAPE
   EMRSETICMPROFILE* {.pure.} = object
     emr*: EMR
@@ -1589,6 +1759,7 @@ type
     cbName*: DWORD
     cbData*: DWORD
     Data*: array[1, BYTE]
+
   PEMRSETICMPROFILE* = ptr EMRSETICMPROFILE
   EMRSETICMPROFILEA* = EMRSETICMPROFILE
   PEMRSETICMPROFILEA* = ptr EMRSETICMPROFILE
@@ -1601,6 +1772,7 @@ type
     dwFlags*: DWORD
     cbData*: DWORD
     Data*: array[1, BYTE]
+
   PEMRCREATECOLORSPACEW* = ptr EMRCREATECOLORSPACEW
   EMRCOLORMATCHTOTARGET* {.pure.} = object
     emr*: EMR
@@ -1609,6 +1781,7 @@ type
     cbName*: DWORD
     cbData*: DWORD
     Data*: array[1, BYTE]
+
   PEMRCOLORMATCHTOTARGET* = ptr EMRCOLORMATCHTOTARGET
   EMRCOLORCORRECTPALETTE* {.pure.} = object
     emr*: EMR
@@ -1616,6 +1789,7 @@ type
     nFirstEntry*: DWORD
     nPalEntries*: DWORD
     nReserved*: DWORD
+
   PEMRCOLORCORRECTPALETTE* = ptr EMRCOLORCORRECTPALETTE
   EMRALPHABLEND* {.pure.} = object
     emr*: EMR
@@ -1636,6 +1810,7 @@ type
     cbBitsSrc*: DWORD
     cxSrc*: LONG
     cySrc*: LONG
+
   PEMRALPHABLEND* = ptr EMRALPHABLEND
   EMRGRADIENTFILL* {.pure.} = object
     emr*: EMR
@@ -1644,6 +1819,7 @@ type
     nTri*: DWORD
     ulMode*: ULONG
     Ver*: array[1, TRIVERTEX]
+
   PEMRGRADIENTFILL* = ptr EMRGRADIENTFILL
   EMRTRANSPARENTBLT* {.pure.} = object
     emr*: EMR
@@ -1664,10 +1840,12 @@ type
     cbBitsSrc*: DWORD
     cxSrc*: LONG
     cySrc*: LONG
+
   PEMRTRANSPARENTBLT* = ptr EMRTRANSPARENTBLT
   POINTFLOAT* {.pure.} = object
     x*: FLOAT
     y*: FLOAT
+
   PPOINTFLOAT* = ptr POINTFLOAT
   GLYPHMETRICSFLOAT* {.pure.} = object
     gmfBlackBoxX*: FLOAT
@@ -1675,6 +1853,7 @@ type
     gmfptGlyphOrigin*: POINTFLOAT
     gmfCellIncX*: FLOAT
     gmfCellIncY*: FLOAT
+
   PGLYPHMETRICSFLOAT* = ptr GLYPHMETRICSFLOAT
   LPGLYPHMETRICSFLOAT* = ptr GLYPHMETRICSFLOAT
   LAYERPLANEDESCRIPTOR* {.pure.} = object
@@ -1702,13 +1881,16 @@ type
     iLayerPlane*: BYTE
     bReserved*: BYTE
     crTransparent*: COLORREF
+
   PLAYERPLANEDESCRIPTOR* = ptr LAYERPLANEDESCRIPTOR
   LPLAYERPLANEDESCRIPTOR* = ptr LAYERPLANEDESCRIPTOR
   WGLSWAP* {.pure.} = object
     hdc*: HDC
     uiFlags*: UINT
+
   PWGLSWAP* = ptr WGLSWAP
   LPWGLSWAP* = ptr WGLSWAP
+
 const
   R2_BLACK* = 1
   R2_NOTMERGEPEN* = 2
@@ -1784,7 +1966,7 @@ const
   TA_BOTTOM* = 8
   TA_BASELINE* = 24
   TA_RTLREADING* = 256
-  TA_MASK* = TA_BASELINE+TA_CENTER+TA_UPDATECP+TA_RTLREADING
+  TA_MASK* = TA_BASELINE + TA_CENTER + TA_UPDATECP + TA_RTLREADING
   VTA_BASELINE* = TA_BASELINE
   VTA_LEFT* = TA_BOTTOM
   VTA_RIGHT* = TA_TOP
@@ -2813,7 +2995,9 @@ const
   SDC_TOPOLOGY_EXTEND* = 0x00000004
   SDC_TOPOLOGY_EXTERNAL* = 0x00000008
   SDC_TOPOLOGY_SUPPLIED* = 0x00000010
-  SDC_USE_DATABASE_CURRENT* = SDC_TOPOLOGY_INTERNAL or SDC_TOPOLOGY_CLONE or SDC_TOPOLOGY_EXTEND or SDC_TOPOLOGY_EXTERNAL
+  SDC_USE_DATABASE_CURRENT* =
+    SDC_TOPOLOGY_INTERNAL or SDC_TOPOLOGY_CLONE or SDC_TOPOLOGY_EXTEND or
+    SDC_TOPOLOGY_EXTERNAL
   SDC_USE_SUPPLIED_DISPLAY_CONFIG* = 0x00000020
   SDC_VALIDATE* = 0x00000040
   SDC_APPLY* = 0x00000080
@@ -3159,29 +3343,48 @@ const
   STAMP_AXESLIST* = 0x08006C61
   STAMP_DESIGNVECTOR* = 0x08007664
 type
-  GOBJENUMPROC* = proc (P1: LPVOID, P2: LPARAM): int32 {.stdcall.}
-  LINEDDAPROC* = proc (P1: int32, P2: int32, P3: LPARAM): VOID {.stdcall.}
+  GOBJENUMPROC* = proc(P1: LPVOID, P2: LPARAM): int32 {.stdcall.}
+  LINEDDAPROC* = proc(P1: int32, P2: int32, P3: LPARAM): VOID {.stdcall.}
+
 when winimUnicode:
-  type
-    LPDEVMODE* = LPDEVMODEW
+  type LPDEVMODE* = LPDEVMODEW
 when winimAnsi:
-  type
-    LPDEVMODE* = LPDEVMODEA
+  type LPDEVMODE* = LPDEVMODEA
 type
-  LPFNDEVMODE* = proc (P1: HWND, P2: HMODULE, P3: LPDEVMODE, P4: LPSTR, P5: LPSTR, P6: LPDEVMODE, P7: LPSTR, P8: UINT): UINT {.stdcall.}
-  LPFNDEVCAPS* = proc (P1: LPSTR, P2: LPSTR, P3: UINT, P4: LPSTR, P5: LPDEVMODE): DWORD {.stdcall.}
-  GDIMARSHALLOC* = proc (dwSize: DWORD, pGdiRef: LPVOID): PVOID {.stdcall.}
-  MFENUMPROC* = proc (hdc: HDC, lpht: ptr HANDLETABLE, lpMR: ptr METARECORD, nObj: int32, lParam: LPARAM): int32 {.stdcall.}
-  ENHMFENUMPROC* = proc (hdc: HDC, lpht: ptr HANDLETABLE, lpmr: ptr ENHMETARECORD, hHandles: int32, data: LPARAM): int32 {.stdcall.}
-  ABORTPROC* = proc (P1: HDC, P2: int32): WINBOOL {.stdcall.}
-  ICMENUMPROCA* = proc (P1: LPSTR, P2: LPARAM): int32 {.stdcall.}
-  ICMENUMPROCW* = proc (P1: LPWSTR, P2: LPARAM): int32 {.stdcall.}
+  LPFNDEVMODE* = proc(
+    P1: HWND,
+    P2: HMODULE,
+    P3: LPDEVMODE,
+    P4: LPSTR,
+    P5: LPSTR,
+    P6: LPDEVMODE,
+    P7: LPSTR,
+    P8: UINT,
+  ): UINT {.stdcall.}
+  LPFNDEVCAPS* =
+    proc(P1: LPSTR, P2: LPSTR, P3: UINT, P4: LPSTR, P5: LPDEVMODE): DWORD {.stdcall.}
+  GDIMARSHALLOC* = proc(dwSize: DWORD, pGdiRef: LPVOID): PVOID {.stdcall.}
+  MFENUMPROC* = proc(
+    hdc: HDC, lpht: ptr HANDLETABLE, lpMR: ptr METARECORD, nObj: int32, lParam: LPARAM
+  ): int32 {.stdcall.}
+  ENHMFENUMPROC* = proc(
+    hdc: HDC,
+    lpht: ptr HANDLETABLE,
+    lpmr: ptr ENHMETARECORD,
+    hHandles: int32,
+    data: LPARAM,
+  ): int32 {.stdcall.}
+  ABORTPROC* = proc(P1: HDC, P2: int32): WINBOOL {.stdcall.}
+  ICMENUMPROCA* = proc(P1: LPSTR, P2: LPARAM): int32 {.stdcall.}
+  ICMENUMPROCW* = proc(P1: LPWSTR, P2: LPARAM): int32 {.stdcall.}
   DISPLAYCONFIG_RATIONAL* {.pure.} = object
     Numerator*: UINT32
     Denominator*: UINT32
+
   DISPLAYCONFIG_2DREGION* {.pure.} = object
     cx*: UINT32
     cy*: UINT32
+
   DISPLAYCONFIG_VIDEO_SIGNAL_INFO* {.pure.} = object
     pixelRate*: UINT64
     hSyncFreq*: DISPLAYCONFIG_RATIONAL
@@ -3190,26 +3393,32 @@ type
     totalSize*: DISPLAYCONFIG_2DREGION
     videoStandard*: UINT32
     scanLineOrdering*: DISPLAYCONFIG_SCANLINE_ORDERING
+
   DISPLAYCONFIG_SOURCE_MODE* {.pure.} = object
     width*: UINT32
     height*: UINT32
     pixelFormat*: DISPLAYCONFIG_PIXELFORMAT
     position*: POINTL
+
   DISPLAYCONFIG_TARGET_MODE* {.pure.} = object
     targetVideoSignalInfo*: DISPLAYCONFIG_VIDEO_SIGNAL_INFO
+
   DISPLAYCONFIG_MODE_INFO_UNION1* {.pure, union.} = object
     targetMode*: DISPLAYCONFIG_TARGET_MODE
     sourceMode*: DISPLAYCONFIG_SOURCE_MODE
+
   DISPLAYCONFIG_MODE_INFO* {.pure.} = object
     infoType*: DISPLAYCONFIG_MODE_INFO_TYPE
     id*: UINT32
     adapterId*: LUID
     union1*: DISPLAYCONFIG_MODE_INFO_UNION1
+
   DISPLAYCONFIG_PATH_SOURCE_INFO* {.pure.} = object
     adapterId*: LUID
     id*: UINT32
     modeInfoIdx*: UINT32
     statusFlags*: UINT32
+
   DISPLAYCONFIG_PATH_TARGET_INFO* {.pure.} = object
     adapterId*: LUID
     id*: UINT32
@@ -3221,28 +3430,35 @@ type
     scanLineOrdering*: DISPLAYCONFIG_SCANLINE_ORDERING
     targetAvailable*: WINBOOL
     statusFlags*: UINT32
+
   DISPLAYCONFIG_PATH_INFO* {.pure.} = object
     sourceInfo*: DISPLAYCONFIG_PATH_SOURCE_INFO
     targetInfo*: DISPLAYCONFIG_PATH_TARGET_INFO
     flags*: UINT32
+
   DISPLAYCONFIG_DEVICE_INFO_HEADER* {.pure.} = object
     `type`*: DISPLAYCONFIG_DEVICE_INFO_TYPE
     size*: UINT32
     adapterId*: LUID
     id*: UINT32
+
   DISPLAYCONFIG_SOURCE_DEVICE_NAME* {.pure.} = object
     header*: DISPLAYCONFIG_DEVICE_INFO_HEADER
     viewGdiDeviceName*: array[CCHDEVICENAME, WCHAR]
+
   DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS_UNION1_STRUCT1* {.pure.} = object
-    friendlyNameFromEdid* {.bitsize:1.}: UINT32
-    friendlyNameForced* {.bitsize:1.}: UINT32
-    edidIdsValid* {.bitsize:1.}: UINT32
-    reserved* {.bitsize:29.}: UINT32
+    friendlyNameFromEdid* {.bitsize: 1.}: UINT32
+    friendlyNameForced* {.bitsize: 1.}: UINT32
+    edidIdsValid* {.bitsize: 1.}: UINT32
+    reserved* {.bitsize: 29.}: UINT32
+
   DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS_UNION1* {.pure, union.} = object
     struct1*: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS_UNION1_STRUCT1
     value*: UINT32
+
   DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS* {.pure.} = object
     union1*: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS_UNION1
+
   DISPLAYCONFIG_TARGET_DEVICE_NAME* {.pure.} = object
     header*: DISPLAYCONFIG_DEVICE_INFO_HEADER
     flags*: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS
@@ -3252,502 +3468,1983 @@ type
     connectorInstance*: UINT32
     monitorFriendlyDeviceName*: array[64, WCHAR]
     monitorDevicePath*: array[128, WCHAR]
+
   DISPLAYCONFIG_TARGET_PREFERRED_MODE* {.pure.} = object
     header*: DISPLAYCONFIG_DEVICE_INFO_HEADER
     width*: UINT32
     height*: UINT32
     targetMode*: DISPLAYCONFIG_TARGET_MODE
+
   DISPLAYCONFIG_ADAPTER_NAME* {.pure.} = object
     header*: DISPLAYCONFIG_DEVICE_INFO_HEADER
     adapterDevicePath*: array[128, WCHAR]
+
   DISPLAYCONFIG_SET_TARGET_PERSISTENCE_UNION1_STRUCT1* {.pure.} = object
-    bootPersistenceOn* {.bitsize:1.}: UINT32
-    reserved* {.bitsize:31.}: UINT32
+    bootPersistenceOn* {.bitsize: 1.}: UINT32
+    reserved* {.bitsize: 31.}: UINT32
+
   DISPLAYCONFIG_SET_TARGET_PERSISTENCE_UNION1* {.pure, union.} = object
     struct1*: DISPLAYCONFIG_SET_TARGET_PERSISTENCE_UNION1_STRUCT1
     value*: UINT32
+
   DISPLAYCONFIG_SET_TARGET_PERSISTENCE* {.pure.} = object
     header*: DISPLAYCONFIG_DEVICE_INFO_HEADER
     union1*: DISPLAYCONFIG_SET_TARGET_PERSISTENCE_UNION1
+
 proc AddFontResourceA*(P1: LPCSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc AddFontResourceW*(P1: LPCWSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc AnimatePalette*(hPal: HPALETTE, iStartIndex: UINT, cEntries: UINT, ppe: ptr PALETTEENTRY): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Arc*(hdc: HDC, x1: int32, y1: int32, x2: int32, y2: int32, x3: int32, y3: int32, x4: int32, y4: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc BitBlt*(hdc: HDC, x: int32, y: int32, cx: int32, cy: int32, hdcSrc: HDC, x1: int32, y1: int32, rop: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc AnimatePalette*(
+  hPal: HPALETTE, iStartIndex: UINT, cEntries: UINT, ppe: ptr PALETTEENTRY
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc Arc*(
+  hdc: HDC,
+  x1: int32,
+  y1: int32,
+  x2: int32,
+  y2: int32,
+  x3: int32,
+  y3: int32,
+  x4: int32,
+  y4: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc BitBlt*(
+  hdc: HDC,
+  x: int32,
+  y: int32,
+  cx: int32,
+  cy: int32,
+  hdcSrc: HDC,
+  x1: int32,
+  y1: int32,
+  rop: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc CancelDC*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Chord*(hdc: HDC, x1: int32, y1: int32, x2: int32, y2: int32, x3: int32, y3: int32, x4: int32, y4: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ChoosePixelFormat*(hdc: HDC, ppfd: ptr PIXELFORMATDESCRIPTOR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc Chord*(
+  hdc: HDC,
+  x1: int32,
+  y1: int32,
+  x2: int32,
+  y2: int32,
+  x3: int32,
+  y3: int32,
+  x4: int32,
+  y4: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ChoosePixelFormat*(
+  hdc: HDC, ppfd: ptr PIXELFORMATDESCRIPTOR
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc CloseMetaFile*(hdc: HDC): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CombineRgn*(hrgnDst: HRGN, hrgnSrc1: HRGN, hrgnSrc2: HRGN, iMode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CopyMetaFileA*(P1: HMETAFILE, P2: LPCSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CopyMetaFileW*(P1: HMETAFILE, P2: LPCWSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateBitmap*(nWidth: int32, nHeight: int32, nPlanes: UINT, nBitCount: UINT, lpBits: pointer): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateBitmapIndirect*(pbm: ptr BITMAP): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateBrushIndirect*(plbrush: ptr LOGBRUSH): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateCompatibleBitmap*(hdc: HDC, cx: int32, cy: int32): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateDiscardableBitmap*(hdc: HDC, cx: int32, cy: int32): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc CombineRgn*(
+  hrgnDst: HRGN, hrgnSrc1: HRGN, hrgnSrc2: HRGN, iMode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CopyMetaFileA*(
+  P1: HMETAFILE, P2: LPCSTR
+): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CopyMetaFileW*(
+  P1: HMETAFILE, P2: LPCWSTR
+): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateBitmap*(
+  nWidth: int32, nHeight: int32, nPlanes: UINT, nBitCount: UINT, lpBits: pointer
+): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateBitmapIndirect*(
+  pbm: ptr BITMAP
+): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateBrushIndirect*(
+  plbrush: ptr LOGBRUSH
+): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateCompatibleBitmap*(
+  hdc: HDC, cx: int32, cy: int32
+): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateDiscardableBitmap*(
+  hdc: HDC, cx: int32, cy: int32
+): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc CreateCompatibleDC*(hdc: HDC): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateDCA*(pwszDriver: LPCSTR, pwszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateDCW*(pwszDriver: LPCWSTR, pwszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateDIBitmap*(hdc: HDC, pbmih: ptr BITMAPINFOHEADER, flInit: DWORD, pjBits: pointer, pbmi: ptr BITMAPINFO, iUsage: UINT): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateDIBPatternBrush*(h: HGLOBAL, iUsage: UINT): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateDIBPatternBrushPt*(lpPackedDIB: pointer, iUsage: UINT): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateEllipticRgn*(x1: int32, y1: int32, x2: int32, y2: int32): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateEllipticRgnIndirect*(lprect: ptr RECT): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateFontIndirectA*(lplf: ptr LOGFONTA): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateFontIndirectW*(lplf: ptr LOGFONTW): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateFontA*(cHeight: int32, cWidth: int32, cEscapement: int32, cOrientation: int32, cWeight: int32, bItalic: DWORD, bUnderline: DWORD, bStrikeOut: DWORD, iCharSet: DWORD, iOutPrecision: DWORD, iClipPrecision: DWORD, iQuality: DWORD, iPitchAndFamily: DWORD, pszFaceName: LPCSTR): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateFontW*(cHeight: int32, cWidth: int32, cEscapement: int32, cOrientation: int32, cWeight: int32, bItalic: DWORD, bUnderline: DWORD, bStrikeOut: DWORD, iCharSet: DWORD, iOutPrecision: DWORD, iClipPrecision: DWORD, iQuality: DWORD, iPitchAndFamily: DWORD, pszFaceName: LPCWSTR): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateHatchBrush*(iHatch: int32, color: COLORREF): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateICA*(pszDriver: LPCSTR, pszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateICW*(pszDriver: LPCWSTR, pszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateMetaFileA*(pszFile: LPCSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateMetaFileW*(pszFile: LPCWSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreatePalette*(plpal: ptr LOGPALETTE): HPALETTE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreatePen*(iStyle: int32, cWidth: int32, color: COLORREF): HPEN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreatePenIndirect*(plpen: ptr LOGPEN): HPEN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreatePolyPolygonRgn*(pptl: ptr POINT, pc: ptr INT, cPoly: int32, iMode: int32): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreatePatternBrush*(hbm: HBITMAP): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateRectRgn*(x1: int32, y1: int32, x2: int32, y2: int32): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateRectRgnIndirect*(lprect: ptr RECT): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateRoundRectRgn*(x1: int32, y1: int32, x2: int32, y2: int32, w: int32, h: int32): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateScalableFontResourceA*(fdwHidden: DWORD, lpszFont: LPCSTR, lpszFile: LPCSTR, lpszPath: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateScalableFontResourceW*(fdwHidden: DWORD, lpszFont: LPCWSTR, lpszFile: LPCWSTR, lpszPath: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateSolidBrush*(color: COLORREF): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc CreateDCA*(
+  pwszDriver: LPCSTR, pwszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateDCW*(
+  pwszDriver: LPCWSTR, pwszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateDIBitmap*(
+  hdc: HDC,
+  pbmih: ptr BITMAPINFOHEADER,
+  flInit: DWORD,
+  pjBits: pointer,
+  pbmi: ptr BITMAPINFO,
+  iUsage: UINT,
+): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateDIBPatternBrush*(
+  h: HGLOBAL, iUsage: UINT
+): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateDIBPatternBrushPt*(
+  lpPackedDIB: pointer, iUsage: UINT
+): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateEllipticRgn*(
+  x1: int32, y1: int32, x2: int32, y2: int32
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateEllipticRgnIndirect*(
+  lprect: ptr RECT
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateFontIndirectA*(
+  lplf: ptr LOGFONTA
+): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateFontIndirectW*(
+  lplf: ptr LOGFONTW
+): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateFontA*(
+  cHeight: int32,
+  cWidth: int32,
+  cEscapement: int32,
+  cOrientation: int32,
+  cWeight: int32,
+  bItalic: DWORD,
+  bUnderline: DWORD,
+  bStrikeOut: DWORD,
+  iCharSet: DWORD,
+  iOutPrecision: DWORD,
+  iClipPrecision: DWORD,
+  iQuality: DWORD,
+  iPitchAndFamily: DWORD,
+  pszFaceName: LPCSTR,
+): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateFontW*(
+  cHeight: int32,
+  cWidth: int32,
+  cEscapement: int32,
+  cOrientation: int32,
+  cWeight: int32,
+  bItalic: DWORD,
+  bUnderline: DWORD,
+  bStrikeOut: DWORD,
+  iCharSet: DWORD,
+  iOutPrecision: DWORD,
+  iClipPrecision: DWORD,
+  iQuality: DWORD,
+  iPitchAndFamily: DWORD,
+  pszFaceName: LPCWSTR,
+): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateHatchBrush*(
+  iHatch: int32, color: COLORREF
+): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateICA*(
+  pszDriver: LPCSTR, pszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateICW*(
+  pszDriver: LPCWSTR, pszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateMetaFileA*(
+  pszFile: LPCSTR
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateMetaFileW*(
+  pszFile: LPCWSTR
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreatePalette*(
+  plpal: ptr LOGPALETTE
+): HPALETTE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreatePen*(
+  iStyle: int32, cWidth: int32, color: COLORREF
+): HPEN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreatePenIndirect*(
+  plpen: ptr LOGPEN
+): HPEN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreatePolyPolygonRgn*(
+  pptl: ptr POINT, pc: ptr INT, cPoly: int32, iMode: int32
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreatePatternBrush*(
+  hbm: HBITMAP
+): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateRectRgn*(
+  x1: int32, y1: int32, x2: int32, y2: int32
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateRectRgnIndirect*(
+  lprect: ptr RECT
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateRoundRectRgn*(
+  x1: int32, y1: int32, x2: int32, y2: int32, w: int32, h: int32
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateScalableFontResourceA*(
+  fdwHidden: DWORD, lpszFont: LPCSTR, lpszFile: LPCSTR, lpszPath: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateScalableFontResourceW*(
+  fdwHidden: DWORD, lpszFont: LPCWSTR, lpszFile: LPCWSTR, lpszPath: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateSolidBrush*(
+  color: COLORREF
+): HBRUSH {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc DeleteDC*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc DeleteMetaFile*(hmf: HMETAFILE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc DeleteMetaFile*(
+  hmf: HMETAFILE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc DeleteObject*(ho: HGDIOBJ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc DescribePixelFormat*(hdc: HDC, iPixelFormat: int32, nBytes: UINT, ppfd: LPPIXELFORMATDESCRIPTOR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc DeviceCapabilitiesA*(pDevice: LPCSTR, pPort: LPCSTR, fwCapability: WORD, pOutput: LPSTR, pDevMode: ptr DEVMODEA): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc.}
-proc DeviceCapabilitiesW*(pDevice: LPCWSTR, pPort: LPCWSTR, fwCapability: WORD, pOutput: LPWSTR, pDevMode: ptr DEVMODEW): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc.}
-proc DrawEscape*(hdc: HDC, iEscape: int32, cjIn: int32, lpIn: LPCSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Ellipse*(hdc: HDC, left: int32, top: int32, right: int32, bottom: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumFontFamiliesExA*(hdc: HDC, lpLogfont: LPLOGFONTA, lpProc: FONTENUMPROCA, lParam: LPARAM, dwFlags: DWORD): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumFontFamiliesExW*(hdc: HDC, lpLogfont: LPLOGFONTW, lpProc: FONTENUMPROCW, lParam: LPARAM, dwFlags: DWORD): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumFontFamiliesA*(hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumFontFamiliesW*(hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumFontsA*(hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumFontsW*(hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumObjects*(hdc: HDC, nType: int32, lpFunc: GOBJENUMPROC, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EqualRgn*(hrgn1: HRGN, hrgn2: HRGN): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Escape*(hdc: HDC, iEscape: int32, cjIn: int32, pvIn: LPCSTR, pvOut: LPVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExtEscape*(hdc: HDC, iEscape: int32, cjInput: int32, lpInData: LPCSTR, cjOutput: int32, lpOutData: LPSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExcludeClipRect*(hdc: HDC, left: int32, top: int32, right: int32, bottom: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExtCreateRegion*(lpx: ptr XFORM, nCount: DWORD, lpData: ptr RGNDATA): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExtFloodFill*(hdc: HDC, x: int32, y: int32, color: COLORREF, `type`: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc FillRgn*(hdc: HDC, hrgn: HRGN, hbr: HBRUSH): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc FloodFill*(hdc: HDC, x: int32, y: int32, color: COLORREF): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc FrameRgn*(hdc: HDC, hrgn: HRGN, hbr: HBRUSH, w: int32, h: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc DescribePixelFormat*(
+  hdc: HDC, iPixelFormat: int32, nBytes: UINT, ppfd: LPPIXELFORMATDESCRIPTOR
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc DeviceCapabilitiesA*(
+  pDevice: LPCSTR,
+  pPort: LPCSTR,
+  fwCapability: WORD,
+  pOutput: LPSTR,
+  pDevMode: ptr DEVMODEA,
+): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc.}
+
+proc DeviceCapabilitiesW*(
+  pDevice: LPCWSTR,
+  pPort: LPCWSTR,
+  fwCapability: WORD,
+  pOutput: LPWSTR,
+  pDevMode: ptr DEVMODEW,
+): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc.}
+
+proc DrawEscape*(
+  hdc: HDC, iEscape: int32, cjIn: int32, lpIn: LPCSTR
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc Ellipse*(
+  hdc: HDC, left: int32, top: int32, right: int32, bottom: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumFontFamiliesExA*(
+  hdc: HDC, lpLogfont: LPLOGFONTA, lpProc: FONTENUMPROCA, lParam: LPARAM, dwFlags: DWORD
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumFontFamiliesExW*(
+  hdc: HDC, lpLogfont: LPLOGFONTW, lpProc: FONTENUMPROCW, lParam: LPARAM, dwFlags: DWORD
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumFontFamiliesA*(
+  hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumFontFamiliesW*(
+  hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumFontsA*(
+  hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumFontsW*(
+  hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumObjects*(
+  hdc: HDC, nType: int32, lpFunc: GOBJENUMPROC, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EqualRgn*(
+  hrgn1: HRGN, hrgn2: HRGN
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc Escape*(
+  hdc: HDC, iEscape: int32, cjIn: int32, pvIn: LPCSTR, pvOut: LPVOID
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ExtEscape*(
+  hdc: HDC,
+  iEscape: int32,
+  cjInput: int32,
+  lpInData: LPCSTR,
+  cjOutput: int32,
+  lpOutData: LPSTR,
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ExcludeClipRect*(
+  hdc: HDC, left: int32, top: int32, right: int32, bottom: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ExtCreateRegion*(
+  lpx: ptr XFORM, nCount: DWORD, lpData: ptr RGNDATA
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ExtFloodFill*(
+  hdc: HDC, x: int32, y: int32, color: COLORREF, `type`: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc FillRgn*(
+  hdc: HDC, hrgn: HRGN, hbr: HBRUSH
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc FloodFill*(
+  hdc: HDC, x: int32, y: int32, color: COLORREF
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc FrameRgn*(
+  hdc: HDC, hrgn: HRGN, hbr: HBRUSH, w: int32, h: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetROP2*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetAspectRatioFilterEx*(hdc: HDC, lpsize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetAspectRatioFilterEx*(
+  hdc: HDC, lpsize: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetBkColor*(hdc: HDC): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetDCBrushColor*(hdc: HDC): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetDCPenColor*(hdc: HDC): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetBkMode*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetBitmapBits*(hbit: HBITMAP, cb: LONG, lpvBits: LPVOID): LONG {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetBitmapDimensionEx*(hbit: HBITMAP, lpsize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetBoundsRect*(hdc: HDC, lprect: LPRECT, flags: UINT): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetBrushOrgEx*(hdc: HDC, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharWidthA*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharWidthW*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharWidth32A*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharWidth32W*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharWidthFloatA*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharWidthFloatW*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharABCWidthsA*(hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharABCWidthsW*(hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharABCWidthsFloatA*(hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharABCWidthsFloatW*(hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetClipBox*(hdc: HDC, lprect: LPRECT): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetClipRgn*(hdc: HDC, hrgn: HRGN): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetMetaRgn*(hdc: HDC, hrgn: HRGN): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCurrentObject*(hdc: HDC, `type`: UINT): HGDIOBJ {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCurrentPositionEx*(hdc: HDC, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetDeviceCaps*(hdc: HDC, index: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetDIBits*(hdc: HDC, hbm: HBITMAP, start: UINT, cLines: UINT, lpvBits: LPVOID, lpbmi: LPBITMAPINFO, usage: UINT): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetFontData*(hdc: HDC, dwTable: DWORD, dwOffset: DWORD, pvBuffer: PVOID, cjBuffer: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetGlyphOutlineA*(hdc: HDC, uChar: UINT, fuFormat: UINT, lpgm: LPGLYPHMETRICS, cjBuffer: DWORD, pvBuffer: LPVOID, lpmat2: ptr MAT2): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetGlyphOutlineW*(hdc: HDC, uChar: UINT, fuFormat: UINT, lpgm: LPGLYPHMETRICS, cjBuffer: DWORD, pvBuffer: LPVOID, lpmat2: ptr MAT2): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetBitmapBits*(
+  hbit: HBITMAP, cb: LONG, lpvBits: LPVOID
+): LONG {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetBitmapDimensionEx*(
+  hbit: HBITMAP, lpsize: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetBoundsRect*(
+  hdc: HDC, lprect: LPRECT, flags: UINT
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetBrushOrgEx*(
+  hdc: HDC, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharWidthA*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharWidthW*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharWidth32A*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharWidth32W*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharWidthFloatA*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharWidthFloatW*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharABCWidthsA*(
+  hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharABCWidthsW*(
+  hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharABCWidthsFloatA*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharABCWidthsFloatW*(
+  hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetClipBox*(
+  hdc: HDC, lprect: LPRECT
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetClipRgn*(
+  hdc: HDC, hrgn: HRGN
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetMetaRgn*(
+  hdc: HDC, hrgn: HRGN
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCurrentObject*(
+  hdc: HDC, `type`: UINT
+): HGDIOBJ {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCurrentPositionEx*(
+  hdc: HDC, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetDeviceCaps*(
+  hdc: HDC, index: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetDIBits*(
+  hdc: HDC,
+  hbm: HBITMAP,
+  start: UINT,
+  cLines: UINT,
+  lpvBits: LPVOID,
+  lpbmi: LPBITMAPINFO,
+  usage: UINT,
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetFontData*(
+  hdc: HDC, dwTable: DWORD, dwOffset: DWORD, pvBuffer: PVOID, cjBuffer: DWORD
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetGlyphOutlineA*(
+  hdc: HDC,
+  uChar: UINT,
+  fuFormat: UINT,
+  lpgm: LPGLYPHMETRICS,
+  cjBuffer: DWORD,
+  pvBuffer: LPVOID,
+  lpmat2: ptr MAT2,
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetGlyphOutlineW*(
+  hdc: HDC,
+  uChar: UINT,
+  fuFormat: UINT,
+  lpgm: LPGLYPHMETRICS,
+  cjBuffer: DWORD,
+  pvBuffer: LPVOID,
+  lpmat2: ptr MAT2,
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetGraphicsMode*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetMapMode*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetMetaFileBitsEx*(hMF: HMETAFILE, cbBuffer: UINT, lpData: LPVOID): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetMetaFileA*(lpName: LPCSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetMetaFileW*(lpName: LPCWSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetNearestColor*(hdc: HDC, color: COLORREF): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetNearestPaletteIndex*(h: HPALETTE, color: COLORREF): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetMetaFileBitsEx*(
+  hMF: HMETAFILE, cbBuffer: UINT, lpData: LPVOID
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetMetaFileA*(
+  lpName: LPCSTR
+): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetMetaFileW*(
+  lpName: LPCWSTR
+): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetNearestColor*(
+  hdc: HDC, color: COLORREF
+): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetNearestPaletteIndex*(
+  h: HPALETTE, color: COLORREF
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetObjectType*(h: HGDIOBJ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetOutlineTextMetricsA*(hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICA): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetOutlineTextMetricsW*(hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICW): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetPaletteEntries*(hpal: HPALETTE, iStart: UINT, cEntries: UINT, pPalEntries: LPPALETTEENTRY): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetPixel*(hdc: HDC, x: int32, y: int32): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetOutlineTextMetricsA*(
+  hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICA
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetOutlineTextMetricsW*(
+  hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICW
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetPaletteEntries*(
+  hpal: HPALETTE, iStart: UINT, cEntries: UINT, pPalEntries: LPPALETTEENTRY
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetPixel*(
+  hdc: HDC, x: int32, y: int32
+): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetPixelFormat*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetPolyFillMode*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetRasterizerCaps*(lpraststat: LPRASTERIZER_STATUS, cjBytes: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetRandomRgn*(hdc: HDC, hrgn: HRGN, i: INT): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetRegionData*(hrgn: HRGN, nCount: DWORD, lpRgnData: LPRGNDATA): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetRgnBox*(hrgn: HRGN, lprc: LPRECT): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetRasterizerCaps*(
+  lpraststat: LPRASTERIZER_STATUS, cjBytes: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetRandomRgn*(
+  hdc: HDC, hrgn: HRGN, i: INT
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetRegionData*(
+  hrgn: HRGN, nCount: DWORD, lpRgnData: LPRGNDATA
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetRgnBox*(
+  hrgn: HRGN, lprc: LPRECT
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetStockObject*(i: int32): HGDIOBJ {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetStretchBltMode*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetSystemPaletteEntries*(hdc: HDC, iStart: UINT, cEntries: UINT, pPalEntries: LPPALETTEENTRY): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetSystemPaletteEntries*(
+  hdc: HDC, iStart: UINT, cEntries: UINT, pPalEntries: LPPALETTEENTRY
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetSystemPaletteUse*(hdc: HDC): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextCharacterExtra*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetTextCharacterExtra*(
+  hdc: HDC
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetTextAlign*(hdc: HDC): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetTextColor*(hdc: HDC): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentPointA*(hdc: HDC, lpString: LPCSTR, c: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentPointW*(hdc: HDC, lpString: LPCWSTR, c: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentPoint32A*(hdc: HDC, lpString: LPCSTR, c: int32, psizl: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentPoint32W*(hdc: HDC, lpString: LPCWSTR, c: int32, psizl: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentExPointA*(hdc: HDC, lpszString: LPCSTR, cchString: int32, nMaxExtent: int32, lpnFit: LPINT, lpnDx: LPINT, lpSize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentExPointW*(hdc: HDC, lpszString: LPCWSTR, cchString: int32, nMaxExtent: int32, lpnFit: LPINT, lpnDx: LPINT, lpSize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetTextExtentPointA*(
+  hdc: HDC, lpString: LPCSTR, c: int32, lpsz: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextExtentPointW*(
+  hdc: HDC, lpString: LPCWSTR, c: int32, lpsz: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextExtentPoint32A*(
+  hdc: HDC, lpString: LPCSTR, c: int32, psizl: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextExtentPoint32W*(
+  hdc: HDC, lpString: LPCWSTR, c: int32, psizl: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextExtentExPointA*(
+  hdc: HDC,
+  lpszString: LPCSTR,
+  cchString: int32,
+  nMaxExtent: int32,
+  lpnFit: LPINT,
+  lpnDx: LPINT,
+  lpSize: LPSIZE,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextExtentExPointW*(
+  hdc: HDC,
+  lpszString: LPCWSTR,
+  cchString: int32,
+  nMaxExtent: int32,
+  lpnFit: LPINT,
+  lpnDx: LPINT,
+  lpSize: LPSIZE,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetTextCharset*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextCharsetInfo*(hdc: HDC, lpSig: LPFONTSIGNATURE, dwFlags: DWORD): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc TranslateCharsetInfo*(lpSrc: ptr DWORD, lpCs: LPCHARSETINFO, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetTextCharsetInfo*(
+  hdc: HDC, lpSig: LPFONTSIGNATURE, dwFlags: DWORD
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc TranslateCharsetInfo*(
+  lpSrc: ptr DWORD, lpCs: LPCHARSETINFO, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetFontLanguageInfo*(hdc: HDC): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharacterPlacementA*(hdc: HDC, lpString: LPCSTR, nCount: int32, nMexExtent: int32, lpResults: LPGCP_RESULTSA, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharacterPlacementW*(hdc: HDC, lpString: LPCWSTR, nCount: int32, nMexExtent: int32, lpResults: LPGCP_RESULTSW, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetFontUnicodeRanges*(hdc: HDC, lpgs: LPGLYPHSET): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetGlyphIndicesA*(hdc: HDC, lpstr: LPCSTR, c: int32, pgi: LPWORD, fl: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetGlyphIndicesW*(hdc: HDC, lpstr: LPCWSTR, c: int32, pgi: LPWORD, fl: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentPointI*(hdc: HDC, pgiIn: LPWORD, cgi: int32, psize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextExtentExPointI*(hdc: HDC, lpwszString: LPWORD, cwchString: int32, nMaxExtent: int32, lpnFit: LPINT, lpnDx: LPINT, lpSize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharWidthI*(hdc: HDC, giFirst: UINT, cgi: UINT, pgi: LPWORD, piWidths: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetCharABCWidthsI*(hdc: HDC, giFirst: UINT, cgi: UINT, pgi: LPWORD, pabc: LPABC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc AddFontResourceExA*(name: LPCSTR, fl: DWORD, res: PVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc AddFontResourceExW*(name: LPCWSTR, fl: DWORD, res: PVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RemoveFontResourceExA*(name: LPCSTR, fl: DWORD, pdv: PVOID): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RemoveFontResourceExW*(name: LPCWSTR, fl: DWORD, pdv: PVOID): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc AddFontMemResourceEx*(pFileView: PVOID, cjSize: DWORD, pvResrved: PVOID, pNumFonts: ptr DWORD): HANDLE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RemoveFontMemResourceEx*(h: HANDLE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateFontIndirectExA*(P1: ptr ENUMLOGFONTEXDVA): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateFontIndirectExW*(P1: ptr ENUMLOGFONTEXDVW): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetViewportExtEx*(hdc: HDC, lpsize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetViewportOrgEx*(hdc: HDC, lppoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetWindowExtEx*(hdc: HDC, lpsize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetWindowOrgEx*(hdc: HDC, lppoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc IntersectClipRect*(hdc: HDC, left: int32, top: int32, right: int32, bottom: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc InvertRgn*(hdc: HDC, hrgn: HRGN): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc LineDDA*(xStart: int32, yStart: int32, xEnd: int32, yEnd: int32, lpProc: LINEDDAPROC, data: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc LineTo*(hdc: HDC, x: int32, y: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc MaskBlt*(hdcDest: HDC, xDest: int32, yDest: int32, width: int32, height: int32, hdcSrc: HDC, xSrc: int32, ySrc: int32, hbmMask: HBITMAP, xMask: int32, yMask: int32, rop: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PlgBlt*(hdcDest: HDC, lpPoint: ptr POINT, hdcSrc: HDC, xSrc: int32, ySrc: int32, width: int32, height: int32, hbmMask: HBITMAP, xMask: int32, yMask: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc OffsetClipRgn*(hdc: HDC, x: int32, y: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc OffsetRgn*(hrgn: HRGN, x: int32, y: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PatBlt*(hdc: HDC, x: int32, y: int32, w: int32, h: int32, rop: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Pie*(hdc: HDC, left: int32, top: int32, right: int32, bottom: int32, xr1: int32, yr1: int32, xr2: int32, yr2: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PlayMetaFile*(hdc: HDC, hmf: HMETAFILE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PaintRgn*(hdc: HDC, hrgn: HRGN): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolyPolygon*(hdc: HDC, apt: ptr POINT, asz: ptr INT, csz: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PtInRegion*(hrgn: HRGN, x: int32, y: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PtVisible*(hdc: HDC, x: int32, y: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RectInRegion*(hrgn: HRGN, lprect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RectVisible*(hdc: HDC, lprect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Rectangle*(hdc: HDC, left: int32, top: int32, right: int32, bottom: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RestoreDC*(hdc: HDC, nSavedDC: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ResetDCA*(hdc: HDC, lpdm: ptr DEVMODEA): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ResetDCW*(hdc: HDC, lpdm: ptr DEVMODEW): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetCharacterPlacementA*(
+  hdc: HDC,
+  lpString: LPCSTR,
+  nCount: int32,
+  nMexExtent: int32,
+  lpResults: LPGCP_RESULTSA,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharacterPlacementW*(
+  hdc: HDC,
+  lpString: LPCWSTR,
+  nCount: int32,
+  nMexExtent: int32,
+  lpResults: LPGCP_RESULTSW,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetFontUnicodeRanges*(
+  hdc: HDC, lpgs: LPGLYPHSET
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetGlyphIndicesA*(
+  hdc: HDC, lpstr: LPCSTR, c: int32, pgi: LPWORD, fl: DWORD
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetGlyphIndicesW*(
+  hdc: HDC, lpstr: LPCWSTR, c: int32, pgi: LPWORD, fl: DWORD
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextExtentPointI*(
+  hdc: HDC, pgiIn: LPWORD, cgi: int32, psize: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextExtentExPointI*(
+  hdc: HDC,
+  lpwszString: LPWORD,
+  cwchString: int32,
+  nMaxExtent: int32,
+  lpnFit: LPINT,
+  lpnDx: LPINT,
+  lpSize: LPSIZE,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharWidthI*(
+  hdc: HDC, giFirst: UINT, cgi: UINT, pgi: LPWORD, piWidths: LPINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetCharABCWidthsI*(
+  hdc: HDC, giFirst: UINT, cgi: UINT, pgi: LPWORD, pabc: LPABC
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc AddFontResourceExA*(
+  name: LPCSTR, fl: DWORD, res: PVOID
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc AddFontResourceExW*(
+  name: LPCWSTR, fl: DWORD, res: PVOID
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RemoveFontResourceExA*(
+  name: LPCSTR, fl: DWORD, pdv: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RemoveFontResourceExW*(
+  name: LPCWSTR, fl: DWORD, pdv: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc AddFontMemResourceEx*(
+  pFileView: PVOID, cjSize: DWORD, pvResrved: PVOID, pNumFonts: ptr DWORD
+): HANDLE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RemoveFontMemResourceEx*(
+  h: HANDLE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateFontIndirectExA*(
+  P1: ptr ENUMLOGFONTEXDVA
+): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateFontIndirectExW*(
+  P1: ptr ENUMLOGFONTEXDVW
+): HFONT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetViewportExtEx*(
+  hdc: HDC, lpsize: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetViewportOrgEx*(
+  hdc: HDC, lppoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetWindowExtEx*(
+  hdc: HDC, lpsize: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetWindowOrgEx*(
+  hdc: HDC, lppoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc IntersectClipRect*(
+  hdc: HDC, left: int32, top: int32, right: int32, bottom: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc InvertRgn*(
+  hdc: HDC, hrgn: HRGN
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc LineDDA*(
+  xStart: int32,
+  yStart: int32,
+  xEnd: int32,
+  yEnd: int32,
+  lpProc: LINEDDAPROC,
+  data: LPARAM,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc LineTo*(
+  hdc: HDC, x: int32, y: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc MaskBlt*(
+  hdcDest: HDC,
+  xDest: int32,
+  yDest: int32,
+  width: int32,
+  height: int32,
+  hdcSrc: HDC,
+  xSrc: int32,
+  ySrc: int32,
+  hbmMask: HBITMAP,
+  xMask: int32,
+  yMask: int32,
+  rop: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PlgBlt*(
+  hdcDest: HDC,
+  lpPoint: ptr POINT,
+  hdcSrc: HDC,
+  xSrc: int32,
+  ySrc: int32,
+  width: int32,
+  height: int32,
+  hbmMask: HBITMAP,
+  xMask: int32,
+  yMask: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc OffsetClipRgn*(
+  hdc: HDC, x: int32, y: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc OffsetRgn*(
+  hrgn: HRGN, x: int32, y: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PatBlt*(
+  hdc: HDC, x: int32, y: int32, w: int32, h: int32, rop: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc Pie*(
+  hdc: HDC,
+  left: int32,
+  top: int32,
+  right: int32,
+  bottom: int32,
+  xr1: int32,
+  yr1: int32,
+  xr2: int32,
+  yr2: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PlayMetaFile*(
+  hdc: HDC, hmf: HMETAFILE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PaintRgn*(
+  hdc: HDC, hrgn: HRGN
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PolyPolygon*(
+  hdc: HDC, apt: ptr POINT, asz: ptr INT, csz: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PtInRegion*(
+  hrgn: HRGN, x: int32, y: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PtVisible*(
+  hdc: HDC, x: int32, y: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RectInRegion*(
+  hrgn: HRGN, lprect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RectVisible*(
+  hdc: HDC, lprect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc Rectangle*(
+  hdc: HDC, left: int32, top: int32, right: int32, bottom: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RestoreDC*(
+  hdc: HDC, nSavedDC: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ResetDCA*(
+  hdc: HDC, lpdm: ptr DEVMODEA
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ResetDCW*(
+  hdc: HDC, lpdm: ptr DEVMODEW
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc RealizePalette*(hdc: HDC): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RemoveFontResourceA*(lpFileName: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RemoveFontResourceW*(lpFileName: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc RoundRect*(hdc: HDC, left: int32, top: int32, right: int32, bottom: int32, width: int32, height: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ResizePalette*(hpal: HPALETTE, n: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc RemoveFontResourceA*(
+  lpFileName: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RemoveFontResourceW*(
+  lpFileName: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc RoundRect*(
+  hdc: HDC,
+  left: int32,
+  top: int32,
+  right: int32,
+  bottom: int32,
+  width: int32,
+  height: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ResizePalette*(
+  hpal: HPALETTE, n: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc SaveDC*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SelectClipRgn*(hdc: HDC, hrgn: HRGN): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExtSelectClipRgn*(hdc: HDC, hrgn: HRGN, mode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc SelectClipRgn*(
+  hdc: HDC, hrgn: HRGN
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ExtSelectClipRgn*(
+  hdc: HDC, hrgn: HRGN, mode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc SetMetaRgn*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SelectObject*(hdc: HDC, h: HGDIOBJ): HGDIOBJ {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SelectPalette*(hdc: HDC, hPal: HPALETTE, bForceBkgd: WINBOOL): HPALETTE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetBkColor*(hdc: HDC, color: COLORREF): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetDCBrushColor*(hdc: HDC, color: COLORREF): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetDCPenColor*(hdc: HDC, color: COLORREF): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetBkMode*(hdc: HDC, mode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetBitmapBits*(hbm: HBITMAP, cb: DWORD, pvBits: pointer): LONG {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetBoundsRect*(hdc: HDC, lprect: ptr RECT, flags: UINT): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetDIBits*(hdc: HDC, hbm: HBITMAP, start: UINT, cLines: UINT, lpBits: pointer, lpbmi: ptr BITMAPINFO, ColorUse: UINT): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetDIBitsToDevice*(hdc: HDC, xDest: int32, yDest: int32, w: DWORD, h: DWORD, xSrc: int32, ySrc: int32, StartScan: UINT, cLines: UINT, lpvBits: pointer, lpbmi: ptr BITMAPINFO, ColorUse: UINT): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetMapperFlags*(hdc: HDC, flags: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetGraphicsMode*(hdc: HDC, iMode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetMapMode*(hdc: HDC, iMode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc SelectObject*(
+  hdc: HDC, h: HGDIOBJ
+): HGDIOBJ {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SelectPalette*(
+  hdc: HDC, hPal: HPALETTE, bForceBkgd: WINBOOL
+): HPALETTE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetBkColor*(
+  hdc: HDC, color: COLORREF
+): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetDCBrushColor*(
+  hdc: HDC, color: COLORREF
+): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetDCPenColor*(
+  hdc: HDC, color: COLORREF
+): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetBkMode*(
+  hdc: HDC, mode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetBitmapBits*(
+  hbm: HBITMAP, cb: DWORD, pvBits: pointer
+): LONG {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetBoundsRect*(
+  hdc: HDC, lprect: ptr RECT, flags: UINT
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetDIBits*(
+  hdc: HDC,
+  hbm: HBITMAP,
+  start: UINT,
+  cLines: UINT,
+  lpBits: pointer,
+  lpbmi: ptr BITMAPINFO,
+  ColorUse: UINT,
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetDIBitsToDevice*(
+  hdc: HDC,
+  xDest: int32,
+  yDest: int32,
+  w: DWORD,
+  h: DWORD,
+  xSrc: int32,
+  ySrc: int32,
+  StartScan: UINT,
+  cLines: UINT,
+  lpvBits: pointer,
+  lpbmi: ptr BITMAPINFO,
+  ColorUse: UINT,
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetMapperFlags*(
+  hdc: HDC, flags: DWORD
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetGraphicsMode*(
+  hdc: HDC, iMode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetMapMode*(
+  hdc: HDC, iMode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc SetLayout*(hdc: HDC, l: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GetLayout*(hdc: HDC): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetMetaFileBitsEx*(cbBuffer: UINT, lpData: ptr BYTE): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetPaletteEntries*(hpal: HPALETTE, iStart: UINT, cEntries: UINT, pPalEntries: ptr PALETTEENTRY): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetPixel*(hdc: HDC, x: int32, y: int32, color: COLORREF): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetPixelV*(hdc: HDC, x: int32, y: int32, color: COLORREF): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetPixelFormat*(hdc: HDC, format: int32, ppfd: ptr PIXELFORMATDESCRIPTOR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetPolyFillMode*(hdc: HDC, mode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc StretchBlt*(hdcDest: HDC, xDest: int32, yDest: int32, wDest: int32, hDest: int32, hdcSrc: HDC, xSrc: int32, ySrc: int32, wSrc: int32, hSrc: int32, rop: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetRectRgn*(hrgn: HRGN, left: int32, top: int32, right: int32, bottom: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc StretchDIBits*(hdc: HDC, xDest: int32, yDest: int32, DestWidth: int32, DestHeight: int32, xSrc: int32, ySrc: int32, SrcWidth: int32, SrcHeight: int32, lpBits: pointer, lpbmi: ptr BITMAPINFO, iUsage: UINT, rop: DWORD): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetROP2*(hdc: HDC, rop2: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetStretchBltMode*(hdc: HDC, mode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetSystemPaletteUse*(hdc: HDC, use: UINT): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetTextCharacterExtra*(hdc: HDC, extra: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetTextColor*(hdc: HDC, color: COLORREF): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetTextAlign*(hdc: HDC, align: UINT): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetTextJustification*(hdc: HDC, extra: int32, count: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc SetMetaFileBitsEx*(
+  cbBuffer: UINT, lpData: ptr BYTE
+): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetPaletteEntries*(
+  hpal: HPALETTE, iStart: UINT, cEntries: UINT, pPalEntries: ptr PALETTEENTRY
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetPixel*(
+  hdc: HDC, x: int32, y: int32, color: COLORREF
+): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetPixelV*(
+  hdc: HDC, x: int32, y: int32, color: COLORREF
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetPixelFormat*(
+  hdc: HDC, format: int32, ppfd: ptr PIXELFORMATDESCRIPTOR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetPolyFillMode*(
+  hdc: HDC, mode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc StretchBlt*(
+  hdcDest: HDC,
+  xDest: int32,
+  yDest: int32,
+  wDest: int32,
+  hDest: int32,
+  hdcSrc: HDC,
+  xSrc: int32,
+  ySrc: int32,
+  wSrc: int32,
+  hSrc: int32,
+  rop: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetRectRgn*(
+  hrgn: HRGN, left: int32, top: int32, right: int32, bottom: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc StretchDIBits*(
+  hdc: HDC,
+  xDest: int32,
+  yDest: int32,
+  DestWidth: int32,
+  DestHeight: int32,
+  xSrc: int32,
+  ySrc: int32,
+  SrcWidth: int32,
+  SrcHeight: int32,
+  lpBits: pointer,
+  lpbmi: ptr BITMAPINFO,
+  iUsage: UINT,
+  rop: DWORD,
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetROP2*(
+  hdc: HDC, rop2: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetStretchBltMode*(
+  hdc: HDC, mode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetSystemPaletteUse*(
+  hdc: HDC, use: UINT
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetTextCharacterExtra*(
+  hdc: HDC, extra: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetTextColor*(
+  hdc: HDC, color: COLORREF
+): COLORREF {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetTextAlign*(
+  hdc: HDC, align: UINT
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetTextJustification*(
+  hdc: HDC, extra: int32, count: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc UpdateColors*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc AlphaBlend*(hdcDest: HDC, xoriginDest: int32, yoriginDest: int32, wDest: int32, hDest: int32, hdcSrc: HDC, xoriginSrc: int32, yoriginSrc: int32, wSrc: int32, hSrc: int32, ftn: BLENDFUNCTION): WINBOOL {.winapi, stdcall, dynlib: "msimg32", importc.}
-proc GdiAlphaBlend*(hdcDest: HDC, xoriginDest: int32, yoriginDest: int32, wDest: int32, hDest: int32, hdcSrc: HDC, xoriginSrc: int32, yoriginSrc: int32, wSrc: int32, hSrc: int32, ftn: BLENDFUNCTION): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc TransparentBlt*(hdcDest: HDC, xoriginDest: int32, yoriginDest: int32, wDest: int32, hDest: int32, hdcSrc: HDC, xoriginSrc: int32, yoriginSrc: int32, wSrc: int32, hSrc: int32, crTransparent: UINT): WINBOOL {.winapi, stdcall, dynlib: "msimg32", importc.}
-proc GdiTransparentBlt*(hdcDest: HDC, xoriginDest: int32, yoriginDest: int32, wDest: int32, hDest: int32, hdcSrc: HDC, xoriginSrc: int32, yoriginSrc: int32, wSrc: int32, hSrc: int32, crTransparent: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GradientFill*(hdc: HDC, pVertex: PTRIVERTEX, nVertex: ULONG, pMesh: PVOID, nMesh: ULONG, ulMode: ULONG): WINBOOL {.winapi, stdcall, dynlib: "msimg32", importc.}
-proc GdiGradientFill*(hdc: HDC, pVertex: PTRIVERTEX, nVertex: ULONG, pMesh: PVOID, nMesh: ULONG, ulMode: ULONG): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PlayMetaFileRecord*(hdc: HDC, lpHandleTable: LPHANDLETABLE, lpMR: LPMETARECORD, noObjs: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumMetaFile*(hdc: HDC, hmf: HMETAFILE, lpProc: MFENUMPROC, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CloseEnhMetaFile*(hdc: HDC): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CopyEnhMetaFileA*(hEnh: HENHMETAFILE, lpFileName: LPCSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CopyEnhMetaFileW*(hEnh: HENHMETAFILE, lpFileName: LPCWSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateEnhMetaFileA*(hdc: HDC, lpFilename: LPCSTR, lprc: ptr RECT, lpDesc: LPCSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateEnhMetaFileW*(hdc: HDC, lpFilename: LPCWSTR, lprc: ptr RECT, lpDesc: LPCWSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc DeleteEnhMetaFile*(hmf: HENHMETAFILE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumEnhMetaFile*(hdc: HDC, hmf: HENHMETAFILE, lpProc: ENHMFENUMPROC, lpParam: LPVOID, lpRect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFileA*(lpName: LPCSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFileW*(lpName: LPCWSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFileBits*(hEMF: HENHMETAFILE, nSize: UINT, lpData: LPBYTE): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFileDescriptionA*(hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPSTR): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFileDescriptionW*(hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPWSTR): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFileHeader*(hemf: HENHMETAFILE, nSize: UINT, lpEnhMetaHeader: LPENHMETAHEADER): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFilePaletteEntries*(hemf: HENHMETAFILE, nNumEntries: UINT, lpPaletteEntries: LPPALETTEENTRY): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetEnhMetaFilePixelFormat*(hemf: HENHMETAFILE, cbBuffer: UINT, ppfd: ptr PIXELFORMATDESCRIPTOR): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetWinMetaFileBits*(hemf: HENHMETAFILE, cbData16: UINT, pData16: LPBYTE, iMapMode: INT, hdcRef: HDC): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PlayEnhMetaFile*(hdc: HDC, hmf: HENHMETAFILE, lprect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PlayEnhMetaFileRecord*(hdc: HDC, pht: LPHANDLETABLE, pmr: ptr ENHMETARECORD, cht: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetEnhMetaFileBits*(nSize: UINT, pb: ptr BYTE): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetWinMetaFileBits*(nSize: UINT, lpMeta16Data: ptr BYTE, hdcRef: HDC, lpMFP: ptr METAFILEPICT): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GdiComment*(hdc: HDC, nSize: UINT, lpData: ptr BYTE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextMetricsA*(hdc: HDC, lptm: LPTEXTMETRICA): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextMetricsW*(hdc: HDC, lptm: LPTEXTMETRICW): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc AngleArc*(hdc: HDC, x: int32, y: int32, r: DWORD, StartAngle: FLOAT, SweepAngle: FLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolyPolyline*(hdc: HDC, apt: ptr POINT, asz: ptr DWORD, csz: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetWorldTransform*(hdc: HDC, lpxf: LPXFORM): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetWorldTransform*(hdc: HDC, lpxf: ptr XFORM): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ModifyWorldTransform*(hdc: HDC, lpxf: ptr XFORM, mode: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CombineTransform*(lpxfOut: LPXFORM, lpxf1: ptr XFORM, lpxf2: ptr XFORM): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateDIBSection*(hdc: HDC, lpbmi: ptr BITMAPINFO, usage: UINT, ppvBits: ptr pointer, hSection: HANDLE, offset: DWORD): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetDIBColorTable*(hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ptr RGBQUAD): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetDIBColorTable*(hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ptr RGBQUAD): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetColorAdjustment*(hdc: HDC, lpca: ptr COLORADJUSTMENT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetColorAdjustment*(hdc: HDC, lpca: LPCOLORADJUSTMENT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateHalftonePalette*(hdc: HDC): HPALETTE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc StartDocA*(hdc: HDC, lpdi: ptr DOCINFOA): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc StartDocW*(hdc: HDC, lpdi: ptr DOCINFOW): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc AlphaBlend*(
+  hdcDest: HDC,
+  xoriginDest: int32,
+  yoriginDest: int32,
+  wDest: int32,
+  hDest: int32,
+  hdcSrc: HDC,
+  xoriginSrc: int32,
+  yoriginSrc: int32,
+  wSrc: int32,
+  hSrc: int32,
+  ftn: BLENDFUNCTION,
+): WINBOOL {.winapi, stdcall, dynlib: "msimg32", importc.}
+
+proc GdiAlphaBlend*(
+  hdcDest: HDC,
+  xoriginDest: int32,
+  yoriginDest: int32,
+  wDest: int32,
+  hDest: int32,
+  hdcSrc: HDC,
+  xoriginSrc: int32,
+  yoriginSrc: int32,
+  wSrc: int32,
+  hSrc: int32,
+  ftn: BLENDFUNCTION,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc TransparentBlt*(
+  hdcDest: HDC,
+  xoriginDest: int32,
+  yoriginDest: int32,
+  wDest: int32,
+  hDest: int32,
+  hdcSrc: HDC,
+  xoriginSrc: int32,
+  yoriginSrc: int32,
+  wSrc: int32,
+  hSrc: int32,
+  crTransparent: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "msimg32", importc.}
+
+proc GdiTransparentBlt*(
+  hdcDest: HDC,
+  xoriginDest: int32,
+  yoriginDest: int32,
+  wDest: int32,
+  hDest: int32,
+  hdcSrc: HDC,
+  xoriginSrc: int32,
+  yoriginSrc: int32,
+  wSrc: int32,
+  hSrc: int32,
+  crTransparent: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GradientFill*(
+  hdc: HDC,
+  pVertex: PTRIVERTEX,
+  nVertex: ULONG,
+  pMesh: PVOID,
+  nMesh: ULONG,
+  ulMode: ULONG,
+): WINBOOL {.winapi, stdcall, dynlib: "msimg32", importc.}
+
+proc GdiGradientFill*(
+  hdc: HDC,
+  pVertex: PTRIVERTEX,
+  nVertex: ULONG,
+  pMesh: PVOID,
+  nMesh: ULONG,
+  ulMode: ULONG,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PlayMetaFileRecord*(
+  hdc: HDC, lpHandleTable: LPHANDLETABLE, lpMR: LPMETARECORD, noObjs: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumMetaFile*(
+  hdc: HDC, hmf: HMETAFILE, lpProc: MFENUMPROC, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CloseEnhMetaFile*(
+  hdc: HDC
+): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CopyEnhMetaFileA*(
+  hEnh: HENHMETAFILE, lpFileName: LPCSTR
+): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CopyEnhMetaFileW*(
+  hEnh: HENHMETAFILE, lpFileName: LPCWSTR
+): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateEnhMetaFileA*(
+  hdc: HDC, lpFilename: LPCSTR, lprc: ptr RECT, lpDesc: LPCSTR
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateEnhMetaFileW*(
+  hdc: HDC, lpFilename: LPCWSTR, lprc: ptr RECT, lpDesc: LPCWSTR
+): HDC {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc DeleteEnhMetaFile*(
+  hmf: HENHMETAFILE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumEnhMetaFile*(
+  hdc: HDC, hmf: HENHMETAFILE, lpProc: ENHMFENUMPROC, lpParam: LPVOID, lpRect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFileA*(
+  lpName: LPCSTR
+): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFileW*(
+  lpName: LPCWSTR
+): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFileBits*(
+  hEMF: HENHMETAFILE, nSize: UINT, lpData: LPBYTE
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFileDescriptionA*(
+  hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPSTR
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFileDescriptionW*(
+  hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPWSTR
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFileHeader*(
+  hemf: HENHMETAFILE, nSize: UINT, lpEnhMetaHeader: LPENHMETAHEADER
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFilePaletteEntries*(
+  hemf: HENHMETAFILE, nNumEntries: UINT, lpPaletteEntries: LPPALETTEENTRY
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetEnhMetaFilePixelFormat*(
+  hemf: HENHMETAFILE, cbBuffer: UINT, ppfd: ptr PIXELFORMATDESCRIPTOR
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetWinMetaFileBits*(
+  hemf: HENHMETAFILE, cbData16: UINT, pData16: LPBYTE, iMapMode: INT, hdcRef: HDC
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PlayEnhMetaFile*(
+  hdc: HDC, hmf: HENHMETAFILE, lprect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PlayEnhMetaFileRecord*(
+  hdc: HDC, pht: LPHANDLETABLE, pmr: ptr ENHMETARECORD, cht: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetEnhMetaFileBits*(
+  nSize: UINT, pb: ptr BYTE
+): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetWinMetaFileBits*(
+  nSize: UINT, lpMeta16Data: ptr BYTE, hdcRef: HDC, lpMFP: ptr METAFILEPICT
+): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GdiComment*(
+  hdc: HDC, nSize: UINT, lpData: ptr BYTE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextMetricsA*(
+  hdc: HDC, lptm: LPTEXTMETRICA
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextMetricsW*(
+  hdc: HDC, lptm: LPTEXTMETRICW
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc AngleArc*(
+  hdc: HDC, x: int32, y: int32, r: DWORD, StartAngle: FLOAT, SweepAngle: FLOAT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PolyPolyline*(
+  hdc: HDC, apt: ptr POINT, asz: ptr DWORD, csz: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetWorldTransform*(
+  hdc: HDC, lpxf: LPXFORM
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetWorldTransform*(
+  hdc: HDC, lpxf: ptr XFORM
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ModifyWorldTransform*(
+  hdc: HDC, lpxf: ptr XFORM, mode: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CombineTransform*(
+  lpxfOut: LPXFORM, lpxf1: ptr XFORM, lpxf2: ptr XFORM
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateDIBSection*(
+  hdc: HDC,
+  lpbmi: ptr BITMAPINFO,
+  usage: UINT,
+  ppvBits: ptr pointer,
+  hSection: HANDLE,
+  offset: DWORD,
+): HBITMAP {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetDIBColorTable*(
+  hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ptr RGBQUAD
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetDIBColorTable*(
+  hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ptr RGBQUAD
+): UINT {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetColorAdjustment*(
+  hdc: HDC, lpca: ptr COLORADJUSTMENT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetColorAdjustment*(
+  hdc: HDC, lpca: LPCOLORADJUSTMENT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateHalftonePalette*(
+  hdc: HDC
+): HPALETTE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc StartDocA*(
+  hdc: HDC, lpdi: ptr DOCINFOA
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc StartDocW*(
+  hdc: HDC, lpdi: ptr DOCINFOW
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc EndDoc*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc StartPage*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc EndPage*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc AbortDoc*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetAbortProc*(hdc: HDC, lpProc: ABORTPROC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc SetAbortProc*(
+  hdc: HDC, lpProc: ABORTPROC
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc AbortPath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ArcTo*(hdc: HDC, left: int32, top: int32, right: int32, bottom: int32, xr1: int32, yr1: int32, xr2: int32, yr2: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc ArcTo*(
+  hdc: HDC,
+  left: int32,
+  top: int32,
+  right: int32,
+  bottom: int32,
+  xr1: int32,
+  yr1: int32,
+  xr2: int32,
+  yr2: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc BeginPath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc CloseFigure*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc EndPath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc FillPath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc FlattenPath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetPath*(hdc: HDC, apt: LPPOINT, aj: LPBYTE, cpt: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetPath*(
+  hdc: HDC, apt: LPPOINT, aj: LPBYTE, cpt: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc PathToRegion*(hdc: HDC): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolyDraw*(hdc: HDC, apt: ptr POINT, aj: ptr BYTE, cpt: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SelectClipPath*(hdc: HDC, mode: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetArcDirection*(hdc: HDC, dir: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetMiterLimit*(hdc: HDC, limit: FLOAT, old: PFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc PolyDraw*(
+  hdc: HDC, apt: ptr POINT, aj: ptr BYTE, cpt: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SelectClipPath*(
+  hdc: HDC, mode: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetArcDirection*(
+  hdc: HDC, dir: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetMiterLimit*(
+  hdc: HDC, limit: FLOAT, old: PFLOAT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc StrokeAndFillPath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc StrokePath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc WidenPath*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExtCreatePen*(iPenStyle: DWORD, cWidth: DWORD, plbrush: ptr LOGBRUSH, cStyle: DWORD, pstyle: ptr DWORD): HPEN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetMiterLimit*(hdc: HDC, plimit: PFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc ExtCreatePen*(
+  iPenStyle: DWORD,
+  cWidth: DWORD,
+  plbrush: ptr LOGBRUSH,
+  cStyle: DWORD,
+  pstyle: ptr DWORD,
+): HPEN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetMiterLimit*(
+  hdc: HDC, plimit: PFLOAT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetArcDirection*(hdc: HDC): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetObjectA*(h: HANDLE, c: int32, pv: LPVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetObjectW*(h: HANDLE, c: int32, pv: LPVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc MoveToEx*(hdc: HDC, x: int32, y: int32, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc TextOutA*(hdc: HDC, x: int32, y: int32, lpString: LPCSTR, c: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc TextOutW*(hdc: HDC, x: int32, y: int32, lpString: LPCWSTR, c: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExtTextOutA*(hdc: HDC, x: int32, y: int32, options: UINT, lprect: ptr RECT, lpString: LPCSTR, c: UINT, lpDx: ptr INT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ExtTextOutW*(hdc: HDC, x: int32, y: int32, options: UINT, lprect: ptr RECT, lpString: LPCWSTR, c: UINT, lpDx: ptr INT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolyTextOutA*(hdc: HDC, ppt: ptr POLYTEXTA, nstrings: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolyTextOutW*(hdc: HDC, ppt: ptr POLYTEXTW, nstrings: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreatePolygonRgn*(pptl: ptr POINT, cPoint: int32, iMode: int32): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc DPtoLP*(hdc: HDC, lppt: LPPOINT, c: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc LPtoDP*(hdc: HDC, lppt: LPPOINT, c: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Polygon*(hdc: HDC, apt: ptr POINT, cpt: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc Polyline*(hdc: HDC, apt: ptr POINT, cpt: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolyBezier*(hdc: HDC, apt: ptr POINT, cpt: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolyBezierTo*(hdc: HDC, apt: ptr POINT, cpt: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc PolylineTo*(hdc: HDC, apt: ptr POINT, cpt: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetViewportExtEx*(hdc: HDC, x: int32, y: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetViewportOrgEx*(hdc: HDC, x: int32, y: int32, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetWindowExtEx*(hdc: HDC, x: int32, y: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetWindowOrgEx*(hdc: HDC, x: int32, y: int32, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc OffsetViewportOrgEx*(hdc: HDC, x: int32, y: int32, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc OffsetWindowOrgEx*(hdc: HDC, x: int32, y: int32, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ScaleViewportExtEx*(hdc: HDC, xn: int32, dx: int32, yn: int32, yd: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ScaleWindowExtEx*(hdc: HDC, xn: int32, xd: int32, yn: int32, yd: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetBitmapDimensionEx*(hbm: HBITMAP, w: int32, h: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetBrushOrgEx*(hdc: HDC, x: int32, y: int32, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextFaceA*(hdc: HDC, c: int32, lpName: LPSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetTextFaceW*(hdc: HDC, c: int32, lpName: LPWSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetKerningPairsA*(hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetKerningPairsW*(hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetDCOrgEx*(hdc: HDC, lppt: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc FixBrushOrgEx*(hdc: HDC, x: int32, y: int32, ptl: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc GetObjectA*(
+  h: HANDLE, c: int32, pv: LPVOID
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetObjectW*(
+  h: HANDLE, c: int32, pv: LPVOID
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc MoveToEx*(
+  hdc: HDC, x: int32, y: int32, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc TextOutA*(
+  hdc: HDC, x: int32, y: int32, lpString: LPCSTR, c: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc TextOutW*(
+  hdc: HDC, x: int32, y: int32, lpString: LPCWSTR, c: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ExtTextOutA*(
+  hdc: HDC,
+  x: int32,
+  y: int32,
+  options: UINT,
+  lprect: ptr RECT,
+  lpString: LPCSTR,
+  c: UINT,
+  lpDx: ptr INT,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ExtTextOutW*(
+  hdc: HDC,
+  x: int32,
+  y: int32,
+  options: UINT,
+  lprect: ptr RECT,
+  lpString: LPCWSTR,
+  c: UINT,
+  lpDx: ptr INT,
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PolyTextOutA*(
+  hdc: HDC, ppt: ptr POLYTEXTA, nstrings: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PolyTextOutW*(
+  hdc: HDC, ppt: ptr POLYTEXTW, nstrings: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreatePolygonRgn*(
+  pptl: ptr POINT, cPoint: int32, iMode: int32
+): HRGN {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc DPtoLP*(
+  hdc: HDC, lppt: LPPOINT, c: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc LPtoDP*(
+  hdc: HDC, lppt: LPPOINT, c: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc Polygon*(
+  hdc: HDC, apt: ptr POINT, cpt: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc Polyline*(
+  hdc: HDC, apt: ptr POINT, cpt: int32
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PolyBezier*(
+  hdc: HDC, apt: ptr POINT, cpt: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PolyBezierTo*(
+  hdc: HDC, apt: ptr POINT, cpt: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc PolylineTo*(
+  hdc: HDC, apt: ptr POINT, cpt: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetViewportExtEx*(
+  hdc: HDC, x: int32, y: int32, lpsz: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetViewportOrgEx*(
+  hdc: HDC, x: int32, y: int32, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetWindowExtEx*(
+  hdc: HDC, x: int32, y: int32, lpsz: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetWindowOrgEx*(
+  hdc: HDC, x: int32, y: int32, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc OffsetViewportOrgEx*(
+  hdc: HDC, x: int32, y: int32, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc OffsetWindowOrgEx*(
+  hdc: HDC, x: int32, y: int32, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ScaleViewportExtEx*(
+  hdc: HDC, xn: int32, dx: int32, yn: int32, yd: int32, lpsz: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ScaleWindowExtEx*(
+  hdc: HDC, xn: int32, xd: int32, yn: int32, yd: int32, lpsz: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetBitmapDimensionEx*(
+  hbm: HBITMAP, w: int32, h: int32, lpsz: LPSIZE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetBrushOrgEx*(
+  hdc: HDC, x: int32, y: int32, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextFaceA*(
+  hdc: HDC, c: int32, lpName: LPSTR
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetTextFaceW*(
+  hdc: HDC, c: int32, lpName: LPWSTR
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetKerningPairsA*(
+  hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetKerningPairsW*(
+  hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR
+): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetDCOrgEx*(
+  hdc: HDC, lppt: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc FixBrushOrgEx*(
+  hdc: HDC, x: int32, y: int32, ptl: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc UnrealizeObject*(h: HGDIOBJ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GdiFlush*(): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GdiSetBatchLimit*(dw: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
 proc GdiGetBatchLimit*(): DWORD {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetICMMode*(hdc: HDC, mode: int32): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CheckColorsInGamut*(hdc: HDC, lpRGBTriple: LPVOID, dlpBuffer: LPVOID, nCount: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+proc SetICMMode*(
+  hdc: HDC, mode: int32
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CheckColorsInGamut*(
+  hdc: HDC, lpRGBTriple: LPVOID, dlpBuffer: LPVOID, nCount: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
 proc GetColorSpace*(hdc: HDC): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetLogColorSpaceA*(hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEA, nSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetLogColorSpaceW*(hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEW, nSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateColorSpaceA*(lplcs: LPLOGCOLORSPACEA): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc CreateColorSpaceW*(lplcs: LPLOGCOLORSPACEW): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetColorSpace*(hdc: HDC, hcs: HCOLORSPACE): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc DeleteColorSpace*(hcs: HCOLORSPACE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetICMProfileA*(hdc: HDC, pBufSize: LPDWORD, pszFilename: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetICMProfileW*(hdc: HDC, pBufSize: LPDWORD, pszFilename: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetICMProfileA*(hdc: HDC, lpFileName: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetICMProfileW*(hdc: HDC, lpFileName: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc GetDeviceGammaRamp*(hdc: HDC, lpRamp: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc SetDeviceGammaRamp*(hdc: HDC, lpRamp: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ColorMatchToTarget*(hdc: HDC, hdcTarget: HDC, action: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumICMProfilesA*(hdc: HDC, lpProc: ICMENUMPROCA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc EnumICMProfilesW*(hdc: HDC, lpProc: ICMENUMPROCW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc UpdateICMRegKeyA*(reserved: DWORD, lpszCMID: LPSTR, lpszFileName: LPSTR, command: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc UpdateICMRegKeyW*(reserved: DWORD, lpszCMID: LPWSTR, lpszFileName: LPWSTR, command: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc ColorCorrectPalette*(hdc: HDC, hPal: HPALETTE, deFirst: DWORD, num: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc wglCopyContext*(P1: HGLRC, P2: HGLRC, P3: UINT): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+proc GetLogColorSpaceA*(
+  hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEA, nSize: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetLogColorSpaceW*(
+  hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEW, nSize: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateColorSpaceA*(
+  lplcs: LPLOGCOLORSPACEA
+): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc CreateColorSpaceW*(
+  lplcs: LPLOGCOLORSPACEW
+): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetColorSpace*(
+  hdc: HDC, hcs: HCOLORSPACE
+): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc DeleteColorSpace*(
+  hcs: HCOLORSPACE
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetICMProfileA*(
+  hdc: HDC, pBufSize: LPDWORD, pszFilename: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetICMProfileW*(
+  hdc: HDC, pBufSize: LPDWORD, pszFilename: LPWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetICMProfileA*(
+  hdc: HDC, lpFileName: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetICMProfileW*(
+  hdc: HDC, lpFileName: LPWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc GetDeviceGammaRamp*(
+  hdc: HDC, lpRamp: LPVOID
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc SetDeviceGammaRamp*(
+  hdc: HDC, lpRamp: LPVOID
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ColorMatchToTarget*(
+  hdc: HDC, hdcTarget: HDC, action: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumICMProfilesA*(
+  hdc: HDC, lpProc: ICMENUMPROCA, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc EnumICMProfilesW*(
+  hdc: HDC, lpProc: ICMENUMPROCW, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc UpdateICMRegKeyA*(
+  reserved: DWORD, lpszCMID: LPSTR, lpszFileName: LPSTR, command: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc UpdateICMRegKeyW*(
+  reserved: DWORD, lpszCMID: LPWSTR, lpszFileName: LPWSTR, command: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc ColorCorrectPalette*(
+  hdc: HDC, hPal: HPALETTE, deFirst: DWORD, num: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
+
+proc wglCopyContext*(
+  P1: HGLRC, P2: HGLRC, P3: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
 proc wglCreateContext*(P1: HDC): HGLRC {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglCreateLayerContext*(P1: HDC, P2: int32): HGLRC {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglDeleteContext*(P1: HGLRC): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+proc wglCreateLayerContext*(
+  P1: HDC, P2: int32
+): HGLRC {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglDeleteContext*(
+  P1: HGLRC
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
 proc wglGetCurrentContext*(): HGLRC {.winapi, stdcall, dynlib: "opengl32", importc.}
 proc wglGetCurrentDC*(): HDC {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglGetProcAddress*(P1: LPCSTR): PROC {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglMakeCurrent*(P1: HDC, P2: HGLRC): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglShareLists*(P1: HGLRC, P2: HGLRC): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglUseFontBitmapsA*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglUseFontBitmapsW*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+proc wglGetProcAddress*(
+  P1: LPCSTR
+): PROC {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglMakeCurrent*(
+  P1: HDC, P2: HGLRC
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglShareLists*(
+  P1: HGLRC, P2: HGLRC
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglUseFontBitmapsA*(
+  P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglUseFontBitmapsW*(
+  P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
 proc SwapBuffers*(P1: HDC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc.}
-proc wglUseFontOutlinesA*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD, P5: FLOAT, P6: FLOAT, P7: int32, P8: LPGLYPHMETRICSFLOAT): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglUseFontOutlinesW*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD, P5: FLOAT, P6: FLOAT, P7: int32, P8: LPGLYPHMETRICSFLOAT): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglDescribeLayerPlane*(P1: HDC, P2: int32, P3: int32, P4: UINT, P5: LPLAYERPLANEDESCRIPTOR): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglSetLayerPaletteEntries*(P1: HDC, P2: int32, P3: int32, P4: int32, P5: ptr COLORREF): int32 {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglGetLayerPaletteEntries*(P1: HDC, P2: int32, P3: int32, P4: int32, P5: ptr COLORREF): int32 {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglRealizeLayerPalette*(P1: HDC, P2: int32, P3: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglSwapLayerBuffers*(P1: HDC, P2: UINT): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
-proc wglSwapMultipleBuffers*(P1: UINT, P2: ptr WGLSWAP): DWORD {.winapi, stdcall, dynlib: "opengl32", importc.}
-template MAKEROP4*(fore: untyped, back: untyped): DWORD = DWORD((back shl 8) and 0xff000000) or DWORD(fore)
-template GetCValue*(cmyk: untyped): BYTE = BYTE((cmyk shr 24) and 0xff)
-template GetMValue*(cmyk: untyped): BYTE = BYTE((cmyk shr 16) and 0xff)
-template GetYValue*(cmyk: untyped): BYTE = BYTE((cmyk shr 8) and 0xff)
-template GetKValue*(cmyk: untyped): BYTE = BYTE((cmyk) and 0xff)
-template CMYK*(c: untyped, m: untyped, y: untyped, k: untyped): COLORREF = COLORREF(COLORREF(k) or COLORREF(y shl 8) or COLORREF(m shl 16) or COLORREF(c shl 24))
-template MAKEPOINTS*(l: untyped): POINTS = POINTS(x: SHORT(l and 0xffff), y: SHORT(l shr 16 and 0xffff))
-template RGB*(r: untyped, g: untyped, b: untyped): COLORREF = COLORREF(COLORREF(r and 0xff) or (COLORREF(g and 0xff) shl 8) or (COLORREF(b and 0xff) shl 16))
-template PALETTERGB*(r: untyped, g: untyped, b: untyped): COLORREF = COLORREF(RGB(r, g, b) or 0x02000000)
-template GetRValue*(c: untyped): BYTE = BYTE((c) and 0xff)
-template GetGValue*(c: untyped): BYTE = BYTE((c shr 8) and 0xff)
-template GetBValue*(c: untyped): BYTE = BYTE((c shr 16) and 0xff)
-template PALETTEINDEX*(i: untyped): COLORREF = COLORREF(i and 0xff) or 0x01000000
-proc `dmOrientation=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmOrientation = x
-proc dmOrientation*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmOrientation
-proc dmOrientation*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmOrientation
-proc `dmPaperSize=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmPaperSize = x
-proc dmPaperSize*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmPaperSize
-proc dmPaperSize*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmPaperSize
-proc `dmPaperLength=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmPaperLength = x
-proc dmPaperLength*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmPaperLength
-proc dmPaperLength*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmPaperLength
-proc `dmPaperWidth=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmPaperWidth = x
-proc dmPaperWidth*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmPaperWidth
-proc dmPaperWidth*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmPaperWidth
-proc `dmScale=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmScale = x
-proc dmScale*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmScale
-proc dmScale*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmScale
-proc `dmCopies=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmCopies = x
-proc dmCopies*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmCopies
-proc dmCopies*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmCopies
-proc `dmDefaultSource=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmDefaultSource = x
-proc dmDefaultSource*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmDefaultSource
-proc dmDefaultSource*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmDefaultSource
-proc `dmPrintQuality=`*(self: var DEVMODEA, x: int16) {.inline.} = self.union1.struct1.dmPrintQuality = x
-proc dmPrintQuality*(self: DEVMODEA): int16 {.inline.} = self.union1.struct1.dmPrintQuality
-proc dmPrintQuality*(self: var DEVMODEA): var int16 {.inline.} = self.union1.struct1.dmPrintQuality
-proc `dmPosition=`*(self: var DEVMODEA, x: POINTL) {.inline.} = self.union1.struct2.dmPosition = x
-proc dmPosition*(self: DEVMODEA): POINTL {.inline.} = self.union1.struct2.dmPosition
-proc dmPosition*(self: var DEVMODEA): var POINTL {.inline.} = self.union1.struct2.dmPosition
-proc `dmDisplayOrientation=`*(self: var DEVMODEA, x: DWORD) {.inline.} = self.union1.struct2.dmDisplayOrientation = x
-proc dmDisplayOrientation*(self: DEVMODEA): DWORD {.inline.} = self.union1.struct2.dmDisplayOrientation
-proc dmDisplayOrientation*(self: var DEVMODEA): var DWORD {.inline.} = self.union1.struct2.dmDisplayOrientation
-proc `dmDisplayFixedOutput=`*(self: var DEVMODEA, x: DWORD) {.inline.} = self.union1.struct2.dmDisplayFixedOutput = x
-proc dmDisplayFixedOutput*(self: DEVMODEA): DWORD {.inline.} = self.union1.struct2.dmDisplayFixedOutput
-proc dmDisplayFixedOutput*(self: var DEVMODEA): var DWORD {.inline.} = self.union1.struct2.dmDisplayFixedOutput
-proc `dmDisplayFlags=`*(self: var DEVMODEA, x: DWORD) {.inline.} = self.union2.dmDisplayFlags = x
-proc dmDisplayFlags*(self: DEVMODEA): DWORD {.inline.} = self.union2.dmDisplayFlags
-proc dmDisplayFlags*(self: var DEVMODEA): var DWORD {.inline.} = self.union2.dmDisplayFlags
-proc `dmNup=`*(self: var DEVMODEA, x: DWORD) {.inline.} = self.union2.dmNup = x
-proc dmNup*(self: DEVMODEA): DWORD {.inline.} = self.union2.dmNup
-proc dmNup*(self: var DEVMODEA): var DWORD {.inline.} = self.union2.dmNup
-proc `dmOrientation=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmOrientation = x
-proc dmOrientation*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmOrientation
-proc dmOrientation*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmOrientation
-proc `dmPaperSize=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmPaperSize = x
-proc dmPaperSize*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmPaperSize
-proc dmPaperSize*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmPaperSize
-proc `dmPaperLength=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmPaperLength = x
-proc dmPaperLength*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmPaperLength
-proc dmPaperLength*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmPaperLength
-proc `dmPaperWidth=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmPaperWidth = x
-proc dmPaperWidth*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmPaperWidth
-proc dmPaperWidth*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmPaperWidth
-proc `dmScale=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmScale = x
-proc dmScale*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmScale
-proc dmScale*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmScale
-proc `dmCopies=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmCopies = x
-proc dmCopies*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmCopies
-proc dmCopies*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmCopies
-proc `dmDefaultSource=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmDefaultSource = x
-proc dmDefaultSource*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmDefaultSource
-proc dmDefaultSource*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmDefaultSource
-proc `dmPrintQuality=`*(self: var DEVMODEW, x: int16) {.inline.} = self.union1.struct1.dmPrintQuality = x
-proc dmPrintQuality*(self: DEVMODEW): int16 {.inline.} = self.union1.struct1.dmPrintQuality
-proc dmPrintQuality*(self: var DEVMODEW): var int16 {.inline.} = self.union1.struct1.dmPrintQuality
-proc `dmPosition=`*(self: var DEVMODEW, x: POINTL) {.inline.} = self.union1.struct2.dmPosition = x
-proc dmPosition*(self: DEVMODEW): POINTL {.inline.} = self.union1.struct2.dmPosition
-proc dmPosition*(self: var DEVMODEW): var POINTL {.inline.} = self.union1.struct2.dmPosition
-proc `dmDisplayOrientation=`*(self: var DEVMODEW, x: DWORD) {.inline.} = self.union1.struct2.dmDisplayOrientation = x
-proc dmDisplayOrientation*(self: DEVMODEW): DWORD {.inline.} = self.union1.struct2.dmDisplayOrientation
-proc dmDisplayOrientation*(self: var DEVMODEW): var DWORD {.inline.} = self.union1.struct2.dmDisplayOrientation
-proc `dmDisplayFixedOutput=`*(self: var DEVMODEW, x: DWORD) {.inline.} = self.union1.struct2.dmDisplayFixedOutput = x
-proc dmDisplayFixedOutput*(self: DEVMODEW): DWORD {.inline.} = self.union1.struct2.dmDisplayFixedOutput
-proc dmDisplayFixedOutput*(self: var DEVMODEW): var DWORD {.inline.} = self.union1.struct2.dmDisplayFixedOutput
-proc `dmDisplayFlags=`*(self: var DEVMODEW, x: DWORD) {.inline.} = self.union2.dmDisplayFlags = x
-proc dmDisplayFlags*(self: DEVMODEW): DWORD {.inline.} = self.union2.dmDisplayFlags
-proc dmDisplayFlags*(self: var DEVMODEW): var DWORD {.inline.} = self.union2.dmDisplayFlags
-proc `dmNup=`*(self: var DEVMODEW, x: DWORD) {.inline.} = self.union2.dmNup = x
-proc dmNup*(self: DEVMODEW): DWORD {.inline.} = self.union2.dmNup
-proc dmNup*(self: var DEVMODEW): var DWORD {.inline.} = self.union2.dmNup
-proc `targetMode=`*(self: var DISPLAYCONFIG_MODE_INFO, x: DISPLAYCONFIG_TARGET_MODE) {.inline.} = self.union1.targetMode = x
-proc targetMode*(self: DISPLAYCONFIG_MODE_INFO): DISPLAYCONFIG_TARGET_MODE {.inline.} = self.union1.targetMode
-proc targetMode*(self: var DISPLAYCONFIG_MODE_INFO): var DISPLAYCONFIG_TARGET_MODE {.inline.} = self.union1.targetMode
-proc `sourceMode=`*(self: var DISPLAYCONFIG_MODE_INFO, x: DISPLAYCONFIG_SOURCE_MODE) {.inline.} = self.union1.sourceMode = x
-proc sourceMode*(self: DISPLAYCONFIG_MODE_INFO): DISPLAYCONFIG_SOURCE_MODE {.inline.} = self.union1.sourceMode
-proc sourceMode*(self: var DISPLAYCONFIG_MODE_INFO): var DISPLAYCONFIG_SOURCE_MODE {.inline.} = self.union1.sourceMode
-proc `friendlyNameFromEdid=`*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32) {.inline.} = self.union1.struct1.friendlyNameFromEdid = x
-proc friendlyNameFromEdid*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} = self.union1.struct1.friendlyNameFromEdid
-proc `friendlyNameForced=`*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32) {.inline.} = self.union1.struct1.friendlyNameForced = x
-proc friendlyNameForced*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} = self.union1.struct1.friendlyNameForced
-proc `edidIdsValid=`*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32) {.inline.} = self.union1.struct1.edidIdsValid = x
-proc edidIdsValid*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} = self.union1.struct1.edidIdsValid
-proc `reserved=`*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32) {.inline.} = self.union1.struct1.reserved = x
-proc reserved*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} = self.union1.struct1.reserved
-proc `value=`*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32) {.inline.} = self.union1.value = x
-proc value*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} = self.union1.value
-proc value*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): var UINT32 {.inline.} = self.union1.value
-proc `bootPersistenceOn=`*(self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE, x: UINT32) {.inline.} = self.union1.struct1.bootPersistenceOn = x
-proc bootPersistenceOn*(self: DISPLAYCONFIG_SET_TARGET_PERSISTENCE): UINT32 {.inline.} = self.union1.struct1.bootPersistenceOn
-proc `reserved=`*(self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE, x: UINT32) {.inline.} = self.union1.struct1.reserved = x
-proc reserved*(self: DISPLAYCONFIG_SET_TARGET_PERSISTENCE): UINT32 {.inline.} = self.union1.struct1.reserved
-proc `value=`*(self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE, x: UINT32) {.inline.} = self.union1.value = x
-proc value*(self: DISPLAYCONFIG_SET_TARGET_PERSISTENCE): UINT32 {.inline.} = self.union1.value
-proc value*(self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE): var UINT32 {.inline.} = self.union1.value
+proc wglUseFontOutlinesA*(
+  P1: HDC,
+  P2: DWORD,
+  P3: DWORD,
+  P4: DWORD,
+  P5: FLOAT,
+  P6: FLOAT,
+  P7: int32,
+  P8: LPGLYPHMETRICSFLOAT,
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglUseFontOutlinesW*(
+  P1: HDC,
+  P2: DWORD,
+  P3: DWORD,
+  P4: DWORD,
+  P5: FLOAT,
+  P6: FLOAT,
+  P7: int32,
+  P8: LPGLYPHMETRICSFLOAT,
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglDescribeLayerPlane*(
+  P1: HDC, P2: int32, P3: int32, P4: UINT, P5: LPLAYERPLANEDESCRIPTOR
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglSetLayerPaletteEntries*(
+  P1: HDC, P2: int32, P3: int32, P4: int32, P5: ptr COLORREF
+): int32 {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglGetLayerPaletteEntries*(
+  P1: HDC, P2: int32, P3: int32, P4: int32, P5: ptr COLORREF
+): int32 {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglRealizeLayerPalette*(
+  P1: HDC, P2: int32, P3: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglSwapLayerBuffers*(
+  P1: HDC, P2: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+proc wglSwapMultipleBuffers*(
+  P1: UINT, P2: ptr WGLSWAP
+): DWORD {.winapi, stdcall, dynlib: "opengl32", importc.}
+
+template MAKEROP4*(fore: untyped, back: untyped): DWORD =
+  DWORD((back shl 8) and 0xff000000) or DWORD(fore)
+
+template GetCValue*(cmyk: untyped): BYTE =
+  BYTE((cmyk shr 24) and 0xff)
+
+template GetMValue*(cmyk: untyped): BYTE =
+  BYTE((cmyk shr 16) and 0xff)
+
+template GetYValue*(cmyk: untyped): BYTE =
+  BYTE((cmyk shr 8) and 0xff)
+
+template GetKValue*(cmyk: untyped): BYTE =
+  BYTE((cmyk) and 0xff)
+
+template CMYK*(c: untyped, m: untyped, y: untyped, k: untyped): COLORREF =
+  COLORREF(COLORREF(k) or COLORREF(y shl 8) or COLORREF(m shl 16) or COLORREF(c shl 24))
+
+template MAKEPOINTS*(l: untyped): POINTS =
+  POINTS(x: SHORT(l and 0xffff), y: SHORT(l shr 16 and 0xffff))
+
+template RGB*(r: untyped, g: untyped, b: untyped): COLORREF =
+  COLORREF(
+    COLORREF(r and 0xff) or (COLORREF(g and 0xff) shl 8) or (
+      COLORREF(b and 0xff) shl 16
+    )
+  )
+
+template PALETTERGB*(r: untyped, g: untyped, b: untyped): COLORREF =
+  COLORREF(RGB(r, g, b) or 0x02000000)
+
+template GetRValue*(c: untyped): BYTE =
+  BYTE((c) and 0xff)
+
+template GetGValue*(c: untyped): BYTE =
+  BYTE((c shr 8) and 0xff)
+
+template GetBValue*(c: untyped): BYTE =
+  BYTE((c shr 16) and 0xff)
+
+template PALETTEINDEX*(i: untyped): COLORREF =
+  COLORREF(i and 0xff) or 0x01000000
+
+proc `dmOrientation=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmOrientation = x
+
+proc dmOrientation*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmOrientation
+
+proc dmOrientation*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmOrientation
+
+proc `dmPaperSize=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmPaperSize = x
+
+proc dmPaperSize*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmPaperSize
+
+proc dmPaperSize*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmPaperSize
+
+proc `dmPaperLength=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmPaperLength = x
+
+proc dmPaperLength*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmPaperLength
+
+proc dmPaperLength*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmPaperLength
+
+proc `dmPaperWidth=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmPaperWidth = x
+
+proc dmPaperWidth*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmPaperWidth
+
+proc dmPaperWidth*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmPaperWidth
+
+proc `dmScale=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmScale = x
+
+proc dmScale*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmScale
+
+proc dmScale*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmScale
+
+proc `dmCopies=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmCopies = x
+
+proc dmCopies*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmCopies
+
+proc dmCopies*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmCopies
+
+proc `dmDefaultSource=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmDefaultSource = x
+
+proc dmDefaultSource*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmDefaultSource
+
+proc dmDefaultSource*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmDefaultSource
+
+proc `dmPrintQuality=`*(self: var DEVMODEA, x: int16) {.inline.} =
+  self.union1.struct1.dmPrintQuality = x
+
+proc dmPrintQuality*(self: DEVMODEA): int16 {.inline.} =
+  self.union1.struct1.dmPrintQuality
+
+proc dmPrintQuality*(self: var DEVMODEA): var int16 {.inline.} =
+  self.union1.struct1.dmPrintQuality
+
+proc `dmPosition=`*(self: var DEVMODEA, x: POINTL) {.inline.} =
+  self.union1.struct2.dmPosition = x
+
+proc dmPosition*(self: DEVMODEA): POINTL {.inline.} =
+  self.union1.struct2.dmPosition
+
+proc dmPosition*(self: var DEVMODEA): var POINTL {.inline.} =
+  self.union1.struct2.dmPosition
+
+proc `dmDisplayOrientation=`*(self: var DEVMODEA, x: DWORD) {.inline.} =
+  self.union1.struct2.dmDisplayOrientation = x
+
+proc dmDisplayOrientation*(self: DEVMODEA): DWORD {.inline.} =
+  self.union1.struct2.dmDisplayOrientation
+
+proc dmDisplayOrientation*(self: var DEVMODEA): var DWORD {.inline.} =
+  self.union1.struct2.dmDisplayOrientation
+
+proc `dmDisplayFixedOutput=`*(self: var DEVMODEA, x: DWORD) {.inline.} =
+  self.union1.struct2.dmDisplayFixedOutput = x
+
+proc dmDisplayFixedOutput*(self: DEVMODEA): DWORD {.inline.} =
+  self.union1.struct2.dmDisplayFixedOutput
+
+proc dmDisplayFixedOutput*(self: var DEVMODEA): var DWORD {.inline.} =
+  self.union1.struct2.dmDisplayFixedOutput
+
+proc `dmDisplayFlags=`*(self: var DEVMODEA, x: DWORD) {.inline.} =
+  self.union2.dmDisplayFlags = x
+
+proc dmDisplayFlags*(self: DEVMODEA): DWORD {.inline.} =
+  self.union2.dmDisplayFlags
+
+proc dmDisplayFlags*(self: var DEVMODEA): var DWORD {.inline.} =
+  self.union2.dmDisplayFlags
+
+proc `dmNup=`*(self: var DEVMODEA, x: DWORD) {.inline.} =
+  self.union2.dmNup = x
+
+proc dmNup*(self: DEVMODEA): DWORD {.inline.} =
+  self.union2.dmNup
+
+proc dmNup*(self: var DEVMODEA): var DWORD {.inline.} =
+  self.union2.dmNup
+
+proc `dmOrientation=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmOrientation = x
+
+proc dmOrientation*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmOrientation
+
+proc dmOrientation*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmOrientation
+
+proc `dmPaperSize=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmPaperSize = x
+
+proc dmPaperSize*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmPaperSize
+
+proc dmPaperSize*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmPaperSize
+
+proc `dmPaperLength=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmPaperLength = x
+
+proc dmPaperLength*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmPaperLength
+
+proc dmPaperLength*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmPaperLength
+
+proc `dmPaperWidth=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmPaperWidth = x
+
+proc dmPaperWidth*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmPaperWidth
+
+proc dmPaperWidth*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmPaperWidth
+
+proc `dmScale=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmScale = x
+
+proc dmScale*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmScale
+
+proc dmScale*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmScale
+
+proc `dmCopies=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmCopies = x
+
+proc dmCopies*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmCopies
+
+proc dmCopies*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmCopies
+
+proc `dmDefaultSource=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmDefaultSource = x
+
+proc dmDefaultSource*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmDefaultSource
+
+proc dmDefaultSource*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmDefaultSource
+
+proc `dmPrintQuality=`*(self: var DEVMODEW, x: int16) {.inline.} =
+  self.union1.struct1.dmPrintQuality = x
+
+proc dmPrintQuality*(self: DEVMODEW): int16 {.inline.} =
+  self.union1.struct1.dmPrintQuality
+
+proc dmPrintQuality*(self: var DEVMODEW): var int16 {.inline.} =
+  self.union1.struct1.dmPrintQuality
+
+proc `dmPosition=`*(self: var DEVMODEW, x: POINTL) {.inline.} =
+  self.union1.struct2.dmPosition = x
+
+proc dmPosition*(self: DEVMODEW): POINTL {.inline.} =
+  self.union1.struct2.dmPosition
+
+proc dmPosition*(self: var DEVMODEW): var POINTL {.inline.} =
+  self.union1.struct2.dmPosition
+
+proc `dmDisplayOrientation=`*(self: var DEVMODEW, x: DWORD) {.inline.} =
+  self.union1.struct2.dmDisplayOrientation = x
+
+proc dmDisplayOrientation*(self: DEVMODEW): DWORD {.inline.} =
+  self.union1.struct2.dmDisplayOrientation
+
+proc dmDisplayOrientation*(self: var DEVMODEW): var DWORD {.inline.} =
+  self.union1.struct2.dmDisplayOrientation
+
+proc `dmDisplayFixedOutput=`*(self: var DEVMODEW, x: DWORD) {.inline.} =
+  self.union1.struct2.dmDisplayFixedOutput = x
+
+proc dmDisplayFixedOutput*(self: DEVMODEW): DWORD {.inline.} =
+  self.union1.struct2.dmDisplayFixedOutput
+
+proc dmDisplayFixedOutput*(self: var DEVMODEW): var DWORD {.inline.} =
+  self.union1.struct2.dmDisplayFixedOutput
+
+proc `dmDisplayFlags=`*(self: var DEVMODEW, x: DWORD) {.inline.} =
+  self.union2.dmDisplayFlags = x
+
+proc dmDisplayFlags*(self: DEVMODEW): DWORD {.inline.} =
+  self.union2.dmDisplayFlags
+
+proc dmDisplayFlags*(self: var DEVMODEW): var DWORD {.inline.} =
+  self.union2.dmDisplayFlags
+
+proc `dmNup=`*(self: var DEVMODEW, x: DWORD) {.inline.} =
+  self.union2.dmNup = x
+
+proc dmNup*(self: DEVMODEW): DWORD {.inline.} =
+  self.union2.dmNup
+
+proc dmNup*(self: var DEVMODEW): var DWORD {.inline.} =
+  self.union2.dmNup
+
+proc `targetMode=`*(
+    self: var DISPLAYCONFIG_MODE_INFO, x: DISPLAYCONFIG_TARGET_MODE
+) {.inline.} =
+  self.union1.targetMode = x
+
+proc targetMode*(self: DISPLAYCONFIG_MODE_INFO): DISPLAYCONFIG_TARGET_MODE {.inline.} =
+  self.union1.targetMode
+
+proc targetMode*(
+    self: var DISPLAYCONFIG_MODE_INFO
+): var DISPLAYCONFIG_TARGET_MODE {.inline.} =
+  self.union1.targetMode
+
+proc `sourceMode=`*(
+    self: var DISPLAYCONFIG_MODE_INFO, x: DISPLAYCONFIG_SOURCE_MODE
+) {.inline.} =
+  self.union1.sourceMode = x
+
+proc sourceMode*(self: DISPLAYCONFIG_MODE_INFO): DISPLAYCONFIG_SOURCE_MODE {.inline.} =
+  self.union1.sourceMode
+
+proc sourceMode*(
+    self: var DISPLAYCONFIG_MODE_INFO
+): var DISPLAYCONFIG_SOURCE_MODE {.inline.} =
+  self.union1.sourceMode
+
+proc `friendlyNameFromEdid=`*(
+    self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32
+) {.inline.} =
+  self.union1.struct1.friendlyNameFromEdid = x
+
+proc friendlyNameFromEdid*(
+    self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS
+): UINT32 {.inline.} =
+  self.union1.struct1.friendlyNameFromEdid
+
+proc `friendlyNameForced=`*(
+    self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32
+) {.inline.} =
+  self.union1.struct1.friendlyNameForced = x
+
+proc friendlyNameForced*(
+    self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS
+): UINT32 {.inline.} =
+  self.union1.struct1.friendlyNameForced
+
+proc `edidIdsValid=`*(
+    self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32
+) {.inline.} =
+  self.union1.struct1.edidIdsValid = x
+
+proc edidIdsValid*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} =
+  self.union1.struct1.edidIdsValid
+
+proc `reserved=`*(
+    self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32
+) {.inline.} =
+  self.union1.struct1.reserved = x
+
+proc reserved*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} =
+  self.union1.struct1.reserved
+
+proc `value=`*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS, x: UINT32) {.inline.} =
+  self.union1.value = x
+
+proc value*(self: DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): UINT32 {.inline.} =
+  self.union1.value
+
+proc value*(self: var DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS): var UINT32 {.inline.} =
+  self.union1.value
+
+proc `bootPersistenceOn=`*(
+    self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE, x: UINT32
+) {.inline.} =
+  self.union1.struct1.bootPersistenceOn = x
+
+proc bootPersistenceOn*(self: DISPLAYCONFIG_SET_TARGET_PERSISTENCE): UINT32 {.inline.} =
+  self.union1.struct1.bootPersistenceOn
+
+proc `reserved=`*(
+    self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE, x: UINT32
+) {.inline.} =
+  self.union1.struct1.reserved = x
+
+proc reserved*(self: DISPLAYCONFIG_SET_TARGET_PERSISTENCE): UINT32 {.inline.} =
+  self.union1.struct1.reserved
+
+proc `value=`*(self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE, x: UINT32) {.inline.} =
+  self.union1.value = x
+
+proc value*(self: DISPLAYCONFIG_SET_TARGET_PERSISTENCE): UINT32 {.inline.} =
+  self.union1.value
+
+proc value*(self: var DISPLAYCONFIG_SET_TARGET_PERSISTENCE): var UINT32 {.inline.} =
+  self.union1.value
+
 when winimUnicode:
   type
     LOGCOLORSPACE* = LOGCOLORSPACEW
@@ -3806,56 +5503,261 @@ when winimUnicode:
     DOCINFO* = DOCINFOW
     LPDOCINFO* = LPDOCINFOW
     ICMENUMPROC* = ICMENUMPROCW
-  proc AddFontResource*(P1: LPCWSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceW".}
-  proc CopyMetaFile*(P1: HMETAFILE, P2: LPCWSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyMetaFileW".}
-  proc CreateDC*(pwszDriver: LPCWSTR, pwszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateDCW".}
-  proc CreateFontIndirect*(lplf: ptr LOGFONTW): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectW".}
-  proc CreateFont*(cHeight: int32, cWidth: int32, cEscapement: int32, cOrientation: int32, cWeight: int32, bItalic: DWORD, bUnderline: DWORD, bStrikeOut: DWORD, iCharSet: DWORD, iOutPrecision: DWORD, iClipPrecision: DWORD, iQuality: DWORD, iPitchAndFamily: DWORD, pszFaceName: LPCWSTR): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontW".}
-  proc CreateIC*(pszDriver: LPCWSTR, pszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateICW".}
-  proc CreateMetaFile*(pszFile: LPCWSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateMetaFileW".}
-  proc CreateScalableFontResource*(fdwHidden: DWORD, lpszFont: LPCWSTR, lpszFile: LPCWSTR, lpszPath: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "CreateScalableFontResourceW".}
-  proc DeviceCapabilities*(pDevice: LPCWSTR, pPort: LPCWSTR, fwCapability: WORD, pOutput: LPWSTR, pDevMode: ptr DEVMODEW): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc: "DeviceCapabilitiesW".}
-  proc EnumFontFamiliesEx*(hdc: HDC, lpLogfont: LPLOGFONTW, lpProc: FONTENUMPROCW, lParam: LPARAM, dwFlags: DWORD): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesExW".}
-  proc EnumFontFamilies*(hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesW".}
-  proc EnumFonts*(hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontsW".}
-  proc GetCharWidth*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthW".}
-  proc GetCharWidth32*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidth32W".}
-  proc GetCharWidthFloat*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthFloatW".}
-  proc GetCharABCWidths*(hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsW".}
-  proc GetCharABCWidthsFloat*(hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsFloatW".}
-  proc GetGlyphOutline*(hdc: HDC, uChar: UINT, fuFormat: UINT, lpgm: LPGLYPHMETRICS, cjBuffer: DWORD, pvBuffer: LPVOID, lpmat2: ptr MAT2): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphOutlineW".}
-  proc GetMetaFile*(lpName: LPCWSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetMetaFileW".}
-  proc GetOutlineTextMetrics*(hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICW): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetOutlineTextMetricsW".}
-  proc GetTextExtentPoint*(hdc: HDC, lpString: LPCWSTR, c: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPointW".}
-  proc GetTextExtentPoint32*(hdc: HDC, lpString: LPCWSTR, c: int32, psizl: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPoint32W".}
-  proc GetTextExtentExPoint*(hdc: HDC, lpszString: LPCWSTR, cchString: int32, nMaxExtent: int32, lpnFit: LPINT, lpnDx: LPINT, lpSize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentExPointW".}
-  proc GetCharacterPlacement*(hdc: HDC, lpString: LPCWSTR, nCount: int32, nMexExtent: int32, lpResults: LPGCP_RESULTSW, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharacterPlacementW".}
-  proc GetGlyphIndices*(hdc: HDC, lpstr: LPCWSTR, c: int32, pgi: LPWORD, fl: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphIndicesW".}
-  proc AddFontResourceEx*(name: LPCWSTR, fl: DWORD, res: PVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceExW".}
-  proc RemoveFontResourceEx*(name: LPCWSTR, fl: DWORD, pdv: PVOID): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceExW".}
-  proc CreateFontIndirectEx*(P1: ptr ENUMLOGFONTEXDVW): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectExW".}
-  proc ResetDC*(hdc: HDC, lpdm: ptr DEVMODEW): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "ResetDCW".}
-  proc RemoveFontResource*(lpFileName: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceW".}
-  proc CopyEnhMetaFile*(hEnh: HENHMETAFILE, lpFileName: LPCWSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyEnhMetaFileW".}
-  proc CreateEnhMetaFile*(hdc: HDC, lpFilename: LPCWSTR, lprc: ptr RECT, lpDesc: LPCWSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateEnhMetaFileW".}
-  proc GetEnhMetaFile*(lpName: LPCWSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileW".}
-  proc GetEnhMetaFileDescription*(hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPWSTR): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileDescriptionW".}
-  proc GetTextMetrics*(hdc: HDC, lptm: LPTEXTMETRICW): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextMetricsW".}
-  proc StartDoc*(hdc: HDC, lpdi: ptr DOCINFOW): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "StartDocW".}
-  proc GetObject*(h: HANDLE, c: int32, pv: LPVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetObjectW".}
-  proc TextOut*(hdc: HDC, x: int32, y: int32, lpString: LPCWSTR, c: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "TextOutW".}
-  proc ExtTextOut*(hdc: HDC, x: int32, y: int32, options: UINT, lprect: ptr RECT, lpString: LPCWSTR, c: UINT, lpDx: ptr INT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "ExtTextOutW".}
-  proc PolyTextOut*(hdc: HDC, ppt: ptr POLYTEXTW, nstrings: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "PolyTextOutW".}
-  proc GetTextFace*(hdc: HDC, c: int32, lpName: LPWSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextFaceW".}
-  proc GetKerningPairs*(hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetKerningPairsW".}
-  proc EnumICMProfiles*(hdc: HDC, lpProc: ICMENUMPROCW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumICMProfilesW".}
-  proc UpdateICMRegKey*(reserved: DWORD, lpszCMID: LPWSTR, lpszFileName: LPWSTR, command: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "UpdateICMRegKeyW".}
-  proc GetLogColorSpace*(hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEW, nSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetLogColorSpaceW".}
-  proc CreateColorSpace*(lplcs: LPLOGCOLORSPACEW): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc: "CreateColorSpaceW".}
-  proc GetICMProfile*(hdc: HDC, pBufSize: LPDWORD, pszFilename: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetICMProfileW".}
-  proc SetICMProfile*(hdc: HDC, lpFileName: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "SetICMProfileW".}
-  proc wglUseFontBitmaps*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontBitmapsW".}
-  proc wglUseFontOutlines*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD, P5: FLOAT, P6: FLOAT, P7: int32, P8: LPGLYPHMETRICSFLOAT): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontOutlinesW".}
+
+  proc AddFontResource*(
+    P1: LPCWSTR
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceW".}
+
+  proc CopyMetaFile*(
+    P1: HMETAFILE, P2: LPCWSTR
+  ): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyMetaFileW".}
+
+  proc CreateDC*(
+    pwszDriver: LPCWSTR, pwszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateDCW".}
+
+  proc CreateFontIndirect*(
+    lplf: ptr LOGFONTW
+  ): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectW".}
+
+  proc CreateFont*(
+    cHeight: int32,
+    cWidth: int32,
+    cEscapement: int32,
+    cOrientation: int32,
+    cWeight: int32,
+    bItalic: DWORD,
+    bUnderline: DWORD,
+    bStrikeOut: DWORD,
+    iCharSet: DWORD,
+    iOutPrecision: DWORD,
+    iClipPrecision: DWORD,
+    iQuality: DWORD,
+    iPitchAndFamily: DWORD,
+    pszFaceName: LPCWSTR,
+  ): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontW".}
+
+  proc CreateIC*(
+    pszDriver: LPCWSTR, pszDevice: LPCWSTR, pszPort: LPCWSTR, pdm: ptr DEVMODEW
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateICW".}
+
+  proc CreateMetaFile*(
+    pszFile: LPCWSTR
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateMetaFileW".}
+
+  proc CreateScalableFontResource*(
+    fdwHidden: DWORD, lpszFont: LPCWSTR, lpszFile: LPCWSTR, lpszPath: LPCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "gdi32", importc: "CreateScalableFontResourceW"
+  .}
+
+  proc DeviceCapabilities*(
+    pDevice: LPCWSTR,
+    pPort: LPCWSTR,
+    fwCapability: WORD,
+    pOutput: LPWSTR,
+    pDevMode: ptr DEVMODEW,
+  ): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc: "DeviceCapabilitiesW".}
+
+  proc EnumFontFamiliesEx*(
+    hdc: HDC,
+    lpLogfont: LPLOGFONTW,
+    lpProc: FONTENUMPROCW,
+    lParam: LPARAM,
+    dwFlags: DWORD,
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesExW".}
+
+  proc EnumFontFamilies*(
+    hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesW".}
+
+  proc EnumFonts*(
+    hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontsW".}
+
+  proc GetCharWidth*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthW".}
+
+  proc GetCharWidth32*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidth32W".}
+
+  proc GetCharWidthFloat*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthFloatW".}
+
+  proc GetCharABCWidths*(
+    hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsW".}
+
+  proc GetCharABCWidthsFloat*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsFloatW".}
+
+  proc GetGlyphOutline*(
+    hdc: HDC,
+    uChar: UINT,
+    fuFormat: UINT,
+    lpgm: LPGLYPHMETRICS,
+    cjBuffer: DWORD,
+    pvBuffer: LPVOID,
+    lpmat2: ptr MAT2,
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphOutlineW".}
+
+  proc GetMetaFile*(
+    lpName: LPCWSTR
+  ): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetMetaFileW".}
+
+  proc GetOutlineTextMetrics*(
+    hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICW
+  ): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetOutlineTextMetricsW".}
+
+  proc GetTextExtentPoint*(
+    hdc: HDC, lpString: LPCWSTR, c: int32, lpsz: LPSIZE
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPointW".}
+
+  proc GetTextExtentPoint32*(
+    hdc: HDC, lpString: LPCWSTR, c: int32, psizl: LPSIZE
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPoint32W".}
+
+  proc GetTextExtentExPoint*(
+    hdc: HDC,
+    lpszString: LPCWSTR,
+    cchString: int32,
+    nMaxExtent: int32,
+    lpnFit: LPINT,
+    lpnDx: LPINT,
+    lpSize: LPSIZE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentExPointW".}
+
+  proc GetCharacterPlacement*(
+    hdc: HDC,
+    lpString: LPCWSTR,
+    nCount: int32,
+    nMexExtent: int32,
+    lpResults: LPGCP_RESULTSW,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharacterPlacementW".}
+
+  proc GetGlyphIndices*(
+    hdc: HDC, lpstr: LPCWSTR, c: int32, pgi: LPWORD, fl: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphIndicesW".}
+
+  proc AddFontResourceEx*(
+    name: LPCWSTR, fl: DWORD, res: PVOID
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceExW".}
+
+  proc RemoveFontResourceEx*(
+    name: LPCWSTR, fl: DWORD, pdv: PVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceExW".}
+
+  proc CreateFontIndirectEx*(
+    P1: ptr ENUMLOGFONTEXDVW
+  ): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectExW".}
+
+  proc ResetDC*(
+    hdc: HDC, lpdm: ptr DEVMODEW
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "ResetDCW".}
+
+  proc RemoveFontResource*(
+    lpFileName: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceW".}
+
+  proc CopyEnhMetaFile*(
+    hEnh: HENHMETAFILE, lpFileName: LPCWSTR
+  ): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyEnhMetaFileW".}
+
+  proc CreateEnhMetaFile*(
+    hdc: HDC, lpFilename: LPCWSTR, lprc: ptr RECT, lpDesc: LPCWSTR
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateEnhMetaFileW".}
+
+  proc GetEnhMetaFile*(
+    lpName: LPCWSTR
+  ): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileW".}
+
+  proc GetEnhMetaFileDescription*(
+    hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPWSTR
+  ): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileDescriptionW".}
+
+  proc GetTextMetrics*(
+    hdc: HDC, lptm: LPTEXTMETRICW
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextMetricsW".}
+
+  proc StartDoc*(
+    hdc: HDC, lpdi: ptr DOCINFOW
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "StartDocW".}
+
+  proc GetObject*(
+    h: HANDLE, c: int32, pv: LPVOID
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetObjectW".}
+
+  proc TextOut*(
+    hdc: HDC, x: int32, y: int32, lpString: LPCWSTR, c: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "TextOutW".}
+
+  proc ExtTextOut*(
+    hdc: HDC,
+    x: int32,
+    y: int32,
+    options: UINT,
+    lprect: ptr RECT,
+    lpString: LPCWSTR,
+    c: UINT,
+    lpDx: ptr INT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "ExtTextOutW".}
+
+  proc PolyTextOut*(
+    hdc: HDC, ppt: ptr POLYTEXTW, nstrings: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "PolyTextOutW".}
+
+  proc GetTextFace*(
+    hdc: HDC, c: int32, lpName: LPWSTR
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextFaceW".}
+
+  proc GetKerningPairs*(
+    hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetKerningPairsW".}
+
+  proc EnumICMProfiles*(
+    hdc: HDC, lpProc: ICMENUMPROCW, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumICMProfilesW".}
+
+  proc UpdateICMRegKey*(
+    reserved: DWORD, lpszCMID: LPWSTR, lpszFileName: LPWSTR, command: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "UpdateICMRegKeyW".}
+
+  proc GetLogColorSpace*(
+    hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEW, nSize: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetLogColorSpaceW".}
+
+  proc CreateColorSpace*(
+    lplcs: LPLOGCOLORSPACEW
+  ): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc: "CreateColorSpaceW".}
+
+  proc GetICMProfile*(
+    hdc: HDC, pBufSize: LPDWORD, pszFilename: LPWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetICMProfileW".}
+
+  proc SetICMProfile*(
+    hdc: HDC, lpFileName: LPWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "SetICMProfileW".}
+
+  proc wglUseFontBitmaps*(
+    P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontBitmapsW".}
+
+  proc wglUseFontOutlines*(
+    P1: HDC,
+    P2: DWORD,
+    P3: DWORD,
+    P4: DWORD,
+    P5: FLOAT,
+    P6: FLOAT,
+    P7: int32,
+    P8: LPGLYPHMETRICSFLOAT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontOutlinesW".}
+
 when winimAnsi:
   type
     LOGCOLORSPACE* = LOGCOLORSPACEA
@@ -3914,53 +5816,257 @@ when winimAnsi:
     DOCINFO* = DOCINFOA
     LPDOCINFO* = LPDOCINFOA
     ICMENUMPROC* = ICMENUMPROCA
-  proc AddFontResource*(P1: LPCSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceA".}
-  proc CopyMetaFile*(P1: HMETAFILE, P2: LPCSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyMetaFileA".}
-  proc CreateDC*(pwszDriver: LPCSTR, pwszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateDCA".}
-  proc CreateFontIndirect*(lplf: ptr LOGFONTA): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectA".}
-  proc CreateFont*(cHeight: int32, cWidth: int32, cEscapement: int32, cOrientation: int32, cWeight: int32, bItalic: DWORD, bUnderline: DWORD, bStrikeOut: DWORD, iCharSet: DWORD, iOutPrecision: DWORD, iClipPrecision: DWORD, iQuality: DWORD, iPitchAndFamily: DWORD, pszFaceName: LPCSTR): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontA".}
-  proc CreateIC*(pszDriver: LPCSTR, pszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateICA".}
-  proc CreateMetaFile*(pszFile: LPCSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateMetaFileA".}
-  proc CreateScalableFontResource*(fdwHidden: DWORD, lpszFont: LPCSTR, lpszFile: LPCSTR, lpszPath: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "CreateScalableFontResourceA".}
-  proc DeviceCapabilities*(pDevice: LPCSTR, pPort: LPCSTR, fwCapability: WORD, pOutput: LPSTR, pDevMode: ptr DEVMODEA): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc: "DeviceCapabilitiesA".}
-  proc EnumFontFamiliesEx*(hdc: HDC, lpLogfont: LPLOGFONTA, lpProc: FONTENUMPROCA, lParam: LPARAM, dwFlags: DWORD): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesExA".}
-  proc EnumFontFamilies*(hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesA".}
-  proc EnumFonts*(hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontsA".}
-  proc GetCharWidth*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthA".}
-  proc GetCharWidth32*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidth32A".}
-  proc GetCharWidthFloat*(hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthFloatA".}
-  proc GetCharABCWidths*(hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsA".}
-  proc GetCharABCWidthsFloat*(hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsFloatA".}
-  proc GetGlyphOutline*(hdc: HDC, uChar: UINT, fuFormat: UINT, lpgm: LPGLYPHMETRICS, cjBuffer: DWORD, pvBuffer: LPVOID, lpmat2: ptr MAT2): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphOutlineA".}
-  proc GetMetaFile*(lpName: LPCSTR): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetMetaFileA".}
-  proc GetOutlineTextMetrics*(hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICA): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetOutlineTextMetricsA".}
-  proc GetTextExtentPoint*(hdc: HDC, lpString: LPCSTR, c: int32, lpsz: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPointA".}
-  proc GetTextExtentPoint32*(hdc: HDC, lpString: LPCSTR, c: int32, psizl: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPoint32A".}
-  proc GetTextExtentExPoint*(hdc: HDC, lpszString: LPCSTR, cchString: int32, nMaxExtent: int32, lpnFit: LPINT, lpnDx: LPINT, lpSize: LPSIZE): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentExPointA".}
-  proc GetCharacterPlacement*(hdc: HDC, lpString: LPCSTR, nCount: int32, nMexExtent: int32, lpResults: LPGCP_RESULTSA, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharacterPlacementA".}
-  proc GetGlyphIndices*(hdc: HDC, lpstr: LPCSTR, c: int32, pgi: LPWORD, fl: DWORD): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphIndicesA".}
-  proc AddFontResourceEx*(name: LPCSTR, fl: DWORD, res: PVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceExA".}
-  proc RemoveFontResourceEx*(name: LPCSTR, fl: DWORD, pdv: PVOID): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceExA".}
-  proc CreateFontIndirectEx*(P1: ptr ENUMLOGFONTEXDVA): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectExA".}
-  proc ResetDC*(hdc: HDC, lpdm: ptr DEVMODEA): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "ResetDCA".}
-  proc RemoveFontResource*(lpFileName: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceA".}
-  proc CopyEnhMetaFile*(hEnh: HENHMETAFILE, lpFileName: LPCSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyEnhMetaFileA".}
-  proc CreateEnhMetaFile*(hdc: HDC, lpFilename: LPCSTR, lprc: ptr RECT, lpDesc: LPCSTR): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateEnhMetaFileA".}
-  proc GetEnhMetaFile*(lpName: LPCSTR): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileA".}
-  proc GetEnhMetaFileDescription*(hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPSTR): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileDescriptionA".}
-  proc GetTextMetrics*(hdc: HDC, lptm: LPTEXTMETRICA): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextMetricsA".}
-  proc StartDoc*(hdc: HDC, lpdi: ptr DOCINFOA): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "StartDocA".}
-  proc GetObject*(h: HANDLE, c: int32, pv: LPVOID): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetObjectA".}
-  proc TextOut*(hdc: HDC, x: int32, y: int32, lpString: LPCSTR, c: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "TextOutA".}
-  proc ExtTextOut*(hdc: HDC, x: int32, y: int32, options: UINT, lprect: ptr RECT, lpString: LPCSTR, c: UINT, lpDx: ptr INT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "ExtTextOutA".}
-  proc PolyTextOut*(hdc: HDC, ppt: ptr POLYTEXTA, nstrings: int32): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "PolyTextOutA".}
-  proc GetTextFace*(hdc: HDC, c: int32, lpName: LPSTR): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextFaceA".}
-  proc GetKerningPairs*(hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetKerningPairsA".}
-  proc EnumICMProfiles*(hdc: HDC, lpProc: ICMENUMPROCA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumICMProfilesA".}
-  proc UpdateICMRegKey*(reserved: DWORD, lpszCMID: LPSTR, lpszFileName: LPSTR, command: UINT): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "UpdateICMRegKeyA".}
-  proc GetLogColorSpace*(hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEA, nSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetLogColorSpaceA".}
-  proc CreateColorSpace*(lplcs: LPLOGCOLORSPACEA): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc: "CreateColorSpaceA".}
-  proc GetICMProfile*(hdc: HDC, pBufSize: LPDWORD, pszFilename: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetICMProfileA".}
-  proc SetICMProfile*(hdc: HDC, lpFileName: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "SetICMProfileA".}
-  proc wglUseFontBitmaps*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontBitmapsA".}
-  proc wglUseFontOutlines*(P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD, P5: FLOAT, P6: FLOAT, P7: int32, P8: LPGLYPHMETRICSFLOAT): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontOutlinesA".}
+
+  proc AddFontResource*(
+    P1: LPCSTR
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceA".}
+
+  proc CopyMetaFile*(
+    P1: HMETAFILE, P2: LPCSTR
+  ): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyMetaFileA".}
+
+  proc CreateDC*(
+    pwszDriver: LPCSTR, pwszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateDCA".}
+
+  proc CreateFontIndirect*(
+    lplf: ptr LOGFONTA
+  ): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectA".}
+
+  proc CreateFont*(
+    cHeight: int32,
+    cWidth: int32,
+    cEscapement: int32,
+    cOrientation: int32,
+    cWeight: int32,
+    bItalic: DWORD,
+    bUnderline: DWORD,
+    bStrikeOut: DWORD,
+    iCharSet: DWORD,
+    iOutPrecision: DWORD,
+    iClipPrecision: DWORD,
+    iQuality: DWORD,
+    iPitchAndFamily: DWORD,
+    pszFaceName: LPCSTR,
+  ): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontA".}
+
+  proc CreateIC*(
+    pszDriver: LPCSTR, pszDevice: LPCSTR, pszPort: LPCSTR, pdm: ptr DEVMODEA
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateICA".}
+
+  proc CreateMetaFile*(
+    pszFile: LPCSTR
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateMetaFileA".}
+
+  proc CreateScalableFontResource*(
+    fdwHidden: DWORD, lpszFont: LPCSTR, lpszFile: LPCSTR, lpszPath: LPCSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "gdi32", importc: "CreateScalableFontResourceA"
+  .}
+
+  proc DeviceCapabilities*(
+    pDevice: LPCSTR,
+    pPort: LPCSTR,
+    fwCapability: WORD,
+    pOutput: LPSTR,
+    pDevMode: ptr DEVMODEA,
+  ): int32 {.winapi, stdcall, dynlib: "winspool.drv", importc: "DeviceCapabilitiesA".}
+
+  proc EnumFontFamiliesEx*(
+    hdc: HDC,
+    lpLogfont: LPLOGFONTA,
+    lpProc: FONTENUMPROCA,
+    lParam: LPARAM,
+    dwFlags: DWORD,
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesExA".}
+
+  proc EnumFontFamilies*(
+    hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontFamiliesA".}
+
+  proc EnumFonts*(
+    hdc: HDC, lpLogfont: LPCSTR, lpProc: FONTENUMPROCA, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumFontsA".}
+
+  proc GetCharWidth*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthA".}
+
+  proc GetCharWidth32*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: LPINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidth32A".}
+
+  proc GetCharWidthFloat*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpBuffer: PFLOAT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharWidthFloatA".}
+
+  proc GetCharABCWidths*(
+    hdc: HDC, wFirst: UINT, wLast: UINT, lpABC: LPABC
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsA".}
+
+  proc GetCharABCWidthsFloat*(
+    hdc: HDC, iFirst: UINT, iLast: UINT, lpABC: LPABCFLOAT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharABCWidthsFloatA".}
+
+  proc GetGlyphOutline*(
+    hdc: HDC,
+    uChar: UINT,
+    fuFormat: UINT,
+    lpgm: LPGLYPHMETRICS,
+    cjBuffer: DWORD,
+    pvBuffer: LPVOID,
+    lpmat2: ptr MAT2,
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphOutlineA".}
+
+  proc GetMetaFile*(
+    lpName: LPCSTR
+  ): HMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetMetaFileA".}
+
+  proc GetOutlineTextMetrics*(
+    hdc: HDC, cjCopy: UINT, potm: LPOUTLINETEXTMETRICA
+  ): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetOutlineTextMetricsA".}
+
+  proc GetTextExtentPoint*(
+    hdc: HDC, lpString: LPCSTR, c: int32, lpsz: LPSIZE
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPointA".}
+
+  proc GetTextExtentPoint32*(
+    hdc: HDC, lpString: LPCSTR, c: int32, psizl: LPSIZE
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentPoint32A".}
+
+  proc GetTextExtentExPoint*(
+    hdc: HDC,
+    lpszString: LPCSTR,
+    cchString: int32,
+    nMaxExtent: int32,
+    lpnFit: LPINT,
+    lpnDx: LPINT,
+    lpSize: LPSIZE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextExtentExPointA".}
+
+  proc GetCharacterPlacement*(
+    hdc: HDC,
+    lpString: LPCSTR,
+    nCount: int32,
+    nMexExtent: int32,
+    lpResults: LPGCP_RESULTSA,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetCharacterPlacementA".}
+
+  proc GetGlyphIndices*(
+    hdc: HDC, lpstr: LPCSTR, c: int32, pgi: LPWORD, fl: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetGlyphIndicesA".}
+
+  proc AddFontResourceEx*(
+    name: LPCSTR, fl: DWORD, res: PVOID
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "AddFontResourceExA".}
+
+  proc RemoveFontResourceEx*(
+    name: LPCSTR, fl: DWORD, pdv: PVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceExA".}
+
+  proc CreateFontIndirectEx*(
+    P1: ptr ENUMLOGFONTEXDVA
+  ): HFONT {.winapi, stdcall, dynlib: "gdi32", importc: "CreateFontIndirectExA".}
+
+  proc ResetDC*(
+    hdc: HDC, lpdm: ptr DEVMODEA
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "ResetDCA".}
+
+  proc RemoveFontResource*(
+    lpFileName: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "RemoveFontResourceA".}
+
+  proc CopyEnhMetaFile*(
+    hEnh: HENHMETAFILE, lpFileName: LPCSTR
+  ): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "CopyEnhMetaFileA".}
+
+  proc CreateEnhMetaFile*(
+    hdc: HDC, lpFilename: LPCSTR, lprc: ptr RECT, lpDesc: LPCSTR
+  ): HDC {.winapi, stdcall, dynlib: "gdi32", importc: "CreateEnhMetaFileA".}
+
+  proc GetEnhMetaFile*(
+    lpName: LPCSTR
+  ): HENHMETAFILE {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileA".}
+
+  proc GetEnhMetaFileDescription*(
+    hemf: HENHMETAFILE, cchBuffer: UINT, lpDescription: LPSTR
+  ): UINT {.winapi, stdcall, dynlib: "gdi32", importc: "GetEnhMetaFileDescriptionA".}
+
+  proc GetTextMetrics*(
+    hdc: HDC, lptm: LPTEXTMETRICA
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextMetricsA".}
+
+  proc StartDoc*(
+    hdc: HDC, lpdi: ptr DOCINFOA
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "StartDocA".}
+
+  proc GetObject*(
+    h: HANDLE, c: int32, pv: LPVOID
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetObjectA".}
+
+  proc TextOut*(
+    hdc: HDC, x: int32, y: int32, lpString: LPCSTR, c: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "TextOutA".}
+
+  proc ExtTextOut*(
+    hdc: HDC,
+    x: int32,
+    y: int32,
+    options: UINT,
+    lprect: ptr RECT,
+    lpString: LPCSTR,
+    c: UINT,
+    lpDx: ptr INT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "ExtTextOutA".}
+
+  proc PolyTextOut*(
+    hdc: HDC, ppt: ptr POLYTEXTA, nstrings: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "PolyTextOutA".}
+
+  proc GetTextFace*(
+    hdc: HDC, c: int32, lpName: LPSTR
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "GetTextFaceA".}
+
+  proc GetKerningPairs*(
+    hdc: HDC, nPairs: DWORD, lpKernPair: LPKERNINGPAIR
+  ): DWORD {.winapi, stdcall, dynlib: "gdi32", importc: "GetKerningPairsA".}
+
+  proc EnumICMProfiles*(
+    hdc: HDC, lpProc: ICMENUMPROCA, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "gdi32", importc: "EnumICMProfilesA".}
+
+  proc UpdateICMRegKey*(
+    reserved: DWORD, lpszCMID: LPSTR, lpszFileName: LPSTR, command: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "UpdateICMRegKeyA".}
+
+  proc GetLogColorSpace*(
+    hColorSpace: HCOLORSPACE, lpBuffer: LPLOGCOLORSPACEA, nSize: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetLogColorSpaceA".}
+
+  proc CreateColorSpace*(
+    lplcs: LPLOGCOLORSPACEA
+  ): HCOLORSPACE {.winapi, stdcall, dynlib: "gdi32", importc: "CreateColorSpaceA".}
+
+  proc GetICMProfile*(
+    hdc: HDC, pBufSize: LPDWORD, pszFilename: LPSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "GetICMProfileA".}
+
+  proc SetICMProfile*(
+    hdc: HDC, lpFileName: LPSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "gdi32", importc: "SetICMProfileA".}
+
+  proc wglUseFontBitmaps*(
+    P1: HDC, P2: DWORD, P3: DWORD, P4: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontBitmapsA".}
+
+  proc wglUseFontOutlines*(
+    P1: HDC,
+    P2: DWORD,
+    P3: DWORD,
+    P4: DWORD,
+    P5: FLOAT,
+    P6: FLOAT,
+    P7: int32,
+    P8: LPGLYPHMETRICSFLOAT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "opengl32", importc: "wglUseFontOutlinesA".}

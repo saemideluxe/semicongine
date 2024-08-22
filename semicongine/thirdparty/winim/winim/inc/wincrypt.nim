@@ -47,6 +47,7 @@ type
     Algid*: ALG_ID
     pbOID*: ptr BYTE
     cbOID*: DWORD
+
   PCMS_KEY_INFO* = ptr CMS_KEY_INFO
   HMAC_INFO* {.pure.} = object
     HashAlgid*: ALG_ID
@@ -54,6 +55,7 @@ type
     cbInnerString*: DWORD
     pbOuterString*: ptr BYTE
     cbOuterString*: DWORD
+
   PHMAC_INFO* = ptr HMAC_INFO
   SCHANNEL_ALG* {.pure.} = object
     dwUse*: DWORD
@@ -61,28 +63,33 @@ type
     cBits*: DWORD
     dwFlags*: DWORD
     dwReserved*: DWORD
+
   PSCHANNEL_ALG* = ptr SCHANNEL_ALG
   BLOBHEADER* {.pure.} = object
     bType*: BYTE
     bVersion*: BYTE
     reserved*: WORD
     aiKeyAlg*: ALG_ID
+
   PUBLICKEYSTRUC* = BLOBHEADER
   DHPUBKEY* {.pure.} = object
     magic*: DWORD
     bitlen*: DWORD
+
   DSSPUBKEY* = DHPUBKEY
   KEAPUBKEY* = DHPUBKEY
   TEKPUBKEY* = DHPUBKEY
   DSSSEED* {.pure.} = object
     counter*: DWORD
     seed*: array[20, BYTE]
+
   DHPUBKEY_VER3* {.pure.} = object
     magic*: DWORD
     bitlenP*: DWORD
     bitlenQ*: DWORD
     bitlenJ*: DWORD
     DSSSeed*: DSSSEED
+
   DSSPUBKEY_VER3* = DHPUBKEY_VER3
   DHPRIVKEY_VER3* {.pure.} = object
     magic*: DWORD
@@ -91,27 +98,32 @@ type
     bitlenJ*: DWORD
     bitlenX*: DWORD
     DSSSeed*: DSSSEED
+
   DSSPRIVKEY_VER3* = DHPRIVKEY_VER3
   KEY_TYPE_SUBTYPE* {.pure.} = object
     dwKeySpec*: DWORD
     Type*: GUID
     Subtype*: GUID
+
   PKEY_TYPE_SUBTYPE* = ptr KEY_TYPE_SUBTYPE
   CRYPT_RC4_KEY_STATE* {.pure.} = object
     Key*: array[16, uint8]
     SBox*: array[256, uint8]
     i*: uint8
     j*: uint8
+
   PCRYPT_RC4_KEY_STATE* = ptr CRYPT_RC4_KEY_STATE
   CRYPT_DES_KEY_STATE* {.pure.} = object
     Key*: array[8, uint8]
     IV*: array[8, uint8]
     Feedback*: array[8, uint8]
+
   PCRYPT_DES_KEY_STATE* = ptr CRYPT_DES_KEY_STATE
   CRYPT_3DES_KEY_STATE* {.pure.} = object
     Key*: array[24, uint8]
     IV*: array[8, uint8]
     Feedback*: array[8, uint8]
+
   PCRYPT_3DES_KEY_STATE* = ptr CRYPT_3DES_KEY_STATE
   CRYPT_AES_128_KEY_STATE* {.pure.} = object
     Key*: array[16, uint8]
@@ -119,6 +131,7 @@ type
     EncryptionState*: array[11, array[16, uint8]]
     DecryptionState*: array[11, array[16, uint8]]
     Feedback*: array[16, uint8]
+
   PCRYPT_AES_128_KEY_STATE* = ptr CRYPT_AES_128_KEY_STATE
   CRYPT_AES_256_KEY_STATE* {.pure.} = object
     Key*: array[32, uint8]
@@ -126,10 +139,12 @@ type
     EncryptionState*: array[15, array[16, uint8]]
     DecryptionState*: array[15, array[16, uint8]]
     Feedback*: array[16, uint8]
+
   PCRYPT_AES_256_KEY_STATE* = ptr CRYPT_AES_256_KEY_STATE
   CRYPT_INTEGER_BLOB* {.pure.} = object
     cbData*: DWORD
     pbData*: ptr BYTE
+
   PCRYPT_INTEGER_BLOB* = ptr CRYPT_INTEGER_BLOB
   CRYPT_UINT_BLOB* = CRYPT_INTEGER_BLOB
   PCRYPT_UINT_BLOB* = ptr CRYPT_INTEGER_BLOB
@@ -161,11 +176,13 @@ type
     pszContentEncObjId*: LPSTR
     PubInfo*: CRYPT_DATA_BLOB
     pReserved*: pointer
+
   PCMS_DH_KEY_INFO* = ptr CMS_DH_KEY_INFO
   BCRYPT_KEY_LENGTHS_STRUCT* {.pure.} = object
     dwMinLength*: ULONG
     dwMaxLength*: ULONG
     dwIncrement*: ULONG
+
   BCRYPT_AUTH_TAG_LENGTHS_STRUCT* = BCRYPT_KEY_LENGTHS_STRUCT
   BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO* {.pure.} = object
     cbSize*: ULONG
@@ -181,24 +198,29 @@ type
     cbAAD*: ULONG
     cbData*: ULONGLONG
     dwFlags*: ULONG
+
   PBCRYPT_AUTHENTICATED_CIPHER_MODE_INFO* = ptr BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO
   BCryptBuffer* {.pure.} = object
     cbBuffer*: ULONG
     BufferType*: ULONG
     pvBuffer*: PVOID
+
   PBCryptBuffer* = ptr BCryptBuffer
   BCryptBufferDesc* {.pure.} = object
     ulVersion*: ULONG
     cBuffers*: ULONG
     pBuffers*: PBCryptBuffer
+
   PBCryptBufferDesc* = ptr BCryptBufferDesc
   BCRYPT_ECCKEY_BLOB* {.pure.} = object
     dwMagic*: ULONG
     cbKey*: ULONG
+
   PBCRYPT_ECCKEY_BLOB* = ptr BCRYPT_ECCKEY_BLOB
   BCRYPT_DH_KEY_BLOB* {.pure.} = object
     dwMagic*: ULONG
     cbKey*: ULONG
+
   PBCRYPT_DH_KEY_BLOB* = ptr BCRYPT_DH_KEY_BLOB
   BCRYPT_DSA_KEY_BLOB* {.pure.} = object
     dwMagic*: ULONG
@@ -206,6 +228,7 @@ type
     Count*: array[4, UCHAR]
     Seed*: array[20, UCHAR]
     q*: array[20, UCHAR]
+
   PBCRYPT_DSA_KEY_BLOB* = ptr BCRYPT_DSA_KEY_BLOB
   BCRYPT_DSA_KEY_BLOB_V2* {.pure.} = object
     dwMagic*: ULONG
@@ -215,65 +238,79 @@ type
     cbSeedLength*: ULONG
     cbGroupSize*: ULONG
     Count*: array[4, UCHAR]
+
   PBCRYPT_DSA_KEY_BLOB_V2* = ptr BCRYPT_DSA_KEY_BLOB_V2
   BCRYPT_KEY_DATA_BLOB_HEADER* {.pure.} = object
     dwMagic*: ULONG
     dwVersion*: ULONG
     cbKeyData*: ULONG
+
   PBCRYPT_KEY_DATA_BLOB_HEADER* = ptr BCRYPT_KEY_DATA_BLOB_HEADER
   BCRYPT_INTERFACE_VERSION* {.pure.} = object
     MajorVersion*: USHORT
     MinorVersion*: USHORT
+
   PBCRYPT_INTERFACE_VERSION* = ptr BCRYPT_INTERFACE_VERSION
   CRYPT_INTERFACE_REG* {.pure.} = object
     dwInterface*: ULONG
     dwFlags*: ULONG
     cFunctions*: ULONG
     rgpszFunctions*: ptr PWSTR
+
   PCRYPT_INTERFACE_REG* = ptr CRYPT_INTERFACE_REG
   CRYPT_IMAGE_REG* {.pure.} = object
     pszImage*: PWSTR
     cInterfaces*: ULONG
     rgpInterfaces*: ptr PCRYPT_INTERFACE_REG
+
   PCRYPT_IMAGE_REG* = ptr CRYPT_IMAGE_REG
   CRYPT_PROVIDER_REG* {.pure.} = object
     cAliases*: ULONG
     rgpszAliases*: ptr PWSTR
     pUM*: PCRYPT_IMAGE_REG
     pKM*: PCRYPT_IMAGE_REG
+
   PCRYPT_PROVIDER_REG* = ptr CRYPT_PROVIDER_REG
   CRYPT_PROVIDERS* {.pure.} = object
     cProviders*: ULONG
     rgpszProviders*: ptr PWSTR
+
   PCRYPT_PROVIDERS* = ptr CRYPT_PROVIDERS
   CRYPT_CONTEXT_CONFIG* {.pure.} = object
     dwFlags*: ULONG
     dwReserved*: ULONG
+
   PCRYPT_CONTEXT_CONFIG* = ptr CRYPT_CONTEXT_CONFIG
   CRYPT_CONTEXT_FUNCTION_CONFIG* {.pure.} = object
     dwFlags*: ULONG
     dwReserved*: ULONG
+
   PCRYPT_CONTEXT_FUNCTION_CONFIG* = ptr CRYPT_CONTEXT_FUNCTION_CONFIG
   CRYPT_CONTEXTS* {.pure.} = object
     cContexts*: ULONG
     rgpszContexts*: ptr PWSTR
+
   PCRYPT_CONTEXTS* = ptr CRYPT_CONTEXTS
   CRYPT_CONTEXT_FUNCTIONS* {.pure.} = object
     cFunctions*: ULONG
     rgpszFunctions*: ptr PWSTR
+
   PCRYPT_CONTEXT_FUNCTIONS* = ptr CRYPT_CONTEXT_FUNCTIONS
   CRYPT_CONTEXT_FUNCTION_PROVIDERS* {.pure.} = object
     cProviders*: ULONG
     rgpszProviders*: ptr PWSTR
+
   PCRYPT_CONTEXT_FUNCTION_PROVIDERS* = ptr CRYPT_CONTEXT_FUNCTION_PROVIDERS
   CRYPT_PROPERTY_REF* {.pure.} = object
     pszProperty*: PWSTR
     cbValue*: ULONG
     pbValue*: PUCHAR
+
   PCRYPT_PROPERTY_REF* = ptr CRYPT_PROPERTY_REF
   CRYPT_IMAGE_REF* {.pure.} = object
     pszImage*: PWSTR
     dwFlags*: ULONG
+
   PCRYPT_IMAGE_REF* = ptr CRYPT_IMAGE_REF
   CRYPT_PROVIDER_REF* {.pure.} = object
     dwInterface*: ULONG
@@ -283,10 +320,12 @@ type
     rgpProperties*: ptr PCRYPT_PROPERTY_REF
     pUM*: PCRYPT_IMAGE_REF
     pKM*: PCRYPT_IMAGE_REF
+
   PCRYPT_PROVIDER_REF* = ptr CRYPT_PROVIDER_REF
   CRYPT_PROVIDER_REFS* {.pure.} = object
     cProviders*: ULONG
     rgpProviders*: ptr PCRYPT_PROVIDER_REF
+
   PCRYPT_PROVIDER_REFS* = ptr CRYPT_PROVIDER_REFS
   NCryptBuffer* = BCryptBuffer
   PNCryptBuffer* = ptr BCryptBuffer
@@ -299,104 +338,140 @@ type
     cbIV*: ULONG
     pbOtherInfo*: PUCHAR
     cbOtherInfo*: ULONG
+
   PNCRYPT_CIPHER_PADDING_INFO* = ptr NCRYPT_CIPHER_PADDING_INFO
   NCRYPT_KEY_BLOB_HEADER* {.pure.} = object
     cbSize*: ULONG
     dwMagic*: ULONG
     cbAlgName*: ULONG
     cbKeyData*: ULONG
+
   PNCRYPT_KEY_BLOB_HEADER* = ptr NCRYPT_KEY_BLOB_HEADER
   CRYPT_BIT_BLOB* {.pure.} = object
     cbData*: DWORD
     pbData*: ptr BYTE
     cUnusedBits*: DWORD
+
   PCRYPT_BIT_BLOB* = ptr CRYPT_BIT_BLOB
   CRYPT_ALGORITHM_IDENTIFIER* {.pure.} = object
     pszObjId*: LPSTR
     Parameters*: CRYPT_OBJID_BLOB
+
   PCRYPT_ALGORITHM_IDENTIFIER* = ptr CRYPT_ALGORITHM_IDENTIFIER
   CRYPT_OBJID_TABLE* {.pure.} = object
     dwAlgId*: DWORD
     pszObjId*: LPCSTR
+
   PCRYPT_OBJID_TABLE* = ptr CRYPT_OBJID_TABLE
   CRYPT_HASH_INFO* {.pure.} = object
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     Hash*: CRYPT_HASH_BLOB
+
   PCRYPT_HASH_INFO* = ptr CRYPT_HASH_INFO
   CERT_EXTENSION* {.pure.} = object
     pszObjId*: LPSTR
     fCritical*: WINBOOL
     Value*: CRYPT_OBJID_BLOB
+
   PCERT_EXTENSION* = ptr CERT_EXTENSION
   PCCERT_EXTENSION* = ptr CERT_EXTENSION
   CRYPT_ATTRIBUTE_TYPE_VALUE* {.pure.} = object
     pszObjId*: LPSTR
     Value*: CRYPT_OBJID_BLOB
+
   PCRYPT_ATTRIBUTE_TYPE_VALUE* = ptr CRYPT_ATTRIBUTE_TYPE_VALUE
   CRYPT_ATTRIBUTE* {.pure.} = object
     pszObjId*: LPSTR
     cValue*: DWORD
     rgValue*: PCRYPT_ATTR_BLOB
+
   PCRYPT_ATTRIBUTE* = ptr CRYPT_ATTRIBUTE
   CRYPT_ATTRIBUTES* {.pure.} = object
     cAttr*: DWORD
     rgAttr*: PCRYPT_ATTRIBUTE
+
   PCRYPT_ATTRIBUTES* = ptr CRYPT_ATTRIBUTES
   CERT_RDN_ATTR* {.pure.} = object
     pszObjId*: LPSTR
     dwValueType*: DWORD
     Value*: CERT_RDN_VALUE_BLOB
+
   PCERT_RDN_ATTR* = ptr CERT_RDN_ATTR
   CERT_RDN* {.pure.} = object
     cRDNAttr*: DWORD
     rgRDNAttr*: PCERT_RDN_ATTR
+
   PCERT_RDN* = ptr CERT_RDN
   CERT_NAME_INFO* {.pure.} = object
     cRDN*: DWORD
     rgRDN*: PCERT_RDN
+
   PCERT_NAME_INFO* = ptr CERT_NAME_INFO
   CERT_NAME_VALUE* {.pure.} = object
     dwValueType*: DWORD
     Value*: CERT_RDN_VALUE_BLOB
+
   PCERT_NAME_VALUE* = ptr CERT_NAME_VALUE
   CERT_PUBLIC_KEY_INFO* {.pure.} = object
     Algorithm*: CRYPT_ALGORITHM_IDENTIFIER
     PublicKey*: CRYPT_BIT_BLOB
+
   PCERT_PUBLIC_KEY_INFO* = ptr CERT_PUBLIC_KEY_INFO
   CRYPT_ECC_PRIVATE_KEY_INFO* {.pure.} = object
     dwVersion*: DWORD
     PrivateKey*: CRYPT_DER_BLOB
     szCurveOid*: LPSTR
     PublicKey*: CRYPT_BIT_BLOB
+
   PCRYPT_ECC_PRIVATE_KEY_INFO* = ptr CRYPT_ECC_PRIVATE_KEY_INFO
   CRYPT_PRIVATE_KEY_INFO* {.pure.} = object
     Version*: DWORD
     Algorithm*: CRYPT_ALGORITHM_IDENTIFIER
     PrivateKey*: CRYPT_DER_BLOB
     pAttributes*: PCRYPT_ATTRIBUTES
+
   PCRYPT_PRIVATE_KEY_INFO* = ptr CRYPT_PRIVATE_KEY_INFO
   CRYPT_ENCRYPTED_PRIVATE_KEY_INFO* {.pure.} = object
     EncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     EncryptedPrivateKey*: CRYPT_DATA_BLOB
+
   PCRYPT_ENCRYPTED_PRIVATE_KEY_INFO* = ptr CRYPT_ENCRYPTED_PRIVATE_KEY_INFO
-  PCRYPT_RESOLVE_HCRYPTPROV_FUNC* = proc (pPrivateKeyInfo: ptr CRYPT_PRIVATE_KEY_INFO, phCryptProv: ptr HCRYPTPROV, pVoidResolveFunc: LPVOID): WINBOOL {.stdcall.}
-  PCRYPT_DECRYPT_PRIVATE_KEY_FUNC* = proc (Algorithm: CRYPT_ALGORITHM_IDENTIFIER, EncryptedPrivateKey: CRYPT_DATA_BLOB, pbClearTextKey: ptr BYTE, pcbClearTextKey: ptr DWORD, pVoidDecryptFunc: LPVOID): WINBOOL {.stdcall.}
+  PCRYPT_RESOLVE_HCRYPTPROV_FUNC* = proc(
+    pPrivateKeyInfo: ptr CRYPT_PRIVATE_KEY_INFO,
+    phCryptProv: ptr HCRYPTPROV,
+    pVoidResolveFunc: LPVOID,
+  ): WINBOOL {.stdcall.}
+  PCRYPT_DECRYPT_PRIVATE_KEY_FUNC* = proc(
+    Algorithm: CRYPT_ALGORITHM_IDENTIFIER,
+    EncryptedPrivateKey: CRYPT_DATA_BLOB,
+    pbClearTextKey: ptr BYTE,
+    pcbClearTextKey: ptr DWORD,
+    pVoidDecryptFunc: LPVOID,
+  ): WINBOOL {.stdcall.}
   CRYPT_PKCS8_IMPORT_PARAMS* {.pure.} = object
     PrivateKey*: CRYPT_DIGEST_BLOB
     pResolvehCryptProvFunc*: PCRYPT_RESOLVE_HCRYPTPROV_FUNC
     pVoidResolveFunc*: LPVOID
     pDecryptPrivateKeyFunc*: PCRYPT_DECRYPT_PRIVATE_KEY_FUNC
     pVoidDecryptFunc*: LPVOID
+
   PCRYPT_PKCS8_IMPORT_PARAMS* = ptr CRYPT_PKCS8_IMPORT_PARAMS
   CRYPT_PRIVATE_KEY_BLOB_AND_PARAMS* = CRYPT_PKCS8_IMPORT_PARAMS
   PCRYPT_PRIVATE_KEY_BLOB_AND_PARAMS* = ptr CRYPT_PKCS8_IMPORT_PARAMS
-  PCRYPT_ENCRYPT_PRIVATE_KEY_FUNC* = proc (pAlgorithm: ptr CRYPT_ALGORITHM_IDENTIFIER, pClearTextPrivateKey: ptr CRYPT_DATA_BLOB, pbEncryptedKey: ptr BYTE, pcbEncryptedKey: ptr DWORD, pVoidEncryptFunc: LPVOID): WINBOOL {.stdcall.}
+  PCRYPT_ENCRYPT_PRIVATE_KEY_FUNC* = proc(
+    pAlgorithm: ptr CRYPT_ALGORITHM_IDENTIFIER,
+    pClearTextPrivateKey: ptr CRYPT_DATA_BLOB,
+    pbEncryptedKey: ptr BYTE,
+    pcbEncryptedKey: ptr DWORD,
+    pVoidEncryptFunc: LPVOID,
+  ): WINBOOL {.stdcall.}
   CRYPT_PKCS8_EXPORT_PARAMS* {.pure.} = object
     hCryptProv*: HCRYPTPROV
     dwKeySpec*: DWORD
     pszPrivateKeyObjId*: LPSTR
     pEncryptPrivateKeyFunc*: PCRYPT_ENCRYPT_PRIVATE_KEY_FUNC
     pVoidEncryptFunc*: LPVOID
+
   PCRYPT_PKCS8_EXPORT_PARAMS* = ptr CRYPT_PKCS8_EXPORT_PARAMS
   CERT_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -411,12 +486,14 @@ type
     SubjectUniqueId*: CRYPT_BIT_BLOB
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCERT_INFO* = ptr CERT_INFO
   CRL_ENTRY* {.pure.} = object
     SerialNumber*: CRYPT_INTEGER_BLOB
     RevocationDate*: FILETIME
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCRL_ENTRY* = ptr CRL_ENTRY
   CRL_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -428,15 +505,18 @@ type
     rgCRLEntry*: PCRL_ENTRY
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCRL_INFO* = ptr CRL_INFO
   CERT_OR_CRL_BLOB* {.pure.} = object
     dwChoice*: DWORD
     cbEncoded*: DWORD
     pbEncoded*: ptr BYTE
+
   PCERT_OR_CRL_BLOB* = ptr CERT_OR_CRL_BLOB
   CERT_OR_CRL_BUNDLE* {.pure.} = object
     cItem*: DWORD
     rgItem*: PCERT_OR_CRL_BLOB
+
   PCERT_OR_CRL_BUNDLE* = ptr CERT_OR_CRL_BUNDLE
   CERT_REQUEST_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -444,20 +524,24 @@ type
     SubjectPublicKeyInfo*: CERT_PUBLIC_KEY_INFO
     cAttribute*: DWORD
     rgAttribute*: PCRYPT_ATTRIBUTE
+
   PCERT_REQUEST_INFO* = ptr CERT_REQUEST_INFO
   CERT_KEYGEN_REQUEST_INFO* {.pure.} = object
     dwVersion*: DWORD
     SubjectPublicKeyInfo*: CERT_PUBLIC_KEY_INFO
     pwszChallengeString*: LPWSTR
+
   PCERT_KEYGEN_REQUEST_INFO* = ptr CERT_KEYGEN_REQUEST_INFO
   CERT_SIGNED_CONTENT_INFO* {.pure.} = object
     ToBeSigned*: CRYPT_DER_BLOB
     SignatureAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     Signature*: CRYPT_BIT_BLOB
+
   PCERT_SIGNED_CONTENT_INFO* = ptr CERT_SIGNED_CONTENT_INFO
   CTL_USAGE* {.pure.} = object
     cUsageIdentifier*: DWORD
     rgpszUsageIdentifier*: ptr LPSTR
+
   PCTL_USAGE* = ptr CTL_USAGE
   CERT_ENHKEY_USAGE* = CTL_USAGE
   PCERT_ENHKEY_USAGE* = ptr CTL_USAGE
@@ -467,6 +551,7 @@ type
     SubjectIdentifier*: CRYPT_DATA_BLOB
     cAttribute*: DWORD
     rgAttribute*: PCRYPT_ATTRIBUTE
+
   PCTL_ENTRY* = ptr CTL_ENTRY
   CTL_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -480,6 +565,7 @@ type
     rgCTLEntry*: PCTL_ENTRY
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCTL_INFO* = ptr CTL_INFO
   CRYPT_TIME_STAMP_REQUEST_INFO* {.pure.} = object
     pszTimeStampAlgorithm*: LPSTR
@@ -487,58 +573,70 @@ type
     Content*: CRYPT_OBJID_BLOB
     cAttribute*: DWORD
     rgAttribute*: PCRYPT_ATTRIBUTE
+
   PCRYPT_TIME_STAMP_REQUEST_INFO* = ptr CRYPT_TIME_STAMP_REQUEST_INFO
   CRYPT_ENROLLMENT_NAME_VALUE_PAIR* {.pure.} = object
     pwszName*: LPWSTR
     pwszValue*: LPWSTR
+
   PCRYPT_ENROLLMENT_NAME_VALUE_PAIR* = ptr CRYPT_ENROLLMENT_NAME_VALUE_PAIR
   CRYPT_CSP_PROVIDER* {.pure.} = object
     dwKeySpec*: DWORD
     pwszProviderName*: LPWSTR
     Signature*: CRYPT_BIT_BLOB
+
   PCRYPT_CSP_PROVIDER* = ptr CRYPT_CSP_PROVIDER
-  PFN_CRYPT_ALLOC* = proc (cbSize: int): LPVOID {.stdcall.}
-  PFN_CRYPT_FREE* = proc (pv: LPVOID): VOID {.stdcall.}
+  PFN_CRYPT_ALLOC* = proc(cbSize: int): LPVOID {.stdcall.}
+  PFN_CRYPT_FREE* = proc(pv: LPVOID): VOID {.stdcall.}
   CRYPT_ENCODE_PARA* {.pure.} = object
     cbSize*: DWORD
     pfnAlloc*: PFN_CRYPT_ALLOC
     pfnFree*: PFN_CRYPT_FREE
+
   PCRYPT_ENCODE_PARA* = ptr CRYPT_ENCODE_PARA
   CRYPT_DECODE_PARA* {.pure.} = object
     cbSize*: DWORD
     pfnAlloc*: PFN_CRYPT_ALLOC
     pfnFree*: PFN_CRYPT_FREE
+
   PCRYPT_DECODE_PARA* = ptr CRYPT_DECODE_PARA
   CERT_EXTENSIONS* {.pure.} = object
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCERT_EXTENSIONS* = ptr CERT_EXTENSIONS
   CERT_AUTHORITY_KEY_ID_INFO* {.pure.} = object
     KeyId*: CRYPT_DATA_BLOB
     CertIssuer*: CERT_NAME_BLOB
     CertSerialNumber*: CRYPT_INTEGER_BLOB
+
   PCERT_AUTHORITY_KEY_ID_INFO* = ptr CERT_AUTHORITY_KEY_ID_INFO
   CERT_PRIVATE_KEY_VALIDITY* {.pure.} = object
     NotBefore*: FILETIME
     NotAfter*: FILETIME
+
   PCERT_PRIVATE_KEY_VALIDITY* = ptr CERT_PRIVATE_KEY_VALIDITY
   CERT_KEY_ATTRIBUTES_INFO* {.pure.} = object
     KeyId*: CRYPT_DATA_BLOB
     IntendedKeyUsage*: CRYPT_BIT_BLOB
     pPrivateKeyUsagePeriod*: PCERT_PRIVATE_KEY_VALIDITY
+
   PCERT_KEY_ATTRIBUTES_INFO* = ptr CERT_KEY_ATTRIBUTES_INFO
   CERT_POLICY_ID* {.pure.} = object
     cCertPolicyElementId*: DWORD
     rgpszCertPolicyElementId*: ptr LPSTR
+
   PCERT_POLICY_ID* = ptr CERT_POLICY_ID
   CERT_KEY_USAGE_RESTRICTION_INFO* {.pure.} = object
     cCertPolicyId*: DWORD
     rgCertPolicyId*: PCERT_POLICY_ID
     RestrictedKeyUsage*: CRYPT_BIT_BLOB
+
   PCERT_KEY_USAGE_RESTRICTION_INFO* = ptr CERT_KEY_USAGE_RESTRICTION_INFO
   CERT_OTHER_NAME* {.pure.} = object
     pszObjId*: LPSTR
     Value*: CRYPT_OBJID_BLOB
+
   PCERT_OTHER_NAME* = ptr CERT_OTHER_NAME
   CERT_ALT_NAME_ENTRY_UNION1* {.pure, union.} = object
     pOtherName*: PCERT_OTHER_NAME
@@ -548,13 +646,16 @@ type
     pwszURL*: LPWSTR
     IPAddress*: CRYPT_DATA_BLOB
     pszRegisteredID*: LPSTR
+
   CERT_ALT_NAME_ENTRY* {.pure.} = object
     dwAltNameChoice*: DWORD
     union1*: CERT_ALT_NAME_ENTRY_UNION1
+
   PCERT_ALT_NAME_ENTRY* = ptr CERT_ALT_NAME_ENTRY
   CERT_ALT_NAME_INFO* {.pure.} = object
     cAltEntry*: DWORD
     rgAltEntry*: PCERT_ALT_NAME_ENTRY
+
   PCERT_ALT_NAME_INFO* = ptr CERT_ALT_NAME_INFO
   CERT_BASIC_CONSTRAINTS_INFO* {.pure.} = object
     SubjectType*: CRYPT_BIT_BLOB
@@ -562,38 +663,46 @@ type
     dwPathLenConstraint*: DWORD
     cSubtreesConstraint*: DWORD
     rgSubtreesConstraint*: ptr CERT_NAME_BLOB
+
   PCERT_BASIC_CONSTRAINTS_INFO* = ptr CERT_BASIC_CONSTRAINTS_INFO
   CERT_BASIC_CONSTRAINTS2_INFO* {.pure.} = object
     fCA*: WINBOOL
     fPathLenConstraint*: WINBOOL
     dwPathLenConstraint*: DWORD
+
   PCERT_BASIC_CONSTRAINTS2_INFO* = ptr CERT_BASIC_CONSTRAINTS2_INFO
   CERT_POLICY_QUALIFIER_INFO* {.pure.} = object
     pszPolicyQualifierId*: LPSTR
     Qualifier*: CRYPT_OBJID_BLOB
+
   PCERT_POLICY_QUALIFIER_INFO* = ptr CERT_POLICY_QUALIFIER_INFO
   CERT_POLICY_INFO* {.pure.} = object
     pszPolicyIdentifier*: LPSTR
     cPolicyQualifier*: DWORD
     rgPolicyQualifier*: ptr CERT_POLICY_QUALIFIER_INFO
+
   PCERT_POLICY_INFO* = ptr CERT_POLICY_INFO
   CERT_POLICIES_INFO* {.pure.} = object
     cPolicyInfo*: DWORD
     rgPolicyInfo*: ptr CERT_POLICY_INFO
+
   PCERT_POLICIES_INFO* = ptr CERT_POLICIES_INFO
   CERT_POLICY_QUALIFIER_NOTICE_REFERENCE* {.pure.} = object
     pszOrganization*: LPSTR
     cNoticeNumbers*: DWORD
     rgNoticeNumbers*: ptr int32
+
   PCERT_POLICY_QUALIFIER_NOTICE_REFERENCE* = ptr CERT_POLICY_QUALIFIER_NOTICE_REFERENCE
   CERT_POLICY_QUALIFIER_USER_NOTICE* {.pure.} = object
     pNoticeReference*: ptr CERT_POLICY_QUALIFIER_NOTICE_REFERENCE
     pszDisplayText*: LPWSTR
+
   PCERT_POLICY_QUALIFIER_USER_NOTICE* = ptr CERT_POLICY_QUALIFIER_USER_NOTICE
   CPS_URLS* {.pure.} = object
     pszURL*: LPWSTR
     pAlgorithm*: ptr CRYPT_ALGORITHM_IDENTIFIER
     pDigest*: ptr CRYPT_DATA_BLOB
+
   PCPS_URLS* = ptr CPS_URLS
   CERT_POLICY95_QUALIFIER1* {.pure.} = object
     pszPracticesReference*: LPWSTR
@@ -601,72 +710,88 @@ type
     pszNSINoticeIdentifier*: LPSTR
     cCPSURLs*: DWORD
     rgCPSURLs*: ptr CPS_URLS
+
   PCERT_POLICY95_QUALIFIER1* = ptr CERT_POLICY95_QUALIFIER1
   CERT_POLICY_MAPPING* {.pure.} = object
     pszIssuerDomainPolicy*: LPSTR
     pszSubjectDomainPolicy*: LPSTR
+
   PCERT_POLICY_MAPPING* = ptr CERT_POLICY_MAPPING
   CERT_POLICY_MAPPINGS_INFO* {.pure.} = object
     cPolicyMapping*: DWORD
     rgPolicyMapping*: PCERT_POLICY_MAPPING
+
   PCERT_POLICY_MAPPINGS_INFO* = ptr CERT_POLICY_MAPPINGS_INFO
   CERT_POLICY_CONSTRAINTS_INFO* {.pure.} = object
     fRequireExplicitPolicy*: WINBOOL
     dwRequireExplicitPolicySkipCerts*: DWORD
     fInhibitPolicyMapping*: WINBOOL
     dwInhibitPolicyMappingSkipCerts*: DWORD
+
   PCERT_POLICY_CONSTRAINTS_INFO* = ptr CERT_POLICY_CONSTRAINTS_INFO
   CRYPT_CONTENT_INFO_SEQUENCE_OF_ANY* {.pure.} = object
     pszObjId*: LPSTR
     cValue*: DWORD
     rgValue*: PCRYPT_DER_BLOB
+
   PCRYPT_CONTENT_INFO_SEQUENCE_OF_ANY* = ptr CRYPT_CONTENT_INFO_SEQUENCE_OF_ANY
   CRYPT_CONTENT_INFO* {.pure.} = object
     pszObjId*: LPSTR
     Content*: CRYPT_DER_BLOB
+
   PCRYPT_CONTENT_INFO* = ptr CRYPT_CONTENT_INFO
   CRYPT_SEQUENCE_OF_ANY* {.pure.} = object
     cValue*: DWORD
     rgValue*: PCRYPT_DER_BLOB
+
   PCRYPT_SEQUENCE_OF_ANY* = ptr CRYPT_SEQUENCE_OF_ANY
   CERT_AUTHORITY_KEY_ID2_INFO* {.pure.} = object
     KeyId*: CRYPT_DATA_BLOB
     AuthorityCertIssuer*: CERT_ALT_NAME_INFO
     AuthorityCertSerialNumber*: CRYPT_INTEGER_BLOB
+
   PCERT_AUTHORITY_KEY_ID2_INFO* = ptr CERT_AUTHORITY_KEY_ID2_INFO
   CERT_ACCESS_DESCRIPTION* {.pure.} = object
     pszAccessMethod*: LPSTR
     AccessLocation*: CERT_ALT_NAME_ENTRY
+
   PCERT_ACCESS_DESCRIPTION* = ptr CERT_ACCESS_DESCRIPTION
   CERT_AUTHORITY_INFO_ACCESS* {.pure.} = object
     cAccDescr*: DWORD
     rgAccDescr*: PCERT_ACCESS_DESCRIPTION
+
   PCERT_AUTHORITY_INFO_ACCESS* = ptr CERT_AUTHORITY_INFO_ACCESS
   CERT_SUBJECT_INFO_ACCESS* = CERT_AUTHORITY_INFO_ACCESS
   PCERT_SUBJECT_INFO_ACCESS* = ptr CERT_AUTHORITY_INFO_ACCESS
   CRL_DIST_POINT_NAME_UNION1* {.pure, union.} = object
     FullName*: CERT_ALT_NAME_INFO
+
   CRL_DIST_POINT_NAME* {.pure.} = object
     dwDistPointNameChoice*: DWORD
     union1*: CRL_DIST_POINT_NAME_UNION1
+
   PCRL_DIST_POINT_NAME* = ptr CRL_DIST_POINT_NAME
   CRL_DIST_POINT* {.pure.} = object
     DistPointName*: CRL_DIST_POINT_NAME
     ReasonFlags*: CRYPT_BIT_BLOB
     CRLIssuer*: CERT_ALT_NAME_INFO
+
   PCRL_DIST_POINT* = ptr CRL_DIST_POINT
   CRL_DIST_POINTS_INFO* {.pure.} = object
     cDistPoint*: DWORD
     rgDistPoint*: PCRL_DIST_POINT
+
   PCRL_DIST_POINTS_INFO* = ptr CRL_DIST_POINTS_INFO
   CROSS_CERT_DIST_POINTS_INFO* {.pure.} = object
     dwSyncDeltaTime*: DWORD
     cDistPoint*: DWORD
     rgDistPoint*: PCERT_ALT_NAME_INFO
+
   PCROSS_CERT_DIST_POINTS_INFO* = ptr CROSS_CERT_DIST_POINTS_INFO
   CERT_PAIR* {.pure.} = object
     Forward*: CERT_BLOB
     Reverse*: CERT_BLOB
+
   PCERT_PAIR* = ptr CERT_PAIR
   CRL_ISSUING_DIST_POINT* {.pure.} = object
     DistPointName*: CRL_DIST_POINT_NAME
@@ -674,35 +799,42 @@ type
     fOnlyContainsCACerts*: WINBOOL
     OnlySomeReasonFlags*: CRYPT_BIT_BLOB
     fIndirectCRL*: WINBOOL
+
   PCRL_ISSUING_DIST_POINT* = ptr CRL_ISSUING_DIST_POINT
   CERT_GENERAL_SUBTREE* {.pure.} = object
     Base*: CERT_ALT_NAME_ENTRY
     dwMinimum*: DWORD
     fMaximum*: WINBOOL
     dwMaximum*: DWORD
+
   PCERT_GENERAL_SUBTREE* = ptr CERT_GENERAL_SUBTREE
   CERT_NAME_CONSTRAINTS_INFO* {.pure.} = object
     cPermittedSubtree*: DWORD
     rgPermittedSubtree*: PCERT_GENERAL_SUBTREE
     cExcludedSubtree*: DWORD
     rgExcludedSubtree*: PCERT_GENERAL_SUBTREE
+
   PCERT_NAME_CONSTRAINTS_INFO* = ptr CERT_NAME_CONSTRAINTS_INFO
   CERT_DSS_PARAMETERS* {.pure.} = object
     p*: CRYPT_UINT_BLOB
     q*: CRYPT_UINT_BLOB
     g*: CRYPT_UINT_BLOB
+
   PCERT_DSS_PARAMETERS* = ptr CERT_DSS_PARAMETERS
   CERT_DH_PARAMETERS* {.pure.} = object
     p*: CRYPT_UINT_BLOB
     g*: CRYPT_UINT_BLOB
+
   PCERT_DH_PARAMETERS* = ptr CERT_DH_PARAMETERS
   CERT_ECC_SIGNATURE* {.pure.} = object
     r*: CRYPT_UINT_BLOB
     s*: CRYPT_UINT_BLOB
+
   PCERT_ECC_SIGNATURE* = ptr CERT_ECC_SIGNATURE
   CERT_X942_DH_VALIDATION_PARAMS* {.pure.} = object
     seed*: CRYPT_BIT_BLOB
     pgenCounter*: DWORD
+
   PCERT_X942_DH_VALIDATION_PARAMS* = ptr CERT_X942_DH_VALIDATION_PARAMS
   CERT_X942_DH_PARAMETERS* {.pure.} = object
     p*: CRYPT_UINT_BLOB
@@ -710,7 +842,9 @@ type
     q*: CRYPT_UINT_BLOB
     j*: CRYPT_UINT_BLOB
     pValidationParams*: PCERT_X942_DH_VALIDATION_PARAMS
+
   PCERT_X942_DH_PARAMETERS* = ptr CERT_X942_DH_PARAMETERS
+
 const
   CRYPT_X942_COUNTER_BYTE_LENGTH* = 4
   CRYPT_X942_KEY_LENGTH_BYTE_LENGTH* = 4
@@ -720,77 +854,94 @@ type
     rgbCounter*: array[CRYPT_X942_COUNTER_BYTE_LENGTH, BYTE]
     rgbKeyLength*: array[CRYPT_X942_KEY_LENGTH_BYTE_LENGTH, BYTE]
     PubInfo*: CRYPT_DATA_BLOB
+
   PCRYPT_X942_OTHER_INFO* = ptr CRYPT_X942_OTHER_INFO
-const
-  CRYPT_ECC_CMS_SHARED_INFO_SUPPPUBINFO_BYTE_LENGTH* = 4
+
+const CRYPT_ECC_CMS_SHARED_INFO_SUPPPUBINFO_BYTE_LENGTH* = 4
 type
   CRYPT_ECC_CMS_SHARED_INFO* {.pure.} = object
     Algorithm*: CRYPT_ALGORITHM_IDENTIFIER
     EntityUInfo*: CRYPT_DATA_BLOB
     rgbSuppPubInfo*: array[CRYPT_ECC_CMS_SHARED_INFO_SUPPPUBINFO_BYTE_LENGTH, BYTE]
+
   PCRYPT_ECC_CMS_SHARED_INFO* = ptr CRYPT_ECC_CMS_SHARED_INFO
   CRYPT_RC2_CBC_PARAMETERS* {.pure.} = object
     dwVersion*: DWORD
     fIV*: WINBOOL
     rgbIV*: array[8, BYTE]
+
   PCRYPT_RC2_CBC_PARAMETERS* = ptr CRYPT_RC2_CBC_PARAMETERS
   CRYPT_SMIME_CAPABILITY* {.pure.} = object
     pszObjId*: LPSTR
     Parameters*: CRYPT_OBJID_BLOB
+
   PCRYPT_SMIME_CAPABILITY* = ptr CRYPT_SMIME_CAPABILITY
   CRYPT_SMIME_CAPABILITIES* {.pure.} = object
     cCapability*: DWORD
     rgCapability*: PCRYPT_SMIME_CAPABILITY
+
   PCRYPT_SMIME_CAPABILITIES* = ptr CRYPT_SMIME_CAPABILITIES
   CERT_QC_STATEMENT* {.pure.} = object
     pszStatementId*: LPSTR
     StatementInfo*: CRYPT_OBJID_BLOB
+
   PCERT_QC_STATEMENT* = ptr CERT_QC_STATEMENT
   CERT_QC_STATEMENTS_EXT_INFO* {.pure.} = object
     cStatement*: DWORD
     rgStatement*: PCERT_QC_STATEMENT
+
   PCERT_QC_STATEMENTS_EXT_INFO* = ptr CERT_QC_STATEMENTS_EXT_INFO
   CRYPT_MASK_GEN_ALGORITHM* {.pure.} = object
     pszObjId*: LPSTR
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
+
   PCRYPT_MASK_GEN_ALGORITHM* = ptr CRYPT_MASK_GEN_ALGORITHM
   CRYPT_RSA_SSA_PSS_PARAMETERS* {.pure.} = object
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     MaskGenAlgorithm*: CRYPT_MASK_GEN_ALGORITHM
     dwSaltLength*: DWORD
     dwTrailerField*: DWORD
+
   PCRYPT_RSA_SSA_PSS_PARAMETERS* = ptr CRYPT_RSA_SSA_PSS_PARAMETERS
   CRYPT_PSOURCE_ALGORITHM* {.pure.} = object
     pszObjId*: LPSTR
     EncodingParameters*: CRYPT_DATA_BLOB
+
   PCRYPT_PSOURCE_ALGORITHM* = ptr CRYPT_PSOURCE_ALGORITHM
   CRYPT_RSAES_OAEP_PARAMETERS* {.pure.} = object
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     MaskGenAlgorithm*: CRYPT_MASK_GEN_ALGORITHM
     PSourceAlgorithm*: CRYPT_PSOURCE_ALGORITHM
+
   PCRYPT_RSAES_OAEP_PARAMETERS* = ptr CRYPT_RSAES_OAEP_PARAMETERS
   CMC_TAGGED_ATTRIBUTE* {.pure.} = object
     dwBodyPartID*: DWORD
     Attribute*: CRYPT_ATTRIBUTE
+
   PCMC_TAGGED_ATTRIBUTE* = ptr CMC_TAGGED_ATTRIBUTE
   CMC_TAGGED_CERT_REQUEST* {.pure.} = object
     dwBodyPartID*: DWORD
     SignedCertRequest*: CRYPT_DER_BLOB
+
   PCMC_TAGGED_CERT_REQUEST* = ptr CMC_TAGGED_CERT_REQUEST
   CMC_TAGGED_REQUEST_UNION1* {.pure, union.} = object
     pTaggedCertRequest*: PCMC_TAGGED_CERT_REQUEST
+
   CMC_TAGGED_REQUEST* {.pure.} = object
     dwTaggedRequestChoice*: DWORD
     union1*: CMC_TAGGED_REQUEST_UNION1
+
   PCMC_TAGGED_REQUEST* = ptr CMC_TAGGED_REQUEST
   CMC_TAGGED_CONTENT_INFO* {.pure.} = object
     dwBodyPartID*: DWORD
     EncodedContentInfo*: CRYPT_DER_BLOB
+
   PCMC_TAGGED_CONTENT_INFO* = ptr CMC_TAGGED_CONTENT_INFO
   CMC_TAGGED_OTHER_MSG* {.pure.} = object
     dwBodyPartID*: DWORD
     pszObjId*: LPSTR
     Value*: CRYPT_OBJID_BLOB
+
   PCMC_TAGGED_OTHER_MSG* = ptr CMC_TAGGED_OTHER_MSG
   CMC_DATA_INFO* {.pure.} = object
     cTaggedAttribute*: DWORD
@@ -801,6 +952,7 @@ type
     rgTaggedContentInfo*: PCMC_TAGGED_CONTENT_INFO
     cTaggedOtherMsg*: DWORD
     rgTaggedOtherMsg*: PCMC_TAGGED_OTHER_MSG
+
   PCMC_DATA_INFO* = ptr CMC_DATA_INFO
   CMC_RESPONSE_INFO* {.pure.} = object
     cTaggedAttribute*: DWORD
@@ -809,14 +961,17 @@ type
     rgTaggedContentInfo*: PCMC_TAGGED_CONTENT_INFO
     cTaggedOtherMsg*: DWORD
     rgTaggedOtherMsg*: PCMC_TAGGED_OTHER_MSG
+
   PCMC_RESPONSE_INFO* = ptr CMC_RESPONSE_INFO
   CMC_PEND_INFO* {.pure.} = object
     PendToken*: CRYPT_DATA_BLOB
     PendTime*: FILETIME
+
   PCMC_PEND_INFO* = ptr CMC_PEND_INFO
   CMC_STATUS_INFO_UNION1* {.pure, union.} = object
     dwFailInfo*: DWORD
     pPendInfo*: PCMC_PEND_INFO
+
   CMC_STATUS_INFO* {.pure.} = object
     dwStatus*: DWORD
     cBodyList*: DWORD
@@ -824,6 +979,7 @@ type
     pwszStatusString*: LPWSTR
     dwOtherInfoChoice*: DWORD
     union1*: CMC_STATUS_INFO_UNION1
+
   PCMC_STATUS_INFO* = ptr CMC_STATUS_INFO
   CMC_ADD_EXTENSIONS_INFO* {.pure.} = object
     dwCmcDataReference*: DWORD
@@ -831,6 +987,7 @@ type
     rgdwCertReference*: ptr DWORD
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCMC_ADD_EXTENSIONS_INFO* = ptr CMC_ADD_EXTENSIONS_INFO
   CMC_ADD_ATTRIBUTES_INFO* {.pure.} = object
     dwCmcDataReference*: DWORD
@@ -838,30 +995,36 @@ type
     rgdwCertReference*: ptr DWORD
     cAttribute*: DWORD
     rgAttribute*: PCRYPT_ATTRIBUTE
+
   PCMC_ADD_ATTRIBUTES_INFO* = ptr CMC_ADD_ATTRIBUTES_INFO
   CERT_TEMPLATE_EXT* {.pure.} = object
     pszObjId*: LPSTR
     dwMajorVersion*: DWORD
     fMinorVersion*: WINBOOL
     dwMinorVersion*: DWORD
+
   PCERT_TEMPLATE_EXT* = ptr CERT_TEMPLATE_EXT
   CERT_HASHED_URL* {.pure.} = object
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     Hash*: CRYPT_HASH_BLOB
     pwszUrl*: LPWSTR
+
   PCERT_HASHED_URL* = ptr CERT_HASHED_URL
   CERT_LOGOTYPE_DETAILS* {.pure.} = object
     pwszMimeType*: LPWSTR
     cHashedUrl*: DWORD
     rgHashedUrl*: PCERT_HASHED_URL
+
   PCERT_LOGOTYPE_DETAILS* = ptr CERT_LOGOTYPE_DETAILS
   CERT_LOGOTYPE_REFERENCE* {.pure.} = object
     cHashedUrl*: DWORD
     rgHashedUrl*: PCERT_HASHED_URL
+
   PCERT_LOGOTYPE_REFERENCE* = ptr CERT_LOGOTYPE_REFERENCE
   CERT_LOGOTYPE_IMAGE_INFO_UNION1* {.pure, union.} = object
     dwNumBits*: DWORD
     dwTableSize*: DWORD
+
   CERT_LOGOTYPE_IMAGE_INFO* {.pure.} = object
     dwLogotypeImageInfoChoice*: DWORD
     dwFileSize*: DWORD
@@ -870,10 +1033,12 @@ type
     dwLogotypeImageResolutionChoice*: DWORD
     union1*: CERT_LOGOTYPE_IMAGE_INFO_UNION1
     pwszLanguage*: LPWSTR
+
   PCERT_LOGOTYPE_IMAGE_INFO* = ptr CERT_LOGOTYPE_IMAGE_INFO
   CERT_LOGOTYPE_IMAGE* {.pure.} = object
     LogotypeDetails*: CERT_LOGOTYPE_DETAILS
     pLogotypeImageInfo*: PCERT_LOGOTYPE_IMAGE_INFO
+
   PCERT_LOGOTYPE_IMAGE* = ptr CERT_LOGOTYPE_IMAGE
   CERT_LOGOTYPE_AUDIO_INFO* {.pure.} = object
     dwFileSize*: DWORD
@@ -881,27 +1046,33 @@ type
     dwChannels*: DWORD
     dwSampleRate*: DWORD
     pwszLanguage*: LPWSTR
+
   PCERT_LOGOTYPE_AUDIO_INFO* = ptr CERT_LOGOTYPE_AUDIO_INFO
   CERT_LOGOTYPE_AUDIO* {.pure.} = object
     LogotypeDetails*: CERT_LOGOTYPE_DETAILS
     pLogotypeAudioInfo*: PCERT_LOGOTYPE_AUDIO_INFO
+
   PCERT_LOGOTYPE_AUDIO* = ptr CERT_LOGOTYPE_AUDIO
   CERT_LOGOTYPE_DATA* {.pure.} = object
     cLogotypeImage*: DWORD
     rgLogotypeImage*: PCERT_LOGOTYPE_IMAGE
     cLogotypeAudio*: DWORD
     rgLogotypeAudio*: PCERT_LOGOTYPE_AUDIO
+
   PCERT_LOGOTYPE_DATA* = ptr CERT_LOGOTYPE_DATA
   CERT_LOGOTYPE_INFO_UNION1* {.pure, union.} = object
     pLogotypeDirectInfo*: PCERT_LOGOTYPE_DATA
     pLogotypeIndirectInfo*: PCERT_LOGOTYPE_REFERENCE
+
   CERT_LOGOTYPE_INFO* {.pure.} = object
     dwLogotypeInfoChoice*: DWORD
     union1*: CERT_LOGOTYPE_INFO_UNION1
+
   PCERT_LOGOTYPE_INFO* = ptr CERT_LOGOTYPE_INFO
   CERT_OTHER_LOGOTYPE_INFO* {.pure.} = object
     pszObjId*: LPSTR
     LogotypeInfo*: CERT_LOGOTYPE_INFO
+
   PCERT_OTHER_LOGOTYPE_INFO* = ptr CERT_OTHER_LOGOTYPE_INFO
   CERT_LOGOTYPE_EXT_INFO* {.pure.} = object
     cCommunityLogo*: DWORD
@@ -910,39 +1081,47 @@ type
     pSubjectLogo*: PCERT_LOGOTYPE_INFO
     cOtherLogo*: DWORD
     rgOtherLogo*: PCERT_OTHER_LOGOTYPE_INFO
+
   PCERT_LOGOTYPE_EXT_INFO* = ptr CERT_LOGOTYPE_EXT_INFO
   CERT_BIOMETRIC_DATA_UNION1* {.pure, union.} = object
     dwPredefined*: DWORD
     pszObjId*: LPSTR
+
   CERT_BIOMETRIC_DATA* {.pure.} = object
     dwTypeOfBiometricDataChoice*: DWORD
     union1*: CERT_BIOMETRIC_DATA_UNION1
     HashedUrl*: CERT_HASHED_URL
+
   PCERT_BIOMETRIC_DATA* = ptr CERT_BIOMETRIC_DATA
   CERT_BIOMETRIC_EXT_INFO* {.pure.} = object
     cBiometricData*: DWORD
     rgBiometricData*: PCERT_BIOMETRIC_DATA
+
   PCERT_BIOMETRIC_EXT_INFO* = ptr CERT_BIOMETRIC_EXT_INFO
   OCSP_SIGNATURE_INFO* {.pure.} = object
     SignatureAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     Signature*: CRYPT_BIT_BLOB
     cCertEncoded*: DWORD
     rgCertEncoded*: PCERT_BLOB
+
   POCSP_SIGNATURE_INFO* = ptr OCSP_SIGNATURE_INFO
   OCSP_SIGNED_REQUEST_INFO* {.pure.} = object
     ToBeSigned*: CRYPT_DER_BLOB
     pOptionalSignatureInfo*: POCSP_SIGNATURE_INFO
+
   POCSP_SIGNED_REQUEST_INFO* = ptr OCSP_SIGNED_REQUEST_INFO
   OCSP_CERT_ID* {.pure.} = object
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     IssuerNameHash*: CRYPT_HASH_BLOB
     IssuerKeyHash*: CRYPT_HASH_BLOB
     SerialNumber*: CRYPT_INTEGER_BLOB
+
   POCSP_CERT_ID* = ptr OCSP_CERT_ID
   OCSP_REQUEST_ENTRY* {.pure.} = object
     CertId*: OCSP_CERT_ID
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   POCSP_REQUEST_ENTRY* = ptr OCSP_REQUEST_ENTRY
   OCSP_REQUEST_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -951,22 +1130,27 @@ type
     rgRequestEntry*: POCSP_REQUEST_ENTRY
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   POCSP_REQUEST_INFO* = ptr OCSP_REQUEST_INFO
   OCSP_RESPONSE_INFO* {.pure.} = object
     dwStatus*: DWORD
     pszObjId*: LPSTR
     Value*: CRYPT_OBJID_BLOB
+
   POCSP_RESPONSE_INFO* = ptr OCSP_RESPONSE_INFO
   OCSP_BASIC_SIGNED_RESPONSE_INFO* {.pure.} = object
     ToBeSigned*: CRYPT_DER_BLOB
     SignatureInfo*: OCSP_SIGNATURE_INFO
+
   POCSP_BASIC_SIGNED_RESPONSE_INFO* = ptr OCSP_BASIC_SIGNED_RESPONSE_INFO
   OCSP_BASIC_REVOKED_INFO* {.pure.} = object
     RevocationDate*: FILETIME
     dwCrlReasonCode*: DWORD
+
   POCSP_BASIC_REVOKED_INFO* = ptr OCSP_BASIC_REVOKED_INFO
   OCSP_BASIC_RESPONSE_ENTRY_UNION1* {.pure, union.} = object
     pRevokedInfo*: POCSP_BASIC_REVOKED_INFO
+
   OCSP_BASIC_RESPONSE_ENTRY* {.pure.} = object
     CertId*: OCSP_CERT_ID
     dwCertStatus*: DWORD
@@ -975,10 +1159,12 @@ type
     NextUpdate*: FILETIME
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   POCSP_BASIC_RESPONSE_ENTRY* = ptr OCSP_BASIC_RESPONSE_ENTRY
   OCSP_BASIC_RESPONSE_INFO_UNION1* {.pure, union.} = object
     ByNameResponderId*: CERT_NAME_BLOB
     ByKeyResponderId*: CRYPT_HASH_BLOB
+
   OCSP_BASIC_RESPONSE_INFO* {.pure.} = object
     dwVersion*: DWORD
     dwResponderIdChoice*: DWORD
@@ -988,37 +1174,40 @@ type
     rgResponseEntry*: POCSP_BASIC_RESPONSE_ENTRY
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   POCSP_BASIC_RESPONSE_INFO* = ptr OCSP_BASIC_RESPONSE_INFO
   CRYPT_OID_FUNC_ENTRY* {.pure.} = object
     pszOID*: LPCSTR
     pvFuncAddr*: pointer
+
   PCRYPT_OID_FUNC_ENTRY* = ptr CRYPT_OID_FUNC_ENTRY
   CRYPT_OID_INFO_UNION1* {.pure, union.} = object
     dwValue*: DWORD
     Algid*: ALG_ID
     dwLength*: DWORD
+
 when winimCpu64:
-  type
-    CRYPT_OID_INFO* {.pure.} = object
-      cbSize*: DWORD
-      pszOID*: LPCSTR
-      pwszName*: LPCWSTR
-      dwGroupId*: DWORD
-      union1*: CRYPT_OID_INFO_UNION1
-      ExtraInfo*: CRYPT_DATA_BLOB
-      pwszCNGAlgid*: LPCWSTR
-      pwszCNGExtraAlgid*: LPCWSTR
+  type CRYPT_OID_INFO* {.pure.} = object
+    cbSize*: DWORD
+    pszOID*: LPCSTR
+    pwszName*: LPCWSTR
+    dwGroupId*: DWORD
+    union1*: CRYPT_OID_INFO_UNION1
+    ExtraInfo*: CRYPT_DATA_BLOB
+    pwszCNGAlgid*: LPCWSTR
+    pwszCNGExtraAlgid*: LPCWSTR
+
 when winimCpu32:
-  type
-    CRYPT_OID_INFO* {.pure, packed.} = object
-      cbSize*: DWORD
-      pszOID*: LPCSTR
-      pwszName*: LPCWSTR
-      dwGroupId*: DWORD
-      union1*: CRYPT_OID_INFO_UNION1
-      ExtraInfo*: CRYPT_DATA_BLOB
-      pwszCNGAlgid*: LPCWSTR
-      pwszCNGExtraAlgid*: LPCWSTR
+  type CRYPT_OID_INFO* {.pure, packed.} = object
+    cbSize*: DWORD
+    pszOID*: LPCSTR
+    pwszName*: LPCWSTR
+    dwGroupId*: DWORD
+    union1*: CRYPT_OID_INFO_UNION1
+    ExtraInfo*: CRYPT_DATA_BLOB
+    pwszCNGAlgid*: LPCWSTR
+    pwszCNGExtraAlgid*: LPCWSTR
+
 type
   PCRYPT_OID_INFO* = ptr CRYPT_OID_INFO
   CCRYPT_OID_INFO* = CRYPT_OID_INFO
@@ -1027,32 +1216,39 @@ type
     dwFlags*: DWORD
     pwszCNGSignHashAlgids*: LPWSTR
     pwszCNGPubKeyMinBitLengths*: LPWSTR
+
   PCERT_STRONG_SIGN_SERIALIZED_INFO* = ptr CERT_STRONG_SIGN_SERIALIZED_INFO
   CERT_STRONG_SIGN_PARA_UNION1* {.pure, union.} = object
     pvInfo*: pointer
     pSerializedInfo*: PCERT_STRONG_SIGN_SERIALIZED_INFO
     pszOID*: LPSTR
+
   CERT_STRONG_SIGN_PARA* {.pure.} = object
     cbSize*: DWORD
     dwInfoChoice*: DWORD
     union1*: CERT_STRONG_SIGN_PARA_UNION1
+
   PCERT_STRONG_SIGN_PARA* = ptr CERT_STRONG_SIGN_PARA
   PCCERT_STRONG_SIGN_PARA* = ptr CERT_STRONG_SIGN_PARA
   CERT_ISSUER_SERIAL_NUMBER* {.pure.} = object
     Issuer*: CERT_NAME_BLOB
     SerialNumber*: CRYPT_INTEGER_BLOB
+
   PCERT_ISSUER_SERIAL_NUMBER* = ptr CERT_ISSUER_SERIAL_NUMBER
   CERT_ID_UNION1* {.pure, union.} = object
     IssuerSerialNumber*: CERT_ISSUER_SERIAL_NUMBER
     KeyId*: CRYPT_HASH_BLOB
     HashId*: CRYPT_HASH_BLOB
+
   CERT_ID* {.pure.} = object
     dwIdChoice*: DWORD
     union1*: CERT_ID_UNION1
+
   PCERT_ID* = ptr CERT_ID
   CMSG_SIGNER_ENCODE_INFO_UNION1* {.pure, union.} = object
     hCryptProv*: HCRYPTPROV
     hNCryptKey*: NCRYPT_KEY_HANDLE
+
   CMSG_SIGNER_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
     pCertInfo*: PCERT_INFO
@@ -1067,6 +1263,7 @@ type
     SignerId*: CERT_ID
     HashEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     pvHashEncryptionAuxInfo*: pointer
+
   PCMSG_SIGNER_ENCODE_INFO* = ptr CMSG_SIGNER_ENCODE_INFO
   CMSG_SIGNED_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1078,6 +1275,7 @@ type
     rgCrlEncoded*: PCRL_BLOB
     cAttrCertEncoded*: DWORD
     rgAttrCertEncoded*: PCERT_BLOB
+
   PCMSG_SIGNED_ENCODE_INFO* = ptr CMSG_SIGNED_ENCODE_INFO
   CMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1086,17 +1284,21 @@ type
     hCryptProv*: HCRYPTPROV_LEGACY
     RecipientPublicKey*: CRYPT_BIT_BLOB
     RecipientId*: CERT_ID
+
   PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO* = ptr CMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO
   CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO_UNION1* {.pure, union.} = object
     pEphemeralAlgorithm*: PCRYPT_ALGORITHM_IDENTIFIER
     pSenderId*: PCERT_ID
+
   CMSG_RECIPIENT_ENCRYPTED_KEY_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
     RecipientPublicKey*: CRYPT_BIT_BLOB
     RecipientId*: CERT_ID
     Date*: FILETIME
     pOtherAttr*: PCRYPT_ATTRIBUTE_TYPE_VALUE
-  PCMSG_RECIPIENT_ENCRYPTED_KEY_ENCODE_INFO* = ptr CMSG_RECIPIENT_ENCRYPTED_KEY_ENCODE_INFO
+
+  PCMSG_RECIPIENT_ENCRYPTED_KEY_ENCODE_INFO* =
+    ptr CMSG_RECIPIENT_ENCRYPTED_KEY_ENCODE_INFO
   CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
     KeyEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
@@ -1110,10 +1312,12 @@ type
     UserKeyingMaterial*: CRYPT_DATA_BLOB
     cRecipientEncryptedKeys*: DWORD
     rgpRecipientEncryptedKeys*: ptr PCMSG_RECIPIENT_ENCRYPTED_KEY_ENCODE_INFO
+
   PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO* = ptr CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO
   CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO_UNION1* {.pure, union.} = object
     hKeyEncryptionKey*: HCRYPTKEY
     pvKeyEncryptionKey*: pointer
+
   CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
     KeyEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
@@ -1124,14 +1328,17 @@ type
     KeyId*: CRYPT_DATA_BLOB
     Date*: FILETIME
     pOtherAttr*: PCRYPT_ATTRIBUTE_TYPE_VALUE
+
   PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO* = ptr CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO
   CMSG_RECIPIENT_ENCODE_INFO_UNION1* {.pure, union.} = object
     pKeyTrans*: PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO
     pKeyAgree*: PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO
     pMailList*: PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO
+
   CMSG_RECIPIENT_ENCODE_INFO* {.pure.} = object
     dwRecipientChoice*: DWORD
     union1*: CMSG_RECIPIENT_ENCODE_INFO_UNION1
+
   PCMSG_RECIPIENT_ENCODE_INFO* = ptr CMSG_RECIPIENT_ENCODE_INFO
   CMSG_ENVELOPED_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1149,40 +1356,50 @@ type
     rgAttrCertEncoded*: PCERT_BLOB
     cUnprotectedAttr*: DWORD
     rgUnprotectedAttr*: PCRYPT_ATTRIBUTE
+
   PCMSG_ENVELOPED_ENCODE_INFO* = ptr CMSG_ENVELOPED_ENCODE_INFO
   CMSG_RC2_AUX_INFO* {.pure.} = object
     cbSize*: DWORD
     dwBitLen*: DWORD
+
   PCMSG_RC2_AUX_INFO* = ptr CMSG_RC2_AUX_INFO
   CMSG_SP3_COMPATIBLE_AUX_INFO* {.pure.} = object
     cbSize*: DWORD
     dwFlags*: DWORD
+
   PCMSG_SP3_COMPATIBLE_AUX_INFO* = ptr CMSG_SP3_COMPATIBLE_AUX_INFO
   CMSG_RC4_AUX_INFO* {.pure.} = object
     cbSize*: DWORD
     dwBitLen*: DWORD
+
   PCMSG_RC4_AUX_INFO* = ptr CMSG_RC4_AUX_INFO
   CMSG_SIGNED_AND_ENVELOPED_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
     SignedInfo*: CMSG_SIGNED_ENCODE_INFO
     EnvelopedInfo*: CMSG_ENVELOPED_ENCODE_INFO
+
   PCMSG_SIGNED_AND_ENVELOPED_ENCODE_INFO* = ptr CMSG_SIGNED_AND_ENVELOPED_ENCODE_INFO
   CMSG_HASHED_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
     hCryptProv*: HCRYPTPROV_LEGACY
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     pvHashAuxInfo*: pointer
+
   PCMSG_HASHED_ENCODE_INFO* = ptr CMSG_HASHED_ENCODE_INFO
   CMSG_ENCRYPTED_ENCODE_INFO* {.pure.} = object
     cbSize*: DWORD
     ContentEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     pvEncryptionAuxInfo*: pointer
+
   PCMSG_ENCRYPTED_ENCODE_INFO* = ptr CMSG_ENCRYPTED_ENCODE_INFO
-  PFN_CMSG_STREAM_OUTPUT* = proc (pvArg: pointer, pbData: ptr BYTE, cbData: DWORD, fFinal: WINBOOL): WINBOOL {.stdcall.}
+  PFN_CMSG_STREAM_OUTPUT* = proc(
+    pvArg: pointer, pbData: ptr BYTE, cbData: DWORD, fFinal: WINBOOL
+  ): WINBOOL {.stdcall.}
   CMSG_STREAM_INFO* {.pure.} = object
     cbContent*: DWORD
     pfnStreamOutput*: PFN_CMSG_STREAM_OUTPUT
     pvArg*: pointer
+
   PCMSG_STREAM_INFO* = ptr CMSG_STREAM_INFO
   CMSG_SIGNER_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -1193,6 +1410,7 @@ type
     EncryptedHash*: CRYPT_DATA_BLOB
     AuthAttrs*: CRYPT_ATTRIBUTES
     UnauthAttrs*: CRYPT_ATTRIBUTES
+
   PCMSG_SIGNER_INFO* = ptr CMSG_SIGNER_INFO
   CMSG_CMS_SIGNER_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -1202,6 +1420,7 @@ type
     EncryptedHash*: CRYPT_DATA_BLOB
     AuthAttrs*: CRYPT_ATTRIBUTES
     UnauthAttrs*: CRYPT_ATTRIBUTES
+
   PCMSG_CMS_SIGNER_INFO* = ptr CMSG_CMS_SIGNER_INFO
   CMSG_ATTR* = CRYPT_ATTRIBUTES
   PCMSG_ATTR* = ptr CRYPT_ATTRIBUTES
@@ -1210,16 +1429,19 @@ type
     RecipientId*: CERT_ID
     KeyEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     EncryptedKey*: CRYPT_DATA_BLOB
+
   PCMSG_KEY_TRANS_RECIPIENT_INFO* = ptr CMSG_KEY_TRANS_RECIPIENT_INFO
   CMSG_RECIPIENT_ENCRYPTED_KEY_INFO* {.pure.} = object
     RecipientId*: CERT_ID
     EncryptedKey*: CRYPT_DATA_BLOB
     Date*: FILETIME
     pOtherAttr*: PCRYPT_ATTRIBUTE_TYPE_VALUE
+
   PCMSG_RECIPIENT_ENCRYPTED_KEY_INFO* = ptr CMSG_RECIPIENT_ENCRYPTED_KEY_INFO
   CMSG_KEY_AGREE_RECIPIENT_INFO_UNION1* {.pure, union.} = object
     OriginatorCertId*: CERT_ID
     OriginatorPublicKeyInfo*: CERT_PUBLIC_KEY_INFO
+
   CMSG_KEY_AGREE_RECIPIENT_INFO* {.pure.} = object
     dwVersion*: DWORD
     dwOriginatorChoice*: DWORD
@@ -1228,6 +1450,7 @@ type
     KeyEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     cRecipientEncryptedKeys*: DWORD
     rgpRecipientEncryptedKeys*: ptr PCMSG_RECIPIENT_ENCRYPTED_KEY_INFO
+
   PCMSG_KEY_AGREE_RECIPIENT_INFO* = ptr CMSG_KEY_AGREE_RECIPIENT_INFO
   CMSG_MAIL_LIST_RECIPIENT_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -1236,14 +1459,17 @@ type
     EncryptedKey*: CRYPT_DATA_BLOB
     Date*: FILETIME
     pOtherAttr*: PCRYPT_ATTRIBUTE_TYPE_VALUE
+
   PCMSG_MAIL_LIST_RECIPIENT_INFO* = ptr CMSG_MAIL_LIST_RECIPIENT_INFO
   CMSG_CMS_RECIPIENT_INFO_UNION1* {.pure, union.} = object
     pKeyTrans*: PCMSG_KEY_TRANS_RECIPIENT_INFO
     pKeyAgree*: PCMSG_KEY_AGREE_RECIPIENT_INFO
     pMailList*: PCMSG_MAIL_LIST_RECIPIENT_INFO
+
   CMSG_CMS_RECIPIENT_INFO* {.pure.} = object
     dwRecipientChoice*: DWORD
     union1*: CMSG_CMS_RECIPIENT_INFO_UNION1
+
   PCMSG_CMS_RECIPIENT_INFO* = ptr CMSG_CMS_RECIPIENT_INFO
   CMSG_CTRL_VERIFY_SIGNATURE_EX_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1251,29 +1477,35 @@ type
     dwSignerIndex*: DWORD
     dwSignerType*: DWORD
     pvSigner*: pointer
+
   PCMSG_CTRL_VERIFY_SIGNATURE_EX_PARA* = ptr CMSG_CTRL_VERIFY_SIGNATURE_EX_PARA
   CMSG_CTRL_DECRYPT_PARA_UNION1* {.pure, union.} = object
     hCryptProv*: HCRYPTPROV
     hNCryptKey*: NCRYPT_KEY_HANDLE
+
   CMSG_CTRL_DECRYPT_PARA* {.pure.} = object
     cbSize*: DWORD
     union1*: CMSG_CTRL_DECRYPT_PARA_UNION1
     dwKeySpec*: DWORD
     dwRecipientIndex*: DWORD
+
   PCMSG_CTRL_DECRYPT_PARA* = ptr CMSG_CTRL_DECRYPT_PARA
   CMSG_CTRL_KEY_TRANS_DECRYPT_PARA_UNION1* {.pure, union.} = object
     hCryptProv*: HCRYPTPROV
     hNCryptKey*: NCRYPT_KEY_HANDLE
+
   CMSG_CTRL_KEY_TRANS_DECRYPT_PARA* {.pure.} = object
     cbSize*: DWORD
     union1*: CMSG_CTRL_KEY_TRANS_DECRYPT_PARA_UNION1
     dwKeySpec*: DWORD
     pKeyTrans*: PCMSG_KEY_TRANS_RECIPIENT_INFO
     dwRecipientIndex*: DWORD
+
   PCMSG_CTRL_KEY_TRANS_DECRYPT_PARA* = ptr CMSG_CTRL_KEY_TRANS_DECRYPT_PARA
   CMSG_CTRL_KEY_AGREE_DECRYPT_PARA_UNION1* {.pure, union.} = object
     hCryptProv*: HCRYPTPROV
     hNCryptKey*: NCRYPT_KEY_HANDLE
+
   CMSG_CTRL_KEY_AGREE_DECRYPT_PARA* {.pure.} = object
     cbSize*: DWORD
     union1*: CMSG_CTRL_KEY_AGREE_DECRYPT_PARA_UNION1
@@ -1282,10 +1514,12 @@ type
     dwRecipientIndex*: DWORD
     dwRecipientEncryptedKeyIndex*: DWORD
     OriginatorPublicKey*: CRYPT_BIT_BLOB
+
   PCMSG_CTRL_KEY_AGREE_DECRYPT_PARA* = ptr CMSG_CTRL_KEY_AGREE_DECRYPT_PARA
   CMSG_CTRL_MAIL_LIST_DECRYPT_PARA_UNION1* {.pure, union.} = object
     hKeyEncryptionKey*: HCRYPTKEY
     pvKeyEncryptionKey*: pointer
+
   CMSG_CTRL_MAIL_LIST_DECRYPT_PARA* {.pure.} = object
     cbSize*: DWORD
     hCryptProv*: HCRYPTPROV
@@ -1293,22 +1527,26 @@ type
     dwRecipientIndex*: DWORD
     dwKeyChoice*: DWORD
     union1*: CMSG_CTRL_MAIL_LIST_DECRYPT_PARA_UNION1
+
   PCMSG_CTRL_MAIL_LIST_DECRYPT_PARA* = ptr CMSG_CTRL_MAIL_LIST_DECRYPT_PARA
   CMSG_CTRL_ADD_SIGNER_UNAUTH_ATTR_PARA* {.pure.} = object
     cbSize*: DWORD
     dwSignerIndex*: DWORD
     blob*: CRYPT_DATA_BLOB
+
   PCMSG_CTRL_ADD_SIGNER_UNAUTH_ATTR_PARA* = ptr CMSG_CTRL_ADD_SIGNER_UNAUTH_ATTR_PARA
   CMSG_CTRL_DEL_SIGNER_UNAUTH_ATTR_PARA* {.pure.} = object
     cbSize*: DWORD
     dwSignerIndex*: DWORD
     dwUnauthAttrIndex*: DWORD
+
   PCMSG_CTRL_DEL_SIGNER_UNAUTH_ATTR_PARA* = ptr CMSG_CTRL_DEL_SIGNER_UNAUTH_ATTR_PARA
-  PFN_CMSG_ALLOC* = proc (cb: int): pointer {.stdcall.}
-  PFN_CMSG_FREE* = proc (pv: pointer): void {.stdcall.}
+  PFN_CMSG_ALLOC* = proc(cb: int): pointer {.stdcall.}
+  PFN_CMSG_FREE* = proc(pv: pointer): void {.stdcall.}
   CMSG_CONTENT_ENCRYPT_INFO_UNION1* {.pure, union.} = object
     hContentEncryptKey*: HCRYPTKEY
     hCNGContentEncryptKey*: BCRYPT_KEY_HANDLE
+
   CMSG_CONTENT_ENCRYPT_INFO* {.pure.} = object
     cbSize*: DWORD
     hCryptProv*: HCRYPTPROV_LEGACY
@@ -1325,6 +1563,7 @@ type
     pbCNGContentEncryptKeyObject*: ptr BYTE
     pbContentEncryptKey*: ptr BYTE
     cbContentEncryptKey*: DWORD
+
   PCMSG_CONTENT_ENCRYPT_INFO* = ptr CMSG_CONTENT_ENCRYPT_INFO
   CMSG_KEY_TRANS_ENCRYPT_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1332,14 +1571,17 @@ type
     KeyEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     EncryptedKey*: CRYPT_DATA_BLOB
     dwFlags*: DWORD
+
   PCMSG_KEY_TRANS_ENCRYPT_INFO* = ptr CMSG_KEY_TRANS_ENCRYPT_INFO
   CMSG_KEY_AGREE_KEY_ENCRYPT_INFO* {.pure.} = object
     cbSize*: DWORD
     EncryptedKey*: CRYPT_DATA_BLOB
+
   PCMSG_KEY_AGREE_KEY_ENCRYPT_INFO* = ptr CMSG_KEY_AGREE_KEY_ENCRYPT_INFO
   CMSG_KEY_AGREE_ENCRYPT_INFO_UNION1* {.pure, union.} = object
     OriginatorCertId*: CERT_ID
     OriginatorPublicKeyInfo*: CERT_PUBLIC_KEY_INFO
+
   CMSG_KEY_AGREE_ENCRYPT_INFO* {.pure.} = object
     cbSize*: DWORD
     dwRecipientIndex*: DWORD
@@ -1350,6 +1592,7 @@ type
     cKeyAgreeKeyEncryptInfo*: DWORD
     rgpKeyAgreeKeyEncryptInfo*: ptr PCMSG_KEY_AGREE_KEY_ENCRYPT_INFO
     dwFlags*: DWORD
+
   PCMSG_KEY_AGREE_ENCRYPT_INFO* = ptr CMSG_KEY_AGREE_ENCRYPT_INFO
   CMSG_MAIL_LIST_ENCRYPT_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1357,6 +1600,7 @@ type
     KeyEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     EncryptedKey*: CRYPT_DATA_BLOB
     dwFlags*: DWORD
+
   PCMSG_MAIL_LIST_ENCRYPT_INFO* = ptr CMSG_MAIL_LIST_ENCRYPT_INFO
   CMSG_CNG_CONTENT_DECRYPT_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1368,6 +1612,7 @@ type
     cbContentEncryptKey*: DWORD
     hCNGContentEncryptKey*: BCRYPT_KEY_HANDLE
     pbCNGContentEncryptKeyObject*: ptr BYTE
+
   PCMSG_CNG_CONTENT_DECRYPT_INFO* = ptr CMSG_CNG_CONTENT_DECRYPT_INFO
   CERT_CONTEXT* {.pure.} = object
     dwCertEncodingType*: DWORD
@@ -1375,6 +1620,7 @@ type
     cbCertEncoded*: DWORD
     pCertInfo*: PCERT_INFO
     hCertStore*: HCERTSTORE
+
   PCERT_CONTEXT* = ptr CERT_CONTEXT
   PCCERT_CONTEXT* = ptr CERT_CONTEXT
   CRL_CONTEXT* {.pure.} = object
@@ -1383,6 +1629,7 @@ type
     cbCrlEncoded*: DWORD
     pCrlInfo*: PCRL_INFO
     hCertStore*: HCERTSTORE
+
   PCRL_CONTEXT* = ptr CRL_CONTEXT
   PCCRL_CONTEXT* = ptr CRL_CONTEXT
   CTL_CONTEXT* {.pure.} = object
@@ -1394,6 +1641,7 @@ type
     hCryptMsg*: HCRYPTMSG
     pbCtlContent*: ptr BYTE
     cbCtlContent*: DWORD
+
   PCTL_CONTEXT* = ptr CTL_CONTEXT
   PCCTL_CONTEXT* = ptr CTL_CONTEXT
   CRYPT_KEY_PROV_PARAM* {.pure.} = object
@@ -1401,6 +1649,7 @@ type
     pbData*: ptr BYTE
     cbData*: DWORD
     dwFlags*: DWORD
+
   PCRYPT_KEY_PROV_PARAM* = ptr CRYPT_KEY_PROV_PARAM
   CRYPT_KEY_PROV_INFO* {.pure.} = object
     pwszContainerName*: LPWSTR
@@ -1410,45 +1659,56 @@ type
     cProvParam*: DWORD
     rgProvParam*: PCRYPT_KEY_PROV_PARAM
     dwKeySpec*: DWORD
+
   PCRYPT_KEY_PROV_INFO* = ptr CRYPT_KEY_PROV_INFO
   CERT_KEY_CONTEXT_UNION1* {.pure, union.} = object
     hCryptProv*: HCRYPTPROV
     hNCryptKey*: NCRYPT_KEY_HANDLE
+
   CERT_KEY_CONTEXT* {.pure.} = object
     cbSize*: DWORD
     union1*: CERT_KEY_CONTEXT_UNION1
     dwKeySpec*: DWORD
+
   PCERT_KEY_CONTEXT* = ptr CERT_KEY_CONTEXT
   ROOT_INFO_LUID* {.pure.} = object
     LowPart*: DWORD
     HighPart*: LONG
+
   PROOT_INFO_LUID* = ptr ROOT_INFO_LUID
   CRYPT_SMART_CARD_ROOT_INFO* {.pure.} = object
     rgbCardID*: array[16, BYTE]
     luid*: ROOT_INFO_LUID
+
   PCRYPT_SMART_CARD_ROOT_INFO* = ptr CRYPT_SMART_CARD_ROOT_INFO
   CERT_SYSTEM_STORE_RELOCATE_PARA_UNION1* {.pure, union.} = object
     hKeyBase*: HKEY
     pvBase*: pointer
+
   CERT_SYSTEM_STORE_RELOCATE_PARA_UNION2* {.pure, union.} = object
     pvSystemStore*: pointer
     pszSystemStore*: LPCSTR
     pwszSystemStore*: LPCWSTR
+
   CERT_SYSTEM_STORE_RELOCATE_PARA* {.pure.} = object
     union1*: CERT_SYSTEM_STORE_RELOCATE_PARA_UNION1
     union2*: CERT_SYSTEM_STORE_RELOCATE_PARA_UNION2
+
   PCERT_SYSTEM_STORE_RELOCATE_PARA* = ptr CERT_SYSTEM_STORE_RELOCATE_PARA
   CERT_REGISTRY_STORE_CLIENT_GPT_PARA* {.pure.} = object
     hKeyBase*: HKEY
     pwszRegPath*: LPWSTR
+
   PCERT_REGISTRY_STORE_CLIENT_GPT_PARA* = ptr CERT_REGISTRY_STORE_CLIENT_GPT_PARA
   CERT_REGISTRY_STORE_ROAMING_PARA* {.pure.} = object
     hKey*: HKEY
     pwszStoreDirectory*: LPWSTR
+
   PCERT_REGISTRY_STORE_ROAMING_PARA* = ptr CERT_REGISTRY_STORE_ROAMING_PARA
   CERT_LDAP_STORE_OPENED_PARA* {.pure.} = object
     pvLdapSessionHandle*: pointer
     pwszLdapUrl*: LPCWSTR
+
   PCERT_LDAP_STORE_OPENED_PARA* = ptr CERT_LDAP_STORE_OPENED_PARA
   CERT_STORE_PROV_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1457,6 +1717,7 @@ type
     hStoreProv*: HCERTSTOREPROV
     dwStoreProvFlags*: DWORD
     hStoreProvFuncAddr2*: HCRYPTOIDFUNCADDR
+
   PCERT_STORE_PROV_INFO* = ptr CERT_STORE_PROV_INFO
   CERT_STORE_PROV_FIND_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1464,39 +1725,48 @@ type
     dwFindFlags*: DWORD
     dwFindType*: DWORD
     pvFindPara*: pointer
+
   PCERT_STORE_PROV_FIND_INFO* = ptr CERT_STORE_PROV_FIND_INFO
   CCERT_STORE_PROV_FIND_INFO* = CERT_STORE_PROV_FIND_INFO
   PCCERT_STORE_PROV_FIND_INFO* = ptr CERT_STORE_PROV_FIND_INFO
   CRL_FIND_ISSUED_FOR_PARA* {.pure.} = object
     pSubjectCert*: PCCERT_CONTEXT
     pIssuerCert*: PCCERT_CONTEXT
+
   PCRL_FIND_ISSUED_FOR_PARA* = ptr CRL_FIND_ISSUED_FOR_PARA
   CTL_ANY_SUBJECT_INFO* {.pure.} = object
     SubjectAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     SubjectIdentifier*: CRYPT_DATA_BLOB
+
   PCTL_ANY_SUBJECT_INFO* = ptr CTL_ANY_SUBJECT_INFO
   CTL_FIND_USAGE_PARA* {.pure.} = object
     cbSize*: DWORD
     SubjectUsage*: CTL_USAGE
     ListIdentifier*: CRYPT_DATA_BLOB
     pSigner*: PCERT_INFO
+
   PCTL_FIND_USAGE_PARA* = ptr CTL_FIND_USAGE_PARA
   CTL_FIND_SUBJECT_PARA* {.pure.} = object
     cbSize*: DWORD
     pUsagePara*: PCTL_FIND_USAGE_PARA
     dwSubjectType*: DWORD
     pvSubject*: pointer
+
   PCTL_FIND_SUBJECT_PARA* = ptr CTL_FIND_SUBJECT_PARA
-  PFN_CERT_CREATE_CONTEXT_SORT_FUNC* = proc (cbTotalEncoded: DWORD, cbRemainEncoded: DWORD, cEntry: DWORD, pvSort: pointer): WINBOOL {.stdcall.}
+  PFN_CERT_CREATE_CONTEXT_SORT_FUNC* = proc(
+    cbTotalEncoded: DWORD, cbRemainEncoded: DWORD, cEntry: DWORD, pvSort: pointer
+  ): WINBOOL {.stdcall.}
   CERT_CREATE_CONTEXT_PARA* {.pure.} = object
     cbSize*: DWORD
     pfnFree*: PFN_CRYPT_FREE
     pvFree*: pointer
     pfnSort*: PFN_CERT_CREATE_CONTEXT_SORT_FUNC
     pvSort*: pointer
+
   PCERT_CREATE_CONTEXT_PARA* = ptr CERT_CREATE_CONTEXT_PARA
   CERT_SYSTEM_STORE_INFO* {.pure.} = object
     cbSize*: DWORD
+
   PCERT_SYSTEM_STORE_INFO* = ptr CERT_SYSTEM_STORE_INFO
   CERT_PHYSICAL_STORE_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1506,6 +1776,7 @@ type
     OpenParameters*: CRYPT_DATA_BLOB
     dwFlags*: DWORD
     dwPriority*: DWORD
+
   PCERT_PHYSICAL_STORE_INFO* = ptr CERT_PHYSICAL_STORE_INFO
   CTL_VERIFY_USAGE_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1514,6 +1785,7 @@ type
     rghCtlStore*: ptr HCERTSTORE
     cSignerStore*: DWORD
     rghSignerStore*: ptr HCERTSTORE
+
   PCTL_VERIFY_USAGE_PARA* = ptr CTL_VERIFY_USAGE_PARA
   CTL_VERIFY_USAGE_STATUS* {.pure.} = object
     cbSize*: DWORD
@@ -1523,6 +1795,7 @@ type
     dwCtlEntryIndex*: DWORD
     ppSigner*: ptr PCCERT_CONTEXT
     dwSignerIndex*: DWORD
+
   PCTL_VERIFY_USAGE_STATUS* = ptr CTL_VERIFY_USAGE_STATUS
   CERT_REVOCATION_CRL_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1530,6 +1803,7 @@ type
     pDeltaCrlContext*: PCCRL_CONTEXT
     pCrlEntry*: PCRL_ENTRY
     fDeltaCrlEntry*: WINBOOL
+
   PCERT_REVOCATION_CRL_INFO* = ptr CERT_REVOCATION_CRL_INFO
   CERT_REVOCATION_CHAIN_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1540,6 +1814,7 @@ type
     pftCurrentTime*: LPFILETIME
     pftCacheResync*: LPFILETIME
     cbMaxUrlRetrievalByteCount*: DWORD
+
   PCERT_REVOCATION_CHAIN_PARA* = ptr CERT_REVOCATION_CHAIN_PARA
   CERT_REVOCATION_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1555,6 +1830,7 @@ type
     pCrlInfo*: PCERT_REVOCATION_CRL_INFO
     pftCacheResync*: LPFILETIME
     pChainPara*: PCERT_REVOCATION_CHAIN_PARA
+
   PCERT_REVOCATION_PARA* = ptr CERT_REVOCATION_PARA
   CERT_REVOCATION_STATUS* {.pure.} = object
     cbSize*: DWORD
@@ -1563,14 +1839,18 @@ type
     dwReason*: DWORD
     fHasFreshnessTime*: WINBOOL
     dwFreshnessTime*: DWORD
+
   PCERT_REVOCATION_STATUS* = ptr CERT_REVOCATION_STATUS
   CRYPT_VERIFY_CERT_SIGN_STRONG_PROPERTIES_INFO* {.pure.} = object
     CertSignHashCNGAlgPropData*: CRYPT_DATA_BLOB
     CertIssuerPubKeyBitLengthPropData*: CRYPT_DATA_BLOB
-  PCRYPT_VERIFY_CERT_SIGN_STRONG_PROPERTIES_INFO* = ptr CRYPT_VERIFY_CERT_SIGN_STRONG_PROPERTIES_INFO
+
+  PCRYPT_VERIFY_CERT_SIGN_STRONG_PROPERTIES_INFO* =
+    ptr CRYPT_VERIFY_CERT_SIGN_STRONG_PROPERTIES_INFO
   CRYPT_DEFAULT_CONTEXT_MULTI_OID_PARA* {.pure.} = object
     cOID*: DWORD
     rgpszOID*: ptr LPSTR
+
   PCRYPT_DEFAULT_CONTEXT_MULTI_OID_PARA* = ptr CRYPT_DEFAULT_CONTEXT_MULTI_OID_PARA
   CRYPT_SIGN_MESSAGE_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1590,8 +1870,14 @@ type
     dwInnerContentType*: DWORD
     HashEncryptionAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     pvHashEncryptionAuxInfo*: pointer
+
   PCRYPT_SIGN_MESSAGE_PARA* = ptr CRYPT_SIGN_MESSAGE_PARA
-  PFN_CRYPT_GET_SIGNER_CERTIFICATE* = proc (pvGetArg: pointer, dwCertEncodingType: DWORD, pSignerId: PCERT_INFO, hMsgCertStore: HCERTSTORE): PCCERT_CONTEXT {.stdcall.}
+  PFN_CRYPT_GET_SIGNER_CERTIFICATE* = proc(
+    pvGetArg: pointer,
+    dwCertEncodingType: DWORD,
+    pSignerId: PCERT_INFO,
+    hMsgCertStore: HCERTSTORE,
+  ): PCCERT_CONTEXT {.stdcall.}
   CRYPT_VERIFY_MESSAGE_PARA* {.pure.} = object
     cbSize*: DWORD
     dwMsgAndCertEncodingType*: DWORD
@@ -1599,6 +1885,7 @@ type
     pfnGetSignerCertificate*: PFN_CRYPT_GET_SIGNER_CERTIFICATE
     pvGetArg*: pointer
     pStrongSignPara*: PCCERT_STRONG_SIGN_PARA
+
   PCRYPT_VERIFY_MESSAGE_PARA* = ptr CRYPT_VERIFY_MESSAGE_PARA
   CRYPT_ENCRYPT_MESSAGE_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1608,6 +1895,7 @@ type
     pvEncryptionAuxInfo*: pointer
     dwFlags*: DWORD
     dwInnerContentType*: DWORD
+
   PCRYPT_ENCRYPT_MESSAGE_PARA* = ptr CRYPT_ENCRYPT_MESSAGE_PARA
   CRYPT_DECRYPT_MESSAGE_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1615,6 +1903,7 @@ type
     cCertStore*: DWORD
     rghCertStore*: ptr HCERTSTORE
     dwFlags*: DWORD
+
   PCRYPT_DECRYPT_MESSAGE_PARA* = ptr CRYPT_DECRYPT_MESSAGE_PARA
   CRYPT_HASH_MESSAGE_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1622,10 +1911,12 @@ type
     hCryptProv*: HCRYPTPROV_LEGACY
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     pvHashAuxInfo*: pointer
+
   PCRYPT_HASH_MESSAGE_PARA* = ptr CRYPT_HASH_MESSAGE_PARA
   CRYPT_KEY_SIGN_MESSAGE_PARA_UNION1* {.pure, union.} = object
     hCryptProv*: HCRYPTPROV
     hNCryptKey*: NCRYPT_KEY_HANDLE
+
   CRYPT_KEY_SIGN_MESSAGE_PARA* {.pure.} = object
     cbSize*: DWORD
     dwMsgAndCertEncodingType*: DWORD
@@ -1634,35 +1925,42 @@ type
     HashAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
     pvHashAuxInfo*: pointer
     PubKeyAlgorithm*: CRYPT_ALGORITHM_IDENTIFIER
+
   PCRYPT_KEY_SIGN_MESSAGE_PARA* = ptr CRYPT_KEY_SIGN_MESSAGE_PARA
   CRYPT_KEY_VERIFY_MESSAGE_PARA* {.pure.} = object
     cbSize*: DWORD
     dwMsgEncodingType*: DWORD
     hCryptProv*: HCRYPTPROV_LEGACY
+
   PCRYPT_KEY_VERIFY_MESSAGE_PARA* = ptr CRYPT_KEY_VERIFY_MESSAGE_PARA
   CERT_CHAIN* {.pure.} = object
     cCerts*: DWORD
     certs*: PCERT_BLOB
     keyLocatorInfo*: CRYPT_KEY_PROV_INFO
+
   PCERT_CHAIN* = ptr CERT_CHAIN
   CRYPT_BLOB_ARRAY* {.pure.} = object
     cBlob*: DWORD
     rgBlob*: PCRYPT_DATA_BLOB
+
   PCRYPT_BLOB_ARRAY* = ptr CRYPT_BLOB_ARRAY
   CRYPT_CREDENTIALS* {.pure.} = object
     cbSize*: DWORD
     pszCredentialsOid*: LPCSTR
     pvCredentials*: LPVOID
+
   PCRYPT_CREDENTIALS* = ptr CRYPT_CREDENTIALS
   CRYPT_PASSWORD_CREDENTIALSA* {.pure.} = object
     cbSize*: DWORD
     pszUsername*: LPSTR
     pszPassword*: LPSTR
+
   PCRYPT_PASSWORD_CREDENTIALSA* = ptr CRYPT_PASSWORD_CREDENTIALSA
   CRYPT_PASSWORD_CREDENTIALSW* {.pure.} = object
     cbSize*: DWORD
     pszUsername*: LPWSTR
     pszPassword*: LPWSTR
+
   PCRYPT_PASSWORD_CREDENTIALSW* = ptr CRYPT_PASSWORD_CREDENTIALSW
   CRYPTNET_URL_CACHE_PRE_FETCH_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1672,11 +1970,13 @@ type
     ThisUpdateTime*: FILETIME
     NextUpdateTime*: FILETIME
     PublishTime*: FILETIME
+
   PCRYPTNET_URL_CACHE_PRE_FETCH_INFO* = ptr CRYPTNET_URL_CACHE_PRE_FETCH_INFO
   CRYPTNET_URL_CACHE_FLUSH_INFO* {.pure.} = object
     cbSize*: DWORD
     dwExemptSeconds*: DWORD
     ExpireTime*: FILETIME
+
   PCRYPTNET_URL_CACHE_FLUSH_INFO* = ptr CRYPTNET_URL_CACHE_FLUSH_INFO
   CRYPTNET_URL_CACHE_RESPONSE_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1686,6 +1986,7 @@ type
     dwMaxAge*: DWORD
     pwszETag*: LPCWSTR
     dwProxyId*: DWORD
+
   PCRYPTNET_URL_CACHE_RESPONSE_INFO* = ptr CRYPTNET_URL_CACHE_RESPONSE_INFO
   CRYPT_RETRIEVE_AUX_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1698,25 +1999,36 @@ type
     pftCacheResync*: LPFILETIME
     fProxyCacheRetrieval*: WINBOOL
     dwHttpStatusCode*: DWORD
+
   PCRYPT_RETRIEVE_AUX_INFO* = ptr CRYPT_RETRIEVE_AUX_INFO
-  PFN_CRYPT_ASYNC_RETRIEVAL_COMPLETION_FUNC* = proc (pvCompletion: LPVOID, dwCompletionCode: DWORD, pszUrl: LPCSTR, pszObjectOid: LPSTR, pvObject: LPVOID): VOID {.stdcall.}
+  PFN_CRYPT_ASYNC_RETRIEVAL_COMPLETION_FUNC* = proc(
+    pvCompletion: LPVOID,
+    dwCompletionCode: DWORD,
+    pszUrl: LPCSTR,
+    pszObjectOid: LPSTR,
+    pvObject: LPVOID,
+  ): VOID {.stdcall.}
   CRYPT_ASYNC_RETRIEVAL_COMPLETION* {.pure.} = object
     pfnCompletion*: PFN_CRYPT_ASYNC_RETRIEVAL_COMPLETION_FUNC
     pvCompletion*: LPVOID
+
   PCRYPT_ASYNC_RETRIEVAL_COMPLETION* = ptr CRYPT_ASYNC_RETRIEVAL_COMPLETION
   CRYPT_URL_ARRAY* {.pure.} = object
     cUrl*: DWORD
     rgwszUrl*: ptr LPWSTR
+
   PCRYPT_URL_ARRAY* = ptr CRYPT_URL_ARRAY
   CRYPT_URL_INFO* {.pure.} = object
     cbSize*: DWORD
     dwSyncDeltaTime*: DWORD
     cGroup*: DWORD
     rgcGroupEntry*: ptr DWORD
+
   PCRYPT_URL_INFO* = ptr CRYPT_URL_INFO
   CERT_CRL_CONTEXT_PAIR* {.pure.} = object
     pCertContext*: PCCERT_CONTEXT
     pCrlContext*: PCCRL_CONTEXT
+
   PCERT_CRL_CONTEXT_PAIR* = ptr CERT_CRL_CONTEXT_PAIR
   PCCERT_CRL_CONTEXT_PAIR* = ptr CERT_CRL_CONTEXT_PAIR
   CRYPT_GET_TIME_VALID_OBJECT_EXTRA_INFO* {.pure.} = object
@@ -1727,6 +2039,7 @@ type
     pMaxAgeTime*: LPFILETIME
     pChainPara*: PCERT_REVOCATION_CHAIN_PARA
     pDeltaCrlIndicator*: PCRYPT_INTEGER_BLOB
+
   PCRYPT_GET_TIME_VALID_OBJECT_EXTRA_INFO* = ptr CRYPT_GET_TIME_VALID_OBJECT_EXTRA_INFO
   CERT_CHAIN_ENGINE_CONFIG* {.pure.} = object
     cbSize*: DWORD
@@ -1742,10 +2055,12 @@ type
     hExclusiveRoot*: HCERTSTORE
     hExclusiveTrustedPeople*: HCERTSTORE
     dwExclusiveFlags*: DWORD
+
   PCERT_CHAIN_ENGINE_CONFIG* = ptr CERT_CHAIN_ENGINE_CONFIG
   CERT_TRUST_STATUS* {.pure.} = object
     dwErrorStatus*: DWORD
     dwInfoStatus*: DWORD
+
   PCERT_TRUST_STATUS* = ptr CERT_TRUST_STATUS
   CERT_REVOCATION_INFO* {.pure.} = object
     cbSize*: DWORD
@@ -1755,11 +2070,13 @@ type
     fHasFreshnessTime*: WINBOOL
     dwFreshnessTime*: DWORD
     pCrlInfo*: PCERT_REVOCATION_CRL_INFO
+
   PCERT_REVOCATION_INFO* = ptr CERT_REVOCATION_INFO
   CERT_TRUST_LIST_INFO* {.pure.} = object
     cbSize*: DWORD
     pCtlEntry*: PCTL_ENTRY
     pCtlContext*: PCCTL_CONTEXT
+
   PCERT_TRUST_LIST_INFO* = ptr CERT_TRUST_LIST_INFO
   CERT_CHAIN_ELEMENT* {.pure.} = object
     cbSize*: DWORD
@@ -1769,6 +2086,7 @@ type
     pIssuanceUsage*: PCERT_ENHKEY_USAGE
     pApplicationUsage*: PCERT_ENHKEY_USAGE
     pwszExtendedErrorInfo*: LPCWSTR
+
   PCERT_CHAIN_ELEMENT* = ptr CERT_CHAIN_ELEMENT
   PCCERT_CHAIN_ELEMENT* = ptr CERT_CHAIN_ELEMENT
   CERT_SIMPLE_CHAIN* {.pure.} = object
@@ -1779,6 +2097,7 @@ type
     pTrustListInfo*: PCERT_TRUST_LIST_INFO
     fHasRevocationFreshnessTime*: WINBOOL
     dwRevocationFreshnessTime*: DWORD
+
   PCERT_SIMPLE_CHAIN* = ptr CERT_SIMPLE_CHAIN
   PCCERT_SIMPLE_CHAIN* = ptr CERT_SIMPLE_CHAIN
   PCCERT_CHAIN_CONTEXT* = ptr CERT_CHAIN_CONTEXT
@@ -1793,14 +2112,17 @@ type
     dwRevocationFreshnessTime*: DWORD
     dwCreateFlags*: DWORD
     ChainId*: GUID
+
   PCERT_CHAIN_CONTEXT* = ptr CERT_CHAIN_CONTEXT
   CERT_USAGE_MATCH* {.pure.} = object
     dwType*: DWORD
     Usage*: CERT_ENHKEY_USAGE
+
   PCERT_USAGE_MATCH* = ptr CERT_USAGE_MATCH
   CTL_USAGE_MATCH* {.pure.} = object
     dwType*: DWORD
     Usage*: CTL_USAGE
+
   PCTL_USAGE_MATCH* = ptr CTL_USAGE_MATCH
   CERT_CHAIN_PARA* {.pure.} = object
     cbSize*: DWORD
@@ -1812,13 +2134,16 @@ type
     pftCacheResync*: LPFILETIME
     pStrongSignPara*: PCCERT_STRONG_SIGN_PARA
     dwStrongSignFlags*: DWORD
+
   PCERT_CHAIN_PARA* = ptr CERT_CHAIN_PARA
   CRL_REVOCATION_INFO* {.pure.} = object
     pCrlEntry*: PCRL_ENTRY
     pCrlContext*: PCCRL_CONTEXT
     pCrlIssuerChain*: PCCERT_CHAIN_CONTEXT
+
   PCRL_REVOCATION_INFO* = ptr CRL_REVOCATION_INFO
-  PFN_CERT_CHAIN_FIND_BY_ISSUER_CALLBACK* = proc (pCert: PCCERT_CONTEXT, pvFindArg: pointer): WINBOOL {.stdcall.}
+  PFN_CERT_CHAIN_FIND_BY_ISSUER_CALLBACK* =
+    proc(pCert: PCCERT_CONTEXT, pvFindArg: pointer): WINBOOL {.stdcall.}
   CERT_CHAIN_FIND_ISSUER_PARA* {.pure.} = object
     cbSize*: DWORD
     pszUsageIdentifier*: LPCSTR
@@ -1830,6 +2155,7 @@ type
     pvFindArg*: pointer
     pdwIssuerChainIndex*: ptr DWORD
     pdwIssuerElementIndex*: ptr DWORD
+
   PCERT_CHAIN_FIND_ISSUER_PARA* = ptr CERT_CHAIN_FIND_ISSUER_PARA
   CERT_CHAIN_FIND_BY_ISSUER_PARA* = CERT_CHAIN_FIND_ISSUER_PARA
   PCERT_CHAIN_FIND_BY_ISSUER_PARA* = ptr CERT_CHAIN_FIND_ISSUER_PARA
@@ -1837,6 +2163,7 @@ type
     cbSize*: DWORD
     dwFlags*: DWORD
     pvExtraPolicyPara*: pointer
+
   PCERT_CHAIN_POLICY_PARA* = ptr CERT_CHAIN_POLICY_PARA
   CERT_CHAIN_POLICY_STATUS* {.pure.} = object
     cbSize*: DWORD
@@ -1844,45 +2171,57 @@ type
     lChainIndex*: LONG
     lElementIndex*: LONG
     pvExtraPolicyStatus*: pointer
+
   PCERT_CHAIN_POLICY_STATUS* = ptr CERT_CHAIN_POLICY_STATUS
   AUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_PARA* {.pure.} = object
     cbSize*: DWORD
     dwRegPolicySettings*: DWORD
     pSignerInfo*: PCMSG_SIGNER_INFO
-  PAUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_PARA* = ptr AUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_PARA
+
+  PAUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_PARA* =
+    ptr AUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_PARA
   AUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_STATUS* {.pure.} = object
     cbSize*: DWORD
     fCommercial*: WINBOOL
-  PAUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_STATUS* = ptr AUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_STATUS
+
+  PAUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_STATUS* =
+    ptr AUTHENTICODE_EXTRA_CERT_CHAIN_POLICY_STATUS
   AUTHENTICODE_TS_EXTRA_CERT_CHAIN_POLICY_PARA* {.pure.} = object
     cbSize*: DWORD
     dwRegPolicySettings*: DWORD
     fCommercial*: WINBOOL
-  PAUTHENTICODE_TS_EXTRA_CERT_CHAIN_POLICY_PARA* = ptr AUTHENTICODE_TS_EXTRA_CERT_CHAIN_POLICY_PARA
+
+  PAUTHENTICODE_TS_EXTRA_CERT_CHAIN_POLICY_PARA* =
+    ptr AUTHENTICODE_TS_EXTRA_CERT_CHAIN_POLICY_PARA
   HTTPSPolicyCallbackData_UNION1* {.pure, union.} = object
     cbStruct*: DWORD
     cbSize*: DWORD
+
   HTTPSPolicyCallbackData* {.pure.} = object
     union1*: HTTPSPolicyCallbackData_UNION1
     dwAuthType*: DWORD
     fdwChecks*: DWORD
     pwszServerName*: ptr WCHAR
+
   PHTTPSPolicyCallbackData* = ptr HTTPSPolicyCallbackData
   SSL_EXTRA_CERT_CHAIN_POLICY_PARA* = HTTPSPolicyCallbackData
   PSSL_EXTRA_CERT_CHAIN_POLICY_PARA* = ptr HTTPSPolicyCallbackData
   EV_EXTRA_CERT_CHAIN_POLICY_PARA* {.pure.} = object
     cbSize*: DWORD
     dwRootProgramQualifierFlags*: DWORD
+
   PEV_EXTRA_CERT_CHAIN_POLICY_PARA* = ptr EV_EXTRA_CERT_CHAIN_POLICY_PARA
   EV_EXTRA_CERT_CHAIN_POLICY_STATUS* {.pure.} = object
     cbSize*: DWORD
     dwQualifiers*: DWORD
     dwIssuanceUsageIndex*: DWORD
+
   PEV_EXTRA_CERT_CHAIN_POLICY_STATUS* = ptr EV_EXTRA_CERT_CHAIN_POLICY_STATUS
   CERT_SERVER_OCSP_RESPONSE_CONTEXT* {.pure.} = object
     cbSize*: DWORD
     pbEncodedOcspResponse*: ptr BYTE
     cbEncodedOcspResponse*: DWORD
+
   PCERT_SERVER_OCSP_RESPONSE_CONTEXT* = ptr CERT_SERVER_OCSP_RESPONSE_CONTEXT
   PCCERT_SERVER_OCSP_RESPONSE_CONTEXT* = ptr CERT_SERVER_OCSP_RESPONSE_CONTEXT
   CERT_SELECT_CHAIN_PARA* {.pure.} = object
@@ -1891,12 +2230,14 @@ type
     hAdditionalStore*: HCERTSTORE
     pChainPara*: PCERT_CHAIN_PARA
     dwFlags*: DWORD
+
   PCERT_SELECT_CHAIN_PARA* = ptr CERT_SELECT_CHAIN_PARA
   PCCERT_SELECT_CHAIN_PARA* = ptr CERT_SELECT_CHAIN_PARA
   CERT_SELECT_CRITERIA* {.pure.} = object
     dwType*: DWORD
     cPara*: DWORD
     ppPara*: ptr pointer
+
   PCERT_SELECT_CRITERIA* = ptr CERT_SELECT_CRITERIA
   PCCERT_SELECT_CRITERIA* = ptr CERT_SELECT_CRITERIA
   CRYPT_TIMESTAMP_REQUEST* {.pure.} = object
@@ -1908,6 +2249,7 @@ type
     fCertReq*: WINBOOL
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCRYPT_TIMESTAMP_REQUEST* = ptr CRYPT_TIMESTAMP_REQUEST
   CRYPT_TIMESTAMP_RESPONSE* {.pure.} = object
     dwStatus*: DWORD
@@ -1915,11 +2257,13 @@ type
     rgFreeText*: ptr LPWSTR
     FailureInfo*: CRYPT_BIT_BLOB
     ContentInfo*: CRYPT_DER_BLOB
+
   PCRYPT_TIMESTAMP_RESPONSE* = ptr CRYPT_TIMESTAMP_RESPONSE
   CRYPT_TIMESTAMP_ACCURACY* {.pure.} = object
     dwSeconds*: DWORD
     dwMillis*: DWORD
     dwMicros*: DWORD
+
   PCRYPT_TIMESTAMP_ACCURACY* = ptr CRYPT_TIMESTAMP_ACCURACY
   CRYPT_TIMESTAMP_INFO* {.pure.} = object
     dwVersion*: DWORD
@@ -1934,11 +2278,13 @@ type
     Tsa*: CRYPT_DER_BLOB
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCRYPT_TIMESTAMP_INFO* = ptr CRYPT_TIMESTAMP_INFO
   CRYPT_TIMESTAMP_CONTEXT* {.pure.} = object
     cbEncoded*: DWORD
     pbEncoded*: ptr BYTE
     pTimeStamp*: PCRYPT_TIMESTAMP_INFO
+
   PCRYPT_TIMESTAMP_CONTEXT* = ptr CRYPT_TIMESTAMP_CONTEXT
   CRYPT_TIMESTAMP_PARA* {.pure.} = object
     pszTSAPolicyId*: LPCSTR
@@ -1946,12 +2292,26 @@ type
     Nonce*: CRYPT_INTEGER_BLOB
     cExtension*: DWORD
     rgExtension*: PCERT_EXTENSION
+
   PCRYPT_TIMESTAMP_PARA* = ptr CRYPT_TIMESTAMP_PARA
-  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_GET* = proc (pPluginContext: LPVOID, pIdentifier: PCRYPT_DATA_BLOB, dwNameType: DWORD, pNameBlob: PCERT_NAME_BLOB, ppbContent: ptr PBYTE, pcbContent: ptr DWORD, ppwszPassword: ptr PCWSTR, ppIdentifier: ptr PCRYPT_DATA_BLOB): WINBOOL {.stdcall.}
-  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_RELEASE* = proc (dwReason: DWORD, pPluginContext: LPVOID): void {.stdcall.}
-  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_PASSWORD* = proc (pPluginContext: LPVOID, pwszPassword: PCWSTR): void {.stdcall.}
-  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE* = proc (pPluginContext: LPVOID, pbData: PBYTE): void {.stdcall.}
-  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_IDENTIFIER* = proc (pPluginContext: LPVOID, pIdentifier: PCRYPT_DATA_BLOB): void {.stdcall.}
+  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_GET* = proc(
+    pPluginContext: LPVOID,
+    pIdentifier: PCRYPT_DATA_BLOB,
+    dwNameType: DWORD,
+    pNameBlob: PCERT_NAME_BLOB,
+    ppbContent: ptr PBYTE,
+    pcbContent: ptr DWORD,
+    ppwszPassword: ptr PCWSTR,
+    ppIdentifier: ptr PCRYPT_DATA_BLOB,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_RELEASE* =
+    proc(dwReason: DWORD, pPluginContext: LPVOID): void {.stdcall.}
+  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_PASSWORD* =
+    proc(pPluginContext: LPVOID, pwszPassword: PCWSTR): void {.stdcall.}
+  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE* =
+    proc(pPluginContext: LPVOID, pbData: PBYTE): void {.stdcall.}
+  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_IDENTIFIER* =
+    proc(pPluginContext: LPVOID, pIdentifier: PCRYPT_DATA_BLOB): void {.stdcall.}
   CRYPT_OBJECT_LOCATOR_PROVIDER_TABLE* {.pure.} = object
     cbSize*: DWORD
     pfnGet*: PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_GET
@@ -1959,13 +2319,16 @@ type
     pfnFreePassword*: PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_PASSWORD
     pfnFree*: PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE
     pfnFreeIdentifier*: PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FREE_IDENTIFIER
+
   PCRYPT_OBJECT_LOCATOR_PROVIDER_TABLE* = ptr CRYPT_OBJECT_LOCATOR_PROVIDER_TABLE
   CRYPTPROTECT_PROMPTSTRUCT* {.pure.} = object
     cbSize*: DWORD
     dwPromptFlags*: DWORD
     hwndApp*: HWND
     szPrompt*: LPCWSTR
+
   PCRYPTPROTECT_PROMPTSTRUCT* = ptr CRYPTPROTECT_PROMPTSTRUCT
+
 const
   ALG_CLASS_ANY* = 0
   ALG_CLASS_SIGNATURE* = 1 shl 13
@@ -2070,13 +2433,20 @@ const
   CALG_TEK* = ALG_CLASS_DATA_ENCRYPT or ALG_TYPE_BLOCK or ALG_SID_TEK
   CALG_CYLINK_MEK* = ALG_CLASS_DATA_ENCRYPT or ALG_TYPE_BLOCK or ALG_SID_CYLINK_MEK
   CALG_SSL3_SHAMD5* = ALG_CLASS_HASH or ALG_TYPE_ANY or ALG_SID_SSL3SHAMD5
-  CALG_SSL3_MASTER* = ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SSL3_MASTER
-  CALG_SCHANNEL_MASTER_HASH* = ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SCHANNEL_MASTER_HASH
-  CALG_SCHANNEL_MAC_KEY* = ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SCHANNEL_MAC_KEY
-  CALG_SCHANNEL_ENC_KEY* = ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SCHANNEL_ENC_KEY
-  CALG_PCT1_MASTER* = ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_PCT1_MASTER
-  CALG_SSL2_MASTER* = ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SSL2_MASTER
-  CALG_TLS1_MASTER* = ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_TLS1_MASTER
+  CALG_SSL3_MASTER* =
+    ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SSL3_MASTER
+  CALG_SCHANNEL_MASTER_HASH* =
+    ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SCHANNEL_MASTER_HASH
+  CALG_SCHANNEL_MAC_KEY* =
+    ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SCHANNEL_MAC_KEY
+  CALG_SCHANNEL_ENC_KEY* =
+    ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SCHANNEL_ENC_KEY
+  CALG_PCT1_MASTER* =
+    ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_PCT1_MASTER
+  CALG_SSL2_MASTER* =
+    ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_SSL2_MASTER
+  CALG_TLS1_MASTER* =
+    ALG_CLASS_MSG_ENCRYPT or ALG_TYPE_SECURECHANNEL or ALG_SID_TLS1_MASTER
   CALG_RC5* = ALG_CLASS_DATA_ENCRYPT or ALG_TYPE_BLOCK or ALG_SID_RC5
   CALG_HMAC* = ALG_CLASS_HASH or ALG_TYPE_ANY or ALG_SID_HMAC
   CALG_TLS1PRF* = ALG_CLASS_HASH or ALG_TYPE_ANY or ALG_SID_TLS1PRF
@@ -2316,8 +2686,10 @@ const
   MS_DEF_DSS_PROV_W* = "Microsoft Base DSS Cryptographic Provider"
   MS_DEF_DSS_DH_PROV_A* = "Microsoft Base DSS and Diffie-Hellman Cryptographic Provider"
   MS_DEF_DSS_DH_PROV_W* = "Microsoft Base DSS and Diffie-Hellman Cryptographic Provider"
-  MS_ENH_DSS_DH_PROV_A* = "Microsoft Enhanced DSS and Diffie-Hellman Cryptographic Provider"
-  MS_ENH_DSS_DH_PROV_W* = "Microsoft Enhanced DSS and Diffie-Hellman Cryptographic Provider"
+  MS_ENH_DSS_DH_PROV_A* =
+    "Microsoft Enhanced DSS and Diffie-Hellman Cryptographic Provider"
+  MS_ENH_DSS_DH_PROV_W* =
+    "Microsoft Enhanced DSS and Diffie-Hellman Cryptographic Provider"
   MS_DEF_DH_SCHANNEL_PROV_A* = "Microsoft DH SChannel Cryptographic Provider"
   MS_DEF_DH_SCHANNEL_PROV_W* = "Microsoft DH SChannel Cryptographic Provider"
   MS_SCARD_PROV_A* = "Microsoft Base Smart Card Crypto Provider"
@@ -2688,13 +3060,15 @@ const
   NCRYPT_PCP_PROVIDERHANDLE_PROPERTY* = "PCP_PROVIDERMHANDLE"
   NCRYPT_PCP_PLATFORMHANDLE_PROPERTY* = "PCP_PLATFORMHANDLE"
   NCRYPT_PCP_PLATFORM_BINDING_PCRMASK_PROPERTY* = "PCP_PLATFORM_BINDING_PCRMASK"
-  NCRYPT_PCP_PLATFORM_BINDING_PCRDIGESTLIST_PROPERTY* = "PCP_PLATFORM_BINDING_PCRDIGESTLIST"
+  NCRYPT_PCP_PLATFORM_BINDING_PCRDIGESTLIST_PROPERTY* =
+    "PCP_PLATFORM_BINDING_PCRDIGESTLIST"
   NCRYPT_PCP_PLATFORM_BINDING_PCRDIGEST_PROPERTY* = "PCP_PLATFORM_BINDING_PCRDIGEST"
   NCRYPT_PCP_KEY_USAGE_POLICY_PROPERTY* = "PCP_KEY_USAGE_POLICY"
   NCRYPT_PCP_TPM12_IDBINDING_PROPERTY* = "PCP_TPM12_IDBINDING"
   NCRYPT_PCP_TPM12_IDACTIVATION_PROPERTY* = "PCP_TPM12_IDACTIVATION"
   NCRYPT_PCP_KEYATTESTATION_PROPERTY* = "PCP_TPM12_KEYATTESTATION"
-  NCRYPT_PCP_ALTERNATE_KEY_STORAGE_LOCATION_PROPERTY* = "PCP_ALTERNATE_KEY_STORAGE_LOCATION"
+  NCRYPT_PCP_ALTERNATE_KEY_STORAGE_LOCATION_PROPERTY* =
+    "PCP_ALTERNATE_KEY_STORAGE_LOCATION"
   NCRYPT_TPM12_PROVIDER* = 0x00010000
   NCRYPT_PCP_SIGNATURE_KEY* = 0x1
   NCRYPT_PCP_ENCRYPTION_KEY* = 0x2
@@ -3002,13 +3376,15 @@ const
   CRYPT_ENCODE_NO_SIGNATURE_BYTE_REVERSAL_FLAG* = 0x8
   CRYPT_ENCODE_ALLOC_FLAG* = 0x8000
   CRYPT_UNICODE_NAME_ENCODE_ENABLE_T61_UNICODE_FLAG* = CERT_RDN_ENABLE_T61_UNICODE_FLAG
-  CRYPT_UNICODE_NAME_ENCODE_ENABLE_UTF8_UNICODE_FLAG* = CERT_RDN_ENABLE_UTF8_UNICODE_FLAG
+  CRYPT_UNICODE_NAME_ENCODE_ENABLE_UTF8_UNICODE_FLAG* =
+    CERT_RDN_ENABLE_UTF8_UNICODE_FLAG
   CRYPT_UNICODE_NAME_ENCODE_FORCE_UTF8_UNICODE_FLAG* = CERT_RDN_FORCE_UTF8_UNICODE_FLAG
   CRYPT_UNICODE_NAME_ENCODE_DISABLE_CHECK_TYPE_FLAG* = CERT_RDN_DISABLE_CHECK_TYPE_FLAG
   CRYPT_SORTED_CTL_ENCODE_HASHED_SUBJECT_IDENTIFIER_FLAG* = 0x10000
   CRYPT_ENCODE_ENABLE_PUNYCODE_FLAG* = 0x20000
   CRYPT_ENCODE_ENABLE_UTF8PERCENT_FLAG* = 0x40000
-  CRYPT_ENCODE_ENABLE_IA5CONVERSION_FLAG* = CRYPT_ENCODE_ENABLE_PUNYCODE_FLAG or CRYPT_ENCODE_ENABLE_UTF8PERCENT_FLAG
+  CRYPT_ENCODE_ENABLE_IA5CONVERSION_FLAG* =
+    CRYPT_ENCODE_ENABLE_PUNYCODE_FLAG or CRYPT_ENCODE_ENABLE_UTF8PERCENT_FLAG
   CRYPT_DECODE_NOCOPY_FLAG* = 0x1
   CRYPT_DECODE_TO_BE_SIGNED_FLAG* = 0x2
   CRYPT_DECODE_SHARE_OID_STRING_FLAG* = 0x4
@@ -3017,7 +3393,8 @@ const
   CRYPT_UNICODE_NAME_DECODE_DISABLE_IE4_UTF8_FLAG* = CERT_RDN_DISABLE_IE4_UTF8_FLAG
   CRYPT_DECODE_ENABLE_PUNYCODE_FLAG* = 0x2000000
   CRYPT_DECODE_ENABLE_UTF8PERCENT_FLAG* = 0x4000000
-  CRYPT_DECODE_ENABLE_IA5CONVERSION_FLAG* = CRYPT_DECODE_ENABLE_PUNYCODE_FLAG or CRYPT_DECODE_ENABLE_UTF8PERCENT_FLAG
+  CRYPT_DECODE_ENABLE_IA5CONVERSION_FLAG* =
+    CRYPT_DECODE_ENABLE_PUNYCODE_FLAG or CRYPT_DECODE_ENABLE_UTF8PERCENT_FLAG
   CRYPT_ENCODE_DECODE_NONE* = 0
   X509_CERT* = cast[LPCSTR](1)
   X509_CERT_TO_BE_SIGNED* = cast[LPCSTR](2)
@@ -3309,9 +3686,9 @@ const
   SORTED_CTL_EXT_HASHED_SUBJECT_IDENTIFIER_FLAG* = 0x1
   CERT_DSS_R_LEN* = 20
   CERT_DSS_S_LEN* = 20
-  CERT_DSS_SIGNATURE_LEN* = CERT_DSS_R_LEN+CERT_DSS_S_LEN
+  CERT_DSS_SIGNATURE_LEN* = CERT_DSS_R_LEN + CERT_DSS_S_LEN
   CERT_MAX_ASN_ENCODED_DSS_SIGNATURE_LEN* = 48
-  CRYPT_X942_PUB_INFO_BYTE_LENGTH* = 512/8
+  CRYPT_X942_PUB_INFO_BYTE_LENGTH* = 512 / 8
   CRYPT_RC2_40BIT_VERSION* = 160
   CRYPT_RC2_56BIT_VERSION* = 52
   CRYPT_RC2_64BIT_VERSION* = 120
@@ -3655,7 +4032,8 @@ const
   CMSG_OID_CAPI1_IMPORT_MAIL_LIST_FUNC* = CMSG_OID_IMPORT_MAIL_LIST_FUNC
   CMSG_OID_CNG_IMPORT_KEY_TRANS_FUNC* = "CryptMsgDllCNGImportKeyTrans"
   CMSG_OID_CNG_IMPORT_KEY_AGREE_FUNC* = "CryptMsgDllCNGImportKeyAgree"
-  CMSG_OID_CNG_IMPORT_CONTENT_ENCRYPT_KEY_FUNC* = "CryptMsgDllCNGImportContentEncryptKey"
+  CMSG_OID_CNG_IMPORT_CONTENT_ENCRYPT_KEY_FUNC* =
+    "CryptMsgDllCNGImportContentEncryptKey"
   CERT_KEY_PROV_HANDLE_PROP_ID* = 1
   CERT_KEY_PROV_INFO_PROP_ID* = 2
   CERT_SHA1_HASH_PROP_ID* = 3
@@ -3829,15 +4207,24 @@ const
   CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY_ID* = 7
   CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY_ID* = 8
   CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE_ID* = 9
-  CERT_SYSTEM_STORE_CURRENT_USER* = CERT_SYSTEM_STORE_CURRENT_USER_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_SYSTEM_STORE_LOCAL_MACHINE* = CERT_SYSTEM_STORE_LOCAL_MACHINE_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_SYSTEM_STORE_CURRENT_SERVICE* = CERT_SYSTEM_STORE_CURRENT_SERVICE_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_SYSTEM_STORE_SERVICES* = CERT_SYSTEM_STORE_SERVICES_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_SYSTEM_STORE_USERS* = CERT_SYSTEM_STORE_USERS_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY* = CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY* = CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE* = CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
-  CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH* = "Software\\Policies\\Microsoft\\SystemCertificates"
+  CERT_SYSTEM_STORE_CURRENT_USER* =
+    CERT_SYSTEM_STORE_CURRENT_USER_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_SYSTEM_STORE_LOCAL_MACHINE* =
+    CERT_SYSTEM_STORE_LOCAL_MACHINE_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_SYSTEM_STORE_CURRENT_SERVICE* =
+    CERT_SYSTEM_STORE_CURRENT_SERVICE_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_SYSTEM_STORE_SERVICES* =
+    CERT_SYSTEM_STORE_SERVICES_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_SYSTEM_STORE_USERS* =
+    CERT_SYSTEM_STORE_USERS_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY* =
+    CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY* =
+    CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE* =
+    CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE_ID shl CERT_SYSTEM_STORE_LOCATION_SHIFT
+  CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH* =
+    "Software\\Policies\\Microsoft\\SystemCertificates"
   CERT_EFSBLOB_VALUE_NAME* = "EFSBlob"
   CERT_PROT_ROOT_FLAGS_VALUE_NAME* = "Flags"
   CERT_PROT_ROOT_DISABLE_CURRENT_USER_FLAG* = 0x1
@@ -3858,13 +4245,17 @@ const
   CERT_TRUST_PUB_ALLOW_ENTERPRISE_ADMIN_TRUST* = 0x2
   CERT_TRUST_PUB_CHECK_PUBLISHER_REV_FLAG* = 0x100
   CERT_TRUST_PUB_CHECK_TIMESTAMP_REV_FLAG* = 0x200
-  CERT_OCM_SUBCOMPONENTS_LOCAL_MACHINE_REGPATH* = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\OC Manager\\Subcomponents"
+  CERT_OCM_SUBCOMPONENTS_LOCAL_MACHINE_REGPATH* =
+    "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\OC Manager\\Subcomponents"
   CERT_OCM_SUBCOMPONENTS_ROOT_AUTO_UPDATE_VALUE_NAME* = "RootAutoUpdate"
   CERT_DISABLE_ROOT_AUTO_UPDATE_VALUE_NAME* = "DisableRootAutoUpdate"
   CERT_AUTO_UPDATE_ROOT_DIR_URL_VALUE_NAME* = "RootDirUrl"
-  CERT_AUTO_UPDATE_LOCAL_MACHINE_REGPATH* = CERT_LOCAL_MACHINE_SYSTEM_STORE_REGPATH & "\\AuthRoot\\AutoUpdate"
-  CERT_AUTH_ROOT_AUTO_UPDATE_LOCAL_MACHINE_REGPATH* = CERT_AUTO_UPDATE_LOCAL_MACHINE_REGPATH
-  CERT_AUTH_ROOT_AUTO_UPDATE_ROOT_DIR_URL_VALUE_NAME* = CERT_AUTO_UPDATE_ROOT_DIR_URL_VALUE_NAME
+  CERT_AUTO_UPDATE_LOCAL_MACHINE_REGPATH* =
+    CERT_LOCAL_MACHINE_SYSTEM_STORE_REGPATH & "\\AuthRoot\\AutoUpdate"
+  CERT_AUTH_ROOT_AUTO_UPDATE_LOCAL_MACHINE_REGPATH* =
+    CERT_AUTO_UPDATE_LOCAL_MACHINE_REGPATH
+  CERT_AUTH_ROOT_AUTO_UPDATE_ROOT_DIR_URL_VALUE_NAME* =
+    CERT_AUTO_UPDATE_ROOT_DIR_URL_VALUE_NAME
   CERT_AUTH_ROOT_AUTO_UPDATE_SYNC_DELTA_TIME_VALUE_NAME* = "SyncDeltaTime"
   CERT_AUTH_ROOT_AUTO_UPDATE_FLAGS_VALUE_NAME* = "Flags"
   CERT_AUTH_ROOT_AUTO_UPDATE_DISABLE_UNTRUSTED_ROOT_LOGGING_FLAG* = 0x1
@@ -3877,8 +4268,10 @@ const
   CERT_AUTH_ROOT_CAB_FILENAME* = "authrootstl.cab"
   CERT_AUTH_ROOT_SEQ_FILENAME* = "authrootseq.txt"
   CERT_AUTH_ROOT_CERT_EXT* = ".crt"
-  CERT_DISALLOWED_CERT_AUTO_UPDATE_SYNC_DELTA_TIME_VALUE_NAME* = "DisallowedCertSyncDeltaTime"
-  CERT_DISALLOWED_CERT_AUTO_UPDATE_LAST_SYNC_TIME_VALUE_NAME* = "DisallowedCertLastSyncTime"
+  CERT_DISALLOWED_CERT_AUTO_UPDATE_SYNC_DELTA_TIME_VALUE_NAME* =
+    "DisallowedCertSyncDeltaTime"
+  CERT_DISALLOWED_CERT_AUTO_UPDATE_LAST_SYNC_TIME_VALUE_NAME* =
+    "DisallowedCertLastSyncTime"
   CERT_DISALLOWED_CERT_AUTO_UPDATE_ENCODED_CTL_VALUE_NAME* = "DisallowedCertEncodedCtl"
   CERT_DISALLOWED_CERT_CTL_FILENAME* = "disallowedcert.stl"
   CERT_DISALLOWED_CERT_CTL_FILENAME_A* = "disallowedcert.stl"
@@ -3973,15 +4366,23 @@ const
   CERT_FIND_HASH* = CERT_FIND_SHA1_HASH
   CERT_FIND_PROPERTY* = CERT_COMPARE_PROPERTY shl CERT_COMPARE_SHIFT
   CERT_FIND_PUBLIC_KEY* = CERT_COMPARE_PUBLIC_KEY shl CERT_COMPARE_SHIFT
-  CERT_FIND_SUBJECT_NAME* = CERT_COMPARE_NAME shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
-  CERT_FIND_SUBJECT_ATTR* = CERT_COMPARE_ATTR shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
-  CERT_FIND_ISSUER_NAME* = CERT_COMPARE_NAME shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
-  CERT_FIND_ISSUER_ATTR* = CERT_COMPARE_ATTR shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
-  CERT_FIND_SUBJECT_STR_A* = CERT_COMPARE_NAME_STR_A shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
-  CERT_FIND_SUBJECT_STR_W* = CERT_COMPARE_NAME_STR_W shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
+  CERT_FIND_SUBJECT_NAME* =
+    CERT_COMPARE_NAME shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
+  CERT_FIND_SUBJECT_ATTR* =
+    CERT_COMPARE_ATTR shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
+  CERT_FIND_ISSUER_NAME* =
+    CERT_COMPARE_NAME shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
+  CERT_FIND_ISSUER_ATTR* =
+    CERT_COMPARE_ATTR shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
+  CERT_FIND_SUBJECT_STR_A* =
+    CERT_COMPARE_NAME_STR_A shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
+  CERT_FIND_SUBJECT_STR_W* =
+    CERT_COMPARE_NAME_STR_W shl CERT_COMPARE_SHIFT or CERT_INFO_SUBJECT_FLAG
   CERT_FIND_SUBJECT_STR* = CERT_FIND_SUBJECT_STR_W
-  CERT_FIND_ISSUER_STR_A* = CERT_COMPARE_NAME_STR_A shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
-  CERT_FIND_ISSUER_STR_W* = CERT_COMPARE_NAME_STR_W shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
+  CERT_FIND_ISSUER_STR_A* =
+    CERT_COMPARE_NAME_STR_A shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
+  CERT_FIND_ISSUER_STR_W* =
+    CERT_COMPARE_NAME_STR_W shl CERT_COMPARE_SHIFT or CERT_INFO_ISSUER_FLAG
   CERT_FIND_ISSUER_STR* = CERT_FIND_ISSUER_STR_W
   CERT_FIND_KEY_SPEC* = CERT_COMPARE_KEY_SPEC shl CERT_COMPARE_SHIFT
   CERT_FIND_ENHKEY_USAGE* = CERT_COMPARE_ENHKEY_USAGE shl CERT_COMPARE_SHIFT
@@ -3990,9 +4391,11 @@ const
   CERT_FIND_ISSUER_OF* = CERT_COMPARE_ISSUER_OF shl CERT_COMPARE_SHIFT
   CERT_FIND_EXISTING* = CERT_COMPARE_EXISTING shl CERT_COMPARE_SHIFT
   CERT_FIND_CERT_ID* = CERT_COMPARE_CERT_ID shl CERT_COMPARE_SHIFT
-  CERT_FIND_CROSS_CERT_DIST_POINTS* = CERT_COMPARE_CROSS_CERT_DIST_POINTS shl CERT_COMPARE_SHIFT
+  CERT_FIND_CROSS_CERT_DIST_POINTS* =
+    CERT_COMPARE_CROSS_CERT_DIST_POINTS shl CERT_COMPARE_SHIFT
   CERT_FIND_PUBKEY_MD5_HASH* = CERT_COMPARE_PUBKEY_MD5_HASH shl CERT_COMPARE_SHIFT
-  CERT_FIND_SUBJECT_INFO_ACCESS* = CERT_COMPARE_SUBJECT_INFO_ACCESS shl CERT_COMPARE_SHIFT
+  CERT_FIND_SUBJECT_INFO_ACCESS* =
+    CERT_COMPARE_SUBJECT_INFO_ACCESS shl CERT_COMPARE_SHIFT
   CERT_FIND_HASH_STR* = CERT_COMPARE_HASH_STR shl CERT_COMPARE_SHIFT
   CERT_FIND_HAS_PRIVATE_KEY* = CERT_COMPARE_HAS_PRIVATE_KEY shl CERT_COMPARE_SHIFT
   CERT_FIND_OPTIONAL_ENHKEY_USAGE_FLAG* = 0x1
@@ -4107,7 +4510,8 @@ const
   CRYPT_VERIFY_CERT_SIGN_DISABLE_MD2_MD4_FLAG* = 0x1
   CRYPT_VERIFY_CERT_SIGN_SET_STRONG_PROPERTIES_FLAG* = 0x2
   CRYPT_VERIFY_CERT_SIGN_RETURN_STRONG_PROPERTIES_FLAG* = 0x4
-  CRYPT_OID_EXTRACT_ENCODED_SIGNATURE_PARAMETERS_FUNC* = "CryptDllExtractEncodedSignatureParameters"
+  CRYPT_OID_EXTRACT_ENCODED_SIGNATURE_PARAMETERS_FUNC* =
+    "CryptDllExtractEncodedSignatureParameters"
   CRYPT_OID_SIGN_AND_ENCODE_HASH_FUNC* = "CryptDllSignAndEncodeHash"
   CRYPT_OID_VERIFY_ENCODED_SIGNATURE_FUNC* = "CryptDllVerifyEncodedSignature"
   CRYPT_DEFAULT_CONTEXT_AUTO_RELEASE_FLAG* = 0x1
@@ -4116,7 +4520,8 @@ const
   CRYPT_DEFAULT_CONTEXT_MULTI_CERT_SIGN_OID* = 2
   CRYPT_OID_EXPORT_PUBLIC_KEY_INFO_FUNC* = "CryptDllExportPublicKeyInfoEx"
   CRYPT_OID_EXPORT_PUBLIC_KEY_INFO_EX2_FUNC* = "CryptDllExportPublicKeyInfoEx2"
-  CRYPT_OID_EXPORT_PUBLIC_KEY_INFO_FROM_BCRYPT_HANDLE_FUNC* = "CryptDllExportPublicKeyInfoFromBCryptKeyHandle"
+  CRYPT_OID_EXPORT_PUBLIC_KEY_INFO_FROM_BCRYPT_HANDLE_FUNC* =
+    "CryptDllExportPublicKeyInfoFromBCryptKeyHandle"
   CRYPT_OID_IMPORT_PUBLIC_KEY_INFO_FUNC* = "CryptDllImportPublicKeyInfoEx"
   CRYPT_OID_IMPORT_PRIVATE_KEY_INFO_FUNC* = "CryptDllImportPrivateKeyInfoEx"
   CRYPT_OID_EXPORT_PRIVATE_KEY_INFO_FUNC* = "CryptDllExportPrivateKeyInfoEx"
@@ -4192,20 +4597,34 @@ const
   CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL* = 1 shl CERT_QUERY_CONTENT_SERIALIZED_CRL
   CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED* = 1 shl CERT_QUERY_CONTENT_PKCS7_SIGNED
   CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED* = 1 shl CERT_QUERY_CONTENT_PKCS7_UNSIGNED
-  CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED* = 1 shl CERT_QUERY_CONTENT_PKCS7_SIGNED_EMBED
+  CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED* =
+    1 shl CERT_QUERY_CONTENT_PKCS7_SIGNED_EMBED
   CERT_QUERY_CONTENT_FLAG_PKCS10* = 1 shl CERT_QUERY_CONTENT_PKCS10
   CERT_QUERY_CONTENT_FLAG_PFX* = 1 shl CERT_QUERY_CONTENT_PFX
   CERT_QUERY_CONTENT_FLAG_CERT_PAIR* = 1 shl CERT_QUERY_CONTENT_CERT_PAIR
   CERT_QUERY_CONTENT_FLAG_PFX_AND_LOAD* = 1 shl CERT_QUERY_CONTENT_PFX_AND_LOAD
-  CERT_QUERY_CONTENT_FLAG_ALL* = CERT_QUERY_CONTENT_FLAG_CERT or CERT_QUERY_CONTENT_FLAG_CTL or CERT_QUERY_CONTENT_FLAG_CRL or CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE or CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT or CERT_QUERY_CONTENT_FLAG_SERIALIZED_CTL or CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL or CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED or CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED or CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED or CERT_QUERY_CONTENT_FLAG_PKCS10 or CERT_QUERY_CONTENT_FLAG_PFX or CERT_QUERY_CONTENT_FLAG_CERT_PAIR
-  CERT_QUERY_CONTENT_FLAG_ALL_ISSUER_CERT* = CERT_QUERY_CONTENT_FLAG_CERT or CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE or CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT or CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED or CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED
+  CERT_QUERY_CONTENT_FLAG_ALL* =
+    CERT_QUERY_CONTENT_FLAG_CERT or CERT_QUERY_CONTENT_FLAG_CTL or
+    CERT_QUERY_CONTENT_FLAG_CRL or CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE or
+    CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT or CERT_QUERY_CONTENT_FLAG_SERIALIZED_CTL or
+    CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL or CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED or
+    CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED or CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED or
+    CERT_QUERY_CONTENT_FLAG_PKCS10 or CERT_QUERY_CONTENT_FLAG_PFX or
+    CERT_QUERY_CONTENT_FLAG_CERT_PAIR
+  CERT_QUERY_CONTENT_FLAG_ALL_ISSUER_CERT* =
+    CERT_QUERY_CONTENT_FLAG_CERT or CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE or
+    CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT or CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED or
+    CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED
   CERT_QUERY_FORMAT_BINARY* = 1
   CERT_QUERY_FORMAT_BASE64_ENCODED* = 2
   CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED* = 3
   CERT_QUERY_FORMAT_FLAG_BINARY* = 1 shl CERT_QUERY_FORMAT_BINARY
   CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED* = 1 shl CERT_QUERY_FORMAT_BASE64_ENCODED
-  CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED* = 1 shl CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED
-  CERT_QUERY_FORMAT_FLAG_ALL* = CERT_QUERY_FORMAT_FLAG_BINARY or CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED or CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED
+  CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED* =
+    1 shl CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED
+  CERT_QUERY_FORMAT_FLAG_ALL* =
+    CERT_QUERY_FORMAT_FLAG_BINARY or CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED or
+    CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED
   CREDENTIAL_OID_PASSWORD_CREDENTIALS_A* = cast[LPCSTR](1)
   CREDENTIAL_OID_PASSWORD_CREDENTIALS_W* = cast[LPCSTR](2)
   SCHEME_OID_RETRIEVE_ENCODED_OBJECT_FUNC* = "SchemeDllRetrieveEncodedObject"
@@ -4276,7 +4695,8 @@ const
   URL_OID_CROSS_CERT_SUBJECT_INFO_ACCESS* = cast[LPCSTR](12)
   URL_OID_CERTIFICATE_ONLY_OCSP* = cast[LPCSTR](13)
   TIME_VALID_OID_GET_OBJECT_FUNC* = "TimeValidDllGetObject"
-  CERT_CHAIN_CONFIG_REGPATH* = "Software\\Microsoft\\Cryptography\\OID\\EncodingType 0\\CertDllCreateCertificateChainEngine\\Config"
+  CERT_CHAIN_CONFIG_REGPATH* =
+    "Software\\Microsoft\\Cryptography\\OID\\EncodingType 0\\CertDllCreateCertificateChainEngine\\Config"
   TIME_VALID_OID_GET_CTL* = cast[LPCSTR](1)
   TIME_VALID_OID_GET_CRL* = cast[LPCSTR](2)
   TIME_VALID_OID_GET_CRL_FROM_CERT* = cast[LPCSTR](3)
@@ -4295,21 +4715,26 @@ const
   CRYPT_KEYID_SET_NEW_FLAG* = 0x2000
   CRYPT_KEYID_ALLOC_FLAG* = 0x8000
   CERT_CHAIN_MAX_URL_RETRIEVAL_BYTE_COUNT_VALUE_NAME* = "MaxUrlRetrievalByteCount"
-  CERT_CHAIN_MAX_URL_RETRIEVAL_BYTE_COUNT_DEFAULT* = 100*1024*1024
+  CERT_CHAIN_MAX_URL_RETRIEVAL_BYTE_COUNT_DEFAULT* = 100 * 1024 * 1024
   CERT_CHAIN_CACHE_RESYNC_FILETIME_VALUE_NAME* = "ChainCacheResyncFiletime"
-  CERT_CHAIN_DISABLE_MANDATORY_BASIC_CONSTRAINTS_VALUE_NAME* = "DisableMandatoryBasicConstraints"
+  CERT_CHAIN_DISABLE_MANDATORY_BASIC_CONSTRAINTS_VALUE_NAME* =
+    "DisableMandatoryBasicConstraints"
   CERT_CHAIN_DISABLE_CA_NAME_CONSTRAINTS_VALUE_NAME* = "DisableCANameConstraints"
-  CERT_CHAIN_DISABLE_UNSUPPORTED_CRITICAL_EXTENSIONS_VALUE_NAME* = "DisableUnsupportedCriticalExtensions"
+  CERT_CHAIN_DISABLE_UNSUPPORTED_CRITICAL_EXTENSIONS_VALUE_NAME* =
+    "DisableUnsupportedCriticalExtensions"
   CERT_CHAIN_MAX_AIA_URL_COUNT_IN_CERT_VALUE_NAME* = "MaxAIAUrlCountInCert"
   CERT_CHAIN_MAX_AIA_URL_COUNT_IN_CERT_DEFAULT* = 5
-  CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_COUNT_PER_CHAIN_VALUE_NAME* = "MaxAIAUrlRetrievalCountPerChain"
+  CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_COUNT_PER_CHAIN_VALUE_NAME* =
+    "MaxAIAUrlRetrievalCountPerChain"
   CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_COUNT_PER_CHAIN_DEFAULT* = 3
-  CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_BYTE_COUNT_VALUE_NAME* = "MaxAIAUrlRetrievalByteCount"
+  CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_BYTE_COUNT_VALUE_NAME* =
+    "MaxAIAUrlRetrievalByteCount"
   CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_BYTE_COUNT_DEFAULT* = 100000
-  CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_CERT_COUNT_VALUE_NAME* = "MaxAIAUrlRetrievalCertCount"
+  CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_CERT_COUNT_VALUE_NAME* =
+    "MaxAIAUrlRetrievalCertCount"
   CERT_CHAIN_MAX_AIA_URL_RETRIEVAL_CERT_COUNT_DEFAULT* = 10
   CERT_CHAIN_OCSP_VALIDITY_SECONDS_VALUE_NAME* = "OcspValiditySeconds"
-  CERT_CHAIN_OCSP_VALIDITY_SECONDS_DEFAULT* = 12*60*60
+  CERT_CHAIN_OCSP_VALIDITY_SECONDS_DEFAULT* = 12 * 60 * 60
   CERT_CHAIN_ENABLE_WEAK_SIGNATURE_FLAGS_VALUE_NAME* = "EnableWeakSignatureFlags"
   CERT_CHAIN_ENABLE_MD2_MD4_FLAG* = 0x1
   CERT_CHAIN_ENABLE_WEAK_RSA_ROOT_FLAG* = 0x2
@@ -4322,64 +4747,89 @@ const
   CERT_CHAIN_WEAK_RSA_PUB_KEY_TIME_DEFAULT* = 0x01ca8a755c6e0000
   CERT_CHAIN_WEAK_SIGNATURE_LOG_DIR_VALUE_NAME* = "WeakSignatureLogDir"
   CERT_SRV_OCSP_RESP_MIN_VALIDITY_SECONDS_VALUE_NAME* = "SrvOcspRespMinValiditySeconds"
-  CERT_SRV_OCSP_RESP_MIN_VALIDITY_SECONDS_DEFAULT* = 10*60
-  CERT_SRV_OCSP_RESP_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_VALUE_NAME* = "SrvOcspRespUrlRetrievalTimeoutMilliseconds"
-  CERT_SRV_OCSP_RESP_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_DEFAULT* = 15*1000
-  CERT_SRV_OCSP_RESP_MAX_BEFORE_NEXT_UPDATE_SECONDS_VALUE_NAME* = "SrvOcspRespMaxBeforeNextUpdateSeconds"
-  CERT_SRV_OCSP_RESP_MAX_BEFORE_NEXT_UPDATE_SECONDS_DEFAULT* = 4*60*60
-  CERT_SRV_OCSP_RESP_MIN_BEFORE_NEXT_UPDATE_SECONDS_VALUE_NAME* = "SrvOcspRespMinBeforeNextUpdateSeconds"
-  CERT_SRV_OCSP_RESP_MIN_BEFORE_NEXT_UPDATE_SECONDS_DEFAULT* = 2*60
-  CERT_SRV_OCSP_RESP_MIN_AFTER_NEXT_UPDATE_SECONDS_VALUE_NAME* = "SrvOcspRespMinAfterNextUpdateSeconds"
-  CERT_SRV_OCSP_RESP_MIN_AFTER_NEXT_UPDATE_SECONDS_DEFAULT* = 1*60
-  CRYPTNET_MAX_CACHED_OCSP_PER_CRL_COUNT_VALUE_NAME* = "CryptnetMaxCachedOcspPerCrlCount"
+  CERT_SRV_OCSP_RESP_MIN_VALIDITY_SECONDS_DEFAULT* = 10 * 60
+  CERT_SRV_OCSP_RESP_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_VALUE_NAME* =
+    "SrvOcspRespUrlRetrievalTimeoutMilliseconds"
+  CERT_SRV_OCSP_RESP_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_DEFAULT* = 15 * 1000
+  CERT_SRV_OCSP_RESP_MAX_BEFORE_NEXT_UPDATE_SECONDS_VALUE_NAME* =
+    "SrvOcspRespMaxBeforeNextUpdateSeconds"
+  CERT_SRV_OCSP_RESP_MAX_BEFORE_NEXT_UPDATE_SECONDS_DEFAULT* = 4 * 60 * 60
+  CERT_SRV_OCSP_RESP_MIN_BEFORE_NEXT_UPDATE_SECONDS_VALUE_NAME* =
+    "SrvOcspRespMinBeforeNextUpdateSeconds"
+  CERT_SRV_OCSP_RESP_MIN_BEFORE_NEXT_UPDATE_SECONDS_DEFAULT* = 2 * 60
+  CERT_SRV_OCSP_RESP_MIN_AFTER_NEXT_UPDATE_SECONDS_VALUE_NAME* =
+    "SrvOcspRespMinAfterNextUpdateSeconds"
+  CERT_SRV_OCSP_RESP_MIN_AFTER_NEXT_UPDATE_SECONDS_DEFAULT* = 1 * 60
+  CRYPTNET_MAX_CACHED_OCSP_PER_CRL_COUNT_VALUE_NAME* =
+    "CryptnetMaxCachedOcspPerCrlCount"
   CRYPTNET_MAX_CACHED_OCSP_PER_CRL_COUNT_DEFAULT* = 500
   CRYPTNET_OCSP_AFTER_CRL_DISABLE* = 0xffffffff'i32
-  CRYPTNET_URL_CACHE_DEFAULT_FLUSH_EXEMPT_SECONDS_VALUE_NAME* = "CryptnetDefaultFlushExemptSeconds"
-  CRYPTNET_URL_CACHE_DEFAULT_FLUSH_EXEMPT_SECONDS_DEFAULT* = 28*24*60*60
-  CRYPTNET_PRE_FETCH_MIN_MAX_AGE_SECONDS_VALUE_NAME* = "CryptnetPreFetchMinMaxAgeSeconds"
-  CRYPTNET_PRE_FETCH_MIN_MAX_AGE_SECONDS_DEFAULT* = 1*60*60
-  CRYPTNET_PRE_FETCH_MAX_MAX_AGE_SECONDS_VALUE_NAME* = "CryptnetPreFetchMaxMaxAgeSeconds"
-  CRYPTNET_PRE_FETCH_MAX_MAX_AGE_SECONDS_DEFAULT* = 14*24*60*60
-  CRYPTNET_PRE_FETCH_MIN_OCSP_VALIDITY_PERIOD_SECONDS_VALUE_NAME* = "CryptnetPreFetchMinOcspValidityPeriodSeconds"
-  CRYPTNET_PRE_FETCH_MIN_OCSP_VALIDITY_PERIOD_SECONDS_DEFAULT* = 14*24*60*60
-  CRYPTNET_PRE_FETCH_AFTER_PUBLISH_PRE_FETCH_DIVISOR_VALUE_NAME* = "CryptnetPreFetchAfterPublishPreFetchDivisor"
+  CRYPTNET_URL_CACHE_DEFAULT_FLUSH_EXEMPT_SECONDS_VALUE_NAME* =
+    "CryptnetDefaultFlushExemptSeconds"
+  CRYPTNET_URL_CACHE_DEFAULT_FLUSH_EXEMPT_SECONDS_DEFAULT* = 28 * 24 * 60 * 60
+  CRYPTNET_PRE_FETCH_MIN_MAX_AGE_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchMinMaxAgeSeconds"
+  CRYPTNET_PRE_FETCH_MIN_MAX_AGE_SECONDS_DEFAULT* = 1 * 60 * 60
+  CRYPTNET_PRE_FETCH_MAX_MAX_AGE_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchMaxMaxAgeSeconds"
+  CRYPTNET_PRE_FETCH_MAX_MAX_AGE_SECONDS_DEFAULT* = 14 * 24 * 60 * 60
+  CRYPTNET_PRE_FETCH_MIN_OCSP_VALIDITY_PERIOD_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchMinOcspValidityPeriodSeconds"
+  CRYPTNET_PRE_FETCH_MIN_OCSP_VALIDITY_PERIOD_SECONDS_DEFAULT* = 14 * 24 * 60 * 60
+  CRYPTNET_PRE_FETCH_AFTER_PUBLISH_PRE_FETCH_DIVISOR_VALUE_NAME* =
+    "CryptnetPreFetchAfterPublishPreFetchDivisor"
   CRYPTNET_PRE_FETCH_AFTER_PUBLISH_PRE_FETCH_DIVISOR_DEFAULT* = 10
-  CRYPTNET_PRE_FETCH_BEFORE_NEXT_UPDATE_PRE_FETCH_DIVISOR_VALUE_NAME* = "CryptnetPreFetchBeforeNextUpdatePreFetchDivisor"
+  CRYPTNET_PRE_FETCH_BEFORE_NEXT_UPDATE_PRE_FETCH_DIVISOR_VALUE_NAME* =
+    "CryptnetPreFetchBeforeNextUpdatePreFetchDivisor"
   CRYPTNET_PRE_FETCH_BEFORE_NEXT_UPDATE_PRE_FETCH_DIVISOR_DEFAULT* = 20
-  CRYPTNET_PRE_FETCH_MIN_BEFORE_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* = "CryptnetPreFetchMinBeforeNextUpdatePreFetchSeconds"
-  CRYPTNET_PRE_FETCH_MIN_BEFORE_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_DEFAULT* = 1*60*60
-  CRYPTNET_PRE_FETCH_VALIDITY_PERIOD_AFTER_NEXT_UPDATE_PRE_FETCH_DIVISOR_VALUE_NAME* = "CryptnetPreFetchValidityPeriodAfterNextUpdatePreFetchDivisor"
+  CRYPTNET_PRE_FETCH_MIN_BEFORE_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchMinBeforeNextUpdatePreFetchSeconds"
+  CRYPTNET_PRE_FETCH_MIN_BEFORE_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_DEFAULT* =
+    1 * 60 * 60
+  CRYPTNET_PRE_FETCH_VALIDITY_PERIOD_AFTER_NEXT_UPDATE_PRE_FETCH_DIVISOR_VALUE_NAME* =
+    "CryptnetPreFetchValidityPeriodAfterNextUpdatePreFetchDivisor"
   CRYPTNET_PRE_FETCH_VALIDITY_PERIOD_AFTER_NEXT_UPDATE_PRE_FETCH_DIVISOR_DEFAULT* = 10
-  CRYPTNET_PRE_FETCH_MAX_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* = "CryptnetPreFetchMaxAfterNextUpdatePreFetchPeriodSeconds"
-  CRYPTNET_PRE_FETCH_MAX_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_DEFAULT* = 4*60*60
-  CRYPTNET_PRE_FETCH_MIN_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* = "CryptnetPreFetchMinAfterNextUpdatePreFetchPeriodSeconds"
-  CRYPTNET_PRE_FETCH_MIN_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_DEFAULT* = 30*60
-  CRYPTNET_PRE_FETCH_AFTER_CURRENT_TIME_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* = "CryptnetPreFetchAfterCurrentTimePreFetchPeriodSeconds"
-  CRYPTNET_PRE_FETCH_AFTER_CURRENT_TIME_PRE_FETCH_PERIOD_SECONDS_DEFAULT* = 30*60
-  CRYPTNET_PRE_FETCH_TRIGGER_PERIOD_SECONDS_VALUE_NAME* = "CryptnetPreFetchTriggerPeriodSeconds"
-  CRYPTNET_PRE_FETCH_TRIGGER_PERIOD_SECONDS_DEFAULT* = 10*60
+  CRYPTNET_PRE_FETCH_MAX_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchMaxAfterNextUpdatePreFetchPeriodSeconds"
+  CRYPTNET_PRE_FETCH_MAX_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_DEFAULT* =
+    4 * 60 * 60
+  CRYPTNET_PRE_FETCH_MIN_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchMinAfterNextUpdatePreFetchPeriodSeconds"
+  CRYPTNET_PRE_FETCH_MIN_AFTER_NEXT_UPDATE_PRE_FETCH_PERIOD_SECONDS_DEFAULT* = 30 * 60
+  CRYPTNET_PRE_FETCH_AFTER_CURRENT_TIME_PRE_FETCH_PERIOD_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchAfterCurrentTimePreFetchPeriodSeconds"
+  CRYPTNET_PRE_FETCH_AFTER_CURRENT_TIME_PRE_FETCH_PERIOD_SECONDS_DEFAULT* = 30 * 60
+  CRYPTNET_PRE_FETCH_TRIGGER_PERIOD_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchTriggerPeriodSeconds"
+  CRYPTNET_PRE_FETCH_TRIGGER_PERIOD_SECONDS_DEFAULT* = 10 * 60
   CRYPTNET_PRE_FETCH_TRIGGER_DISABLE* = 0xffffffff'i32
-  CRYPTNET_PRE_FETCH_SCAN_AFTER_TRIGGER_DELAY_SECONDS_VALUE_NAME* = "CryptnetPreFetchScanAfterTriggerDelaySeconds"
+  CRYPTNET_PRE_FETCH_SCAN_AFTER_TRIGGER_DELAY_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchScanAfterTriggerDelaySeconds"
   CRYPTNET_PRE_FETCH_SCAN_AFTER_TRIGGER_DELAY_SECONDS_DEFAULT* = 30
-  CRYPTNET_PRE_FETCH_RETRIEVAL_TIMEOUT_SECONDS_VALUE_NAME* = "CryptnetPreFetchRetrievalTimeoutSeconds"
-  CRYPTNET_PRE_FETCH_RETRIEVAL_TIMEOUT_SECONDS_DEFAULT* = 5*60
-  CERT_CHAIN_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_VALUE_NAME* = "ChainUrlRetrievalTimeoutMilliseconds"
-  CERT_CHAIN_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_DEFAULT* = 15*1000
-  CERT_CHAIN_REV_ACCUMULATIVE_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_VALUE_NAME* = "ChainRevAccumulativeUrlRetrievalTimeoutMilliseconds"
-  CERT_CHAIN_REV_ACCUMULATIVE_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_DEFAULT* = 20*1000
+  CRYPTNET_PRE_FETCH_RETRIEVAL_TIMEOUT_SECONDS_VALUE_NAME* =
+    "CryptnetPreFetchRetrievalTimeoutSeconds"
+  CRYPTNET_PRE_FETCH_RETRIEVAL_TIMEOUT_SECONDS_DEFAULT* = 5 * 60
+  CERT_CHAIN_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_VALUE_NAME* =
+    "ChainUrlRetrievalTimeoutMilliseconds"
+  CERT_CHAIN_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_DEFAULT* = 15 * 1000
+  CERT_CHAIN_REV_ACCUMULATIVE_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_VALUE_NAME* =
+    "ChainRevAccumulativeUrlRetrievalTimeoutMilliseconds"
+  CERT_CHAIN_REV_ACCUMULATIVE_URL_RETRIEVAL_TIMEOUT_MILLISECONDS_DEFAULT* = 20 * 1000
   CERT_RETR_BEHAVIOR_INET_AUTH_VALUE_NAME* = "EnableInetUnknownAuth"
   CERT_RETR_BEHAVIOR_INET_STATUS_VALUE_NAME* = "EnableInetLocal"
   CERT_RETR_BEHAVIOR_FILE_VALUE_NAME* = "AllowFileUrlScheme"
   CERT_RETR_BEHAVIOR_LDAP_VALUE_NAME* = "DisableLDAPSignAndEncrypt"
-  CRYPTNET_CACHED_OCSP_SWITCH_TO_CRL_COUNT_VALUE_NAME* = "CryptnetCachedOcspSwitchToCrlCount"
+  CRYPTNET_CACHED_OCSP_SWITCH_TO_CRL_COUNT_VALUE_NAME* =
+    "CryptnetCachedOcspSwitchToCrlCount"
   CRYPTNET_CACHED_OCSP_SWITCH_TO_CRL_COUNT_DEFAULT* = 50
   CRYPTNET_CRL_BEFORE_OCSP_ENABLE* = 0xffffffff'i32
   CERT_CHAIN_DISABLE_AIA_URL_RETRIEVAL_VALUE_NAME* = "DisableAIAUrlRetrieval"
   CERT_CHAIN_OPTIONS_VALUE_NAME* = "Options"
   CERT_CHAIN_OPTION_DISABLE_AIA_URL_RETRIEVAL* = 0x2
   CERT_CHAIN_OPTION_ENABLE_SIA_URL_RETRIEVAL* = 0x4
-  CERT_CHAIN_CROSS_CERT_DOWNLOAD_INTERVAL_HOURS_VALUE_NAME* = "CrossCertDownloadIntervalHours"
-  CERT_CHAIN_CROSS_CERT_DOWNLOAD_INTERVAL_HOURS_DEFAULT* = 24*7
+  CERT_CHAIN_CROSS_CERT_DOWNLOAD_INTERVAL_HOURS_VALUE_NAME* =
+    "CrossCertDownloadIntervalHours"
+  CERT_CHAIN_CROSS_CERT_DOWNLOAD_INTERVAL_HOURS_DEFAULT* = 24 * 7
   CERT_CHAIN_CRL_VALIDITY_EXT_PERIOD_HOURS_VALUE_NAME* = "CRLValidityExtensionPeriod"
   CERT_CHAIN_CRL_VALIDITY_EXT_PERIOD_HOURS_DEFAULT* = 12
   HCCE_LOCAL_MACHINE* = HCERTCHAINENGINE 0x1
@@ -4459,7 +4909,10 @@ const
   CERT_CHAIN_POLICY_IGNORE_CTL_NOT_TIME_VALID_FLAG* = 0x2
   CERT_CHAIN_POLICY_IGNORE_NOT_TIME_NESTED_FLAG* = 0x4
   CERT_CHAIN_POLICY_IGNORE_INVALID_BASIC_CONSTRAINTS_FLAG* = 0x8
-  CERT_CHAIN_POLICY_IGNORE_ALL_NOT_TIME_VALID_FLAGS* = CERT_CHAIN_POLICY_IGNORE_NOT_TIME_VALID_FLAG or CERT_CHAIN_POLICY_IGNORE_CTL_NOT_TIME_VALID_FLAG or CERT_CHAIN_POLICY_IGNORE_NOT_TIME_NESTED_FLAG
+  CERT_CHAIN_POLICY_IGNORE_ALL_NOT_TIME_VALID_FLAGS* =
+    CERT_CHAIN_POLICY_IGNORE_NOT_TIME_VALID_FLAG or
+    CERT_CHAIN_POLICY_IGNORE_CTL_NOT_TIME_VALID_FLAG or
+    CERT_CHAIN_POLICY_IGNORE_NOT_TIME_NESTED_FLAG
   CERT_CHAIN_POLICY_ALLOW_UNKNOWN_CA_FLAG* = 0x10
   CERT_CHAIN_POLICY_IGNORE_WRONG_USAGE_FLAG* = 0x20
   CERT_CHAIN_POLICY_IGNORE_INVALID_NAME_FLAG* = 0x40
@@ -4468,12 +4921,17 @@ const
   CERT_CHAIN_POLICY_IGNORE_CTL_SIGNER_REV_UNKNOWN_FLAG* = 0x200
   CERT_CHAIN_POLICY_IGNORE_CA_REV_UNKNOWN_FLAG* = 0x400
   CERT_CHAIN_POLICY_IGNORE_ROOT_REV_UNKNOWN_FLAG* = 0x800
-  CERT_CHAIN_POLICY_IGNORE_ALL_REV_UNKNOWN_FLAGS* = CERT_CHAIN_POLICY_IGNORE_END_REV_UNKNOWN_FLAG or CERT_CHAIN_POLICY_IGNORE_CTL_SIGNER_REV_UNKNOWN_FLAG or CERT_CHAIN_POLICY_IGNORE_CA_REV_UNKNOWN_FLAG or CERT_CHAIN_POLICY_IGNORE_ROOT_REV_UNKNOWN_FLAG
+  CERT_CHAIN_POLICY_IGNORE_ALL_REV_UNKNOWN_FLAGS* =
+    CERT_CHAIN_POLICY_IGNORE_END_REV_UNKNOWN_FLAG or
+    CERT_CHAIN_POLICY_IGNORE_CTL_SIGNER_REV_UNKNOWN_FLAG or
+    CERT_CHAIN_POLICY_IGNORE_CA_REV_UNKNOWN_FLAG or
+    CERT_CHAIN_POLICY_IGNORE_ROOT_REV_UNKNOWN_FLAG
   CERT_CHAIN_POLICY_IGNORE_PEER_TRUST_FLAG* = 0x1000
   CERT_CHAIN_POLICY_IGNORE_NOT_SUPPORTED_CRITICAL_EXT_FLAG* = 0x2000
   CERT_CHAIN_POLICY_TRUST_TESTROOT_FLAG* = 0x4000
   CERT_CHAIN_POLICY_ALLOW_TESTROOT_FLAG* = 0x8000
-  CRYPT_OID_VERIFY_CERTIFICATE_CHAIN_POLICY_FUNC* = "CertDllVerifyCertificateChainPolicy"
+  CRYPT_OID_VERIFY_CERTIFICATE_CHAIN_POLICY_FUNC* =
+    "CertDllVerifyCertificateChainPolicy"
   CERT_CHAIN_POLICY_BASE* = cast[LPCSTR](1)
   CERT_CHAIN_POLICY_AUTHENTICODE* = cast[LPCSTR](2)
   CERT_CHAIN_POLICY_AUTHENTICODE_TS* = cast[LPCSTR](3)
@@ -4520,7 +4978,9 @@ const
   PKCS12_NO_PERSIST_KEY* = 0x8000
   PKCS12_IMPORT_RESERVED_MASK* = 0xffff0000'i32
   PKCS12_INCLUDE_EXTENDED_PROPERTIES* = 0x10
-  PKCS12_OBJECT_LOCATOR_ALL_IMPORT_FLAGS* = PKCS12_ALWAYS_CNG_KSP or PKCS12_NO_PERSIST_KEY or PKCS12_IMPORT_SILENT or PKCS12_INCLUDE_EXTENDED_PROPERTIES
+  PKCS12_OBJECT_LOCATOR_ALL_IMPORT_FLAGS* =
+    PKCS12_ALWAYS_CNG_KSP or PKCS12_NO_PERSIST_KEY or PKCS12_IMPORT_SILENT or
+    PKCS12_INCLUDE_EXTENDED_PROPERTIES
   REPORT_NO_PRIVATE_KEY* = 0x1
   REPORT_NOT_ABLE_TO_EXPORT_PRIVATE_KEY* = 0x2
   EXPORT_PRIVATE_KEYS* = 0x4
@@ -4545,7 +5005,7 @@ const
   CERT_SELECT_BY_PUBLIC_KEY* = 10
   CERT_SELECT_BY_TLS_SIGNATURES* = 11
   CERT_SELECT_LAST* = CERT_SELECT_BY_TLS_SIGNATURES
-  CERT_SELECT_MAX* = CERT_SELECT_LAST*3
+  CERT_SELECT_MAX* = CERT_SELECT_LAST * 3
   CERT_SELECT_ALLOW_EXPIRED* = 0x1
   CERT_SELECT_TRUSTED_ROOT* = 0x2
   CERT_SELECT_DISALLOW_SELFSIGNED* = 0x4
@@ -4578,7 +5038,8 @@ const
   CRYPT_OBJECT_LOCATOR_LAST_RESERVED_USER_NAME_TYPE* = 0x0000ffff
   SSL_OBJECT_LOCATOR_PFX_FUNC* = "SslObjectLocatorInitializePfx"
   SSL_OBJECT_LOCATOR_ISSUER_LIST_FUNC* = "SslObjectLocatorInitializeIssuerList"
-  SSL_OBJECT_LOCATOR_CERT_VALIDATION_CONFIG_FUNC* = "SslObjectLocatorInitializeCertValidationConfig"
+  SSL_OBJECT_LOCATOR_CERT_VALIDATION_CONFIG_FUNC* =
+    "SslObjectLocatorInitializeCertValidationConfig"
   CRYPT_OBJECT_LOCATOR_RELEASE_SYSTEM_SHUTDOWN* = 1
   CRYPT_OBJECT_LOCATOR_RELEASE_SERVICE_STOP* = 2
   CRYPT_OBJECT_LOCATOR_RELEASE_PROCESS_EXIT* = 3
@@ -4606,8 +5067,10 @@ const
   CRYPTPROTECTMEMORY_SAME_PROCESS* = 0x0
   CRYPTPROTECTMEMORY_CROSS_PROCESS* = 0x1
   CRYPTPROTECTMEMORY_SAME_LOGON* = 0x2
-  MS_ENH_RSA_AES_PROV_XP_A* = "Microsoft Enhanced RSA and AES Cryptographic Provider (Prototype)"
-  MS_ENH_RSA_AES_PROV_XP_W* = "Microsoft Enhanced RSA and AES Cryptographic Provider (Prototype)"
+  MS_ENH_RSA_AES_PROV_XP_A* =
+    "Microsoft Enhanced RSA and AES Cryptographic Provider (Prototype)"
+  MS_ENH_RSA_AES_PROV_XP_W* =
+    "Microsoft Enhanced RSA and AES Cryptographic Provider (Prototype)"
   BCRYPT_CIPHER_INTERFACE_VERSION_1* = [1'u16, 0]
   BCRYPT_HASH_INTERFACE_VERSION_1* = [1'u16, 0]
   BCRYPT_ASYMMETRIC_ENCRYPTION_INTERFACE_VERSION_1* = [1'u16, 0]
@@ -4619,79 +5082,387 @@ const
   CTL_FIND_NO_SIGNER_PTR* = cast[PCERT_INFO](-1)
   HCCE_CURRENT_USER* = HCERTCHAINENGINE(0)
   CERT_EFSBLOB_REGPATH* = CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\EFS"
-  CERT_PROT_ROOT_FLAGS_REGPATH* = CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\Root\\ProtectedRoots"
-  CERT_PROT_ROOT_PEER_USAGES_DEFAULT_A* = szOID_PKIX_KP_CLIENT_AUTH & "\0" & szOID_PKIX_KP_EMAIL_PROTECTION & "\0" & szOID_KP_EFS & "\0"
-  CERT_TRUST_PUB_SAFER_GROUP_POLICY_REGPATH* = CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\TrustedPublisher\\Safer"
-  CERT_TRUST_PUB_SAFER_LOCAL_MACHINE_REGPATH* = CERT_LOCAL_MACHINE_SYSTEM_STORE_REGPATH & "\\TrustedPublisher\\Safer"
-  CERT_DISABLE_ROOT_AUTO_UPDATE_REGPATH* = CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\AuthRoot"
-  CERT_GROUP_POLICY_CHAIN_CONFIG_REGPATH* = CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\ChainEngine\\Config"
+  CERT_PROT_ROOT_FLAGS_REGPATH* =
+    CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\Root\\ProtectedRoots"
+  CERT_PROT_ROOT_PEER_USAGES_DEFAULT_A* =
+    szOID_PKIX_KP_CLIENT_AUTH & "\0" & szOID_PKIX_KP_EMAIL_PROTECTION & "\0" &
+    szOID_KP_EFS & "\0"
+  CERT_TRUST_PUB_SAFER_GROUP_POLICY_REGPATH* =
+    CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\TrustedPublisher\\Safer"
+  CERT_TRUST_PUB_SAFER_LOCAL_MACHINE_REGPATH* =
+    CERT_LOCAL_MACHINE_SYSTEM_STORE_REGPATH & "\\TrustedPublisher\\Safer"
+  CERT_DISABLE_ROOT_AUTO_UPDATE_REGPATH* =
+    CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\AuthRoot"
+  CERT_GROUP_POLICY_CHAIN_CONFIG_REGPATH* =
+    CERT_GROUP_POLICY_SYSTEM_STORE_REGPATH & "\\ChainEngine\\Config"
   CERT_RETRIEVE_BIOMETRIC_PICTURE_TYPE* = cast[LPCSTR](1000)
   CERT_RETRIEVE_BIOMETRIC_SIGNATURE_TYPE* = cast[LPCSTR](1001)
 type
-  PFN_NCRYPT_ALLOC* = proc (cbSize: SIZE_T): LPVOID {.stdcall.}
-  PFN_NCRYPT_FREE* = proc (pv: LPVOID): VOID {.stdcall.}
-  PFN_CRYPT_ENUM_OID_FUNC* = proc (dwEncodingType: DWORD, pszFuncName: LPCSTR, pszOID: LPCSTR, cValue: DWORD, rgdwValueType: ptr DWORD, rgpwszValueName: ptr LPCWSTR, rgpbValueData: ptr ptr BYTE, rgcbValueData: ptr DWORD, pvArg: pointer): WINBOOL {.stdcall.}
-  PFN_CRYPT_ENUM_OID_INFO* = proc (pInfo: PCCRYPT_OID_INFO, pvArg: pointer): WINBOOL {.stdcall.}
-  PFN_CMSG_GEN_ENCRYPT_KEY* = proc (phCryptProv: ptr HCRYPTPROV, paiEncrypt: PCRYPT_ALGORITHM_IDENTIFIER, pvEncryptAuxInfo: PVOID, pPublicKeyInfo: PCERT_PUBLIC_KEY_INFO, pfnAlloc: PFN_CMSG_ALLOC, phEncryptKey: ptr HCRYPTKEY, ppbEncryptParameters: ptr PBYTE, pcbEncryptParameters: PDWORD): WINBOOL {.stdcall.}
-  PFN_CMSG_EXPORT_ENCRYPT_KEY* = proc (hCryptProv: HCRYPTPROV, hEncryptKey: HCRYPTKEY, pPublicKeyInfo: PCERT_PUBLIC_KEY_INFO, pbData: PBYTE, pcbData: PDWORD): WINBOOL {.stdcall.}
-  PFN_CMSG_IMPORT_ENCRYPT_KEY* = proc (hCryptProv: HCRYPTPROV, dwKeySpec: DWORD, paiEncrypt: PCRYPT_ALGORITHM_IDENTIFIER, paiPubKey: PCRYPT_ALGORITHM_IDENTIFIER, pbEncodedKey: PBYTE, cbEncodedKey: DWORD, phEncryptKey: ptr HCRYPTKEY): WINBOOL {.stdcall.}
-  PFN_CMSG_GEN_CONTENT_ENCRYPT_KEY* = proc (pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.stdcall.}
-  PFN_CMSG_EXPORT_KEY_TRANS* = proc (pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO, pKeyTransEncodeInfo: PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO, pKeyTransEncryptInfo: PCMSG_KEY_TRANS_ENCRYPT_INFO, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.stdcall.}
-  PFN_CMSG_EXPORT_KEY_AGREE* = proc (pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO, pKeyAgreeEncodeInfo: PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO, pKeyAgreeEncryptInfo: PCMSG_KEY_AGREE_ENCRYPT_INFO, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.stdcall.}
-  PFN_CMSG_EXPORT_MAIL_LIST* = proc (pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO, pMailListEncodeInfo: PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO, pMailListEncryptInfo: PCMSG_MAIL_LIST_ENCRYPT_INFO, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.stdcall.}
-  PFN_CMSG_IMPORT_KEY_TRANS* = proc (pContentEncryptionAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pKeyTransDecryptPara: PCMSG_CTRL_KEY_TRANS_DECRYPT_PARA, dwFlags: DWORD, pvReserved: pointer, phContentEncryptKey: ptr HCRYPTKEY): WINBOOL {.stdcall.}
-  PFN_CMSG_IMPORT_KEY_AGREE* = proc (pContentEncryptionAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pKeyAgreeDecryptPara: PCMSG_CTRL_KEY_AGREE_DECRYPT_PARA, dwFlags: DWORD, pvReserved: pointer, phContentEncryptKey: ptr HCRYPTKEY): WINBOOL {.stdcall.}
-  PFN_CMSG_IMPORT_MAIL_LIST* = proc (pContentEncryptionAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pMailListDecryptPara: PCMSG_CTRL_MAIL_LIST_DECRYPT_PARA, dwFlags: DWORD, pvReserved: pointer, phContentEncryptKey: ptr HCRYPTKEY): WINBOOL {.stdcall.}
-  PFN_CMSG_CNG_IMPORT_KEY_TRANS* = proc (pCNGContentDecryptInfo: PCMSG_CNG_CONTENT_DECRYPT_INFO, pKeyTransDecryptPara: PCMSG_CTRL_KEY_TRANS_DECRYPT_PARA, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.stdcall.}
-  PFN_CMSG_CNG_IMPORT_KEY_AGREE* = proc (pCNGContentDecryptInfo: PCMSG_CNG_CONTENT_DECRYPT_INFO, pKeyAgreeDecryptPara: PCMSG_CTRL_KEY_AGREE_DECRYPT_PARA, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.stdcall.}
-  PFN_CMSG_CNG_IMPORT_CONTENT_ENCRYPT_KEY* = proc (pCNGContentDecryptInfo: PCMSG_CNG_CONTENT_DECRYPT_INFO, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.stdcall.}
-  PFN_CERT_DLL_OPEN_STORE_PROV_FUNC* = proc (lpszStoreProvider: LPCSTR, dwEncodingType: DWORD, hCryptProv: HCRYPTPROV_LEGACY, dwFlags: DWORD, pvPara: pointer, hCertStore: HCERTSTORE, pStoreProvInfo: PCERT_STORE_PROV_INFO): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_CLOSE* = proc (hStoreProv: HCERTSTOREPROV, dwFlags: DWORD): void {.stdcall.}
-  PFN_CERT_STORE_PROV_READ_CERT* = proc (hStoreProv: HCERTSTOREPROV, pStoreCertContext: PCCERT_CONTEXT, dwFlags: DWORD, ppProvCertContext: ptr PCCERT_CONTEXT): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_WRITE_CERT* = proc (hStoreProv: HCERTSTOREPROV, pCertContext: PCCERT_CONTEXT, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_DELETE_CERT* = proc (hStoreProv: HCERTSTOREPROV, pCertContext: PCCERT_CONTEXT, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_SET_CERT_PROPERTY* = proc (hStoreProv: HCERTSTOREPROV, pCertContext: PCCERT_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_READ_CRL* = proc (hStoreProv: HCERTSTOREPROV, pStoreCrlContext: PCCRL_CONTEXT, dwFlags: DWORD, ppProvCrlContext: ptr PCCRL_CONTEXT): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_WRITE_CRL* = proc (hStoreProv: HCERTSTOREPROV, pCrlContext: PCCRL_CONTEXT, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_DELETE_CRL* = proc (hStoreProv: HCERTSTOREPROV, pCrlContext: PCCRL_CONTEXT, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_SET_CRL_PROPERTY* = proc (hStoreProv: HCERTSTOREPROV, pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_READ_CTL* = proc (hStoreProv: HCERTSTOREPROV, pStoreCtlContext: PCCTL_CONTEXT, dwFlags: DWORD, ppProvCtlContext: ptr PCCTL_CONTEXT): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_WRITE_CTL* = proc (hStoreProv: HCERTSTOREPROV, pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_DELETE_CTL* = proc (hStoreProv: HCERTSTOREPROV, pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_SET_CTL_PROPERTY* = proc (hStoreProv: HCERTSTOREPROV, pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_CONTROL* = proc (hStoreProv: HCERTSTOREPROV, dwFlags: DWORD, dwCtrlType: DWORD, pvCtrlPara: pointer): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_FIND_CERT* = proc (hStoreProv: HCERTSTOREPROV, pFindInfo: PCCERT_STORE_PROV_FIND_INFO, pPrevCertContext: PCCERT_CONTEXT, dwFlags: DWORD, ppvStoreProvFindInfo: ptr pointer, ppProvCertContext: ptr PCCERT_CONTEXT): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_FREE_FIND_CERT* = proc (hStoreProv: HCERTSTOREPROV, pCertContext: PCCERT_CONTEXT, pvStoreProvFindInfo: pointer, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_GET_CERT_PROPERTY* = proc (hStoreProv: HCERTSTOREPROV, pCertContext: PCCERT_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_FIND_CRL* = proc (hStoreProv: HCERTSTOREPROV, pFindInfo: PCCERT_STORE_PROV_FIND_INFO, pPrevCrlContext: PCCRL_CONTEXT, dwFlags: DWORD, ppvStoreProvFindInfo: ptr pointer, ppProvCrlContext: ptr PCCRL_CONTEXT): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_FREE_FIND_CRL* = proc (hStoreProv: HCERTSTOREPROV, pCrlContext: PCCRL_CONTEXT, pvStoreProvFindInfo: pointer, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_GET_CRL_PROPERTY* = proc (hStoreProv: HCERTSTOREPROV, pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_FIND_CTL* = proc (hStoreProv: HCERTSTOREPROV, pFindInfo: PCCERT_STORE_PROV_FIND_INFO, pPrevCtlContext: PCCTL_CONTEXT, dwFlags: DWORD, ppvStoreProvFindInfo: ptr pointer, ppProvCtlContext: ptr PCCTL_CONTEXT): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_FREE_FIND_CTL* = proc (hStoreProv: HCERTSTOREPROV, pCtlContext: PCCTL_CONTEXT, pvStoreProvFindInfo: pointer, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_STORE_PROV_GET_CTL_PROPERTY* = proc (hStoreProv: HCERTSTOREPROV, pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_CERT_ENUM_SYSTEM_STORE_LOCATION* = proc (pwszStoreLocation: LPCWSTR, dwFlags: DWORD, pvReserved: pointer, pvArg: pointer): WINBOOL {.stdcall.}
-  PFN_CERT_ENUM_SYSTEM_STORE* = proc (pvSystemStore: pointer, dwFlags: DWORD, pStoreInfo: PCERT_SYSTEM_STORE_INFO, pvReserved: pointer, pvArg: pointer): WINBOOL {.stdcall.}
-  PFN_CERT_ENUM_PHYSICAL_STORE* = proc (pvSystemStore: pointer, dwFlags: DWORD, pwszStoreName: LPCWSTR, pStoreInfo: PCERT_PHYSICAL_STORE_INFO, pvReserved: pointer, pvArg: pointer): WINBOOL {.stdcall.}
-  PFN_CRYPT_EXTRACT_ENCODED_SIGNATURE_PARAMETERS_FUNC* = proc (dwCertEncodingType: DWORD, pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, ppvDecodedSignPara: ptr pointer, ppwszCNGHashAlgid: ptr LPWSTR): WINBOOL {.stdcall.}
-  PFN_CRYPT_SIGN_AND_ENCODE_HASH_FUNC* = proc (hKey: NCRYPT_KEY_HANDLE, dwCertEncodingType: DWORD, pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pvDecodedSignPara: pointer, pwszCNGPubKeyAlgid: LPCWSTR, pwszCNGHashAlgid: LPCWSTR, pbComputedHash: ptr BYTE, cbComputedHash: DWORD, pbSignature: ptr BYTE, pcbSignature: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_CRYPT_VERIFY_ENCODED_SIGNATURE_FUNC* = proc (dwCertEncodingType: DWORD, pPubKeyInfo: PCERT_PUBLIC_KEY_INFO, pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pvDecodedSignPara: pointer, pwszCNGPubKeyAlgid: LPCWSTR, pwszCNGHashAlgid: LPCWSTR, pbComputedHash: ptr BYTE, cbComputedHash: DWORD, pbSignature: ptr BYTE, cbSignature: DWORD): WINBOOL {.stdcall.}
-  PFN_CRYPT_EXPORT_PUBLIC_KEY_INFO_EX2_FUNC* = proc (hNCryptKey: NCRYPT_KEY_HANDLE, dwCertEncodingType: DWORD, pszPublicKeyObjId: LPSTR, dwFlags: DWORD, pvAuxInfo: pointer, pInfo: PCERT_PUBLIC_KEY_INFO, pcbInfo: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_CRYPT_EXPORT_PUBLIC_KEY_INFO_FROM_BCRYPT_HANDLE_FUNC* = proc (hBCryptKey: BCRYPT_KEY_HANDLE, dwCertEncodingType: DWORD, pszPublicKeyObjId: LPSTR, dwFlags: DWORD, pvAuxInfo: pointer, pInfo: PCERT_PUBLIC_KEY_INFO, pcbInfo: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_IMPORT_PRIV_KEY_FUNC* = proc (hCryptProv: HCRYPTPROV, pPrivateKeyInfo: ptr CRYPT_PRIVATE_KEY_INFO, dwFlags: DWORD, pvAuxInfo: pointer): WINBOOL {.stdcall.}
-  PFN_EXPORT_PRIV_KEY_FUNC* = proc (hCryptProv: HCRYPTPROV, dwKeySpec: DWORD, pszPrivateKeyObjId: LPSTR, dwFlags: DWORD, pvAuxInfo: pointer, pPrivateKeyInfo: ptr CRYPT_PRIVATE_KEY_INFO, pcbPrivateKeyInfo: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_IMPORT_PUBLIC_KEY_INFO_EX2_FUNC* = proc (dwCertEncodingType: DWORD, pInfo: PCERT_PUBLIC_KEY_INFO, dwFlags: DWORD, pvAuxInfo: pointer, phKey: ptr BCRYPT_KEY_HANDLE): WINBOOL {.stdcall.}
-  PFN_CRYPT_ASYNC_PARAM_FREE_FUNC* = proc (pszParamOid: LPSTR, pvParam: LPVOID): VOID {.stdcall.}
-  PFN_FREE_ENCODED_OBJECT_FUNC* = proc (pszObjectOid: LPCSTR, pObject: PCRYPT_BLOB_ARRAY, pvFreeContext: LPVOID): VOID {.stdcall.}
-  PFN_CRYPT_CANCEL_RETRIEVAL* = proc (dwFlags: DWORD, pvArg: pointer): WINBOOL {.stdcall.}
-  PFN_CANCEL_ASYNC_RETRIEVAL_FUNC* = proc (hAsyncRetrieve: HCRYPTASYNC): WINBOOL {.stdcall.}
-  PFN_CRYPT_ENUM_KEYID_PROP* = proc (pKeyIdentifier: ptr CRYPT_HASH_BLOB, dwFlags: DWORD, pvReserved: pointer, pvArg: pointer, cProp: DWORD, rgdwPropId: ptr DWORD, rgpvData: ptr pointer, rgcbData: ptr DWORD): WINBOOL {.stdcall.}
-  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FLUSH* = proc (pContext: LPVOID, rgIdentifierOrNameList: ptr PCERT_NAME_BLOB, dwIdentifierOrNameListCount: DWORD): WINBOOL {.stdcall.}
-  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_INITIALIZE* = proc (pfnFlush: PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FLUSH, pContext: LPVOID, pdwExpectedObjectCount: ptr DWORD, ppFuncTable: ptr PCRYPT_OBJECT_LOCATOR_PROVIDER_TABLE, ppPluginContext: ptr pointer): WINBOOL {.stdcall.}
+  PFN_NCRYPT_ALLOC* = proc(cbSize: SIZE_T): LPVOID {.stdcall.}
+  PFN_NCRYPT_FREE* = proc(pv: LPVOID): VOID {.stdcall.}
+  PFN_CRYPT_ENUM_OID_FUNC* = proc(
+    dwEncodingType: DWORD,
+    pszFuncName: LPCSTR,
+    pszOID: LPCSTR,
+    cValue: DWORD,
+    rgdwValueType: ptr DWORD,
+    rgpwszValueName: ptr LPCWSTR,
+    rgpbValueData: ptr ptr BYTE,
+    rgcbValueData: ptr DWORD,
+    pvArg: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_ENUM_OID_INFO* =
+    proc(pInfo: PCCRYPT_OID_INFO, pvArg: pointer): WINBOOL {.stdcall.}
+  PFN_CMSG_GEN_ENCRYPT_KEY* = proc(
+    phCryptProv: ptr HCRYPTPROV,
+    paiEncrypt: PCRYPT_ALGORITHM_IDENTIFIER,
+    pvEncryptAuxInfo: PVOID,
+    pPublicKeyInfo: PCERT_PUBLIC_KEY_INFO,
+    pfnAlloc: PFN_CMSG_ALLOC,
+    phEncryptKey: ptr HCRYPTKEY,
+    ppbEncryptParameters: ptr PBYTE,
+    pcbEncryptParameters: PDWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_EXPORT_ENCRYPT_KEY* = proc(
+    hCryptProv: HCRYPTPROV,
+    hEncryptKey: HCRYPTKEY,
+    pPublicKeyInfo: PCERT_PUBLIC_KEY_INFO,
+    pbData: PBYTE,
+    pcbData: PDWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_IMPORT_ENCRYPT_KEY* = proc(
+    hCryptProv: HCRYPTPROV,
+    dwKeySpec: DWORD,
+    paiEncrypt: PCRYPT_ALGORITHM_IDENTIFIER,
+    paiPubKey: PCRYPT_ALGORITHM_IDENTIFIER,
+    pbEncodedKey: PBYTE,
+    cbEncodedKey: DWORD,
+    phEncryptKey: ptr HCRYPTKEY,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_GEN_CONTENT_ENCRYPT_KEY* = proc(
+    pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO, dwFlags: DWORD, pvReserved: pointer
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_EXPORT_KEY_TRANS* = proc(
+    pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO,
+    pKeyTransEncodeInfo: PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO,
+    pKeyTransEncryptInfo: PCMSG_KEY_TRANS_ENCRYPT_INFO,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_EXPORT_KEY_AGREE* = proc(
+    pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO,
+    pKeyAgreeEncodeInfo: PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO,
+    pKeyAgreeEncryptInfo: PCMSG_KEY_AGREE_ENCRYPT_INFO,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_EXPORT_MAIL_LIST* = proc(
+    pContentEncryptInfo: PCMSG_CONTENT_ENCRYPT_INFO,
+    pMailListEncodeInfo: PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO,
+    pMailListEncryptInfo: PCMSG_MAIL_LIST_ENCRYPT_INFO,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_IMPORT_KEY_TRANS* = proc(
+    pContentEncryptionAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+    pKeyTransDecryptPara: PCMSG_CTRL_KEY_TRANS_DECRYPT_PARA,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+    phContentEncryptKey: ptr HCRYPTKEY,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_IMPORT_KEY_AGREE* = proc(
+    pContentEncryptionAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+    pKeyAgreeDecryptPara: PCMSG_CTRL_KEY_AGREE_DECRYPT_PARA,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+    phContentEncryptKey: ptr HCRYPTKEY,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_IMPORT_MAIL_LIST* = proc(
+    pContentEncryptionAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+    pMailListDecryptPara: PCMSG_CTRL_MAIL_LIST_DECRYPT_PARA,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+    phContentEncryptKey: ptr HCRYPTKEY,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_CNG_IMPORT_KEY_TRANS* = proc(
+    pCNGContentDecryptInfo: PCMSG_CNG_CONTENT_DECRYPT_INFO,
+    pKeyTransDecryptPara: PCMSG_CTRL_KEY_TRANS_DECRYPT_PARA,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_CNG_IMPORT_KEY_AGREE* = proc(
+    pCNGContentDecryptInfo: PCMSG_CNG_CONTENT_DECRYPT_INFO,
+    pKeyAgreeDecryptPara: PCMSG_CTRL_KEY_AGREE_DECRYPT_PARA,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CMSG_CNG_IMPORT_CONTENT_ENCRYPT_KEY* = proc(
+    pCNGContentDecryptInfo: PCMSG_CNG_CONTENT_DECRYPT_INFO,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_DLL_OPEN_STORE_PROV_FUNC* = proc(
+    lpszStoreProvider: LPCSTR,
+    dwEncodingType: DWORD,
+    hCryptProv: HCRYPTPROV_LEGACY,
+    dwFlags: DWORD,
+    pvPara: pointer,
+    hCertStore: HCERTSTORE,
+    pStoreProvInfo: PCERT_STORE_PROV_INFO,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_CLOSE* =
+    proc(hStoreProv: HCERTSTOREPROV, dwFlags: DWORD): void {.stdcall.}
+  PFN_CERT_STORE_PROV_READ_CERT* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pStoreCertContext: PCCERT_CONTEXT,
+    dwFlags: DWORD,
+    ppProvCertContext: ptr PCCERT_CONTEXT,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_WRITE_CERT* = proc(
+    hStoreProv: HCERTSTOREPROV, pCertContext: PCCERT_CONTEXT, dwFlags: DWORD
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_DELETE_CERT* = proc(
+    hStoreProv: HCERTSTOREPROV, pCertContext: PCCERT_CONTEXT, dwFlags: DWORD
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_SET_CERT_PROPERTY* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCertContext: PCCERT_CONTEXT,
+    dwPropId: DWORD,
+    dwFlags: DWORD,
+    pvData: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_READ_CRL* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pStoreCrlContext: PCCRL_CONTEXT,
+    dwFlags: DWORD,
+    ppProvCrlContext: ptr PCCRL_CONTEXT,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_WRITE_CRL* = proc(
+    hStoreProv: HCERTSTOREPROV, pCrlContext: PCCRL_CONTEXT, dwFlags: DWORD
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_DELETE_CRL* = proc(
+    hStoreProv: HCERTSTOREPROV, pCrlContext: PCCRL_CONTEXT, dwFlags: DWORD
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_SET_CRL_PROPERTY* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCrlContext: PCCRL_CONTEXT,
+    dwPropId: DWORD,
+    dwFlags: DWORD,
+    pvData: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_READ_CTL* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pStoreCtlContext: PCCTL_CONTEXT,
+    dwFlags: DWORD,
+    ppProvCtlContext: ptr PCCTL_CONTEXT,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_WRITE_CTL* = proc(
+    hStoreProv: HCERTSTOREPROV, pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_DELETE_CTL* = proc(
+    hStoreProv: HCERTSTOREPROV, pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_SET_CTL_PROPERTY* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCtlContext: PCCTL_CONTEXT,
+    dwPropId: DWORD,
+    dwFlags: DWORD,
+    pvData: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_CONTROL* = proc(
+    hStoreProv: HCERTSTOREPROV, dwFlags: DWORD, dwCtrlType: DWORD, pvCtrlPara: pointer
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_FIND_CERT* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pFindInfo: PCCERT_STORE_PROV_FIND_INFO,
+    pPrevCertContext: PCCERT_CONTEXT,
+    dwFlags: DWORD,
+    ppvStoreProvFindInfo: ptr pointer,
+    ppProvCertContext: ptr PCCERT_CONTEXT,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_FREE_FIND_CERT* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCertContext: PCCERT_CONTEXT,
+    pvStoreProvFindInfo: pointer,
+    dwFlags: DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_GET_CERT_PROPERTY* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCertContext: PCCERT_CONTEXT,
+    dwPropId: DWORD,
+    dwFlags: DWORD,
+    pvData: pointer,
+    pcbData: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_FIND_CRL* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pFindInfo: PCCERT_STORE_PROV_FIND_INFO,
+    pPrevCrlContext: PCCRL_CONTEXT,
+    dwFlags: DWORD,
+    ppvStoreProvFindInfo: ptr pointer,
+    ppProvCrlContext: ptr PCCRL_CONTEXT,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_FREE_FIND_CRL* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCrlContext: PCCRL_CONTEXT,
+    pvStoreProvFindInfo: pointer,
+    dwFlags: DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_GET_CRL_PROPERTY* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCrlContext: PCCRL_CONTEXT,
+    dwPropId: DWORD,
+    dwFlags: DWORD,
+    pvData: pointer,
+    pcbData: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_FIND_CTL* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pFindInfo: PCCERT_STORE_PROV_FIND_INFO,
+    pPrevCtlContext: PCCTL_CONTEXT,
+    dwFlags: DWORD,
+    ppvStoreProvFindInfo: ptr pointer,
+    ppProvCtlContext: ptr PCCTL_CONTEXT,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_FREE_FIND_CTL* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCtlContext: PCCTL_CONTEXT,
+    pvStoreProvFindInfo: pointer,
+    dwFlags: DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_STORE_PROV_GET_CTL_PROPERTY* = proc(
+    hStoreProv: HCERTSTOREPROV,
+    pCtlContext: PCCTL_CONTEXT,
+    dwPropId: DWORD,
+    dwFlags: DWORD,
+    pvData: pointer,
+    pcbData: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_ENUM_SYSTEM_STORE_LOCATION* = proc(
+    pwszStoreLocation: LPCWSTR, dwFlags: DWORD, pvReserved: pointer, pvArg: pointer
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_ENUM_SYSTEM_STORE* = proc(
+    pvSystemStore: pointer,
+    dwFlags: DWORD,
+    pStoreInfo: PCERT_SYSTEM_STORE_INFO,
+    pvReserved: pointer,
+    pvArg: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CERT_ENUM_PHYSICAL_STORE* = proc(
+    pvSystemStore: pointer,
+    dwFlags: DWORD,
+    pwszStoreName: LPCWSTR,
+    pStoreInfo: PCERT_PHYSICAL_STORE_INFO,
+    pvReserved: pointer,
+    pvArg: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_EXTRACT_ENCODED_SIGNATURE_PARAMETERS_FUNC* = proc(
+    dwCertEncodingType: DWORD,
+    pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+    ppvDecodedSignPara: ptr pointer,
+    ppwszCNGHashAlgid: ptr LPWSTR,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_SIGN_AND_ENCODE_HASH_FUNC* = proc(
+    hKey: NCRYPT_KEY_HANDLE,
+    dwCertEncodingType: DWORD,
+    pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+    pvDecodedSignPara: pointer,
+    pwszCNGPubKeyAlgid: LPCWSTR,
+    pwszCNGHashAlgid: LPCWSTR,
+    pbComputedHash: ptr BYTE,
+    cbComputedHash: DWORD,
+    pbSignature: ptr BYTE,
+    pcbSignature: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_VERIFY_ENCODED_SIGNATURE_FUNC* = proc(
+    dwCertEncodingType: DWORD,
+    pPubKeyInfo: PCERT_PUBLIC_KEY_INFO,
+    pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+    pvDecodedSignPara: pointer,
+    pwszCNGPubKeyAlgid: LPCWSTR,
+    pwszCNGHashAlgid: LPCWSTR,
+    pbComputedHash: ptr BYTE,
+    cbComputedHash: DWORD,
+    pbSignature: ptr BYTE,
+    cbSignature: DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_EXPORT_PUBLIC_KEY_INFO_EX2_FUNC* = proc(
+    hNCryptKey: NCRYPT_KEY_HANDLE,
+    dwCertEncodingType: DWORD,
+    pszPublicKeyObjId: LPSTR,
+    dwFlags: DWORD,
+    pvAuxInfo: pointer,
+    pInfo: PCERT_PUBLIC_KEY_INFO,
+    pcbInfo: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_EXPORT_PUBLIC_KEY_INFO_FROM_BCRYPT_HANDLE_FUNC* = proc(
+    hBCryptKey: BCRYPT_KEY_HANDLE,
+    dwCertEncodingType: DWORD,
+    pszPublicKeyObjId: LPSTR,
+    dwFlags: DWORD,
+    pvAuxInfo: pointer,
+    pInfo: PCERT_PUBLIC_KEY_INFO,
+    pcbInfo: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_IMPORT_PRIV_KEY_FUNC* = proc(
+    hCryptProv: HCRYPTPROV,
+    pPrivateKeyInfo: ptr CRYPT_PRIVATE_KEY_INFO,
+    dwFlags: DWORD,
+    pvAuxInfo: pointer,
+  ): WINBOOL {.stdcall.}
+  PFN_EXPORT_PRIV_KEY_FUNC* = proc(
+    hCryptProv: HCRYPTPROV,
+    dwKeySpec: DWORD,
+    pszPrivateKeyObjId: LPSTR,
+    dwFlags: DWORD,
+    pvAuxInfo: pointer,
+    pPrivateKeyInfo: ptr CRYPT_PRIVATE_KEY_INFO,
+    pcbPrivateKeyInfo: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_IMPORT_PUBLIC_KEY_INFO_EX2_FUNC* = proc(
+    dwCertEncodingType: DWORD,
+    pInfo: PCERT_PUBLIC_KEY_INFO,
+    dwFlags: DWORD,
+    pvAuxInfo: pointer,
+    phKey: ptr BCRYPT_KEY_HANDLE,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_ASYNC_PARAM_FREE_FUNC* =
+    proc(pszParamOid: LPSTR, pvParam: LPVOID): VOID {.stdcall.}
+  PFN_FREE_ENCODED_OBJECT_FUNC* = proc(
+    pszObjectOid: LPCSTR, pObject: PCRYPT_BLOB_ARRAY, pvFreeContext: LPVOID
+  ): VOID {.stdcall.}
+  PFN_CRYPT_CANCEL_RETRIEVAL* =
+    proc(dwFlags: DWORD, pvArg: pointer): WINBOOL {.stdcall.}
+  PFN_CANCEL_ASYNC_RETRIEVAL_FUNC* =
+    proc(hAsyncRetrieve: HCRYPTASYNC): WINBOOL {.stdcall.}
+  PFN_CRYPT_ENUM_KEYID_PROP* = proc(
+    pKeyIdentifier: ptr CRYPT_HASH_BLOB,
+    dwFlags: DWORD,
+    pvReserved: pointer,
+    pvArg: pointer,
+    cProp: DWORD,
+    rgdwPropId: ptr DWORD,
+    rgpvData: ptr pointer,
+    rgcbData: ptr DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FLUSH* = proc(
+    pContext: LPVOID,
+    rgIdentifierOrNameList: ptr PCERT_NAME_BLOB,
+    dwIdentifierOrNameListCount: DWORD,
+  ): WINBOOL {.stdcall.}
+  PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_INITIALIZE* = proc(
+    pfnFlush: PFN_CRYPT_OBJECT_LOCATOR_PROVIDER_FLUSH,
+    pContext: LPVOID,
+    pdwExpectedObjectCount: ptr DWORD,
+    ppFuncTable: ptr PCRYPT_OBJECT_LOCATOR_PROVIDER_TABLE,
+    ppPluginContext: ptr pointer,
+  ): WINBOOL {.stdcall.}
   PROV_ENUMALGS* {.pure.} = object
     aiAlgid*: ALG_ID
     dwBitLen*: DWORD
     dwNameLen*: DWORD
     szName*: array[20, CHAR]
+
   PROV_ENUMALGS_EX* {.pure.} = object
     aiAlgid*: ALG_ID
     dwDefaultLen*: DWORD
@@ -4702,31 +5473,40 @@ type
     szName*: array[20, CHAR]
     dwLongNameLen*: DWORD
     szLongName*: array[40, CHAR]
+
   RSAPUBKEY* {.pure.} = object
     magic*: DWORD
     bitlen*: DWORD
     pubexp*: DWORD
+
   CERT_FORTEZZA_DATA_PROP* {.pure.} = object
     SerialNumber*: array[8, uint8]
     CertIndex*: int32
     CertLabel*: array[36, uint8]
+
   BCRYPT_OID* {.pure.} = object
     cbOID*: ULONG
     pbOID*: PUCHAR
+
   BCRYPT_OID_LIST* {.pure.} = object
     dwOIDCount*: ULONG
     pOIDs*: ptr BCRYPT_OID
+
   BCRYPT_PKCS1_PADDING_INFO* {.pure.} = object
     pszAlgId*: LPCWSTR
+
   BCRYPT_PSS_PADDING_INFO* {.pure.} = object
     pszAlgId*: LPCWSTR
     cbSalt*: ULONG
+
   BCRYPT_OAEP_PADDING_INFO* {.pure.} = object
     pszAlgId*: LPCWSTR
     pbLabel*: PUCHAR
     cbLabel*: ULONG
+
   BCRYPT_KEY_BLOB* {.pure.} = object
     Magic*: ULONG
+
   BCRYPT_RSAKEY_BLOB* {.pure.} = object
     Magic*: ULONG
     BitLength*: ULONG
@@ -4734,10 +5514,12 @@ type
     cbModulus*: ULONG
     cbPrime1*: ULONG
     cbPrime2*: ULONG
+
   BCRYPT_DH_PARAMETER_HEADER* {.pure.} = object
     cbLength*: ULONG
     dwMagic*: ULONG
     cbKeyLength*: ULONG
+
   BCRYPT_DSA_PARAMETER_HEADER* {.pure.} = object
     cbLength*: ULONG
     dwMagic*: ULONG
@@ -4745,6 +5527,7 @@ type
     Count*: array[4, UCHAR]
     Seed*: array[20, UCHAR]
     q*: array[20, UCHAR]
+
   BCRYPT_DSA_PARAMETER_HEADER_V2* {.pure.} = object
     cbLength*: ULONG
     dwMagic*: ULONG
@@ -4754,592 +5537,3218 @@ type
     cbSeedLength*: ULONG
     cbGroupSize*: ULONG
     Count*: array[4, UCHAR]
+
   BCRYPT_ALGORITHM_IDENTIFIER* {.pure.} = object
     pszName*: LPWSTR
     dwClass*: ULONG
     dwFlags*: ULONG
+
   BCRYPT_PROVIDER_NAME* {.pure.} = object
     pszProviderName*: LPWSTR
+
   NCRYPT_ALLOC_PARA* {.pure.} = object
     cbSize*: DWORD
     pfnAlloc*: PFN_NCRYPT_ALLOC
     pfnFree*: PFN_NCRYPT_FREE
+
   NCryptAlgorithmName* {.pure.} = object
     pszName*: LPWSTR
     dwClass*: DWORD
     dwAlgOperations*: DWORD
     dwFlags*: DWORD
+
   NCryptKeyName* {.pure.} = object
     pszName*: LPWSTR
     pszAlgid*: LPWSTR
     dwLegacyKeySpec*: DWORD
     dwFlags*: DWORD
+
   NCryptProviderName* {.pure.} = object
     pszName*: LPWSTR
     pszComment*: LPWSTR
+
   NCRYPT_UI_POLICY* {.pure.} = object
     dwVersion*: DWORD
     dwFlags*: DWORD
     pszCreationTitle*: LPCWSTR
     pszFriendlyName*: LPCWSTR
     pszDescription*: LPCWSTR
+
   NCRYPT_SUPPORTED_LENGTHS* {.pure.} = object
     dwMinLength*: DWORD
     dwMaxLength*: DWORD
     dwIncrement*: DWORD
     dwDefaultLength*: DWORD
+
   CRYPT_PKCS12_PBE_PARAMS* {.pure.} = object
     iIterations*: int32
     cbSalt*: ULONG
-proc CryptAcquireContextA*(phProv: ptr HCRYPTPROV, szContainer: LPCSTR, szProvider: LPCSTR, dwProvType: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptAcquireContextW*(phProv: ptr HCRYPTPROV, szContainer: LPCWSTR, szProvider: LPCWSTR, dwProvType: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptReleaseContext*(hProv: HCRYPTPROV, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGenKey*(hProv: HCRYPTPROV, Algid: ALG_ID, dwFlags: DWORD, phKey: ptr HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptDeriveKey*(hProv: HCRYPTPROV, Algid: ALG_ID, hBaseData: HCRYPTHASH, dwFlags: DWORD, phKey: ptr HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptDestroyKey*(hKey: HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSetKeyParam*(hKey: HCRYPTKEY, dwParam: DWORD, pbData: ptr BYTE, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGetKeyParam*(hKey: HCRYPTKEY, dwParam: DWORD, pbData: ptr BYTE, pdwDataLen: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSetHashParam*(hHash: HCRYPTHASH, dwParam: DWORD, pbData: ptr BYTE, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGetHashParam*(hHash: HCRYPTHASH, dwParam: DWORD, pbData: ptr BYTE, pdwDataLen: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSetProvParam*(hProv: HCRYPTPROV, dwParam: DWORD, pbData: ptr BYTE, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGetProvParam*(hProv: HCRYPTPROV, dwParam: DWORD, pbData: ptr BYTE, pdwDataLen: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGenRandom*(hProv: HCRYPTPROV, dwLen: DWORD, pbBuffer: ptr BYTE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGetUserKey*(hProv: HCRYPTPROV, dwKeySpec: DWORD, phUserKey: ptr HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptExportKey*(hKey: HCRYPTKEY, hExpKey: HCRYPTKEY, dwBlobType: DWORD, dwFlags: DWORD, pbData: ptr BYTE, pdwDataLen: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptImportKey*(hProv: HCRYPTPROV, pbData: ptr BYTE, dwDataLen: DWORD, hPubKey: HCRYPTKEY, dwFlags: DWORD, phKey: ptr HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptEncrypt*(hKey: HCRYPTKEY, hHash: HCRYPTHASH, Final: WINBOOL, dwFlags: DWORD, pbData: ptr BYTE, pdwDataLen: ptr DWORD, dwBufLen: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptDecrypt*(hKey: HCRYPTKEY, hHash: HCRYPTHASH, Final: WINBOOL, dwFlags: DWORD, pbData: ptr BYTE, pdwDataLen: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptCreateHash*(hProv: HCRYPTPROV, Algid: ALG_ID, hKey: HCRYPTKEY, dwFlags: DWORD, phHash: ptr HCRYPTHASH): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptHashData*(hHash: HCRYPTHASH, pbData: ptr BYTE, dwDataLen: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptHashSessionKey*(hHash: HCRYPTHASH, hKey: HCRYPTKEY, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptDestroyHash*(hHash: HCRYPTHASH): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSignHashA*(hHash: HCRYPTHASH, dwKeySpec: DWORD, szDescription: LPCSTR, dwFlags: DWORD, pbSignature: ptr BYTE, pdwSigLen: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSignHashW*(hHash: HCRYPTHASH, dwKeySpec: DWORD, szDescription: LPCWSTR, dwFlags: DWORD, pbSignature: ptr BYTE, pdwSigLen: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptVerifySignatureA*(hHash: HCRYPTHASH, pbSignature: ptr BYTE, dwSigLen: DWORD, hPubKey: HCRYPTKEY, szDescription: LPCSTR, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptVerifySignatureW*(hHash: HCRYPTHASH, pbSignature: ptr BYTE, dwSigLen: DWORD, hPubKey: HCRYPTKEY, szDescription: LPCWSTR, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSetProviderA*(pszProvName: LPCSTR, dwProvType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSetProviderW*(pszProvName: LPCWSTR, dwProvType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSetProviderExA*(pszProvName: LPCSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptSetProviderExW*(pszProvName: LPCWSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGetDefaultProviderA*(dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pszProvName: LPSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptGetDefaultProviderW*(dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pszProvName: LPWSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptEnumProviderTypesA*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szTypeName: LPSTR, pcbTypeName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptEnumProviderTypesW*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szTypeName: LPWSTR, pcbTypeName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptEnumProvidersA*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szProvName: LPSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptEnumProvidersW*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szProvName: LPWSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptContextAddRef*(hProv: HCRYPTPROV, pdwReserved: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptDuplicateKey*(hKey: HCRYPTKEY, pdwReserved: ptr DWORD, dwFlags: DWORD, phKey: ptr HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CryptDuplicateHash*(hHash: HCRYPTHASH, pdwReserved: ptr DWORD, dwFlags: DWORD, phHash: ptr HCRYPTHASH): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc BCryptOpenAlgorithmProvider*(phAlgorithm: ptr BCRYPT_ALG_HANDLE, pszAlgId: LPCWSTR, pszImplementation: LPCWSTR, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptEnumAlgorithms*(dwAlgOperations: ULONG, pAlgCount: ptr ULONG, ppAlgList: ptr ptr BCRYPT_ALGORITHM_IDENTIFIER, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptEnumProviders*(pszAlgId: LPCWSTR, pImplCount: ptr ULONG, ppImplList: ptr ptr BCRYPT_PROVIDER_NAME, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptGetProperty*(hObject: BCRYPT_HANDLE, pszProperty: LPCWSTR, pbOutput: PUCHAR, cbOutput: ULONG, pcbResult: ptr ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptSetProperty*(hObject: BCRYPT_HANDLE, pszProperty: LPCWSTR, pbInput: PUCHAR, cbInput: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptCloseAlgorithmProvider*(hAlgorithm: BCRYPT_ALG_HANDLE, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptFreeBuffer*(pvBuffer: PVOID): VOID {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptGenerateSymmetricKey*(hAlgorithm: BCRYPT_ALG_HANDLE, phKey: ptr BCRYPT_KEY_HANDLE, pbKeyObject: PUCHAR, cbKeyObject: ULONG, pbSecret: PUCHAR, cbSecret: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptGenerateKeyPair*(hAlgorithm: BCRYPT_ALG_HANDLE, phKey: ptr BCRYPT_KEY_HANDLE, dwLength: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptEncrypt*(hKey: BCRYPT_KEY_HANDLE, pbInput: PUCHAR, cbInput: ULONG, pPaddingInfo: pointer, pbIV: PUCHAR, cbIV: ULONG, pbOutput: PUCHAR, cbOutput: ULONG, pcbResult: ptr ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDecrypt*(hKey: BCRYPT_KEY_HANDLE, pbInput: PUCHAR, cbInput: ULONG, pPaddingInfo: pointer, pbIV: PUCHAR, cbIV: ULONG, pbOutput: PUCHAR, cbOutput: ULONG, pcbResult: ptr ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptExportKey*(hKey: BCRYPT_KEY_HANDLE, hExportKey: BCRYPT_KEY_HANDLE, pszBlobType: LPCWSTR, pbOutput: PUCHAR, cbOutput: ULONG, pcbResult: ptr ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptImportKey*(hAlgorithm: BCRYPT_ALG_HANDLE, hImportKey: BCRYPT_KEY_HANDLE, pszBlobType: LPCWSTR, phKey: ptr BCRYPT_KEY_HANDLE, pbKeyObject: PUCHAR, cbKeyObject: ULONG, pbInput: PUCHAR, cbInput: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptImportKeyPair*(hAlgorithm: BCRYPT_ALG_HANDLE, hImportKey: BCRYPT_KEY_HANDLE, pszBlobType: LPCWSTR, phKey: ptr BCRYPT_KEY_HANDLE, pbInput: PUCHAR, cbInput: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDuplicateKey*(hKey: BCRYPT_KEY_HANDLE, phNewKey: ptr BCRYPT_KEY_HANDLE, pbKeyObject: PUCHAR, cbKeyObject: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptFinalizeKeyPair*(hKey: BCRYPT_KEY_HANDLE, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDestroyKey*(hKey: BCRYPT_KEY_HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDestroySecret*(hSecret: BCRYPT_SECRET_HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptSignHash*(hKey: BCRYPT_KEY_HANDLE, pPaddingInfo: pointer, pbInput: PUCHAR, cbInput: ULONG, pbOutput: PUCHAR, cbOutput: ULONG, pcbResult: ptr ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptVerifySignature*(hKey: BCRYPT_KEY_HANDLE, pPaddingInfo: pointer, pbHash: PUCHAR, cbHash: ULONG, pbSignature: PUCHAR, cbSignature: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptSecretAgreement*(hPrivKey: BCRYPT_KEY_HANDLE, hPubKey: BCRYPT_KEY_HANDLE, phAgreedSecret: ptr BCRYPT_SECRET_HANDLE, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDeriveKey*(hSharedSecret: BCRYPT_SECRET_HANDLE, pwszKDF: LPCWSTR, pParameterList: ptr BCryptBufferDesc, pbDerivedKey: PUCHAR, cbDerivedKey: ULONG, pcbResult: ptr ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptKeyDerivation*(hKey: BCRYPT_KEY_HANDLE, pParameterList: ptr BCryptBufferDesc, pbDerivedKey: PUCHAR, cbDerivedKey: ULONG, pcbResult: ptr ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptCreateHash*(hAlgorithm: BCRYPT_ALG_HANDLE, phHash: ptr BCRYPT_HASH_HANDLE, pbHashObject: PUCHAR, cbHashObject: ULONG, pbSecret: PUCHAR, cbSecret: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptHashData*(hHash: BCRYPT_HASH_HANDLE, pbInput: PUCHAR, cbInput: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptFinishHash*(hHash: BCRYPT_HASH_HANDLE, pbOutput: PUCHAR, cbOutput: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDuplicateHash*(hHash: BCRYPT_HASH_HANDLE, phNewHash: ptr BCRYPT_HASH_HANDLE, pbHashObject: PUCHAR, cbHashObject: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDestroyHash*(hHash: BCRYPT_HASH_HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptGenRandom*(hAlgorithm: BCRYPT_ALG_HANDLE, pbBuffer: PUCHAR, cbBuffer: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDeriveKeyCapi*(hHash: BCRYPT_HASH_HANDLE, hTargetAlg: BCRYPT_ALG_HANDLE, pbDerivedKey: PUCHAR, cbDerivedKey: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDeriveKeyPBKDF2*(hPrf: BCRYPT_ALG_HANDLE, pbPassword: PUCHAR, cbPassword: ULONG, pbSalt: PUCHAR, cbSalt: ULONG, cIterations: ULONGLONG, pbDerivedKey: PUCHAR, cbDerivedKey: ULONG, dwFlags: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptResolveProviders*(pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR, pszProvider: LPCWSTR, dwMode: ULONG, dwFlags: ULONG, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_PROVIDER_REFS): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptGetFipsAlgorithmMode*(pfEnabled: ptr BOOLEAN): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptRegisterConfigChangeNotify*(pEvent: PRKEVENT): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptUnregisterConfigChangeNotify*(pEvent: PRKEVENT): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptUnregisterConfigChangeNotify*(hEvent: HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptQueryProviderRegistration*(pszProvider: LPCWSTR, dwMode: ULONG, dwInterface: ULONG, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_PROVIDER_REG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptEnumRegisteredProviders*(pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_PROVIDERS): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptCreateContext*(dwTable: ULONG, pszContext: LPCWSTR, pConfig: PCRYPT_CONTEXT_CONFIG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptDeleteContext*(dwTable: ULONG, pszContext: LPCWSTR): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptEnumContexts*(dwTable: ULONG, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_CONTEXTS): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptConfigureContext*(dwTable: ULONG, pszContext: LPCWSTR, pConfig: PCRYPT_CONTEXT_CONFIG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptQueryContextConfiguration*(dwTable: ULONG, pszContext: LPCWSTR, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_CONTEXT_CONFIG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptAddContextFunction*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR, dwPosition: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptRemoveContextFunction*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptEnumContextFunctions*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_CONTEXT_FUNCTIONS): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptConfigureContextFunction*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR, pConfig: PCRYPT_CONTEXT_FUNCTION_CONFIG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptQueryContextFunctionConfiguration*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_CONTEXT_FUNCTION_CONFIG): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptEnumContextFunctionProviders*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_CONTEXT_FUNCTION_PROVIDERS): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptSetContextFunctionProperty*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR, pszProperty: LPCWSTR, cbValue: ULONG, pbValue: PUCHAR): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptQueryContextFunctionProperty*(dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR, pszProperty: LPCWSTR, pcbValue: ptr ULONG, ppbValue: ptr PUCHAR): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc BCryptRegisterConfigChangeNotify*(phEvent: ptr HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
-proc NCryptOpenStorageProvider*(phProvider: ptr NCRYPT_PROV_HANDLE, pszProviderName: LPCWSTR, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptEnumAlgorithms*(hProvider: NCRYPT_PROV_HANDLE, dwAlgOperations: DWORD, pdwAlgCount: ptr DWORD, ppAlgList: ptr ptr NCryptAlgorithmName, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptIsAlgSupported*(hProvider: NCRYPT_PROV_HANDLE, pszAlgId: LPCWSTR, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptEnumKeys*(hProvider: NCRYPT_PROV_HANDLE, pszScope: LPCWSTR, ppKeyName: ptr ptr NCryptKeyName, ppEnumState: ptr PVOID, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptEnumStorageProviders*(pdwProviderCount: ptr DWORD, ppProviderList: ptr ptr NCryptProviderName, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptFreeBuffer*(pvInput: PVOID): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptOpenKey*(hProvider: NCRYPT_PROV_HANDLE, phKey: ptr NCRYPT_KEY_HANDLE, pszKeyName: LPCWSTR, dwLegacyKeySpec: DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptCreatePersistedKey*(hProvider: NCRYPT_PROV_HANDLE, phKey: ptr NCRYPT_KEY_HANDLE, pszAlgId: LPCWSTR, pszKeyName: LPCWSTR, dwLegacyKeySpec: DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptGetProperty*(hObject: NCRYPT_HANDLE, pszProperty: LPCWSTR, pbOutput: PBYTE, cbOutput: DWORD, pcbResult: ptr DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptSetProperty*(hObject: NCRYPT_HANDLE, pszProperty: LPCWSTR, pbInput: PBYTE, cbInput: DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptFinalizeKey*(hKey: NCRYPT_KEY_HANDLE, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptEncrypt*(hKey: NCRYPT_KEY_HANDLE, pbInput: PBYTE, cbInput: DWORD, pPaddingInfo: pointer, pbOutput: PBYTE, cbOutput: DWORD, pcbResult: ptr DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptDecrypt*(hKey: NCRYPT_KEY_HANDLE, pbInput: PBYTE, cbInput: DWORD, pPaddingInfo: pointer, pbOutput: PBYTE, cbOutput: DWORD, pcbResult: ptr DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptImportKey*(hProvider: NCRYPT_PROV_HANDLE, hImportKey: NCRYPT_KEY_HANDLE, pszBlobType: LPCWSTR, pParameterList: ptr NCryptBufferDesc, phKey: ptr NCRYPT_KEY_HANDLE, pbData: PBYTE, cbData: DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptExportKey*(hKey: NCRYPT_KEY_HANDLE, hExportKey: NCRYPT_KEY_HANDLE, pszBlobType: LPCWSTR, pParameterList: ptr NCryptBufferDesc, pbOutput: PBYTE, cbOutput: DWORD, pcbResult: ptr DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptSignHash*(hKey: NCRYPT_KEY_HANDLE, pPaddingInfo: pointer, pbHashValue: PBYTE, cbHashValue: DWORD, pbSignature: PBYTE, cbSignature: DWORD, pcbResult: ptr DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptVerifySignature*(hKey: NCRYPT_KEY_HANDLE, pPaddingInfo: pointer, pbHashValue: PBYTE, cbHashValue: DWORD, pbSignature: PBYTE, cbSignature: DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptDeleteKey*(hKey: NCRYPT_KEY_HANDLE, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptFreeObject*(hObject: NCRYPT_HANDLE): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptIsKeyHandle*(hKey: NCRYPT_KEY_HANDLE): WINBOOL {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptTranslateHandle*(phProvider: ptr NCRYPT_PROV_HANDLE, phKey: ptr NCRYPT_KEY_HANDLE, hLegacyProv: HCRYPTPROV, hLegacyKey: HCRYPTKEY, dwLegacyKeySpec: DWORD, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptNotifyChangeKey*(hProvider: NCRYPT_PROV_HANDLE, phEvent: ptr HANDLE, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptSecretAgreement*(hPrivKey: NCRYPT_KEY_HANDLE, hPubKey: NCRYPT_KEY_HANDLE, phAgreedSecret: ptr NCRYPT_SECRET_HANDLE, dwFlags: DWORD): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptDeriveKey*(hSharedSecret: NCRYPT_SECRET_HANDLE, pwszKDF: LPCWSTR, pParameterList: ptr NCryptBufferDesc, pbDerivedKey: PBYTE, cbDerivedKey: DWORD, pcbResult: ptr DWORD, dwFlags: ULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc NCryptKeyDerivation*(hKey: NCRYPT_KEY_HANDLE, pParameterList: ptr NCryptBufferDesc, pbDerivedKey: PUCHAR, cbDerivedKey: DWORD, pcbResult: ptr DWORD, dwFlags: ULONG): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
-proc CryptFormatObject*(dwCertEncodingType: DWORD, dwFormatType: DWORD, dwFormatStrType: DWORD, pFormatStruct: pointer, lpszStructType: LPCSTR, pbEncoded: ptr BYTE, cbEncoded: DWORD, pbFormat: pointer, pcbFormat: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptEncodeObjectEx*(dwCertEncodingType: DWORD, lpszStructType: LPCSTR, pvStructInfo: pointer, dwFlags: DWORD, pEncodePara: PCRYPT_ENCODE_PARA, pvEncoded: pointer, pcbEncoded: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptEncodeObject*(dwCertEncodingType: DWORD, lpszStructType: LPCSTR, pvStructInfo: pointer, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptDecodeObjectEx*(dwCertEncodingType: DWORD, lpszStructType: LPCSTR, pbEncoded: ptr BYTE, cbEncoded: DWORD, dwFlags: DWORD, pDecodePara: PCRYPT_DECODE_PARA, pvStructInfo: pointer, pcbStructInfo: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptDecodeObject*(dwCertEncodingType: DWORD, lpszStructType: LPCSTR, pbEncoded: ptr BYTE, cbEncoded: DWORD, dwFlags: DWORD, pvStructInfo: pointer, pcbStructInfo: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptInstallOIDFunctionAddress*(hModule: HMODULE, dwEncodingType: DWORD, pszFuncName: LPCSTR, cFuncEntry: DWORD, rgFuncEntry: ptr CRYPT_OID_FUNC_ENTRY, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptInitOIDFunctionSet*(pszFuncName: LPCSTR, dwFlags: DWORD): HCRYPTOIDFUNCSET {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetOIDFunctionAddress*(hFuncSet: HCRYPTOIDFUNCSET, dwEncodingType: DWORD, pszOID: LPCSTR, dwFlags: DWORD, ppvFuncAddr: ptr pointer, phFuncAddr: ptr HCRYPTOIDFUNCADDR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetDefaultOIDDllList*(hFuncSet: HCRYPTOIDFUNCSET, dwEncodingType: DWORD, pwszDllList: ptr WCHAR, pcchDllList: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetDefaultOIDFunctionAddress*(hFuncSet: HCRYPTOIDFUNCSET, dwEncodingType: DWORD, pwszDll: LPCWSTR, dwFlags: DWORD, ppvFuncAddr: ptr pointer, phFuncAddr: ptr HCRYPTOIDFUNCADDR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptFreeOIDFunctionAddress*(hFuncAddr: HCRYPTOIDFUNCADDR, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptRegisterOIDFunction*(dwEncodingType: DWORD, pszFuncName: LPCSTR, pszOID: LPCSTR, pwszDll: LPCWSTR, pszOverrideFuncName: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptUnregisterOIDFunction*(dwEncodingType: DWORD, pszFuncName: LPCSTR, pszOID: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptRegisterDefaultOIDFunction*(dwEncodingType: DWORD, pszFuncName: LPCSTR, dwIndex: DWORD, pwszDll: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptUnregisterDefaultOIDFunction*(dwEncodingType: DWORD, pszFuncName: LPCSTR, pwszDll: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSetOIDFunctionValue*(dwEncodingType: DWORD, pszFuncName: LPCSTR, pszOID: LPCSTR, pwszValueName: LPCWSTR, dwValueType: DWORD, pbValueData: ptr BYTE, cbValueData: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetOIDFunctionValue*(dwEncodingType: DWORD, pszFuncName: LPCSTR, pszOID: LPCSTR, pwszValueName: LPCWSTR, pdwValueType: ptr DWORD, pbValueData: ptr BYTE, pcbValueData: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptEnumOIDFunction*(dwEncodingType: DWORD, pszFuncName: LPCSTR, pszOID: LPCSTR, dwFlags: DWORD, pvArg: pointer, pfnEnumOIDFunc: PFN_CRYPT_ENUM_OID_FUNC): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptFindOIDInfo*(dwKeyType: DWORD, pvKey: pointer, dwGroupId: DWORD): PCCRYPT_OID_INFO {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptRegisterOIDInfo*(pInfo: PCCRYPT_OID_INFO, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptUnregisterOIDInfo*(pInfo: PCCRYPT_OID_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptEnumOIDInfo*(dwGroupId: DWORD, dwFlags: DWORD, pvArg: pointer, pfnEnumOIDInfo: PFN_CRYPT_ENUM_OID_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptFindLocalizedName*(pwszCryptName: LPCWSTR): LPCWSTR {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgOpenToEncode*(dwMsgEncodingType: DWORD, dwFlags: DWORD, dwMsgType: DWORD, pvMsgEncodeInfo: pointer, pszInnerContentObjID: LPSTR, pStreamInfo: PCMSG_STREAM_INFO): HCRYPTMSG {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgCalculateEncodedLength*(dwMsgEncodingType: DWORD, dwFlags: DWORD, dwMsgType: DWORD, pvMsgEncodeInfo: pointer, pszInnerContentObjID: LPSTR, cbData: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgOpenToDecode*(dwMsgEncodingType: DWORD, dwFlags: DWORD, dwMsgType: DWORD, hCryptProv: HCRYPTPROV_LEGACY, pRecipientInfo: PCERT_INFO, pStreamInfo: PCMSG_STREAM_INFO): HCRYPTMSG {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgDuplicate*(hCryptMsg: HCRYPTMSG): HCRYPTMSG {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgClose*(hCryptMsg: HCRYPTMSG): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgUpdate*(hCryptMsg: HCRYPTMSG, pbData: ptr BYTE, cbData: DWORD, fFinal: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgGetParam*(hCryptMsg: HCRYPTMSG, dwParamType: DWORD, dwIndex: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgControl*(hCryptMsg: HCRYPTMSG, dwFlags: DWORD, dwCtrlType: DWORD, pvCtrlPara: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgVerifyCountersignatureEncoded*(hCryptProv: HCRYPTPROV_LEGACY, dwEncodingType: DWORD, pbSignerInfo: PBYTE, cbSignerInfo: DWORD, pbSignerInfoCountersignature: PBYTE, cbSignerInfoCountersignature: DWORD, pciCountersigner: PCERT_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgVerifyCountersignatureEncodedEx*(hCryptProv: HCRYPTPROV_LEGACY, dwEncodingType: DWORD, pbSignerInfo: PBYTE, cbSignerInfo: DWORD, pbSignerInfoCountersignature: PBYTE, cbSignerInfoCountersignature: DWORD, dwSignerType: DWORD, pvSigner: pointer, dwFlags: DWORD, pvExtra: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgCountersign*(hCryptMsg: HCRYPTMSG, dwIndex: DWORD, cCountersigners: DWORD, rgCountersigners: PCMSG_SIGNER_ENCODE_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgCountersignEncoded*(dwEncodingType: DWORD, pbSignerInfo: PBYTE, cbSignerInfo: DWORD, cCountersigners: DWORD, rgCountersigners: PCMSG_SIGNER_ENCODE_INFO, pbCountersignature: PBYTE, pcbCountersignature: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertOpenStore*(lpszStoreProvider: LPCSTR, dwEncodingType: DWORD, hCryptProv: HCRYPTPROV_LEGACY, dwFlags: DWORD, pvPara: pointer): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDuplicateStore*(hCertStore: HCERTSTORE): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSaveStore*(hCertStore: HCERTSTORE, dwEncodingType: DWORD, dwSaveAs: DWORD, dwSaveTo: DWORD, pvSaveToPara: pointer, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCloseStore*(hCertStore: HCERTSTORE, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetSubjectCertificateFromStore*(hCertStore: HCERTSTORE, dwCertEncodingType: DWORD, pCertId: PCERT_INFO): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumCertificatesInStore*(hCertStore: HCERTSTORE, pPrevCertContext: PCCERT_CONTEXT): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindCertificateInStore*(hCertStore: HCERTSTORE, dwCertEncodingType: DWORD, dwFindFlags: DWORD, dwFindType: DWORD, pvFindPara: pointer, pPrevCertContext: PCCERT_CONTEXT): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetIssuerCertificateFromStore*(hCertStore: HCERTSTORE, pSubjectContext: PCCERT_CONTEXT, pPrevIssuerContext: PCCERT_CONTEXT, pdwFlags: ptr DWORD): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifySubjectCertificateContext*(pSubject: PCCERT_CONTEXT, pIssuer: PCCERT_CONTEXT, pdwFlags: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDuplicateCertificateContext*(pCertContext: PCCERT_CONTEXT): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCreateCertificateContext*(dwCertEncodingType: DWORD, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFreeCertificateContext*(pCertContext: PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSetCertificateContextProperty*(pCertContext: PCCERT_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumCRLsInStore*(hCertStore: HCERTSTORE, pPrevCrlContext: PCCRL_CONTEXT): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDeleteCRLFromStore*(pCrlContext: PCCRL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDuplicateCRLContext*(pCrlContext: PCCRL_CONTEXT): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindCRLInStore*(hCertStore: HCERTSTORE, dwCertEncodingType: DWORD, dwFindFlags: DWORD, dwFindType: DWORD, pvFindPara: pointer, pPrevCrlContext: PCCRL_CONTEXT): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFreeCRLContext*(pCrlContext: PCCRL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetCertificateContextProperty*(pCertContext: PCCERT_CONTEXT, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumCertificateContextProperties*(pCertContext: PCCERT_CONTEXT, dwPropId: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCreateCTLEntryFromCertificateContextProperties*(pCertContext: PCCERT_CONTEXT, cOptAttr: DWORD, rgOptAttr: PCRYPT_ATTRIBUTE, dwFlags: DWORD, pvReserved: pointer, pCtlEntry: PCTL_ENTRY, pcbCtlEntry: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSetCertificateContextPropertiesFromCTLEntry*(pCertContext: PCCERT_CONTEXT, pCtlEntry: PCTL_ENTRY, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetCRLFromStore*(hCertStore: HCERTSTORE, pIssuerContext: PCCERT_CONTEXT, pPrevCrlContext: PCCRL_CONTEXT, pdwFlags: ptr DWORD): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCreateCRLContext*(dwCertEncodingType: DWORD, pbCrlEncoded: ptr BYTE, cbCrlEncoded: DWORD): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSetCRLContextProperty*(pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetCRLContextProperty*(pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumCRLContextProperties*(pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindCertificateInCRL*(pCert: PCCERT_CONTEXT, pCrlContext: PCCRL_CONTEXT, dwFlags: DWORD, pvReserved: pointer, ppCrlEntry: ptr PCRL_ENTRY): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertIsValidCRLForCertificate*(pCert: PCCERT_CONTEXT, pCrl: PCCRL_CONTEXT, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddEncodedCertificateToStore*(hCertStore: HCERTSTORE, dwCertEncodingType: DWORD, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD, dwAddDisposition: DWORD, ppCertContext: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddCertificateContextToStore*(hCertStore: HCERTSTORE, pCertContext: PCCERT_CONTEXT, dwAddDisposition: DWORD, ppStoreContext: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddSerializedElementToStore*(hCertStore: HCERTSTORE, pbElement: ptr BYTE, cbElement: DWORD, dwAddDisposition: DWORD, dwFlags: DWORD, dwContextTypeFlags: DWORD, pdwContextType: ptr DWORD, ppvContext: ptr pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDeleteCertificateFromStore*(pCertContext: PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddEncodedCRLToStore*(hCertStore: HCERTSTORE, dwCertEncodingType: DWORD, pbCrlEncoded: ptr BYTE, cbCrlEncoded: DWORD, dwAddDisposition: DWORD, ppCrlContext: ptr PCCRL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddCRLContextToStore*(hCertStore: HCERTSTORE, pCrlContext: PCCRL_CONTEXT, dwAddDisposition: DWORD, ppStoreContext: ptr PCCRL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSerializeCertificateStoreElement*(pCertContext: PCCERT_CONTEXT, dwFlags: DWORD, pbElement: ptr BYTE, pcbElement: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSerializeCRLStoreElement*(pCrlContext: PCCRL_CONTEXT, dwFlags: DWORD, pbElement: ptr BYTE, pcbElement: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDuplicateCTLContext*(pCtlContext: PCCTL_CONTEXT): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCreateCTLContext*(dwMsgAndCertEncodingType: DWORD, pbCtlEncoded: ptr BYTE, cbCtlEncoded: DWORD): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFreeCTLContext*(pCtlContext: PCCTL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSetCTLContextProperty*(pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetCTLContextProperty*(pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumCTLContextProperties*(pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumCTLsInStore*(hCertStore: HCERTSTORE, pPrevCtlContext: PCCTL_CONTEXT): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindSubjectInCTL*(dwEncodingType: DWORD, dwSubjectType: DWORD, pvSubject: pointer, pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD): PCTL_ENTRY {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindCTLInStore*(hCertStore: HCERTSTORE, dwMsgAndCertEncodingType: DWORD, dwFindFlags: DWORD, dwFindType: DWORD, pvFindPara: pointer, pPrevCtlContext: PCCTL_CONTEXT): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddEncodedCTLToStore*(hCertStore: HCERTSTORE, dwMsgAndCertEncodingType: DWORD, pbCtlEncoded: ptr BYTE, cbCtlEncoded: DWORD, dwAddDisposition: DWORD, ppCtlContext: ptr PCCTL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddCTLContextToStore*(hCertStore: HCERTSTORE, pCtlContext: PCCTL_CONTEXT, dwAddDisposition: DWORD, ppStoreContext: ptr PCCTL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSerializeCTLStoreElement*(pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD, pbElement: ptr BYTE, pcbElement: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDeleteCTLFromStore*(pCtlContext: PCCTL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddCertificateLinkToStore*(hCertStore: HCERTSTORE, pCertContext: PCCERT_CONTEXT, dwAddDisposition: DWORD, ppStoreContext: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddCRLLinkToStore*(hCertStore: HCERTSTORE, pCrlContext: PCCRL_CONTEXT, dwAddDisposition: DWORD, ppStoreContext: ptr PCCRL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddCTLLinkToStore*(hCertStore: HCERTSTORE, pCtlContext: PCCTL_CONTEXT, dwAddDisposition: DWORD, ppStoreContext: ptr PCCTL_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddStoreToCollection*(hCollectionStore: HCERTSTORE, hSiblingStore: HCERTSTORE, dwUpdateFlags: DWORD, dwPriority: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertRemoveStoreFromCollection*(hCollectionStore: HCERTSTORE, hSiblingStore: HCERTSTORE): void {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertControlStore*(hCertStore: HCERTSTORE, dwFlags: DWORD, dwCtrlType: DWORD, pvCtrlPara: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSetStoreProperty*(hCertStore: HCERTSTORE, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetStoreProperty*(hCertStore: HCERTSTORE, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertRegisterSystemStore*(pvSystemStore: pointer, dwFlags: DWORD, pStoreInfo: PCERT_SYSTEM_STORE_INFO, pvReserved: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertRegisterPhysicalStore*(pvSystemStore: pointer, dwFlags: DWORD, pwszStoreName: LPCWSTR, pStoreInfo: PCERT_PHYSICAL_STORE_INFO, pvReserved: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertUnregisterSystemStore*(pvSystemStore: pointer, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertUnregisterPhysicalStore*(pvSystemStore: pointer, dwFlags: DWORD, pwszStoreName: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumSystemStoreLocation*(dwFlags: DWORD, pvArg: pointer, pfnEnum: PFN_CERT_ENUM_SYSTEM_STORE_LOCATION): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumSystemStore*(dwFlags: DWORD, pvSystemStoreLocationPara: pointer, pvArg: pointer, pfnEnum: PFN_CERT_ENUM_SYSTEM_STORE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumPhysicalStore*(pvSystemStore: pointer, dwFlags: DWORD, pvArg: pointer, pfnEnum: PFN_CERT_ENUM_PHYSICAL_STORE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetEnhancedKeyUsage*(pCertContext: PCCERT_CONTEXT, dwFlags: DWORD, pUsage: PCERT_ENHKEY_USAGE, pcbUsage: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSetEnhancedKeyUsage*(pCertContext: PCCERT_CONTEXT, pUsage: PCERT_ENHKEY_USAGE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddEnhancedKeyUsageIdentifier*(pCertContext: PCCERT_CONTEXT, pszUsageIdentifier: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertRemoveEnhancedKeyUsageIdentifier*(pCertContext: PCCERT_CONTEXT, pszUsageIdentifier: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetValidUsages*(cCerts: DWORD, rghCerts: ptr PCCERT_CONTEXT, cNumOIDs: ptr int32, rghOIDs: ptr LPSTR, pcbOIDs: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgGetAndVerifySigner*(hCryptMsg: HCRYPTMSG, cSignerStore: DWORD, rghSignerStore: ptr HCERTSTORE, dwFlags: DWORD, ppSigner: ptr PCCERT_CONTEXT, pdwSignerIndex: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgSignCTL*(dwMsgEncodingType: DWORD, pbCtlContent: ptr BYTE, cbCtlContent: DWORD, pSignInfo: PCMSG_SIGNED_ENCODE_INFO, dwFlags: DWORD, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMsgEncodeAndSignCTL*(dwMsgEncodingType: DWORD, pCtlInfo: PCTL_INFO, pSignInfo: PCMSG_SIGNED_ENCODE_INFO, dwFlags: DWORD, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindSubjectInSortedCTL*(pSubjectIdentifier: PCRYPT_DATA_BLOB, pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD, pvReserved: pointer, pEncodedAttributes: PCRYPT_DER_BLOB): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertEnumSubjectInSortedCTL*(pCtlContext: PCCTL_CONTEXT, ppvNextSubject: ptr pointer, pSubjectIdentifier: PCRYPT_DER_BLOB, pEncodedAttributes: PCRYPT_DER_BLOB): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifyCTLUsage*(dwEncodingType: DWORD, dwSubjectType: DWORD, pvSubject: pointer, pSubjectUsage: PCTL_USAGE, dwFlags: DWORD, pVerifyUsagePara: PCTL_VERIFY_USAGE_PARA, pVerifyUsageStatus: PCTL_VERIFY_USAGE_STATUS): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifyRevocation*(dwEncodingType: DWORD, dwRevType: DWORD, cContext: DWORD, rgpvContext: ptr PVOID, dwFlags: DWORD, pRevPara: PCERT_REVOCATION_PARA, pRevStatus: PCERT_REVOCATION_STATUS): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCompareIntegerBlob*(pInt1: PCRYPT_INTEGER_BLOB, pInt2: PCRYPT_INTEGER_BLOB): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCompareCertificate*(dwCertEncodingType: DWORD, pCertId1: PCERT_INFO, pCertId2: PCERT_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCompareCertificateName*(dwCertEncodingType: DWORD, pCertName1: PCERT_NAME_BLOB, pCertName2: PCERT_NAME_BLOB): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertIsRDNAttrsInCertificateName*(dwCertEncodingType: DWORD, dwFlags: DWORD, pCertName: PCERT_NAME_BLOB, pRDN: PCERT_RDN): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertComparePublicKeyInfo*(dwCertEncodingType: DWORD, pPublicKey1: PCERT_PUBLIC_KEY_INFO, pPublicKey2: PCERT_PUBLIC_KEY_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetPublicKeyLength*(dwCertEncodingType: DWORD, pPublicKey: PCERT_PUBLIC_KEY_INFO): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyCertificateSignature*(hCryptProv: HCRYPTPROV_LEGACY, dwCertEncodingType: DWORD, pbEncoded: ptr BYTE, cbEncoded: DWORD, pPublicKey: PCERT_PUBLIC_KEY_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyCertificateSignatureEx*(hCryptProv: HCRYPTPROV_LEGACY, dwCertEncodingType: DWORD, dwSubjectType: DWORD, pvSubject: pointer, dwIssuerType: DWORD, pvIssuer: pointer, dwFlags: DWORD, pvExtra: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertIsStrongHashToSign*(pStrongSignPara: PCCERT_STRONG_SIGN_PARA, pwszCNGHashAlgid: LPCWSTR, pSigningCert: PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptHashToBeSigned*(hCryptProv: HCRYPTPROV_LEGACY, dwCertEncodingType: DWORD, pbEncoded: ptr BYTE, cbEncoded: DWORD, pbComputedHash: ptr BYTE, pcbComputedHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptHashCertificate*(hCryptProv: HCRYPTPROV_LEGACY, Algid: ALG_ID, dwFlags: DWORD, pbEncoded: ptr BYTE, cbEncoded: DWORD, pbComputedHash: ptr BYTE, pcbComputedHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptHashCertificate2*(pwszCNGHashAlgid: LPCWSTR, dwFlags: DWORD, pvReserved: pointer, pbEncoded: ptr BYTE, cbEncoded: DWORD, pbComputedHash: ptr BYTE, pcbComputedHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSignCertificate*(hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, dwKeySpec: DWORD, dwCertEncodingType: DWORD, pbEncodedToBeSigned: ptr BYTE, cbEncodedToBeSigned: DWORD, pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pvHashAuxInfo: pointer, pbSignature: ptr BYTE, pcbSignature: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSignAndEncodeCertificate*(hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, dwKeySpec: DWORD, dwCertEncodingType: DWORD, lpszStructType: LPCSTR, pvStructInfo: pointer, pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pvHashAuxInfo: pointer, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifyTimeValidity*(pTimeToVerify: LPFILETIME, pCertInfo: PCERT_INFO): LONG {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifyCRLTimeValidity*(pTimeToVerify: LPFILETIME, pCrlInfo: PCRL_INFO): LONG {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifyValidityNesting*(pSubjectInfo: PCERT_INFO, pIssuerInfo: PCERT_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifyCRLRevocation*(dwCertEncodingType: DWORD, pCertId: PCERT_INFO, cCrlInfo: DWORD, rgpCrlInfo: ptr PCRL_INFO): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAlgIdToOID*(dwAlgId: DWORD): LPCSTR {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertOIDToAlgId*(pszObjId: LPCSTR): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindExtension*(pszObjId: LPCSTR, cExtensions: DWORD, rgExtensions: ptr CERT_EXTENSION): PCERT_EXTENSION {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindAttribute*(pszObjId: LPCSTR, cAttr: DWORD, rgAttr: ptr CRYPT_ATTRIBUTE): PCRYPT_ATTRIBUTE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindRDNAttr*(pszObjId: LPCSTR, pName: PCERT_NAME_INFO): PCERT_RDN_ATTR {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetIntendedKeyUsage*(dwCertEncodingType: DWORD, pCertInfo: PCERT_INFO, pbKeyUsage: ptr BYTE, cbKeyUsage: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptInstallDefaultContext*(hCryptProv: HCRYPTPROV, dwDefaultType: DWORD, pvDefaultPara: pointer, dwFlags: DWORD, pvReserved: pointer, phDefaultContext: ptr HCRYPTDEFAULTCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptUninstallDefaultContext*(hDefaultContext: HCRYPTDEFAULTCONTEXT, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptExportPublicKeyInfo*(hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, dwKeySpec: DWORD, dwCertEncodingType: DWORD, pInfo: PCERT_PUBLIC_KEY_INFO, pcbInfo: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptExportPublicKeyInfoEx*(hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, dwKeySpec: DWORD, dwCertEncodingType: DWORD, pszPublicKeyObjId: LPSTR, dwFlags: DWORD, pvAuxInfo: pointer, pInfo: PCERT_PUBLIC_KEY_INFO, pcbInfo: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptExportPublicKeyInfoFromBCryptKeyHandle*(hBCryptKey: BCRYPT_KEY_HANDLE, dwCertEncodingType: DWORD, pszPublicKeyObjId: LPSTR, dwFlags: DWORD, pvAuxInfo: pointer, pInfo: PCERT_PUBLIC_KEY_INFO, pcbInfo: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptImportPublicKeyInfo*(hCryptProv: HCRYPTPROV, dwCertEncodingType: DWORD, pInfo: PCERT_PUBLIC_KEY_INFO, phKey: ptr HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptImportPublicKeyInfoEx*(hCryptProv: HCRYPTPROV, dwCertEncodingType: DWORD, pInfo: PCERT_PUBLIC_KEY_INFO, aiKeyAlg: ALG_ID, dwFlags: DWORD, pvAuxInfo: pointer, phKey: ptr HCRYPTKEY): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptImportPublicKeyInfoEx2*(dwCertEncodingType: DWORD, pInfo: PCERT_PUBLIC_KEY_INFO, dwFlags: DWORD, pvAuxInfo: pointer, phKey: ptr BCRYPT_KEY_HANDLE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptAcquireCertificatePrivateKey*(pCert: PCCERT_CONTEXT, dwFlags: DWORD, pvParameters: pointer, phCryptProvOrNCryptKey: ptr HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, pdwKeySpec: ptr DWORD, pfCallerFreeProvOrNCryptKey: ptr WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptFindCertificateKeyProvInfo*(pCert: PCCERT_CONTEXT, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptImportPKCS8*(sPrivateKeyAndParams: CRYPT_PKCS8_IMPORT_PARAMS, dwFlags: DWORD, phCryptProv: ptr HCRYPTPROV, pvAuxInfo: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptExportPKCS8*(hCryptProv: HCRYPTPROV, dwKeySpec: DWORD, pszPrivateKeyObjId: LPSTR, dwFlags: DWORD, pvAuxInfo: pointer, pbPrivateKeyBlob: ptr BYTE, pcbPrivateKeyBlob: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptHashPublicKeyInfo*(hCryptProv: HCRYPTPROV_LEGACY, Algid: ALG_ID, dwFlags: DWORD, dwCertEncodingType: DWORD, pInfo: PCERT_PUBLIC_KEY_INFO, pbComputedHash: ptr BYTE, pcbComputedHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertRDNValueToStrA*(dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertRDNValueToStrW*(dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPWSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertNameToStrA*(dwCertEncodingType: DWORD, pName: PCERT_NAME_BLOB, dwStrType: DWORD, psz: LPSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertNameToStrW*(dwCertEncodingType: DWORD, pName: PCERT_NAME_BLOB, dwStrType: DWORD, psz: LPWSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertStrToNameA*(dwCertEncodingType: DWORD, pszX500: LPCSTR, dwStrType: DWORD, pvReserved: pointer, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD, ppszError: ptr LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertStrToNameW*(dwCertEncodingType: DWORD, pszX500: LPCWSTR, dwStrType: DWORD, pvReserved: pointer, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD, ppszError: ptr LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetNameStringA*(pCertContext: PCCERT_CONTEXT, dwType: DWORD, dwFlags: DWORD, pvTypePara: pointer, pszNameString: LPSTR, cchNameString: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetNameStringW*(pCertContext: PCCERT_CONTEXT, dwType: DWORD, dwFlags: DWORD, pvTypePara: pointer, pszNameString: LPWSTR, cchNameString: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSignMessage*(pSignPara: PCRYPT_SIGN_MESSAGE_PARA, fDetachedSignature: WINBOOL, cToBeSigned: DWORD, rgpbToBeSigned: ptr ptr BYTE, rgcbToBeSigned: ptr DWORD, pbSignedBlob: ptr BYTE, pcbSignedBlob: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyMessageSignature*(pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA, dwSignerIndex: DWORD, pbSignedBlob: ptr BYTE, cbSignedBlob: DWORD, pbDecoded: ptr BYTE, pcbDecoded: ptr DWORD, ppSignerCert: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetMessageSignerCount*(dwMsgEncodingType: DWORD, pbSignedBlob: ptr BYTE, cbSignedBlob: DWORD): LONG {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetMessageCertificates*(dwMsgAndCertEncodingType: DWORD, hCryptProv: HCRYPTPROV_LEGACY, dwFlags: DWORD, pbSignedBlob: ptr BYTE, cbSignedBlob: DWORD): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyDetachedMessageSignature*(pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA, dwSignerIndex: DWORD, pbDetachedSignBlob: ptr BYTE, cbDetachedSignBlob: DWORD, cToBeSigned: DWORD, rgpbToBeSigned: ptr ptr BYTE, rgcbToBeSigned: ptr DWORD, ppSignerCert: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptEncryptMessage*(pEncryptPara: PCRYPT_ENCRYPT_MESSAGE_PARA, cRecipientCert: DWORD, rgpRecipientCert: ptr PCCERT_CONTEXT, pbToBeEncrypted: ptr BYTE, cbToBeEncrypted: DWORD, pbEncryptedBlob: ptr BYTE, pcbEncryptedBlob: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptDecryptMessage*(pDecryptPara: PCRYPT_DECRYPT_MESSAGE_PARA, pbEncryptedBlob: ptr BYTE, cbEncryptedBlob: DWORD, pbDecrypted: ptr BYTE, pcbDecrypted: ptr DWORD, ppXchgCert: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSignAndEncryptMessage*(pSignPara: PCRYPT_SIGN_MESSAGE_PARA, pEncryptPara: PCRYPT_ENCRYPT_MESSAGE_PARA, cRecipientCert: DWORD, rgpRecipientCert: ptr PCCERT_CONTEXT, pbToBeSignedAndEncrypted: ptr BYTE, cbToBeSignedAndEncrypted: DWORD, pbSignedAndEncryptedBlob: ptr BYTE, pcbSignedAndEncryptedBlob: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptDecryptAndVerifyMessageSignature*(pDecryptPara: PCRYPT_DECRYPT_MESSAGE_PARA, pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA, dwSignerIndex: DWORD, pbEncryptedBlob: ptr BYTE, cbEncryptedBlob: DWORD, pbDecrypted: ptr BYTE, pcbDecrypted: ptr DWORD, ppXchgCert: ptr PCCERT_CONTEXT, ppSignerCert: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptDecodeMessage*(dwMsgTypeFlags: DWORD, pDecryptPara: PCRYPT_DECRYPT_MESSAGE_PARA, pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA, dwSignerIndex: DWORD, pbEncodedBlob: ptr BYTE, cbEncodedBlob: DWORD, dwPrevInnerContentType: DWORD, pdwMsgType: ptr DWORD, pdwInnerContentType: ptr DWORD, pbDecoded: ptr BYTE, pcbDecoded: ptr DWORD, ppXchgCert: ptr PCCERT_CONTEXT, ppSignerCert: ptr PCCERT_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptHashMessage*(pHashPara: PCRYPT_HASH_MESSAGE_PARA, fDetachedHash: WINBOOL, cToBeHashed: DWORD, rgpbToBeHashed: ptr ptr BYTE, rgcbToBeHashed: ptr DWORD, pbHashedBlob: ptr BYTE, pcbHashedBlob: ptr DWORD, pbComputedHash: ptr BYTE, pcbComputedHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyMessageHash*(pHashPara: PCRYPT_HASH_MESSAGE_PARA, pbHashedBlob: ptr BYTE, cbHashedBlob: DWORD, pbToBeHashed: ptr BYTE, pcbToBeHashed: ptr DWORD, pbComputedHash: ptr BYTE, pcbComputedHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyDetachedMessageHash*(pHashPara: PCRYPT_HASH_MESSAGE_PARA, pbDetachedHashBlob: ptr BYTE, cbDetachedHashBlob: DWORD, cToBeHashed: DWORD, rgpbToBeHashed: ptr ptr BYTE, rgcbToBeHashed: ptr DWORD, pbComputedHash: ptr BYTE, pcbComputedHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSignMessageWithKey*(pSignPara: PCRYPT_KEY_SIGN_MESSAGE_PARA, pbToBeSigned: ptr BYTE, cbToBeSigned: DWORD, pbSignedBlob: ptr BYTE, pcbSignedBlob: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyMessageSignatureWithKey*(pVerifyPara: PCRYPT_KEY_VERIFY_MESSAGE_PARA, pPublicKeyInfo: PCERT_PUBLIC_KEY_INFO, pbSignedBlob: ptr BYTE, cbSignedBlob: DWORD, pbDecoded: ptr BYTE, pcbDecoded: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertOpenSystemStoreA*(hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCSTR): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertOpenSystemStoreW*(hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCWSTR): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddEncodedCertificateToSystemStoreA*(szCertStoreName: LPCSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddEncodedCertificateToSystemStoreW*(szCertStoreName: LPCWSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc FindCertsByIssuer*(pCertChains: PCERT_CHAIN, pcbCertChains: ptr DWORD, pcCertChains: ptr DWORD, pbEncodedIssuerName: ptr BYTE, cbEncodedIssuerName: DWORD, pwszPurpose: LPCWSTR, dwKeySpec: DWORD): HRESULT {.winapi, stdcall, dynlib: "wintrust", importc.}
-proc CryptQueryObject*(dwObjectType: DWORD, pvObject: pointer, dwExpectedContentTypeFlags: DWORD, dwExpectedFormatTypeFlags: DWORD, dwFlags: DWORD, pdwMsgAndCertEncodingType: ptr DWORD, pdwContentType: ptr DWORD, pdwFormatType: ptr DWORD, phCertStore: ptr HCERTSTORE, phMsg: ptr HCRYPTMSG, ppvContext: ptr pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMemAlloc*(cbSize: ULONG): LPVOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptMemRealloc*(pv: LPVOID, cbSize: ULONG): LPVOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptAcquireContextA*(
+  phProv: ptr HCRYPTPROV,
+  szContainer: LPCSTR,
+  szProvider: LPCSTR,
+  dwProvType: DWORD,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptAcquireContextW*(
+  phProv: ptr HCRYPTPROV,
+  szContainer: LPCWSTR,
+  szProvider: LPCWSTR,
+  dwProvType: DWORD,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptReleaseContext*(
+  hProv: HCRYPTPROV, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGenKey*(
+  hProv: HCRYPTPROV, Algid: ALG_ID, dwFlags: DWORD, phKey: ptr HCRYPTKEY
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptDeriveKey*(
+  hProv: HCRYPTPROV,
+  Algid: ALG_ID,
+  hBaseData: HCRYPTHASH,
+  dwFlags: DWORD,
+  phKey: ptr HCRYPTKEY,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptDestroyKey*(
+  hKey: HCRYPTKEY
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSetKeyParam*(
+  hKey: HCRYPTKEY, dwParam: DWORD, pbData: ptr BYTE, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGetKeyParam*(
+  hKey: HCRYPTKEY,
+  dwParam: DWORD,
+  pbData: ptr BYTE,
+  pdwDataLen: ptr DWORD,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSetHashParam*(
+  hHash: HCRYPTHASH, dwParam: DWORD, pbData: ptr BYTE, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGetHashParam*(
+  hHash: HCRYPTHASH,
+  dwParam: DWORD,
+  pbData: ptr BYTE,
+  pdwDataLen: ptr DWORD,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSetProvParam*(
+  hProv: HCRYPTPROV, dwParam: DWORD, pbData: ptr BYTE, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGetProvParam*(
+  hProv: HCRYPTPROV,
+  dwParam: DWORD,
+  pbData: ptr BYTE,
+  pdwDataLen: ptr DWORD,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGenRandom*(
+  hProv: HCRYPTPROV, dwLen: DWORD, pbBuffer: ptr BYTE
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGetUserKey*(
+  hProv: HCRYPTPROV, dwKeySpec: DWORD, phUserKey: ptr HCRYPTKEY
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptExportKey*(
+  hKey: HCRYPTKEY,
+  hExpKey: HCRYPTKEY,
+  dwBlobType: DWORD,
+  dwFlags: DWORD,
+  pbData: ptr BYTE,
+  pdwDataLen: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptImportKey*(
+  hProv: HCRYPTPROV,
+  pbData: ptr BYTE,
+  dwDataLen: DWORD,
+  hPubKey: HCRYPTKEY,
+  dwFlags: DWORD,
+  phKey: ptr HCRYPTKEY,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptEncrypt*(
+  hKey: HCRYPTKEY,
+  hHash: HCRYPTHASH,
+  Final: WINBOOL,
+  dwFlags: DWORD,
+  pbData: ptr BYTE,
+  pdwDataLen: ptr DWORD,
+  dwBufLen: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptDecrypt*(
+  hKey: HCRYPTKEY,
+  hHash: HCRYPTHASH,
+  Final: WINBOOL,
+  dwFlags: DWORD,
+  pbData: ptr BYTE,
+  pdwDataLen: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptCreateHash*(
+  hProv: HCRYPTPROV,
+  Algid: ALG_ID,
+  hKey: HCRYPTKEY,
+  dwFlags: DWORD,
+  phHash: ptr HCRYPTHASH,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptHashData*(
+  hHash: HCRYPTHASH, pbData: ptr BYTE, dwDataLen: DWORD, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptHashSessionKey*(
+  hHash: HCRYPTHASH, hKey: HCRYPTKEY, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptDestroyHash*(
+  hHash: HCRYPTHASH
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSignHashA*(
+  hHash: HCRYPTHASH,
+  dwKeySpec: DWORD,
+  szDescription: LPCSTR,
+  dwFlags: DWORD,
+  pbSignature: ptr BYTE,
+  pdwSigLen: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSignHashW*(
+  hHash: HCRYPTHASH,
+  dwKeySpec: DWORD,
+  szDescription: LPCWSTR,
+  dwFlags: DWORD,
+  pbSignature: ptr BYTE,
+  pdwSigLen: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptVerifySignatureA*(
+  hHash: HCRYPTHASH,
+  pbSignature: ptr BYTE,
+  dwSigLen: DWORD,
+  hPubKey: HCRYPTKEY,
+  szDescription: LPCSTR,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptVerifySignatureW*(
+  hHash: HCRYPTHASH,
+  pbSignature: ptr BYTE,
+  dwSigLen: DWORD,
+  hPubKey: HCRYPTKEY,
+  szDescription: LPCWSTR,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSetProviderA*(
+  pszProvName: LPCSTR, dwProvType: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSetProviderW*(
+  pszProvName: LPCWSTR, dwProvType: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSetProviderExA*(
+  pszProvName: LPCSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptSetProviderExW*(
+  pszProvName: LPCWSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGetDefaultProviderA*(
+  dwProvType: DWORD,
+  pdwReserved: ptr DWORD,
+  dwFlags: DWORD,
+  pszProvName: LPSTR,
+  pcbProvName: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptGetDefaultProviderW*(
+  dwProvType: DWORD,
+  pdwReserved: ptr DWORD,
+  dwFlags: DWORD,
+  pszProvName: LPWSTR,
+  pcbProvName: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptEnumProviderTypesA*(
+  dwIndex: DWORD,
+  pdwReserved: ptr DWORD,
+  dwFlags: DWORD,
+  pdwProvType: ptr DWORD,
+  szTypeName: LPSTR,
+  pcbTypeName: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptEnumProviderTypesW*(
+  dwIndex: DWORD,
+  pdwReserved: ptr DWORD,
+  dwFlags: DWORD,
+  pdwProvType: ptr DWORD,
+  szTypeName: LPWSTR,
+  pcbTypeName: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptEnumProvidersA*(
+  dwIndex: DWORD,
+  pdwReserved: ptr DWORD,
+  dwFlags: DWORD,
+  pdwProvType: ptr DWORD,
+  szProvName: LPSTR,
+  pcbProvName: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptEnumProvidersW*(
+  dwIndex: DWORD,
+  pdwReserved: ptr DWORD,
+  dwFlags: DWORD,
+  pdwProvType: ptr DWORD,
+  szProvName: LPWSTR,
+  pcbProvName: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptContextAddRef*(
+  hProv: HCRYPTPROV, pdwReserved: ptr DWORD, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptDuplicateKey*(
+  hKey: HCRYPTKEY, pdwReserved: ptr DWORD, dwFlags: DWORD, phKey: ptr HCRYPTKEY
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CryptDuplicateHash*(
+  hHash: HCRYPTHASH, pdwReserved: ptr DWORD, dwFlags: DWORD, phHash: ptr HCRYPTHASH
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc BCryptOpenAlgorithmProvider*(
+  phAlgorithm: ptr BCRYPT_ALG_HANDLE,
+  pszAlgId: LPCWSTR,
+  pszImplementation: LPCWSTR,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptEnumAlgorithms*(
+  dwAlgOperations: ULONG,
+  pAlgCount: ptr ULONG,
+  ppAlgList: ptr ptr BCRYPT_ALGORITHM_IDENTIFIER,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptEnumProviders*(
+  pszAlgId: LPCWSTR,
+  pImplCount: ptr ULONG,
+  ppImplList: ptr ptr BCRYPT_PROVIDER_NAME,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptGetProperty*(
+  hObject: BCRYPT_HANDLE,
+  pszProperty: LPCWSTR,
+  pbOutput: PUCHAR,
+  cbOutput: ULONG,
+  pcbResult: ptr ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptSetProperty*(
+  hObject: BCRYPT_HANDLE,
+  pszProperty: LPCWSTR,
+  pbInput: PUCHAR,
+  cbInput: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptCloseAlgorithmProvider*(
+  hAlgorithm: BCRYPT_ALG_HANDLE, dwFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptFreeBuffer*(
+  pvBuffer: PVOID
+): VOID {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptGenerateSymmetricKey*(
+  hAlgorithm: BCRYPT_ALG_HANDLE,
+  phKey: ptr BCRYPT_KEY_HANDLE,
+  pbKeyObject: PUCHAR,
+  cbKeyObject: ULONG,
+  pbSecret: PUCHAR,
+  cbSecret: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptGenerateKeyPair*(
+  hAlgorithm: BCRYPT_ALG_HANDLE,
+  phKey: ptr BCRYPT_KEY_HANDLE,
+  dwLength: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptEncrypt*(
+  hKey: BCRYPT_KEY_HANDLE,
+  pbInput: PUCHAR,
+  cbInput: ULONG,
+  pPaddingInfo: pointer,
+  pbIV: PUCHAR,
+  cbIV: ULONG,
+  pbOutput: PUCHAR,
+  cbOutput: ULONG,
+  pcbResult: ptr ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDecrypt*(
+  hKey: BCRYPT_KEY_HANDLE,
+  pbInput: PUCHAR,
+  cbInput: ULONG,
+  pPaddingInfo: pointer,
+  pbIV: PUCHAR,
+  cbIV: ULONG,
+  pbOutput: PUCHAR,
+  cbOutput: ULONG,
+  pcbResult: ptr ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptExportKey*(
+  hKey: BCRYPT_KEY_HANDLE,
+  hExportKey: BCRYPT_KEY_HANDLE,
+  pszBlobType: LPCWSTR,
+  pbOutput: PUCHAR,
+  cbOutput: ULONG,
+  pcbResult: ptr ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptImportKey*(
+  hAlgorithm: BCRYPT_ALG_HANDLE,
+  hImportKey: BCRYPT_KEY_HANDLE,
+  pszBlobType: LPCWSTR,
+  phKey: ptr BCRYPT_KEY_HANDLE,
+  pbKeyObject: PUCHAR,
+  cbKeyObject: ULONG,
+  pbInput: PUCHAR,
+  cbInput: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptImportKeyPair*(
+  hAlgorithm: BCRYPT_ALG_HANDLE,
+  hImportKey: BCRYPT_KEY_HANDLE,
+  pszBlobType: LPCWSTR,
+  phKey: ptr BCRYPT_KEY_HANDLE,
+  pbInput: PUCHAR,
+  cbInput: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDuplicateKey*(
+  hKey: BCRYPT_KEY_HANDLE,
+  phNewKey: ptr BCRYPT_KEY_HANDLE,
+  pbKeyObject: PUCHAR,
+  cbKeyObject: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptFinalizeKeyPair*(
+  hKey: BCRYPT_KEY_HANDLE, dwFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDestroyKey*(
+  hKey: BCRYPT_KEY_HANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDestroySecret*(
+  hSecret: BCRYPT_SECRET_HANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptSignHash*(
+  hKey: BCRYPT_KEY_HANDLE,
+  pPaddingInfo: pointer,
+  pbInput: PUCHAR,
+  cbInput: ULONG,
+  pbOutput: PUCHAR,
+  cbOutput: ULONG,
+  pcbResult: ptr ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptVerifySignature*(
+  hKey: BCRYPT_KEY_HANDLE,
+  pPaddingInfo: pointer,
+  pbHash: PUCHAR,
+  cbHash: ULONG,
+  pbSignature: PUCHAR,
+  cbSignature: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptSecretAgreement*(
+  hPrivKey: BCRYPT_KEY_HANDLE,
+  hPubKey: BCRYPT_KEY_HANDLE,
+  phAgreedSecret: ptr BCRYPT_SECRET_HANDLE,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDeriveKey*(
+  hSharedSecret: BCRYPT_SECRET_HANDLE,
+  pwszKDF: LPCWSTR,
+  pParameterList: ptr BCryptBufferDesc,
+  pbDerivedKey: PUCHAR,
+  cbDerivedKey: ULONG,
+  pcbResult: ptr ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptKeyDerivation*(
+  hKey: BCRYPT_KEY_HANDLE,
+  pParameterList: ptr BCryptBufferDesc,
+  pbDerivedKey: PUCHAR,
+  cbDerivedKey: ULONG,
+  pcbResult: ptr ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptCreateHash*(
+  hAlgorithm: BCRYPT_ALG_HANDLE,
+  phHash: ptr BCRYPT_HASH_HANDLE,
+  pbHashObject: PUCHAR,
+  cbHashObject: ULONG,
+  pbSecret: PUCHAR,
+  cbSecret: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptHashData*(
+  hHash: BCRYPT_HASH_HANDLE, pbInput: PUCHAR, cbInput: ULONG, dwFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptFinishHash*(
+  hHash: BCRYPT_HASH_HANDLE, pbOutput: PUCHAR, cbOutput: ULONG, dwFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDuplicateHash*(
+  hHash: BCRYPT_HASH_HANDLE,
+  phNewHash: ptr BCRYPT_HASH_HANDLE,
+  pbHashObject: PUCHAR,
+  cbHashObject: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDestroyHash*(
+  hHash: BCRYPT_HASH_HANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptGenRandom*(
+  hAlgorithm: BCRYPT_ALG_HANDLE, pbBuffer: PUCHAR, cbBuffer: ULONG, dwFlags: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDeriveKeyCapi*(
+  hHash: BCRYPT_HASH_HANDLE,
+  hTargetAlg: BCRYPT_ALG_HANDLE,
+  pbDerivedKey: PUCHAR,
+  cbDerivedKey: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDeriveKeyPBKDF2*(
+  hPrf: BCRYPT_ALG_HANDLE,
+  pbPassword: PUCHAR,
+  cbPassword: ULONG,
+  pbSalt: PUCHAR,
+  cbSalt: ULONG,
+  cIterations: ULONGLONG,
+  pbDerivedKey: PUCHAR,
+  cbDerivedKey: ULONG,
+  dwFlags: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptResolveProviders*(
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pszFunction: LPCWSTR,
+  pszProvider: LPCWSTR,
+  dwMode: ULONG,
+  dwFlags: ULONG,
+  pcbBuffer: ptr ULONG,
+  ppBuffer: ptr PCRYPT_PROVIDER_REFS,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptGetFipsAlgorithmMode*(
+  pfEnabled: ptr BOOLEAN
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptRegisterConfigChangeNotify*(
+  pEvent: PRKEVENT
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptUnregisterConfigChangeNotify*(
+  pEvent: PRKEVENT
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptUnregisterConfigChangeNotify*(
+  hEvent: HANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptQueryProviderRegistration*(
+  pszProvider: LPCWSTR,
+  dwMode: ULONG,
+  dwInterface: ULONG,
+  pcbBuffer: ptr ULONG,
+  ppBuffer: ptr PCRYPT_PROVIDER_REG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptEnumRegisteredProviders*(
+  pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_PROVIDERS
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptCreateContext*(
+  dwTable: ULONG, pszContext: LPCWSTR, pConfig: PCRYPT_CONTEXT_CONFIG
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptDeleteContext*(
+  dwTable: ULONG, pszContext: LPCWSTR
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptEnumContexts*(
+  dwTable: ULONG, pcbBuffer: ptr ULONG, ppBuffer: ptr PCRYPT_CONTEXTS
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptConfigureContext*(
+  dwTable: ULONG, pszContext: LPCWSTR, pConfig: PCRYPT_CONTEXT_CONFIG
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptQueryContextConfiguration*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  pcbBuffer: ptr ULONG,
+  ppBuffer: ptr PCRYPT_CONTEXT_CONFIG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptAddContextFunction*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pszFunction: LPCWSTR,
+  dwPosition: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptRemoveContextFunction*(
+  dwTable: ULONG, pszContext: LPCWSTR, dwInterface: ULONG, pszFunction: LPCWSTR
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptEnumContextFunctions*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pcbBuffer: ptr ULONG,
+  ppBuffer: ptr PCRYPT_CONTEXT_FUNCTIONS,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptConfigureContextFunction*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pszFunction: LPCWSTR,
+  pConfig: PCRYPT_CONTEXT_FUNCTION_CONFIG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptQueryContextFunctionConfiguration*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pszFunction: LPCWSTR,
+  pcbBuffer: ptr ULONG,
+  ppBuffer: ptr PCRYPT_CONTEXT_FUNCTION_CONFIG,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptEnumContextFunctionProviders*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pszFunction: LPCWSTR,
+  pcbBuffer: ptr ULONG,
+  ppBuffer: ptr PCRYPT_CONTEXT_FUNCTION_PROVIDERS,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptSetContextFunctionProperty*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pszFunction: LPCWSTR,
+  pszProperty: LPCWSTR,
+  cbValue: ULONG,
+  pbValue: PUCHAR,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptQueryContextFunctionProperty*(
+  dwTable: ULONG,
+  pszContext: LPCWSTR,
+  dwInterface: ULONG,
+  pszFunction: LPCWSTR,
+  pszProperty: LPCWSTR,
+  pcbValue: ptr ULONG,
+  ppbValue: ptr PUCHAR,
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc BCryptRegisterConfigChangeNotify*(
+  phEvent: ptr HANDLE
+): NTSTATUS {.winapi, stdcall, dynlib: "bcrypt", importc.}
+
+proc NCryptOpenStorageProvider*(
+  phProvider: ptr NCRYPT_PROV_HANDLE, pszProviderName: LPCWSTR, dwFlags: DWORD
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptEnumAlgorithms*(
+  hProvider: NCRYPT_PROV_HANDLE,
+  dwAlgOperations: DWORD,
+  pdwAlgCount: ptr DWORD,
+  ppAlgList: ptr ptr NCryptAlgorithmName,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptIsAlgSupported*(
+  hProvider: NCRYPT_PROV_HANDLE, pszAlgId: LPCWSTR, dwFlags: DWORD
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptEnumKeys*(
+  hProvider: NCRYPT_PROV_HANDLE,
+  pszScope: LPCWSTR,
+  ppKeyName: ptr ptr NCryptKeyName,
+  ppEnumState: ptr PVOID,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptEnumStorageProviders*(
+  pdwProviderCount: ptr DWORD,
+  ppProviderList: ptr ptr NCryptProviderName,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptFreeBuffer*(
+  pvInput: PVOID
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptOpenKey*(
+  hProvider: NCRYPT_PROV_HANDLE,
+  phKey: ptr NCRYPT_KEY_HANDLE,
+  pszKeyName: LPCWSTR,
+  dwLegacyKeySpec: DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptCreatePersistedKey*(
+  hProvider: NCRYPT_PROV_HANDLE,
+  phKey: ptr NCRYPT_KEY_HANDLE,
+  pszAlgId: LPCWSTR,
+  pszKeyName: LPCWSTR,
+  dwLegacyKeySpec: DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptGetProperty*(
+  hObject: NCRYPT_HANDLE,
+  pszProperty: LPCWSTR,
+  pbOutput: PBYTE,
+  cbOutput: DWORD,
+  pcbResult: ptr DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptSetProperty*(
+  hObject: NCRYPT_HANDLE,
+  pszProperty: LPCWSTR,
+  pbInput: PBYTE,
+  cbInput: DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptFinalizeKey*(
+  hKey: NCRYPT_KEY_HANDLE, dwFlags: DWORD
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptEncrypt*(
+  hKey: NCRYPT_KEY_HANDLE,
+  pbInput: PBYTE,
+  cbInput: DWORD,
+  pPaddingInfo: pointer,
+  pbOutput: PBYTE,
+  cbOutput: DWORD,
+  pcbResult: ptr DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptDecrypt*(
+  hKey: NCRYPT_KEY_HANDLE,
+  pbInput: PBYTE,
+  cbInput: DWORD,
+  pPaddingInfo: pointer,
+  pbOutput: PBYTE,
+  cbOutput: DWORD,
+  pcbResult: ptr DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptImportKey*(
+  hProvider: NCRYPT_PROV_HANDLE,
+  hImportKey: NCRYPT_KEY_HANDLE,
+  pszBlobType: LPCWSTR,
+  pParameterList: ptr NCryptBufferDesc,
+  phKey: ptr NCRYPT_KEY_HANDLE,
+  pbData: PBYTE,
+  cbData: DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptExportKey*(
+  hKey: NCRYPT_KEY_HANDLE,
+  hExportKey: NCRYPT_KEY_HANDLE,
+  pszBlobType: LPCWSTR,
+  pParameterList: ptr NCryptBufferDesc,
+  pbOutput: PBYTE,
+  cbOutput: DWORD,
+  pcbResult: ptr DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptSignHash*(
+  hKey: NCRYPT_KEY_HANDLE,
+  pPaddingInfo: pointer,
+  pbHashValue: PBYTE,
+  cbHashValue: DWORD,
+  pbSignature: PBYTE,
+  cbSignature: DWORD,
+  pcbResult: ptr DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptVerifySignature*(
+  hKey: NCRYPT_KEY_HANDLE,
+  pPaddingInfo: pointer,
+  pbHashValue: PBYTE,
+  cbHashValue: DWORD,
+  pbSignature: PBYTE,
+  cbSignature: DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptDeleteKey*(
+  hKey: NCRYPT_KEY_HANDLE, dwFlags: DWORD
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptFreeObject*(
+  hObject: NCRYPT_HANDLE
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptIsKeyHandle*(
+  hKey: NCRYPT_KEY_HANDLE
+): WINBOOL {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptTranslateHandle*(
+  phProvider: ptr NCRYPT_PROV_HANDLE,
+  phKey: ptr NCRYPT_KEY_HANDLE,
+  hLegacyProv: HCRYPTPROV,
+  hLegacyKey: HCRYPTKEY,
+  dwLegacyKeySpec: DWORD,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptNotifyChangeKey*(
+  hProvider: NCRYPT_PROV_HANDLE, phEvent: ptr HANDLE, dwFlags: DWORD
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptSecretAgreement*(
+  hPrivKey: NCRYPT_KEY_HANDLE,
+  hPubKey: NCRYPT_KEY_HANDLE,
+  phAgreedSecret: ptr NCRYPT_SECRET_HANDLE,
+  dwFlags: DWORD,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptDeriveKey*(
+  hSharedSecret: NCRYPT_SECRET_HANDLE,
+  pwszKDF: LPCWSTR,
+  pParameterList: ptr NCryptBufferDesc,
+  pbDerivedKey: PBYTE,
+  cbDerivedKey: DWORD,
+  pcbResult: ptr DWORD,
+  dwFlags: ULONG,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc NCryptKeyDerivation*(
+  hKey: NCRYPT_KEY_HANDLE,
+  pParameterList: ptr NCryptBufferDesc,
+  pbDerivedKey: PUCHAR,
+  cbDerivedKey: DWORD,
+  pcbResult: ptr DWORD,
+  dwFlags: ULONG,
+): SECURITY_STATUS {.winapi, stdcall, dynlib: "ncrypt", importc.}
+
+proc CryptFormatObject*(
+  dwCertEncodingType: DWORD,
+  dwFormatType: DWORD,
+  dwFormatStrType: DWORD,
+  pFormatStruct: pointer,
+  lpszStructType: LPCSTR,
+  pbEncoded: ptr BYTE,
+  cbEncoded: DWORD,
+  pbFormat: pointer,
+  pcbFormat: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptEncodeObjectEx*(
+  dwCertEncodingType: DWORD,
+  lpszStructType: LPCSTR,
+  pvStructInfo: pointer,
+  dwFlags: DWORD,
+  pEncodePara: PCRYPT_ENCODE_PARA,
+  pvEncoded: pointer,
+  pcbEncoded: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptEncodeObject*(
+  dwCertEncodingType: DWORD,
+  lpszStructType: LPCSTR,
+  pvStructInfo: pointer,
+  pbEncoded: ptr BYTE,
+  pcbEncoded: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptDecodeObjectEx*(
+  dwCertEncodingType: DWORD,
+  lpszStructType: LPCSTR,
+  pbEncoded: ptr BYTE,
+  cbEncoded: DWORD,
+  dwFlags: DWORD,
+  pDecodePara: PCRYPT_DECODE_PARA,
+  pvStructInfo: pointer,
+  pcbStructInfo: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptDecodeObject*(
+  dwCertEncodingType: DWORD,
+  lpszStructType: LPCSTR,
+  pbEncoded: ptr BYTE,
+  cbEncoded: DWORD,
+  dwFlags: DWORD,
+  pvStructInfo: pointer,
+  pcbStructInfo: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptInstallOIDFunctionAddress*(
+  hModule: HMODULE,
+  dwEncodingType: DWORD,
+  pszFuncName: LPCSTR,
+  cFuncEntry: DWORD,
+  rgFuncEntry: ptr CRYPT_OID_FUNC_ENTRY,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptInitOIDFunctionSet*(
+  pszFuncName: LPCSTR, dwFlags: DWORD
+): HCRYPTOIDFUNCSET {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetOIDFunctionAddress*(
+  hFuncSet: HCRYPTOIDFUNCSET,
+  dwEncodingType: DWORD,
+  pszOID: LPCSTR,
+  dwFlags: DWORD,
+  ppvFuncAddr: ptr pointer,
+  phFuncAddr: ptr HCRYPTOIDFUNCADDR,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetDefaultOIDDllList*(
+  hFuncSet: HCRYPTOIDFUNCSET,
+  dwEncodingType: DWORD,
+  pwszDllList: ptr WCHAR,
+  pcchDllList: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetDefaultOIDFunctionAddress*(
+  hFuncSet: HCRYPTOIDFUNCSET,
+  dwEncodingType: DWORD,
+  pwszDll: LPCWSTR,
+  dwFlags: DWORD,
+  ppvFuncAddr: ptr pointer,
+  phFuncAddr: ptr HCRYPTOIDFUNCADDR,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptFreeOIDFunctionAddress*(
+  hFuncAddr: HCRYPTOIDFUNCADDR, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptRegisterOIDFunction*(
+  dwEncodingType: DWORD,
+  pszFuncName: LPCSTR,
+  pszOID: LPCSTR,
+  pwszDll: LPCWSTR,
+  pszOverrideFuncName: LPCSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptUnregisterOIDFunction*(
+  dwEncodingType: DWORD, pszFuncName: LPCSTR, pszOID: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptRegisterDefaultOIDFunction*(
+  dwEncodingType: DWORD, pszFuncName: LPCSTR, dwIndex: DWORD, pwszDll: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptUnregisterDefaultOIDFunction*(
+  dwEncodingType: DWORD, pszFuncName: LPCSTR, pwszDll: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSetOIDFunctionValue*(
+  dwEncodingType: DWORD,
+  pszFuncName: LPCSTR,
+  pszOID: LPCSTR,
+  pwszValueName: LPCWSTR,
+  dwValueType: DWORD,
+  pbValueData: ptr BYTE,
+  cbValueData: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetOIDFunctionValue*(
+  dwEncodingType: DWORD,
+  pszFuncName: LPCSTR,
+  pszOID: LPCSTR,
+  pwszValueName: LPCWSTR,
+  pdwValueType: ptr DWORD,
+  pbValueData: ptr BYTE,
+  pcbValueData: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptEnumOIDFunction*(
+  dwEncodingType: DWORD,
+  pszFuncName: LPCSTR,
+  pszOID: LPCSTR,
+  dwFlags: DWORD,
+  pvArg: pointer,
+  pfnEnumOIDFunc: PFN_CRYPT_ENUM_OID_FUNC,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptFindOIDInfo*(
+  dwKeyType: DWORD, pvKey: pointer, dwGroupId: DWORD
+): PCCRYPT_OID_INFO {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptRegisterOIDInfo*(
+  pInfo: PCCRYPT_OID_INFO, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptUnregisterOIDInfo*(
+  pInfo: PCCRYPT_OID_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptEnumOIDInfo*(
+  dwGroupId: DWORD,
+  dwFlags: DWORD,
+  pvArg: pointer,
+  pfnEnumOIDInfo: PFN_CRYPT_ENUM_OID_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptFindLocalizedName*(
+  pwszCryptName: LPCWSTR
+): LPCWSTR {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgOpenToEncode*(
+  dwMsgEncodingType: DWORD,
+  dwFlags: DWORD,
+  dwMsgType: DWORD,
+  pvMsgEncodeInfo: pointer,
+  pszInnerContentObjID: LPSTR,
+  pStreamInfo: PCMSG_STREAM_INFO,
+): HCRYPTMSG {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgCalculateEncodedLength*(
+  dwMsgEncodingType: DWORD,
+  dwFlags: DWORD,
+  dwMsgType: DWORD,
+  pvMsgEncodeInfo: pointer,
+  pszInnerContentObjID: LPSTR,
+  cbData: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgOpenToDecode*(
+  dwMsgEncodingType: DWORD,
+  dwFlags: DWORD,
+  dwMsgType: DWORD,
+  hCryptProv: HCRYPTPROV_LEGACY,
+  pRecipientInfo: PCERT_INFO,
+  pStreamInfo: PCMSG_STREAM_INFO,
+): HCRYPTMSG {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgDuplicate*(
+  hCryptMsg: HCRYPTMSG
+): HCRYPTMSG {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgClose*(
+  hCryptMsg: HCRYPTMSG
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgUpdate*(
+  hCryptMsg: HCRYPTMSG, pbData: ptr BYTE, cbData: DWORD, fFinal: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgGetParam*(
+  hCryptMsg: HCRYPTMSG,
+  dwParamType: DWORD,
+  dwIndex: DWORD,
+  pvData: pointer,
+  pcbData: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgControl*(
+  hCryptMsg: HCRYPTMSG, dwFlags: DWORD, dwCtrlType: DWORD, pvCtrlPara: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgVerifyCountersignatureEncoded*(
+  hCryptProv: HCRYPTPROV_LEGACY,
+  dwEncodingType: DWORD,
+  pbSignerInfo: PBYTE,
+  cbSignerInfo: DWORD,
+  pbSignerInfoCountersignature: PBYTE,
+  cbSignerInfoCountersignature: DWORD,
+  pciCountersigner: PCERT_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgVerifyCountersignatureEncodedEx*(
+  hCryptProv: HCRYPTPROV_LEGACY,
+  dwEncodingType: DWORD,
+  pbSignerInfo: PBYTE,
+  cbSignerInfo: DWORD,
+  pbSignerInfoCountersignature: PBYTE,
+  cbSignerInfoCountersignature: DWORD,
+  dwSignerType: DWORD,
+  pvSigner: pointer,
+  dwFlags: DWORD,
+  pvExtra: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgCountersign*(
+  hCryptMsg: HCRYPTMSG,
+  dwIndex: DWORD,
+  cCountersigners: DWORD,
+  rgCountersigners: PCMSG_SIGNER_ENCODE_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgCountersignEncoded*(
+  dwEncodingType: DWORD,
+  pbSignerInfo: PBYTE,
+  cbSignerInfo: DWORD,
+  cCountersigners: DWORD,
+  rgCountersigners: PCMSG_SIGNER_ENCODE_INFO,
+  pbCountersignature: PBYTE,
+  pcbCountersignature: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertOpenStore*(
+  lpszStoreProvider: LPCSTR,
+  dwEncodingType: DWORD,
+  hCryptProv: HCRYPTPROV_LEGACY,
+  dwFlags: DWORD,
+  pvPara: pointer,
+): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDuplicateStore*(
+  hCertStore: HCERTSTORE
+): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSaveStore*(
+  hCertStore: HCERTSTORE,
+  dwEncodingType: DWORD,
+  dwSaveAs: DWORD,
+  dwSaveTo: DWORD,
+  pvSaveToPara: pointer,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCloseStore*(
+  hCertStore: HCERTSTORE, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetSubjectCertificateFromStore*(
+  hCertStore: HCERTSTORE, dwCertEncodingType: DWORD, pCertId: PCERT_INFO
+): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumCertificatesInStore*(
+  hCertStore: HCERTSTORE, pPrevCertContext: PCCERT_CONTEXT
+): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindCertificateInStore*(
+  hCertStore: HCERTSTORE,
+  dwCertEncodingType: DWORD,
+  dwFindFlags: DWORD,
+  dwFindType: DWORD,
+  pvFindPara: pointer,
+  pPrevCertContext: PCCERT_CONTEXT,
+): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetIssuerCertificateFromStore*(
+  hCertStore: HCERTSTORE,
+  pSubjectContext: PCCERT_CONTEXT,
+  pPrevIssuerContext: PCCERT_CONTEXT,
+  pdwFlags: ptr DWORD,
+): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifySubjectCertificateContext*(
+  pSubject: PCCERT_CONTEXT, pIssuer: PCCERT_CONTEXT, pdwFlags: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDuplicateCertificateContext*(
+  pCertContext: PCCERT_CONTEXT
+): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCreateCertificateContext*(
+  dwCertEncodingType: DWORD, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD
+): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFreeCertificateContext*(
+  pCertContext: PCCERT_CONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSetCertificateContextProperty*(
+  pCertContext: PCCERT_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumCRLsInStore*(
+  hCertStore: HCERTSTORE, pPrevCrlContext: PCCRL_CONTEXT
+): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDeleteCRLFromStore*(
+  pCrlContext: PCCRL_CONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDuplicateCRLContext*(
+  pCrlContext: PCCRL_CONTEXT
+): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindCRLInStore*(
+  hCertStore: HCERTSTORE,
+  dwCertEncodingType: DWORD,
+  dwFindFlags: DWORD,
+  dwFindType: DWORD,
+  pvFindPara: pointer,
+  pPrevCrlContext: PCCRL_CONTEXT,
+): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFreeCRLContext*(
+  pCrlContext: PCCRL_CONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetCertificateContextProperty*(
+  pCertContext: PCCERT_CONTEXT, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumCertificateContextProperties*(
+  pCertContext: PCCERT_CONTEXT, dwPropId: DWORD
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCreateCTLEntryFromCertificateContextProperties*(
+  pCertContext: PCCERT_CONTEXT,
+  cOptAttr: DWORD,
+  rgOptAttr: PCRYPT_ATTRIBUTE,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+  pCtlEntry: PCTL_ENTRY,
+  pcbCtlEntry: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSetCertificateContextPropertiesFromCTLEntry*(
+  pCertContext: PCCERT_CONTEXT, pCtlEntry: PCTL_ENTRY, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetCRLFromStore*(
+  hCertStore: HCERTSTORE,
+  pIssuerContext: PCCERT_CONTEXT,
+  pPrevCrlContext: PCCRL_CONTEXT,
+  pdwFlags: ptr DWORD,
+): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCreateCRLContext*(
+  dwCertEncodingType: DWORD, pbCrlEncoded: ptr BYTE, cbCrlEncoded: DWORD
+): PCCRL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSetCRLContextProperty*(
+  pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetCRLContextProperty*(
+  pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumCRLContextProperties*(
+  pCrlContext: PCCRL_CONTEXT, dwPropId: DWORD
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindCertificateInCRL*(
+  pCert: PCCERT_CONTEXT,
+  pCrlContext: PCCRL_CONTEXT,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+  ppCrlEntry: ptr PCRL_ENTRY,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertIsValidCRLForCertificate*(
+  pCert: PCCERT_CONTEXT, pCrl: PCCRL_CONTEXT, dwFlags: DWORD, pvReserved: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddEncodedCertificateToStore*(
+  hCertStore: HCERTSTORE,
+  dwCertEncodingType: DWORD,
+  pbCertEncoded: ptr BYTE,
+  cbCertEncoded: DWORD,
+  dwAddDisposition: DWORD,
+  ppCertContext: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddCertificateContextToStore*(
+  hCertStore: HCERTSTORE,
+  pCertContext: PCCERT_CONTEXT,
+  dwAddDisposition: DWORD,
+  ppStoreContext: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddSerializedElementToStore*(
+  hCertStore: HCERTSTORE,
+  pbElement: ptr BYTE,
+  cbElement: DWORD,
+  dwAddDisposition: DWORD,
+  dwFlags: DWORD,
+  dwContextTypeFlags: DWORD,
+  pdwContextType: ptr DWORD,
+  ppvContext: ptr pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDeleteCertificateFromStore*(
+  pCertContext: PCCERT_CONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddEncodedCRLToStore*(
+  hCertStore: HCERTSTORE,
+  dwCertEncodingType: DWORD,
+  pbCrlEncoded: ptr BYTE,
+  cbCrlEncoded: DWORD,
+  dwAddDisposition: DWORD,
+  ppCrlContext: ptr PCCRL_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddCRLContextToStore*(
+  hCertStore: HCERTSTORE,
+  pCrlContext: PCCRL_CONTEXT,
+  dwAddDisposition: DWORD,
+  ppStoreContext: ptr PCCRL_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSerializeCertificateStoreElement*(
+  pCertContext: PCCERT_CONTEXT,
+  dwFlags: DWORD,
+  pbElement: ptr BYTE,
+  pcbElement: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSerializeCRLStoreElement*(
+  pCrlContext: PCCRL_CONTEXT, dwFlags: DWORD, pbElement: ptr BYTE, pcbElement: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDuplicateCTLContext*(
+  pCtlContext: PCCTL_CONTEXT
+): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCreateCTLContext*(
+  dwMsgAndCertEncodingType: DWORD, pbCtlEncoded: ptr BYTE, cbCtlEncoded: DWORD
+): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFreeCTLContext*(
+  pCtlContext: PCCTL_CONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSetCTLContextProperty*(
+  pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetCTLContextProperty*(
+  pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumCTLContextProperties*(
+  pCtlContext: PCCTL_CONTEXT, dwPropId: DWORD
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumCTLsInStore*(
+  hCertStore: HCERTSTORE, pPrevCtlContext: PCCTL_CONTEXT
+): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindSubjectInCTL*(
+  dwEncodingType: DWORD,
+  dwSubjectType: DWORD,
+  pvSubject: pointer,
+  pCtlContext: PCCTL_CONTEXT,
+  dwFlags: DWORD,
+): PCTL_ENTRY {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindCTLInStore*(
+  hCertStore: HCERTSTORE,
+  dwMsgAndCertEncodingType: DWORD,
+  dwFindFlags: DWORD,
+  dwFindType: DWORD,
+  pvFindPara: pointer,
+  pPrevCtlContext: PCCTL_CONTEXT,
+): PCCTL_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddEncodedCTLToStore*(
+  hCertStore: HCERTSTORE,
+  dwMsgAndCertEncodingType: DWORD,
+  pbCtlEncoded: ptr BYTE,
+  cbCtlEncoded: DWORD,
+  dwAddDisposition: DWORD,
+  ppCtlContext: ptr PCCTL_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddCTLContextToStore*(
+  hCertStore: HCERTSTORE,
+  pCtlContext: PCCTL_CONTEXT,
+  dwAddDisposition: DWORD,
+  ppStoreContext: ptr PCCTL_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSerializeCTLStoreElement*(
+  pCtlContext: PCCTL_CONTEXT, dwFlags: DWORD, pbElement: ptr BYTE, pcbElement: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDeleteCTLFromStore*(
+  pCtlContext: PCCTL_CONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddCertificateLinkToStore*(
+  hCertStore: HCERTSTORE,
+  pCertContext: PCCERT_CONTEXT,
+  dwAddDisposition: DWORD,
+  ppStoreContext: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddCRLLinkToStore*(
+  hCertStore: HCERTSTORE,
+  pCrlContext: PCCRL_CONTEXT,
+  dwAddDisposition: DWORD,
+  ppStoreContext: ptr PCCRL_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddCTLLinkToStore*(
+  hCertStore: HCERTSTORE,
+  pCtlContext: PCCTL_CONTEXT,
+  dwAddDisposition: DWORD,
+  ppStoreContext: ptr PCCTL_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddStoreToCollection*(
+  hCollectionStore: HCERTSTORE,
+  hSiblingStore: HCERTSTORE,
+  dwUpdateFlags: DWORD,
+  dwPriority: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertRemoveStoreFromCollection*(
+  hCollectionStore: HCERTSTORE, hSiblingStore: HCERTSTORE
+): void {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertControlStore*(
+  hCertStore: HCERTSTORE, dwFlags: DWORD, dwCtrlType: DWORD, pvCtrlPara: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSetStoreProperty*(
+  hCertStore: HCERTSTORE, dwPropId: DWORD, dwFlags: DWORD, pvData: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetStoreProperty*(
+  hCertStore: HCERTSTORE, dwPropId: DWORD, pvData: pointer, pcbData: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertRegisterSystemStore*(
+  pvSystemStore: pointer,
+  dwFlags: DWORD,
+  pStoreInfo: PCERT_SYSTEM_STORE_INFO,
+  pvReserved: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertRegisterPhysicalStore*(
+  pvSystemStore: pointer,
+  dwFlags: DWORD,
+  pwszStoreName: LPCWSTR,
+  pStoreInfo: PCERT_PHYSICAL_STORE_INFO,
+  pvReserved: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertUnregisterSystemStore*(
+  pvSystemStore: pointer, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertUnregisterPhysicalStore*(
+  pvSystemStore: pointer, dwFlags: DWORD, pwszStoreName: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumSystemStoreLocation*(
+  dwFlags: DWORD, pvArg: pointer, pfnEnum: PFN_CERT_ENUM_SYSTEM_STORE_LOCATION
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumSystemStore*(
+  dwFlags: DWORD,
+  pvSystemStoreLocationPara: pointer,
+  pvArg: pointer,
+  pfnEnum: PFN_CERT_ENUM_SYSTEM_STORE,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumPhysicalStore*(
+  pvSystemStore: pointer,
+  dwFlags: DWORD,
+  pvArg: pointer,
+  pfnEnum: PFN_CERT_ENUM_PHYSICAL_STORE,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetEnhancedKeyUsage*(
+  pCertContext: PCCERT_CONTEXT,
+  dwFlags: DWORD,
+  pUsage: PCERT_ENHKEY_USAGE,
+  pcbUsage: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSetEnhancedKeyUsage*(
+  pCertContext: PCCERT_CONTEXT, pUsage: PCERT_ENHKEY_USAGE
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddEnhancedKeyUsageIdentifier*(
+  pCertContext: PCCERT_CONTEXT, pszUsageIdentifier: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertRemoveEnhancedKeyUsageIdentifier*(
+  pCertContext: PCCERT_CONTEXT, pszUsageIdentifier: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetValidUsages*(
+  cCerts: DWORD,
+  rghCerts: ptr PCCERT_CONTEXT,
+  cNumOIDs: ptr int32,
+  rghOIDs: ptr LPSTR,
+  pcbOIDs: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgGetAndVerifySigner*(
+  hCryptMsg: HCRYPTMSG,
+  cSignerStore: DWORD,
+  rghSignerStore: ptr HCERTSTORE,
+  dwFlags: DWORD,
+  ppSigner: ptr PCCERT_CONTEXT,
+  pdwSignerIndex: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgSignCTL*(
+  dwMsgEncodingType: DWORD,
+  pbCtlContent: ptr BYTE,
+  cbCtlContent: DWORD,
+  pSignInfo: PCMSG_SIGNED_ENCODE_INFO,
+  dwFlags: DWORD,
+  pbEncoded: ptr BYTE,
+  pcbEncoded: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMsgEncodeAndSignCTL*(
+  dwMsgEncodingType: DWORD,
+  pCtlInfo: PCTL_INFO,
+  pSignInfo: PCMSG_SIGNED_ENCODE_INFO,
+  dwFlags: DWORD,
+  pbEncoded: ptr BYTE,
+  pcbEncoded: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindSubjectInSortedCTL*(
+  pSubjectIdentifier: PCRYPT_DATA_BLOB,
+  pCtlContext: PCCTL_CONTEXT,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+  pEncodedAttributes: PCRYPT_DER_BLOB,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertEnumSubjectInSortedCTL*(
+  pCtlContext: PCCTL_CONTEXT,
+  ppvNextSubject: ptr pointer,
+  pSubjectIdentifier: PCRYPT_DER_BLOB,
+  pEncodedAttributes: PCRYPT_DER_BLOB,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifyCTLUsage*(
+  dwEncodingType: DWORD,
+  dwSubjectType: DWORD,
+  pvSubject: pointer,
+  pSubjectUsage: PCTL_USAGE,
+  dwFlags: DWORD,
+  pVerifyUsagePara: PCTL_VERIFY_USAGE_PARA,
+  pVerifyUsageStatus: PCTL_VERIFY_USAGE_STATUS,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifyRevocation*(
+  dwEncodingType: DWORD,
+  dwRevType: DWORD,
+  cContext: DWORD,
+  rgpvContext: ptr PVOID,
+  dwFlags: DWORD,
+  pRevPara: PCERT_REVOCATION_PARA,
+  pRevStatus: PCERT_REVOCATION_STATUS,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCompareIntegerBlob*(
+  pInt1: PCRYPT_INTEGER_BLOB, pInt2: PCRYPT_INTEGER_BLOB
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCompareCertificate*(
+  dwCertEncodingType: DWORD, pCertId1: PCERT_INFO, pCertId2: PCERT_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCompareCertificateName*(
+  dwCertEncodingType: DWORD, pCertName1: PCERT_NAME_BLOB, pCertName2: PCERT_NAME_BLOB
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertIsRDNAttrsInCertificateName*(
+  dwCertEncodingType: DWORD, dwFlags: DWORD, pCertName: PCERT_NAME_BLOB, pRDN: PCERT_RDN
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertComparePublicKeyInfo*(
+  dwCertEncodingType: DWORD,
+  pPublicKey1: PCERT_PUBLIC_KEY_INFO,
+  pPublicKey2: PCERT_PUBLIC_KEY_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetPublicKeyLength*(
+  dwCertEncodingType: DWORD, pPublicKey: PCERT_PUBLIC_KEY_INFO
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyCertificateSignature*(
+  hCryptProv: HCRYPTPROV_LEGACY,
+  dwCertEncodingType: DWORD,
+  pbEncoded: ptr BYTE,
+  cbEncoded: DWORD,
+  pPublicKey: PCERT_PUBLIC_KEY_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyCertificateSignatureEx*(
+  hCryptProv: HCRYPTPROV_LEGACY,
+  dwCertEncodingType: DWORD,
+  dwSubjectType: DWORD,
+  pvSubject: pointer,
+  dwIssuerType: DWORD,
+  pvIssuer: pointer,
+  dwFlags: DWORD,
+  pvExtra: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertIsStrongHashToSign*(
+  pStrongSignPara: PCCERT_STRONG_SIGN_PARA,
+  pwszCNGHashAlgid: LPCWSTR,
+  pSigningCert: PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptHashToBeSigned*(
+  hCryptProv: HCRYPTPROV_LEGACY,
+  dwCertEncodingType: DWORD,
+  pbEncoded: ptr BYTE,
+  cbEncoded: DWORD,
+  pbComputedHash: ptr BYTE,
+  pcbComputedHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptHashCertificate*(
+  hCryptProv: HCRYPTPROV_LEGACY,
+  Algid: ALG_ID,
+  dwFlags: DWORD,
+  pbEncoded: ptr BYTE,
+  cbEncoded: DWORD,
+  pbComputedHash: ptr BYTE,
+  pcbComputedHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptHashCertificate2*(
+  pwszCNGHashAlgid: LPCWSTR,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+  pbEncoded: ptr BYTE,
+  cbEncoded: DWORD,
+  pbComputedHash: ptr BYTE,
+  pcbComputedHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSignCertificate*(
+  hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE,
+  dwKeySpec: DWORD,
+  dwCertEncodingType: DWORD,
+  pbEncodedToBeSigned: ptr BYTE,
+  cbEncodedToBeSigned: DWORD,
+  pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+  pvHashAuxInfo: pointer,
+  pbSignature: ptr BYTE,
+  pcbSignature: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSignAndEncodeCertificate*(
+  hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE,
+  dwKeySpec: DWORD,
+  dwCertEncodingType: DWORD,
+  lpszStructType: LPCSTR,
+  pvStructInfo: pointer,
+  pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+  pvHashAuxInfo: pointer,
+  pbEncoded: ptr BYTE,
+  pcbEncoded: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifyTimeValidity*(
+  pTimeToVerify: LPFILETIME, pCertInfo: PCERT_INFO
+): LONG {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifyCRLTimeValidity*(
+  pTimeToVerify: LPFILETIME, pCrlInfo: PCRL_INFO
+): LONG {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifyValidityNesting*(
+  pSubjectInfo: PCERT_INFO, pIssuerInfo: PCERT_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifyCRLRevocation*(
+  dwCertEncodingType: DWORD,
+  pCertId: PCERT_INFO,
+  cCrlInfo: DWORD,
+  rgpCrlInfo: ptr PCRL_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAlgIdToOID*(
+  dwAlgId: DWORD
+): LPCSTR {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertOIDToAlgId*(
+  pszObjId: LPCSTR
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindExtension*(
+  pszObjId: LPCSTR, cExtensions: DWORD, rgExtensions: ptr CERT_EXTENSION
+): PCERT_EXTENSION {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindAttribute*(
+  pszObjId: LPCSTR, cAttr: DWORD, rgAttr: ptr CRYPT_ATTRIBUTE
+): PCRYPT_ATTRIBUTE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindRDNAttr*(
+  pszObjId: LPCSTR, pName: PCERT_NAME_INFO
+): PCERT_RDN_ATTR {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetIntendedKeyUsage*(
+  dwCertEncodingType: DWORD,
+  pCertInfo: PCERT_INFO,
+  pbKeyUsage: ptr BYTE,
+  cbKeyUsage: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptInstallDefaultContext*(
+  hCryptProv: HCRYPTPROV,
+  dwDefaultType: DWORD,
+  pvDefaultPara: pointer,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+  phDefaultContext: ptr HCRYPTDEFAULTCONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptUninstallDefaultContext*(
+  hDefaultContext: HCRYPTDEFAULTCONTEXT, dwFlags: DWORD, pvReserved: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptExportPublicKeyInfo*(
+  hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE,
+  dwKeySpec: DWORD,
+  dwCertEncodingType: DWORD,
+  pInfo: PCERT_PUBLIC_KEY_INFO,
+  pcbInfo: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptExportPublicKeyInfoEx*(
+  hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE,
+  dwKeySpec: DWORD,
+  dwCertEncodingType: DWORD,
+  pszPublicKeyObjId: LPSTR,
+  dwFlags: DWORD,
+  pvAuxInfo: pointer,
+  pInfo: PCERT_PUBLIC_KEY_INFO,
+  pcbInfo: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptExportPublicKeyInfoFromBCryptKeyHandle*(
+  hBCryptKey: BCRYPT_KEY_HANDLE,
+  dwCertEncodingType: DWORD,
+  pszPublicKeyObjId: LPSTR,
+  dwFlags: DWORD,
+  pvAuxInfo: pointer,
+  pInfo: PCERT_PUBLIC_KEY_INFO,
+  pcbInfo: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptImportPublicKeyInfo*(
+  hCryptProv: HCRYPTPROV,
+  dwCertEncodingType: DWORD,
+  pInfo: PCERT_PUBLIC_KEY_INFO,
+  phKey: ptr HCRYPTKEY,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptImportPublicKeyInfoEx*(
+  hCryptProv: HCRYPTPROV,
+  dwCertEncodingType: DWORD,
+  pInfo: PCERT_PUBLIC_KEY_INFO,
+  aiKeyAlg: ALG_ID,
+  dwFlags: DWORD,
+  pvAuxInfo: pointer,
+  phKey: ptr HCRYPTKEY,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptImportPublicKeyInfoEx2*(
+  dwCertEncodingType: DWORD,
+  pInfo: PCERT_PUBLIC_KEY_INFO,
+  dwFlags: DWORD,
+  pvAuxInfo: pointer,
+  phKey: ptr BCRYPT_KEY_HANDLE,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptAcquireCertificatePrivateKey*(
+  pCert: PCCERT_CONTEXT,
+  dwFlags: DWORD,
+  pvParameters: pointer,
+  phCryptProvOrNCryptKey: ptr HCRYPTPROV_OR_NCRYPT_KEY_HANDLE,
+  pdwKeySpec: ptr DWORD,
+  pfCallerFreeProvOrNCryptKey: ptr WINBOOL,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptFindCertificateKeyProvInfo*(
+  pCert: PCCERT_CONTEXT, dwFlags: DWORD, pvReserved: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptImportPKCS8*(
+  sPrivateKeyAndParams: CRYPT_PKCS8_IMPORT_PARAMS,
+  dwFlags: DWORD,
+  phCryptProv: ptr HCRYPTPROV,
+  pvAuxInfo: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptExportPKCS8*(
+  hCryptProv: HCRYPTPROV,
+  dwKeySpec: DWORD,
+  pszPrivateKeyObjId: LPSTR,
+  dwFlags: DWORD,
+  pvAuxInfo: pointer,
+  pbPrivateKeyBlob: ptr BYTE,
+  pcbPrivateKeyBlob: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptHashPublicKeyInfo*(
+  hCryptProv: HCRYPTPROV_LEGACY,
+  Algid: ALG_ID,
+  dwFlags: DWORD,
+  dwCertEncodingType: DWORD,
+  pInfo: PCERT_PUBLIC_KEY_INFO,
+  pbComputedHash: ptr BYTE,
+  pcbComputedHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertRDNValueToStrA*(
+  dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPSTR, csz: DWORD
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertRDNValueToStrW*(
+  dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPWSTR, csz: DWORD
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertNameToStrA*(
+  dwCertEncodingType: DWORD,
+  pName: PCERT_NAME_BLOB,
+  dwStrType: DWORD,
+  psz: LPSTR,
+  csz: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertNameToStrW*(
+  dwCertEncodingType: DWORD,
+  pName: PCERT_NAME_BLOB,
+  dwStrType: DWORD,
+  psz: LPWSTR,
+  csz: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertStrToNameA*(
+  dwCertEncodingType: DWORD,
+  pszX500: LPCSTR,
+  dwStrType: DWORD,
+  pvReserved: pointer,
+  pbEncoded: ptr BYTE,
+  pcbEncoded: ptr DWORD,
+  ppszError: ptr LPCSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertStrToNameW*(
+  dwCertEncodingType: DWORD,
+  pszX500: LPCWSTR,
+  dwStrType: DWORD,
+  pvReserved: pointer,
+  pbEncoded: ptr BYTE,
+  pcbEncoded: ptr DWORD,
+  ppszError: ptr LPCWSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetNameStringA*(
+  pCertContext: PCCERT_CONTEXT,
+  dwType: DWORD,
+  dwFlags: DWORD,
+  pvTypePara: pointer,
+  pszNameString: LPSTR,
+  cchNameString: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetNameStringW*(
+  pCertContext: PCCERT_CONTEXT,
+  dwType: DWORD,
+  dwFlags: DWORD,
+  pvTypePara: pointer,
+  pszNameString: LPWSTR,
+  cchNameString: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSignMessage*(
+  pSignPara: PCRYPT_SIGN_MESSAGE_PARA,
+  fDetachedSignature: WINBOOL,
+  cToBeSigned: DWORD,
+  rgpbToBeSigned: ptr ptr BYTE,
+  rgcbToBeSigned: ptr DWORD,
+  pbSignedBlob: ptr BYTE,
+  pcbSignedBlob: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyMessageSignature*(
+  pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA,
+  dwSignerIndex: DWORD,
+  pbSignedBlob: ptr BYTE,
+  cbSignedBlob: DWORD,
+  pbDecoded: ptr BYTE,
+  pcbDecoded: ptr DWORD,
+  ppSignerCert: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetMessageSignerCount*(
+  dwMsgEncodingType: DWORD, pbSignedBlob: ptr BYTE, cbSignedBlob: DWORD
+): LONG {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetMessageCertificates*(
+  dwMsgAndCertEncodingType: DWORD,
+  hCryptProv: HCRYPTPROV_LEGACY,
+  dwFlags: DWORD,
+  pbSignedBlob: ptr BYTE,
+  cbSignedBlob: DWORD,
+): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyDetachedMessageSignature*(
+  pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA,
+  dwSignerIndex: DWORD,
+  pbDetachedSignBlob: ptr BYTE,
+  cbDetachedSignBlob: DWORD,
+  cToBeSigned: DWORD,
+  rgpbToBeSigned: ptr ptr BYTE,
+  rgcbToBeSigned: ptr DWORD,
+  ppSignerCert: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptEncryptMessage*(
+  pEncryptPara: PCRYPT_ENCRYPT_MESSAGE_PARA,
+  cRecipientCert: DWORD,
+  rgpRecipientCert: ptr PCCERT_CONTEXT,
+  pbToBeEncrypted: ptr BYTE,
+  cbToBeEncrypted: DWORD,
+  pbEncryptedBlob: ptr BYTE,
+  pcbEncryptedBlob: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptDecryptMessage*(
+  pDecryptPara: PCRYPT_DECRYPT_MESSAGE_PARA,
+  pbEncryptedBlob: ptr BYTE,
+  cbEncryptedBlob: DWORD,
+  pbDecrypted: ptr BYTE,
+  pcbDecrypted: ptr DWORD,
+  ppXchgCert: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSignAndEncryptMessage*(
+  pSignPara: PCRYPT_SIGN_MESSAGE_PARA,
+  pEncryptPara: PCRYPT_ENCRYPT_MESSAGE_PARA,
+  cRecipientCert: DWORD,
+  rgpRecipientCert: ptr PCCERT_CONTEXT,
+  pbToBeSignedAndEncrypted: ptr BYTE,
+  cbToBeSignedAndEncrypted: DWORD,
+  pbSignedAndEncryptedBlob: ptr BYTE,
+  pcbSignedAndEncryptedBlob: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptDecryptAndVerifyMessageSignature*(
+  pDecryptPara: PCRYPT_DECRYPT_MESSAGE_PARA,
+  pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA,
+  dwSignerIndex: DWORD,
+  pbEncryptedBlob: ptr BYTE,
+  cbEncryptedBlob: DWORD,
+  pbDecrypted: ptr BYTE,
+  pcbDecrypted: ptr DWORD,
+  ppXchgCert: ptr PCCERT_CONTEXT,
+  ppSignerCert: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptDecodeMessage*(
+  dwMsgTypeFlags: DWORD,
+  pDecryptPara: PCRYPT_DECRYPT_MESSAGE_PARA,
+  pVerifyPara: PCRYPT_VERIFY_MESSAGE_PARA,
+  dwSignerIndex: DWORD,
+  pbEncodedBlob: ptr BYTE,
+  cbEncodedBlob: DWORD,
+  dwPrevInnerContentType: DWORD,
+  pdwMsgType: ptr DWORD,
+  pdwInnerContentType: ptr DWORD,
+  pbDecoded: ptr BYTE,
+  pcbDecoded: ptr DWORD,
+  ppXchgCert: ptr PCCERT_CONTEXT,
+  ppSignerCert: ptr PCCERT_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptHashMessage*(
+  pHashPara: PCRYPT_HASH_MESSAGE_PARA,
+  fDetachedHash: WINBOOL,
+  cToBeHashed: DWORD,
+  rgpbToBeHashed: ptr ptr BYTE,
+  rgcbToBeHashed: ptr DWORD,
+  pbHashedBlob: ptr BYTE,
+  pcbHashedBlob: ptr DWORD,
+  pbComputedHash: ptr BYTE,
+  pcbComputedHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyMessageHash*(
+  pHashPara: PCRYPT_HASH_MESSAGE_PARA,
+  pbHashedBlob: ptr BYTE,
+  cbHashedBlob: DWORD,
+  pbToBeHashed: ptr BYTE,
+  pcbToBeHashed: ptr DWORD,
+  pbComputedHash: ptr BYTE,
+  pcbComputedHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyDetachedMessageHash*(
+  pHashPara: PCRYPT_HASH_MESSAGE_PARA,
+  pbDetachedHashBlob: ptr BYTE,
+  cbDetachedHashBlob: DWORD,
+  cToBeHashed: DWORD,
+  rgpbToBeHashed: ptr ptr BYTE,
+  rgcbToBeHashed: ptr DWORD,
+  pbComputedHash: ptr BYTE,
+  pcbComputedHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSignMessageWithKey*(
+  pSignPara: PCRYPT_KEY_SIGN_MESSAGE_PARA,
+  pbToBeSigned: ptr BYTE,
+  cbToBeSigned: DWORD,
+  pbSignedBlob: ptr BYTE,
+  pcbSignedBlob: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyMessageSignatureWithKey*(
+  pVerifyPara: PCRYPT_KEY_VERIFY_MESSAGE_PARA,
+  pPublicKeyInfo: PCERT_PUBLIC_KEY_INFO,
+  pbSignedBlob: ptr BYTE,
+  cbSignedBlob: DWORD,
+  pbDecoded: ptr BYTE,
+  pcbDecoded: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertOpenSystemStoreA*(
+  hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCSTR
+): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertOpenSystemStoreW*(
+  hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCWSTR
+): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddEncodedCertificateToSystemStoreA*(
+  szCertStoreName: LPCSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddEncodedCertificateToSystemStoreW*(
+  szCertStoreName: LPCWSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc FindCertsByIssuer*(
+  pCertChains: PCERT_CHAIN,
+  pcbCertChains: ptr DWORD,
+  pcCertChains: ptr DWORD,
+  pbEncodedIssuerName: ptr BYTE,
+  cbEncodedIssuerName: DWORD,
+  pwszPurpose: LPCWSTR,
+  dwKeySpec: DWORD,
+): HRESULT {.winapi, stdcall, dynlib: "wintrust", importc.}
+
+proc CryptQueryObject*(
+  dwObjectType: DWORD,
+  pvObject: pointer,
+  dwExpectedContentTypeFlags: DWORD,
+  dwExpectedFormatTypeFlags: DWORD,
+  dwFlags: DWORD,
+  pdwMsgAndCertEncodingType: ptr DWORD,
+  pdwContentType: ptr DWORD,
+  pdwFormatType: ptr DWORD,
+  phCertStore: ptr HCERTSTORE,
+  phMsg: ptr HCRYPTMSG,
+  ppvContext: ptr pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMemAlloc*(
+  cbSize: ULONG
+): LPVOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptMemRealloc*(
+  pv: LPVOID, cbSize: ULONG
+): LPVOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
 proc CryptMemFree*(pv: LPVOID): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptCreateAsyncHandle*(dwFlags: DWORD, phAsync: PHCRYPTASYNC): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSetAsyncParam*(hAsync: HCRYPTASYNC, pszParamOid: LPSTR, pvParam: LPVOID, pfnFree: PFN_CRYPT_ASYNC_PARAM_FREE_FUNC): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetAsyncParam*(hAsync: HCRYPTASYNC, pszParamOid: LPSTR, ppvParam: ptr LPVOID, ppfnFree: ptr PFN_CRYPT_ASYNC_PARAM_FREE_FUNC): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptCloseAsyncHandle*(hAsync: HCRYPTASYNC): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptRetrieveObjectByUrlA*(pszUrl: LPCSTR, pszObjectOid: LPCSTR, dwRetrievalFlags: DWORD, dwTimeout: DWORD, ppvObject: ptr LPVOID, hAsyncRetrieve: HCRYPTASYNC, pCredentials: PCRYPT_CREDENTIALS, pvVerify: LPVOID, pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CryptRetrieveObjectByUrlW*(pszUrl: LPCWSTR, pszObjectOid: LPCSTR, dwRetrievalFlags: DWORD, dwTimeout: DWORD, ppvObject: ptr LPVOID, hAsyncRetrieve: HCRYPTASYNC, pCredentials: PCRYPT_CREDENTIALS, pvVerify: LPVOID, pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CryptInstallCancelRetrieval*(pfnCancel: PFN_CRYPT_CANCEL_RETRIEVAL, pvArg: pointer, dwFlags: DWORD, pvReserved: pointer): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CryptUninstallCancelRetrieval*(dwFlags: DWORD, pvReserved: pointer): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CryptCancelAsyncRetrieval*(hAsyncRetrieval: HCRYPTASYNC): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CryptGetObjectUrl*(pszUrlOid: LPCSTR, pvPara: LPVOID, dwFlags: DWORD, pUrlArray: PCRYPT_URL_ARRAY, pcbUrlArray: ptr DWORD, pUrlInfo: PCRYPT_URL_INFO, pcbUrlInfo: ptr DWORD, pvReserved: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CryptGetTimeValidObject*(pszTimeValidOid: LPCSTR, pvPara: LPVOID, pIssuer: PCCERT_CONTEXT, pftValidFor: LPFILETIME, dwFlags: DWORD, dwTimeout: DWORD, ppvObject: ptr LPVOID, pCredentials: PCRYPT_CREDENTIALS, pExtraInfo: PCRYPT_GET_TIME_VALID_OBJECT_EXTRA_INFO): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CryptFlushTimeValidObject*(pszFlushTimeValidOid: LPCSTR, pvPara: LPVOID, pIssuer: PCCERT_CONTEXT, dwFlags: DWORD, pvReserved: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
-proc CertCreateSelfSignCertificate*(hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE, pSubjectIssuerBlob: PCERT_NAME_BLOB, dwFlags: DWORD, pKeyProvInfo: PCRYPT_KEY_PROV_INFO, pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER, pStartTime: PSYSTEMTIME, pEndTime: PSYSTEMTIME, pExtensions: PCERT_EXTENSIONS): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptGetKeyIdentifierProperty*(pKeyIdentifier: ptr CRYPT_HASH_BLOB, dwPropId: DWORD, dwFlags: DWORD, pwszComputerName: LPCWSTR, pvReserved: pointer, pvData: pointer, pcbData: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptSetKeyIdentifierProperty*(pKeyIdentifier: ptr CRYPT_HASH_BLOB, dwPropId: DWORD, dwFlags: DWORD, pwszComputerName: LPCWSTR, pvReserved: pointer, pvData: pointer): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptEnumKeyIdentifierProperties*(pKeyIdentifier: ptr CRYPT_HASH_BLOB, dwPropId: DWORD, dwFlags: DWORD, pwszComputerName: LPCWSTR, pvReserved: pointer, pvArg: pointer, pfnEnum: PFN_CRYPT_ENUM_KEYID_PROP): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptCreateKeyIdentifierFromCSP*(dwCertEncodingType: DWORD, pszPubKeyOID: LPCSTR, pPubKeyStruc: ptr PUBLICKEYSTRUC, cbPubKeyStruc: DWORD, dwFlags: DWORD, pvReserved: pointer, pbHash: ptr BYTE, pcbHash: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCreateCertificateChainEngine*(pConfig: PCERT_CHAIN_ENGINE_CONFIG, phChainEngine: ptr HCERTCHAINENGINE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFreeCertificateChainEngine*(hChainEngine: HCERTCHAINENGINE): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertResyncCertificateChainEngine*(hChainEngine: HCERTCHAINENGINE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetCertificateChain*(hChainEngine: HCERTCHAINENGINE, pCertContext: PCCERT_CONTEXT, pTime: LPFILETIME, hAdditionalStore: HCERTSTORE, pChainPara: PCERT_CHAIN_PARA, dwFlags: DWORD, pvReserved: LPVOID, ppChainContext: ptr PCCERT_CHAIN_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFreeCertificateChain*(pChainContext: PCCERT_CHAIN_CONTEXT): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertDuplicateCertificateChain*(pChainContext: PCCERT_CHAIN_CONTEXT): PCCERT_CHAIN_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFindChainInStore*(hCertStore: HCERTSTORE, dwCertEncodingType: DWORD, dwFindFlags: DWORD, dwFindType: DWORD, pvFindPara: pointer, pPrevChainContext: PCCERT_CHAIN_CONTEXT): PCCERT_CHAIN_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertVerifyCertificateChainPolicy*(pszPolicyOID: LPCSTR, pChainContext: PCCERT_CHAIN_CONTEXT, pPolicyPara: PCERT_CHAIN_POLICY_PARA, pPolicyStatus: PCERT_CHAIN_POLICY_STATUS): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptStringToBinaryA*(pszString: LPCSTR, cchString: DWORD, dwFlags: DWORD, pbBinary: ptr BYTE, pcbBinary: ptr DWORD, pdwSkip: ptr DWORD, pdwFlags: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptStringToBinaryW*(pszString: LPCWSTR, cchString: DWORD, dwFlags: DWORD, pbBinary: ptr BYTE, pcbBinary: ptr DWORD, pdwSkip: ptr DWORD, pdwFlags: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptBinaryToStringA*(pbBinary: ptr BYTE, cbBinary: DWORD, dwFlags: DWORD, pszString: LPSTR, pcchString: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptBinaryToStringW*(pbBinary: ptr BYTE, cbBinary: DWORD, dwFlags: DWORD, pszString: LPWSTR, pcchString: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc PFXImportCertStore*(pPFX: ptr CRYPT_DATA_BLOB, szPassword: LPCWSTR, dwFlags: DWORD): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc PFXIsPFXBlob*(pPFX: ptr CRYPT_DATA_BLOB): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc PFXVerifyPassword*(pPFX: ptr CRYPT_DATA_BLOB, szPassword: LPCWSTR, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc PFXExportCertStoreEx*(hStore: HCERTSTORE, pPFX: ptr CRYPT_DATA_BLOB, szPassword: LPCWSTR, pvPara: pointer, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc PFXExportCertStore*(hStore: HCERTSTORE, pPFX: ptr CRYPT_DATA_BLOB, szPassword: LPCWSTR, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertOpenServerOcspResponse*(pChainContext: PCCERT_CHAIN_CONTEXT, dwFlags: DWORD, pvReserved: LPVOID): HCERT_SERVER_OCSP_RESPONSE {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddRefServerOcspResponse*(hServerOcspResponse: HCERT_SERVER_OCSP_RESPONSE): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertCloseServerOcspResponse*(hServerOcspResponse: HCERT_SERVER_OCSP_RESPONSE, dwFlags: DWORD): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertGetServerOcspResponseContext*(hServerOcspResponse: HCERT_SERVER_OCSP_RESPONSE, dwFlags: DWORD, pvReserved: LPVOID): PCCERT_SERVER_OCSP_RESPONSE_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertAddRefServerOcspResponseContext*(pServerOcspResponseContext: PCCERT_SERVER_OCSP_RESPONSE_CONTEXT): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFreeServerOcspResponseContext*(pServerOcspResponseContext: PCCERT_SERVER_OCSP_RESPONSE_CONTEXT): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertRetrieveLogoOrBiometricInfo*(pCertContext: PCCERT_CONTEXT, lpszLogoOrBiometricType: LPCSTR, dwRetrievalFlags: DWORD, dwTimeout: DWORD, dwFlags: DWORD, pvReserved: pointer, ppbData: ptr ptr BYTE, pcbData: ptr DWORD, ppwszMimeType: ptr LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertSelectCertificateChains*(pSelectionContext: LPCGUID, dwFlags: DWORD, pChainParameters: PCCERT_SELECT_CHAIN_PARA, cCriteria: DWORD, rgpCriteria: PCCERT_SELECT_CRITERIA, hStore: HCERTSTORE, pcSelection: PDWORD, pprgpSelection: ptr ptr PCCERT_CHAIN_CONTEXT): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CertFreeCertificateChainList*(prgpSelection: ptr PCCERT_CHAIN_CONTEXT): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptRetrieveTimeStamp*(wszUrl: LPCWSTR, dwRetrievalFlags: DWORD, dwTimeout: DWORD, pszHashId: LPCSTR, pPara: ptr CRYPT_TIMESTAMP_PARA, pbData: ptr BYTE, cbData: DWORD, ppTsContext: ptr PCRYPT_TIMESTAMP_CONTEXT, ppTsSigner: ptr PCCERT_CONTEXT, phStore: ptr HCERTSTORE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptVerifyTimeStampSignature*(pbTSContentInfo: ptr BYTE, cbTSContentInfo: DWORD, pbData: ptr BYTE, cbData: DWORD, hAdditionalStore: HCERTSTORE, ppTsContext: ptr PCRYPT_TIMESTAMP_CONTEXT, ppTsSigner: ptr PCCERT_CONTEXT, phStore: ptr HCERTSTORE): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptProtectData*(pDataIn: ptr DATA_BLOB, szDataDescr: LPCWSTR, pOptionalEntropy: ptr DATA_BLOB, pvReserved: PVOID, pPromptStruct: ptr CRYPTPROTECT_PROMPTSTRUCT, dwFlags: DWORD, pDataOut: ptr DATA_BLOB): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptUnprotectData*(pDataIn: ptr DATA_BLOB, ppszDataDescr: ptr LPWSTR, pOptionalEntropy: ptr DATA_BLOB, pvReserved: PVOID, pPromptStruct: ptr CRYPTPROTECT_PROMPTSTRUCT, dwFlags: DWORD, pDataOut: ptr DATA_BLOB): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptProtectMemory*(pDataIn: LPVOID, cbDataIn: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptUnprotectMemory*(pDataIn: LPVOID, cbDataIn: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc CryptUpdateProtectedState*(pOldSid: PSID, pwszOldPassword: LPCWSTR, dwFlags: DWORD, pdwSuccessCount: ptr DWORD, pdwFailureCount: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
-proc `pOtherName=`*(self: var CERT_ALT_NAME_ENTRY, x: PCERT_OTHER_NAME) {.inline.} = self.union1.pOtherName = x
-proc pOtherName*(self: CERT_ALT_NAME_ENTRY): PCERT_OTHER_NAME {.inline.} = self.union1.pOtherName
-proc pOtherName*(self: var CERT_ALT_NAME_ENTRY): var PCERT_OTHER_NAME {.inline.} = self.union1.pOtherName
-proc `pwszRfc822Name=`*(self: var CERT_ALT_NAME_ENTRY, x: LPWSTR) {.inline.} = self.union1.pwszRfc822Name = x
-proc pwszRfc822Name*(self: CERT_ALT_NAME_ENTRY): LPWSTR {.inline.} = self.union1.pwszRfc822Name
-proc pwszRfc822Name*(self: var CERT_ALT_NAME_ENTRY): var LPWSTR {.inline.} = self.union1.pwszRfc822Name
-proc `pwszDNSName=`*(self: var CERT_ALT_NAME_ENTRY, x: LPWSTR) {.inline.} = self.union1.pwszDNSName = x
-proc pwszDNSName*(self: CERT_ALT_NAME_ENTRY): LPWSTR {.inline.} = self.union1.pwszDNSName
-proc pwszDNSName*(self: var CERT_ALT_NAME_ENTRY): var LPWSTR {.inline.} = self.union1.pwszDNSName
-proc `DirectoryName=`*(self: var CERT_ALT_NAME_ENTRY, x: CERT_NAME_BLOB) {.inline.} = self.union1.DirectoryName = x
-proc DirectoryName*(self: CERT_ALT_NAME_ENTRY): CERT_NAME_BLOB {.inline.} = self.union1.DirectoryName
-proc DirectoryName*(self: var CERT_ALT_NAME_ENTRY): var CERT_NAME_BLOB {.inline.} = self.union1.DirectoryName
-proc `pwszURL=`*(self: var CERT_ALT_NAME_ENTRY, x: LPWSTR) {.inline.} = self.union1.pwszURL = x
-proc pwszURL*(self: CERT_ALT_NAME_ENTRY): LPWSTR {.inline.} = self.union1.pwszURL
-proc pwszURL*(self: var CERT_ALT_NAME_ENTRY): var LPWSTR {.inline.} = self.union1.pwszURL
-proc `IPAddress=`*(self: var CERT_ALT_NAME_ENTRY, x: CRYPT_DATA_BLOB) {.inline.} = self.union1.IPAddress = x
-proc IPAddress*(self: CERT_ALT_NAME_ENTRY): CRYPT_DATA_BLOB {.inline.} = self.union1.IPAddress
-proc IPAddress*(self: var CERT_ALT_NAME_ENTRY): var CRYPT_DATA_BLOB {.inline.} = self.union1.IPAddress
-proc `pszRegisteredID=`*(self: var CERT_ALT_NAME_ENTRY, x: LPSTR) {.inline.} = self.union1.pszRegisteredID = x
-proc pszRegisteredID*(self: CERT_ALT_NAME_ENTRY): LPSTR {.inline.} = self.union1.pszRegisteredID
-proc pszRegisteredID*(self: var CERT_ALT_NAME_ENTRY): var LPSTR {.inline.} = self.union1.pszRegisteredID
-proc `FullName=`*(self: var CRL_DIST_POINT_NAME, x: CERT_ALT_NAME_INFO) {.inline.} = self.union1.FullName = x
-proc FullName*(self: CRL_DIST_POINT_NAME): CERT_ALT_NAME_INFO {.inline.} = self.union1.FullName
-proc FullName*(self: var CRL_DIST_POINT_NAME): var CERT_ALT_NAME_INFO {.inline.} = self.union1.FullName
-proc `pTaggedCertRequest=`*(self: var CMC_TAGGED_REQUEST, x: PCMC_TAGGED_CERT_REQUEST) {.inline.} = self.union1.pTaggedCertRequest = x
-proc pTaggedCertRequest*(self: CMC_TAGGED_REQUEST): PCMC_TAGGED_CERT_REQUEST {.inline.} = self.union1.pTaggedCertRequest
-proc pTaggedCertRequest*(self: var CMC_TAGGED_REQUEST): var PCMC_TAGGED_CERT_REQUEST {.inline.} = self.union1.pTaggedCertRequest
-proc `dwFailInfo=`*(self: var CMC_STATUS_INFO, x: DWORD) {.inline.} = self.union1.dwFailInfo = x
-proc dwFailInfo*(self: CMC_STATUS_INFO): DWORD {.inline.} = self.union1.dwFailInfo
-proc dwFailInfo*(self: var CMC_STATUS_INFO): var DWORD {.inline.} = self.union1.dwFailInfo
-proc `pPendInfo=`*(self: var CMC_STATUS_INFO, x: PCMC_PEND_INFO) {.inline.} = self.union1.pPendInfo = x
-proc pPendInfo*(self: CMC_STATUS_INFO): PCMC_PEND_INFO {.inline.} = self.union1.pPendInfo
-proc pPendInfo*(self: var CMC_STATUS_INFO): var PCMC_PEND_INFO {.inline.} = self.union1.pPendInfo
-proc `dwNumBits=`*(self: var CERT_LOGOTYPE_IMAGE_INFO, x: DWORD) {.inline.} = self.union1.dwNumBits = x
-proc dwNumBits*(self: CERT_LOGOTYPE_IMAGE_INFO): DWORD {.inline.} = self.union1.dwNumBits
-proc dwNumBits*(self: var CERT_LOGOTYPE_IMAGE_INFO): var DWORD {.inline.} = self.union1.dwNumBits
-proc `dwTableSize=`*(self: var CERT_LOGOTYPE_IMAGE_INFO, x: DWORD) {.inline.} = self.union1.dwTableSize = x
-proc dwTableSize*(self: CERT_LOGOTYPE_IMAGE_INFO): DWORD {.inline.} = self.union1.dwTableSize
-proc dwTableSize*(self: var CERT_LOGOTYPE_IMAGE_INFO): var DWORD {.inline.} = self.union1.dwTableSize
-proc `pLogotypeDirectInfo=`*(self: var CERT_LOGOTYPE_INFO, x: PCERT_LOGOTYPE_DATA) {.inline.} = self.union1.pLogotypeDirectInfo = x
-proc pLogotypeDirectInfo*(self: CERT_LOGOTYPE_INFO): PCERT_LOGOTYPE_DATA {.inline.} = self.union1.pLogotypeDirectInfo
-proc pLogotypeDirectInfo*(self: var CERT_LOGOTYPE_INFO): var PCERT_LOGOTYPE_DATA {.inline.} = self.union1.pLogotypeDirectInfo
-proc `pLogotypeIndirectInfo=`*(self: var CERT_LOGOTYPE_INFO, x: PCERT_LOGOTYPE_REFERENCE) {.inline.} = self.union1.pLogotypeIndirectInfo = x
-proc pLogotypeIndirectInfo*(self: CERT_LOGOTYPE_INFO): PCERT_LOGOTYPE_REFERENCE {.inline.} = self.union1.pLogotypeIndirectInfo
-proc pLogotypeIndirectInfo*(self: var CERT_LOGOTYPE_INFO): var PCERT_LOGOTYPE_REFERENCE {.inline.} = self.union1.pLogotypeIndirectInfo
-proc `dwPredefined=`*(self: var CERT_BIOMETRIC_DATA, x: DWORD) {.inline.} = self.union1.dwPredefined = x
-proc dwPredefined*(self: CERT_BIOMETRIC_DATA): DWORD {.inline.} = self.union1.dwPredefined
-proc dwPredefined*(self: var CERT_BIOMETRIC_DATA): var DWORD {.inline.} = self.union1.dwPredefined
-proc `pszObjId=`*(self: var CERT_BIOMETRIC_DATA, x: LPSTR) {.inline.} = self.union1.pszObjId = x
-proc pszObjId*(self: CERT_BIOMETRIC_DATA): LPSTR {.inline.} = self.union1.pszObjId
-proc pszObjId*(self: var CERT_BIOMETRIC_DATA): var LPSTR {.inline.} = self.union1.pszObjId
-proc `pRevokedInfo=`*(self: var OCSP_BASIC_RESPONSE_ENTRY, x: POCSP_BASIC_REVOKED_INFO) {.inline.} = self.union1.pRevokedInfo = x
-proc pRevokedInfo*(self: OCSP_BASIC_RESPONSE_ENTRY): POCSP_BASIC_REVOKED_INFO {.inline.} = self.union1.pRevokedInfo
-proc pRevokedInfo*(self: var OCSP_BASIC_RESPONSE_ENTRY): var POCSP_BASIC_REVOKED_INFO {.inline.} = self.union1.pRevokedInfo
-proc `ByNameResponderId=`*(self: var OCSP_BASIC_RESPONSE_INFO, x: CERT_NAME_BLOB) {.inline.} = self.union1.ByNameResponderId = x
-proc ByNameResponderId*(self: OCSP_BASIC_RESPONSE_INFO): CERT_NAME_BLOB {.inline.} = self.union1.ByNameResponderId
-proc ByNameResponderId*(self: var OCSP_BASIC_RESPONSE_INFO): var CERT_NAME_BLOB {.inline.} = self.union1.ByNameResponderId
-proc `ByKeyResponderId=`*(self: var OCSP_BASIC_RESPONSE_INFO, x: CRYPT_HASH_BLOB) {.inline.} = self.union1.ByKeyResponderId = x
-proc ByKeyResponderId*(self: OCSP_BASIC_RESPONSE_INFO): CRYPT_HASH_BLOB {.inline.} = self.union1.ByKeyResponderId
-proc ByKeyResponderId*(self: var OCSP_BASIC_RESPONSE_INFO): var CRYPT_HASH_BLOB {.inline.} = self.union1.ByKeyResponderId
-proc `dwValue=`*(self: var CRYPT_OID_INFO, x: DWORD) {.inline.} = self.union1.dwValue = x
-proc dwValue*(self: CRYPT_OID_INFO): DWORD {.inline.} = self.union1.dwValue
-proc dwValue*(self: var CRYPT_OID_INFO): var DWORD {.inline.} = self.union1.dwValue
-proc `Algid=`*(self: var CRYPT_OID_INFO, x: ALG_ID) {.inline.} = self.union1.Algid = x
-proc algid*(self: CRYPT_OID_INFO): ALG_ID {.inline.} = self.union1.Algid
-proc algid*(self: var CRYPT_OID_INFO): var ALG_ID {.inline.} = self.union1.Algid
-proc `dwLength=`*(self: var CRYPT_OID_INFO, x: DWORD) {.inline.} = self.union1.dwLength = x
-proc dwLength*(self: CRYPT_OID_INFO): DWORD {.inline.} = self.union1.dwLength
-proc dwLength*(self: var CRYPT_OID_INFO): var DWORD {.inline.} = self.union1.dwLength
-proc `pvInfo=`*(self: var CERT_STRONG_SIGN_PARA, x: pointer) {.inline.} = self.union1.pvInfo = x
-proc pvInfo*(self: CERT_STRONG_SIGN_PARA): pointer {.inline.} = self.union1.pvInfo
-proc pvInfo*(self: var CERT_STRONG_SIGN_PARA): var pointer {.inline.} = self.union1.pvInfo
-proc `pSerializedInfo=`*(self: var CERT_STRONG_SIGN_PARA, x: PCERT_STRONG_SIGN_SERIALIZED_INFO) {.inline.} = self.union1.pSerializedInfo = x
-proc pSerializedInfo*(self: CERT_STRONG_SIGN_PARA): PCERT_STRONG_SIGN_SERIALIZED_INFO {.inline.} = self.union1.pSerializedInfo
-proc pSerializedInfo*(self: var CERT_STRONG_SIGN_PARA): var PCERT_STRONG_SIGN_SERIALIZED_INFO {.inline.} = self.union1.pSerializedInfo
-proc `pszOID=`*(self: var CERT_STRONG_SIGN_PARA, x: LPSTR) {.inline.} = self.union1.pszOID = x
-proc pszOID*(self: CERT_STRONG_SIGN_PARA): LPSTR {.inline.} = self.union1.pszOID
-proc pszOID*(self: var CERT_STRONG_SIGN_PARA): var LPSTR {.inline.} = self.union1.pszOID
-proc `IssuerSerialNumber=`*(self: var CERT_ID, x: CERT_ISSUER_SERIAL_NUMBER) {.inline.} = self.union1.IssuerSerialNumber = x
-proc IssuerSerialNumber*(self: CERT_ID): CERT_ISSUER_SERIAL_NUMBER {.inline.} = self.union1.IssuerSerialNumber
-proc IssuerSerialNumber*(self: var CERT_ID): var CERT_ISSUER_SERIAL_NUMBER {.inline.} = self.union1.IssuerSerialNumber
-proc `KeyId=`*(self: var CERT_ID, x: CRYPT_HASH_BLOB) {.inline.} = self.union1.KeyId = x
-proc KeyId*(self: CERT_ID): CRYPT_HASH_BLOB {.inline.} = self.union1.KeyId
-proc KeyId*(self: var CERT_ID): var CRYPT_HASH_BLOB {.inline.} = self.union1.KeyId
-proc `HashId=`*(self: var CERT_ID, x: CRYPT_HASH_BLOB) {.inline.} = self.union1.HashId = x
-proc HashId*(self: CERT_ID): CRYPT_HASH_BLOB {.inline.} = self.union1.HashId
-proc HashId*(self: var CERT_ID): var CRYPT_HASH_BLOB {.inline.} = self.union1.HashId
-proc `hCryptProv=`*(self: var CMSG_SIGNER_ENCODE_INFO, x: HCRYPTPROV) {.inline.} = self.union1.hCryptProv = x
-proc hCryptProv*(self: CMSG_SIGNER_ENCODE_INFO): HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc hCryptProv*(self: var CMSG_SIGNER_ENCODE_INFO): var HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc `hNCryptKey=`*(self: var CMSG_SIGNER_ENCODE_INFO, x: NCRYPT_KEY_HANDLE) {.inline.} = self.union1.hNCryptKey = x
-proc hNCryptKey*(self: CMSG_SIGNER_ENCODE_INFO): NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc hNCryptKey*(self: var CMSG_SIGNER_ENCODE_INFO): var NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc `pEphemeralAlgorithm=`*(self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO, x: PCRYPT_ALGORITHM_IDENTIFIER) {.inline.} = self.union1.pEphemeralAlgorithm = x
-proc pEphemeralAlgorithm*(self: CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO): PCRYPT_ALGORITHM_IDENTIFIER {.inline.} = self.union1.pEphemeralAlgorithm
-proc pEphemeralAlgorithm*(self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO): var PCRYPT_ALGORITHM_IDENTIFIER {.inline.} = self.union1.pEphemeralAlgorithm
-proc `pSenderId=`*(self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO, x: PCERT_ID) {.inline.} = self.union1.pSenderId = x
-proc pSenderId*(self: CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO): PCERT_ID {.inline.} = self.union1.pSenderId
-proc pSenderId*(self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO): var PCERT_ID {.inline.} = self.union1.pSenderId
-proc `hKeyEncryptionKey=`*(self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO, x: HCRYPTKEY) {.inline.} = self.union1.hKeyEncryptionKey = x
-proc hKeyEncryptionKey*(self: CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO): HCRYPTKEY {.inline.} = self.union1.hKeyEncryptionKey
-proc hKeyEncryptionKey*(self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO): var HCRYPTKEY {.inline.} = self.union1.hKeyEncryptionKey
-proc `pvKeyEncryptionKey=`*(self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO, x: pointer) {.inline.} = self.union1.pvKeyEncryptionKey = x
-proc pvKeyEncryptionKey*(self: CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO): pointer {.inline.} = self.union1.pvKeyEncryptionKey
-proc pvKeyEncryptionKey*(self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO): var pointer {.inline.} = self.union1.pvKeyEncryptionKey
-proc `pKeyTrans=`*(self: var CMSG_RECIPIENT_ENCODE_INFO, x: PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO) {.inline.} = self.union1.pKeyTrans = x
-proc pKeyTrans*(self: CMSG_RECIPIENT_ENCODE_INFO): PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO {.inline.} = self.union1.pKeyTrans
-proc pKeyTrans*(self: var CMSG_RECIPIENT_ENCODE_INFO): var PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO {.inline.} = self.union1.pKeyTrans
-proc `pKeyAgree=`*(self: var CMSG_RECIPIENT_ENCODE_INFO, x: PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO) {.inline.} = self.union1.pKeyAgree = x
-proc pKeyAgree*(self: CMSG_RECIPIENT_ENCODE_INFO): PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO {.inline.} = self.union1.pKeyAgree
-proc pKeyAgree*(self: var CMSG_RECIPIENT_ENCODE_INFO): var PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO {.inline.} = self.union1.pKeyAgree
-proc `pMailList=`*(self: var CMSG_RECIPIENT_ENCODE_INFO, x: PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO) {.inline.} = self.union1.pMailList = x
-proc pMailList*(self: CMSG_RECIPIENT_ENCODE_INFO): PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO {.inline.} = self.union1.pMailList
-proc pMailList*(self: var CMSG_RECIPIENT_ENCODE_INFO): var PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO {.inline.} = self.union1.pMailList
-proc `OriginatorCertId=`*(self: var CMSG_KEY_AGREE_RECIPIENT_INFO, x: CERT_ID) {.inline.} = self.union1.OriginatorCertId = x
-proc OriginatorCertId*(self: CMSG_KEY_AGREE_RECIPIENT_INFO): CERT_ID {.inline.} = self.union1.OriginatorCertId
-proc OriginatorCertId*(self: var CMSG_KEY_AGREE_RECIPIENT_INFO): var CERT_ID {.inline.} = self.union1.OriginatorCertId
-proc `OriginatorPublicKeyInfo=`*(self: var CMSG_KEY_AGREE_RECIPIENT_INFO, x: CERT_PUBLIC_KEY_INFO) {.inline.} = self.union1.OriginatorPublicKeyInfo = x
-proc OriginatorPublicKeyInfo*(self: CMSG_KEY_AGREE_RECIPIENT_INFO): CERT_PUBLIC_KEY_INFO {.inline.} = self.union1.OriginatorPublicKeyInfo
-proc OriginatorPublicKeyInfo*(self: var CMSG_KEY_AGREE_RECIPIENT_INFO): var CERT_PUBLIC_KEY_INFO {.inline.} = self.union1.OriginatorPublicKeyInfo
-proc `pKeyTrans=`*(self: var CMSG_CMS_RECIPIENT_INFO, x: PCMSG_KEY_TRANS_RECIPIENT_INFO) {.inline.} = self.union1.pKeyTrans = x
-proc pKeyTrans*(self: CMSG_CMS_RECIPIENT_INFO): PCMSG_KEY_TRANS_RECIPIENT_INFO {.inline.} = self.union1.pKeyTrans
-proc pKeyTrans*(self: var CMSG_CMS_RECIPIENT_INFO): var PCMSG_KEY_TRANS_RECIPIENT_INFO {.inline.} = self.union1.pKeyTrans
-proc `pKeyAgree=`*(self: var CMSG_CMS_RECIPIENT_INFO, x: PCMSG_KEY_AGREE_RECIPIENT_INFO) {.inline.} = self.union1.pKeyAgree = x
-proc pKeyAgree*(self: CMSG_CMS_RECIPIENT_INFO): PCMSG_KEY_AGREE_RECIPIENT_INFO {.inline.} = self.union1.pKeyAgree
-proc pKeyAgree*(self: var CMSG_CMS_RECIPIENT_INFO): var PCMSG_KEY_AGREE_RECIPIENT_INFO {.inline.} = self.union1.pKeyAgree
-proc `pMailList=`*(self: var CMSG_CMS_RECIPIENT_INFO, x: PCMSG_MAIL_LIST_RECIPIENT_INFO) {.inline.} = self.union1.pMailList = x
-proc pMailList*(self: CMSG_CMS_RECIPIENT_INFO): PCMSG_MAIL_LIST_RECIPIENT_INFO {.inline.} = self.union1.pMailList
-proc pMailList*(self: var CMSG_CMS_RECIPIENT_INFO): var PCMSG_MAIL_LIST_RECIPIENT_INFO {.inline.} = self.union1.pMailList
-proc `hCryptProv=`*(self: var CMSG_CTRL_DECRYPT_PARA, x: HCRYPTPROV) {.inline.} = self.union1.hCryptProv = x
-proc hCryptProv*(self: CMSG_CTRL_DECRYPT_PARA): HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc hCryptProv*(self: var CMSG_CTRL_DECRYPT_PARA): var HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc `hNCryptKey=`*(self: var CMSG_CTRL_DECRYPT_PARA, x: NCRYPT_KEY_HANDLE) {.inline.} = self.union1.hNCryptKey = x
-proc hNCryptKey*(self: CMSG_CTRL_DECRYPT_PARA): NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc hNCryptKey*(self: var CMSG_CTRL_DECRYPT_PARA): var NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc `hCryptProv=`*(self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA, x: HCRYPTPROV) {.inline.} = self.union1.hCryptProv = x
-proc hCryptProv*(self: CMSG_CTRL_KEY_TRANS_DECRYPT_PARA): HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc hCryptProv*(self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA): var HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc `hNCryptKey=`*(self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA, x: NCRYPT_KEY_HANDLE) {.inline.} = self.union1.hNCryptKey = x
-proc hNCryptKey*(self: CMSG_CTRL_KEY_TRANS_DECRYPT_PARA): NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc hNCryptKey*(self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA): var NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc `hCryptProv=`*(self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA, x: HCRYPTPROV) {.inline.} = self.union1.hCryptProv = x
-proc hCryptProv*(self: CMSG_CTRL_KEY_AGREE_DECRYPT_PARA): HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc hCryptProv*(self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA): var HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc `hNCryptKey=`*(self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA, x: NCRYPT_KEY_HANDLE) {.inline.} = self.union1.hNCryptKey = x
-proc hNCryptKey*(self: CMSG_CTRL_KEY_AGREE_DECRYPT_PARA): NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc hNCryptKey*(self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA): var NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc `hKeyEncryptionKey=`*(self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA, x: HCRYPTKEY) {.inline.} = self.union1.hKeyEncryptionKey = x
-proc hKeyEncryptionKey*(self: CMSG_CTRL_MAIL_LIST_DECRYPT_PARA): HCRYPTKEY {.inline.} = self.union1.hKeyEncryptionKey
-proc hKeyEncryptionKey*(self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA): var HCRYPTKEY {.inline.} = self.union1.hKeyEncryptionKey
-proc `pvKeyEncryptionKey=`*(self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA, x: pointer) {.inline.} = self.union1.pvKeyEncryptionKey = x
-proc pvKeyEncryptionKey*(self: CMSG_CTRL_MAIL_LIST_DECRYPT_PARA): pointer {.inline.} = self.union1.pvKeyEncryptionKey
-proc pvKeyEncryptionKey*(self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA): var pointer {.inline.} = self.union1.pvKeyEncryptionKey
-proc `hContentEncryptKey=`*(self: var CMSG_CONTENT_ENCRYPT_INFO, x: HCRYPTKEY) {.inline.} = self.union1.hContentEncryptKey = x
-proc hContentEncryptKey*(self: CMSG_CONTENT_ENCRYPT_INFO): HCRYPTKEY {.inline.} = self.union1.hContentEncryptKey
-proc hContentEncryptKey*(self: var CMSG_CONTENT_ENCRYPT_INFO): var HCRYPTKEY {.inline.} = self.union1.hContentEncryptKey
-proc `hCNGContentEncryptKey=`*(self: var CMSG_CONTENT_ENCRYPT_INFO, x: BCRYPT_KEY_HANDLE) {.inline.} = self.union1.hCNGContentEncryptKey = x
-proc hCNGContentEncryptKey*(self: CMSG_CONTENT_ENCRYPT_INFO): BCRYPT_KEY_HANDLE {.inline.} = self.union1.hCNGContentEncryptKey
-proc hCNGContentEncryptKey*(self: var CMSG_CONTENT_ENCRYPT_INFO): var BCRYPT_KEY_HANDLE {.inline.} = self.union1.hCNGContentEncryptKey
-proc `OriginatorCertId=`*(self: var CMSG_KEY_AGREE_ENCRYPT_INFO, x: CERT_ID) {.inline.} = self.union1.OriginatorCertId = x
-proc OriginatorCertId*(self: CMSG_KEY_AGREE_ENCRYPT_INFO): CERT_ID {.inline.} = self.union1.OriginatorCertId
-proc OriginatorCertId*(self: var CMSG_KEY_AGREE_ENCRYPT_INFO): var CERT_ID {.inline.} = self.union1.OriginatorCertId
-proc `OriginatorPublicKeyInfo=`*(self: var CMSG_KEY_AGREE_ENCRYPT_INFO, x: CERT_PUBLIC_KEY_INFO) {.inline.} = self.union1.OriginatorPublicKeyInfo = x
-proc OriginatorPublicKeyInfo*(self: CMSG_KEY_AGREE_ENCRYPT_INFO): CERT_PUBLIC_KEY_INFO {.inline.} = self.union1.OriginatorPublicKeyInfo
-proc OriginatorPublicKeyInfo*(self: var CMSG_KEY_AGREE_ENCRYPT_INFO): var CERT_PUBLIC_KEY_INFO {.inline.} = self.union1.OriginatorPublicKeyInfo
-proc `hCryptProv=`*(self: var CERT_KEY_CONTEXT, x: HCRYPTPROV) {.inline.} = self.union1.hCryptProv = x
-proc hCryptProv*(self: CERT_KEY_CONTEXT): HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc hCryptProv*(self: var CERT_KEY_CONTEXT): var HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc `hNCryptKey=`*(self: var CERT_KEY_CONTEXT, x: NCRYPT_KEY_HANDLE) {.inline.} = self.union1.hNCryptKey = x
-proc hNCryptKey*(self: CERT_KEY_CONTEXT): NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc hNCryptKey*(self: var CERT_KEY_CONTEXT): var NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc `hKeyBase=`*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: HKEY) {.inline.} = self.union1.hKeyBase = x
-proc hKeyBase*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): HKEY {.inline.} = self.union1.hKeyBase
-proc hKeyBase*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var HKEY {.inline.} = self.union1.hKeyBase
-proc `pvBase=`*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: pointer) {.inline.} = self.union1.pvBase = x
-proc pvBase*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): pointer {.inline.} = self.union1.pvBase
-proc pvBase*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var pointer {.inline.} = self.union1.pvBase
-proc `pvSystemStore=`*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: pointer) {.inline.} = self.union2.pvSystemStore = x
-proc pvSystemStore*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): pointer {.inline.} = self.union2.pvSystemStore
-proc pvSystemStore*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var pointer {.inline.} = self.union2.pvSystemStore
-proc `pszSystemStore=`*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: LPCSTR) {.inline.} = self.union2.pszSystemStore = x
-proc pszSystemStore*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): LPCSTR {.inline.} = self.union2.pszSystemStore
-proc pszSystemStore*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var LPCSTR {.inline.} = self.union2.pszSystemStore
-proc `pwszSystemStore=`*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: LPCWSTR) {.inline.} = self.union2.pwszSystemStore = x
-proc pwszSystemStore*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): LPCWSTR {.inline.} = self.union2.pwszSystemStore
-proc pwszSystemStore*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var LPCWSTR {.inline.} = self.union2.pwszSystemStore
-proc `hCryptProv=`*(self: var CRYPT_KEY_SIGN_MESSAGE_PARA, x: HCRYPTPROV) {.inline.} = self.union1.hCryptProv = x
-proc hCryptProv*(self: CRYPT_KEY_SIGN_MESSAGE_PARA): HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc hCryptProv*(self: var CRYPT_KEY_SIGN_MESSAGE_PARA): var HCRYPTPROV {.inline.} = self.union1.hCryptProv
-proc `hNCryptKey=`*(self: var CRYPT_KEY_SIGN_MESSAGE_PARA, x: NCRYPT_KEY_HANDLE) {.inline.} = self.union1.hNCryptKey = x
-proc hNCryptKey*(self: CRYPT_KEY_SIGN_MESSAGE_PARA): NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc hNCryptKey*(self: var CRYPT_KEY_SIGN_MESSAGE_PARA): var NCRYPT_KEY_HANDLE {.inline.} = self.union1.hNCryptKey
-proc `cbStruct=`*(self: var HTTPSPolicyCallbackData, x: DWORD) {.inline.} = self.union1.cbStruct = x
-proc cbStruct*(self: HTTPSPolicyCallbackData): DWORD {.inline.} = self.union1.cbStruct
-proc cbStruct*(self: var HTTPSPolicyCallbackData): var DWORD {.inline.} = self.union1.cbStruct
-proc `cbSize=`*(self: var HTTPSPolicyCallbackData, x: DWORD) {.inline.} = self.union1.cbSize = x
-proc cbSize*(self: HTTPSPolicyCallbackData): DWORD {.inline.} = self.union1.cbSize
-proc cbSize*(self: var HTTPSPolicyCallbackData): var DWORD {.inline.} = self.union1.cbSize
+proc CryptCreateAsyncHandle*(
+  dwFlags: DWORD, phAsync: PHCRYPTASYNC
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSetAsyncParam*(
+  hAsync: HCRYPTASYNC,
+  pszParamOid: LPSTR,
+  pvParam: LPVOID,
+  pfnFree: PFN_CRYPT_ASYNC_PARAM_FREE_FUNC,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetAsyncParam*(
+  hAsync: HCRYPTASYNC,
+  pszParamOid: LPSTR,
+  ppvParam: ptr LPVOID,
+  ppfnFree: ptr PFN_CRYPT_ASYNC_PARAM_FREE_FUNC,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptCloseAsyncHandle*(
+  hAsync: HCRYPTASYNC
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptRetrieveObjectByUrlA*(
+  pszUrl: LPCSTR,
+  pszObjectOid: LPCSTR,
+  dwRetrievalFlags: DWORD,
+  dwTimeout: DWORD,
+  ppvObject: ptr LPVOID,
+  hAsyncRetrieve: HCRYPTASYNC,
+  pCredentials: PCRYPT_CREDENTIALS,
+  pvVerify: LPVOID,
+  pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CryptRetrieveObjectByUrlW*(
+  pszUrl: LPCWSTR,
+  pszObjectOid: LPCSTR,
+  dwRetrievalFlags: DWORD,
+  dwTimeout: DWORD,
+  ppvObject: ptr LPVOID,
+  hAsyncRetrieve: HCRYPTASYNC,
+  pCredentials: PCRYPT_CREDENTIALS,
+  pvVerify: LPVOID,
+  pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CryptInstallCancelRetrieval*(
+  pfnCancel: PFN_CRYPT_CANCEL_RETRIEVAL,
+  pvArg: pointer,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CryptUninstallCancelRetrieval*(
+  dwFlags: DWORD, pvReserved: pointer
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CryptCancelAsyncRetrieval*(
+  hAsyncRetrieval: HCRYPTASYNC
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CryptGetObjectUrl*(
+  pszUrlOid: LPCSTR,
+  pvPara: LPVOID,
+  dwFlags: DWORD,
+  pUrlArray: PCRYPT_URL_ARRAY,
+  pcbUrlArray: ptr DWORD,
+  pUrlInfo: PCRYPT_URL_INFO,
+  pcbUrlInfo: ptr DWORD,
+  pvReserved: LPVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CryptGetTimeValidObject*(
+  pszTimeValidOid: LPCSTR,
+  pvPara: LPVOID,
+  pIssuer: PCCERT_CONTEXT,
+  pftValidFor: LPFILETIME,
+  dwFlags: DWORD,
+  dwTimeout: DWORD,
+  ppvObject: ptr LPVOID,
+  pCredentials: PCRYPT_CREDENTIALS,
+  pExtraInfo: PCRYPT_GET_TIME_VALID_OBJECT_EXTRA_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CryptFlushTimeValidObject*(
+  pszFlushTimeValidOid: LPCSTR,
+  pvPara: LPVOID,
+  pIssuer: PCCERT_CONTEXT,
+  dwFlags: DWORD,
+  pvReserved: LPVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc.}
+
+proc CertCreateSelfSignCertificate*(
+  hCryptProvOrNCryptKey: HCRYPTPROV_OR_NCRYPT_KEY_HANDLE,
+  pSubjectIssuerBlob: PCERT_NAME_BLOB,
+  dwFlags: DWORD,
+  pKeyProvInfo: PCRYPT_KEY_PROV_INFO,
+  pSignatureAlgorithm: PCRYPT_ALGORITHM_IDENTIFIER,
+  pStartTime: PSYSTEMTIME,
+  pEndTime: PSYSTEMTIME,
+  pExtensions: PCERT_EXTENSIONS,
+): PCCERT_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptGetKeyIdentifierProperty*(
+  pKeyIdentifier: ptr CRYPT_HASH_BLOB,
+  dwPropId: DWORD,
+  dwFlags: DWORD,
+  pwszComputerName: LPCWSTR,
+  pvReserved: pointer,
+  pvData: pointer,
+  pcbData: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptSetKeyIdentifierProperty*(
+  pKeyIdentifier: ptr CRYPT_HASH_BLOB,
+  dwPropId: DWORD,
+  dwFlags: DWORD,
+  pwszComputerName: LPCWSTR,
+  pvReserved: pointer,
+  pvData: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptEnumKeyIdentifierProperties*(
+  pKeyIdentifier: ptr CRYPT_HASH_BLOB,
+  dwPropId: DWORD,
+  dwFlags: DWORD,
+  pwszComputerName: LPCWSTR,
+  pvReserved: pointer,
+  pvArg: pointer,
+  pfnEnum: PFN_CRYPT_ENUM_KEYID_PROP,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptCreateKeyIdentifierFromCSP*(
+  dwCertEncodingType: DWORD,
+  pszPubKeyOID: LPCSTR,
+  pPubKeyStruc: ptr PUBLICKEYSTRUC,
+  cbPubKeyStruc: DWORD,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+  pbHash: ptr BYTE,
+  pcbHash: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCreateCertificateChainEngine*(
+  pConfig: PCERT_CHAIN_ENGINE_CONFIG, phChainEngine: ptr HCERTCHAINENGINE
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFreeCertificateChainEngine*(
+  hChainEngine: HCERTCHAINENGINE
+): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertResyncCertificateChainEngine*(
+  hChainEngine: HCERTCHAINENGINE
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetCertificateChain*(
+  hChainEngine: HCERTCHAINENGINE,
+  pCertContext: PCCERT_CONTEXT,
+  pTime: LPFILETIME,
+  hAdditionalStore: HCERTSTORE,
+  pChainPara: PCERT_CHAIN_PARA,
+  dwFlags: DWORD,
+  pvReserved: LPVOID,
+  ppChainContext: ptr PCCERT_CHAIN_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFreeCertificateChain*(
+  pChainContext: PCCERT_CHAIN_CONTEXT
+): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertDuplicateCertificateChain*(
+  pChainContext: PCCERT_CHAIN_CONTEXT
+): PCCERT_CHAIN_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFindChainInStore*(
+  hCertStore: HCERTSTORE,
+  dwCertEncodingType: DWORD,
+  dwFindFlags: DWORD,
+  dwFindType: DWORD,
+  pvFindPara: pointer,
+  pPrevChainContext: PCCERT_CHAIN_CONTEXT,
+): PCCERT_CHAIN_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertVerifyCertificateChainPolicy*(
+  pszPolicyOID: LPCSTR,
+  pChainContext: PCCERT_CHAIN_CONTEXT,
+  pPolicyPara: PCERT_CHAIN_POLICY_PARA,
+  pPolicyStatus: PCERT_CHAIN_POLICY_STATUS,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptStringToBinaryA*(
+  pszString: LPCSTR,
+  cchString: DWORD,
+  dwFlags: DWORD,
+  pbBinary: ptr BYTE,
+  pcbBinary: ptr DWORD,
+  pdwSkip: ptr DWORD,
+  pdwFlags: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptStringToBinaryW*(
+  pszString: LPCWSTR,
+  cchString: DWORD,
+  dwFlags: DWORD,
+  pbBinary: ptr BYTE,
+  pcbBinary: ptr DWORD,
+  pdwSkip: ptr DWORD,
+  pdwFlags: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptBinaryToStringA*(
+  pbBinary: ptr BYTE,
+  cbBinary: DWORD,
+  dwFlags: DWORD,
+  pszString: LPSTR,
+  pcchString: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptBinaryToStringW*(
+  pbBinary: ptr BYTE,
+  cbBinary: DWORD,
+  dwFlags: DWORD,
+  pszString: LPWSTR,
+  pcchString: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc PFXImportCertStore*(
+  pPFX: ptr CRYPT_DATA_BLOB, szPassword: LPCWSTR, dwFlags: DWORD
+): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc PFXIsPFXBlob*(
+  pPFX: ptr CRYPT_DATA_BLOB
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc PFXVerifyPassword*(
+  pPFX: ptr CRYPT_DATA_BLOB, szPassword: LPCWSTR, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc PFXExportCertStoreEx*(
+  hStore: HCERTSTORE,
+  pPFX: ptr CRYPT_DATA_BLOB,
+  szPassword: LPCWSTR,
+  pvPara: pointer,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc PFXExportCertStore*(
+  hStore: HCERTSTORE, pPFX: ptr CRYPT_DATA_BLOB, szPassword: LPCWSTR, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertOpenServerOcspResponse*(
+  pChainContext: PCCERT_CHAIN_CONTEXT, dwFlags: DWORD, pvReserved: LPVOID
+): HCERT_SERVER_OCSP_RESPONSE {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddRefServerOcspResponse*(
+  hServerOcspResponse: HCERT_SERVER_OCSP_RESPONSE
+): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertCloseServerOcspResponse*(
+  hServerOcspResponse: HCERT_SERVER_OCSP_RESPONSE, dwFlags: DWORD
+): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertGetServerOcspResponseContext*(
+  hServerOcspResponse: HCERT_SERVER_OCSP_RESPONSE, dwFlags: DWORD, pvReserved: LPVOID
+): PCCERT_SERVER_OCSP_RESPONSE_CONTEXT {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertAddRefServerOcspResponseContext*(
+  pServerOcspResponseContext: PCCERT_SERVER_OCSP_RESPONSE_CONTEXT
+): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFreeServerOcspResponseContext*(
+  pServerOcspResponseContext: PCCERT_SERVER_OCSP_RESPONSE_CONTEXT
+): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertRetrieveLogoOrBiometricInfo*(
+  pCertContext: PCCERT_CONTEXT,
+  lpszLogoOrBiometricType: LPCSTR,
+  dwRetrievalFlags: DWORD,
+  dwTimeout: DWORD,
+  dwFlags: DWORD,
+  pvReserved: pointer,
+  ppbData: ptr ptr BYTE,
+  pcbData: ptr DWORD,
+  ppwszMimeType: ptr LPWSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertSelectCertificateChains*(
+  pSelectionContext: LPCGUID,
+  dwFlags: DWORD,
+  pChainParameters: PCCERT_SELECT_CHAIN_PARA,
+  cCriteria: DWORD,
+  rgpCriteria: PCCERT_SELECT_CRITERIA,
+  hStore: HCERTSTORE,
+  pcSelection: PDWORD,
+  pprgpSelection: ptr ptr PCCERT_CHAIN_CONTEXT,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CertFreeCertificateChainList*(
+  prgpSelection: ptr PCCERT_CHAIN_CONTEXT
+): VOID {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptRetrieveTimeStamp*(
+  wszUrl: LPCWSTR,
+  dwRetrievalFlags: DWORD,
+  dwTimeout: DWORD,
+  pszHashId: LPCSTR,
+  pPara: ptr CRYPT_TIMESTAMP_PARA,
+  pbData: ptr BYTE,
+  cbData: DWORD,
+  ppTsContext: ptr PCRYPT_TIMESTAMP_CONTEXT,
+  ppTsSigner: ptr PCCERT_CONTEXT,
+  phStore: ptr HCERTSTORE,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptVerifyTimeStampSignature*(
+  pbTSContentInfo: ptr BYTE,
+  cbTSContentInfo: DWORD,
+  pbData: ptr BYTE,
+  cbData: DWORD,
+  hAdditionalStore: HCERTSTORE,
+  ppTsContext: ptr PCRYPT_TIMESTAMP_CONTEXT,
+  ppTsSigner: ptr PCCERT_CONTEXT,
+  phStore: ptr HCERTSTORE,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptProtectData*(
+  pDataIn: ptr DATA_BLOB,
+  szDataDescr: LPCWSTR,
+  pOptionalEntropy: ptr DATA_BLOB,
+  pvReserved: PVOID,
+  pPromptStruct: ptr CRYPTPROTECT_PROMPTSTRUCT,
+  dwFlags: DWORD,
+  pDataOut: ptr DATA_BLOB,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptUnprotectData*(
+  pDataIn: ptr DATA_BLOB,
+  ppszDataDescr: ptr LPWSTR,
+  pOptionalEntropy: ptr DATA_BLOB,
+  pvReserved: PVOID,
+  pPromptStruct: ptr CRYPTPROTECT_PROMPTSTRUCT,
+  dwFlags: DWORD,
+  pDataOut: ptr DATA_BLOB,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptProtectMemory*(
+  pDataIn: LPVOID, cbDataIn: DWORD, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptUnprotectMemory*(
+  pDataIn: LPVOID, cbDataIn: DWORD, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc CryptUpdateProtectedState*(
+  pOldSid: PSID,
+  pwszOldPassword: LPCWSTR,
+  dwFlags: DWORD,
+  pdwSuccessCount: ptr DWORD,
+  pdwFailureCount: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc.}
+
+proc `pOtherName=`*(self: var CERT_ALT_NAME_ENTRY, x: PCERT_OTHER_NAME) {.inline.} =
+  self.union1.pOtherName = x
+
+proc pOtherName*(self: CERT_ALT_NAME_ENTRY): PCERT_OTHER_NAME {.inline.} =
+  self.union1.pOtherName
+
+proc pOtherName*(self: var CERT_ALT_NAME_ENTRY): var PCERT_OTHER_NAME {.inline.} =
+  self.union1.pOtherName
+
+proc `pwszRfc822Name=`*(self: var CERT_ALT_NAME_ENTRY, x: LPWSTR) {.inline.} =
+  self.union1.pwszRfc822Name = x
+
+proc pwszRfc822Name*(self: CERT_ALT_NAME_ENTRY): LPWSTR {.inline.} =
+  self.union1.pwszRfc822Name
+
+proc pwszRfc822Name*(self: var CERT_ALT_NAME_ENTRY): var LPWSTR {.inline.} =
+  self.union1.pwszRfc822Name
+
+proc `pwszDNSName=`*(self: var CERT_ALT_NAME_ENTRY, x: LPWSTR) {.inline.} =
+  self.union1.pwszDNSName = x
+
+proc pwszDNSName*(self: CERT_ALT_NAME_ENTRY): LPWSTR {.inline.} =
+  self.union1.pwszDNSName
+
+proc pwszDNSName*(self: var CERT_ALT_NAME_ENTRY): var LPWSTR {.inline.} =
+  self.union1.pwszDNSName
+
+proc `DirectoryName=`*(self: var CERT_ALT_NAME_ENTRY, x: CERT_NAME_BLOB) {.inline.} =
+  self.union1.DirectoryName = x
+
+proc DirectoryName*(self: CERT_ALT_NAME_ENTRY): CERT_NAME_BLOB {.inline.} =
+  self.union1.DirectoryName
+
+proc DirectoryName*(self: var CERT_ALT_NAME_ENTRY): var CERT_NAME_BLOB {.inline.} =
+  self.union1.DirectoryName
+
+proc `pwszURL=`*(self: var CERT_ALT_NAME_ENTRY, x: LPWSTR) {.inline.} =
+  self.union1.pwszURL = x
+
+proc pwszURL*(self: CERT_ALT_NAME_ENTRY): LPWSTR {.inline.} =
+  self.union1.pwszURL
+
+proc pwszURL*(self: var CERT_ALT_NAME_ENTRY): var LPWSTR {.inline.} =
+  self.union1.pwszURL
+
+proc `IPAddress=`*(self: var CERT_ALT_NAME_ENTRY, x: CRYPT_DATA_BLOB) {.inline.} =
+  self.union1.IPAddress = x
+
+proc IPAddress*(self: CERT_ALT_NAME_ENTRY): CRYPT_DATA_BLOB {.inline.} =
+  self.union1.IPAddress
+
+proc IPAddress*(self: var CERT_ALT_NAME_ENTRY): var CRYPT_DATA_BLOB {.inline.} =
+  self.union1.IPAddress
+
+proc `pszRegisteredID=`*(self: var CERT_ALT_NAME_ENTRY, x: LPSTR) {.inline.} =
+  self.union1.pszRegisteredID = x
+
+proc pszRegisteredID*(self: CERT_ALT_NAME_ENTRY): LPSTR {.inline.} =
+  self.union1.pszRegisteredID
+
+proc pszRegisteredID*(self: var CERT_ALT_NAME_ENTRY): var LPSTR {.inline.} =
+  self.union1.pszRegisteredID
+
+proc `FullName=`*(self: var CRL_DIST_POINT_NAME, x: CERT_ALT_NAME_INFO) {.inline.} =
+  self.union1.FullName = x
+
+proc FullName*(self: CRL_DIST_POINT_NAME): CERT_ALT_NAME_INFO {.inline.} =
+  self.union1.FullName
+
+proc FullName*(self: var CRL_DIST_POINT_NAME): var CERT_ALT_NAME_INFO {.inline.} =
+  self.union1.FullName
+
+proc `pTaggedCertRequest=`*(
+    self: var CMC_TAGGED_REQUEST, x: PCMC_TAGGED_CERT_REQUEST
+) {.inline.} =
+  self.union1.pTaggedCertRequest = x
+
+proc pTaggedCertRequest*(
+    self: CMC_TAGGED_REQUEST
+): PCMC_TAGGED_CERT_REQUEST {.inline.} =
+  self.union1.pTaggedCertRequest
+
+proc pTaggedCertRequest*(
+    self: var CMC_TAGGED_REQUEST
+): var PCMC_TAGGED_CERT_REQUEST {.inline.} =
+  self.union1.pTaggedCertRequest
+
+proc `dwFailInfo=`*(self: var CMC_STATUS_INFO, x: DWORD) {.inline.} =
+  self.union1.dwFailInfo = x
+
+proc dwFailInfo*(self: CMC_STATUS_INFO): DWORD {.inline.} =
+  self.union1.dwFailInfo
+
+proc dwFailInfo*(self: var CMC_STATUS_INFO): var DWORD {.inline.} =
+  self.union1.dwFailInfo
+
+proc `pPendInfo=`*(self: var CMC_STATUS_INFO, x: PCMC_PEND_INFO) {.inline.} =
+  self.union1.pPendInfo = x
+
+proc pPendInfo*(self: CMC_STATUS_INFO): PCMC_PEND_INFO {.inline.} =
+  self.union1.pPendInfo
+
+proc pPendInfo*(self: var CMC_STATUS_INFO): var PCMC_PEND_INFO {.inline.} =
+  self.union1.pPendInfo
+
+proc `dwNumBits=`*(self: var CERT_LOGOTYPE_IMAGE_INFO, x: DWORD) {.inline.} =
+  self.union1.dwNumBits = x
+
+proc dwNumBits*(self: CERT_LOGOTYPE_IMAGE_INFO): DWORD {.inline.} =
+  self.union1.dwNumBits
+
+proc dwNumBits*(self: var CERT_LOGOTYPE_IMAGE_INFO): var DWORD {.inline.} =
+  self.union1.dwNumBits
+
+proc `dwTableSize=`*(self: var CERT_LOGOTYPE_IMAGE_INFO, x: DWORD) {.inline.} =
+  self.union1.dwTableSize = x
+
+proc dwTableSize*(self: CERT_LOGOTYPE_IMAGE_INFO): DWORD {.inline.} =
+  self.union1.dwTableSize
+
+proc dwTableSize*(self: var CERT_LOGOTYPE_IMAGE_INFO): var DWORD {.inline.} =
+  self.union1.dwTableSize
+
+proc `pLogotypeDirectInfo=`*(
+    self: var CERT_LOGOTYPE_INFO, x: PCERT_LOGOTYPE_DATA
+) {.inline.} =
+  self.union1.pLogotypeDirectInfo = x
+
+proc pLogotypeDirectInfo*(self: CERT_LOGOTYPE_INFO): PCERT_LOGOTYPE_DATA {.inline.} =
+  self.union1.pLogotypeDirectInfo
+
+proc pLogotypeDirectInfo*(
+    self: var CERT_LOGOTYPE_INFO
+): var PCERT_LOGOTYPE_DATA {.inline.} =
+  self.union1.pLogotypeDirectInfo
+
+proc `pLogotypeIndirectInfo=`*(
+    self: var CERT_LOGOTYPE_INFO, x: PCERT_LOGOTYPE_REFERENCE
+) {.inline.} =
+  self.union1.pLogotypeIndirectInfo = x
+
+proc pLogotypeIndirectInfo*(
+    self: CERT_LOGOTYPE_INFO
+): PCERT_LOGOTYPE_REFERENCE {.inline.} =
+  self.union1.pLogotypeIndirectInfo
+
+proc pLogotypeIndirectInfo*(
+    self: var CERT_LOGOTYPE_INFO
+): var PCERT_LOGOTYPE_REFERENCE {.inline.} =
+  self.union1.pLogotypeIndirectInfo
+
+proc `dwPredefined=`*(self: var CERT_BIOMETRIC_DATA, x: DWORD) {.inline.} =
+  self.union1.dwPredefined = x
+
+proc dwPredefined*(self: CERT_BIOMETRIC_DATA): DWORD {.inline.} =
+  self.union1.dwPredefined
+
+proc dwPredefined*(self: var CERT_BIOMETRIC_DATA): var DWORD {.inline.} =
+  self.union1.dwPredefined
+
+proc `pszObjId=`*(self: var CERT_BIOMETRIC_DATA, x: LPSTR) {.inline.} =
+  self.union1.pszObjId = x
+
+proc pszObjId*(self: CERT_BIOMETRIC_DATA): LPSTR {.inline.} =
+  self.union1.pszObjId
+
+proc pszObjId*(self: var CERT_BIOMETRIC_DATA): var LPSTR {.inline.} =
+  self.union1.pszObjId
+
+proc `pRevokedInfo=`*(
+    self: var OCSP_BASIC_RESPONSE_ENTRY, x: POCSP_BASIC_REVOKED_INFO
+) {.inline.} =
+  self.union1.pRevokedInfo = x
+
+proc pRevokedInfo*(
+    self: OCSP_BASIC_RESPONSE_ENTRY
+): POCSP_BASIC_REVOKED_INFO {.inline.} =
+  self.union1.pRevokedInfo
+
+proc pRevokedInfo*(
+    self: var OCSP_BASIC_RESPONSE_ENTRY
+): var POCSP_BASIC_REVOKED_INFO {.inline.} =
+  self.union1.pRevokedInfo
+
+proc `ByNameResponderId=`*(
+    self: var OCSP_BASIC_RESPONSE_INFO, x: CERT_NAME_BLOB
+) {.inline.} =
+  self.union1.ByNameResponderId = x
+
+proc ByNameResponderId*(self: OCSP_BASIC_RESPONSE_INFO): CERT_NAME_BLOB {.inline.} =
+  self.union1.ByNameResponderId
+
+proc ByNameResponderId*(
+    self: var OCSP_BASIC_RESPONSE_INFO
+): var CERT_NAME_BLOB {.inline.} =
+  self.union1.ByNameResponderId
+
+proc `ByKeyResponderId=`*(
+    self: var OCSP_BASIC_RESPONSE_INFO, x: CRYPT_HASH_BLOB
+) {.inline.} =
+  self.union1.ByKeyResponderId = x
+
+proc ByKeyResponderId*(self: OCSP_BASIC_RESPONSE_INFO): CRYPT_HASH_BLOB {.inline.} =
+  self.union1.ByKeyResponderId
+
+proc ByKeyResponderId*(
+    self: var OCSP_BASIC_RESPONSE_INFO
+): var CRYPT_HASH_BLOB {.inline.} =
+  self.union1.ByKeyResponderId
+
+proc `dwValue=`*(self: var CRYPT_OID_INFO, x: DWORD) {.inline.} =
+  self.union1.dwValue = x
+
+proc dwValue*(self: CRYPT_OID_INFO): DWORD {.inline.} =
+  self.union1.dwValue
+
+proc dwValue*(self: var CRYPT_OID_INFO): var DWORD {.inline.} =
+  self.union1.dwValue
+
+proc `Algid=`*(self: var CRYPT_OID_INFO, x: ALG_ID) {.inline.} =
+  self.union1.Algid = x
+
+proc algid*(self: CRYPT_OID_INFO): ALG_ID {.inline.} =
+  self.union1.Algid
+
+proc algid*(self: var CRYPT_OID_INFO): var ALG_ID {.inline.} =
+  self.union1.Algid
+
+proc `dwLength=`*(self: var CRYPT_OID_INFO, x: DWORD) {.inline.} =
+  self.union1.dwLength = x
+
+proc dwLength*(self: CRYPT_OID_INFO): DWORD {.inline.} =
+  self.union1.dwLength
+
+proc dwLength*(self: var CRYPT_OID_INFO): var DWORD {.inline.} =
+  self.union1.dwLength
+
+proc `pvInfo=`*(self: var CERT_STRONG_SIGN_PARA, x: pointer) {.inline.} =
+  self.union1.pvInfo = x
+
+proc pvInfo*(self: CERT_STRONG_SIGN_PARA): pointer {.inline.} =
+  self.union1.pvInfo
+
+proc pvInfo*(self: var CERT_STRONG_SIGN_PARA): var pointer {.inline.} =
+  self.union1.pvInfo
+
+proc `pSerializedInfo=`*(
+    self: var CERT_STRONG_SIGN_PARA, x: PCERT_STRONG_SIGN_SERIALIZED_INFO
+) {.inline.} =
+  self.union1.pSerializedInfo = x
+
+proc pSerializedInfo*(
+    self: CERT_STRONG_SIGN_PARA
+): PCERT_STRONG_SIGN_SERIALIZED_INFO {.inline.} =
+  self.union1.pSerializedInfo
+
+proc pSerializedInfo*(
+    self: var CERT_STRONG_SIGN_PARA
+): var PCERT_STRONG_SIGN_SERIALIZED_INFO {.inline.} =
+  self.union1.pSerializedInfo
+
+proc `pszOID=`*(self: var CERT_STRONG_SIGN_PARA, x: LPSTR) {.inline.} =
+  self.union1.pszOID = x
+
+proc pszOID*(self: CERT_STRONG_SIGN_PARA): LPSTR {.inline.} =
+  self.union1.pszOID
+
+proc pszOID*(self: var CERT_STRONG_SIGN_PARA): var LPSTR {.inline.} =
+  self.union1.pszOID
+
+proc `IssuerSerialNumber=`*(
+    self: var CERT_ID, x: CERT_ISSUER_SERIAL_NUMBER
+) {.inline.} =
+  self.union1.IssuerSerialNumber = x
+
+proc IssuerSerialNumber*(self: CERT_ID): CERT_ISSUER_SERIAL_NUMBER {.inline.} =
+  self.union1.IssuerSerialNumber
+
+proc IssuerSerialNumber*(self: var CERT_ID): var CERT_ISSUER_SERIAL_NUMBER {.inline.} =
+  self.union1.IssuerSerialNumber
+
+proc `KeyId=`*(self: var CERT_ID, x: CRYPT_HASH_BLOB) {.inline.} =
+  self.union1.KeyId = x
+
+proc KeyId*(self: CERT_ID): CRYPT_HASH_BLOB {.inline.} =
+  self.union1.KeyId
+
+proc KeyId*(self: var CERT_ID): var CRYPT_HASH_BLOB {.inline.} =
+  self.union1.KeyId
+
+proc `HashId=`*(self: var CERT_ID, x: CRYPT_HASH_BLOB) {.inline.} =
+  self.union1.HashId = x
+
+proc HashId*(self: CERT_ID): CRYPT_HASH_BLOB {.inline.} =
+  self.union1.HashId
+
+proc HashId*(self: var CERT_ID): var CRYPT_HASH_BLOB {.inline.} =
+  self.union1.HashId
+
+proc `hCryptProv=`*(self: var CMSG_SIGNER_ENCODE_INFO, x: HCRYPTPROV) {.inline.} =
+  self.union1.hCryptProv = x
+
+proc hCryptProv*(self: CMSG_SIGNER_ENCODE_INFO): HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc hCryptProv*(self: var CMSG_SIGNER_ENCODE_INFO): var HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc `hNCryptKey=`*(
+    self: var CMSG_SIGNER_ENCODE_INFO, x: NCRYPT_KEY_HANDLE
+) {.inline.} =
+  self.union1.hNCryptKey = x
+
+proc hNCryptKey*(self: CMSG_SIGNER_ENCODE_INFO): NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc hNCryptKey*(self: var CMSG_SIGNER_ENCODE_INFO): var NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc `pEphemeralAlgorithm=`*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO, x: PCRYPT_ALGORITHM_IDENTIFIER
+) {.inline.} =
+  self.union1.pEphemeralAlgorithm = x
+
+proc pEphemeralAlgorithm*(
+    self: CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO
+): PCRYPT_ALGORITHM_IDENTIFIER {.inline.} =
+  self.union1.pEphemeralAlgorithm
+
+proc pEphemeralAlgorithm*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO
+): var PCRYPT_ALGORITHM_IDENTIFIER {.inline.} =
+  self.union1.pEphemeralAlgorithm
+
+proc `pSenderId=`*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO, x: PCERT_ID
+) {.inline.} =
+  self.union1.pSenderId = x
+
+proc pSenderId*(self: CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO): PCERT_ID {.inline.} =
+  self.union1.pSenderId
+
+proc pSenderId*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO
+): var PCERT_ID {.inline.} =
+  self.union1.pSenderId
+
+proc `hKeyEncryptionKey=`*(
+    self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO, x: HCRYPTKEY
+) {.inline.} =
+  self.union1.hKeyEncryptionKey = x
+
+proc hKeyEncryptionKey*(
+    self: CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO
+): HCRYPTKEY {.inline.} =
+  self.union1.hKeyEncryptionKey
+
+proc hKeyEncryptionKey*(
+    self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO
+): var HCRYPTKEY {.inline.} =
+  self.union1.hKeyEncryptionKey
+
+proc `pvKeyEncryptionKey=`*(
+    self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO, x: pointer
+) {.inline.} =
+  self.union1.pvKeyEncryptionKey = x
+
+proc pvKeyEncryptionKey*(
+    self: CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO
+): pointer {.inline.} =
+  self.union1.pvKeyEncryptionKey
+
+proc pvKeyEncryptionKey*(
+    self: var CMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO
+): var pointer {.inline.} =
+  self.union1.pvKeyEncryptionKey
+
+proc `pKeyTrans=`*(
+    self: var CMSG_RECIPIENT_ENCODE_INFO, x: PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO
+) {.inline.} =
+  self.union1.pKeyTrans = x
+
+proc pKeyTrans*(
+    self: CMSG_RECIPIENT_ENCODE_INFO
+): PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO {.inline.} =
+  self.union1.pKeyTrans
+
+proc pKeyTrans*(
+    self: var CMSG_RECIPIENT_ENCODE_INFO
+): var PCMSG_KEY_TRANS_RECIPIENT_ENCODE_INFO {.inline.} =
+  self.union1.pKeyTrans
+
+proc `pKeyAgree=`*(
+    self: var CMSG_RECIPIENT_ENCODE_INFO, x: PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO
+) {.inline.} =
+  self.union1.pKeyAgree = x
+
+proc pKeyAgree*(
+    self: CMSG_RECIPIENT_ENCODE_INFO
+): PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO {.inline.} =
+  self.union1.pKeyAgree
+
+proc pKeyAgree*(
+    self: var CMSG_RECIPIENT_ENCODE_INFO
+): var PCMSG_KEY_AGREE_RECIPIENT_ENCODE_INFO {.inline.} =
+  self.union1.pKeyAgree
+
+proc `pMailList=`*(
+    self: var CMSG_RECIPIENT_ENCODE_INFO, x: PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO
+) {.inline.} =
+  self.union1.pMailList = x
+
+proc pMailList*(
+    self: CMSG_RECIPIENT_ENCODE_INFO
+): PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO {.inline.} =
+  self.union1.pMailList
+
+proc pMailList*(
+    self: var CMSG_RECIPIENT_ENCODE_INFO
+): var PCMSG_MAIL_LIST_RECIPIENT_ENCODE_INFO {.inline.} =
+  self.union1.pMailList
+
+proc `OriginatorCertId=`*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_INFO, x: CERT_ID
+) {.inline.} =
+  self.union1.OriginatorCertId = x
+
+proc OriginatorCertId*(self: CMSG_KEY_AGREE_RECIPIENT_INFO): CERT_ID {.inline.} =
+  self.union1.OriginatorCertId
+
+proc OriginatorCertId*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_INFO
+): var CERT_ID {.inline.} =
+  self.union1.OriginatorCertId
+
+proc `OriginatorPublicKeyInfo=`*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_INFO, x: CERT_PUBLIC_KEY_INFO
+) {.inline.} =
+  self.union1.OriginatorPublicKeyInfo = x
+
+proc OriginatorPublicKeyInfo*(
+    self: CMSG_KEY_AGREE_RECIPIENT_INFO
+): CERT_PUBLIC_KEY_INFO {.inline.} =
+  self.union1.OriginatorPublicKeyInfo
+
+proc OriginatorPublicKeyInfo*(
+    self: var CMSG_KEY_AGREE_RECIPIENT_INFO
+): var CERT_PUBLIC_KEY_INFO {.inline.} =
+  self.union1.OriginatorPublicKeyInfo
+
+proc `pKeyTrans=`*(
+    self: var CMSG_CMS_RECIPIENT_INFO, x: PCMSG_KEY_TRANS_RECIPIENT_INFO
+) {.inline.} =
+  self.union1.pKeyTrans = x
+
+proc pKeyTrans*(
+    self: CMSG_CMS_RECIPIENT_INFO
+): PCMSG_KEY_TRANS_RECIPIENT_INFO {.inline.} =
+  self.union1.pKeyTrans
+
+proc pKeyTrans*(
+    self: var CMSG_CMS_RECIPIENT_INFO
+): var PCMSG_KEY_TRANS_RECIPIENT_INFO {.inline.} =
+  self.union1.pKeyTrans
+
+proc `pKeyAgree=`*(
+    self: var CMSG_CMS_RECIPIENT_INFO, x: PCMSG_KEY_AGREE_RECIPIENT_INFO
+) {.inline.} =
+  self.union1.pKeyAgree = x
+
+proc pKeyAgree*(
+    self: CMSG_CMS_RECIPIENT_INFO
+): PCMSG_KEY_AGREE_RECIPIENT_INFO {.inline.} =
+  self.union1.pKeyAgree
+
+proc pKeyAgree*(
+    self: var CMSG_CMS_RECIPIENT_INFO
+): var PCMSG_KEY_AGREE_RECIPIENT_INFO {.inline.} =
+  self.union1.pKeyAgree
+
+proc `pMailList=`*(
+    self: var CMSG_CMS_RECIPIENT_INFO, x: PCMSG_MAIL_LIST_RECIPIENT_INFO
+) {.inline.} =
+  self.union1.pMailList = x
+
+proc pMailList*(
+    self: CMSG_CMS_RECIPIENT_INFO
+): PCMSG_MAIL_LIST_RECIPIENT_INFO {.inline.} =
+  self.union1.pMailList
+
+proc pMailList*(
+    self: var CMSG_CMS_RECIPIENT_INFO
+): var PCMSG_MAIL_LIST_RECIPIENT_INFO {.inline.} =
+  self.union1.pMailList
+
+proc `hCryptProv=`*(self: var CMSG_CTRL_DECRYPT_PARA, x: HCRYPTPROV) {.inline.} =
+  self.union1.hCryptProv = x
+
+proc hCryptProv*(self: CMSG_CTRL_DECRYPT_PARA): HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc hCryptProv*(self: var CMSG_CTRL_DECRYPT_PARA): var HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc `hNCryptKey=`*(self: var CMSG_CTRL_DECRYPT_PARA, x: NCRYPT_KEY_HANDLE) {.inline.} =
+  self.union1.hNCryptKey = x
+
+proc hNCryptKey*(self: CMSG_CTRL_DECRYPT_PARA): NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc hNCryptKey*(self: var CMSG_CTRL_DECRYPT_PARA): var NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc `hCryptProv=`*(
+    self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA, x: HCRYPTPROV
+) {.inline.} =
+  self.union1.hCryptProv = x
+
+proc hCryptProv*(self: CMSG_CTRL_KEY_TRANS_DECRYPT_PARA): HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc hCryptProv*(
+    self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA
+): var HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc `hNCryptKey=`*(
+    self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA, x: NCRYPT_KEY_HANDLE
+) {.inline.} =
+  self.union1.hNCryptKey = x
+
+proc hNCryptKey*(self: CMSG_CTRL_KEY_TRANS_DECRYPT_PARA): NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc hNCryptKey*(
+    self: var CMSG_CTRL_KEY_TRANS_DECRYPT_PARA
+): var NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc `hCryptProv=`*(
+    self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA, x: HCRYPTPROV
+) {.inline.} =
+  self.union1.hCryptProv = x
+
+proc hCryptProv*(self: CMSG_CTRL_KEY_AGREE_DECRYPT_PARA): HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc hCryptProv*(
+    self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA
+): var HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc `hNCryptKey=`*(
+    self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA, x: NCRYPT_KEY_HANDLE
+) {.inline.} =
+  self.union1.hNCryptKey = x
+
+proc hNCryptKey*(self: CMSG_CTRL_KEY_AGREE_DECRYPT_PARA): NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc hNCryptKey*(
+    self: var CMSG_CTRL_KEY_AGREE_DECRYPT_PARA
+): var NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc `hKeyEncryptionKey=`*(
+    self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA, x: HCRYPTKEY
+) {.inline.} =
+  self.union1.hKeyEncryptionKey = x
+
+proc hKeyEncryptionKey*(self: CMSG_CTRL_MAIL_LIST_DECRYPT_PARA): HCRYPTKEY {.inline.} =
+  self.union1.hKeyEncryptionKey
+
+proc hKeyEncryptionKey*(
+    self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA
+): var HCRYPTKEY {.inline.} =
+  self.union1.hKeyEncryptionKey
+
+proc `pvKeyEncryptionKey=`*(
+    self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA, x: pointer
+) {.inline.} =
+  self.union1.pvKeyEncryptionKey = x
+
+proc pvKeyEncryptionKey*(self: CMSG_CTRL_MAIL_LIST_DECRYPT_PARA): pointer {.inline.} =
+  self.union1.pvKeyEncryptionKey
+
+proc pvKeyEncryptionKey*(
+    self: var CMSG_CTRL_MAIL_LIST_DECRYPT_PARA
+): var pointer {.inline.} =
+  self.union1.pvKeyEncryptionKey
+
+proc `hContentEncryptKey=`*(
+    self: var CMSG_CONTENT_ENCRYPT_INFO, x: HCRYPTKEY
+) {.inline.} =
+  self.union1.hContentEncryptKey = x
+
+proc hContentEncryptKey*(self: CMSG_CONTENT_ENCRYPT_INFO): HCRYPTKEY {.inline.} =
+  self.union1.hContentEncryptKey
+
+proc hContentEncryptKey*(
+    self: var CMSG_CONTENT_ENCRYPT_INFO
+): var HCRYPTKEY {.inline.} =
+  self.union1.hContentEncryptKey
+
+proc `hCNGContentEncryptKey=`*(
+    self: var CMSG_CONTENT_ENCRYPT_INFO, x: BCRYPT_KEY_HANDLE
+) {.inline.} =
+  self.union1.hCNGContentEncryptKey = x
+
+proc hCNGContentEncryptKey*(
+    self: CMSG_CONTENT_ENCRYPT_INFO
+): BCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hCNGContentEncryptKey
+
+proc hCNGContentEncryptKey*(
+    self: var CMSG_CONTENT_ENCRYPT_INFO
+): var BCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hCNGContentEncryptKey
+
+proc `OriginatorCertId=`*(
+    self: var CMSG_KEY_AGREE_ENCRYPT_INFO, x: CERT_ID
+) {.inline.} =
+  self.union1.OriginatorCertId = x
+
+proc OriginatorCertId*(self: CMSG_KEY_AGREE_ENCRYPT_INFO): CERT_ID {.inline.} =
+  self.union1.OriginatorCertId
+
+proc OriginatorCertId*(self: var CMSG_KEY_AGREE_ENCRYPT_INFO): var CERT_ID {.inline.} =
+  self.union1.OriginatorCertId
+
+proc `OriginatorPublicKeyInfo=`*(
+    self: var CMSG_KEY_AGREE_ENCRYPT_INFO, x: CERT_PUBLIC_KEY_INFO
+) {.inline.} =
+  self.union1.OriginatorPublicKeyInfo = x
+
+proc OriginatorPublicKeyInfo*(
+    self: CMSG_KEY_AGREE_ENCRYPT_INFO
+): CERT_PUBLIC_KEY_INFO {.inline.} =
+  self.union1.OriginatorPublicKeyInfo
+
+proc OriginatorPublicKeyInfo*(
+    self: var CMSG_KEY_AGREE_ENCRYPT_INFO
+): var CERT_PUBLIC_KEY_INFO {.inline.} =
+  self.union1.OriginatorPublicKeyInfo
+
+proc `hCryptProv=`*(self: var CERT_KEY_CONTEXT, x: HCRYPTPROV) {.inline.} =
+  self.union1.hCryptProv = x
+
+proc hCryptProv*(self: CERT_KEY_CONTEXT): HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc hCryptProv*(self: var CERT_KEY_CONTEXT): var HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc `hNCryptKey=`*(self: var CERT_KEY_CONTEXT, x: NCRYPT_KEY_HANDLE) {.inline.} =
+  self.union1.hNCryptKey = x
+
+proc hNCryptKey*(self: CERT_KEY_CONTEXT): NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc hNCryptKey*(self: var CERT_KEY_CONTEXT): var NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc `hKeyBase=`*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: HKEY) {.inline.} =
+  self.union1.hKeyBase = x
+
+proc hKeyBase*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): HKEY {.inline.} =
+  self.union1.hKeyBase
+
+proc hKeyBase*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var HKEY {.inline.} =
+  self.union1.hKeyBase
+
+proc `pvBase=`*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: pointer) {.inline.} =
+  self.union1.pvBase = x
+
+proc pvBase*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): pointer {.inline.} =
+  self.union1.pvBase
+
+proc pvBase*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var pointer {.inline.} =
+  self.union1.pvBase
+
+proc `pvSystemStore=`*(
+    self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: pointer
+) {.inline.} =
+  self.union2.pvSystemStore = x
+
+proc pvSystemStore*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): pointer {.inline.} =
+  self.union2.pvSystemStore
+
+proc pvSystemStore*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var pointer {.inline.} =
+  self.union2.pvSystemStore
+
+proc `pszSystemStore=`*(
+    self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: LPCSTR
+) {.inline.} =
+  self.union2.pszSystemStore = x
+
+proc pszSystemStore*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): LPCSTR {.inline.} =
+  self.union2.pszSystemStore
+
+proc pszSystemStore*(self: var CERT_SYSTEM_STORE_RELOCATE_PARA): var LPCSTR {.inline.} =
+  self.union2.pszSystemStore
+
+proc `pwszSystemStore=`*(
+    self: var CERT_SYSTEM_STORE_RELOCATE_PARA, x: LPCWSTR
+) {.inline.} =
+  self.union2.pwszSystemStore = x
+
+proc pwszSystemStore*(self: CERT_SYSTEM_STORE_RELOCATE_PARA): LPCWSTR {.inline.} =
+  self.union2.pwszSystemStore
+
+proc pwszSystemStore*(
+    self: var CERT_SYSTEM_STORE_RELOCATE_PARA
+): var LPCWSTR {.inline.} =
+  self.union2.pwszSystemStore
+
+proc `hCryptProv=`*(self: var CRYPT_KEY_SIGN_MESSAGE_PARA, x: HCRYPTPROV) {.inline.} =
+  self.union1.hCryptProv = x
+
+proc hCryptProv*(self: CRYPT_KEY_SIGN_MESSAGE_PARA): HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc hCryptProv*(self: var CRYPT_KEY_SIGN_MESSAGE_PARA): var HCRYPTPROV {.inline.} =
+  self.union1.hCryptProv
+
+proc `hNCryptKey=`*(
+    self: var CRYPT_KEY_SIGN_MESSAGE_PARA, x: NCRYPT_KEY_HANDLE
+) {.inline.} =
+  self.union1.hNCryptKey = x
+
+proc hNCryptKey*(self: CRYPT_KEY_SIGN_MESSAGE_PARA): NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc hNCryptKey*(
+    self: var CRYPT_KEY_SIGN_MESSAGE_PARA
+): var NCRYPT_KEY_HANDLE {.inline.} =
+  self.union1.hNCryptKey
+
+proc `cbStruct=`*(self: var HTTPSPolicyCallbackData, x: DWORD) {.inline.} =
+  self.union1.cbStruct = x
+
+proc cbStruct*(self: HTTPSPolicyCallbackData): DWORD {.inline.} =
+  self.union1.cbStruct
+
+proc cbStruct*(self: var HTTPSPolicyCallbackData): var DWORD {.inline.} =
+  self.union1.cbStruct
+
+proc `cbSize=`*(self: var HTTPSPolicyCallbackData, x: DWORD) {.inline.} =
+  self.union1.cbSize = x
+
+proc cbSize*(self: HTTPSPolicyCallbackData): DWORD {.inline.} =
+  self.union1.cbSize
+
+proc cbSize*(self: var HTTPSPolicyCallbackData): var DWORD {.inline.} =
+  self.union1.cbSize
+
 when winimUnicode:
   type
     CRYPT_PASSWORD_CREDENTIALS* = CRYPT_PASSWORD_CREDENTIALSW
     PCRYPT_PASSWORD_CREDENTIALS* = PCRYPT_PASSWORD_CREDENTIALSW
+
   const
     MS_DEF_PROV* = MS_DEF_PROV_W
     MS_ENHANCED_PROV* = MS_ENHANCED_PROV_W
@@ -5354,27 +8763,149 @@ when winimUnicode:
     MS_ENH_RSA_AES_PROV_XP* = MS_ENH_RSA_AES_PROV_XP_W
     MS_ENH_RSA_AES_PROV* = MS_ENH_RSA_AES_PROV_W
     CREDENTIAL_OID_PASSWORD_CREDENTIALS* = CREDENTIAL_OID_PASSWORD_CREDENTIALS_W
-  proc CryptAcquireContext*(phProv: ptr HCRYPTPROV, szContainer: LPCWSTR, szProvider: LPCWSTR, dwProvType: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptAcquireContextW".}
-  proc CryptSignHash*(hHash: HCRYPTHASH, dwKeySpec: DWORD, szDescription: LPCWSTR, dwFlags: DWORD, pbSignature: ptr BYTE, pdwSigLen: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSignHashW".}
-  proc CryptVerifySignature*(hHash: HCRYPTHASH, pbSignature: ptr BYTE, dwSigLen: DWORD, hPubKey: HCRYPTKEY, szDescription: LPCWSTR, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptVerifySignatureW".}
-  proc CryptSetProvider*(pszProvName: LPCWSTR, dwProvType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderW".}
-  proc CryptSetProviderEx*(pszProvName: LPCWSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderExW".}
-  proc CryptGetDefaultProvider*(dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pszProvName: LPWSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptGetDefaultProviderW".}
-  proc CryptEnumProviderTypes*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szTypeName: LPWSTR, pcbTypeName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProviderTypesW".}
-  proc CryptEnumProviders*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szProvName: LPWSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProvidersW".}
-  proc CertRDNValueToStr*(dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPWSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertRDNValueToStrW".}
-  proc CertNameToStr*(dwCertEncodingType: DWORD, pName: PCERT_NAME_BLOB, dwStrType: DWORD, psz: LPWSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertNameToStrW".}
-  proc CertStrToName*(dwCertEncodingType: DWORD, pszX500: LPCWSTR, dwStrType: DWORD, pvReserved: pointer, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD, ppszError: ptr LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CertStrToNameW".}
-  proc CertGetNameString*(pCertContext: PCCERT_CONTEXT, dwType: DWORD, dwFlags: DWORD, pvTypePara: pointer, pszNameString: LPWSTR, cchNameString: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertGetNameStringW".}
-  proc CertOpenSystemStore*(hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCWSTR): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc: "CertOpenSystemStoreW".}
-  proc CertAddEncodedCertificateToSystemStore*(szCertStoreName: LPCWSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CertAddEncodedCertificateToSystemStoreW".}
-  proc CryptRetrieveObjectByUrl*(pszUrl: LPCWSTR, pszObjectOid: LPCSTR, dwRetrievalFlags: DWORD, dwTimeout: DWORD, ppvObject: ptr LPVOID, hAsyncRetrieve: HCRYPTASYNC, pCredentials: PCRYPT_CREDENTIALS, pvVerify: LPVOID, pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc: "CryptRetrieveObjectByUrlW".}
-  proc CryptStringToBinary*(pszString: LPCWSTR, cchString: DWORD, dwFlags: DWORD, pbBinary: ptr BYTE, pcbBinary: ptr DWORD, pdwSkip: ptr DWORD, pdwFlags: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptStringToBinaryW".}
-  proc CryptBinaryToString*(pbBinary: ptr BYTE, cbBinary: DWORD, dwFlags: DWORD, pszString: LPWSTR, pcchString: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptBinaryToStringW".}
+  proc CryptAcquireContext*(
+    phProv: ptr HCRYPTPROV,
+    szContainer: LPCWSTR,
+    szProvider: LPCWSTR,
+    dwProvType: DWORD,
+    dwFlags: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptAcquireContextW".}
+
+  proc CryptSignHash*(
+    hHash: HCRYPTHASH,
+    dwKeySpec: DWORD,
+    szDescription: LPCWSTR,
+    dwFlags: DWORD,
+    pbSignature: ptr BYTE,
+    pdwSigLen: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSignHashW".}
+
+  proc CryptVerifySignature*(
+    hHash: HCRYPTHASH,
+    pbSignature: ptr BYTE,
+    dwSigLen: DWORD,
+    hPubKey: HCRYPTKEY,
+    szDescription: LPCWSTR,
+    dwFlags: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptVerifySignatureW".}
+
+  proc CryptSetProvider*(
+    pszProvName: LPCWSTR, dwProvType: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderW".}
+
+  proc CryptSetProviderEx*(
+    pszProvName: LPCWSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderExW".}
+
+  proc CryptGetDefaultProvider*(
+    dwProvType: DWORD,
+    pdwReserved: ptr DWORD,
+    dwFlags: DWORD,
+    pszProvName: LPWSTR,
+    pcbProvName: ptr DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CryptGetDefaultProviderW"
+  .}
+
+  proc CryptEnumProviderTypes*(
+    dwIndex: DWORD,
+    pdwReserved: ptr DWORD,
+    dwFlags: DWORD,
+    pdwProvType: ptr DWORD,
+    szTypeName: LPWSTR,
+    pcbTypeName: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProviderTypesW".}
+
+  proc CryptEnumProviders*(
+    dwIndex: DWORD,
+    pdwReserved: ptr DWORD,
+    dwFlags: DWORD,
+    pdwProvType: ptr DWORD,
+    szProvName: LPWSTR,
+    pcbProvName: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProvidersW".}
+
+  proc CertRDNValueToStr*(
+    dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPWSTR, csz: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertRDNValueToStrW".}
+
+  proc CertNameToStr*(
+    dwCertEncodingType: DWORD,
+    pName: PCERT_NAME_BLOB,
+    dwStrType: DWORD,
+    psz: LPWSTR,
+    csz: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertNameToStrW".}
+
+  proc CertStrToName*(
+    dwCertEncodingType: DWORD,
+    pszX500: LPCWSTR,
+    dwStrType: DWORD,
+    pvReserved: pointer,
+    pbEncoded: ptr BYTE,
+    pcbEncoded: ptr DWORD,
+    ppszError: ptr LPCWSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CertStrToNameW".}
+
+  proc CertGetNameString*(
+    pCertContext: PCCERT_CONTEXT,
+    dwType: DWORD,
+    dwFlags: DWORD,
+    pvTypePara: pointer,
+    pszNameString: LPWSTR,
+    cchNameString: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertGetNameStringW".}
+
+  proc CertOpenSystemStore*(
+    hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCWSTR
+  ): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc: "CertOpenSystemStoreW".}
+
+  proc CertAddEncodedCertificateToSystemStore*(
+    szCertStoreName: LPCWSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "crypt32",
+    importc: "CertAddEncodedCertificateToSystemStoreW"
+  .}
+
+  proc CryptRetrieveObjectByUrl*(
+    pszUrl: LPCWSTR,
+    pszObjectOid: LPCSTR,
+    dwRetrievalFlags: DWORD,
+    dwTimeout: DWORD,
+    ppvObject: ptr LPVOID,
+    hAsyncRetrieve: HCRYPTASYNC,
+    pCredentials: PCRYPT_CREDENTIALS,
+    pvVerify: LPVOID,
+    pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "cryptnet", importc: "CryptRetrieveObjectByUrlW"
+  .}
+
+  proc CryptStringToBinary*(
+    pszString: LPCWSTR,
+    cchString: DWORD,
+    dwFlags: DWORD,
+    pbBinary: ptr BYTE,
+    pcbBinary: ptr DWORD,
+    pdwSkip: ptr DWORD,
+    pdwFlags: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptStringToBinaryW".}
+
+  proc CryptBinaryToString*(
+    pbBinary: ptr BYTE,
+    cbBinary: DWORD,
+    dwFlags: DWORD,
+    pszString: LPWSTR,
+    pcchString: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptBinaryToStringW".}
+
 when winimAnsi:
   type
     CRYPT_PASSWORD_CREDENTIALS* = CRYPT_PASSWORD_CREDENTIALSA
     PCRYPT_PASSWORD_CREDENTIALS* = PCRYPT_PASSWORD_CREDENTIALSA
+
   const
     MS_DEF_PROV* = MS_DEF_PROV_A
     MS_ENHANCED_PROV* = MS_ENHANCED_PROV_A
@@ -5389,20 +8920,140 @@ when winimAnsi:
     MS_ENH_RSA_AES_PROV_XP* = MS_ENH_RSA_AES_PROV_XP_A
     MS_ENH_RSA_AES_PROV* = MS_ENH_RSA_AES_PROV_A
     CREDENTIAL_OID_PASSWORD_CREDENTIALS* = CREDENTIAL_OID_PASSWORD_CREDENTIALS_A
-  proc CryptAcquireContext*(phProv: ptr HCRYPTPROV, szContainer: LPCSTR, szProvider: LPCSTR, dwProvType: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptAcquireContextA".}
-  proc CryptSignHash*(hHash: HCRYPTHASH, dwKeySpec: DWORD, szDescription: LPCSTR, dwFlags: DWORD, pbSignature: ptr BYTE, pdwSigLen: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSignHashA".}
-  proc CryptVerifySignature*(hHash: HCRYPTHASH, pbSignature: ptr BYTE, dwSigLen: DWORD, hPubKey: HCRYPTKEY, szDescription: LPCSTR, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptVerifySignatureA".}
-  proc CryptSetProvider*(pszProvName: LPCSTR, dwProvType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderA".}
-  proc CryptSetProviderEx*(pszProvName: LPCSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderExA".}
-  proc CryptGetDefaultProvider*(dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pszProvName: LPSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptGetDefaultProviderA".}
-  proc CryptEnumProviderTypes*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szTypeName: LPSTR, pcbTypeName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProviderTypesA".}
-  proc CryptEnumProviders*(dwIndex: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD, pdwProvType: ptr DWORD, szProvName: LPSTR, pcbProvName: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProvidersA".}
-  proc CertRDNValueToStr*(dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertRDNValueToStrA".}
-  proc CertNameToStr*(dwCertEncodingType: DWORD, pName: PCERT_NAME_BLOB, dwStrType: DWORD, psz: LPSTR, csz: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertNameToStrA".}
-  proc CertStrToName*(dwCertEncodingType: DWORD, pszX500: LPCSTR, dwStrType: DWORD, pvReserved: pointer, pbEncoded: ptr BYTE, pcbEncoded: ptr DWORD, ppszError: ptr LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CertStrToNameA".}
-  proc CertGetNameString*(pCertContext: PCCERT_CONTEXT, dwType: DWORD, dwFlags: DWORD, pvTypePara: pointer, pszNameString: LPSTR, cchNameString: DWORD): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertGetNameStringA".}
-  proc CertOpenSystemStore*(hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCSTR): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc: "CertOpenSystemStoreA".}
-  proc CertAddEncodedCertificateToSystemStore*(szCertStoreName: LPCSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CertAddEncodedCertificateToSystemStoreA".}
-  proc CryptRetrieveObjectByUrl*(pszUrl: LPCSTR, pszObjectOid: LPCSTR, dwRetrievalFlags: DWORD, dwTimeout: DWORD, ppvObject: ptr LPVOID, hAsyncRetrieve: HCRYPTASYNC, pCredentials: PCRYPT_CREDENTIALS, pvVerify: LPVOID, pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO): WINBOOL {.winapi, stdcall, dynlib: "cryptnet", importc: "CryptRetrieveObjectByUrlA".}
-  proc CryptStringToBinary*(pszString: LPCSTR, cchString: DWORD, dwFlags: DWORD, pbBinary: ptr BYTE, pcbBinary: ptr DWORD, pdwSkip: ptr DWORD, pdwFlags: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptStringToBinaryA".}
-  proc CryptBinaryToString*(pbBinary: ptr BYTE, cbBinary: DWORD, dwFlags: DWORD, pszString: LPSTR, pcchString: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptBinaryToStringA".}
+  proc CryptAcquireContext*(
+    phProv: ptr HCRYPTPROV,
+    szContainer: LPCSTR,
+    szProvider: LPCSTR,
+    dwProvType: DWORD,
+    dwFlags: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptAcquireContextA".}
+
+  proc CryptSignHash*(
+    hHash: HCRYPTHASH,
+    dwKeySpec: DWORD,
+    szDescription: LPCSTR,
+    dwFlags: DWORD,
+    pbSignature: ptr BYTE,
+    pdwSigLen: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSignHashA".}
+
+  proc CryptVerifySignature*(
+    hHash: HCRYPTHASH,
+    pbSignature: ptr BYTE,
+    dwSigLen: DWORD,
+    hPubKey: HCRYPTKEY,
+    szDescription: LPCSTR,
+    dwFlags: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptVerifySignatureA".}
+
+  proc CryptSetProvider*(
+    pszProvName: LPCSTR, dwProvType: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderA".}
+
+  proc CryptSetProviderEx*(
+    pszProvName: LPCSTR, dwProvType: DWORD, pdwReserved: ptr DWORD, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptSetProviderExA".}
+
+  proc CryptGetDefaultProvider*(
+    dwProvType: DWORD,
+    pdwReserved: ptr DWORD,
+    dwFlags: DWORD,
+    pszProvName: LPSTR,
+    pcbProvName: ptr DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CryptGetDefaultProviderA"
+  .}
+
+  proc CryptEnumProviderTypes*(
+    dwIndex: DWORD,
+    pdwReserved: ptr DWORD,
+    dwFlags: DWORD,
+    pdwProvType: ptr DWORD,
+    szTypeName: LPSTR,
+    pcbTypeName: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProviderTypesA".}
+
+  proc CryptEnumProviders*(
+    dwIndex: DWORD,
+    pdwReserved: ptr DWORD,
+    dwFlags: DWORD,
+    pdwProvType: ptr DWORD,
+    szProvName: LPSTR,
+    pcbProvName: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CryptEnumProvidersA".}
+
+  proc CertRDNValueToStr*(
+    dwValueType: DWORD, pValue: PCERT_RDN_VALUE_BLOB, psz: LPSTR, csz: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertRDNValueToStrA".}
+
+  proc CertNameToStr*(
+    dwCertEncodingType: DWORD,
+    pName: PCERT_NAME_BLOB,
+    dwStrType: DWORD,
+    psz: LPSTR,
+    csz: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertNameToStrA".}
+
+  proc CertStrToName*(
+    dwCertEncodingType: DWORD,
+    pszX500: LPCSTR,
+    dwStrType: DWORD,
+    pvReserved: pointer,
+    pbEncoded: ptr BYTE,
+    pcbEncoded: ptr DWORD,
+    ppszError: ptr LPCSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CertStrToNameA".}
+
+  proc CertGetNameString*(
+    pCertContext: PCCERT_CONTEXT,
+    dwType: DWORD,
+    dwFlags: DWORD,
+    pvTypePara: pointer,
+    pszNameString: LPSTR,
+    cchNameString: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "crypt32", importc: "CertGetNameStringA".}
+
+  proc CertOpenSystemStore*(
+    hProv: HCRYPTPROV_LEGACY, szSubsystemProtocol: LPCSTR
+  ): HCERTSTORE {.winapi, stdcall, dynlib: "crypt32", importc: "CertOpenSystemStoreA".}
+
+  proc CertAddEncodedCertificateToSystemStore*(
+    szCertStoreName: LPCSTR, pbCertEncoded: ptr BYTE, cbCertEncoded: DWORD
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "crypt32",
+    importc: "CertAddEncodedCertificateToSystemStoreA"
+  .}
+
+  proc CryptRetrieveObjectByUrl*(
+    pszUrl: LPCSTR,
+    pszObjectOid: LPCSTR,
+    dwRetrievalFlags: DWORD,
+    dwTimeout: DWORD,
+    ppvObject: ptr LPVOID,
+    hAsyncRetrieve: HCRYPTASYNC,
+    pCredentials: PCRYPT_CREDENTIALS,
+    pvVerify: LPVOID,
+    pAuxInfo: PCRYPT_RETRIEVE_AUX_INFO,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "cryptnet", importc: "CryptRetrieveObjectByUrlA"
+  .}
+
+  proc CryptStringToBinary*(
+    pszString: LPCSTR,
+    cchString: DWORD,
+    dwFlags: DWORD,
+    pbBinary: ptr BYTE,
+    pcbBinary: ptr DWORD,
+    pdwSkip: ptr DWORD,
+    pdwFlags: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptStringToBinaryA".}
+
+  proc CryptBinaryToString*(
+    pbBinary: ptr BYTE,
+    cbBinary: DWORD,
+    dwFlags: DWORD,
+    pszString: LPSTR,
+    pcchString: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "crypt32", importc: "CryptBinaryToStringA".}

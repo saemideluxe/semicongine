@@ -17,6 +17,7 @@ type
   HSZPAIR* {.pure.} = object
     hszSvc*: HSZ
     hszTopic*: HSZ
+
   PHSZPAIR* = ptr HSZPAIR
   CONVCONTEXT* {.pure.} = object
     cb*: UINT
@@ -26,6 +27,7 @@ type
     dwLangID*: DWORD
     dwSecurity*: DWORD
     qos*: SECURITY_QUALITY_OF_SERVICE
+
   PCONVCONTEXT* = ptr CONVCONTEXT
   CONVINFO* {.pure.} = object
     cb*: DWORD
@@ -44,12 +46,14 @@ type
     ConvCtxt*: CONVCONTEXT
     hwnd*: HWND
     hwndPartner*: HWND
+
   PCONVINFO* = ptr CONVINFO
   DDEML_MSG_HOOK_DATA* {.pure.} = object
     uiLo*: UINT_PTR
     uiHi*: UINT_PTR
     cbData*: DWORD
     Data*: array[8, DWORD]
+
   PDDEML_MSG_HOOK_DATA* = ptr DDEML_MSG_HOOK_DATA
   MONMSGSTRUCT* {.pure.} = object
     cb*: UINT
@@ -60,6 +64,7 @@ type
     wParam*: WPARAM
     lParam*: LPARAM
     dmhd*: DDEML_MSG_HOOK_DATA
+
   PMONMSGSTRUCT* = ptr MONMSGSTRUCT
   MONCBSTRUCT* {.pure.} = object
     cb*: UINT
@@ -77,6 +82,7 @@ type
     cc*: CONVCONTEXT
     cbData*: DWORD
     Data*: array[8, DWORD]
+
   PMONCBSTRUCT* = ptr MONCBSTRUCT
   MONHSZSTRUCTA* {.pure.} = object
     cb*: UINT
@@ -85,6 +91,7 @@ type
     hsz*: HSZ
     hTask*: HANDLE
     str*: array[1, CHAR]
+
   PMONHSZSTRUCTA* = ptr MONHSZSTRUCTA
   MONHSZSTRUCTW* {.pure.} = object
     cb*: UINT
@@ -93,12 +100,14 @@ type
     hsz*: HSZ
     hTask*: HANDLE
     str*: array[1, WCHAR]
+
   PMONHSZSTRUCTW* = ptr MONHSZSTRUCTW
   MONERRSTRUCT* {.pure.} = object
     cb*: UINT
     wLastError*: UINT
     dwTime*: DWORD
     hTask*: HANDLE
+
   PMONERRSTRUCT* = ptr MONERRSTRUCT
   MONLINKSTRUCT* {.pure.} = object
     cb*: UINT
@@ -113,6 +122,7 @@ type
     fServer*: WINBOOL
     hConvServer*: HCONV
     hConvClient*: HCONV
+
   PMONLINKSTRUCT* = ptr MONLINKSTRUCT
   MONCONVSTRUCT* {.pure.} = object
     cb*: UINT
@@ -123,7 +133,9 @@ type
     hszTopic*: HSZ
     hConvClient*: HCONV
     hConvServer*: HCONV
+
   PMONCONVSTRUCT* = ptr MONCONVSTRUCT
+
 const
   CDERR_DIALOGFAILURE* = 0xFFFF
   CDERR_GENERALCODES* = 0x0000
@@ -164,15 +176,15 @@ const
   CCERR_CHOOSECOLORCODES* = 0x5000
   WM_DDE_FIRST* = 0x03E0
   WM_DDE_INITIATE* = WM_DDE_FIRST
-  WM_DDE_TERMINATE* = WM_DDE_FIRST+1
-  WM_DDE_ADVISE* = WM_DDE_FIRST+2
-  WM_DDE_UNADVISE* = WM_DDE_FIRST+3
-  WM_DDE_ACK* = WM_DDE_FIRST+4
-  WM_DDE_DATA* = WM_DDE_FIRST+5
-  WM_DDE_REQUEST* = WM_DDE_FIRST+6
-  WM_DDE_POKE* = WM_DDE_FIRST+7
-  WM_DDE_EXECUTE* = WM_DDE_FIRST+8
-  WM_DDE_LAST* = WM_DDE_FIRST+8
+  WM_DDE_TERMINATE* = WM_DDE_FIRST + 1
+  WM_DDE_ADVISE* = WM_DDE_FIRST + 2
+  WM_DDE_UNADVISE* = WM_DDE_FIRST + 3
+  WM_DDE_ACK* = WM_DDE_FIRST + 4
+  WM_DDE_DATA* = WM_DDE_FIRST + 5
+  WM_DDE_REQUEST* = WM_DDE_FIRST + 6
+  WM_DDE_POKE* = WM_DDE_FIRST + 7
+  WM_DDE_EXECUTE* = WM_DDE_FIRST + 8
+  WM_DDE_LAST* = WM_DDE_FIRST + 8
   XST_NULL* = 0
   XST_INCOMPLETE* = 1
   XST_CONNECTED* = 2
@@ -314,98 +326,262 @@ const
   MF_CONV* = 0x40000000
   MF_MASK* = 0xFF000000'i32
 type
-  FNCALLBACK* = proc (wType: UINT, wFmt: UINT, hConv: HCONV, hsz1: HSZ, hsz2: HSZ, hData: HDDEDATA, dwData1: ULONG_PTR, dwData2: ULONG_PTR): HDDEDATA {.stdcall.}
-  PFNCALLBACK* = proc (wType: UINT, wFmt: UINT, hConv: HCONV, hsz1: HSZ, hsz2: HSZ, hData: HDDEDATA, dwData1: ULONG_PTR, dwData2: ULONG_PTR): HDDEDATA {.stdcall.}
+  FNCALLBACK* = proc(
+    wType: UINT,
+    wFmt: UINT,
+    hConv: HCONV,
+    hsz1: HSZ,
+    hsz2: HSZ,
+    hData: HDDEDATA,
+    dwData1: ULONG_PTR,
+    dwData2: ULONG_PTR,
+  ): HDDEDATA {.stdcall.}
+  PFNCALLBACK* = proc(
+    wType: UINT,
+    wFmt: UINT,
+    hConv: HCONV,
+    hsz1: HSZ,
+    hsz2: HSZ,
+    hData: HDDEDATA,
+    dwData1: ULONG_PTR,
+    dwData2: ULONG_PTR,
+  ): HDDEDATA {.stdcall.}
   DDEACK* {.pure.} = object
-    bAppReturnCode* {.bitsize:8.}: uint16
-    reserved* {.bitsize:6.}: uint16
-    fBusy* {.bitsize:1.}: uint16
-    fAck* {.bitsize:1.}: uint16
+    bAppReturnCode* {.bitsize: 8.}: uint16
+    reserved* {.bitsize: 6.}: uint16
+    fBusy* {.bitsize: 1.}: uint16
+    fAck* {.bitsize: 1.}: uint16
+
   DDEADVISE* {.pure.} = object
-    reserved* {.bitsize:14.}: uint16
-    fDeferUpd* {.bitsize:1.}: uint16
-    fAckReq* {.bitsize:1.}: uint16
+    reserved* {.bitsize: 14.}: uint16
+    fDeferUpd* {.bitsize: 1.}: uint16
+    fAckReq* {.bitsize: 1.}: uint16
     cfFormat*: int16
+
   DDEDATA* {.pure.} = object
-    unused* {.bitsize:12.}: uint16
-    fResponse* {.bitsize:1.}: uint16
-    fRelease* {.bitsize:1.}: uint16
-    reserved* {.bitsize:1.}: uint16
-    fAckReq* {.bitsize:1.}: uint16
+    unused* {.bitsize: 12.}: uint16
+    fResponse* {.bitsize: 1.}: uint16
+    fRelease* {.bitsize: 1.}: uint16
+    reserved* {.bitsize: 1.}: uint16
+    fAckReq* {.bitsize: 1.}: uint16
     cfFormat*: int16
     Value*: array[1, BYTE]
+
   DDEPOKE* {.pure.} = object
-    unused* {.bitsize:13.}: uint16
-    fRelease* {.bitsize:1.}: uint16
-    fReserved* {.bitsize:2.}: uint16
+    unused* {.bitsize: 13.}: uint16
+    fRelease* {.bitsize: 1.}: uint16
+    fReserved* {.bitsize: 2.}: uint16
     cfFormat*: int16
     Value*: array[1, BYTE]
+
   DDELN* {.pure.} = object
-    unused* {.bitsize:13.}: uint16
-    fRelease* {.bitsize:1.}: uint16
-    fDeferUpd* {.bitsize:1.}: uint16
-    fAckReq* {.bitsize:1.}: uint16
+    unused* {.bitsize: 13.}: uint16
+    fRelease* {.bitsize: 1.}: uint16
+    fDeferUpd* {.bitsize: 1.}: uint16
+    fAckReq* {.bitsize: 1.}: uint16
     cfFormat*: int16
+
   DDEUP* {.pure.} = object
-    unused* {.bitsize:12.}: uint16
-    fAck* {.bitsize:1.}: uint16
-    fRelease* {.bitsize:1.}: uint16
-    fReserved* {.bitsize:1.}: uint16
-    fAckReq* {.bitsize:1.}: uint16
+    unused* {.bitsize: 12.}: uint16
+    fAck* {.bitsize: 1.}: uint16
+    fRelease* {.bitsize: 1.}: uint16
+    fReserved* {.bitsize: 1.}: uint16
+    fAckReq* {.bitsize: 1.}: uint16
     cfFormat*: int16
     rgb*: array[1, BYTE]
-proc DdeSetQualityOfService*(hwndClient: HWND, pqosNew: ptr SECURITY_QUALITY_OF_SERVICE, pqosPrev: PSECURITY_QUALITY_OF_SERVICE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ImpersonateDdeClientWindow*(hWndClient: HWND, hWndServer: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PackDDElParam*(msg: UINT, uiLo: UINT_PTR, uiHi: UINT_PTR): LPARAM {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnpackDDElParam*(msg: UINT, lParam: LPARAM, puiLo: PUINT_PTR, puiHi: PUINT_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc FreeDDElParam*(msg: UINT, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ReuseDDElParam*(lParam: LPARAM, msgIn: UINT, msgOut: UINT, uiLo: UINT_PTR, uiHi: UINT_PTR): LPARAM {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeInitializeA*(pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeInitializeW*(pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeUninitialize*(idInst: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeConnectList*(idInst: DWORD, hszService: HSZ, hszTopic: HSZ, hConvList: HCONVLIST, pCC: PCONVCONTEXT): HCONVLIST {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeQueryNextServer*(hConvList: HCONVLIST, hConvPrev: HCONV): HCONV {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeDisconnectList*(hConvList: HCONVLIST): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeConnect*(idInst: DWORD, hszService: HSZ, hszTopic: HSZ, pCC: PCONVCONTEXT): HCONV {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeDisconnect*(hConv: HCONV): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeSetQualityOfService*(
+  hwndClient: HWND,
+  pqosNew: ptr SECURITY_QUALITY_OF_SERVICE,
+  pqosPrev: PSECURITY_QUALITY_OF_SERVICE,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ImpersonateDdeClientWindow*(
+  hWndClient: HWND, hWndServer: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PackDDElParam*(
+  msg: UINT, uiLo: UINT_PTR, uiHi: UINT_PTR
+): LPARAM {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnpackDDElParam*(
+  msg: UINT, lParam: LPARAM, puiLo: PUINT_PTR, puiHi: PUINT_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FreeDDElParam*(
+  msg: UINT, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ReuseDDElParam*(
+  lParam: LPARAM, msgIn: UINT, msgOut: UINT, uiLo: UINT_PTR, uiHi: UINT_PTR
+): LPARAM {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeInitializeA*(
+  pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeInitializeW*(
+  pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeUninitialize*(
+  idInst: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeConnectList*(
+  idInst: DWORD, hszService: HSZ, hszTopic: HSZ, hConvList: HCONVLIST, pCC: PCONVCONTEXT
+): HCONVLIST {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeQueryNextServer*(
+  hConvList: HCONVLIST, hConvPrev: HCONV
+): HCONV {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeDisconnectList*(
+  hConvList: HCONVLIST
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeConnect*(
+  idInst: DWORD, hszService: HSZ, hszTopic: HSZ, pCC: PCONVCONTEXT
+): HCONV {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeDisconnect*(
+  hConv: HCONV
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc DdeReconnect*(hConv: HCONV): HCONV {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeQueryConvInfo*(hConv: HCONV, idTransaction: DWORD, pConvInfo: PCONVINFO): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeSetUserHandle*(hConv: HCONV, id: DWORD, hUser: DWORD_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeAbandonTransaction*(idInst: DWORD, hConv: HCONV, idTransaction: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdePostAdvise*(idInst: DWORD, hszTopic: HSZ, hszItem: HSZ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeEnableCallback*(idInst: DWORD, hConv: HCONV, wCmd: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeImpersonateClient*(hConv: HCONV): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeNameService*(idInst: DWORD, hsz1: HSZ, hsz2: HSZ, afCmd: UINT): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeClientTransaction*(pData: LPBYTE, cbData: DWORD, hConv: HCONV, hszItem: HSZ, wFmt: UINT, wType: UINT, dwTimeout: DWORD, pdwResult: LPDWORD): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeCreateDataHandle*(idInst: DWORD, pSrc: LPBYTE, cb: DWORD, cbOff: DWORD, hszItem: HSZ, wFmt: UINT, afCmd: UINT): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeAddData*(hData: HDDEDATA, pSrc: LPBYTE, cb: DWORD, cbOff: DWORD): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeGetData*(hData: HDDEDATA, pDst: LPBYTE, cbMax: DWORD, cbOff: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeAccessData*(hData: HDDEDATA, pcbDataSize: LPDWORD): LPBYTE {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeUnaccessData*(hData: HDDEDATA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeFreeDataHandle*(hData: HDDEDATA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeGetLastError*(idInst: DWORD): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeCreateStringHandleA*(idInst: DWORD, psz: LPCSTR, iCodePage: int32): HSZ {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeCreateStringHandleW*(idInst: DWORD, psz: LPCWSTR, iCodePage: int32): HSZ {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeQueryStringA*(idInst: DWORD, hsz: HSZ, psz: LPSTR, cchMax: DWORD, iCodePage: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeQueryStringW*(idInst: DWORD, hsz: HSZ, psz: LPWSTR, cchMax: DWORD, iCodePage: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeFreeStringHandle*(idInst: DWORD, hsz: HSZ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeKeepStringHandle*(idInst: DWORD, hsz: HSZ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DdeCmpStringHandles*(hsz1: HSZ, hsz2: HSZ): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc DdeQueryConvInfo*(
+  hConv: HCONV, idTransaction: DWORD, pConvInfo: PCONVINFO
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeSetUserHandle*(
+  hConv: HCONV, id: DWORD, hUser: DWORD_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeAbandonTransaction*(
+  idInst: DWORD, hConv: HCONV, idTransaction: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdePostAdvise*(
+  idInst: DWORD, hszTopic: HSZ, hszItem: HSZ
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeEnableCallback*(
+  idInst: DWORD, hConv: HCONV, wCmd: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeImpersonateClient*(
+  hConv: HCONV
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeNameService*(
+  idInst: DWORD, hsz1: HSZ, hsz2: HSZ, afCmd: UINT
+): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeClientTransaction*(
+  pData: LPBYTE,
+  cbData: DWORD,
+  hConv: HCONV,
+  hszItem: HSZ,
+  wFmt: UINT,
+  wType: UINT,
+  dwTimeout: DWORD,
+  pdwResult: LPDWORD,
+): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeCreateDataHandle*(
+  idInst: DWORD,
+  pSrc: LPBYTE,
+  cb: DWORD,
+  cbOff: DWORD,
+  hszItem: HSZ,
+  wFmt: UINT,
+  afCmd: UINT,
+): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeAddData*(
+  hData: HDDEDATA, pSrc: LPBYTE, cb: DWORD, cbOff: DWORD
+): HDDEDATA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeGetData*(
+  hData: HDDEDATA, pDst: LPBYTE, cbMax: DWORD, cbOff: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeAccessData*(
+  hData: HDDEDATA, pcbDataSize: LPDWORD
+): LPBYTE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeUnaccessData*(
+  hData: HDDEDATA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeFreeDataHandle*(
+  hData: HDDEDATA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeGetLastError*(
+  idInst: DWORD
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeCreateStringHandleA*(
+  idInst: DWORD, psz: LPCSTR, iCodePage: int32
+): HSZ {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeCreateStringHandleW*(
+  idInst: DWORD, psz: LPCWSTR, iCodePage: int32
+): HSZ {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeQueryStringA*(
+  idInst: DWORD, hsz: HSZ, psz: LPSTR, cchMax: DWORD, iCodePage: int32
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeQueryStringW*(
+  idInst: DWORD, hsz: HSZ, psz: LPWSTR, cchMax: DWORD, iCodePage: int32
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeFreeStringHandle*(
+  idInst: DWORD, hsz: HSZ
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeKeepStringHandle*(
+  idInst: DWORD, hsz: HSZ
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DdeCmpStringHandles*(
+  hsz1: HSZ, hsz2: HSZ
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 when winimUnicode:
   type
     MONHSZSTRUCT* = MONHSZSTRUCTW
     PMONHSZSTRUCT* = PMONHSZSTRUCTW
-  const
-    CP_WINNEUTRAL* = CP_WINUNICODE
-  proc DdeInitialize*(pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD): UINT {.winapi, stdcall, dynlib: "user32", importc: "DdeInitializeW".}
-  proc DdeCreateStringHandle*(idInst: DWORD, psz: LPCWSTR, iCodePage: int32): HSZ {.winapi, stdcall, dynlib: "user32", importc: "DdeCreateStringHandleW".}
-  proc DdeQueryString*(idInst: DWORD, hsz: HSZ, psz: LPWSTR, cchMax: DWORD, iCodePage: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "DdeQueryStringW".}
+
+  const CP_WINNEUTRAL* = CP_WINUNICODE
+  proc DdeInitialize*(
+    pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "DdeInitializeW".}
+
+  proc DdeCreateStringHandle*(
+    idInst: DWORD, psz: LPCWSTR, iCodePage: int32
+  ): HSZ {.winapi, stdcall, dynlib: "user32", importc: "DdeCreateStringHandleW".}
+
+  proc DdeQueryString*(
+    idInst: DWORD, hsz: HSZ, psz: LPWSTR, cchMax: DWORD, iCodePage: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "DdeQueryStringW".}
+
 when winimAnsi:
   type
     MONHSZSTRUCT* = MONHSZSTRUCTA
     PMONHSZSTRUCT* = PMONHSZSTRUCTA
-  const
-    CP_WINNEUTRAL* = CP_WINANSI
-  proc DdeInitialize*(pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD): UINT {.winapi, stdcall, dynlib: "user32", importc: "DdeInitializeA".}
-  proc DdeCreateStringHandle*(idInst: DWORD, psz: LPCSTR, iCodePage: int32): HSZ {.winapi, stdcall, dynlib: "user32", importc: "DdeCreateStringHandleA".}
-  proc DdeQueryString*(idInst: DWORD, hsz: HSZ, psz: LPSTR, cchMax: DWORD, iCodePage: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "DdeQueryStringA".}
+
+  const CP_WINNEUTRAL* = CP_WINANSI
+  proc DdeInitialize*(
+    pidInst: LPDWORD, pfnCallback: PFNCALLBACK, afCmd: DWORD, ulRes: DWORD
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "DdeInitializeA".}
+
+  proc DdeCreateStringHandle*(
+    idInst: DWORD, psz: LPCSTR, iCodePage: int32
+  ): HSZ {.winapi, stdcall, dynlib: "user32", importc: "DdeCreateStringHandleA".}
+
+  proc DdeQueryString*(
+    idInst: DWORD, hsz: HSZ, psz: LPSTR, cchMax: DWORD, iCodePage: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "DdeQueryStringA".}

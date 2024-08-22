@@ -13,8 +13,7 @@
 #* default keysyms *
 import x
 
-const
-  XK_VoidSymbol*: KeySym = 0x00FFFFFF # void symbol
+const XK_VoidSymbol*: KeySym = 0x00FFFFFF # void symbol
 
 when defined(XK_MISCELLANY) or true:
   const
@@ -23,74 +22,78 @@ when defined(XK_MISCELLANY) or true:
     # * programming, but could have been arbitrary (at the cost of lookup
     # * tables in client code.
     # *
-    XK_BackSpace*: KeySym = 0x0000FF08  # back space, back char
+    XK_BackSpace*: KeySym = 0x0000FF08 # back space, back char
     XK_Tab*: KeySym = 0x0000FF09
-    XK_Linefeed*: KeySym = 0x0000FF0A   # Linefeed, LF
+    XK_Linefeed*: KeySym = 0x0000FF0A # Linefeed, LF
     XK_Clear*: KeySym = 0x0000FF0B
-    XK_Return*: KeySym = 0x0000FF0D     # Return, enter
-    XK_Pause*: KeySym = 0x0000FF13      # Pause, hold
+    XK_Return*: KeySym = 0x0000FF0D # Return, enter
+    XK_Pause*: KeySym = 0x0000FF13 # Pause, hold
     XK_Scroll_Lock*: KeySym = 0x0000FF14
     XK_Sys_Req*: KeySym = 0x0000FF15
     XK_Escape*: KeySym = 0x0000FF1B
-    XK_Delete*: KeySym = 0x0000FFFF     # Delete, rubout \
-                                # International & multi-key character composition
-    XK_Multi_key*: KeySym = 0x0000FF20  # Multi-key character compose
+    XK_Delete*: KeySym = 0x0000FFFF
+      # Delete, rubout \
+      # International & multi-key character composition
+    XK_Multi_key*: KeySym = 0x0000FF20 # Multi-key character compose
     XK_Codeinput*: KeySym = 0x0000FF37
     XK_SingleCandidate*: KeySym = 0x0000FF3C
     XK_MultipleCandidate*: KeySym = 0x0000FF3D
     XK_PreviousCandidate*: KeySym = 0x0000FF3E # Japanese keyboard support
-    XK_Kanji*: KeySym = 0x0000FF21      # Kanji, Kanji convert
-    XK_Muhenkan*: KeySym = 0x0000FF22   # Cancel Conversion
+    XK_Kanji*: KeySym = 0x0000FF21 # Kanji, Kanji convert
+    XK_Muhenkan*: KeySym = 0x0000FF22 # Cancel Conversion
     XK_Henkan_Mode*: KeySym = 0x0000FF23 # Start/Stop Conversion
-    XK_Henkan*: KeySym = 0x0000FF23     # Alias for Henkan_Mode
-    XK_Romaji*: KeySym = 0x0000FF24     # to Romaji
-    XK_Hiragana*: KeySym = 0x0000FF25   # to Hiragana
-    XK_Katakana*: KeySym = 0x0000FF26   # to Katakana
+    XK_Henkan*: KeySym = 0x0000FF23 # Alias for Henkan_Mode
+    XK_Romaji*: KeySym = 0x0000FF24 # to Romaji
+    XK_Hiragana*: KeySym = 0x0000FF25 # to Hiragana
+    XK_Katakana*: KeySym = 0x0000FF26 # to Katakana
     XK_Hiragana_Katakana*: KeySym = 0x0000FF27 # Hiragana/Katakana toggle
-    XK_Zenkaku*: KeySym = 0x0000FF28    # to Zenkaku
-    XK_Hankaku*: KeySym = 0x0000FF29    # to Hankaku
+    XK_Zenkaku*: KeySym = 0x0000FF28 # to Zenkaku
+    XK_Hankaku*: KeySym = 0x0000FF29 # to Hankaku
     XK_Zenkaku_Hankaku*: KeySym = 0x0000FF2A # Zenkaku/Hankaku toggle
-    XK_Touroku*: KeySym = 0x0000FF2B    # Add to Dictionary
-    XK_Massyo*: KeySym = 0x0000FF2C     # Delete from Dictionary
-    XK_Kana_Lock*: KeySym = 0x0000FF2D  # Kana Lock
+    XK_Touroku*: KeySym = 0x0000FF2B # Add to Dictionary
+    XK_Massyo*: KeySym = 0x0000FF2C # Delete from Dictionary
+    XK_Kana_Lock*: KeySym = 0x0000FF2D # Kana Lock
     XK_Kana_Shift*: KeySym = 0x0000FF2E # Kana Shift
     XK_Eisu_Shift*: KeySym = 0x0000FF2F # Alphanumeric Shift
     XK_Eisu_toggle*: KeySym = 0x0000FF30 # Alphanumeric toggle
     XK_Kanji_Bangou*: KeySym = 0x0000FF37 # Codeinput
-    XK_Zen_Koho*: KeySym = 0x0000FF3D   # Multiple/All Candidate(s)
-    XK_Mae_Koho*: KeySym = 0x0000FF3E   # Previous Candidate \
-                                # = $FF31 thru = $FF3F are under XK_KOREAN
-                                # Cursor control & motion
+    XK_Zen_Koho*: KeySym = 0x0000FF3D # Multiple/All Candidate(s)
+    XK_Mae_Koho*: KeySym = 0x0000FF3E
+      # Previous Candidate \
+      # = $FF31 thru = $FF3F are under XK_KOREAN
+      # Cursor control & motion
     XK_Home*: KeySym = 0x0000FF50
-    XK_Left*: KeySym = 0x0000FF51       # Move left, left arrow
-    XK_Up*: KeySym = 0x0000FF52         # Move up, up arrow
-    XK_Right*: KeySym = 0x0000FF53      # Move right, right arrow
-    XK_Down*: KeySym = 0x0000FF54       # Move down, down arrow
-    XK_Prior*: KeySym = 0x0000FF55      # Prior, previous
+    XK_Left*: KeySym = 0x0000FF51 # Move left, left arrow
+    XK_Up*: KeySym = 0x0000FF52 # Move up, up arrow
+    XK_Right*: KeySym = 0x0000FF53 # Move right, right arrow
+    XK_Down*: KeySym = 0x0000FF54 # Move down, down arrow
+    XK_Prior*: KeySym = 0x0000FF55 # Prior, previous
     XK_Page_Up*: KeySym = 0x0000FF55
-    XK_Next*: KeySym = 0x0000FF56       # Next
+    XK_Next*: KeySym = 0x0000FF56 # Next
     XK_Page_Down*: KeySym = 0x0000FF56
-    XK_End*: KeySym = 0x0000FF57        # EOL
-    XK_Begin*: KeySym = 0x0000FF58      # BOL \
-                                # Misc Functions
-    XK_Select*: KeySym = 0x0000FF60     # Select, mark
+    XK_End*: KeySym = 0x0000FF57 # EOL
+    XK_Begin*: KeySym = 0x0000FF58
+      # BOL \
+      # Misc Functions
+    XK_Select*: KeySym = 0x0000FF60 # Select, mark
     XK_Print*: KeySym = 0x0000FF61
-    XK_Execute*: KeySym = 0x0000FF62    # Execute, run, do
-    XK_Insert*: KeySym = 0x0000FF63     # Insert, insert here
-    XK_Undo*: KeySym = 0x0000FF65       # Undo, oops
-    XK_Redo*: KeySym = 0x0000FF66       # redo, again
+    XK_Execute*: KeySym = 0x0000FF62 # Execute, run, do
+    XK_Insert*: KeySym = 0x0000FF63 # Insert, insert here
+    XK_Undo*: KeySym = 0x0000FF65 # Undo, oops
+    XK_Redo*: KeySym = 0x0000FF66 # redo, again
     XK_Menu*: KeySym = 0x0000FF67
-    XK_Find*: KeySym = 0x0000FF68       # Find, search
-    XK_Cancel*: KeySym = 0x0000FF69     # Cancel, stop, abort, exit
-    XK_Help*: KeySym = 0x0000FF6A       # Help
+    XK_Find*: KeySym = 0x0000FF68 # Find, search
+    XK_Cancel*: KeySym = 0x0000FF69 # Cancel, stop, abort, exit
+    XK_Help*: KeySym = 0x0000FF6A # Help
     XK_Break*: KeySym = 0x0000FF6B
     XK_Mode_switch*: KeySym = 0x0000FF7E # Character set switch
     XK_script_switch*: KeySym = 0x0000FF7E # Alias for mode_switch
-    XK_Num_Lock*: KeySym = 0x0000FF7F   # Keypad Functions, keypad numbers cleverly chosen to map to ascii
-    XK_KP_Space*: KeySym = 0x0000FF80   # space
+    XK_Num_Lock*: KeySym = 0x0000FF7F
+      # Keypad Functions, keypad numbers cleverly chosen to map to ascii
+    XK_KP_Space*: KeySym = 0x0000FF80 # space
     XK_KP_Tab*: KeySym = 0x0000FF89
-    XK_KP_Enter*: KeySym = 0x0000FF8D   # enter
-    XK_KP_F1*: KeySym = 0x0000FF91      # PF1, KP_A, ...
+    XK_KP_Enter*: KeySym = 0x0000FF8D # enter
+    XK_KP_F1*: KeySym = 0x0000FF91 # PF1, KP_A, ...
     XK_KP_F2*: KeySym = 0x0000FF92
     XK_KP_F3*: KeySym = 0x0000FF93
     XK_KP_F4*: KeySym = 0x0000FF94
@@ -107,7 +110,7 @@ when defined(XK_MISCELLANY) or true:
     XK_KP_Begin*: KeySym = 0x0000FF9D
     XK_KP_Insert*: KeySym = 0x0000FF9E
     XK_KP_Delete*: KeySym = 0x0000FF9F
-    XK_KP_Equal*: KeySym = 0x0000FFBD   # equals
+    XK_KP_Equal*: KeySym = 0x0000FFBD # equals
     XK_KP_Multiply*: KeySym = 0x0000FFAA
     XK_KP_Add*: KeySym = 0x0000FFAB
     XK_KP_Separator*: KeySym = 0x0000FFAC # separator, often comma
@@ -123,12 +126,13 @@ when defined(XK_MISCELLANY) or true:
     XK_KP_6*: KeySym = 0x0000FFB6
     XK_KP_7*: KeySym = 0x0000FFB7
     XK_KP_8*: KeySym = 0x0000FFB8
-    XK_KP_9*: KeySym = 0x0000FFB9 #*\
-                          # * Auxilliary Functions; note the duplicate definitions for left and right
-                          # * function keys;  Sun keyboards and a few other manufactures have such
-                          # * function key groups on the left and/or right sides of the keyboard.
-                          # * We've not found a keyboard with more than 35 function keys total.
-                          # *
+    XK_KP_9*: KeySym = 0x0000FFB9
+      #*\
+      # * Auxilliary Functions; note the duplicate definitions for left and right
+      # * function keys;  Sun keyboards and a few other manufactures have such
+      # * function key groups on the left and/or right sides of the keyboard.
+      # * We've not found a keyboard with more than 35 function keys total.
+      # *
     XK_F1*: KeySym = 0x0000FFBE
     XK_F2*: KeySym = 0x0000FFBF
     XK_F3*: KeySym = 0x0000FFC0
@@ -188,21 +192,21 @@ when defined(XK_MISCELLANY) or true:
     XK_F34*: KeySym = 0x0000FFDF
     XK_R14*: KeySym = 0x0000FFDF
     XK_F35*: KeySym = 0x0000FFE0
-    XK_R15*: KeySym = 0x0000FFE0        # Modifiers
-    XK_Shift_L*: KeySym = 0x0000FFE1    # Left shift
-    XK_Shift_R*: KeySym = 0x0000FFE2    # Right shift
-    XK_Control_L*: KeySym = 0x0000FFE3  # Left control
-    XK_Control_R*: KeySym = 0x0000FFE4  # Right control
-    XK_Caps_Lock*: KeySym = 0x0000FFE5  # Caps lock
+    XK_R15*: KeySym = 0x0000FFE0 # Modifiers
+    XK_Shift_L*: KeySym = 0x0000FFE1 # Left shift
+    XK_Shift_R*: KeySym = 0x0000FFE2 # Right shift
+    XK_Control_L*: KeySym = 0x0000FFE3 # Left control
+    XK_Control_R*: KeySym = 0x0000FFE4 # Right control
+    XK_Caps_Lock*: KeySym = 0x0000FFE5 # Caps lock
     XK_Shift_Lock*: KeySym = 0x0000FFE6 # Shift lock
-    XK_Meta_L*: KeySym = 0x0000FFE7     # Left meta
-    XK_Meta_R*: KeySym = 0x0000FFE8     # Right meta
-    XK_Alt_L*: KeySym = 0x0000FFE9      # Left alt
-    XK_Alt_R*: KeySym = 0x0000FFEA      # Right alt
-    XK_Super_L*: KeySym = 0x0000FFEB    # Left super
-    XK_Super_R*: KeySym = 0x0000FFEC    # Right super
-    XK_Hyper_L*: KeySym = 0x0000FFED    # Left hyper
-    XK_Hyper_R*: KeySym = 0x0000FFEE    # Right hyper
+    XK_Meta_L*: KeySym = 0x0000FFE7 # Left meta
+    XK_Meta_R*: KeySym = 0x0000FFE8 # Right meta
+    XK_Alt_L*: KeySym = 0x0000FFE9 # Left alt
+    XK_Alt_R*: KeySym = 0x0000FFEA # Right alt
+    XK_Super_L*: KeySym = 0x0000FFEB # Left super
+    XK_Super_R*: KeySym = 0x0000FFEC # Right super
+    XK_Hyper_L*: KeySym = 0x0000FFED # Left hyper
+    XK_Hyper_R*: KeySym = 0x0000FFEE # Right hyper
 # XK_MISCELLANY
 #*
 # * ISO 9995 Function and Modifier Keys
@@ -423,7 +427,7 @@ when defined(XK_LATIN1) or true:
     XK_asciicircum*: KeySym = 0x0000005E
     XK_underscore*: KeySym = 0x0000005F
     XK_grave*: KeySym = 0x00000060
-    XK_quoteleft*: KeySym = 0x00000060  # deprecated
+    XK_quoteleft*: KeySym = 0x00000060 # deprecated
     XK_a*: KeySym = 0x00000061
     XK_b*: KeySym = 0x00000062
     XK_c*: KeySym = 0x00000063
@@ -656,7 +660,7 @@ when defined(XK_LATIN3) or true:
 when defined(XK_LATIN4) or true:
   const
     XK_kra*: KeySym = 0x000003A2
-    XK_kappa*: KeySym = 0x000003A2      # deprecated
+    XK_kappa*: KeySym = 0x000003A2 # deprecated
     XKc_Rcedilla*: KeySym = 0x000003A3
     XKc_Itilde*: KeySym = 0x000003A5
     XKc_Lcedilla*: KeySym = 0x000003A6
@@ -761,7 +765,7 @@ when defined(XK_KATAKANA) or true:
     XK_kana_yu*: KeySym = 0x000004AD
     XK_kana_yo*: KeySym = 0x000004AE
     XK_kana_tsu*: KeySym = 0x000004AF
-    XK_kana_tu*: KeySym = 0x000004AF    # deprecated
+    XK_kana_tu*: KeySym = 0x000004AF # deprecated
     XK_prolongedsound*: KeySym = 0x000004B0
     XKc_kana_A*: KeySym = 0x000004B1
     XKc_kana_I*: KeySym = 0x000004B2
@@ -780,9 +784,9 @@ when defined(XK_KATAKANA) or true:
     XKc_kana_SO*: KeySym = 0x000004BF
     XKc_kana_TA*: KeySym = 0x000004C0
     XKc_kana_CHI*: KeySym = 0x000004C1
-    XKc_kana_TI*: KeySym = 0x000004C1   # deprecated
+    XKc_kana_TI*: KeySym = 0x000004C1 # deprecated
     XKc_kana_TSU*: KeySym = 0x000004C2
-    XKc_kana_TU*: KeySym = 0x000004C2   # deprecated
+    XKc_kana_TU*: KeySym = 0x000004C2 # deprecated
     XKc_kana_TE*: KeySym = 0x000004C3
     XKc_kana_TO*: KeySym = 0x000004C4
     XKc_kana_NA*: KeySym = 0x000004C5
@@ -793,7 +797,7 @@ when defined(XK_KATAKANA) or true:
     XKc_kana_HA*: KeySym = 0x000004CA
     XKc_kana_HI*: KeySym = 0x000004CB
     XKc_kana_FU*: KeySym = 0x000004CC
-    XKc_kana_HU*: KeySym = 0x000004CC   # deprecated
+    XKc_kana_HU*: KeySym = 0x000004CC # deprecated
     XKc_kana_HE*: KeySym = 0x000004CD
     XKc_kana_HO*: KeySym = 0x000004CE
     XKc_kana_MA*: KeySym = 0x000004CF
@@ -1498,7 +1502,7 @@ when defined(XK_THAI) or true:
 
 when defined(XK_KOREAN) or true:
   const
-    XK_Hangul*: KeySym = 0x0000FF31     # Hangul start/stop(toggle)
+    XK_Hangul*: KeySym = 0x0000FF31 # Hangul start/stop(toggle)
     XK_Hangul_Start*: KeySym = 0x0000FF32 # Hangul start
     XK_Hangul_End*: KeySym = 0x0000FF33 # Hangul end, English start
     XK_Hangul_Hanja*: KeySym = 0x0000FF34 # Start Hangul->Hanja Conversion
@@ -1513,8 +1517,9 @@ when defined(XK_KOREAN) or true:
     XK_Hangul_MultipleCandidate*: KeySym = 0x0000FF3D # Multiple candidate
     XK_Hangul_PreviousCandidate*: KeySym = 0x0000FF3E # Previous candidate
     XK_Hangul_Special*: KeySym = 0x0000FF3F # Special symbols
-    XK_Hangul_switch*: KeySym = 0x0000FF7E # Alias for mode_switch \
-                                   # Hangul Consonant Characters
+    XK_Hangul_switch*: KeySym = 0x0000FF7E
+      # Alias for mode_switch \
+      # Hangul Consonant Characters
     XK_Hangul_Kiyeog*: KeySym = 0x00000EA1
     XK_Hangul_SsangKiyeog*: KeySym = 0x00000EA2
     XK_Hangul_KiyeogSios*: KeySym = 0x00000EA3
@@ -1565,7 +1570,7 @@ when defined(XK_KOREAN) or true:
     XK_Hangul_YU*: KeySym = 0x00000ED0
     XK_Hangul_EU*: KeySym = 0x00000ED1
     XK_Hangul_YI*: KeySym = 0x00000ED2
-    XK_Hangul_I*: KeySym = 0x00000ED3   # Hangul syllable-final (JongSeong) Characters
+    XK_Hangul_I*: KeySym = 0x00000ED3 # Hangul syllable-final (JongSeong) Characters
     XK_Hangul_J_Kiyeog*: KeySym = 0x00000ED4
     XK_Hangul_J_SsangKiyeog*: KeySym = 0x00000ED5
     XK_Hangul_J_KiyeogSios*: KeySym = 0x00000ED6
@@ -1601,7 +1606,8 @@ when defined(XK_KOREAN) or true:
     XK_Hangul_SunkyeongeumPhieuf*: KeySym = 0x00000EF4
     XK_Hangul_YeorinHieuh*: KeySym = 0x00000EF5 # Ancient Hangul Vowel Characters
     XK_Hangul_AraeA*: KeySym = 0x00000EF6
-    XK_Hangul_AraeAE*: KeySym = 0x00000EF7 # Ancient Hangul syllable-final (JongSeong) Characters
+    XK_Hangul_AraeAE*: KeySym = 0x00000EF7
+      # Ancient Hangul syllable-final (JongSeong) Characters
     XK_Hangul_J_PanSios*: KeySym = 0x00000EF8
     XK_Hangul_J_KkogjiDalrinIeung*: KeySym = 0x00000EF9
     XK_Hangul_J_YeorinHieuh*: KeySym = 0x00000EFA # Korean currency symbol
@@ -1793,8 +1799,9 @@ when defined(XK_CAUCASUS) or true:
     XK_ocaron*: KeySym = 0x000016BD
     XK_obarred*: KeySym = 0x000016BF
     XKc_SCHWA*: KeySym = 0x000016C6
-    XK_schwa*: KeySym = 0x000016F6 # those are not really Caucasus, but I put them here for now\ 
-                           # For Inupiak
+    XK_schwa*: KeySym = 0x000016F6
+      # those are not really Caucasus, but I put them here for now\ 
+      # For Inupiak
     XKc_Lbelowdot*: KeySym = 0x000016D1
     XKc_Lstrokebelowdot*: KeySym = 0x000016D2
     XK_lbelowdot*: KeySym = 0x000016E1
@@ -1897,10 +1904,10 @@ when defined(XK_VIETNAMESE) or true:
     XK_yhook*: KeySym = 0x00001EF7
     XKc_Ytilde*: KeySym = 0x00001EF8
     XK_ytilde*: KeySym = 0x00001EF9
-    XKc_Ohorn*: KeySym = 0x00001EFA     # U+01a0
-    XK_ohorn*: KeySym = 0x00001EFB      # U+01a1
-    XKc_Uhorn*: KeySym = 0x00001EFC     # U+01af
-    XK_uhorn*: KeySym = 0x00001EFD      # U+01b0
+    XKc_Ohorn*: KeySym = 0x00001EFA # U+01a0
+    XK_ohorn*: KeySym = 0x00001EFB # U+01a1
+    XKc_Uhorn*: KeySym = 0x00001EFC # U+01af
+    XK_uhorn*: KeySym = 0x00001EFD # U+01b0
     XK_combining_tilde*: KeySym = 0x00001E9F # U+0303
     XK_combining_grave*: KeySym = 0x00001EF2 # U+0300
     XK_combining_acute*: KeySym = 0x00001EF3 # U+0301

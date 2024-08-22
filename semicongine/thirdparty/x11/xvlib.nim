@@ -50,20 +50,18 @@
 #**
 #*
 
-import
-  x, xlib, xshm, xv
+import x, xlib, xshm, xv
 
-const
-  libXv* = "libXv.so"
+const libXv* = "libXv.so"
 
 type
   PXvRational* = ptr XvRational
-  XvRational*{.final.} = object
+  XvRational* {.final.} = object
     numerator*: cint
     denominator*: cint
 
   PXvAttribute* = ptr XvAttribute
-  XvAttribute*{.final.} = object
+  XvAttribute* {.final.} = object
     flags*: cint # XvGettable, XvSettable
     min_value*: cint
     max_value*: cint
@@ -71,7 +69,7 @@ type
 
   PPXvEncodingInfo* = ptr PXvEncodingInfo
   PXvEncodingInfo* = ptr XvEncodingInfo
-  XvEncodingInfo*{.final.} = object
+  XvEncodingInfo* {.final.} = object
     encoding_id*: XvEncodingID
     name*: cstring
     width*: culong
@@ -80,13 +78,13 @@ type
     num_encodings*: culong
 
   PXvFormat* = ptr XvFormat
-  XvFormat*{.final.} = object
+  XvFormat* {.final.} = object
     depth*: cchar
     visual_id*: culong
 
   PPXvAdaptorInfo* = ptr PXvAdaptorInfo
   PXvAdaptorInfo* = ptr XvAdaptorInfo
-  XvAdaptorInfo*{.final.} = object
+  XvAdaptorInfo* {.final.} = object
     base_id*: XvPortID
     num_ports*: culong
     thetype*: cchar
@@ -96,56 +94,57 @@ type
     num_adaptors*: culong
 
   PXvVideoNotifyEvent* = ptr XvVideoNotifyEvent
-  XvVideoNotifyEvent*{.final.} = object
+  XvVideoNotifyEvent* {.final.} = object
     theType*: cint
-    serial*: culong     # # of last request processed by server
-    send_event*: XBool  # true if this came from a SendEvent request
-    display*: PDisplay  # Display the event was read from
+    serial*: culong # # of last request processed by server
+    send_event*: XBool # true if this came from a SendEvent request
+    display*: PDisplay # Display the event was read from
     drawable*: Drawable # drawable
-    reason*: culong     # what generated this event
-    port_id*: XvPortID  # what port
-    time*: Time         # milliseconds
+    reason*: culong # what generated this event
+    port_id*: XvPortID # what port
+    time*: Time # milliseconds
 
   PXvPortNotifyEvent* = ptr XvPortNotifyEvent
-  XvPortNotifyEvent*{.final.} = object
+  XvPortNotifyEvent* {.final.} = object
     theType*: cint
-    serial*: culong    # # of last request processed by server
+    serial*: culong # # of last request processed by server
     send_event*: XBool # true if this came from a SendEvent request
     display*: PDisplay # Display the event was read from
     port_id*: XvPortID # what port
-    time*: Time        # milliseconds
-    attribute*: Atom   # atom that identifies attribute
-    value*: clong      # value of attribute
+    time*: Time # milliseconds
+    attribute*: Atom # atom that identifies attribute
+    value*: clong # value of attribute
 
   PXvEvent* = ptr XvEvent
-  XvEvent*{.final.} = object
-    pad*: array[0..23, clong] # case longint of
-                              #      0 : (
-                              #            theType : cint;
-                              #	  );
-                              #      1 : (
-                              #            xvvideo : XvVideoNotifyEvent;
-                              #          );
-                              #      2 : (
-                              #            xvport : XvPortNotifyEvent;
-                              #          );
-                              #      3 : (
-                              #
-                              #          );
+  XvEvent* {.final.} = object
+    pad*: array[0 .. 23, clong]
+      # case longint of
+      #      0 : (
+      #            theType : cint;
+      #	  );
+      #      1 : (
+      #            xvvideo : XvVideoNotifyEvent;
+      #          );
+      #      2 : (
+      #            xvport : XvPortNotifyEvent;
+      #          );
+      #      3 : (
+      #
+      #          );
 
   PXvImageFormatValues* = ptr XvImageFormatValues
-  XvImageFormatValues*{.final.} = object
-    id*: cint                            # Unique descriptor for the format
-    theType*: cint                       # XvRGB, XvYUV
-    byte_order*: cint                    # LSBFirst, MSBFirst
-    guid*: array[0..15, cchar]           # Globally Unique IDentifier
+  XvImageFormatValues* {.final.} = object
+    id*: cint # Unique descriptor for the format
+    theType*: cint # XvRGB, XvYUV
+    byte_order*: cint # LSBFirst, MSBFirst
+    guid*: array[0 .. 15, cchar] # Globally Unique IDentifier
     bits_per_pixel*: cint
-    format*: cint                        # XvPacked, XvPlanar
-    num_planes*: cint                    # for RGB formats only
+    format*: cint # XvPacked, XvPlanar
+    num_planes*: cint # for RGB formats only
     depth*: cint
     red_mask*: cuint
     green_mask*: cuint
-    blue_mask*: cuint                    # for YUV formats only
+    blue_mask*: cuint # for YUV formats only
     y_sample_bits*: cuint
     u_sample_bits*: cuint
     v_sample_bits*: cuint
@@ -155,79 +154,159 @@ type
     vert_y_period*: cuint
     vert_u_period*: cuint
     vert_v_period*: cuint
-    component_order*: array[0..31, char] # eg. UYVY
-    scanline_order*: cint                # XvTopToBottom, XvBottomToTop
+    component_order*: array[0 .. 31, char] # eg. UYVY
+    scanline_order*: cint # XvTopToBottom, XvBottomToTop
 
   PXvImage* = ptr XvImage
-  XvImage*{.final.} = object
+  XvImage* {.final.} = object
     id*: cint
     width*, height*: cint
     data_size*: cint # bytes
     num_planes*: cint
-    pitches*: cint   # bytes
-    offsets*: cint   # bytes
+    pitches*: cint # bytes
+    offsets*: cint # bytes
     data*: pointer
     obdata*: XPointer
 
-proc XvQueryExtension*(display: PDisplay, p_version, p_revision, p_requestBase,
-    p_eventBase, p_errorBase: cuint): cint{.cdecl, dynlib: libXv, importc.}
-proc XvQueryAdaptors*(display: PDisplay, window: Window, p_nAdaptors: cuint,
-                      p_pAdaptors: PPXvAdaptorInfo): cint{.cdecl, dynlib: libXv,
-    importc.}
-proc XvQueryEncodings*(display: PDisplay, port: XvPortID, p_nEncoding: cuint,
-                       p_pEncoding: PPXvEncodingInfo): cint{.cdecl,
-    dynlib: libXv, importc.}
-proc XvPutVideo*(display: PDisplay, port: XvPortID, d: Drawable, gc: GC,
-                 vx, vy: cint, vw, vh: cuint, dx, dy: cint, dw, dh: cuint): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvPutStill*(display: PDisplay, port: XvPortID, d: Drawable, gc: GC,
-                 vx, vy: cint, vw, vh: cuint, dx, dy: cint, dw, dh: cuint): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvGetVideo*(display: PDisplay, port: XvPortID, d: Drawable, gc: GC,
-                 vx, vy: cint, vw, vh: cuint, dx, dy: cint, dw, dh: cuint): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvGetStill*(display: PDisplay, port: XvPortID, d: Drawable, gc: GC,
-                 vx, vy: cint, vw, vh: cuint, dx, dy: cint, dw, dh: cuint): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvStopVideo*(display: PDisplay, port: XvPortID, drawable: Drawable): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvGrabPort*(display: PDisplay, port: XvPortID, time: Time): cint{.cdecl,
-    dynlib: libXv, importc.}
-proc XvUngrabPort*(display: PDisplay, port: XvPortID, time: Time): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvSelectVideoNotify*(display: PDisplay, drawable: Drawable, onoff: XBool): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvSelectPortNotify*(display: PDisplay, port: XvPortID, onoff: XBool): cint{.
-    cdecl, dynlib: libXv, importc.}
-proc XvSetPortAttribute*(display: PDisplay, port: XvPortID, attribute: Atom,
-                         value: cint): cint{.cdecl, dynlib: libXv, importc.}
-proc XvGetPortAttribute*(display: PDisplay, port: XvPortID, attribute: Atom,
-                         p_value: cint): cint{.cdecl, dynlib: libXv, importc.}
-proc XvQueryBestSize*(display: PDisplay, port: XvPortID, motion: XBool,
-                      vid_w, vid_h, drw_w, drw_h: cuint,
-                      p_actual_width, p_actual_height: cuint): cint{.cdecl,
-    dynlib: libXv, importc.}
-proc XvQueryPortAttributes*(display: PDisplay, port: XvPortID, number: cint): PXvAttribute{.
-    cdecl, dynlib: libXv, importc.}
-proc XvFreeAdaptorInfo*(adaptors: PXvAdaptorInfo){.cdecl, dynlib: libXv, importc.}
-proc XvFreeEncodingInfo*(encodings: PXvEncodingInfo){.cdecl, dynlib: libXv,
-    importc.}
-proc XvListImageFormats*(display: PDisplay, port_id: XvPortID,
-                         count_return: cint): PXvImageFormatValues{.cdecl,
-    dynlib: libXv, importc.}
-proc XvCreateImage*(display: PDisplay, port: XvPortID, id: cint, data: pointer,
-                    width, height: cint): PXvImage{.cdecl, dynlib: libXv,
-    importc.}
-proc XvPutImage*(display: PDisplay, id: XvPortID, d: Drawable, gc: GC,
-                 image: PXvImage, src_x, src_y: cint, src_w, src_h: cuint,
-                 dest_x, dest_y: cint, dest_w, dest_h: cuint): cint{.cdecl,
-    dynlib: libXv, importc.}
-proc XvShmPutImage*(display: PDisplay, id: XvPortID, d: Drawable, gc: GC,
-                    image: PXvImage, src_x, src_y: cint, src_w, src_h: cuint,
-                    dest_x, dest_y: cint, dest_w, dest_h: cuint,
-                    send_event: XBool): cint{.cdecl, dynlib: libXv, importc.}
-proc XvShmCreateImage*(display: PDisplay, port: XvPortID, id: cint,
-                       data: pointer, width, height: cint,
-                       shminfo: PXShmSegmentInfo): PXvImage{.cdecl,
-    dynlib: libXv, importc.}
+proc XvQueryExtension*(
+  display: PDisplay,
+  p_version, p_revision, p_requestBase, p_eventBase, p_errorBase: cuint,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvQueryAdaptors*(
+  display: PDisplay, window: Window, p_nAdaptors: cuint, p_pAdaptors: PPXvAdaptorInfo
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvQueryEncodings*(
+  display: PDisplay, port: XvPortID, p_nEncoding: cuint, p_pEncoding: PPXvEncodingInfo
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvPutVideo*(
+  display: PDisplay,
+  port: XvPortID,
+  d: Drawable,
+  gc: GC,
+  vx, vy: cint,
+  vw, vh: cuint,
+  dx, dy: cint,
+  dw, dh: cuint,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvPutStill*(
+  display: PDisplay,
+  port: XvPortID,
+  d: Drawable,
+  gc: GC,
+  vx, vy: cint,
+  vw, vh: cuint,
+  dx, dy: cint,
+  dw, dh: cuint,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvGetVideo*(
+  display: PDisplay,
+  port: XvPortID,
+  d: Drawable,
+  gc: GC,
+  vx, vy: cint,
+  vw, vh: cuint,
+  dx, dy: cint,
+  dw, dh: cuint,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvGetStill*(
+  display: PDisplay,
+  port: XvPortID,
+  d: Drawable,
+  gc: GC,
+  vx, vy: cint,
+  vw, vh: cuint,
+  dx, dy: cint,
+  dw, dh: cuint,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvStopVideo*(
+  display: PDisplay, port: XvPortID, drawable: Drawable
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvGrabPort*(
+  display: PDisplay, port: XvPortID, time: Time
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvUngrabPort*(
+  display: PDisplay, port: XvPortID, time: Time
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvSelectVideoNotify*(
+  display: PDisplay, drawable: Drawable, onoff: XBool
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvSelectPortNotify*(
+  display: PDisplay, port: XvPortID, onoff: XBool
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvSetPortAttribute*(
+  display: PDisplay, port: XvPortID, attribute: Atom, value: cint
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvGetPortAttribute*(
+  display: PDisplay, port: XvPortID, attribute: Atom, p_value: cint
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvQueryBestSize*(
+  display: PDisplay,
+  port: XvPortID,
+  motion: XBool,
+  vid_w, vid_h, drw_w, drw_h: cuint,
+  p_actual_width, p_actual_height: cuint,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvQueryPortAttributes*(
+  display: PDisplay, port: XvPortID, number: cint
+): PXvAttribute {.cdecl, dynlib: libXv, importc.}
+
+proc XvFreeAdaptorInfo*(adaptors: PXvAdaptorInfo) {.cdecl, dynlib: libXv, importc.}
+proc XvFreeEncodingInfo*(encodings: PXvEncodingInfo) {.cdecl, dynlib: libXv, importc.}
+proc XvListImageFormats*(
+  display: PDisplay, port_id: XvPortID, count_return: cint
+): PXvImageFormatValues {.cdecl, dynlib: libXv, importc.}
+
+proc XvCreateImage*(
+  display: PDisplay, port: XvPortID, id: cint, data: pointer, width, height: cint
+): PXvImage {.cdecl, dynlib: libXv, importc.}
+
+proc XvPutImage*(
+  display: PDisplay,
+  id: XvPortID,
+  d: Drawable,
+  gc: GC,
+  image: PXvImage,
+  src_x, src_y: cint,
+  src_w, src_h: cuint,
+  dest_x, dest_y: cint,
+  dest_w, dest_h: cuint,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvShmPutImage*(
+  display: PDisplay,
+  id: XvPortID,
+  d: Drawable,
+  gc: GC,
+  image: PXvImage,
+  src_x, src_y: cint,
+  src_w, src_h: cuint,
+  dest_x, dest_y: cint,
+  dest_w, dest_h: cuint,
+  send_event: XBool,
+): cint {.cdecl, dynlib: libXv, importc.}
+
+proc XvShmCreateImage*(
+  display: PDisplay,
+  port: XvPortID,
+  id: cint,
+  data: pointer,
+  width, height: cint,
+  shminfo: PXShmSegmentInfo,
+): PXvImage {.cdecl, dynlib: libXv, importc.}
+
 # implementation

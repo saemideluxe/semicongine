@@ -31,14 +31,11 @@
 # $Xorg: xf86vmode.h,v 1.3 2000/08/18 04:05:46 coskrey Exp $
 # THIS IS NOT AN X CONSORTIUM STANDARD OR AN X PROJECT TEAM SPECIFICATION
 
-import
-  x, xlib
+import x, xlib
 
-const
-  libXxf86vm* = "libXxf86vm.so"
+const libXxf86vm* = "libXxf86vm.so"
 
-type
-  PINT32* = ptr int32
+type PINT32* = ptr int32
 
 const
   X_XF86VidModeQueryVersion* = 0
@@ -72,8 +69,7 @@ when defined(XF86VIDMODE_EVENTS):
     XF86VidModeNonEvent* = 0
     XF86VidModeModeChange* = 1
 else:
-  const
-    XF86VidModeNumberEvents* = 0
+  const XF86VidModeNumberEvents* = 0
 const
   XF86VidModeBadClock* = 0
   XF86VidModeBadHTimings* = 1
@@ -88,7 +84,7 @@ const
 
 type
   PXF86VidModeModeLine* = ptr XF86VidModeModeLine
-  XF86VidModeModeLine*{.final.} = object
+  XF86VidModeModeLine* {.final.} = object
     hdisplay*: cushort
     hsyncstart*: cushort
     hsyncend*: cushort
@@ -105,7 +101,7 @@ type
   PPPXF86VidModeModeInfo* = ptr PPXF86VidModeModeInfo
   PPXF86VidModeModeInfo* = ptr PXF86VidModeModeInfo
   PXF86VidModeModeInfo* = ptr XF86VidModeModeInfo
-  XF86VidModeModeInfo*{.final.} = object
+  XF86VidModeModeInfo* {.final.} = object
     dotclock*: cuint
     hdisplay*: cushort
     hsyncstart*: cushort
@@ -121,12 +117,12 @@ type
     c_private*: PINT32
 
   PXF86VidModeSyncRange* = ptr XF86VidModeSyncRange
-  XF86VidModeSyncRange*{.final.} = object
+  XF86VidModeSyncRange* {.final.} = object
     hi*: cfloat
     lo*: cfloat
 
   PXF86VidModeMonitor* = ptr XF86VidModeMonitor
-  XF86VidModeMonitor*{.final.} = object
+  XF86VidModeMonitor* {.final.} = object
     vendor*: cstring
     model*: cstring
     EMPTY*: cfloat
@@ -136,88 +132,132 @@ type
     vsync*: PXF86VidModeSyncRange
 
   PXF86VidModeNotifyEvent* = ptr XF86VidModeNotifyEvent
-  XF86VidModeNotifyEvent*{.final.} = object
-    theType*: cint     # of event
-    serial*: culong    # # of last request processed by server
+  XF86VidModeNotifyEvent* {.final.} = object
+    theType*: cint # of event
+    serial*: culong # # of last request processed by server
     send_event*: XBool # true if this came from a SendEvent req
     display*: PDisplay # Display the event was read from
-    root*: Window      # root window of event screen
-    state*: cint       # What happened
-    kind*: cint        # What happened
-    forced*: XBool     # extents of new region
-    time*: Time        # event timestamp
+    root*: Window # root window of event screen
+    state*: cint # What happened
+    kind*: cint # What happened
+    forced*: XBool # extents of new region
+    time*: Time # event timestamp
 
   PXF86VidModeGamma* = ptr XF86VidModeGamma
-  XF86VidModeGamma*{.final.} = object
-    red*: cfloat   # Red Gamma value
+  XF86VidModeGamma* {.final.} = object
+    red*: cfloat # Red Gamma value
     green*: cfloat # Green Gamma value
-    blue*: cfloat  # Blue Gamma value
+    blue*: cfloat # Blue Gamma value
 
 when defined(MACROS):
   proc XF86VidModeSelectNextMode*(disp: PDisplay, scr: cint): XBool
   proc XF86VidModeSelectPrevMode*(disp: PDisplay, scr: cint): XBool
-proc XF86VidModeQueryVersion*(dpy: PDisplay, majorVersion: Pcint,
-                              minorVersion: Pcint): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeQueryExtension*(dpy: PDisplay, event_base: Pcint,
-                                error_base: Pcint): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeSetClientVersion*(dpy: PDisplay): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetModeLine*(dpy: PDisplay, screen: cint, dotclock: Pcint,
-                             modeline: PXF86VidModeModeLine): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetAllModeLines*(dpy: PDisplay, screen: cint, modecount: Pcint,
-                                 modelinesPtr: PPPXF86VidModeModeInfo): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeAddModeLine*(dpy: PDisplay, screen: cint,
-                             new_modeline: PXF86VidModeModeInfo,
-                             after_modeline: PXF86VidModeModeInfo): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeDeleteModeLine*(dpy: PDisplay, screen: cint,
-                                modeline: PXF86VidModeModeInfo): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeModModeLine*(dpy: PDisplay, screen: cint,
-                             modeline: PXF86VidModeModeLine): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeValidateModeLine*(dpy: PDisplay, screen: cint,
-                                  modeline: PXF86VidModeModeInfo): Status{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeSwitchMode*(dpy: PDisplay, screen: cint, zoom: cint): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeSwitchToMode*(dpy: PDisplay, screen: cint,
-                              modeline: PXF86VidModeModeInfo): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeLockModeSwitch*(dpy: PDisplay, screen: cint, lock: cint): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetMonitor*(dpy: PDisplay, screen: cint,
-                            monitor: PXF86VidModeMonitor): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetViewPort*(dpy: PDisplay, screen: cint, x_return: Pcint,
-                             y_return: Pcint): XBool{.cdecl, dynlib: libXxf86vm,
-    importc.}
-proc XF86VidModeSetViewPort*(dpy: PDisplay, screen: cint, x: cint, y: cint): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetDotClocks*(dpy: PDisplay, screen: cint, flags_return: Pcint,
-                              number_of_clocks_return: Pcint,
-                              max_dot_clock_return: Pcint, clocks_return: PPcint): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetGamma*(dpy: PDisplay, screen: cint, Gamma: PXF86VidModeGamma): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeSetGamma*(dpy: PDisplay, screen: cint, Gamma: PXF86VidModeGamma): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeSetGammaRamp*(dpy: PDisplay, screen: cint, size: cint,
-                              red_array: Pcushort, green_array: Pcushort,
-                              blue_array: Pcushort): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetGammaRamp*(dpy: PDisplay, screen: cint, size: cint,
-                              red_array: Pcushort, green_array: Pcushort,
-                              blue_array: Pcushort): XBool{.cdecl,
-    dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetGammaRampSize*(dpy: PDisplay, screen: cint, size: Pcint): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
-proc XF86VidModeGetPermissions*(dpy: PDisplay, screen: cint, permissions: Pcint): XBool{.
-    cdecl, dynlib: libXxf86vm, importc.}
+proc XF86VidModeQueryVersion*(
+  dpy: PDisplay, majorVersion: Pcint, minorVersion: Pcint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeQueryExtension*(
+  dpy: PDisplay, event_base: Pcint, error_base: Pcint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeSetClientVersion*(
+  dpy: PDisplay
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetModeLine*(
+  dpy: PDisplay, screen: cint, dotclock: Pcint, modeline: PXF86VidModeModeLine
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetAllModeLines*(
+  dpy: PDisplay, screen: cint, modecount: Pcint, modelinesPtr: PPPXF86VidModeModeInfo
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeAddModeLine*(
+  dpy: PDisplay,
+  screen: cint,
+  new_modeline: PXF86VidModeModeInfo,
+  after_modeline: PXF86VidModeModeInfo,
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeDeleteModeLine*(
+  dpy: PDisplay, screen: cint, modeline: PXF86VidModeModeInfo
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeModModeLine*(
+  dpy: PDisplay, screen: cint, modeline: PXF86VidModeModeLine
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeValidateModeLine*(
+  dpy: PDisplay, screen: cint, modeline: PXF86VidModeModeInfo
+): Status {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeSwitchMode*(
+  dpy: PDisplay, screen: cint, zoom: cint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeSwitchToMode*(
+  dpy: PDisplay, screen: cint, modeline: PXF86VidModeModeInfo
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeLockModeSwitch*(
+  dpy: PDisplay, screen: cint, lock: cint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetMonitor*(
+  dpy: PDisplay, screen: cint, monitor: PXF86VidModeMonitor
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetViewPort*(
+  dpy: PDisplay, screen: cint, x_return: Pcint, y_return: Pcint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeSetViewPort*(
+  dpy: PDisplay, screen: cint, x: cint, y: cint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetDotClocks*(
+  dpy: PDisplay,
+  screen: cint,
+  flags_return: Pcint,
+  number_of_clocks_return: Pcint,
+  max_dot_clock_return: Pcint,
+  clocks_return: PPcint,
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetGamma*(
+  dpy: PDisplay, screen: cint, Gamma: PXF86VidModeGamma
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeSetGamma*(
+  dpy: PDisplay, screen: cint, Gamma: PXF86VidModeGamma
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeSetGammaRamp*(
+  dpy: PDisplay,
+  screen: cint,
+  size: cint,
+  red_array: Pcushort,
+  green_array: Pcushort,
+  blue_array: Pcushort,
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetGammaRamp*(
+  dpy: PDisplay,
+  screen: cint,
+  size: cint,
+  red_array: Pcushort,
+  green_array: Pcushort,
+  blue_array: Pcushort,
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetGammaRampSize*(
+  dpy: PDisplay, screen: cint, size: Pcint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
+proc XF86VidModeGetPermissions*(
+  dpy: PDisplay, screen: cint, permissions: Pcint
+): XBool {.cdecl, dynlib: libXxf86vm, importc.}
+
 # implementation
 
 #when defined(MACROS):
@@ -225,4 +265,4 @@ proc XF86VidModeSelectNextMode(disp: PDisplay, scr: cint): XBool =
   XF86VidModeSwitchMode(disp, scr, 1)
 
 proc XF86VidModeSelectPrevMode(disp: PDisplay, scr: cint): XBool =
-  XF86VidModeSwitchMode(disp, scr, - 1)
+  XF86VidModeSwitchMode(disp, scr, -1)

@@ -177,12 +177,14 @@ type
   EXCEPTION_DISPOSITION* = int
   QWORD* = int64
   PQWORD* = ptr int64
+
 when winimAnsi:
   type
     TCHAR* = char
     PTCHAR* = ptr char
     TBYTE* = uint8
     PTBYTE* = ptr uint8
+
 when winimCpu64:
   type
     INT_PTR* = int64
@@ -199,6 +201,7 @@ when winimCpu64:
     PUHALF_PTR* = ptr int32
     HALF_PTR* = int32
     PHALF_PTR* = ptr int32
+
 when winimCpu32:
   type
     INT_PTR* = int32
@@ -213,6 +216,7 @@ when winimCpu32:
     PUHALF_PTR* = ptr uint16
     SHANDLE_PTR* = int32
     HANDLE_PTR* = int32
+
 type
   SIZE_T* = ULONG_PTR
   PSIZE_T* = ptr ULONG_PTR
@@ -380,6 +384,7 @@ type
   KPRIORITY* = LONG
   HGDIOBJ* = HANDLE
   OLECHAR* = WCHAR
+
 when winimUnicode:
   type
     TCHAR* = WCHAR
@@ -401,6 +406,7 @@ when winimUnicode:
     PUZZTSTR* = PUZZWSTR
     PZPTSTR* = PZPWSTR
     PUNZTCH* = PUNZWCH
+
 when winimAnsi:
   type
     LPTCH* = LPSTR
@@ -418,12 +424,13 @@ when winimAnsi:
     PZZTSTR* = PZZSTR
     PUZZTSTR* = PZZSTR
     PZPTSTR* = PZPSTR
+
 type
   INT16* = int16
   PINT16* = ptr int16
   PKAFFINITY* = ptr KAFFINITY
-const
-  EXCEPTION_MAXIMUM_PARAMETERS* = 15
+
+const EXCEPTION_MAXIMUM_PARAMETERS* = 15
 type
   EXCEPTION_RECORD* {.pure.} = object
     ExceptionCode*: DWORD
@@ -432,10 +439,12 @@ type
     ExceptionAddress*: PVOID
     NumberParameters*: DWORD
     ExceptionInformation*: array[EXCEPTION_MAXIMUM_PARAMETERS, ULONG_PTR]
+
   PEXCEPTION_RECORD* = ptr EXCEPTION_RECORD
   M128A* {.pure.} = object
     Low*: ULONGLONG
     High*: LONGLONG
+
 when winimCpu64:
   type
     XMM_SAVE_AREA32* {.pure.} = object
@@ -455,6 +464,7 @@ when winimCpu64:
       FloatRegisters*: array[8, M128A]
       XmmRegisters*: array[16, M128A]
       Reserved4*: array[96, BYTE]
+
     CONTEXT_UNION1_STRUCT1* {.pure.} = object
       Header*: array[2, M128A]
       Legacy*: array[8, M128A]
@@ -474,10 +484,12 @@ when winimCpu64:
       Xmm13*: M128A
       Xmm14*: M128A
       Xmm15*: M128A
+
     CONTEXT_UNION1* {.pure, union.} = object
       FltSave*: XMM_SAVE_AREA32
       FloatSave*: XMM_SAVE_AREA32
       struct1*: CONTEXT_UNION1_STRUCT1
+
     CONTEXT* {.pure.} = object
       P1Home*: DWORD64
       P2Home*: DWORD64
@@ -525,59 +537,57 @@ when winimCpu64:
       LastBranchFromRip*: DWORD64
       LastExceptionToRip*: DWORD64
       LastExceptionFromRip*: DWORD64
+
 when winimCpu32:
-  const
-    SIZE_OF_80387_REGISTERS* = 80
-  type
-    FLOATING_SAVE_AREA* {.pure.} = object
-      ControlWord*: DWORD
-      StatusWord*: DWORD
-      TagWord*: DWORD
-      ErrorOffset*: DWORD
-      ErrorSelector*: DWORD
-      DataOffset*: DWORD
-      DataSelector*: DWORD
-      RegisterArea*: array[SIZE_OF_80387_REGISTERS, BYTE]
-      Cr0NpxState*: DWORD
-  const
-    MAXIMUM_SUPPORTED_EXTENSION* = 512
-  type
-    CONTEXT* {.pure.} = object
-      ContextFlags*: DWORD
-      Dr0*: DWORD
-      Dr1*: DWORD
-      Dr2*: DWORD
-      Dr3*: DWORD
-      Dr6*: DWORD
-      Dr7*: DWORD
-      FloatSave*: FLOATING_SAVE_AREA
-      SegGs*: DWORD
-      SegFs*: DWORD
-      SegEs*: DWORD
-      SegDs*: DWORD
-      Edi*: DWORD
-      Esi*: DWORD
-      Ebx*: DWORD
-      Edx*: DWORD
-      Ecx*: DWORD
-      Eax*: DWORD
-      Ebp*: DWORD
-      Eip*: DWORD
-      SegCs*: DWORD
-      EFlags*: DWORD
-      Esp*: DWORD
-      SegSs*: DWORD
-      ExtendedRegisters*: array[MAXIMUM_SUPPORTED_EXTENSION, BYTE]
+  const SIZE_OF_80387_REGISTERS* = 80
+  type FLOATING_SAVE_AREA* {.pure.} = object
+    ControlWord*: DWORD
+    StatusWord*: DWORD
+    TagWord*: DWORD
+    ErrorOffset*: DWORD
+    ErrorSelector*: DWORD
+    DataOffset*: DWORD
+    DataSelector*: DWORD
+    RegisterArea*: array[SIZE_OF_80387_REGISTERS, BYTE]
+    Cr0NpxState*: DWORD
+
+  const MAXIMUM_SUPPORTED_EXTENSION* = 512
+  type CONTEXT* {.pure.} = object
+    ContextFlags*: DWORD
+    Dr0*: DWORD
+    Dr1*: DWORD
+    Dr2*: DWORD
+    Dr3*: DWORD
+    Dr6*: DWORD
+    Dr7*: DWORD
+    FloatSave*: FLOATING_SAVE_AREA
+    SegGs*: DWORD
+    SegFs*: DWORD
+    SegEs*: DWORD
+    SegDs*: DWORD
+    Edi*: DWORD
+    Esi*: DWORD
+    Ebx*: DWORD
+    Edx*: DWORD
+    Ecx*: DWORD
+    Eax*: DWORD
+    Ebp*: DWORD
+    Eip*: DWORD
+    SegCs*: DWORD
+    EFlags*: DWORD
+    Esp*: DWORD
+    SegSs*: DWORD
+    ExtendedRegisters*: array[MAXIMUM_SUPPORTED_EXTENSION, BYTE]
+
 when winimCpu64:
-  type
-    PCONTEXT* = ptr CONTEXT
+  type PCONTEXT* = ptr CONTEXT
 when winimCpu32:
-  type
-    PCONTEXT* = ptr CONTEXT
+  type PCONTEXT* = ptr CONTEXT
 type
   EXCEPTION_POINTERS* {.pure.} = object
     ExceptionRecord*: PEXCEPTION_RECORD
     ContextRecord*: PCONTEXT
+
   Exception_info_ptr* = ptr EXCEPTION_POINTERS
   DOUBLE* = float64
   PNTSTATUS* = ptr NTSTATUS
@@ -586,36 +596,45 @@ type
   QUAD_UNION1* {.pure, union.} = object
     UseThisFieldToCopy*: int64
     DoNotUseThisField*: float64
+
   QUAD* {.pure.} = object
     union1*: QUAD_UNION1
+
   PQUAD* = ptr QUAD
   UQUAD* = QUAD
   PUQUAD* = ptr QUAD
   LARGE_INTEGER_STRUCT1* {.pure.} = object
     LowPart*: ULONG
     HighPart*: LONG
+
   LARGE_INTEGER_u* {.pure.} = object
     LowPart*: ULONG
     HighPart*: LONG
+
   LARGE_INTEGER* {.pure, union.} = object
     struct1*: LARGE_INTEGER_STRUCT1
     u*: LARGE_INTEGER_u
     QuadPart*: LONGLONG
+
   PLARGE_INTEGER* = ptr LARGE_INTEGER
   ULARGE_INTEGER_STRUCT1* {.pure.} = object
     LowPart*: ULONG
     HighPart*: ULONG
+
   ULARGE_INTEGER_u* {.pure.} = object
     LowPart*: ULONG
     HighPart*: ULONG
+
   ULARGE_INTEGER* {.pure, union.} = object
     struct1*: ULARGE_INTEGER_STRUCT1
     u*: ULARGE_INTEGER_u
     QuadPart*: ULONGLONG
+
   PULARGE_INTEGER* = ptr ULARGE_INTEGER
   LUID* {.pure.} = object
     LowPart*: ULONG
     HighPart*: LONG
+
   PLUID* = ptr LUID
   PHYSICAL_ADDRESS* = LARGE_INTEGER
   PPHYSICAL_ADDRESS* = ptr LARGE_INTEGER
@@ -623,17 +642,20 @@ type
     Length*: USHORT
     MaximumLength*: USHORT
     Buffer*: PWSTR
+
   PUNICODE_STRING* = ptr UNICODE_STRING
   PCUNICODE_STRING* = ptr UNICODE_STRING
   CSTRING* {.pure.} = object
     Length*: USHORT
     MaximumLength*: USHORT
     Buffer*: ptr CHAR
+
   PCSTRING* = ptr CSTRING
   STRING* {.pure.} = object
     Length*: USHORT
     MaximumLength*: USHORT
     Buffer*: PCHAR
+
   PSTRING* = ptr STRING
   ANSI_STRING* = STRING
   PANSI_STRING* = PSTRING
@@ -646,6 +668,7 @@ type
     Length*: USHORT
     MaximumLength*: USHORT
     Buffer*: ULONG
+
   PSTRING32* = ptr STRING32
   UNICODE_STRING32* = STRING32
   PUNICODE_STRING32* = ptr STRING32
@@ -655,6 +678,7 @@ type
     Length*: USHORT
     MaximumLength*: USHORT
     Buffer*: ULONGLONG
+
   PSTRING64* = ptr STRING64
   UNICODE_STRING64* = STRING64
   PUNICODE_STRING64* = ptr STRING64
@@ -667,33 +691,40 @@ type
     Attributes*: ULONG
     SecurityDescriptor*: PVOID
     SecurityQualityOfService*: PVOID
+
   POBJECT_ATTRIBUTES* = ptr OBJECT_ATTRIBUTES
   PCOBJECT_ATTRIBUTES* = ptr OBJECT_ATTRIBUTES
   LIST_ENTRY* {.pure.} = object
     Flink*: ptr LIST_ENTRY
     Blink*: ptr LIST_ENTRY
+
   PLIST_ENTRY* = ptr LIST_ENTRY
   PRLIST_ENTRY* = ptr LIST_ENTRY
   LIST_ENTRY32* {.pure.} = object
     Flink*: ULONG
     Blink*: ULONG
+
   PLIST_ENTRY32* = ptr LIST_ENTRY32
   LIST_ENTRY64* {.pure.} = object
     Flink*: ULONGLONG
     Blink*: ULONGLONG
+
   PLIST_ENTRY64* = ptr LIST_ENTRY64
   SINGLE_LIST_ENTRY* {.pure.} = object
     Next*: ptr SINGLE_LIST_ENTRY
+
   PSINGLE_LIST_ENTRY* = ptr SINGLE_LIST_ENTRY
   PROCESSOR_NUMBER* {.pure.} = object
     Group*: USHORT
     Number*: UCHAR
     Reserved*: UCHAR
+
   PPROCESSOR_NUMBER* = ptr PROCESSOR_NUMBER
   GROUP_AFFINITY* {.pure.} = object
     Mask*: KAFFINITY
     Group*: USHORT
     Reserved*: array[3, USHORT]
+
   PGROUP_AFFINITY* = ptr GROUP_AFFINITY
   REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer* {.pure.} = object
     SubstituteNameOffset*: USHORT
@@ -702,33 +733,40 @@ type
     PrintNameLength*: USHORT
     Flags*: ULONG
     PathBuffer*: array[1, WCHAR]
+
   REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer* {.pure.} = object
     SubstituteNameOffset*: USHORT
     SubstituteNameLength*: USHORT
     PrintNameOffset*: USHORT
     PrintNameLength*: USHORT
     PathBuffer*: array[1, WCHAR]
+
   REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer* {.pure.} = object
     DataBuffer*: array[1, UCHAR]
+
   REPARSE_DATA_BUFFER_UNION1* {.pure, union.} = object
     SymbolicLinkReparseBuffer*: REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer
     MountPointReparseBuffer*: REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer
     GenericReparseBuffer*: REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer
+
   REPARSE_DATA_BUFFER* {.pure.} = object
     ReparseTag*: ULONG
     ReparseDataLength*: USHORT
     Reserved*: USHORT
     union1*: REPARSE_DATA_BUFFER_UNION1
+
   PREPARSE_DATA_BUFFER* = ptr REPARSE_DATA_BUFFER
   FLOAT128* {.pure.} = object
     LowPart*: int64
     HighPart*: int64
+
   PFLOAT128* = ptr FLOAT128
   GUID* {.pure.} = object
     Data1*: int32
     Data2*: uint16
     Data3*: uint16
     Data4*: array[8, uint8]
+
   LPGUID* = ptr GUID
   LPCGUID* = ptr GUID
   IID* = GUID
@@ -741,90 +779,104 @@ type
   REFIID* = ptr IID
   REFCLSID* = ptr IID
   REFFMTID* = ptr IID
-  EXCEPTION_ROUTINE* = proc (ExceptionRecord: ptr EXCEPTION_RECORD, EstablisherFrame: PVOID, ContextRecord: ptr CONTEXT, DispatcherContext: PVOID): EXCEPTION_DISPOSITION {.stdcall.}
+  EXCEPTION_ROUTINE* = proc(
+    ExceptionRecord: ptr EXCEPTION_RECORD,
+    EstablisherFrame: PVOID,
+    ContextRecord: ptr CONTEXT,
+    DispatcherContext: PVOID,
+  ): EXCEPTION_DISPOSITION {.stdcall.}
   PEXCEPTION_ROUTINE* = EXCEPTION_ROUTINE
   PKSPIN_LOCK* = ptr KSPIN_LOCK
   PM128A* = ptr M128A
   XSAVE_AREA_HEADER* {.pure.} = object
     Mask*: DWORD64
     Reserved*: array[7, DWORD64]
+
   PXSAVE_AREA_HEADER* = ptr XSAVE_AREA_HEADER
+
 when winimCpu64:
-  type
-    XSAVE_FORMAT* {.pure.} = object
-      ControlWord*: WORD
-      StatusWord*: WORD
-      TagWord*: BYTE
-      Reserved1*: BYTE
-      ErrorOpcode*: WORD
-      ErrorOffset*: DWORD
-      ErrorSelector*: WORD
-      Reserved2*: WORD
-      DataOffset*: DWORD
-      DataSelector*: WORD
-      Reserved3*: WORD
-      MxCsr*: DWORD
-      MxCsr_Mask*: DWORD
-      FloatRegisters*: array[8, M128A]
-      XmmRegisters*: array[16, M128A]
-      Reserved4*: array[96, BYTE]
+  type XSAVE_FORMAT* {.pure.} = object
+    ControlWord*: WORD
+    StatusWord*: WORD
+    TagWord*: BYTE
+    Reserved1*: BYTE
+    ErrorOpcode*: WORD
+    ErrorOffset*: DWORD
+    ErrorSelector*: WORD
+    Reserved2*: WORD
+    DataOffset*: DWORD
+    DataSelector*: WORD
+    Reserved3*: WORD
+    MxCsr*: DWORD
+    MxCsr_Mask*: DWORD
+    FloatRegisters*: array[8, M128A]
+    XmmRegisters*: array[16, M128A]
+    Reserved4*: array[96, BYTE]
+
 when winimCpu32:
-  type
-    XSAVE_FORMAT* {.pure.} = object
-      ControlWord*: WORD
-      StatusWord*: WORD
-      TagWord*: BYTE
-      Reserved1*: BYTE
-      ErrorOpcode*: WORD
-      ErrorOffset*: DWORD
-      ErrorSelector*: WORD
-      Reserved2*: WORD
-      DataOffset*: DWORD
-      DataSelector*: WORD
-      Reserved3*: WORD
-      MxCsr*: DWORD
-      MxCsr_Mask*: DWORD
-      FloatRegisters*: array[8, M128A]
-      XmmRegisters*: array[8, M128A]
-      Reserved4*: array[220, BYTE]
-      Cr0NpxState*: DWORD
+  type XSAVE_FORMAT* {.pure.} = object
+    ControlWord*: WORD
+    StatusWord*: WORD
+    TagWord*: BYTE
+    Reserved1*: BYTE
+    ErrorOpcode*: WORD
+    ErrorOffset*: DWORD
+    ErrorSelector*: WORD
+    Reserved2*: WORD
+    DataOffset*: DWORD
+    DataSelector*: WORD
+    Reserved3*: WORD
+    MxCsr*: DWORD
+    MxCsr_Mask*: DWORD
+    FloatRegisters*: array[8, M128A]
+    XmmRegisters*: array[8, M128A]
+    Reserved4*: array[220, BYTE]
+    Cr0NpxState*: DWORD
+
 type
   XSAVE_AREA* {.pure.} = object
     LegacyState*: XSAVE_FORMAT
     Header*: XSAVE_AREA_HEADER
+
   PXSAVE_AREA* = ptr XSAVE_AREA
   SCOPE_TABLE_AMD64_ScopeRecord* {.pure.} = object
     BeginAddress*: DWORD
     EndAddress*: DWORD
     HandlerAddress*: DWORD
     JumpTarget*: DWORD
+
   SCOPE_TABLE_AMD64* {.pure.} = object
     Count*: DWORD
     ScopeRecord*: array[1, SCOPE_TABLE_AMD64_ScopeRecord]
+
   PSCOPE_TABLE_AMD64* = ptr SCOPE_TABLE_AMD64
   LDT_ENTRY_HighWord_Bytes* {.pure.} = object
     BaseMid*: BYTE
     Flags1*: BYTE
     Flags2*: BYTE
     BaseHi*: BYTE
+
   LDT_ENTRY_HighWord_Bits* {.pure.} = object
-    BaseMid* {.bitsize:8.}: DWORD
-    Type* {.bitsize:5.}: DWORD
-    Dpl* {.bitsize:2.}: DWORD
-    Pres* {.bitsize:1.}: DWORD
-    LimitHi* {.bitsize:4.}: DWORD
-    Sys* {.bitsize:1.}: DWORD
-    Reserved_0* {.bitsize:1.}: DWORD
-    Default_Big* {.bitsize:1.}: DWORD
-    Granularity* {.bitsize:1.}: DWORD
-    BaseHi* {.bitsize:8.}: DWORD
+    BaseMid* {.bitsize: 8.}: DWORD
+    Type* {.bitsize: 5.}: DWORD
+    Dpl* {.bitsize: 2.}: DWORD
+    Pres* {.bitsize: 1.}: DWORD
+    LimitHi* {.bitsize: 4.}: DWORD
+    Sys* {.bitsize: 1.}: DWORD
+    Reserved_0* {.bitsize: 1.}: DWORD
+    Default_Big* {.bitsize: 1.}: DWORD
+    Granularity* {.bitsize: 1.}: DWORD
+    BaseHi* {.bitsize: 8.}: DWORD
+
   LDT_ENTRY_HighWord* {.pure, union.} = object
     Bytes*: LDT_ENTRY_HighWord_Bytes
     Bits*: LDT_ENTRY_HighWord_Bits
+
   LDT_ENTRY* {.pure.} = object
     LimitLow*: WORD
     BaseLow*: WORD
     HighWord*: LDT_ENTRY_HighWord
+
   PLDT_ENTRY* = ptr LDT_ENTRY
   EXCEPTION_RECORD32* {.pure.} = object
     ExceptionCode*: DWORD
@@ -833,6 +885,7 @@ type
     ExceptionAddress*: DWORD
     NumberParameters*: DWORD
     ExceptionInformation*: array[EXCEPTION_MAXIMUM_PARAMETERS, DWORD]
+
   PEXCEPTION_RECORD32* = ptr EXCEPTION_RECORD32
   EXCEPTION_RECORD64* {.pure.} = object
     ExceptionCode*: DWORD
@@ -842,6 +895,7 @@ type
     NumberParameters*: DWORD
     unusedAlignment*: DWORD
     ExceptionInformation*: array[EXCEPTION_MAXIMUM_PARAMETERS, DWORD64]
+
   PEXCEPTION_RECORD64* = ptr EXCEPTION_RECORD64
   PEXCEPTION_POINTERS* = ptr EXCEPTION_POINTERS
   PACCESS_MASK* = ptr ACCESS_MASK
@@ -850,38 +904,44 @@ type
     GenericWrite*: ACCESS_MASK
     GenericExecute*: ACCESS_MASK
     GenericAll*: ACCESS_MASK
+
   PGENERIC_MAPPING* = ptr GENERIC_MAPPING
   LUID_AND_ATTRIBUTES* {.pure.} = object
     Luid*: LUID
     Attributes*: DWORD
+
   PLUID_AND_ATTRIBUTES* = ptr LUID_AND_ATTRIBUTES
-const
-  ANYSIZE_ARRAY* = 1
+
+const ANYSIZE_ARRAY* = 1
 type
   LUID_AND_ATTRIBUTES_ARRAY* = array[ANYSIZE_ARRAY, LUID_AND_ATTRIBUTES]
   PLUID_AND_ATTRIBUTES_ARRAY* = ptr LUID_AND_ATTRIBUTES_ARRAY
   SID_IDENTIFIER_AUTHORITY* {.pure.} = object
     Value*: array[6, BYTE]
+
   PSID_IDENTIFIER_AUTHORITY* = ptr SID_IDENTIFIER_AUTHORITY
   SID* {.pure.} = object
     Revision*: BYTE
     SubAuthorityCount*: BYTE
     IdentifierAuthority*: SID_IDENTIFIER_AUTHORITY
     SubAuthority*: array[ANYSIZE_ARRAY, DWORD]
+
   PISID* = ptr SID
   SID_AND_ATTRIBUTES* {.pure.} = object
     Sid*: PSID
     Attributes*: DWORD
+
   PSID_AND_ATTRIBUTES* = ptr SID_AND_ATTRIBUTES
   SID_AND_ATTRIBUTES_ARRAY* = array[ANYSIZE_ARRAY, SID_AND_ATTRIBUTES]
   PSID_AND_ATTRIBUTES_ARRAY* = ptr SID_AND_ATTRIBUTES_ARRAY
-const
-  SID_HASH_SIZE* = 32
+
+const SID_HASH_SIZE* = 32
 type
   SID_AND_ATTRIBUTES_HASH* {.pure.} = object
     SidCount*: DWORD
     SidAttr*: PSID_AND_ATTRIBUTES
     Hash*: array[SID_HASH_SIZE, SID_HASH_ENTRY]
+
   PSID_AND_ATTRIBUTES_HASH* = ptr SID_AND_ATTRIBUTES_HASH
   ACL* {.pure.} = object
     AclRevision*: BYTE
@@ -889,46 +949,55 @@ type
     AclSize*: WORD
     AceCount*: WORD
     Sbz2*: WORD
+
   PACL* = ptr ACL
   ACE_HEADER* {.pure.} = object
     AceType*: BYTE
     AceFlags*: BYTE
     AceSize*: WORD
+
   PACE_HEADER* = ptr ACE_HEADER
   ACCESS_ALLOWED_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PACCESS_ALLOWED_ACE* = ptr ACCESS_ALLOWED_ACE
   ACCESS_DENIED_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PACCESS_DENIED_ACE* = ptr ACCESS_DENIED_ACE
   SYSTEM_AUDIT_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PSYSTEM_AUDIT_ACE* = ptr SYSTEM_AUDIT_ACE
   SYSTEM_ALARM_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PSYSTEM_ALARM_ACE* = ptr SYSTEM_ALARM_ACE
   SYSTEM_RESOURCE_ATTRIBUTE_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PSYSTEM_RESOURCE_ATTRIBUTE_ACE* = ptr SYSTEM_RESOURCE_ATTRIBUTE_ACE
   SYSTEM_SCOPED_POLICY_ID_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PSYSTEM_SCOPED_POLICY_ID_ACE* = ptr SYSTEM_SCOPED_POLICY_ID_ACE
   SYSTEM_MANDATORY_LABEL_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PSYSTEM_MANDATORY_LABEL_ACE* = ptr SYSTEM_MANDATORY_LABEL_ACE
   ACCESS_ALLOWED_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -937,6 +1006,7 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PACCESS_ALLOWED_OBJECT_ACE* = ptr ACCESS_ALLOWED_OBJECT_ACE
   ACCESS_DENIED_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -945,6 +1015,7 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PACCESS_DENIED_OBJECT_ACE* = ptr ACCESS_DENIED_OBJECT_ACE
   SYSTEM_AUDIT_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -953,6 +1024,7 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PSYSTEM_AUDIT_OBJECT_ACE* = ptr SYSTEM_AUDIT_OBJECT_ACE
   SYSTEM_ALARM_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -961,26 +1033,31 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PSYSTEM_ALARM_OBJECT_ACE* = ptr SYSTEM_ALARM_OBJECT_ACE
   ACCESS_ALLOWED_CALLBACK_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PACCESS_ALLOWED_CALLBACK_ACE* = ptr ACCESS_ALLOWED_CALLBACK_ACE
   ACCESS_DENIED_CALLBACK_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PACCESS_DENIED_CALLBACK_ACE* = ptr ACCESS_DENIED_CALLBACK_ACE
   SYSTEM_AUDIT_CALLBACK_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PSYSTEM_AUDIT_CALLBACK_ACE* = ptr SYSTEM_AUDIT_CALLBACK_ACE
   SYSTEM_ALARM_CALLBACK_ACE* {.pure.} = object
     Header*: ACE_HEADER
     Mask*: ACCESS_MASK
     SidStart*: DWORD
+
   PSYSTEM_ALARM_CALLBACK_ACE* = ptr SYSTEM_ALARM_CALLBACK_ACE
   ACCESS_ALLOWED_CALLBACK_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -989,6 +1066,7 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PACCESS_ALLOWED_CALLBACK_OBJECT_ACE* = ptr ACCESS_ALLOWED_CALLBACK_OBJECT_ACE
   ACCESS_DENIED_CALLBACK_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -997,6 +1075,7 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PACCESS_DENIED_CALLBACK_OBJECT_ACE* = ptr ACCESS_DENIED_CALLBACK_OBJECT_ACE
   SYSTEM_AUDIT_CALLBACK_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -1005,6 +1084,7 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PSYSTEM_AUDIT_CALLBACK_OBJECT_ACE* = ptr SYSTEM_AUDIT_CALLBACK_OBJECT_ACE
   SYSTEM_ALARM_CALLBACK_OBJECT_ACE* {.pure.} = object
     Header*: ACE_HEADER
@@ -1013,14 +1093,17 @@ type
     ObjectType*: GUID
     InheritedObjectType*: GUID
     SidStart*: DWORD
+
   PSYSTEM_ALARM_CALLBACK_OBJECT_ACE* = ptr SYSTEM_ALARM_CALLBACK_OBJECT_ACE
   ACL_REVISION_INFORMATION* {.pure.} = object
     AclRevision*: DWORD
+
   PACL_REVISION_INFORMATION* = ptr ACL_REVISION_INFORMATION
   ACL_SIZE_INFORMATION* {.pure.} = object
     AceCount*: DWORD
     AclBytesInUse*: DWORD
     AclBytesFree*: DWORD
+
   PACL_SIZE_INFORMATION* = ptr ACL_SIZE_INFORMATION
   SECURITY_DESCRIPTOR_RELATIVE* {.pure.} = object
     Revision*: BYTE
@@ -1030,6 +1113,7 @@ type
     Group*: DWORD
     Sacl*: DWORD
     Dacl*: DWORD
+
   PISECURITY_DESCRIPTOR_RELATIVE* = ptr SECURITY_DESCRIPTOR_RELATIVE
   SECURITY_DESCRIPTOR* {.pure.} = object
     Revision*: BYTE
@@ -1039,24 +1123,29 @@ type
     Group*: PSID
     Sacl*: PACL
     Dacl*: PACL
+
   PISECURITY_DESCRIPTOR* = ptr SECURITY_DESCRIPTOR
   OBJECT_TYPE_LIST* {.pure.} = object
     Level*: WORD
     Sbz*: WORD
     ObjectType*: ptr GUID
+
   POBJECT_TYPE_LIST* = ptr OBJECT_TYPE_LIST
   PRIVILEGE_SET* {.pure.} = object
     PrivilegeCount*: DWORD
     Control*: DWORD
     Privilege*: array[ANYSIZE_ARRAY, LUID_AND_ATTRIBUTES]
+
   PPRIVILEGE_SET* = ptr PRIVILEGE_SET
   ACCESS_REASONS* {.pure.} = object
     Data*: array[32, ACCESS_REASON]
+
   PACCESS_REASONS* = ptr ACCESS_REASONS
   SE_SECURITY_DESCRIPTOR* {.pure.} = object
     Size*: DWORD
     Flags*: DWORD
     SecurityDescriptor*: PSECURITY_DESCRIPTOR
+
   PSE_SECURITY_DESCRIPTOR* = ptr SE_SECURITY_DESCRIPTOR
   SE_ACCESS_REQUEST* {.pure.} = object
     Size*: DWORD
@@ -1067,6 +1156,7 @@ type
     GenericMapping*: PGENERIC_MAPPING
     ObjectTypeListCount*: DWORD
     ObjectTypeList*: POBJECT_TYPE_LIST
+
   PSE_ACCESS_REQUEST* = ptr SE_ACCESS_REQUEST
   SE_ACCESS_REPLY* {.pure.} = object
     Size*: DWORD
@@ -1075,33 +1165,42 @@ type
     AccessStatus*: PDWORD
     AccessReason*: PACCESS_REASONS
     Privileges*: ptr PPRIVILEGE_SET
+
   PSE_ACCESS_REPLY* = ptr SE_ACCESS_REPLY
   PTOKEN_TYPE* = ptr TOKEN_TYPE
   TOKEN_USER* {.pure.} = object
     User*: SID_AND_ATTRIBUTES
+
   PTOKEN_USER* = ptr TOKEN_USER
   TOKEN_GROUPS* {.pure.} = object
     GroupCount*: DWORD
     Groups*: array[ANYSIZE_ARRAY, SID_AND_ATTRIBUTES]
+
   PTOKEN_GROUPS* = ptr TOKEN_GROUPS
   TOKEN_PRIVILEGES* {.pure.} = object
     PrivilegeCount*: DWORD
     Privileges*: array[ANYSIZE_ARRAY, LUID_AND_ATTRIBUTES]
+
   PTOKEN_PRIVILEGES* = ptr TOKEN_PRIVILEGES
   TOKEN_OWNER* {.pure.} = object
     Owner*: PSID
+
   PTOKEN_OWNER* = ptr TOKEN_OWNER
   TOKEN_PRIMARY_GROUP* {.pure.} = object
     PrimaryGroup*: PSID
+
   PTOKEN_PRIMARY_GROUP* = ptr TOKEN_PRIMARY_GROUP
   TOKEN_DEFAULT_DACL* {.pure.} = object
     DefaultDacl*: PACL
+
   PTOKEN_DEFAULT_DACL* = ptr TOKEN_DEFAULT_DACL
   TOKEN_USER_CLAIMS* {.pure.} = object
     UserClaims*: PCLAIMS_BLOB
+
   PTOKEN_USER_CLAIMS* = ptr TOKEN_USER_CLAIMS
   TOKEN_DEVICE_CLAIMS* {.pure.} = object
     DeviceClaims*: PCLAIMS_BLOB
+
   PTOKEN_DEVICE_CLAIMS* = ptr TOKEN_DEVICE_CLAIMS
   TOKEN_GROUPS_AND_PRIVILEGES* {.pure.} = object
     SidCount*: DWORD
@@ -1114,18 +1213,23 @@ type
     PrivilegeLength*: DWORD
     Privileges*: PLUID_AND_ATTRIBUTES
     AuthenticationId*: LUID
+
   PTOKEN_GROUPS_AND_PRIVILEGES* = ptr TOKEN_GROUPS_AND_PRIVILEGES
   TOKEN_LINKED_TOKEN* {.pure.} = object
     LinkedToken*: HANDLE
+
   PTOKEN_LINKED_TOKEN* = ptr TOKEN_LINKED_TOKEN
   TOKEN_ELEVATION* {.pure.} = object
     TokenIsElevated*: DWORD
+
   PTOKEN_ELEVATION* = ptr TOKEN_ELEVATION
   TOKEN_MANDATORY_LABEL* {.pure.} = object
     Label*: SID_AND_ATTRIBUTES
+
   PTOKEN_MANDATORY_LABEL* = ptr TOKEN_MANDATORY_LABEL
   TOKEN_MANDATORY_POLICY* {.pure.} = object
     Policy*: DWORD
+
   PTOKEN_MANDATORY_POLICY* = ptr TOKEN_MANDATORY_POLICY
   TOKEN_ACCESS_INFORMATION* {.pure.} = object
     SidHash*: PSID_AND_ATTRIBUTES_HASH
@@ -1139,19 +1243,22 @@ type
     AppContainerNumber*: DWORD
     PackageSid*: PSID
     CapabilitiesHash*: PSID_AND_ATTRIBUTES_HASH
+
   PTOKEN_ACCESS_INFORMATION* = ptr TOKEN_ACCESS_INFORMATION
-const
-  POLICY_AUDIT_SUBCATEGORY_COUNT* = 56
+
+const POLICY_AUDIT_SUBCATEGORY_COUNT* = 56
 type
   TOKEN_AUDIT_POLICY* {.pure.} = object
     PerUserPolicy*: array[((POLICY_AUDIT_SUBCATEGORY_COUNT) shr 1) + 1, UCHAR]
+
   PTOKEN_AUDIT_POLICY* = ptr TOKEN_AUDIT_POLICY
-const
-  TOKEN_SOURCE_LENGTH* = 8
+
+const TOKEN_SOURCE_LENGTH* = 8
 type
   TOKEN_SOURCE* {.pure.} = object
     SourceName*: array[TOKEN_SOURCE_LENGTH, CHAR]
     SourceIdentifier*: LUID
+
   PTOKEN_SOURCE* = ptr TOKEN_SOURCE
   TOKEN_STATISTICS* {.pure.} = object
     TokenId*: LUID
@@ -1164,33 +1271,41 @@ type
     GroupCount*: DWORD
     PrivilegeCount*: DWORD
     ModifiedId*: LUID
+
   PTOKEN_STATISTICS* = ptr TOKEN_STATISTICS
   TOKEN_CONTROL* {.pure.} = object
     TokenId*: LUID
     AuthenticationId*: LUID
     ModifiedId*: LUID
     TokenSource*: TOKEN_SOURCE
+
   PTOKEN_CONTROL* = ptr TOKEN_CONTROL
   TOKEN_ORIGIN* {.pure.} = object
     OriginatingLogonSession*: LUID
+
   PTOKEN_ORIGIN* = ptr TOKEN_ORIGIN
   TOKEN_APPCONTAINER_INFORMATION* {.pure.} = object
     TokenAppContainer*: PSID
+
   PTOKEN_APPCONTAINER_INFORMATION* = ptr TOKEN_APPCONTAINER_INFORMATION
   CLAIM_SECURITY_ATTRIBUTE_FQBN_VALUE* {.pure.} = object
     Version*: DWORD64
     Name*: PWSTR
+
   PCLAIM_SECURITY_ATTRIBUTE_FQBN_VALUE* = ptr CLAIM_SECURITY_ATTRIBUTE_FQBN_VALUE
   CLAIM_SECURITY_ATTRIBUTE_OCTET_STRING_VALUE* {.pure.} = object
     pValue*: PVOID
     ValueLength*: DWORD
-  PCLAIM_SECURITY_ATTRIBUTE_OCTET_STRING_VALUE* = ptr CLAIM_SECURITY_ATTRIBUTE_OCTET_STRING_VALUE
+
+  PCLAIM_SECURITY_ATTRIBUTE_OCTET_STRING_VALUE* =
+    ptr CLAIM_SECURITY_ATTRIBUTE_OCTET_STRING_VALUE
   CLAIM_SECURITY_ATTRIBUTE_V1_Values* {.pure, union.} = object
     pInt64*: PLONG64
     pUint64*: PDWORD64
     ppString*: ptr PWSTR
     pFqbn*: PCLAIM_SECURITY_ATTRIBUTE_FQBN_VALUE
     pOctetString*: PCLAIM_SECURITY_ATTRIBUTE_OCTET_STRING_VALUE
+
   CLAIM_SECURITY_ATTRIBUTE_V1* {.pure.} = object
     Name*: PWSTR
     ValueType*: WORD
@@ -1198,6 +1313,7 @@ type
     Flags*: DWORD
     ValueCount*: DWORD
     Values*: CLAIM_SECURITY_ATTRIBUTE_V1_Values
+
   PCLAIM_SECURITY_ATTRIBUTE_V1* = ptr CLAIM_SECURITY_ATTRIBUTE_V1
   CLAIM_SECURITY_ATTRIBUTE_RELATIVE_V1_Values* {.pure, union.} = object
     pInt64*: array[ANYSIZE_ARRAY, DWORD]
@@ -1205,6 +1321,7 @@ type
     ppString*: array[ANYSIZE_ARRAY, DWORD]
     pFqbn*: array[ANYSIZE_ARRAY, DWORD]
     pOctetString*: array[ANYSIZE_ARRAY, DWORD]
+
   CLAIM_SECURITY_ATTRIBUTE_RELATIVE_V1* {.pure.} = object
     Name*: DWORD
     ValueType*: WORD
@@ -1212,43 +1329,51 @@ type
     Flags*: DWORD
     ValueCount*: DWORD
     Values*: CLAIM_SECURITY_ATTRIBUTE_RELATIVE_V1_Values
+
   PCLAIM_SECURITY_ATTRIBUTE_RELATIVE_V1* = ptr CLAIM_SECURITY_ATTRIBUTE_RELATIVE_V1
   CLAIM_SECURITY_ATTRIBUTES_INFORMATION_Attribute* {.pure, union.} = object
     pAttributeV1*: PCLAIM_SECURITY_ATTRIBUTE_V1
+
   CLAIM_SECURITY_ATTRIBUTES_INFORMATION* {.pure.} = object
     Version*: WORD
     Reserved*: WORD
     AttributeCount*: DWORD
     Attribute*: CLAIM_SECURITY_ATTRIBUTES_INFORMATION_Attribute
+
   PCLAIM_SECURITY_ATTRIBUTES_INFORMATION* = ptr CLAIM_SECURITY_ATTRIBUTES_INFORMATION
   SECURITY_QUALITY_OF_SERVICE* {.pure.} = object
     Length*: DWORD
     ImpersonationLevel*: SECURITY_IMPERSONATION_LEVEL
     ContextTrackingMode*: SECURITY_CONTEXT_TRACKING_MODE
     EffectiveOnly*: BOOLEAN
+
   PSECURITY_QUALITY_OF_SERVICE* = ptr SECURITY_QUALITY_OF_SERVICE
   SE_IMPERSONATION_STATE* {.pure.} = object
     Token*: PACCESS_TOKEN
     CopyOnOpen*: BOOLEAN
     EffectiveOnly*: BOOLEAN
     Level*: SECURITY_IMPERSONATION_LEVEL
+
   PSE_IMPERSONATION_STATE* = ptr SE_IMPERSONATION_STATE
   SECURITY_CAPABILITIES* {.pure.} = object
     AppContainerSid*: PSID
     Capabilities*: PSID_AND_ATTRIBUTES
     CapabilityCount*: DWORD
     Reserved*: DWORD
+
   PSECURITY_CAPABILITIES* = ptr SECURITY_CAPABILITIES
   LPSECURITY_CAPABILITIES* = ptr SECURITY_CAPABILITIES
   JOB_SET_ARRAY* {.pure.} = object
     JobHandle*: HANDLE
     MemberLevel*: DWORD
     Flags*: DWORD
+
   PJOB_SET_ARRAY* = ptr JOB_SET_ARRAY
   EXCEPTION_REGISTRATION_RECORD* {.pure.} = object
   NT_TIB_UNION1* {.pure, union.} = object
     FiberData*: PVOID
     Version*: DWORD
+
   NT_TIB* {.pure.} = object
     ExceptionList*: ptr EXCEPTION_REGISTRATION_RECORD
     StackBase*: PVOID
@@ -1257,10 +1382,12 @@ type
     union1*: NT_TIB_UNION1
     ArbitraryUserPointer*: PVOID
     Self*: ptr NT_TIB
+
   PNT_TIB* = ptr NT_TIB
   NT_TIB32_UNION1* {.pure, union.} = object
     FiberData*: DWORD
     Version*: DWORD
+
   NT_TIB32* {.pure.} = object
     ExceptionList*: DWORD
     StackBase*: DWORD
@@ -1269,10 +1396,12 @@ type
     union1*: NT_TIB32_UNION1
     ArbitraryUserPointer*: DWORD
     Self*: DWORD
+
   PNT_TIB32* = ptr NT_TIB32
   NT_TIB64_UNION1* {.pure, union.} = object
     FiberData*: DWORD64
     Version*: DWORD
+
   NT_TIB64* {.pure.} = object
     ExceptionList*: DWORD64
     StackBase*: DWORD64
@@ -1281,11 +1410,13 @@ type
     union1*: NT_TIB64_UNION1
     ArbitraryUserPointer*: DWORD64
     Self*: DWORD64
+
   PNT_TIB64* = ptr NT_TIB64
   UMS_CREATE_THREAD_ATTRIBUTES* {.pure.} = object
     UmsVersion*: DWORD
     UmsContext*: PVOID
     UmsCompletionList*: PVOID
+
   PUMS_CREATE_THREAD_ATTRIBUTES* = ptr UMS_CREATE_THREAD_ATTRIBUTES
   QUOTA_LIMITS* {.pure.} = object
     PagedPoolLimit*: SIZE_T
@@ -1294,13 +1425,16 @@ type
     MaximumWorkingSetSize*: SIZE_T
     PagefileLimit*: SIZE_T
     TimeLimit*: LARGE_INTEGER
+
   PQUOTA_LIMITS* = ptr QUOTA_LIMITS
   RATE_QUOTA_LIMIT_STRUCT1* {.pure.} = object
-    RatePercent* {.bitsize:7.}: DWORD
-    Reserved0* {.bitsize:25.}: DWORD
+    RatePercent* {.bitsize: 7.}: DWORD
+    Reserved0* {.bitsize: 25.}: DWORD
+
   RATE_QUOTA_LIMIT* {.pure, union.} = object
     RateData*: DWORD
     struct1*: RATE_QUOTA_LIMIT_STRUCT1
+
   PRATE_QUOTA_LIMIT* = ptr RATE_QUOTA_LIMIT
   QUOTA_LIMITS_EX* {.pure.} = object
     PagedPoolLimit*: SIZE_T
@@ -1315,6 +1449,7 @@ type
     Reserved4*: SIZE_T
     Flags*: DWORD
     CpuRateLimit*: RATE_QUOTA_LIMIT
+
   PQUOTA_LIMITS_EX* = ptr QUOTA_LIMITS_EX
   IO_COUNTERS* {.pure.} = object
     ReadOperationCount*: ULONGLONG
@@ -1323,58 +1458,77 @@ type
     ReadTransferCount*: ULONGLONG
     WriteTransferCount*: ULONGLONG
     OtherTransferCount*: ULONGLONG
+
   PIO_COUNTERS* = ptr IO_COUNTERS
   PROCESS_MITIGATION_ASLR_POLICY_UNION1_STRUCT1* {.pure.} = object
-    EnableBottomUpRandomization* {.bitsize:1.}: DWORD
-    EnableForceRelocateImages* {.bitsize:1.}: DWORD
-    EnableHighEntropy* {.bitsize:1.}: DWORD
-    DisallowStrippedImages* {.bitsize:1.}: DWORD
-    ReservedFlags* {.bitsize:28.}: DWORD
+    EnableBottomUpRandomization* {.bitsize: 1.}: DWORD
+    EnableForceRelocateImages* {.bitsize: 1.}: DWORD
+    EnableHighEntropy* {.bitsize: 1.}: DWORD
+    DisallowStrippedImages* {.bitsize: 1.}: DWORD
+    ReservedFlags* {.bitsize: 28.}: DWORD
+
   PROCESS_MITIGATION_ASLR_POLICY_UNION1* {.pure, union.} = object
     Flags*: DWORD
     struct1*: PROCESS_MITIGATION_ASLR_POLICY_UNION1_STRUCT1
+
   PROCESS_MITIGATION_ASLR_POLICY* {.pure.} = object
     union1*: PROCESS_MITIGATION_ASLR_POLICY_UNION1
+
   PPROCESS_MITIGATION_ASLR_POLICY* = ptr PROCESS_MITIGATION_ASLR_POLICY
   PROCESS_MITIGATION_DEP_POLICY_UNION1_STRUCT1* {.pure.} = object
-    Enable* {.bitsize:1.}: DWORD
-    DisableAtlThunkEmulation* {.bitsize:1.}: DWORD
-    ReservedFlags* {.bitsize:30.}: DWORD
+    Enable* {.bitsize: 1.}: DWORD
+    DisableAtlThunkEmulation* {.bitsize: 1.}: DWORD
+    ReservedFlags* {.bitsize: 30.}: DWORD
+
   PROCESS_MITIGATION_DEP_POLICY_UNION1* {.pure, union.} = object
     Flags*: DWORD
     struct1*: PROCESS_MITIGATION_DEP_POLICY_UNION1_STRUCT1
+
   PROCESS_MITIGATION_DEP_POLICY* {.pure.} = object
     union1*: PROCESS_MITIGATION_DEP_POLICY_UNION1
     Permanent*: BOOLEAN
+
   PPROCESS_MITIGATION_DEP_POLICY* = ptr PROCESS_MITIGATION_DEP_POLICY
   PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY_UNION1_STRUCT1* {.pure.} = object
-    RaiseExceptionOnInvalidHandleReference* {.bitsize:1.}: DWORD
-    HandleExceptionsPermanentlyEnabled* {.bitsize:1.}: DWORD
-    ReservedFlags* {.bitsize:30.}: DWORD
+    RaiseExceptionOnInvalidHandleReference* {.bitsize: 1.}: DWORD
+    HandleExceptionsPermanentlyEnabled* {.bitsize: 1.}: DWORD
+    ReservedFlags* {.bitsize: 30.}: DWORD
+
   PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY_UNION1* {.pure, union.} = object
     Flags*: DWORD
     struct1*: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY_UNION1_STRUCT1
+
   PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY* {.pure.} = object
     union1*: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY_UNION1
-  PPROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY* = ptr PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY
+
+  PPROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY* =
+    ptr PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY
   PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY_UNION1_STRUCT1* {.pure.} = object
-    DisallowWin32kSystemCalls* {.bitsize:1.}: DWORD
-    ReservedFlags* {.bitsize:31.}: DWORD
+    DisallowWin32kSystemCalls* {.bitsize: 1.}: DWORD
+    ReservedFlags* {.bitsize: 31.}: DWORD
+
   PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY_UNION1* {.pure, union.} = object
     Flags*: DWORD
     struct1*: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY_UNION1_STRUCT1
+
   PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY* {.pure.} = object
     union1*: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY_UNION1
-  PPROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY* = ptr PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY
+
+  PPROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY* =
+    ptr PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY
   PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY_UNION1_STRUCT1* {.pure.} = object
-    DisableExtensionPoints* {.bitsize:1.}: DWORD
-    ReservedFlags* {.bitsize:31.}: DWORD
+    DisableExtensionPoints* {.bitsize: 1.}: DWORD
+    ReservedFlags* {.bitsize: 31.}: DWORD
+
   PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY_UNION1* {.pure, union.} = object
     Flags*: DWORD
     struct1*: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY_UNION1_STRUCT1
+
   PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY* {.pure.} = object
     union1*: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY_UNION1
-  PPROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY* = ptr PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY
+
+  PPROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY* =
+    ptr PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY
   JOBOBJECT_BASIC_ACCOUNTING_INFORMATION* {.pure.} = object
     TotalUserTime*: LARGE_INTEGER
     TotalKernelTime*: LARGE_INTEGER
@@ -1384,6 +1538,7 @@ type
     TotalProcesses*: DWORD
     ActiveProcesses*: DWORD
     TotalTerminatedProcesses*: DWORD
+
   PJOBOBJECT_BASIC_ACCOUNTING_INFORMATION* = ptr JOBOBJECT_BASIC_ACCOUNTING_INFORMATION
   JOBOBJECT_BASIC_LIMIT_INFORMATION* {.pure.} = object
     PerProcessUserTimeLimit*: LARGE_INTEGER
@@ -1395,6 +1550,7 @@ type
     Affinity*: ULONG_PTR
     PriorityClass*: DWORD
     SchedulingClass*: DWORD
+
   PJOBOBJECT_BASIC_LIMIT_INFORMATION* = ptr JOBOBJECT_BASIC_LIMIT_INFORMATION
   JOBOBJECT_EXTENDED_LIMIT_INFORMATION* {.pure.} = object
     BasicLimitInformation*: JOBOBJECT_BASIC_LIMIT_INFORMATION
@@ -1403,14 +1559,17 @@ type
     JobMemoryLimit*: SIZE_T
     PeakProcessMemoryUsed*: SIZE_T
     PeakJobMemoryUsed*: SIZE_T
+
   PJOBOBJECT_EXTENDED_LIMIT_INFORMATION* = ptr JOBOBJECT_EXTENDED_LIMIT_INFORMATION
   JOBOBJECT_BASIC_PROCESS_ID_LIST* {.pure.} = object
     NumberOfAssignedProcesses*: DWORD
     NumberOfProcessIdsInList*: DWORD
     ProcessIdList*: array[1, ULONG_PTR]
+
   PJOBOBJECT_BASIC_PROCESS_ID_LIST* = ptr JOBOBJECT_BASIC_PROCESS_ID_LIST
   JOBOBJECT_BASIC_UI_RESTRICTIONS* {.pure.} = object
     UIRestrictionsClass*: DWORD
+
   PJOBOBJECT_BASIC_UI_RESTRICTIONS* = ptr JOBOBJECT_BASIC_UI_RESTRICTIONS
   JOBOBJECT_SECURITY_LIMIT_INFORMATION* {.pure.} = object
     SecurityLimitFlags*: DWORD
@@ -1418,20 +1577,26 @@ type
     SidsToDisable*: PTOKEN_GROUPS
     PrivilegesToDelete*: PTOKEN_PRIVILEGES
     RestrictedSids*: PTOKEN_GROUPS
+
   PJOBOBJECT_SECURITY_LIMIT_INFORMATION* = ptr JOBOBJECT_SECURITY_LIMIT_INFORMATION
   JOBOBJECT_END_OF_JOB_TIME_INFORMATION* {.pure.} = object
     EndOfJobTimeAction*: DWORD
+
   PJOBOBJECT_END_OF_JOB_TIME_INFORMATION* = ptr JOBOBJECT_END_OF_JOB_TIME_INFORMATION
   JOBOBJECT_ASSOCIATE_COMPLETION_PORT* {.pure.} = object
     CompletionKey*: PVOID
     CompletionPort*: HANDLE
+
   PJOBOBJECT_ASSOCIATE_COMPLETION_PORT* = ptr JOBOBJECT_ASSOCIATE_COMPLETION_PORT
   JOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION* {.pure.} = object
     BasicInfo*: JOBOBJECT_BASIC_ACCOUNTING_INFORMATION
     IoInfo*: IO_COUNTERS
-  PJOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION* = ptr JOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION
+
+  PJOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION* =
+    ptr JOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION
   JOBOBJECT_JOBSET_INFORMATION* {.pure.} = object
     MemberLevel*: DWORD
+
   PJOBOBJECT_JOBSET_INFORMATION* = ptr JOBOBJECT_JOBSET_INFORMATION
   JOBOBJECT_NOTIFICATION_LIMIT_INFORMATION* {.pure.} = object
     IoReadBytesLimit*: DWORD64
@@ -1441,7 +1606,9 @@ type
     RateControlTolerance*: JOBOBJECT_RATE_CONTROL_TOLERANCE
     RateControlToleranceInterval*: JOBOBJECT_RATE_CONTROL_TOLERANCE_INTERVAL
     LimitFlags*: DWORD
-  PJOBOBJECT_NOTIFICATION_LIMIT_INFORMATION* = ptr JOBOBJECT_NOTIFICATION_LIMIT_INFORMATION
+
+  PJOBOBJECT_NOTIFICATION_LIMIT_INFORMATION* =
+    ptr JOBOBJECT_NOTIFICATION_LIMIT_INFORMATION
   JOBOBJECT_LIMIT_VIOLATION_INFORMATION* {.pure.} = object
     LimitFlags*: DWORD
     ViolationLimitFlags*: DWORD
@@ -1455,13 +1622,16 @@ type
     JobMemoryLimit*: DWORD64
     RateControlTolerance*: JOBOBJECT_RATE_CONTROL_TOLERANCE
     RateControlToleranceLimit*: JOBOBJECT_RATE_CONTROL_TOLERANCE_INTERVAL
+
   PJOBOBJECT_LIMIT_VIOLATION_INFORMATION* = ptr JOBOBJECT_LIMIT_VIOLATION_INFORMATION
   JOBOBJECT_CPU_RATE_CONTROL_INFORMATION_UNION1* {.pure, union.} = object
     CpuRate*: DWORD
     Weight*: DWORD
+
   JOBOBJECT_CPU_RATE_CONTROL_INFORMATION* {.pure.} = object
     ControlFlags*: DWORD
     union1*: JOBOBJECT_CPU_RATE_CONTROL_INFORMATION_UNION1
+
   PJOBOBJECT_CPU_RATE_CONTROL_INFORMATION* = ptr JOBOBJECT_CPU_RATE_CONTROL_INFORMATION
   CACHE_DESCRIPTOR* {.pure.} = object
     Level*: BYTE
@@ -1469,31 +1639,38 @@ type
     LineSize*: WORD
     Size*: DWORD
     Type*: PROCESSOR_CACHE_TYPE
+
   PCACHE_DESCRIPTOR* = ptr CACHE_DESCRIPTOR
   SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore* {.pure.} = object
     Flags*: BYTE
+
   SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode* {.pure.} = object
     NodeNumber*: DWORD
+
   SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1* {.pure, union.} = object
     ProcessorCore*: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore
     NumaNode*: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode
     Cache*: CACHE_DESCRIPTOR
     Reserved*: array[2, ULONGLONG]
+
   SYSTEM_LOGICAL_PROCESSOR_INFORMATION* {.pure.} = object
     ProcessorMask*: ULONG_PTR
     Relationship*: LOGICAL_PROCESSOR_RELATIONSHIP
     union1*: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1
+
   PSYSTEM_LOGICAL_PROCESSOR_INFORMATION* = ptr SYSTEM_LOGICAL_PROCESSOR_INFORMATION
   PROCESSOR_RELATIONSHIP* {.pure.} = object
     Flags*: BYTE
     Reserved*: array[21, BYTE]
     GroupCount*: WORD
     GroupMask*: array[ANYSIZE_ARRAY, GROUP_AFFINITY]
+
   PPROCESSOR_RELATIONSHIP* = ptr PROCESSOR_RELATIONSHIP
   NUMA_NODE_RELATIONSHIP* {.pure.} = object
     NodeNumber*: DWORD
     Reserved*: array[20, BYTE]
     GroupMask*: GROUP_AFFINITY
+
   PNUMA_NODE_RELATIONSHIP* = ptr NUMA_NODE_RELATIONSHIP
   CACHE_RELATIONSHIP* {.pure.} = object
     Level*: BYTE
@@ -1503,45 +1680,55 @@ type
     Type*: PROCESSOR_CACHE_TYPE
     Reserved*: array[20, BYTE]
     GroupMask*: GROUP_AFFINITY
+
   PCACHE_RELATIONSHIP* = ptr CACHE_RELATIONSHIP
   PROCESSOR_GROUP_INFO* {.pure.} = object
     MaximumProcessorCount*: BYTE
     ActiveProcessorCount*: BYTE
     Reserved*: array[38, BYTE]
     ActiveProcessorMask*: KAFFINITY
+
   PPROCESSOR_GROUP_INFO* = ptr PROCESSOR_GROUP_INFO
   GROUP_RELATIONSHIP* {.pure.} = object
     MaximumGroupCount*: WORD
     ActiveGroupCount*: WORD
     Reserved*: array[20, BYTE]
     GroupInfo*: array[ANYSIZE_ARRAY, PROCESSOR_GROUP_INFO]
+
   PGROUP_RELATIONSHIP* = ptr GROUP_RELATIONSHIP
   SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_UNION1* {.pure, union.} = object
     Processor*: PROCESSOR_RELATIONSHIP
     NumaNode*: NUMA_NODE_RELATIONSHIP
     Cache*: CACHE_RELATIONSHIP
     Group*: GROUP_RELATIONSHIP
+
   SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* {.pure.} = object
     Relationship*: LOGICAL_PROCESSOR_RELATIONSHIP
     Size*: DWORD
     union1*: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_UNION1
-  PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* = ptr SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+
+  PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* =
+    ptr SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
   SYSTEM_PROCESSOR_CYCLE_TIME_INFORMATION* {.pure.} = object
     CycleTime*: DWORD64
-  PSYSTEM_PROCESSOR_CYCLE_TIME_INFORMATION* = ptr SYSTEM_PROCESSOR_CYCLE_TIME_INFORMATION
+
+  PSYSTEM_PROCESSOR_CYCLE_TIME_INFORMATION* =
+    ptr SYSTEM_PROCESSOR_CYCLE_TIME_INFORMATION
   XSTATE_FEATURE* {.pure.} = object
     Offset*: DWORD
     Size*: DWORD
+
   PXSTATE_FEATURE* = ptr XSTATE_FEATURE
-const
-  MAXIMUM_XSTATE_FEATURES* = 64
+
+const MAXIMUM_XSTATE_FEATURES* = 64
 type
   XSTATE_CONFIGURATION* {.pure.} = object
     EnabledFeatures*: DWORD64
     EnabledVolatileFeatures*: DWORD64
     Size*: DWORD
-    OptimizedSave* {.bitsize:1.}: DWORD
+    OptimizedSave* {.bitsize: 1.}: DWORD
     Features*: array[MAXIMUM_XSTATE_FEATURES, XSTATE_FEATURE]
+
   PXSTATE_CONFIGURATION* = ptr XSTATE_CONFIGURATION
   MEMORY_BASIC_INFORMATION* {.pure.} = object
     BaseAddress*: PVOID
@@ -1551,6 +1738,7 @@ type
     State*: DWORD
     Protect*: DWORD
     Type*: DWORD
+
   PMEMORY_BASIC_INFORMATION* = ptr MEMORY_BASIC_INFORMATION
   MEMORY_BASIC_INFORMATION32* {.pure.} = object
     BaseAddress*: DWORD
@@ -1560,6 +1748,7 @@ type
     State*: DWORD
     Protect*: DWORD
     Type*: DWORD
+
   PMEMORY_BASIC_INFORMATION32* = ptr MEMORY_BASIC_INFORMATION32
   MEMORY_BASIC_INFORMATION64* {.pure.} = object
     BaseAddress*: ULONGLONG
@@ -1571,29 +1760,35 @@ type
     Protect*: DWORD
     Type*: DWORD
     alignment2*: DWORD
+
   PMEMORY_BASIC_INFORMATION64* = ptr MEMORY_BASIC_INFORMATION64
   FILE_ID_128* {.pure.} = object
     LowPart*: ULONGLONG
     HighPart*: ULONGLONG
+
   PFILE_ID_128* = ptr FILE_ID_128
   FILE_NOTIFY_INFORMATION* {.pure.} = object
     NextEntryOffset*: DWORD
     Action*: DWORD
     FileNameLength*: DWORD
     FileName*: array[1, WCHAR]
+
   PFILE_NOTIFY_INFORMATION* = ptr FILE_NOTIFY_INFORMATION
   FILE_SEGMENT_ELEMENT* {.pure, union.} = object
     Buffer*: PVOID64
     Alignment*: ULONGLONG
+
   PFILE_SEGMENT_ELEMENT* = ptr FILE_SEGMENT_ELEMENT
   REPARSE_GUID_DATA_BUFFER_GenericReparseBuffer* {.pure.} = object
     DataBuffer*: array[1, BYTE]
+
   REPARSE_GUID_DATA_BUFFER* {.pure.} = object
     ReparseTag*: DWORD
     ReparseDataLength*: WORD
     Reserved*: WORD
     ReparseGuid*: GUID
     GenericReparseBuffer*: REPARSE_GUID_DATA_BUFFER_GenericReparseBuffer
+
   PREPARSE_GUID_DATA_BUFFER* = ptr REPARSE_GUID_DATA_BUFFER
   SCRUB_DATA_INPUT* {.pure.} = object
     Size*: DWORD
@@ -1601,6 +1796,7 @@ type
     MaximumIos*: DWORD
     Reserved*: array[17, DWORD]
     ResumeContext*: array[816, BYTE]
+
   PSCRUB_DATA_INPUT* = ptr SCRUB_DATA_INPUT
   SCRUB_DATA_OUTPUT* {.pure.} = object
     Size*: DWORD
@@ -1613,9 +1809,10 @@ type
     InternalFileReference*: ULONGLONG
     Reserved*: array[6, DWORD]
     ResumeContext*: array[816, BYTE]
+
   PSCRUB_DATA_OUTPUT* = ptr SCRUB_DATA_OUTPUT
-const
-  POWER_SYSTEM_MAXIMUM* = 7
+
+const POWER_SYSTEM_MAXIMUM* = 7
 type
   CM_POWER_DATA* {.pure.} = object
     PD_Size*: DWORD
@@ -1626,40 +1823,49 @@ type
     PD_D3Latency*: DWORD
     PD_PowerStateMapping*: array[POWER_SYSTEM_MAXIMUM, DEVICE_POWER_STATE]
     PD_DeepestSystemWake*: SYSTEM_POWER_STATE
+
   PCM_POWER_DATA* = ptr CM_POWER_DATA
   POWER_USER_PRESENCE* {.pure.} = object
     UserPresence*: POWER_USER_PRESENCE_TYPE
+
   PPOWER_USER_PRESENCE* = ptr POWER_USER_PRESENCE
   POWER_SESSION_CONNECT* {.pure.} = object
     Connected*: BOOLEAN
     Console*: BOOLEAN
+
   PPOWER_SESSION_CONNECT* = ptr POWER_SESSION_CONNECT
   POWER_SESSION_TIMEOUTS* {.pure.} = object
     InputTimeout*: DWORD
     DisplayTimeout*: DWORD
+
   PPOWER_SESSION_TIMEOUTS* = ptr POWER_SESSION_TIMEOUTS
   POWER_SESSION_RIT_STATE* {.pure.} = object
     Active*: BOOLEAN
     LastInputTime*: DWORD
+
   PPOWER_SESSION_RIT_STATE* = ptr POWER_SESSION_RIT_STATE
   POWER_SESSION_WINLOGON* {.pure.} = object
     SessionId*: DWORD
     Console*: BOOLEAN
     Locked*: BOOLEAN
+
   PPOWER_SESSION_WINLOGON* = ptr POWER_SESSION_WINLOGON
   POWER_IDLE_RESILIENCY* {.pure.} = object
     CoalescingTimeout*: DWORD
     IdleResiliencyPeriod*: DWORD
+
   PPOWER_IDLE_RESILIENCY* = ptr POWER_IDLE_RESILIENCY
   POWER_MONITOR_INVOCATION* {.pure.} = object
     On*: BOOLEAN
     Console*: BOOLEAN
     RequestReason*: POWER_MONITOR_REQUEST_REASON
+
   PPOWER_MONITOR_INVOCATION* = ptr POWER_MONITOR_INVOCATION
   RESUME_PERFORMANCE* {.pure.} = object
     PostTimeMs*: DWORD
     TotalResumeTimeMs*: ULONGLONG
     ResumeCompleteTimestamp*: ULONGLONG
+
   PRESUME_PERFORMANCE* = ptr RESUME_PERFORMANCE
   SET_POWER_SETTING_VALUE* {.pure.} = object
     Version*: DWORD
@@ -1667,26 +1873,32 @@ type
     PowerCondition*: SYSTEM_POWER_CONDITION
     DataLength*: DWORD
     Data*: array[ANYSIZE_ARRAY, BYTE]
+
   PSET_POWER_SETTING_VALUE* = ptr SET_POWER_SETTING_VALUE
   NOTIFY_USER_POWER_SETTING* {.pure.} = object
     Guid*: GUID
+
   PNOTIFY_USER_POWER_SETTING* = ptr NOTIFY_USER_POWER_SETTING
   APPLICATIONLAUNCH_SETTING_VALUE* {.pure.} = object
     ActivationTime*: LARGE_INTEGER
     Flags*: DWORD
     ButtonInstanceID*: DWORD
+
   PAPPLICATIONLAUNCH_SETTING_VALUE* = ptr APPLICATIONLAUNCH_SETTING_VALUE
   POWER_PLATFORM_INFORMATION* {.pure.} = object
     AoAc*: BOOLEAN
+
   PPOWER_PLATFORM_INFORMATION* = ptr POWER_PLATFORM_INFORMATION
   BATTERY_REPORTING_SCALE* {.pure.} = object
     Granularity*: DWORD
     Capacity*: DWORD
+
   PBATTERY_REPORTING_SCALE* = ptr BATTERY_REPORTING_SCALE
   PPM_WMI_LEGACY_PERFSTATE* {.pure.} = object
     Frequency*: DWORD
     Flags*: DWORD
     PercentFrequency*: DWORD
+
   PPPM_WMI_LEGACY_PERFSTATE* = ptr PPM_WMI_LEGACY_PERFSTATE
   PPM_WMI_IDLE_STATE* {.pure.} = object
     Latency*: DWORD
@@ -1700,6 +1912,7 @@ type
     Context*: DWORD
     IdleHandler*: DWORD
     Reserved1*: DWORD
+
   PPPM_WMI_IDLE_STATE* = ptr PPM_WMI_IDLE_STATE
   PPM_WMI_IDLE_STATES* {.pure.} = object
     Type*: DWORD
@@ -1708,6 +1921,7 @@ type
     OldState*: DWORD
     TargetProcessors*: DWORD64
     State*: array[ANYSIZE_ARRAY, PPM_WMI_IDLE_STATE]
+
   PPPM_WMI_IDLE_STATES* = ptr PPM_WMI_IDLE_STATES
   PPM_WMI_IDLE_STATES_EX* {.pure.} = object
     Type*: DWORD
@@ -1716,6 +1930,7 @@ type
     OldState*: DWORD
     TargetProcessors*: PVOID
     State*: array[ANYSIZE_ARRAY, PPM_WMI_IDLE_STATE]
+
   PPPM_WMI_IDLE_STATES_EX* = ptr PPM_WMI_IDLE_STATES_EX
   PPM_WMI_PERF_STATE* {.pure.} = object
     Frequency*: DWORD
@@ -1732,6 +1947,7 @@ type
     Reserved1*: DWORD
     Reserved2*: DWORD64
     Reserved3*: DWORD64
+
   PPPM_WMI_PERF_STATE* = ptr PPM_WMI_PERF_STATE
   PPM_WMI_PERF_STATES* {.pure.} = object
     Count*: DWORD
@@ -1755,6 +1971,7 @@ type
     Reserved1*: DWORD
     Reserved2*: DWORD64
     State*: array[ANYSIZE_ARRAY, PPM_WMI_PERF_STATE]
+
   PPPM_WMI_PERF_STATES* = ptr PPM_WMI_PERF_STATES
   PPM_WMI_PERF_STATES_EX* {.pure.} = object
     Count*: DWORD
@@ -1778,9 +1995,10 @@ type
     Reserved1*: DWORD
     Reserved2*: DWORD64
     State*: array[ANYSIZE_ARRAY, PPM_WMI_PERF_STATE]
+
   PPPM_WMI_PERF_STATES_EX* = ptr PPM_WMI_PERF_STATES_EX
-const
-  PROC_IDLE_BUCKET_COUNT* = 6
+
+const PROC_IDLE_BUCKET_COUNT* = 6
 type
   PPM_IDLE_STATE_ACCOUNTING* {.pure.} = object
     IdleTransitions*: DWORD
@@ -1788,6 +2006,7 @@ type
     InvalidBucketIndex*: DWORD
     TotalTime*: DWORD64
     IdleTimeBuckets*: array[PROC_IDLE_BUCKET_COUNT, DWORD]
+
   PPPM_IDLE_STATE_ACCOUNTING* = ptr PPM_IDLE_STATE_ACCOUNTING
   PPM_IDLE_ACCOUNTING* {.pure.} = object
     StateCount*: DWORD
@@ -1795,15 +2014,17 @@ type
     ResetCount*: DWORD
     StartTime*: DWORD64
     State*: array[ANYSIZE_ARRAY, PPM_IDLE_STATE_ACCOUNTING]
+
   PPPM_IDLE_ACCOUNTING* = ptr PPM_IDLE_ACCOUNTING
   PPM_IDLE_STATE_BUCKET_EX* {.pure.} = object
     TotalTimeUs*: DWORD64
     MinTimeUs*: DWORD
     MaxTimeUs*: DWORD
     Count*: DWORD
+
   PPPM_IDLE_STATE_BUCKET_EX* = ptr PPM_IDLE_STATE_BUCKET_EX
-const
-  PROC_IDLE_BUCKET_COUNT_EX* = 16
+
+const PROC_IDLE_BUCKET_COUNT_EX* = 16
 type
   PPM_IDLE_STATE_ACCOUNTING_EX* {.pure.} = object
     TotalTime*: DWORD64
@@ -1814,6 +2035,7 @@ type
     MaxTimeUs*: DWORD
     CancelledTransitions*: DWORD
     IdleTimeBuckets*: array[PROC_IDLE_BUCKET_COUNT_EX, PPM_IDLE_STATE_BUCKET_EX]
+
   PPPM_IDLE_STATE_ACCOUNTING_EX* = ptr PPM_IDLE_STATE_ACCOUNTING_EX
   PPM_IDLE_ACCOUNTING_EX* {.pure.} = object
     StateCount*: DWORD
@@ -1822,6 +2044,7 @@ type
     AbortCount*: DWORD
     StartTime*: DWORD64
     State*: array[ANYSIZE_ARRAY, PPM_IDLE_STATE_ACCOUNTING_EX]
+
   PPPM_IDLE_ACCOUNTING_EX* = ptr PPM_IDLE_ACCOUNTING_EX
   PPM_PERFSTATE_EVENT* {.pure.} = object
     State*: DWORD
@@ -1829,36 +2052,43 @@ type
     Latency*: DWORD
     Speed*: DWORD
     Processor*: DWORD
+
   PPPM_PERFSTATE_EVENT* = ptr PPM_PERFSTATE_EVENT
   PPM_PERFSTATE_DOMAIN_EVENT* {.pure.} = object
     State*: DWORD
     Latency*: DWORD
     Speed*: DWORD
     Processors*: DWORD64
+
   PPPM_PERFSTATE_DOMAIN_EVENT* = ptr PPM_PERFSTATE_DOMAIN_EVENT
   PPM_IDLESTATE_EVENT* {.pure.} = object
     NewState*: DWORD
     OldState*: DWORD
     Processors*: DWORD64
+
   PPPM_IDLESTATE_EVENT* = ptr PPM_IDLESTATE_EVENT
   PPM_THERMALCHANGE_EVENT* {.pure.} = object
     ThermalConstraint*: DWORD
     Processors*: DWORD64
+
   PPPM_THERMALCHANGE_EVENT* = ptr PPM_THERMALCHANGE_EVENT
   PPM_THERMAL_POLICY_EVENT* {.pure.} = object
     Mode*: BYTE
     Processors*: DWORD64
+
   PPPM_THERMAL_POLICY_EVENT* = ptr PPM_THERMAL_POLICY_EVENT
   POWER_ACTION_POLICY* {.pure.} = object
     Action*: POWER_ACTION
     Flags*: DWORD
     EventCode*: DWORD
+
   PPOWER_ACTION_POLICY* = ptr POWER_ACTION_POLICY
   PROCESSOR_IDLESTATE_INFO* {.pure.} = object
     TimeCheck*: DWORD
     DemotePercent*: BYTE
     PromotePercent*: BYTE
     Spare*: array[2, BYTE]
+
   PPROCESSOR_IDLESTATE_INFO* = ptr PROCESSOR_IDLESTATE_INFO
   SYSTEM_POWER_LEVEL* {.pure.} = object
     Enable*: BOOLEAN
@@ -1866,9 +2096,10 @@ type
     BatteryLevel*: DWORD
     PowerPolicy*: POWER_ACTION_POLICY
     MinSystemState*: SYSTEM_POWER_STATE
+
   PSYSTEM_POWER_LEVEL* = ptr SYSTEM_POWER_LEVEL
-const
-  NUM_DISCHARGE_POLICIES* = 4
+
+const NUM_DISCHARGE_POLICIES* = 4
 type
   SYSTEM_POWER_POLICY* {.pure.} = object
     Revision*: DWORD
@@ -1899,22 +2130,25 @@ type
     ForcedThrottle*: BYTE
     MinThrottle*: BYTE
     OverThrottled*: POWER_ACTION_POLICY
+
   PSYSTEM_POWER_POLICY* = ptr SYSTEM_POWER_POLICY
   PROCESSOR_IDLESTATE_POLICY_Flags_STRUCT1* {.pure.} = object
-    AllowScaling* {.bitsize:1.}: WORD
-    Disabled* {.bitsize:1.}: WORD
-    Reserved* {.bitsize:14.}: WORD
+    AllowScaling* {.bitsize: 1.}: WORD
+    Disabled* {.bitsize: 1.}: WORD
+    Reserved* {.bitsize: 14.}: WORD
+
   PROCESSOR_IDLESTATE_POLICY_Flags* {.pure, union.} = object
     AsWORD*: WORD
     struct1*: PROCESSOR_IDLESTATE_POLICY_Flags_STRUCT1
-const
-  PROCESSOR_IDLESTATE_POLICY_COUNT* = 0x3
+
+const PROCESSOR_IDLESTATE_POLICY_COUNT* = 0x3
 type
   PROCESSOR_IDLESTATE_POLICY* {.pure.} = object
     Revision*: WORD
     Flags*: PROCESSOR_IDLESTATE_POLICY_Flags
     PolicyCount*: DWORD
     Policy*: array[PROCESSOR_IDLESTATE_POLICY_COUNT, PROCESSOR_IDLESTATE_INFO]
+
   PPROCESSOR_IDLESTATE_POLICY* = ptr PROCESSOR_IDLESTATE_POLICY
   PROCESSOR_POWER_POLICY_INFO* {.pure.} = object
     TimeCheck*: DWORD
@@ -1923,30 +2157,35 @@ type
     DemotePercent*: BYTE
     PromotePercent*: BYTE
     Spare*: array[2, BYTE]
-    AllowDemotion* {.bitsize:1.}: DWORD
-    AllowPromotion* {.bitsize:1.}: DWORD
-    Reserved* {.bitsize:30.}: DWORD
+    AllowDemotion* {.bitsize: 1.}: DWORD
+    AllowPromotion* {.bitsize: 1.}: DWORD
+    Reserved* {.bitsize: 30.}: DWORD
+
   PPROCESSOR_POWER_POLICY_INFO* = ptr PROCESSOR_POWER_POLICY_INFO
   PROCESSOR_POWER_POLICY* {.pure.} = object
     Revision*: DWORD
     DynamicThrottle*: BYTE
     Spare*: array[3, BYTE]
-    DisableCStates* {.bitsize:1.}: DWORD
-    Reserved* {.bitsize:31.}: DWORD
+    DisableCStates* {.bitsize: 1.}: DWORD
+    Reserved* {.bitsize: 31.}: DWORD
     PolicyCount*: DWORD
     Policy*: array[3, PROCESSOR_POWER_POLICY_INFO]
+
   PPROCESSOR_POWER_POLICY* = ptr PROCESSOR_POWER_POLICY
   PROCESSOR_PERFSTATE_POLICY_UNION1_Flags_STRUCT1* {.pure.} = object
-    NoDomainAccounting* {.bitsize:1.}: BYTE
-    IncreasePolicy* {.bitsize:2.}: BYTE
-    DecreasePolicy* {.bitsize:2.}: BYTE
-    Reserved* {.bitsize:3.}: BYTE
+    NoDomainAccounting* {.bitsize: 1.}: BYTE
+    IncreasePolicy* {.bitsize: 2.}: BYTE
+    DecreasePolicy* {.bitsize: 2.}: BYTE
+    Reserved* {.bitsize: 3.}: BYTE
+
   PROCESSOR_PERFSTATE_POLICY_UNION1_Flags* {.pure, union.} = object
     AsBYTE*: BYTE
     struct1*: PROCESSOR_PERFSTATE_POLICY_UNION1_Flags_STRUCT1
+
   PROCESSOR_PERFSTATE_POLICY_UNION1* {.pure, union.} = object
     Spare*: BYTE
     Flags*: PROCESSOR_PERFSTATE_POLICY_UNION1_Flags
+
   PROCESSOR_PERFSTATE_POLICY* {.pure.} = object
     Revision*: DWORD
     MaxThrottle*: BYTE
@@ -1958,6 +2197,7 @@ type
     DecreaseTime*: DWORD
     IncreasePercent*: DWORD
     DecreasePercent*: DWORD
+
   PPROCESSOR_PERFSTATE_POLICY* = ptr PROCESSOR_PERFSTATE_POLICY
   ADMINISTRATOR_POWER_POLICY* {.pure.} = object
     MinSleep*: SYSTEM_POWER_STATE
@@ -1966,6 +2206,7 @@ type
     MaxVideoTimeout*: DWORD
     MinSpindownTimeout*: DWORD
     MaxSpindownTimeout*: DWORD
+
   PADMINISTRATOR_POWER_POLICY* = ptr ADMINISTRATOR_POWER_POLICY
   SYSTEM_POWER_CAPABILITIES* {.pure.} = object
     PowerButtonPresent*: BOOLEAN
@@ -1997,6 +2238,7 @@ type
     RtcWake*: SYSTEM_POWER_STATE
     MinDeviceWakeState*: SYSTEM_POWER_STATE
     DefaultLowLatencyWake*: SYSTEM_POWER_STATE
+
   PSYSTEM_POWER_CAPABILITIES* = ptr SYSTEM_POWER_CAPABILITIES
   SYSTEM_BATTERY_STATE* {.pure.} = object
     AcOnLine*: BOOLEAN
@@ -2010,6 +2252,7 @@ type
     EstimatedTime*: DWORD
     DefaultAlert1*: DWORD
     DefaultAlert2*: DWORD
+
   PSYSTEM_BATTERY_STATE* = ptr SYSTEM_BATTERY_STATE
   IMAGE_DOS_HEADER* {.pure.} = object
     e_magic*: WORD
@@ -2031,6 +2274,7 @@ type
     e_oeminfo*: WORD
     e_res2*: array[10, WORD]
     e_lfanew*: LONG
+
   PIMAGE_DOS_HEADER* = ptr IMAGE_DOS_HEADER
   IMAGE_OS2_HEADER* {.pure.} = object
     ne_magic*: WORD
@@ -2063,6 +2307,7 @@ type
     ne_psegrefbytes*: WORD
     ne_swaparea*: WORD
     ne_expver*: WORD
+
   PIMAGE_OS2_HEADER* = ptr IMAGE_OS2_HEADER
   IMAGE_VXD_HEADER* {.pure.} = object
     e32_magic*: WORD
@@ -2116,6 +2361,7 @@ type
     e32_winreslen*: DWORD
     e32_devid*: WORD
     e32_ddkver*: WORD
+
   PIMAGE_VXD_HEADER* = ptr IMAGE_VXD_HEADER
   IMAGE_FILE_HEADER* {.pure.} = object
     Machine*: WORD
@@ -2125,13 +2371,15 @@ type
     NumberOfSymbols*: DWORD
     SizeOfOptionalHeader*: WORD
     Characteristics*: WORD
+
   PIMAGE_FILE_HEADER* = ptr IMAGE_FILE_HEADER
   IMAGE_DATA_DIRECTORY* {.pure.} = object
     VirtualAddress*: DWORD
     Size*: DWORD
+
   PIMAGE_DATA_DIRECTORY* = ptr IMAGE_DATA_DIRECTORY
-const
-  IMAGE_NUMBEROF_DIRECTORY_ENTRIES* = 16
+
+const IMAGE_NUMBEROF_DIRECTORY_ENTRIES* = 16
 type
   IMAGE_OPTIONAL_HEADER32* {.pure.} = object
     Magic*: WORD
@@ -2165,6 +2413,7 @@ type
     LoaderFlags*: DWORD
     NumberOfRvaAndSizes*: DWORD
     DataDirectory*: array[IMAGE_NUMBEROF_DIRECTORY_ENTRIES, IMAGE_DATA_DIRECTORY]
+
   PIMAGE_OPTIONAL_HEADER32* = ptr IMAGE_OPTIONAL_HEADER32
   IMAGE_ROM_OPTIONAL_HEADER* {.pure.} = object
     Magic*: WORD
@@ -2180,6 +2429,7 @@ type
     GprMask*: DWORD
     CprMask*: array[4, DWORD]
     GpValue*: DWORD
+
   PIMAGE_ROM_OPTIONAL_HEADER* = ptr IMAGE_ROM_OPTIONAL_HEADER
   IMAGE_OPTIONAL_HEADER64* {.pure.} = object
     Magic*: WORD
@@ -2212,27 +2462,32 @@ type
     LoaderFlags*: DWORD
     NumberOfRvaAndSizes*: DWORD
     DataDirectory*: array[IMAGE_NUMBEROF_DIRECTORY_ENTRIES, IMAGE_DATA_DIRECTORY]
+
   PIMAGE_OPTIONAL_HEADER64* = ptr IMAGE_OPTIONAL_HEADER64
   IMAGE_NT_HEADERS64* {.pure.} = object
     Signature*: DWORD
     FileHeader*: IMAGE_FILE_HEADER
     OptionalHeader*: IMAGE_OPTIONAL_HEADER64
+
   PIMAGE_NT_HEADERS64* = ptr IMAGE_NT_HEADERS64
   IMAGE_NT_HEADERS32* {.pure.} = object
     Signature*: DWORD
     FileHeader*: IMAGE_FILE_HEADER
     OptionalHeader*: IMAGE_OPTIONAL_HEADER32
+
   PIMAGE_NT_HEADERS32* = ptr IMAGE_NT_HEADERS32
   IMAGE_ROM_HEADERS* {.pure.} = object
     FileHeader*: IMAGE_FILE_HEADER
     OptionalHeader*: IMAGE_ROM_OPTIONAL_HEADER
+
   PIMAGE_ROM_HEADERS* = ptr IMAGE_ROM_HEADERS
-const
-  IMAGE_SIZEOF_SHORT_NAME* = 8
+
+const IMAGE_SIZEOF_SHORT_NAME* = 8
 type
   IMAGE_SECTION_HEADER_Misc* {.pure, union.} = object
     PhysicalAddress*: DWORD
     VirtualSize*: DWORD
+
   IMAGE_SECTION_HEADER* {.pure.} = object
     Name*: array[IMAGE_SIZEOF_SHORT_NAME, BYTE]
     Misc*: IMAGE_SECTION_HEADER_Misc
@@ -2244,14 +2499,17 @@ type
     NumberOfRelocations*: WORD
     NumberOfLinenumbers*: WORD
     Characteristics*: DWORD
+
   PIMAGE_SECTION_HEADER* = ptr IMAGE_SECTION_HEADER
   IMAGE_SYMBOL_N_Name* {.pure.} = object
     Short*: DWORD
     Long*: DWORD
+
   IMAGE_SYMBOL_N* {.pure, union.} = object
     ShortName*: array[8, BYTE]
     Name*: IMAGE_SYMBOL_N_Name
     LongName*: array[2, DWORD]
+
   IMAGE_SYMBOL* {.pure, packed.} = object
     N*: IMAGE_SYMBOL_N
     Value*: DWORD
@@ -2259,14 +2517,17 @@ type
     Type*: WORD
     StorageClass*: BYTE
     NumberOfAuxSymbols*: BYTE
+
   PIMAGE_SYMBOL* = ptr IMAGE_SYMBOL
   IMAGE_SYMBOL_EX_N_Name* {.pure.} = object
     Short*: DWORD
     Long*: DWORD
+
   IMAGE_SYMBOL_EX_N* {.pure, union.} = object
     ShortName*: array[8, BYTE]
     Name*: IMAGE_SYMBOL_EX_N_Name
     LongName*: array[2, DWORD]
+
   IMAGE_SYMBOL_EX* {.pure.} = object
     N*: IMAGE_SYMBOL_EX_N
     Value*: DWORD
@@ -2274,37 +2535,45 @@ type
     Type*: WORD
     StorageClass*: BYTE
     NumberOfAuxSymbols*: BYTE
+
   PIMAGE_SYMBOL_EX* = ptr IMAGE_SYMBOL_EX
   IMAGE_AUX_SYMBOL_TOKEN_DEF* {.pure, packed.} = object
     bAuxType*: BYTE
     bReserved*: BYTE
     SymbolTableIndex*: DWORD
     rgbReserved*: array[12, BYTE]
+
   PIMAGE_AUX_SYMBOL_TOKEN_DEF* = ptr IMAGE_AUX_SYMBOL_TOKEN_DEF
   IMAGE_AUX_SYMBOL_Sym_Misc_LnSz* {.pure.} = object
     Linenumber*: WORD
     Size*: WORD
+
   IMAGE_AUX_SYMBOL_Sym_Misc* {.pure, union.} = object
     LnSz*: IMAGE_AUX_SYMBOL_Sym_Misc_LnSz
     TotalSize*: DWORD
+
   IMAGE_AUX_SYMBOL_Sym_FcnAry_Function* {.pure.} = object
     PointerToLinenumber*: DWORD
     PointerToNextFunction*: DWORD
+
   IMAGE_AUX_SYMBOL_Sym_FcnAry_Array* {.pure.} = object
     Dimension*: array[4, WORD]
+
   IMAGE_AUX_SYMBOL_Sym_FcnAry* {.pure, union.} = object
     Function*: IMAGE_AUX_SYMBOL_Sym_FcnAry_Function
     Array*: IMAGE_AUX_SYMBOL_Sym_FcnAry_Array
+
   IMAGE_AUX_SYMBOL_Sym* {.pure.} = object
     TagIndex*: DWORD
     Misc*: IMAGE_AUX_SYMBOL_Sym_Misc
     FcnAry*: IMAGE_AUX_SYMBOL_Sym_FcnAry
     TvIndex*: WORD
-const
-  IMAGE_SIZEOF_SYMBOL* = 18
+
+const IMAGE_SIZEOF_SYMBOL* = 18
 type
   IMAGE_AUX_SYMBOL_File* {.pure.} = object
     Name*: array[IMAGE_SIZEOF_SYMBOL, BYTE]
+
   IMAGE_AUX_SYMBOL_Section* {.pure.} = object
     Length*: DWORD
     NumberOfRelocations*: WORD
@@ -2312,22 +2581,27 @@ type
     CheckSum*: DWORD
     Number*: SHORT
     Selection*: BYTE
+
   IMAGE_AUX_SYMBOL_CRC* {.pure.} = object
     crc*: DWORD
     rgbReserved*: array[14, BYTE]
+
   IMAGE_AUX_SYMBOL* {.pure, union.} = object
     Sym*: IMAGE_AUX_SYMBOL_Sym
     File*: IMAGE_AUX_SYMBOL_File
     Section*: IMAGE_AUX_SYMBOL_Section
     TokenDef*: IMAGE_AUX_SYMBOL_TOKEN_DEF
     CRC*: IMAGE_AUX_SYMBOL_CRC
+
   PIMAGE_AUX_SYMBOL* = ptr IMAGE_AUX_SYMBOL
   IMAGE_AUX_SYMBOL_EX_Sym* {.pure.} = object
     WeakDefaultSymIndex*: DWORD
     WeakSearchType*: DWORD
     rgbReserved*: array[12, BYTE]
+
   IMAGE_AUX_SYMBOL_EX_File* {.pure.} = object
     Name*: array[20, BYTE]
+
   IMAGE_AUX_SYMBOL_EX_Section* {.pure.} = object
     Length*: DWORD
     NumberOfRelocations*: WORD
@@ -2338,37 +2612,46 @@ type
     bReserved*: BYTE
     HighNumber*: SHORT
     rgbReserved*: array[2, BYTE]
+
   IMAGE_AUX_SYMBOL_EX_STRUCT4* {.pure.} = object
     TokenDef*: IMAGE_AUX_SYMBOL_TOKEN_DEF
     rgbReserved*: array[2, BYTE]
+
   IMAGE_AUX_SYMBOL_EX_CRC* {.pure.} = object
     crc*: DWORD
     rgbReserved*: array[16, BYTE]
+
   IMAGE_AUX_SYMBOL_EX* {.pure, union.} = object
     Sym*: IMAGE_AUX_SYMBOL_EX_Sym
     File*: IMAGE_AUX_SYMBOL_EX_File
     Section*: IMAGE_AUX_SYMBOL_EX_Section
     struct4*: IMAGE_AUX_SYMBOL_EX_STRUCT4
     CRC*: IMAGE_AUX_SYMBOL_EX_CRC
+
   PIMAGE_AUX_SYMBOL_EX* = ptr IMAGE_AUX_SYMBOL_EX
   IMAGE_RELOCATION_UNION1* {.pure, union.} = object
     VirtualAddress*: DWORD
     RelocCount*: DWORD
+
   IMAGE_RELOCATION* {.pure, packed.} = object
     union1*: IMAGE_RELOCATION_UNION1
     SymbolTableIndex*: DWORD
     Type*: WORD
+
   PIMAGE_RELOCATION* = ptr IMAGE_RELOCATION
   IMAGE_LINENUMBER_Type* {.pure, union.} = object
     SymbolTableIndex*: DWORD
     VirtualAddress*: DWORD
+
   IMAGE_LINENUMBER* {.pure, packed.} = object
     Type*: IMAGE_LINENUMBER_Type
     Linenumber*: WORD
+
   PIMAGE_LINENUMBER* = ptr IMAGE_LINENUMBER
   IMAGE_BASE_RELOCATION* {.pure.} = object
     VirtualAddress*: DWORD
     SizeOfBlock*: DWORD
+
   PIMAGE_BASE_RELOCATION* = ptr IMAGE_BASE_RELOCATION
   IMAGE_ARCHIVE_MEMBER_HEADER* {.pure.} = object
     Name*: array[16, BYTE]
@@ -2378,6 +2661,7 @@ type
     Mode*: array[8, BYTE]
     Size*: array[10, BYTE]
     EndHeader*: array[2, BYTE]
+
   PIMAGE_ARCHIVE_MEMBER_HEADER* = ptr IMAGE_ARCHIVE_MEMBER_HEADER
   IMAGE_EXPORT_DIRECTORY* {.pure.} = object
     Characteristics*: DWORD
@@ -2391,26 +2675,32 @@ type
     AddressOfFunctions*: DWORD
     AddressOfNames*: DWORD
     AddressOfNameOrdinals*: DWORD
+
   PIMAGE_EXPORT_DIRECTORY* = ptr IMAGE_EXPORT_DIRECTORY
   IMAGE_IMPORT_BY_NAME* {.pure.} = object
     Hint*: WORD
     Name*: array[1, BYTE]
+
   PIMAGE_IMPORT_BY_NAME* = ptr IMAGE_IMPORT_BY_NAME
   IMAGE_THUNK_DATA64_u1* {.pure, union.} = object
     ForwarderString*: ULONGLONG
     Function*: ULONGLONG
     Ordinal*: ULONGLONG
     AddressOfData*: ULONGLONG
+
   IMAGE_THUNK_DATA64* {.pure.} = object
     u1*: IMAGE_THUNK_DATA64_u1
+
   PIMAGE_THUNK_DATA64* = ptr IMAGE_THUNK_DATA64
   IMAGE_THUNK_DATA32_u1* {.pure, union.} = object
     ForwarderString*: DWORD
     Function*: DWORD
     Ordinal*: DWORD
     AddressOfData*: DWORD
+
   IMAGE_THUNK_DATA32* {.pure.} = object
     u1*: IMAGE_THUNK_DATA32_u1
+
   PIMAGE_THUNK_DATA32* = ptr IMAGE_THUNK_DATA32
   IMAGE_TLS_DIRECTORY64* {.pure.} = object
     StartAddressOfRawData*: ULONGLONG
@@ -2419,6 +2709,7 @@ type
     AddressOfCallBacks*: ULONGLONG
     SizeOfZeroFill*: DWORD
     Characteristics*: DWORD
+
   PIMAGE_TLS_DIRECTORY64* = ptr IMAGE_TLS_DIRECTORY64
   IMAGE_TLS_DIRECTORY32* {.pure.} = object
     StartAddressOfRawData*: DWORD
@@ -2427,33 +2718,40 @@ type
     AddressOfCallBacks*: DWORD
     SizeOfZeroFill*: DWORD
     Characteristics*: DWORD
+
   PIMAGE_TLS_DIRECTORY32* = ptr IMAGE_TLS_DIRECTORY32
   IMAGE_IMPORT_DESCRIPTOR_UNION1* {.pure, union.} = object
     Characteristics*: DWORD
     OriginalFirstThunk*: DWORD
+
   IMAGE_IMPORT_DESCRIPTOR* {.pure.} = object
     union1*: IMAGE_IMPORT_DESCRIPTOR_UNION1
     TimeDateStamp*: DWORD
     ForwarderChain*: DWORD
     Name*: DWORD
     FirstThunk*: DWORD
+
   PIMAGE_IMPORT_DESCRIPTOR* = ptr IMAGE_IMPORT_DESCRIPTOR
   IMAGE_BOUND_IMPORT_DESCRIPTOR* {.pure.} = object
     TimeDateStamp*: DWORD
     OffsetModuleName*: WORD
     NumberOfModuleForwarderRefs*: WORD
+
   PIMAGE_BOUND_IMPORT_DESCRIPTOR* = ptr IMAGE_BOUND_IMPORT_DESCRIPTOR
   IMAGE_BOUND_FORWARDER_REF* {.pure.} = object
     TimeDateStamp*: DWORD
     OffsetModuleName*: WORD
     Reserved*: WORD
+
   PIMAGE_BOUND_FORWARDER_REF* = ptr IMAGE_BOUND_FORWARDER_REF
   IMAGE_DELAYLOAD_DESCRIPTOR_Attributes_STRUCT1* {.pure.} = object
-    RvaBased* {.bitsize:1.}: DWORD
-    ReservedAttributes* {.bitsize:31.}: DWORD
+    RvaBased* {.bitsize: 1.}: DWORD
+    ReservedAttributes* {.bitsize: 31.}: DWORD
+
   IMAGE_DELAYLOAD_DESCRIPTOR_Attributes* {.pure, union.} = object
     AllAttributes*: DWORD
     struct1*: IMAGE_DELAYLOAD_DESCRIPTOR_Attributes_STRUCT1
+
   IMAGE_DELAYLOAD_DESCRIPTOR* {.pure.} = object
     Attributes*: IMAGE_DELAYLOAD_DESCRIPTOR_Attributes
     DllNameRVA*: DWORD
@@ -2463,6 +2761,7 @@ type
     BoundImportAddressTableRVA*: DWORD
     UnloadInformationTableRVA*: DWORD
     TimeDateStamp*: DWORD
+
   PIMAGE_DELAYLOAD_DESCRIPTOR* = ptr IMAGE_DELAYLOAD_DESCRIPTOR
   PCIMAGE_DELAYLOAD_DESCRIPTOR* = ptr IMAGE_DELAYLOAD_DESCRIPTOR
   IMAGE_RESOURCE_DIRECTORY* {.pure.} = object
@@ -2472,37 +2771,46 @@ type
     MinorVersion*: WORD
     NumberOfNamedEntries*: WORD
     NumberOfIdEntries*: WORD
+
   PIMAGE_RESOURCE_DIRECTORY* = ptr IMAGE_RESOURCE_DIRECTORY
   IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION1_STRUCT1* {.pure.} = object
-    NameOffset* {.bitsize:31.}: DWORD
-    NameIsString* {.bitsize:1.}: DWORD
+    NameOffset* {.bitsize: 31.}: DWORD
+    NameIsString* {.bitsize: 1.}: DWORD
+
   IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION1* {.pure, union.} = object
     struct1*: IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION1_STRUCT1
     Name*: DWORD
     Id*: WORD
+
   IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION2_STRUCT1* {.pure.} = object
-    OffsetToDirectory* {.bitsize:31.}: DWORD
-    DataIsDirectory* {.bitsize:1.}: DWORD
+    OffsetToDirectory* {.bitsize: 31.}: DWORD
+    DataIsDirectory* {.bitsize: 1.}: DWORD
+
   IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION2* {.pure, union.} = object
     OffsetToData*: DWORD
     struct1*: IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION2_STRUCT1
+
   IMAGE_RESOURCE_DIRECTORY_ENTRY* {.pure.} = object
     union1*: IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION1
     union2*: IMAGE_RESOURCE_DIRECTORY_ENTRY_UNION2
+
   PIMAGE_RESOURCE_DIRECTORY_ENTRY* = ptr IMAGE_RESOURCE_DIRECTORY_ENTRY
   IMAGE_RESOURCE_DIRECTORY_STRING* {.pure.} = object
     Length*: WORD
     NameString*: array[1, CHAR]
+
   PIMAGE_RESOURCE_DIRECTORY_STRING* = ptr IMAGE_RESOURCE_DIRECTORY_STRING
   IMAGE_RESOURCE_DIR_STRING_U* {.pure.} = object
     Length*: WORD
     NameString*: array[1, WCHAR]
+
   PIMAGE_RESOURCE_DIR_STRING_U* = ptr IMAGE_RESOURCE_DIR_STRING_U
   IMAGE_RESOURCE_DATA_ENTRY* {.pure.} = object
     OffsetToData*: DWORD
     Size*: DWORD
     CodePage*: DWORD
     Reserved*: DWORD
+
   PIMAGE_RESOURCE_DATA_ENTRY* = ptr IMAGE_RESOURCE_DATA_ENTRY
   IMAGE_LOAD_CONFIG_DIRECTORY32* {.pure.} = object
     Size*: DWORD
@@ -2525,6 +2833,7 @@ type
     SecurityCookie*: DWORD
     SEHandlerTable*: DWORD
     SEHandlerCount*: DWORD
+
   PIMAGE_LOAD_CONFIG_DIRECTORY32* = ptr IMAGE_LOAD_CONFIG_DIRECTORY32
   IMAGE_LOAD_CONFIG_DIRECTORY64* {.pure.} = object
     Size*: DWORD
@@ -2547,6 +2856,7 @@ type
     SecurityCookie*: ULONGLONG
     SEHandlerTable*: ULONGLONG
     SEHandlerCount*: ULONGLONG
+
   PIMAGE_LOAD_CONFIG_DIRECTORY64* = ptr IMAGE_LOAD_CONFIG_DIRECTORY64
   IMAGE_DEBUG_DIRECTORY* {.pure.} = object
     Characteristics*: DWORD
@@ -2557,6 +2867,7 @@ type
     SizeOfData*: DWORD
     AddressOfRawData*: DWORD
     PointerToRawData*: DWORD
+
   PIMAGE_DEBUG_DIRECTORY* = ptr IMAGE_DEBUG_DIRECTORY
   IMAGE_COFF_SYMBOLS_HEADER* {.pure.} = object
     NumberOfSymbols*: DWORD
@@ -2567,18 +2878,20 @@ type
     RvaToLastByteOfCode*: DWORD
     RvaToFirstByteOfData*: DWORD
     RvaToLastByteOfData*: DWORD
+
   PIMAGE_COFF_SYMBOLS_HEADER* = ptr IMAGE_COFF_SYMBOLS_HEADER
   FPO_DATA* {.pure.} = object
     ulOffStart*: DWORD
     cbProcSize*: DWORD
     cdwLocals*: DWORD
     cdwParams*: WORD
-    cbProlog* {.bitsize:8.}: WORD
-    cbRegs* {.bitsize:3.}: WORD
-    fHasSEH* {.bitsize:1.}: WORD
-    fUseBP* {.bitsize:1.}: WORD
-    reserved* {.bitsize:1.}: WORD
-    cbFrame* {.bitsize:2.}: WORD
+    cbProlog* {.bitsize: 8.}: WORD
+    cbRegs* {.bitsize: 3.}: WORD
+    fHasSEH* {.bitsize: 1.}: WORD
+    fUseBP* {.bitsize: 1.}: WORD
+    reserved* {.bitsize: 1.}: WORD
+    cbFrame* {.bitsize: 2.}: WORD
+
   PFPO_DATA* = ptr FPO_DATA
   IMAGE_DEBUG_MISC* {.pure.} = object
     DataType*: DWORD
@@ -2586,19 +2899,23 @@ type
     Unicode*: BOOLEAN
     Reserved*: array[3, BYTE]
     Data*: array[1, BYTE]
+
   PIMAGE_DEBUG_MISC* = ptr IMAGE_DEBUG_MISC
   IMAGE_FUNCTION_ENTRY* {.pure.} = object
     StartingAddress*: DWORD
     EndingAddress*: DWORD
     EndOfPrologue*: DWORD
+
   PIMAGE_FUNCTION_ENTRY* = ptr IMAGE_FUNCTION_ENTRY
   IMAGE_FUNCTION_ENTRY64_UNION1* {.pure, union.} = object
     EndOfPrologue*: ULONGLONG
     UnwindInfoAddress*: ULONGLONG
+
   IMAGE_FUNCTION_ENTRY64* {.pure.} = object
     StartingAddress*: ULONGLONG
     EndingAddress*: ULONGLONG
     union1*: IMAGE_FUNCTION_ENTRY64_UNION1
+
   PIMAGE_FUNCTION_ENTRY64* = ptr IMAGE_FUNCTION_ENTRY64
   IMAGE_SEPARATE_DEBUG_HEADER* {.pure.} = object
     Signature*: WORD
@@ -2614,6 +2931,7 @@ type
     DebugDirectorySize*: DWORD
     SectionAlignment*: DWORD
     Reserved*: array[2, DWORD]
+
   PIMAGE_SEPARATE_DEBUG_HEADER* = ptr IMAGE_SEPARATE_DEBUG_HEADER
   NON_PAGED_DEBUG_INFO* {.pure.} = object
     Signature*: WORD
@@ -2625,21 +2943,25 @@ type
     CheckSum*: DWORD
     SizeOfImage*: DWORD
     ImageBase*: ULONGLONG
+
   PNON_PAGED_DEBUG_INFO* = ptr NON_PAGED_DEBUG_INFO
   IMAGE_ARCHITECTURE_HEADER* {.pure.} = object
-    AmaskValue* {.bitsize:1.}: int32
-    Adummy1* {.bitsize:7.}: int32
-    AmaskShift* {.bitsize:8.}: int32
-    Adummy2* {.bitsize:16.}: int32
+    AmaskValue* {.bitsize: 1.}: int32
+    Adummy1* {.bitsize: 7.}: int32
+    AmaskShift* {.bitsize: 8.}: int32
+    Adummy2* {.bitsize: 16.}: int32
     FirstEntryRVA*: DWORD
+
   PIMAGE_ARCHITECTURE_HEADER* = ptr IMAGE_ARCHITECTURE_HEADER
   IMAGE_ARCHITECTURE_ENTRY* {.pure.} = object
     FixupInstRVA*: DWORD
     NewInst*: DWORD
+
   PIMAGE_ARCHITECTURE_ENTRY* = ptr IMAGE_ARCHITECTURE_ENTRY
   IMAGE_COR20_HEADER_UNION1* {.pure, union.} = object
     EntryPointToken*: DWORD
     EntryPointRVA*: DWORD
+
   IMAGE_COR20_HEADER* {.pure.} = object
     cb*: DWORD
     MajorRuntimeVersion*: WORD
@@ -2653,9 +2975,11 @@ type
     VTableFixups*: IMAGE_DATA_DIRECTORY
     ExportAddressTableJumps*: IMAGE_DATA_DIRECTORY
     ManagedNativeHeader*: IMAGE_DATA_DIRECTORY
+
   PIMAGE_COR20_HEADER* = ptr IMAGE_COR20_HEADER
   RTL_RUN_ONCE* {.pure.} = object
     Ptr*: PVOID
+
   PRTL_RUN_ONCE* = ptr RTL_RUN_ONCE
   RTL_BARRIER* {.pure.} = object
     Reserved1*: DWORD
@@ -2663,20 +2987,24 @@ type
     Reserved3*: array[2, ULONG_PTR]
     Reserved4*: DWORD
     Reserved5*: DWORD
+
   PRTL_BARRIER* = ptr RTL_BARRIER
   MESSAGE_RESOURCE_ENTRY* {.pure.} = object
     Length*: WORD
     Flags*: WORD
     Text*: array[1, BYTE]
+
   PMESSAGE_RESOURCE_ENTRY* = ptr MESSAGE_RESOURCE_ENTRY
   MESSAGE_RESOURCE_BLOCK* {.pure.} = object
     LowId*: DWORD
     HighId*: DWORD
     OffsetToEntries*: DWORD
+
   PMESSAGE_RESOURCE_BLOCK* = ptr MESSAGE_RESOURCE_BLOCK
   MESSAGE_RESOURCE_DATA* {.pure.} = object
     NumberOfBlocks*: DWORD
     Blocks*: array[1, MESSAGE_RESOURCE_BLOCK]
+
   PMESSAGE_RESOURCE_DATA* = ptr MESSAGE_RESOURCE_DATA
   OSVERSIONINFOA* {.pure.} = object
     dwOSVersionInfoSize*: DWORD
@@ -2685,6 +3013,7 @@ type
     dwBuildNumber*: DWORD
     dwPlatformId*: DWORD
     szCSDVersion*: array[128, CHAR]
+
   POSVERSIONINFOA* = ptr OSVERSIONINFOA
   LPOSVERSIONINFOA* = ptr OSVERSIONINFOA
   OSVERSIONINFOW* {.pure.} = object
@@ -2694,6 +3023,7 @@ type
     dwBuildNumber*: DWORD
     dwPlatformId*: DWORD
     szCSDVersion*: array[128, WCHAR]
+
   POSVERSIONINFOW* = ptr OSVERSIONINFOW
   LPOSVERSIONINFOW* = ptr OSVERSIONINFOW
   RTL_OSVERSIONINFOW* = OSVERSIONINFOW
@@ -2710,6 +3040,7 @@ type
     wSuiteMask*: WORD
     wProductType*: BYTE
     wReserved*: BYTE
+
   POSVERSIONINFOEXA* = ptr OSVERSIONINFOEXA
   LPOSVERSIONINFOEXA* = ptr OSVERSIONINFOEXA
   OSVERSIONINFOEXW* {.pure.} = object
@@ -2724,11 +3055,16 @@ type
     wSuiteMask*: WORD
     wProductType*: BYTE
     wReserved*: BYTE
+
   POSVERSIONINFOEXW* = ptr OSVERSIONINFOEXW
   LPOSVERSIONINFOEXW* = ptr OSVERSIONINFOEXW
   RTL_OSVERSIONINFOEXW* = OSVERSIONINFOEXW
   PRTL_OSVERSIONINFOEXW* = ptr OSVERSIONINFOEXW
-  RTL_UMS_SCHEDULER_ENTRY_POINT* = proc (Reason: RTL_UMS_SCHEDULER_REASON, ActivationPayload: ULONG_PTR, SchedulerParam: PVOID): VOID {.stdcall.}
+  RTL_UMS_SCHEDULER_ENTRY_POINT* = proc(
+    Reason: RTL_UMS_SCHEDULER_REASON,
+    ActivationPayload: ULONG_PTR,
+    SchedulerParam: PVOID,
+  ): VOID {.stdcall.}
   PRTL_UMS_SCHEDULER_ENTRY_POINT* = RTL_UMS_SCHEDULER_ENTRY_POINT
   RTL_CRITICAL_SECTION* {.pure.} = object
     DebugInfo*: PRTL_CRITICAL_SECTION_DEBUG
@@ -2737,6 +3073,7 @@ type
     OwningThread*: HANDLE
     LockSemaphore*: HANDLE
     SpinCount*: ULONG_PTR
+
   RTL_CRITICAL_SECTION_DEBUG* {.pure.} = object
     Type*: WORD
     CreatorBackTraceIndex*: WORD
@@ -2747,21 +3084,25 @@ type
     Flags*: DWORD
     CreatorBackTraceIndexHigh*: WORD
     SpareWORD*: WORD
+
   PRTL_CRITICAL_SECTION_DEBUG* = ptr RTL_CRITICAL_SECTION_DEBUG
   RTL_RESOURCE_DEBUG* = RTL_CRITICAL_SECTION_DEBUG
   PRTL_RESOURCE_DEBUG* = ptr RTL_CRITICAL_SECTION_DEBUG
   PRTL_CRITICAL_SECTION* = ptr RTL_CRITICAL_SECTION
   RTL_SRWLOCK* {.pure.} = object
     Ptr*: PVOID
+
   PRTL_SRWLOCK* = ptr RTL_SRWLOCK
   RTL_CONDITION_VARIABLE* {.pure.} = object
     Ptr*: PVOID
+
   PRTL_CONDITION_VARIABLE* = ptr RTL_CONDITION_VARIABLE
-  WAITORTIMERCALLBACKFUNC* = proc (P1: PVOID, P2: BOOLEAN): VOID {.stdcall.}
+  WAITORTIMERCALLBACKFUNC* = proc(P1: PVOID, P2: BOOLEAN): VOID {.stdcall.}
   WAITORTIMERCALLBACK* = WAITORTIMERCALLBACKFUNC
   ACTIVATION_CONTEXT_QUERY_INDEX* {.pure.} = object
     ulAssemblyIndex*: DWORD
     ulFileIndexInAssembly*: DWORD
+
   PACTIVATION_CONTEXT_QUERY_INDEX* = ptr ACTIVATION_CONTEXT_QUERY_INDEX
   ASSEMBLY_FILE_DETAILED_INFORMATION* {.pure.} = object
     ulFlags*: DWORD
@@ -2769,6 +3110,7 @@ type
     ulPathLength*: DWORD
     lpFileName*: PCWSTR
     lpFilePath*: PCWSTR
+
   PASSEMBLY_FILE_DETAILED_INFORMATION* = ptr ASSEMBLY_FILE_DETAILED_INFORMATION
   ACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION* {.pure.} = object
     ulFlags*: DWORD
@@ -2790,27 +3132,35 @@ type
     lpAssemblyPolicyPath*: PCWSTR
     lpAssemblyDirectoryName*: PCWSTR
     ulFileCount*: DWORD
-  PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION* = ptr ACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION
+
+  PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION
   ACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION* {.pure.} = object
     ulFlags*: DWORD
     RunLevel*: ACTCTX_REQUESTED_RUN_LEVEL
     UiAccess*: DWORD
-  PACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION* = ptr ACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION
+
+  PACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION
   COMPATIBILITY_CONTEXT_ELEMENT* {.pure.} = object
     Id*: GUID
     Type*: ACTCTX_COMPATIBILITY_ELEMENT_TYPE
+
   PCOMPATIBILITY_CONTEXT_ELEMENT* = ptr COMPATIBILITY_CONTEXT_ELEMENT
   ACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION* {.pure.} = object
     ElementCount*: DWORD
     Elements*: UncheckedArray[COMPATIBILITY_CONTEXT_ELEMENT]
-  PACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION* = ptr ACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION
-const
-  MAX_SUPPORTED_OS_NUM* = 4
+
+  PACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION
+
+const MAX_SUPPORTED_OS_NUM* = 4
 type
   SUPPORTED_OS_INFO* {.pure.} = object
     OsCount*: WORD
     MitigationExist*: WORD
     OsList*: array[MAX_SUPPORTED_OS_NUM, WORD]
+
   PSUPPORTED_OS_INFO* = ptr SUPPORTED_OS_INFO
   ACTIVATION_CONTEXT_DETAILED_INFORMATION* {.pure.} = object
     dwFlags*: DWORD
@@ -2825,31 +3175,45 @@ type
     lpRootManifestPath*: PCWSTR
     lpRootConfigurationPath*: PCWSTR
     lpAppDirPath*: PCWSTR
-  PACTIVATION_CONTEXT_DETAILED_INFORMATION* = ptr ACTIVATION_CONTEXT_DETAILED_INFORMATION
+
+  PACTIVATION_CONTEXT_DETAILED_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_DETAILED_INFORMATION
   PCACTIVATION_CONTEXT_QUERY_INDEX* = ptr ACTIVATION_CONTEXT_QUERY_INDEX
   PCASSEMBLY_FILE_DETAILED_INFORMATION* = ptr ASSEMBLY_FILE_DETAILED_INFORMATION
-  PCACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION* = ptr ACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION
-  PCACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION* = ptr ACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION
+  PCACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION
+  PCACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_RUN_LEVEL_INFORMATION
   PCCOMPATIBILITY_CONTEXT_ELEMENT* = ptr COMPATIBILITY_CONTEXT_ELEMENT
-  PCACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION* = ptr ACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION
-  PCACTIVATION_CONTEXT_DETAILED_INFORMATION* = ptr ACTIVATION_CONTEXT_DETAILED_INFORMATION
+  PCACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_COMPATIBILITY_INFORMATION
+  PCACTIVATION_CONTEXT_DETAILED_INFORMATION* =
+    ptr ACTIVATION_CONTEXT_DETAILED_INFORMATION
   ASSEMBLY_DLL_REDIRECTION_DETAILED_INFORMATION* = ASSEMBLY_FILE_DETAILED_INFORMATION
   PASSEMBLY_DLL_REDIRECTION_DETAILED_INFORMATION* = PASSEMBLY_FILE_DETAILED_INFORMATION
-  PCASSEMBLY_DLL_REDIRECTION_DETAILED_INFORMATION* = PCASSEMBLY_FILE_DETAILED_INFORMATION
+  PCASSEMBLY_DLL_REDIRECTION_DETAILED_INFORMATION* =
+    PCASSEMBLY_FILE_DETAILED_INFORMATION
   RTL_VERIFIER_THUNK_DESCRIPTOR* {.pure.} = object
     ThunkName*: PCHAR
     ThunkOldAddress*: PVOID
     ThunkNewAddress*: PVOID
+
   PRTL_VERIFIER_THUNK_DESCRIPTOR* = ptr RTL_VERIFIER_THUNK_DESCRIPTOR
   RTL_VERIFIER_DLL_DESCRIPTOR* {.pure.} = object
     DllName*: PWCHAR
     DllFlags*: DWORD
     DllAddress*: PVOID
     DllThunks*: PRTL_VERIFIER_THUNK_DESCRIPTOR
+
   PRTL_VERIFIER_DLL_DESCRIPTOR* = ptr RTL_VERIFIER_DLL_DESCRIPTOR
-  RTL_VERIFIER_DLL_LOAD_CALLBACK* = proc (DllName: PWSTR, DllBase: PVOID, DllSize: SIZE_T, Reserved: PVOID): VOID {.stdcall.}
-  RTL_VERIFIER_DLL_UNLOAD_CALLBACK* = proc (DllName: PWSTR, DllBase: PVOID, DllSize: SIZE_T, Reserved: PVOID): VOID {.stdcall.}
-  RTL_VERIFIER_NTDLLHEAPFREE_CALLBACK* = proc (AllocationBase: PVOID, AllocationSize: SIZE_T): VOID {.stdcall.}
+  RTL_VERIFIER_DLL_LOAD_CALLBACK* = proc(
+    DllName: PWSTR, DllBase: PVOID, DllSize: SIZE_T, Reserved: PVOID
+  ): VOID {.stdcall.}
+  RTL_VERIFIER_DLL_UNLOAD_CALLBACK* = proc(
+    DllName: PWSTR, DllBase: PVOID, DllSize: SIZE_T, Reserved: PVOID
+  ): VOID {.stdcall.}
+  RTL_VERIFIER_NTDLLHEAPFREE_CALLBACK* =
+    proc(AllocationBase: PVOID, AllocationSize: SIZE_T): VOID {.stdcall.}
   RTL_VERIFIER_PROVIDER_DESCRIPTOR* {.pure.} = object
     Length*: DWORD
     ProviderDlls*: PRTL_VERIFIER_DLL_DESCRIPTOR
@@ -2862,14 +3226,16 @@ type
     RtlpDebugPageHeapCreate*: PVOID
     RtlpDebugPageHeapDestroy*: PVOID
     ProviderNtdllHeapFreeCallback*: RTL_VERIFIER_NTDLLHEAPFREE_CALLBACK
+
   PRTL_VERIFIER_PROVIDER_DESCRIPTOR* = ptr RTL_VERIFIER_PROVIDER_DESCRIPTOR
   HARDWARE_COUNTER_DATA* {.pure.} = object
     Type*: HARDWARE_COUNTER_TYPE
     Reserved*: DWORD
     Value*: DWORD64
+
   PHARDWARE_COUNTER_DATA* = ptr HARDWARE_COUNTER_DATA
-const
-  MAX_HW_COUNTERS* = 16
+
+const MAX_HW_COUNTERS* = 16
 type
   PERFORMANCE_DATA* {.pure.} = object
     Size*: WORD
@@ -2881,6 +3247,7 @@ type
     RetryCount*: DWORD
     Reserved*: DWORD
     HwCounters*: array[MAX_HW_COUNTERS, HARDWARE_COUNTER_DATA]
+
   PPERFORMANCE_DATA* = ptr PERFORMANCE_DATA
   EVENTLOGRECORD* {.pure.} = object
     Length*: DWORD
@@ -2899,44 +3266,52 @@ type
     UserSidOffset*: DWORD
     DataLength*: DWORD
     DataOffset*: DWORD
+
   PEVENTLOGRECORD* = ptr EVENTLOGRECORD
-const
-  MAXLOGICALLOGNAMESIZE* = 256
+
+const MAXLOGICALLOGNAMESIZE* = 256
 type
   EVENTSFORLOGFILE* {.pure.} = object
     ulSize*: DWORD
     szLogicalLogFile*: array[MAXLOGICALLOGNAMESIZE, WCHAR]
     ulNumRecords*: DWORD
     pEventLogRecords*: UncheckedArray[EVENTLOGRECORD]
+
   PEVENTSFORLOGFILE* = ptr EVENTSFORLOGFILE
   PACKEDEVENTINFO* {.pure.} = object
     ulSize*: DWORD
     ulNumEventsForLogFile*: DWORD
     ulOffsets*: UncheckedArray[DWORD]
+
   PPACKEDEVENTINFO* = ptr PACKEDEVENTINFO
   TAPE_ERASE* {.pure.} = object
     Type*: DWORD
     Immediate*: BOOLEAN
+
   PTAPE_ERASE* = ptr TAPE_ERASE
   TAPE_PREPARE* {.pure.} = object
     Operation*: DWORD
     Immediate*: BOOLEAN
+
   PTAPE_PREPARE* = ptr TAPE_PREPARE
   TAPE_WRITE_MARKS* {.pure.} = object
     Type*: DWORD
     Count*: DWORD
     Immediate*: BOOLEAN
+
   PTAPE_WRITE_MARKS* = ptr TAPE_WRITE_MARKS
   TAPE_GET_POSITION* {.pure.} = object
     Type*: DWORD
     Partition*: DWORD
     Offset*: LARGE_INTEGER
+
   PTAPE_GET_POSITION* = ptr TAPE_GET_POSITION
   TAPE_SET_POSITION* {.pure.} = object
     Method*: DWORD
     Partition*: DWORD
     Offset*: LARGE_INTEGER
     Immediate*: BOOLEAN
+
   PTAPE_SET_POSITION* = ptr TAPE_SET_POSITION
   TAPE_GET_DRIVE_PARAMETERS* {.pure.} = object
     ECC*: BOOLEAN
@@ -2950,6 +3325,7 @@ type
     FeaturesLow*: DWORD
     FeaturesHigh*: DWORD
     EOTWarningZoneSize*: DWORD
+
   PTAPE_GET_DRIVE_PARAMETERS* = ptr TAPE_GET_DRIVE_PARAMETERS
   TAPE_SET_DRIVE_PARAMETERS* {.pure.} = object
     ECC*: BOOLEAN
@@ -2957,6 +3333,7 @@ type
     DataPadding*: BOOLEAN
     ReportSetmarks*: BOOLEAN
     EOTWarningZoneSize*: DWORD
+
   PTAPE_SET_DRIVE_PARAMETERS* = ptr TAPE_SET_DRIVE_PARAMETERS
   TAPE_GET_MEDIA_PARAMETERS* {.pure.} = object
     Capacity*: LARGE_INTEGER
@@ -2964,19 +3341,23 @@ type
     BlockSize*: DWORD
     PartitionCount*: DWORD
     WriteProtected*: BOOLEAN
+
   PTAPE_GET_MEDIA_PARAMETERS* = ptr TAPE_GET_MEDIA_PARAMETERS
   TAPE_SET_MEDIA_PARAMETERS* {.pure.} = object
     BlockSize*: DWORD
+
   PTAPE_SET_MEDIA_PARAMETERS* = ptr TAPE_SET_MEDIA_PARAMETERS
   TAPE_CREATE_PARTITION* {.pure.} = object
     Method*: DWORD
     Count*: DWORD
     Size*: DWORD
+
   PTAPE_CREATE_PARTITION* = ptr TAPE_CREATE_PARTITION
   TAPE_WMI_OPERATIONS* {.pure.} = object
     Method*: DWORD
     DataBufferSize*: DWORD
     DataBuffer*: PVOID
+
   PTAPE_WMI_OPERATIONS* = ptr TAPE_WMI_OPERATIONS
   TP_CALLBACK_INSTANCE* {.pure.} = object
   PTP_CALLBACK_INSTANCE* = ptr TP_CALLBACK_INSTANCE
@@ -2985,19 +3366,24 @@ type
   TP_POOL_STACK_INFORMATION* {.pure.} = object
     StackReserve*: SIZE_T
     StackCommit*: SIZE_T
+
   PTP_POOL_STACK_INFORMATION* = ptr TP_POOL_STACK_INFORMATION
   TP_CLEANUP_GROUP* {.pure.} = object
   PTP_CLEANUP_GROUP* = ptr TP_CLEANUP_GROUP
-  PTP_CLEANUP_GROUP_CANCEL_CALLBACK* = proc (ObjectContext: PVOID, CleanupContext: PVOID): VOID {.stdcall.}
+  PTP_CLEANUP_GROUP_CANCEL_CALLBACK* =
+    proc(ObjectContext: PVOID, CleanupContext: PVOID): VOID {.stdcall.}
   ACTIVATION_CONTEXT* {.pure.} = object
-  PTP_SIMPLE_CALLBACK* = proc (Instance: PTP_CALLBACK_INSTANCE, Context: PVOID): VOID {.stdcall.}
+  PTP_SIMPLE_CALLBACK* =
+    proc(Instance: PTP_CALLBACK_INSTANCE, Context: PVOID): VOID {.stdcall.}
   TP_CALLBACK_ENVIRON_V3_u_s* {.pure.} = object
-    LongFunction* {.bitsize:1.}: DWORD
-    Persistent* {.bitsize:1.}: DWORD
-    Private* {.bitsize:30.}: DWORD
+    LongFunction* {.bitsize: 1.}: DWORD
+    Persistent* {.bitsize: 1.}: DWORD
+    Private* {.bitsize: 30.}: DWORD
+
   TP_CALLBACK_ENVIRON_V3_u* {.pure, union.} = object
     Flags*: DWORD
     s*: TP_CALLBACK_ENVIRON_V3_u_s
+
   TP_CALLBACK_ENVIRON_V3* {.pure.} = object
     Version*: TP_VERSION
     Pool*: PTP_POOL
@@ -3009,6 +3395,7 @@ type
     u*: TP_CALLBACK_ENVIRON_V3_u
     CallbackPriority*: TP_CALLBACK_PRIORITY
     Size*: DWORD
+
   TP_CALLBACK_ENVIRON* = TP_CALLBACK_ENVIRON_V3
   PTP_CALLBACK_ENVIRON* = ptr TP_CALLBACK_ENVIRON_V3
   TP_WORK* {.pure.} = object
@@ -3026,39 +3413,53 @@ type
     TransactionNotification*: ULONG
     TmVirtualClock*: LARGE_INTEGER
     ArgumentLength*: ULONG
+
   PTRANSACTION_NOTIFICATION* = ptr TRANSACTION_NOTIFICATION
   TRANSACTION_NOTIFICATION_RECOVERY_ARGUMENT* {.pure.} = object
     EnlistmentId*: GUID
     UOW*: GUID
-  PTRANSACTION_NOTIFICATION_RECOVERY_ARGUMENT* = ptr TRANSACTION_NOTIFICATION_RECOVERY_ARGUMENT
+
+  PTRANSACTION_NOTIFICATION_RECOVERY_ARGUMENT* =
+    ptr TRANSACTION_NOTIFICATION_RECOVERY_ARGUMENT
   TRANSACTION_NOTIFICATION_TM_ONLINE_ARGUMENT* {.pure.} = object
     TmIdentity*: GUID
     Flags*: ULONG
-  PTRANSACTION_NOTIFICATION_TM_ONLINE_ARGUMENT* = ptr TRANSACTION_NOTIFICATION_TM_ONLINE_ARGUMENT
+
+  PTRANSACTION_NOTIFICATION_TM_ONLINE_ARGUMENT* =
+    ptr TRANSACTION_NOTIFICATION_TM_ONLINE_ARGUMENT
   TRANSACTION_NOTIFICATION_SAVEPOINT_ARGUMENT* {.pure.} = object
     SavepointId*: SAVEPOINT_ID
-  PTRANSACTION_NOTIFICATION_SAVEPOINT_ARGUMENT* = ptr TRANSACTION_NOTIFICATION_SAVEPOINT_ARGUMENT
+
+  PTRANSACTION_NOTIFICATION_SAVEPOINT_ARGUMENT* =
+    ptr TRANSACTION_NOTIFICATION_SAVEPOINT_ARGUMENT
   TRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT* {.pure.} = object
     PropagationCookie*: ULONG
     UOW*: GUID
     TmIdentity*: GUID
     BufferLength*: ULONG
-  PTRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT* = ptr TRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT
+
+  PTRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT* =
+    ptr TRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT
   TRANSACTION_NOTIFICATION_MARSHAL_ARGUMENT* {.pure.} = object
     MarshalCookie*: ULONG
     UOW*: GUID
-  PTRANSACTION_NOTIFICATION_MARSHAL_ARGUMENT* = ptr TRANSACTION_NOTIFICATION_MARSHAL_ARGUMENT
-  TRANSACTION_NOTIFICATION_PROMOTE_ARGUMENT* = TRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT
-  PTRANSACTION_NOTIFICATION_PROMOTE_ARGUMENT* = ptr TRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT
+
+  PTRANSACTION_NOTIFICATION_MARSHAL_ARGUMENT* =
+    ptr TRANSACTION_NOTIFICATION_MARSHAL_ARGUMENT
+  TRANSACTION_NOTIFICATION_PROMOTE_ARGUMENT* =
+    TRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT
+  PTRANSACTION_NOTIFICATION_PROMOTE_ARGUMENT* =
+    ptr TRANSACTION_NOTIFICATION_PROPAGATE_ARGUMENT
   KCRM_MARSHAL_HEADER* {.pure.} = object
     VersionMajor*: ULONG
     VersionMinor*: ULONG
     NumProtocols*: ULONG
     Unused*: ULONG
+
   PKCRM_MARSHAL_HEADER* = ptr KCRM_MARSHAL_HEADER
   PRKCRM_MARSHAL_HEADER* = ptr KCRM_MARSHAL_HEADER
-const
-  MAX_TRANSACTION_DESCRIPTION_LENGTH* = 64
+
+const MAX_TRANSACTION_DESCRIPTION_LENGTH* = 64
 type
   KCRM_TRANSACTION_BLOB* {.pure.} = object
     UOW*: GUID
@@ -3067,6 +3468,7 @@ type
     IsolationFlags*: ULONG
     Timeout*: ULONG
     Description*: array[MAX_TRANSACTION_DESCRIPTION_LENGTH, WCHAR]
+
   PKCRM_TRANSACTION_BLOB* = ptr KCRM_TRANSACTION_BLOB
   PRKCRM_TRANSACTION_BLOB* = ptr KCRM_TRANSACTION_BLOB
   KCRM_PROTOCOL_BLOB* {.pure.} = object
@@ -3075,29 +3477,37 @@ type
     TransactionIdInfoLength*: ULONG
     Unused1*: ULONG
     Unused2*: ULONG
+
   PKCRM_PROTOCOL_BLOB* = ptr KCRM_PROTOCOL_BLOB
   PRKCRM_PROTOCOL_BLOB* = ptr KCRM_PROTOCOL_BLOB
   TRANSACTION_BASIC_INFORMATION* {.pure.} = object
     TransactionId*: GUID
     State*: DWORD
     Outcome*: DWORD
+
   PTRANSACTION_BASIC_INFORMATION* = ptr TRANSACTION_BASIC_INFORMATION
   TRANSACTIONMANAGER_BASIC_INFORMATION* {.pure.} = object
     TmIdentity*: GUID
     VirtualClock*: LARGE_INTEGER
+
   PTRANSACTIONMANAGER_BASIC_INFORMATION* = ptr TRANSACTIONMANAGER_BASIC_INFORMATION
   TRANSACTIONMANAGER_LOG_INFORMATION* {.pure.} = object
     LogIdentity*: GUID
+
   PTRANSACTIONMANAGER_LOG_INFORMATION* = ptr TRANSACTIONMANAGER_LOG_INFORMATION
   TRANSACTIONMANAGER_LOGPATH_INFORMATION* {.pure.} = object
     LogPathLength*: DWORD
     LogPath*: array[1, WCHAR]
+
   PTRANSACTIONMANAGER_LOGPATH_INFORMATION* = ptr TRANSACTIONMANAGER_LOGPATH_INFORMATION
   TRANSACTIONMANAGER_RECOVERY_INFORMATION* {.pure.} = object
     LastRecoveredLsn*: ULONGLONG
-  PTRANSACTIONMANAGER_RECOVERY_INFORMATION* = ptr TRANSACTIONMANAGER_RECOVERY_INFORMATION
+
+  PTRANSACTIONMANAGER_RECOVERY_INFORMATION* =
+    ptr TRANSACTIONMANAGER_RECOVERY_INFORMATION
   TRANSACTIONMANAGER_OLDEST_INFORMATION* {.pure.} = object
     OldestTransactionGuid*: GUID
+
   PTRANSACTIONMANAGER_OLDEST_INFORMATION* = ptr TRANSACTIONMANAGER_OLDEST_INFORMATION
   TRANSACTION_PROPERTIES_INFORMATION* {.pure.} = object
     IsolationLevel*: DWORD
@@ -3106,54 +3516,67 @@ type
     Outcome*: DWORD
     DescriptionLength*: DWORD
     Description*: array[1, WCHAR]
+
   PTRANSACTION_PROPERTIES_INFORMATION* = ptr TRANSACTION_PROPERTIES_INFORMATION
   TRANSACTION_BIND_INFORMATION* {.pure.} = object
     TmHandle*: HANDLE
+
   PTRANSACTION_BIND_INFORMATION* = ptr TRANSACTION_BIND_INFORMATION
   TRANSACTION_ENLISTMENT_PAIR* {.pure.} = object
     EnlistmentId*: GUID
     ResourceManagerId*: GUID
+
   PTRANSACTION_ENLISTMENT_PAIR* = ptr TRANSACTION_ENLISTMENT_PAIR
   TRANSACTION_ENLISTMENTS_INFORMATION* {.pure.} = object
     NumberOfEnlistments*: DWORD
     EnlistmentPair*: array[1, TRANSACTION_ENLISTMENT_PAIR]
+
   PTRANSACTION_ENLISTMENTS_INFORMATION* = ptr TRANSACTION_ENLISTMENTS_INFORMATION
   TRANSACTION_SUPERIOR_ENLISTMENT_INFORMATION* {.pure.} = object
     SuperiorEnlistmentPair*: TRANSACTION_ENLISTMENT_PAIR
-  PTRANSACTION_SUPERIOR_ENLISTMENT_INFORMATION* = ptr TRANSACTION_SUPERIOR_ENLISTMENT_INFORMATION
+
+  PTRANSACTION_SUPERIOR_ENLISTMENT_INFORMATION* =
+    ptr TRANSACTION_SUPERIOR_ENLISTMENT_INFORMATION
   RESOURCEMANAGER_BASIC_INFORMATION* {.pure.} = object
     ResourceManagerId*: GUID
     DescriptionLength*: DWORD
     Description*: array[1, WCHAR]
+
   PRESOURCEMANAGER_BASIC_INFORMATION* = ptr RESOURCEMANAGER_BASIC_INFORMATION
   RESOURCEMANAGER_COMPLETION_INFORMATION* {.pure.} = object
     IoCompletionPortHandle*: HANDLE
     CompletionKey*: ULONG_PTR
+
   PRESOURCEMANAGER_COMPLETION_INFORMATION* = ptr RESOURCEMANAGER_COMPLETION_INFORMATION
   ENLISTMENT_BASIC_INFORMATION* {.pure.} = object
     EnlistmentId*: GUID
     TransactionId*: GUID
     ResourceManagerId*: GUID
+
   PENLISTMENT_BASIC_INFORMATION* = ptr ENLISTMENT_BASIC_INFORMATION
   ENLISTMENT_CRM_INFORMATION* {.pure.} = object
     CrmTransactionManagerId*: GUID
     CrmResourceManagerId*: GUID
     CrmEnlistmentId*: GUID
+
   PENLISTMENT_CRM_INFORMATION* = ptr ENLISTMENT_CRM_INFORMATION
   TRANSACTION_LIST_ENTRY* {.pure.} = object
     UOW*: GUID
+
   PTRANSACTION_LIST_ENTRY* = ptr TRANSACTION_LIST_ENTRY
   TRANSACTION_LIST_INFORMATION* {.pure.} = object
     NumberOfTransactions*: DWORD
     TransactionInformation*: array[1, TRANSACTION_LIST_ENTRY]
+
   PTRANSACTION_LIST_INFORMATION* = ptr TRANSACTION_LIST_INFORMATION
   KTMOBJECT_CURSOR* {.pure.} = object
     LastQuery*: GUID
     ObjectIdCount*: DWORD
     ObjectIds*: array[1, GUID]
+
   PKTMOBJECT_CURSOR* = ptr KTMOBJECT_CURSOR
-const
-  WOW64_SIZE_OF_80387_REGISTERS* = 80
+
+const WOW64_SIZE_OF_80387_REGISTERS* = 80
 type
   WOW64_FLOATING_SAVE_AREA* {.pure.} = object
     ControlWord*: DWORD
@@ -3165,9 +3588,10 @@ type
     DataSelector*: DWORD
     RegisterArea*: array[WOW64_SIZE_OF_80387_REGISTERS, BYTE]
     Cr0NpxState*: DWORD
+
   PWOW64_FLOATING_SAVE_AREA* = ptr WOW64_FLOATING_SAVE_AREA
-const
-  WOW64_MAXIMUM_SUPPORTED_EXTENSION* = 512
+
+const WOW64_MAXIMUM_SUPPORTED_EXTENSION* = 512
 type
   WOW64_CONTEXT* {.pure.} = object
     ContextFlags*: DWORD
@@ -3195,39 +3619,46 @@ type
     Esp*: DWORD
     SegSs*: DWORD
     ExtendedRegisters*: array[WOW64_MAXIMUM_SUPPORTED_EXTENSION, BYTE]
+
   PWOW64_CONTEXT* = ptr WOW64_CONTEXT
   WOW64_LDT_ENTRY_HighWord_Bytes* {.pure.} = object
     BaseMid*: BYTE
     Flags1*: BYTE
     Flags2*: BYTE
     BaseHi*: BYTE
+
   WOW64_LDT_ENTRY_HighWord_Bits* {.pure.} = object
-    BaseMid* {.bitsize:8.}: DWORD
-    Type* {.bitsize:5.}: DWORD
-    Dpl* {.bitsize:2.}: DWORD
-    Pres* {.bitsize:1.}: DWORD
-    LimitHi* {.bitsize:4.}: DWORD
-    Sys* {.bitsize:1.}: DWORD
-    Reserved_0* {.bitsize:1.}: DWORD
-    Default_Big* {.bitsize:1.}: DWORD
-    Granularity* {.bitsize:1.}: DWORD
-    BaseHi* {.bitsize:8.}: DWORD
+    BaseMid* {.bitsize: 8.}: DWORD
+    Type* {.bitsize: 5.}: DWORD
+    Dpl* {.bitsize: 2.}: DWORD
+    Pres* {.bitsize: 1.}: DWORD
+    LimitHi* {.bitsize: 4.}: DWORD
+    Sys* {.bitsize: 1.}: DWORD
+    Reserved_0* {.bitsize: 1.}: DWORD
+    Default_Big* {.bitsize: 1.}: DWORD
+    Granularity* {.bitsize: 1.}: DWORD
+    BaseHi* {.bitsize: 8.}: DWORD
+
   WOW64_LDT_ENTRY_HighWord* {.pure, union.} = object
     Bytes*: WOW64_LDT_ENTRY_HighWord_Bytes
     Bits*: WOW64_LDT_ENTRY_HighWord_Bits
+
   WOW64_LDT_ENTRY* {.pure.} = object
     LimitLow*: WORD
     BaseLow*: WORD
     HighWord*: WOW64_LDT_ENTRY_HighWord
+
   PWOW64_LDT_ENTRY* = ptr WOW64_LDT_ENTRY
   WOW64_DESCRIPTOR_TABLE_ENTRY* {.pure.} = object
     Selector*: DWORD
     Descriptor*: WOW64_LDT_ENTRY
+
   PWOW64_DESCRIPTOR_TABLE_ENTRY* = ptr WOW64_DESCRIPTOR_TABLE_ENTRY
   PHKEY* = ptr HKEY
   FILETIME* {.pure.} = object
     dwLowDateTime*: DWORD
     dwHighDateTime*: DWORD
+
   PFILETIME* = ptr FILETIME
   LPFILETIME* = ptr FILETIME
   RECT* {.pure.} = object
@@ -3235,6 +3666,7 @@ type
     top*: LONG
     right*: LONG
     bottom*: LONG
+
   PRECT* = ptr RECT
   NPRECT* = ptr RECT
   LPRECT* = ptr RECT
@@ -3244,22 +3676,26 @@ type
     top*: LONG
     right*: LONG
     bottom*: LONG
+
   PRECTL* = ptr RECTL
   LPRECTL* = ptr RECTL
   LPCRECTL* = ptr RECTL
   POINT* {.pure.} = object
     x*: LONG
     y*: LONG
+
   PPOINT* = ptr POINT
   NPPOINT* = ptr POINT
   LPPOINT* = ptr POINT
   POINTL* {.pure.} = object
     x*: LONG
     y*: LONG
+
   PPOINTL* = ptr POINTL
   SIZE* {.pure.} = object
     cx*: LONG
     cy*: LONG
+
   PSIZE* = ptr SIZE
   LPSIZE* = ptr SIZE
   SIZEL* = SIZE
@@ -3268,16 +3704,19 @@ type
   POINTS* {.pure.} = object
     x*: SHORT
     y*: SHORT
+
   PPOINTS* = ptr POINTS
   LPPOINTS* = ptr POINTS
   PEB_LDR_DATA* {.pure.} = object
     Reserved1*: array[8, BYTE]
     Reserved2*: array[3, PVOID]
     InMemoryOrderModuleList*: LIST_ENTRY
+
   PPEB_LDR_DATA* = ptr PEB_LDR_DATA
   LDR_DATA_TABLE_ENTRY_UNION1* {.pure, union.} = object
     CheckSum*: ULONG
     Reserved6*: PVOID
+
   LDR_DATA_TABLE_ENTRY* {.pure.} = object
     Reserved1*: array[2, PVOID]
     InMemoryOrderLinks*: LIST_ENTRY
@@ -3289,14 +3728,16 @@ type
     Reserved5*: array[3, PVOID]
     union1*: LDR_DATA_TABLE_ENTRY_UNION1
     TimeDateStamp*: ULONG
+
   PLDR_DATA_TABLE_ENTRY* = ptr LDR_DATA_TABLE_ENTRY
   RTL_USER_PROCESS_PARAMETERS* {.pure.} = object
     Reserved1*: array[16, BYTE]
     Reserved2*: array[10, PVOID]
     ImagePathName*: UNICODE_STRING
     CommandLine*: UNICODE_STRING
+
   PRTL_USER_PROCESS_PARAMETERS* = ptr RTL_USER_PROCESS_PARAMETERS
-  PPS_POST_PROCESS_INIT_ROUTINE* = proc (): VOID {.stdcall.}
+  PPS_POST_PROCESS_INIT_ROUTINE* = proc(): VOID {.stdcall.}
   PEB* {.pure.} = object
     Reserved1*: array[2, BYTE]
     BeingDebugged*: BYTE
@@ -3310,6 +3751,7 @@ type
     Reserved6*: array[128, BYTE]
     Reserved7*: array[1, PVOID]
     SessionId*: ULONG
+
   PPEB* = ptr PEB
   TEB* {.pure.} = object
     Reserved1*: array[1952, BYTE]
@@ -3320,10 +3762,12 @@ type
     ReservedForOle*: PVOID
     Reserved5*: array[4, PVOID]
     TlsExpansionSlots*: PVOID
+
   PTEB* = ptr TEB
   OBJECT_DATA_INFORMATION* {.pure.} = object
     InheritHandle*: BOOLEAN
     ProtectFromClose*: BOOLEAN
+
   POBJECT_DATA_INFORMATION* = ptr OBJECT_DATA_INFORMATION
   OBJECT_BASIC_INFORMATION* {.pure.} = object
     Attributes*: ULONG
@@ -3337,9 +3781,11 @@ type
     TypeInformationLength*: ULONG
     SecurityDescriptorLength*: ULONG
     CreateTime*: LARGE_INTEGER
+
   POBJECT_BASIC_INFORMATION* = ptr OBJECT_BASIC_INFORMATION
   OBJECT_NAME_INFORMATION* {.pure.} = object
     Name*: UNICODE_STRING
+
   POBJECT_NAME_INFORMATION* = ptr OBJECT_NAME_INFORMATION
   OBJECT_TYPE_INFORMATION* {.pure.} = object
     TypeName*: UNICODE_STRING
@@ -3363,10 +3809,12 @@ type
     PoolType*: ULONG
     DefaultPagedPoolCharge*: ULONG
     DefaultNonPagedPoolCharge*: ULONG
+
   POBJECT_TYPE_INFORMATION* = ptr OBJECT_TYPE_INFORMATION
   OBJECT_ALL_INFORMATION* {.pure.} = object
     NumberOfObjects*: ULONG
     ObjectTypeInformation*: array[1, OBJECT_TYPE_INFORMATION]
+
   POBJECT_ALL_INFORMATION* = ptr OBJECT_ALL_INFORMATION
   FILE_DIRECTORY_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3380,6 +3828,7 @@ type
     FileAttributes*: ULONG
     FileNameLength*: ULONG
     FileName*: array[ANYSIZE_ARRAY, WCHAR]
+
   PFILE_DIRECTORY_INFORMATION* = ptr FILE_DIRECTORY_INFORMATION
   FILE_FULL_DIR_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3394,6 +3843,7 @@ type
     FileNameLength*: ULONG
     EaSize*: ULONG
     FileName*: array[ANYSIZE_ARRAY, WCHAR]
+
   PFILE_FULL_DIR_INFORMATION* = ptr FILE_FULL_DIR_INFORMATION
   FILE_ID_FULL_DIR_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3409,6 +3859,7 @@ type
     EaSize*: ULONG
     FileId*: LARGE_INTEGER
     FileName*: array[ANYSIZE_ARRAY, WCHAR]
+
   PFILE_ID_FULL_DIR_INFORMATION* = ptr FILE_ID_FULL_DIR_INFORMATION
   FILE_BOTH_DIR_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3425,6 +3876,7 @@ type
     ShortNameLength*: CHAR
     ShortName*: array[12, WCHAR]
     FileName*: array[ANYSIZE_ARRAY, WCHAR]
+
   PFILE_BOTH_DIR_INFORMATION* = ptr FILE_BOTH_DIR_INFORMATION
   FILE_ID_BOTH_DIR_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3442,6 +3894,7 @@ type
     ShortName*: array[12, WCHAR]
     FileId*: LARGE_INTEGER
     FileName*: array[ANYSIZE_ARRAY, WCHAR]
+
   PFILE_ID_BOTH_DIR_INFORMATION* = ptr FILE_ID_BOTH_DIR_INFORMATION
   FILE_FULL_DIRECTORY_INFORMATION* = FILE_FULL_DIR_INFORMATION
   PFILE_FULL_DIRECTORY_INFORMATION* = ptr FILE_FULL_DIR_INFORMATION
@@ -3457,6 +3910,7 @@ type
     LastWriteTime*: LARGE_INTEGER
     ChangeTime*: LARGE_INTEGER
     FileAttributes*: ULONG
+
   PFILE_BASIC_INFORMATION* = ptr FILE_BASIC_INFORMATION
   FILE_STANDARD_INFORMATION* {.pure.} = object
     AllocationSize*: LARGE_INTEGER
@@ -3464,52 +3918,65 @@ type
     NumberOfLinks*: ULONG
     DeletePending*: BOOLEAN
     Directory*: BOOLEAN
+
   PFILE_STANDARD_INFORMATION* = ptr FILE_STANDARD_INFORMATION
   FILE_INTERNAL_INFORMATION* {.pure.} = object
     IndexNumber*: LARGE_INTEGER
+
   PFILE_INTERNAL_INFORMATION* = ptr FILE_INTERNAL_INFORMATION
   FILE_EA_INFORMATION* {.pure.} = object
     EaSize*: ULONG
+
   PFILE_EA_INFORMATION* = ptr FILE_EA_INFORMATION
   FILE_ACCESS_INFORMATION* {.pure.} = object
     AccessFlags*: ACCESS_MASK
+
   PFILE_ACCESS_INFORMATION* = ptr FILE_ACCESS_INFORMATION
   FILE_LINK_INFORMATION* {.pure.} = object
     ReplaceIfExists*: BOOLEAN
     RootDirectory*: HANDLE
     FileNameLength*: ULONG
     FileName*: array[1, WCHAR]
+
   PFILE_LINK_INFORMATION* = ptr FILE_LINK_INFORMATION
   FILE_NAME_INFORMATION* {.pure.} = object
     FileNameLength*: ULONG
     FileName*: array[1, WCHAR]
+
   PFILE_NAME_INFORMATION* = ptr FILE_NAME_INFORMATION
   FILE_RENAME_INFORMATION* {.pure.} = object
     ReplaceIfExists*: BOOLEAN
     RootDirectory*: HANDLE
     FileNameLength*: ULONG
     FileName*: array[1, WCHAR]
+
   PFILE_RENAME_INFORMATION* = ptr FILE_RENAME_INFORMATION
   FILE_NAMES_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
     FileIndex*: ULONG
     FileNameLength*: ULONG
     FileName*: array[1, WCHAR]
+
   PFILE_NAMES_INFORMATION* = ptr FILE_NAMES_INFORMATION
   FILE_DISPOSITION_INFORMATION* {.pure.} = object
     DoDeleteFile*: BOOLEAN
+
   PFILE_DISPOSITION_INFORMATION* = ptr FILE_DISPOSITION_INFORMATION
   FILE_POSITION_INFORMATION* {.pure.} = object
     CurrentByteOffset*: LARGE_INTEGER
+
   PFILE_POSITION_INFORMATION* = ptr FILE_POSITION_INFORMATION
   FILE_ALIGNMENT_INFORMATION* {.pure.} = object
     AlignmentRequirement*: ULONG
+
   PFILE_ALIGNMENT_INFORMATION* = ptr FILE_ALIGNMENT_INFORMATION
   FILE_ALLOCATION_INFORMATION* {.pure.} = object
     AllocationSize*: LARGE_INTEGER
+
   PFILE_ALLOCATION_INFORMATION* = ptr FILE_ALLOCATION_INFORMATION
   FILE_END_OF_FILE_INFORMATION* {.pure.} = object
     EndOfFile*: LARGE_INTEGER
+
   PFILE_END_OF_FILE_INFORMATION* = ptr FILE_END_OF_FILE_INFORMATION
   FILE_NETWORK_OPEN_INFORMATION* {.pure.} = object
     CreationTime*: LARGE_INTEGER
@@ -3519,6 +3986,7 @@ type
     AllocationSize*: LARGE_INTEGER
     EndOfFile*: LARGE_INTEGER
     FileAttributes*: ULONG
+
   PFILE_NETWORK_OPEN_INFORMATION* = ptr FILE_NETWORK_OPEN_INFORMATION
   FILE_FULL_EA_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3526,9 +3994,11 @@ type
     EaNameLength*: UCHAR
     EaValueLength*: USHORT
     EaName*: array[1, CHAR]
+
   PFILE_FULL_EA_INFORMATION* = ptr FILE_FULL_EA_INFORMATION
   FILE_MODE_INFORMATION* {.pure.} = object
     Mode*: ULONG
+
   PFILE_MODE_INFORMATION* = ptr FILE_MODE_INFORMATION
   FILE_STREAM_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3536,10 +4006,12 @@ type
     StreamSize*: LARGE_INTEGER
     StreamAllocationSize*: LARGE_INTEGER
     StreamName*: array[1, WCHAR]
+
   PFILE_STREAM_INFORMATION* = ptr FILE_STREAM_INFORMATION
   FILE_ATTRIBUTE_TAG_INFORMATION* {.pure.} = object
     FileAttributes*: ULONG
     ReparseTag*: ULONG
+
   PFILE_ATTRIBUTE_TAG_INFORMATION* = ptr FILE_ATTRIBUTE_TAG_INFORMATION
   FILE_MAILSLOT_QUERY_INFORMATION* {.pure.} = object
     MaximumMessageSize*: ULONG
@@ -3547,9 +4019,11 @@ type
     NextMessageSize*: ULONG
     MessagesAvailable*: ULONG
     ReadTimeout*: LARGE_INTEGER
+
   PFILE_MAILSLOT_QUERY_INFORMATION* = ptr FILE_MAILSLOT_QUERY_INFORMATION
   FILE_MAILSLOT_SET_INFORMATION* {.pure.} = object
     ReadTimeout*: LARGE_INTEGER
+
   PFILE_MAILSLOT_SET_INFORMATION* = ptr FILE_MAILSLOT_SET_INFORMATION
   FILE_PIPE_LOCAL_INFORMATION* {.pure.} = object
     NamedPipeType*: ULONG
@@ -3562,6 +4036,7 @@ type
     WriteQuotaAvailable*: ULONG
     NamedPipeState*: ULONG
     NamedPipeEnd*: ULONG
+
   PFILE_PIPE_LOCAL_INFORMATION* = ptr FILE_PIPE_LOCAL_INFORMATION
   FILE_ALL_INFORMATION* {.pure.} = object
     BasicInformation*: FILE_BASIC_INFORMATION
@@ -3573,6 +4048,7 @@ type
     ModeInformation*: FILE_MODE_INFORMATION
     AlignmentInformation*: FILE_ALIGNMENT_INFORMATION
     NameInformation*: FILE_NAME_INFORMATION
+
   PFILE_ALL_INFORMATION* = ptr FILE_ALL_INFORMATION
   FILE_FS_VOLUME_INFORMATION* {.pure.} = object
     VolumeCreationTime*: LARGE_INTEGER
@@ -3580,26 +4056,31 @@ type
     VolumeLabelLength*: ULONG
     SupportsObjects*: BOOLEAN
     VolumeLabel*: array[1, WCHAR]
+
   PFILE_FS_VOLUME_INFORMATION* = ptr FILE_FS_VOLUME_INFORMATION
   FILE_FS_LABEL_INFORMATION* {.pure.} = object
     VolumeLabelLength*: ULONG
     VolumeLabel*: array[1, WCHAR]
+
   PFILE_FS_LABEL_INFORMATION* = ptr FILE_FS_LABEL_INFORMATION
   FILE_FS_SIZE_INFORMATION* {.pure.} = object
     TotalAllocationUnits*: LARGE_INTEGER
     AvailableAllocationUnits*: LARGE_INTEGER
     SectorsPerAllocationUnit*: ULONG
     BytesPerSector*: ULONG
+
   PFILE_FS_SIZE_INFORMATION* = ptr FILE_FS_SIZE_INFORMATION
   FILE_FS_DEVICE_INFORMATION* {.pure.} = object
     DeviceType*: DEVICE_TYPE
     Characteristics*: ULONG
+
   PFILE_FS_DEVICE_INFORMATION* = ptr FILE_FS_DEVICE_INFORMATION
   FILE_FS_ATTRIBUTE_INFORMATION* {.pure.} = object
     FileSystemAttributes*: ULONG
     MaximumComponentNameLength*: ULONG
     FileSystemNameLength*: ULONG
     FileSystemName*: array[1, WCHAR]
+
   PFILE_FS_ATTRIBUTE_INFORMATION* = ptr FILE_FS_ATTRIBUTE_INFORMATION
   FILE_FS_FULL_SIZE_INFORMATION* {.pure.} = object
     TotalAllocationUnits*: LARGE_INTEGER
@@ -3607,17 +4088,21 @@ type
     ActualAvailableAllocationUnits*: LARGE_INTEGER
     SectorsPerAllocationUnit*: ULONG
     BytesPerSector*: ULONG
+
   PFILE_FS_FULL_SIZE_INFORMATION* = ptr FILE_FS_FULL_SIZE_INFORMATION
   FILE_FS_OBJECTID_INFORMATION* {.pure.} = object
     ObjectId*: array[16, UCHAR]
     ExtendedInfo*: array[48, UCHAR]
+
   PFILE_FS_OBJECTID_INFORMATION* = ptr FILE_FS_OBJECTID_INFORMATION
   IO_STATUS_BLOCK_UNION1* {.pure, union.} = object
     Status*: NTSTATUS
     Pointer*: PVOID
+
   IO_STATUS_BLOCK* {.pure.} = object
     union1*: IO_STATUS_BLOCK_UNION1
     Information*: ULONG_PTR
+
   PIO_STATUS_BLOCK* = ptr IO_STATUS_BLOCK
   VM_COUNTERS* {.pure.} = object
     PeakVirtualSize*: SIZE_T
@@ -3631,10 +4116,12 @@ type
     QuotaNonPagedPoolUsage*: SIZE_T
     PagefileUsage*: SIZE_T
     PeakPagefileUsage*: SIZE_T
+
   PVM_COUNTERS* = ptr VM_COUNTERS
   CLIENT_ID* {.pure.} = object
     UniqueProcess*: HANDLE
     UniqueThread*: HANDLE
+
   PCLIENT_ID* = ptr CLIENT_ID
   SYSTEM_THREADS* {.pure.} = object
     KernelTime*: LARGE_INTEGER
@@ -3648,6 +4135,7 @@ type
     ContextSwitchCount*: ULONG
     State*: THREAD_STATE
     WaitReason*: KWAIT_REASON
+
   PSYSTEM_THREADS* = ptr SYSTEM_THREADS
   PROCESS_BASIC_INFORMATION* {.pure.} = object
     ExitStatus*: NTSTATUS
@@ -3656,12 +4144,14 @@ type
     BasePriority*: KPRIORITY
     UniqueProcessId*: ULONG_PTR
     InheritedFromUniqueProcessId*: ULONG_PTR
+
   PPROCESS_BASIC_INFORMATION* = ptr PROCESS_BASIC_INFORMATION
   KERNEL_USER_TIMES* {.pure.} = object
     CreateTime*: FILETIME
     ExitTime*: FILETIME
     KernelTime*: LARGE_INTEGER
     UserTime*: LARGE_INTEGER
+
   PKERNEL_USER_TIMES* = ptr KERNEL_USER_TIMES
   SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* {.pure.} = object
     IdleTime*: LARGE_INTEGER
@@ -3669,7 +4159,9 @@ type
     UserTime*: LARGE_INTEGER
     Reserved1*: array[2, LARGE_INTEGER]
     Reserved2*: ULONG
-  PSYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* = ptr SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION
+
+  PSYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* =
+    ptr SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION
   SYSTEM_PROCESS_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
     NumberOfThreads*: ULONG
@@ -3687,11 +4179,13 @@ type
     VirtualMemoryCounters*: VM_COUNTERS
     PrivatePageCount*: SIZE_T
     IoCounters*: IO_COUNTERS
+
   PSYSTEM_PROCESS_INFORMATION* = ptr SYSTEM_PROCESS_INFORMATION
   SYSTEM_REGISTRY_QUOTA_INFORMATION* {.pure.} = object
     RegistryQuotaAllowed*: ULONG
     RegistryQuotaUsed*: ULONG
     Reserved1*: PVOID
+
   PSYSTEM_REGISTRY_QUOTA_INFORMATION* = ptr SYSTEM_REGISTRY_QUOTA_INFORMATION
   SYSTEM_BASIC_INFORMATION* {.pure.} = object
     Reserved1*: array[4, BYTE]
@@ -3705,6 +4199,7 @@ type
     HighestUserAddress*: ULONG_PTR
     ActiveProcessors*: ULONG_PTR
     NumberOfProcessors*: CCHAR
+
   PSYSTEM_BASIC_INFORMATION* = ptr SYSTEM_BASIC_INFORMATION
   SYSTEM_PROCESSOR_INFORMATION* {.pure.} = object
     ProcessorArchitecture*: USHORT
@@ -3712,6 +4207,7 @@ type
     ProcessorRevision*: USHORT
     Unknown*: USHORT
     FeatureBits*: ULONG
+
   PSYSTEM_PROCESSOR_INFORMATION* = ptr SYSTEM_PROCESSOR_INFORMATION
   SYSTEM_TIMEOFDAY_INFORMATION* {.pure.} = object
     BootTime*: LARGE_INTEGER
@@ -3719,6 +4215,7 @@ type
     TimeZoneBias*: LARGE_INTEGER
     CurrentTimeZoneId*: ULONG
     Reserved1*: array[20, BYTE]
+
   PSYSTEM_TIMEOFDAY_INFORMATION* = ptr SYSTEM_TIMEOFDAY_INFORMATION
   SYSTEM_PERFORMANCE_INFORMATION* {.pure.} = object
     IdleTime*: LARGE_INTEGER
@@ -3795,15 +4292,19 @@ type
     FirstLevelTbFills*: ULONG
     SecondLevelTbFills*: ULONG
     SystemCalls*: ULONG
+
   PSYSTEM_PERFORMANCE_INFORMATION* = ptr SYSTEM_PERFORMANCE_INFORMATION
   SYSTEM_EXCEPTION_INFORMATION* {.pure.} = object
     Reserved1*: array[16, BYTE]
+
   PSYSTEM_EXCEPTION_INFORMATION* = ptr SYSTEM_EXCEPTION_INFORMATION
   SYSTEM_LOOKASIDE_INFORMATION* {.pure.} = object
     Reserved1*: array[32, BYTE]
+
   PSYSTEM_LOOKASIDE_INFORMATION* = ptr SYSTEM_LOOKASIDE_INFORMATION
   SYSTEM_INTERRUPT_INFORMATION* {.pure.} = object
     Reserved1*: array[24, BYTE]
+
   PSYSTEM_INTERRUPT_INFORMATION* = ptr SYSTEM_INTERRUPT_INFORMATION
   SYSTEM_HANDLE_ENTRY* {.pure.} = object
     OwnerPid*: ULONG
@@ -3812,10 +4313,12 @@ type
     HandleValue*: USHORT
     ObjectPointer*: PVOID
     AccessMask*: ULONG
+
   PSYSTEM_HANDLE_ENTRY* = ptr SYSTEM_HANDLE_ENTRY
   SYSTEM_HANDLE_INFORMATION* {.pure.} = object
     Count*: ULONG
     Handle*: array[1, SYSTEM_HANDLE_ENTRY]
+
   PSYSTEM_HANDLE_INFORMATION* = ptr SYSTEM_HANDLE_INFORMATION
   SYSTEM_PAGEFILE_INFORMATION* {.pure.} = object
     NextEntryOffset*: ULONG
@@ -3823,8 +4326,11 @@ type
     TotalUsed*: ULONG
     PeakUsed*: ULONG
     FileName*: UNICODE_STRING
+
   PSYSTEM_PAGEFILE_INFORMATION* = ptr SYSTEM_PAGEFILE_INFORMATION
-  PRTL_HEAP_COMMIT_ROUTINE* = proc (Base: PVOID, CommitAddress: ptr PVOID, CommitSize: PSIZE_T): NTSTATUS {.stdcall.}
+  PRTL_HEAP_COMMIT_ROUTINE* = proc(
+    Base: PVOID, CommitAddress: ptr PVOID, CommitSize: PSIZE_T
+  ): NTSTATUS {.stdcall.}
   RTL_HEAP_PARAMETERS* {.pure.} = object
     Length*: ULONG
     SegmentReserve*: SIZE_T
@@ -3836,14 +4342,17 @@ type
     InitialCommit*: SIZE_T
     InitialReserve*: SIZE_T
     CommitRoutine*: PRTL_HEAP_COMMIT_ROUTINE
-    Reserved*: array[ 2 , SIZE_T]
+    Reserved*: array[2, SIZE_T]
+
   PRTL_HEAP_PARAMETERS* = ptr RTL_HEAP_PARAMETERS
   WINSTATIONINFORMATIONW* {.pure.} = object
     Reserved2*: array[70, BYTE]
     LogonId*: ULONG
     Reserved3*: array[1140, BYTE]
+
   PWINSTATIONINFORMATIONW* = ptr WINSTATIONINFORMATIONW
   BSTR* = distinct ptr OLECHAR
+
 const
   exceptionContinueExecution* = 0
   exceptionContinueSearch* = 1
@@ -5013,7 +5522,8 @@ const
   STATUS_AUTHENTICATION_FIREWALL_FAILED* = NTSTATUS 0xC0000413'i32
   STATUS_VDM_DISALLOWED* = NTSTATUS 0xC0000414'i32
   STATUS_HUNG_DISPLAY_DRIVER_THREAD* = NTSTATUS 0xC0000415'i32
-  STATUS_INSUFFICIENT_RESOURCE_FOR_SPECIFIED_SHARED_SECTION_SIZE* = NTSTATUS 0xC0000416'i32
+  STATUS_INSUFFICIENT_RESOURCE_FOR_SPECIFIED_SHARED_SECTION_SIZE* =
+    NTSTATUS 0xC0000416'i32
   STATUS_INVALID_CRUNTIME_PARAMETER* = NTSTATUS 0xC0000417'i32
   STATUS_NTLM_BLOCKED* = NTSTATUS 0xC0000418'i32
   STATUS_DS_SRC_SID_EXISTS_IN_FOREST* = NTSTATUS 0xC0000419'i32
@@ -5589,7 +6099,8 @@ const
   STATUS_GRAPHICS_INVALID_MONITOR_SOURCE_MODE* = NTSTATUS 0xC01E0322'i32
   STATUS_GRAPHICS_NO_RECOMMENDED_FUNCTIONAL_VIDPN* = NTSTATUS 0xC01E0323'i32
   STATUS_GRAPHICS_MODE_ID_MUST_BE_UNIQUE* = NTSTATUS 0xC01E0324'i32
-  STATUS_GRAPHICS_EMPTY_ADAPTER_MONITOR_MODE_SUPPORT_INTERSECTION* = NTSTATUS 0xC01E0325'i32
+  STATUS_GRAPHICS_EMPTY_ADAPTER_MONITOR_MODE_SUPPORT_INTERSECTION* =
+    NTSTATUS 0xC01E0325'i32
   STATUS_GRAPHICS_VIDEO_PRESENT_TARGETS_LESS_THAN_SOURCES* = NTSTATUS 0xC01E0326'i32
   STATUS_GRAPHICS_PATH_NOT_IN_TOPOLOGY* = NTSTATUS 0xC01E0327'i32
   STATUS_GRAPHICS_ADAPTER_MUST_HAVE_AT_LEAST_ONE_SOURCE* = NTSTATUS 0xC01E0328'i32
@@ -5604,7 +6115,8 @@ const
   STATUS_GRAPHICS_SOURCE_ID_MUST_BE_UNIQUE* = NTSTATUS 0xC01E0331'i32
   STATUS_GRAPHICS_TARGET_ID_MUST_BE_UNIQUE* = NTSTATUS 0xC01E0332'i32
   STATUS_GRAPHICS_NO_AVAILABLE_VIDPN_TARGET* = NTSTATUS 0xC01E0333'i32
-  STATUS_GRAPHICS_MONITOR_COULD_NOT_BE_ASSOCIATED_WITH_ADAPTER* = NTSTATUS 0xC01E0334'i32
+  STATUS_GRAPHICS_MONITOR_COULD_NOT_BE_ASSOCIATED_WITH_ADAPTER* =
+    NTSTATUS 0xC01E0334'i32
   STATUS_GRAPHICS_NO_VIDPNMGR* = NTSTATUS 0xC01E0335'i32
   STATUS_GRAPHICS_NO_ACTIVE_VIDPN* = NTSTATUS 0xC01E0336'i32
   STATUS_GRAPHICS_STALE_VIDPN_TOPOLOGY* = NTSTATUS 0xC01E0337'i32
@@ -5621,13 +6133,16 @@ const
   STATUS_GRAPHICS_VIDPN_SOURCE_IN_USE* = NTSTATUS 0xC01E0342'i32
   STATUS_GRAPHICS_CANT_ACCESS_ACTIVE_VIDPN* = NTSTATUS 0xC01E0343'i32
   STATUS_GRAPHICS_INVALID_PATH_IMPORTANCE_ORDINAL* = NTSTATUS 0xC01E0344'i32
-  STATUS_GRAPHICS_INVALID_PATH_CONTENT_GEOMETRY_TRANSFORMATION* = NTSTATUS 0xC01E0345'i32
-  STATUS_GRAPHICS_PATH_CONTENT_GEOMETRY_TRANSFORMATION_NOT_SUPPORTED* = NTSTATUS 0xC01E0346'i32
+  STATUS_GRAPHICS_INVALID_PATH_CONTENT_GEOMETRY_TRANSFORMATION* =
+    NTSTATUS 0xC01E0345'i32
+  STATUS_GRAPHICS_PATH_CONTENT_GEOMETRY_TRANSFORMATION_NOT_SUPPORTED* =
+    NTSTATUS 0xC01E0346'i32
   STATUS_GRAPHICS_INVALID_GAMMA_RAMP* = NTSTATUS 0xC01E0347'i32
   STATUS_GRAPHICS_GAMMA_RAMP_NOT_SUPPORTED* = NTSTATUS 0xC01E0348'i32
   STATUS_GRAPHICS_MULTISAMPLING_NOT_SUPPORTED* = NTSTATUS 0xC01E0349'i32
   STATUS_GRAPHICS_MODE_NOT_IN_MODESET* = NTSTATUS 0xC01E034A'i32
-  STATUS_GRAPHICS_INVALID_VIDPN_TOPOLOGY_RECOMMENDATION_REASON* = NTSTATUS 0xC01E034D'i32
+  STATUS_GRAPHICS_INVALID_VIDPN_TOPOLOGY_RECOMMENDATION_REASON* =
+    NTSTATUS 0xC01E034D'i32
   STATUS_GRAPHICS_INVALID_PATH_CONTENT_TYPE* = NTSTATUS 0xC01E034E'i32
   STATUS_GRAPHICS_INVALID_COPYPROTECTION_TYPE* = NTSTATUS 0xC01E034F'i32
   STATUS_GRAPHICS_UNASSIGNED_MODESET_ALREADY_EXISTS* = NTSTATUS 0xC01E0350'i32
@@ -5665,7 +6180,8 @@ const
   STATUS_GRAPHICS_OPM_INVALID_POINTER* = NTSTATUS 0xC01E050A'i32
   STATUS_GRAPHICS_OPM_INTERNAL_ERROR* = NTSTATUS 0xC01E050B'i32
   STATUS_GRAPHICS_OPM_INVALID_HANDLE* = NTSTATUS 0xC01E050C'i32
-  STATUS_GRAPHICS_PVP_NO_MONITORS_CORRESPOND_TO_DISPLAY_DEVICE* = NTSTATUS 0xC01E050D'i32
+  STATUS_GRAPHICS_PVP_NO_MONITORS_CORRESPOND_TO_DISPLAY_DEVICE* =
+    NTSTATUS 0xC01E050D'i32
   STATUS_GRAPHICS_PVP_INVALID_CERTIFICATE_LENGTH* = NTSTATUS 0xC01E050E'i32
   STATUS_GRAPHICS_OPM_SPANNING_MODE_ENABLED* = NTSTATUS 0xC01E050F'i32
   STATUS_GRAPHICS_OPM_THEATER_MODE_ENABLED* = NTSTATUS 0xC01E0510'i32
@@ -5679,10 +6195,12 @@ const
   STATUS_GRAPHICS_OPM_ALL_HDCP_HARDWARE_ALREADY_IN_USE* = NTSTATUS 0xC01E0518'i32
   STATUS_GRAPHICS_OPM_PROTECTED_OUTPUT_NO_LONGER_EXISTS* = NTSTATUS 0xC01E051A'i32
   STATUS_GRAPHICS_OPM_SESSION_TYPE_CHANGE_IN_PROGRESS* = NTSTATUS 0xC01E051B'i32
-  STATUS_GRAPHICS_OPM_PROTECTED_OUTPUT_DOES_NOT_HAVE_COPP_SEMANTICS* = NTSTATUS 0xC01E051C'i32
+  STATUS_GRAPHICS_OPM_PROTECTED_OUTPUT_DOES_NOT_HAVE_COPP_SEMANTICS* =
+    NTSTATUS 0xC01E051C'i32
   STATUS_GRAPHICS_OPM_INVALID_INFORMATION_REQUEST* = NTSTATUS 0xC01E051D'i32
   STATUS_GRAPHICS_OPM_DRIVER_INTERNAL_ERROR* = NTSTATUS 0xC01E051E'i32
-  STATUS_GRAPHICS_OPM_PROTECTED_OUTPUT_DOES_NOT_HAVE_OPM_SEMANTICS* = NTSTATUS 0xC01E051F'i32
+  STATUS_GRAPHICS_OPM_PROTECTED_OUTPUT_DOES_NOT_HAVE_OPM_SEMANTICS* =
+    NTSTATUS 0xC01E051F'i32
   STATUS_GRAPHICS_OPM_SIGNALING_NOT_SUPPORTED* = NTSTATUS 0xC01E0520'i32
   STATUS_GRAPHICS_OPM_INVALID_CONFIGURATION_REQUEST* = NTSTATUS 0xC01E0521'i32
   STATUS_GRAPHICS_I2C_NOT_SUPPORTED* = NTSTATUS 0xC01E0580'i32
@@ -5691,7 +6209,8 @@ const
   STATUS_GRAPHICS_I2C_ERROR_RECEIVING_DATA* = NTSTATUS 0xC01E0583'i32
   STATUS_GRAPHICS_DDCCI_VCP_NOT_SUPPORTED* = NTSTATUS 0xC01E0584'i32
   STATUS_GRAPHICS_DDCCI_INVALID_DATA* = NTSTATUS 0xC01E0585'i32
-  STATUS_GRAPHICS_DDCCI_MONITOR_RETURNED_INVALID_TIMING_STATUS_BYTE* = NTSTATUS 0xC01E0586'i32
+  STATUS_GRAPHICS_DDCCI_MONITOR_RETURNED_INVALID_TIMING_STATUS_BYTE* =
+    NTSTATUS 0xC01E0586'i32
   STATUS_GRAPHICS_DDCCI_INVALID_CAPABILITIES_STRING* = NTSTATUS 0xC01E0587'i32
   STATUS_GRAPHICS_MCA_INTERNAL_ERROR* = NTSTATUS 0xC01E0588'i32
   STATUS_GRAPHICS_DDCCI_INVALID_MESSAGE_COMMAND* = NTSTATUS 0xC01E0589'i32
@@ -5892,7 +6411,11 @@ const
   ERROR_SEVERITY_ERROR* = 0xC0000000'i32
   UNICODE_STRING_MAX_BYTES* = WORD 65534
   UNICODE_STRING_MAX_CHARS* = 32767
-template DEFINE_GUID*(data1: int32, data2: uint16, data3: uint16, data4: array[8, uint8]): GUID = GUID(Data1: data1, Data2: data2, Data3: data3, Data4: data4)
+template DEFINE_GUID*(
+    data1: int32, data2: uint16, data3: uint16, data4: array[8, uint8]
+): GUID =
+  GUID(Data1: data1, Data2: data2, Data3: data3, Data4: data4)
+
 const
   GUID_NULL* = DEFINE_GUID("00000000-0000-0000-0000-000000000000")
   IID_NULL* = GUID_NULL
@@ -6279,19 +6802,27 @@ const
   SORT_GEORGIAN_TRADITIONAL* = 0x0
   SORT_GEORGIAN_MODERN* = 0x1
   LOCALE_NAME_MAX_LENGTH* = 85
-template MAKELANGID*(p: untyped, s: untyped): WORD = s.WORD shl 10 or p.WORD
+template MAKELANGID*(p: untyped, s: untyped): WORD =
+  s.WORD shl 10 or p.WORD
+
 const
-  LANG_SYSTEM_DEFAULT* = MAKELANGID(LANG_NEUTRAL,SUBLANG_SYS_DEFAULT)
-  LANG_USER_DEFAULT* = MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT)
-template MAKELCID*(l: untyped, s: untyped): DWORD = (s.DWORD shl 16) or l.DWORD
+  LANG_SYSTEM_DEFAULT* = MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT)
+  LANG_USER_DEFAULT* = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT)
+template MAKELCID*(l: untyped, s: untyped): DWORD =
+  (s.DWORD shl 16) or l.DWORD
+
 const
-  LOCALE_SYSTEM_DEFAULT* = MAKELCID(LANG_SYSTEM_DEFAULT,SORT_DEFAULT)
-  LOCALE_USER_DEFAULT* = MAKELCID(LANG_USER_DEFAULT,SORT_DEFAULT)
-  LOCALE_NEUTRAL* = MAKELCID(MAKELANGID(LANG_NEUTRAL,SUBLANG_NEUTRAL),SORT_DEFAULT)
-  LOCALE_CUSTOM_DEFAULT* = MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_CUSTOM_DEFAULT), SORT_DEFAULT)
-  LOCALE_CUSTOM_UNSPECIFIED* = MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_CUSTOM_UNSPECIFIED), SORT_DEFAULT)
-  LOCALE_CUSTOM_UI_DEFAULT* = MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_UI_CUSTOM_DEFAULT), SORT_DEFAULT)
-  LOCALE_INVARIANT* = MAKELCID(MAKELANGID(LANG_INVARIANT,SUBLANG_NEUTRAL),SORT_DEFAULT)
+  LOCALE_SYSTEM_DEFAULT* = MAKELCID(LANG_SYSTEM_DEFAULT, SORT_DEFAULT)
+  LOCALE_USER_DEFAULT* = MAKELCID(LANG_USER_DEFAULT, SORT_DEFAULT)
+  LOCALE_NEUTRAL* = MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), SORT_DEFAULT)
+  LOCALE_CUSTOM_DEFAULT* =
+    MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_CUSTOM_DEFAULT), SORT_DEFAULT)
+  LOCALE_CUSTOM_UNSPECIFIED* =
+    MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_CUSTOM_UNSPECIFIED), SORT_DEFAULT)
+  LOCALE_CUSTOM_UI_DEFAULT* =
+    MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_UI_CUSTOM_DEFAULT), SORT_DEFAULT)
+  LOCALE_INVARIANT* =
+    MAKELCID(MAKELANGID(LANG_INVARIANT, SUBLANG_NEUTRAL), SORT_DEFAULT)
   MAXIMUM_WAIT_OBJECTS* = 64
   MAXIMUM_SUSPEND_COUNT* = MAXCHAR
   EXCEPTION_NONCONTINUABLE* = 0x1
@@ -6332,12 +6863,12 @@ const
   sidTypeUnknown* = 8
   sidTypeComputer* = 9
   sidTypeLabel* = 10
-  SECURITY_NULL_SID_AUTHORITY* = [0'u8,0,0,0,0,0]
-  SECURITY_WORLD_SID_AUTHORITY* = [0'u8,0,0,0,0,1]
-  SECURITY_LOCAL_SID_AUTHORITY* = [0'u8,0,0,0,0,2]
-  SECURITY_CREATOR_SID_AUTHORITY* = [0'u8,0,0,0,0,3]
-  SECURITY_NON_UNIQUE_AUTHORITY* = [0'u8,0,0,0,0,4]
-  SECURITY_RESOURCE_MANAGER_AUTHORITY* = [0'u8,0,0,0,0,9]
+  SECURITY_NULL_SID_AUTHORITY* = [0'u8, 0, 0, 0, 0, 0]
+  SECURITY_WORLD_SID_AUTHORITY* = [0'u8, 0, 0, 0, 0, 1]
+  SECURITY_LOCAL_SID_AUTHORITY* = [0'u8, 0, 0, 0, 0, 2]
+  SECURITY_CREATOR_SID_AUTHORITY* = [0'u8, 0, 0, 0, 0, 3]
+  SECURITY_NON_UNIQUE_AUTHORITY* = [0'u8, 0, 0, 0, 0, 4]
+  SECURITY_RESOURCE_MANAGER_AUTHORITY* = [0'u8, 0, 0, 0, 0, 9]
   SECURITY_NULL_RID* = 0x00000000
   SECURITY_WORLD_RID* = 0x00000000
   SECURITY_LOCAL_RID* = 0x00000000
@@ -6347,7 +6878,7 @@ const
   SECURITY_CREATOR_OWNER_SERVER_RID* = 0x00000002
   SECURITY_CREATOR_GROUP_SERVER_RID* = 0x00000003
   SECURITY_CREATOR_OWNER_RIGHTS_RID* = 0x00000004
-  SECURITY_NT_AUTHORITY* = [0'u8,0,0,0,0,5]
+  SECURITY_NT_AUTHORITY* = [0'u8, 0, 0, 0, 0, 5]
   SECURITY_DIALUP_RID* = 0x00000001
   SECURITY_NETWORK_RID* = 0x00000002
   SECURITY_BATCH_RID* = 0x00000003
@@ -6478,7 +7009,7 @@ const
   SECURITY_CAPABILITY_SHARED_USER_CERTIFICATES* = 0x00000009
   SECURITY_CAPABILITY_REMOVABLE_STORAGE* = 0x0000000a
   SECURITY_CAPABILITY_INTERNET_EXPLORER* = 0x00001000
-  SECURITY_MANDATORY_LABEL_AUTHORITY* = [0'u8,0,0,0,0,16]
+  SECURITY_MANDATORY_LABEL_AUTHORITY* = [0'u8, 0, 0, 0, 0, 16]
   SECURITY_MANDATORY_UNTRUSTED_RID* = 0x00000000
   SECURITY_MANDATORY_LOW_RID* = 0x00001000
   SECURITY_MANDATORY_MEDIUM_RID* = 0x00002000
@@ -6610,7 +7141,10 @@ const
   SE_GROUP_INTEGRITY_ENABLED* = 0x00000040
   SE_GROUP_LOGON_ID* = 0xC0000000'i32
   SE_GROUP_RESOURCE* = 0x20000000
-  SE_GROUP_VALID_ATTRIBUTES* = SE_GROUP_MANDATORY or SE_GROUP_ENABLED_BY_DEFAULT or SE_GROUP_ENABLED or SE_GROUP_OWNER or SE_GROUP_USE_FOR_DENY_ONLY or SE_GROUP_LOGON_ID or SE_GROUP_RESOURCE or SE_GROUP_INTEGRITY or SE_GROUP_INTEGRITY_ENABLED
+  SE_GROUP_VALID_ATTRIBUTES* =
+    SE_GROUP_MANDATORY or SE_GROUP_ENABLED_BY_DEFAULT or SE_GROUP_ENABLED or
+    SE_GROUP_OWNER or SE_GROUP_USE_FOR_DENY_ONLY or SE_GROUP_LOGON_ID or
+    SE_GROUP_RESOURCE or SE_GROUP_INTEGRITY or SE_GROUP_INTEGRITY_ENABLED
   ACL_REVISION* = 2
   ACL_REVISION_DS* = 4
   ACL_REVISION1* = 1
@@ -6658,7 +7192,9 @@ const
   SYSTEM_MANDATORY_LABEL_NO_WRITE_UP* = 0x1
   SYSTEM_MANDATORY_LABEL_NO_READ_UP* = 0x2
   SYSTEM_MANDATORY_LABEL_NO_EXECUTE_UP* = 0x4
-  SYSTEM_MANDATORY_LABEL_VALID_MASK* = SYSTEM_MANDATORY_LABEL_NO_WRITE_UP or SYSTEM_MANDATORY_LABEL_NO_READ_UP or SYSTEM_MANDATORY_LABEL_NO_EXECUTE_UP
+  SYSTEM_MANDATORY_LABEL_VALID_MASK* =
+    SYSTEM_MANDATORY_LABEL_NO_WRITE_UP or SYSTEM_MANDATORY_LABEL_NO_READ_UP or
+    SYSTEM_MANDATORY_LABEL_NO_EXECUTE_UP
   ACE_OBJECT_TYPE_PRESENT* = 0x1
   ACE_INHERITED_OBJECT_TYPE_PRESENT* = 0x2
   aclRevisionInformation* = 1
@@ -6694,7 +7230,9 @@ const
   SE_PRIVILEGE_ENABLED* = 0x00000002
   SE_PRIVILEGE_REMOVED* = 0X00000004
   SE_PRIVILEGE_USED_FOR_ACCESS* = 0x80000000'i32
-  SE_PRIVILEGE_VALID_ATTRIBUTES* = SE_PRIVILEGE_ENABLED_BY_DEFAULT or SE_PRIVILEGE_ENABLED or SE_PRIVILEGE_REMOVED or SE_PRIVILEGE_USED_FOR_ACCESS
+  SE_PRIVILEGE_VALID_ATTRIBUTES* =
+    SE_PRIVILEGE_ENABLED_BY_DEFAULT or SE_PRIVILEGE_ENABLED or SE_PRIVILEGE_REMOVED or
+    SE_PRIVILEGE_USED_FOR_ACCESS
   PRIVILEGE_SET_ALL_NECESSARY* = 1
   ACCESS_REASON_TYPE_MASK* = 0x00ff0000
   ACCESS_REASON_DATA_MASK* = 0x0000ffff
@@ -6770,10 +7308,15 @@ const
   TOKEN_ADJUST_GROUPS* = 0x0040
   TOKEN_ADJUST_DEFAULT* = 0x0080
   TOKEN_ADJUST_SESSIONID* = 0x0100
-  TOKEN_ALL_ACCESS_P* = STANDARD_RIGHTS_REQUIRED or TOKEN_ASSIGN_PRIMARY or TOKEN_DUPLICATE or TOKEN_IMPERSONATE or TOKEN_QUERY or TOKEN_QUERY_SOURCE or TOKEN_ADJUST_PRIVILEGES or TOKEN_ADJUST_GROUPS or TOKEN_ADJUST_DEFAULT
+  TOKEN_ALL_ACCESS_P* =
+    STANDARD_RIGHTS_REQUIRED or TOKEN_ASSIGN_PRIMARY or TOKEN_DUPLICATE or
+    TOKEN_IMPERSONATE or TOKEN_QUERY or TOKEN_QUERY_SOURCE or TOKEN_ADJUST_PRIVILEGES or
+    TOKEN_ADJUST_GROUPS or TOKEN_ADJUST_DEFAULT
   TOKEN_ALL_ACCESS* = TOKEN_ALL_ACCESS_P or TOKEN_ADJUST_SESSIONID
   TOKEN_READ* = STANDARD_RIGHTS_READ or TOKEN_QUERY
-  TOKEN_WRITE* = STANDARD_RIGHTS_WRITE or TOKEN_ADJUST_PRIVILEGES or TOKEN_ADJUST_GROUPS or TOKEN_ADJUST_DEFAULT
+  TOKEN_WRITE* =
+    STANDARD_RIGHTS_WRITE or TOKEN_ADJUST_PRIVILEGES or TOKEN_ADJUST_GROUPS or
+    TOKEN_ADJUST_DEFAULT
   TOKEN_EXECUTE* = STANDARD_RIGHTS_EXECUTE
   tokenPrimary* = 1
   tokenImpersonation* = 2
@@ -6824,7 +7367,8 @@ const
   TOKEN_MANDATORY_POLICY_OFF* = 0x0
   TOKEN_MANDATORY_POLICY_NO_WRITE_UP* = 0x1
   TOKEN_MANDATORY_POLICY_NEW_PROCESS_MIN* = 0x2
-  TOKEN_MANDATORY_POLICY_VALID_MASK* = TOKEN_MANDATORY_POLICY_NO_WRITE_UP or TOKEN_MANDATORY_POLICY_NEW_PROCESS_MIN
+  TOKEN_MANDATORY_POLICY_VALID_MASK* =
+    TOKEN_MANDATORY_POLICY_NO_WRITE_UP or TOKEN_MANDATORY_POLICY_NEW_PROCESS_MIN
   mandatoryLevelUntrusted* = 0
   mandatoryLevelLow* = 1
   mandatoryLevelMedium* = 2
@@ -6846,10 +7390,16 @@ const
   CLAIM_SECURITY_ATTRIBUTE_DISABLED_BY_DEFAULT* = 0x0008
   CLAIM_SECURITY_ATTRIBUTE_DISABLED* = 0x0010
   CLAIM_SECURITY_ATTRIBUTE_MANDATORY* = 0x0020
-  CLAIM_SECURITY_ATTRIBUTE_VALID_FLAGS* = CLAIM_SECURITY_ATTRIBUTE_NON_INHERITABLE or CLAIM_SECURITY_ATTRIBUTE_VALUE_CASE_SENSITIVE or CLAIM_SECURITY_ATTRIBUTE_USE_FOR_DENY_ONLY or CLAIM_SECURITY_ATTRIBUTE_DISABLED_BY_DEFAULT or CLAIM_SECURITY_ATTRIBUTE_DISABLED or CLAIM_SECURITY_ATTRIBUTE_MANDATORY
+  CLAIM_SECURITY_ATTRIBUTE_VALID_FLAGS* =
+    CLAIM_SECURITY_ATTRIBUTE_NON_INHERITABLE or
+    CLAIM_SECURITY_ATTRIBUTE_VALUE_CASE_SENSITIVE or
+    CLAIM_SECURITY_ATTRIBUTE_USE_FOR_DENY_ONLY or
+    CLAIM_SECURITY_ATTRIBUTE_DISABLED_BY_DEFAULT or CLAIM_SECURITY_ATTRIBUTE_DISABLED or
+    CLAIM_SECURITY_ATTRIBUTE_MANDATORY
   CLAIM_SECURITY_ATTRIBUTE_CUSTOM_FLAGS* = 0xffff0000'i32
   CLAIM_SECURITY_ATTRIBUTES_INFORMATION_VERSION_V1* = 1
-  CLAIM_SECURITY_ATTRIBUTES_INFORMATION_VERSION* = CLAIM_SECURITY_ATTRIBUTES_INFORMATION_VERSION_V1
+  CLAIM_SECURITY_ATTRIBUTES_INFORMATION_VERSION* =
+    CLAIM_SECURITY_ATTRIBUTES_INFORMATION_VERSION_V1
   SECURITY_DYNAMIC_TRACKING* = TRUE
   SECURITY_STATIC_TRACKING* = FALSE
   DISABLE_MAX_PRIVILEGE* = 0x1
@@ -6887,11 +7437,9 @@ const
   PROCESS_QUERY_LIMITED_INFORMATION* = 0x1000
   PROCESS_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or SYNCHRONIZE or 0xffff
 when winimCpu64:
-  const
-    MAXIMUM_PROC_PER_GROUP* = 64
+  const MAXIMUM_PROC_PER_GROUP* = 64
 when winimCpu32:
-  const
-    MAXIMUM_PROC_PER_GROUP* = 32
+  const MAXIMUM_PROC_PER_GROUP* = 32
 const
   MAXIMUM_PROCESSORS* = MAXIMUM_PROC_PER_GROUP
   THREAD_TERMINATE* = 0x0001
@@ -7041,7 +7589,8 @@ const
   SEMAPHORE_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or SYNCHRONIZE or 0x3
   TIMER_QUERY_STATE* = 0x0001
   TIMER_MODIFY_STATE* = 0x0002
-  TIMER_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or SYNCHRONIZE or TIMER_QUERY_STATE or TIMER_MODIFY_STATE
+  TIMER_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or SYNCHRONIZE or TIMER_QUERY_STATE or TIMER_MODIFY_STATE
   TIME_ZONE_ID_UNKNOWN* = 0
   TIME_ZONE_ID_STANDARD* = 1
   TIME_ZONE_ID_DAYLIGHT* = 2
@@ -7136,10 +7685,13 @@ const
   SECTION_MAP_EXECUTE* = 0x0008
   SECTION_EXTEND_SIZE* = 0x0010
   SECTION_MAP_EXECUTE_EXPLICIT* = 0x0020
-  SECTION_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or SECTION_QUERY or SECTION_MAP_WRITE or SECTION_MAP_READ or SECTION_MAP_EXECUTE or SECTION_EXTEND_SIZE
+  SECTION_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or SECTION_QUERY or SECTION_MAP_WRITE or SECTION_MAP_READ or
+    SECTION_MAP_EXECUTE or SECTION_EXTEND_SIZE
   SESSION_QUERY_ACCESS* = 0x1
   SESSION_MODIFY_ACCESS* = 0x2
-  SESSION_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or SESSION_QUERY_ACCESS or SESSION_MODIFY_ACCESS
+  SESSION_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or SESSION_QUERY_ACCESS or SESSION_MODIFY_ACCESS
   PAGE_NOACCESS* = 0x01
   PAGE_READONLY* = 0x02
   PAGE_READWRITE* = 0x04
@@ -7192,9 +7744,14 @@ const
   FILE_READ_ATTRIBUTES* = 0x0080
   FILE_WRITE_ATTRIBUTES* = 0x0100
   FILE_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or SYNCHRONIZE or 0x1FF
-  FILE_GENERIC_READ* = STANDARD_RIGHTS_READ or FILE_READ_DATA or FILE_READ_ATTRIBUTES or FILE_READ_EA or SYNCHRONIZE
-  FILE_GENERIC_WRITE* = STANDARD_RIGHTS_WRITE or FILE_WRITE_DATA or FILE_WRITE_ATTRIBUTES or FILE_WRITE_EA or FILE_APPEND_DATA or SYNCHRONIZE
-  FILE_GENERIC_EXECUTE* = STANDARD_RIGHTS_EXECUTE or FILE_READ_ATTRIBUTES or FILE_EXECUTE or SYNCHRONIZE
+  FILE_GENERIC_READ* =
+    STANDARD_RIGHTS_READ or FILE_READ_DATA or FILE_READ_ATTRIBUTES or FILE_READ_EA or
+    SYNCHRONIZE
+  FILE_GENERIC_WRITE* =
+    STANDARD_RIGHTS_WRITE or FILE_WRITE_DATA or FILE_WRITE_ATTRIBUTES or FILE_WRITE_EA or
+    FILE_APPEND_DATA or SYNCHRONIZE
+  FILE_GENERIC_EXECUTE* =
+    STANDARD_RIGHTS_EXECUTE or FILE_READ_ATTRIBUTES or FILE_EXECUTE or SYNCHRONIZE
   FILE_ATTRIBUTE_READONLY* = 0x00000001
   FILE_ATTRIBUTE_HIDDEN* = 0x00000002
   FILE_ATTRIBUTE_SYSTEM* = 0x00000004
@@ -7246,7 +7803,7 @@ const
   FILE_SUPPORTS_OPEN_BY_FILE_ID* = 0x01000000
   FILE_SUPPORTS_USN_JOURNAL* = 0x02000000
   FILE_SUPPORTS_INTEGRITY_STREAMS* = 0x04000000
-  MAXIMUM_REPARSE_DATA_BUFFER_SIZE* = 16*1024
+  MAXIMUM_REPARSE_DATA_BUFFER_SIZE* = 16 * 1024
   SYMLINK_FLAG_RELATIVE* = 1
   IO_REPARSE_TAG_RESERVED_ZERO* = 0
   IO_REPARSE_TAG_RESERVED_ONE* = 1
@@ -7310,28 +7867,37 @@ const
   GUID_ACTIVE_POWERSCHEME* = DEFINE_GUID("31f9f286-5084-42fe-b720-2b0264993763")
   GUID_IDLE_RESILIENCY_SUBGROUP* = DEFINE_GUID("2e601130-5351-4d9d-8e04-252966bad054")
   GUID_IDLE_RESILIENCY_PERIOD* = DEFINE_GUID("c42b79aa-aa3a-484b-a98f-2cf32aa90a28")
-  GUID_DISK_COALESCING_POWERDOWN_TIMEOUT* = DEFINE_GUID("c36f0eb4-2988-4a70-8eee-0884fc2c2433")
-  GUID_EXECUTION_REQUIRED_REQUEST_TIMEOUT* = DEFINE_GUID("3166bc41-7e98-4e03-b34e-ec0f5f2b218e")
+  GUID_DISK_COALESCING_POWERDOWN_TIMEOUT* =
+    DEFINE_GUID("c36f0eb4-2988-4a70-8eee-0884fc2c2433")
+  GUID_EXECUTION_REQUIRED_REQUEST_TIMEOUT* =
+    DEFINE_GUID("3166bc41-7e98-4e03-b34e-ec0f5f2b218e")
   GUID_VIDEO_SUBGROUP* = DEFINE_GUID("7516b95f-f776-4464-8c53-06167f40cc99")
   GUID_VIDEO_POWERDOWN_TIMEOUT* = DEFINE_GUID("3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e")
   GUID_VIDEO_ANNOYANCE_TIMEOUT* = DEFINE_GUID("82dbcf2d-cd67-40c5-bfdc-9f1a5ccd4663")
-  GUID_VIDEO_ADAPTIVE_PERCENT_INCREASE* = DEFINE_GUID("eed904df-b142-4183-b10b-5a1197a37864")
+  GUID_VIDEO_ADAPTIVE_PERCENT_INCREASE* =
+    DEFINE_GUID("eed904df-b142-4183-b10b-5a1197a37864")
   GUID_VIDEO_DIM_TIMEOUT* = DEFINE_GUID("17aaa29b-8b43-4b94-aafe-35f64daaf1ee")
   GUID_VIDEO_ADAPTIVE_POWERDOWN* = DEFINE_GUID("90959d22-d6a1-49b9-af93-bce885ad335b")
   GUID_MONITOR_POWER_ON* = DEFINE_GUID("02731015-4510-4526-99e6-e5a17ebd1aea")
-  GUID_DEVICE_POWER_POLICY_VIDEO_BRIGHTNESS* = DEFINE_GUID("aded5e82-b909-4619-9949-f5d71dac0bcb")
-  GUID_DEVICE_POWER_POLICY_VIDEO_DIM_BRIGHTNESS* = DEFINE_GUID("f1fbfde2-a960-4165-9f88-50667911ce96")
-  GUID_VIDEO_CURRENT_MONITOR_BRIGHTNESS* = DEFINE_GUID("8ffee2c6-2d01-46be-adb9-398addc5b4ff")
-  GUID_VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS* = DEFINE_GUID("fbd9aa66-9553-4097-ba44-ed6e9d65eab8")
+  GUID_DEVICE_POWER_POLICY_VIDEO_BRIGHTNESS* =
+    DEFINE_GUID("aded5e82-b909-4619-9949-f5d71dac0bcb")
+  GUID_DEVICE_POWER_POLICY_VIDEO_DIM_BRIGHTNESS* =
+    DEFINE_GUID("f1fbfde2-a960-4165-9f88-50667911ce96")
+  GUID_VIDEO_CURRENT_MONITOR_BRIGHTNESS* =
+    DEFINE_GUID("8ffee2c6-2d01-46be-adb9-398addc5b4ff")
+  GUID_VIDEO_ADAPTIVE_DISPLAY_BRIGHTNESS* =
+    DEFINE_GUID("fbd9aa66-9553-4097-ba44-ed6e9d65eab8")
   GUID_CONSOLE_DISPLAY_STATE* = DEFINE_GUID("6fe69556-704a-47a0-8f24-c28d936fda47")
   GUID_ALLOW_DISPLAY_REQUIRED* = DEFINE_GUID("a9ceb8da-cd46-44fb-a98b-02af69de4623")
   GUID_VIDEO_CONSOLE_LOCK_TIMEOUT* = DEFINE_GUID("8ec4b3a5-6868-48c2-be75-4f3044be88a7")
-  GUID_ADAPTIVE_POWER_BEHAVIOR_SUBGROUP* = DEFINE_GUID("8619b916-e004-4dd8-9b66-dae86f806698")
+  GUID_ADAPTIVE_POWER_BEHAVIOR_SUBGROUP* =
+    DEFINE_GUID("8619b916-e004-4dd8-9b66-dae86f806698")
   GUID_NON_ADAPTIVE_INPUT_TIMEOUT* = DEFINE_GUID("5adbbfbc-074e-4da1-ba38-db8b36b2c8f3")
   GUID_DISK_SUBGROUP* = DEFINE_GUID("0012ee47-9041-4b5d-9b77-535fba8b1442")
   GUID_DISK_POWERDOWN_TIMEOUT* = DEFINE_GUID("6738e2c4-e8a5-4a42-b16a-e040e769756e")
   GUID_DISK_IDLE_TIMEOUT* = DEFINE_GUID("58e39ba8-b8e6-4ef6-90d0-89ae32b258d6")
-  GUID_DISK_BURST_IGNORE_THRESHOLD* = DEFINE_GUID("80e3c60e-bb94-4ad8-bbe0-0d3195efc663")
+  GUID_DISK_BURST_IGNORE_THRESHOLD* =
+    DEFINE_GUID("80e3c60e-bb94-4ad8-bbe0-0d3195efc663")
   GUID_DISK_ADAPTIVE_POWERDOWN* = DEFINE_GUID("396a32e1-499a-40b2-9124-a96afe707667")
   GUID_SLEEP_SUBGROUP* = DEFINE_GUID("238c9fa8-0aad-41ed-83f4-97be242c8f20")
   GUID_SLEEP_IDLE_THRESHOLD* = DEFINE_GUID("81cd32e0-7833-44f3-8737-7081f38d1f70")
@@ -7364,65 +7930,102 @@ const
   GUID_BATTERY_DISCHARGE_ACTION_3* = DEFINE_GUID("80472613-9780-455e-b308-72d3003cf2f8")
   GUID_BATTERY_DISCHARGE_LEVEL_3* = DEFINE_GUID("58afd5a6-c2dd-47d2-9fbf-ef70cc5c5965")
   GUID_BATTERY_DISCHARGE_FLAGS_3* = DEFINE_GUID("73613ccf-dbfa-4279-8356-4935f6bf62f3")
-  GUID_PROCESSOR_SETTINGS_SUBGROUP* = DEFINE_GUID("54533251-82be-4824-96c1-47b60b740d00")
+  GUID_PROCESSOR_SETTINGS_SUBGROUP* =
+    DEFINE_GUID("54533251-82be-4824-96c1-47b60b740d00")
   GUID_PROCESSOR_THROTTLE_POLICY* = DEFINE_GUID("57027304-4af6-4104-9260-e3d95248fc36")
   GUID_PROCESSOR_THROTTLE_MAXIMUM* = DEFINE_GUID("bc5038f7-23e0-4960-96da-33abaf5935ec")
   GUID_PROCESSOR_THROTTLE_MINIMUM* = DEFINE_GUID("893dee8e-2bef-41e0-89c6-b55d0929964c")
   GUID_PROCESSOR_ALLOW_THROTTLING* = DEFINE_GUID("3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb")
   GUID_PROCESSOR_IDLESTATE_POLICY* = DEFINE_GUID("68f262a7-f621-4069-b9a5-4874169be23c")
   GUID_PROCESSOR_PERFSTATE_POLICY* = DEFINE_GUID("bbdc3814-18e9-4463-8a55-d197327c45c0")
-  GUID_PROCESSOR_PERF_INCREASE_THRESHOLD* = DEFINE_GUID("06cadf0e-64ed-448a-8927-ce7bf90eb35d")
-  GUID_PROCESSOR_PERF_DECREASE_THRESHOLD* = DEFINE_GUID("12a0ab44-fe28-4fa9-b3bd-4b64f44960a6")
-  GUID_PROCESSOR_PERF_INCREASE_POLICY* = DEFINE_GUID("465e1f50-b610-473a-ab58-00d1077dc418")
-  GUID_PROCESSOR_PERF_DECREASE_POLICY* = DEFINE_GUID("40fbefc7-2e9d-4d25-a185-0cfd8574bac6")
-  GUID_PROCESSOR_PERF_INCREASE_TIME* = DEFINE_GUID("984cf492-3bed-4488-a8f9-4286c97bf5aa")
-  GUID_PROCESSOR_PERF_DECREASE_TIME* = DEFINE_GUID("d8edeb9b-95cf-4f95-a73c-b061973693c8")
+  GUID_PROCESSOR_PERF_INCREASE_THRESHOLD* =
+    DEFINE_GUID("06cadf0e-64ed-448a-8927-ce7bf90eb35d")
+  GUID_PROCESSOR_PERF_DECREASE_THRESHOLD* =
+    DEFINE_GUID("12a0ab44-fe28-4fa9-b3bd-4b64f44960a6")
+  GUID_PROCESSOR_PERF_INCREASE_POLICY* =
+    DEFINE_GUID("465e1f50-b610-473a-ab58-00d1077dc418")
+  GUID_PROCESSOR_PERF_DECREASE_POLICY* =
+    DEFINE_GUID("40fbefc7-2e9d-4d25-a185-0cfd8574bac6")
+  GUID_PROCESSOR_PERF_INCREASE_TIME* =
+    DEFINE_GUID("984cf492-3bed-4488-a8f9-4286c97bf5aa")
+  GUID_PROCESSOR_PERF_DECREASE_TIME* =
+    DEFINE_GUID("d8edeb9b-95cf-4f95-a73c-b061973693c8")
   GUID_PROCESSOR_PERF_TIME_CHECK* = DEFINE_GUID("4d2b0152-7d5c-498b-88e2-34345392a2c5")
-  GUID_PROCESSOR_PERF_BOOST_POLICY* = DEFINE_GUID("45bcc044-d885-43e2-8605-ee0ec6e96b59")
+  GUID_PROCESSOR_PERF_BOOST_POLICY* =
+    DEFINE_GUID("45bcc044-d885-43e2-8605-ee0ec6e96b59")
   GUID_PROCESSOR_PERF_BOOST_MODE* = DEFINE_GUID("be337238-0d82-4146-a960-4f3749d470c7")
-  GUID_PROCESSOR_IDLE_ALLOW_SCALING* = DEFINE_GUID("6c2993b0-8f48-481f-bcc6-00dd2742aa06")
+  GUID_PROCESSOR_IDLE_ALLOW_SCALING* =
+    DEFINE_GUID("6c2993b0-8f48-481f-bcc6-00dd2742aa06")
   GUID_PROCESSOR_IDLE_DISABLE* = DEFINE_GUID("5d76a2ca-e8c0-402f-a133-2158492d58ad")
-  GUID_PROCESSOR_IDLE_STATE_MAXIMUM* = DEFINE_GUID("9943e905-9a30-4ec1-9b99-44dd3b76f7a2")
+  GUID_PROCESSOR_IDLE_STATE_MAXIMUM* =
+    DEFINE_GUID("9943e905-9a30-4ec1-9b99-44dd3b76f7a2")
   GUID_PROCESSOR_IDLE_TIME_CHECK* = DEFINE_GUID("c4581c31-89ab-4597-8e2b-9c9cab440e6b")
-  GUID_PROCESSOR_IDLE_DEMOTE_THRESHOLD* = DEFINE_GUID("4b92d758-5a24-4851-a470-815d78aee119")
-  GUID_PROCESSOR_IDLE_PROMOTE_THRESHOLD* = DEFINE_GUID("7b224883-b3cc-4d79-819f-8374152cbe7c")
-  GUID_PROCESSOR_CORE_PARKING_INCREASE_THRESHOLD* = DEFINE_GUID("df142941-20f3-4edf-9a4a-9c83d3d717d1")
-  GUID_PROCESSOR_CORE_PARKING_DECREASE_THRESHOLD* = DEFINE_GUID("68dd2f27-a4ce-4e11-8487-3794e4135dfa")
-  GUID_PROCESSOR_CORE_PARKING_INCREASE_POLICY* = DEFINE_GUID("c7be0679-2817-4d69-9d02-519a537ed0c6")
-  GUID_PROCESSOR_CORE_PARKING_DECREASE_POLICY* = DEFINE_GUID("71021b41-c749-4d21-be74-a00f335d582b")
-  GUID_PROCESSOR_CORE_PARKING_MAX_CORES* = DEFINE_GUID("ea062031-0e34-4ff1-9b6d-eb1059334028")
-  GUID_PROCESSOR_CORE_PARKING_MIN_CORES* = DEFINE_GUID("0cc5b647-c1df-4637-891a-dec35c318583")
-  GUID_PROCESSOR_CORE_PARKING_INCREASE_TIME* = DEFINE_GUID("2ddd5a84-5a71-437e-912a-db0b8c788732")
-  GUID_PROCESSOR_CORE_PARKING_DECREASE_TIME* = DEFINE_GUID("dfd10d17-d5eb-45dd-877a-9a34ddd15c82")
-  GUID_PROCESSOR_CORE_PARKING_AFFINITY_HISTORY_DECREASE_FACTOR* = DEFINE_GUID("8f7b45e3-c393-480a-878c-f67ac3d07082")
-  GUID_PROCESSOR_CORE_PARKING_AFFINITY_HISTORY_THRESHOLD* = DEFINE_GUID("5b33697b-e89d-4d38-aa46-9e7dfb7cd2f9")
-  GUID_PROCESSOR_CORE_PARKING_AFFINITY_WEIGHTING* = DEFINE_GUID("e70867f1-fa2f-4f4e-aea1-4d8a0ba23b20")
-  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_HISTORY_DECREASE_FACTOR* = DEFINE_GUID("1299023c-bc28-4f0a-81ec-d3295a8d815d")
-  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_HISTORY_THRESHOLD* = DEFINE_GUID("9ac18e92-aa3c-4e27-b307-01ae37307129")
-  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_WEIGHTING* = DEFINE_GUID("8809c2d8-b155-42d4-bcda-0d345651b1db")
-  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_THRESHOLD* = DEFINE_GUID("943c8cb6-6f93-4227-ad87-e9a3feec08d1")
-  GUID_PROCESSOR_PARKING_CORE_OVERRIDE* = DEFINE_GUID("a55612aa-f624-42c6-a443-7397d064c04f")
-  GUID_PROCESSOR_PARKING_PERF_STATE* = DEFINE_GUID("447235c7-6a8d-4cc0-8e24-9eaf70b96e2b")
-  GUID_PROCESSOR_PARKING_CONCURRENCY_THRESHOLD* = DEFINE_GUID("2430ab6f-a520-44a2-9601-f7f23b5134b1")
-  GUID_PROCESSOR_PARKING_HEADROOM_THRESHOLD* = DEFINE_GUID("f735a673-2066-4f80-a0c5-ddee0cf1bf5d")
+  GUID_PROCESSOR_IDLE_DEMOTE_THRESHOLD* =
+    DEFINE_GUID("4b92d758-5a24-4851-a470-815d78aee119")
+  GUID_PROCESSOR_IDLE_PROMOTE_THRESHOLD* =
+    DEFINE_GUID("7b224883-b3cc-4d79-819f-8374152cbe7c")
+  GUID_PROCESSOR_CORE_PARKING_INCREASE_THRESHOLD* =
+    DEFINE_GUID("df142941-20f3-4edf-9a4a-9c83d3d717d1")
+  GUID_PROCESSOR_CORE_PARKING_DECREASE_THRESHOLD* =
+    DEFINE_GUID("68dd2f27-a4ce-4e11-8487-3794e4135dfa")
+  GUID_PROCESSOR_CORE_PARKING_INCREASE_POLICY* =
+    DEFINE_GUID("c7be0679-2817-4d69-9d02-519a537ed0c6")
+  GUID_PROCESSOR_CORE_PARKING_DECREASE_POLICY* =
+    DEFINE_GUID("71021b41-c749-4d21-be74-a00f335d582b")
+  GUID_PROCESSOR_CORE_PARKING_MAX_CORES* =
+    DEFINE_GUID("ea062031-0e34-4ff1-9b6d-eb1059334028")
+  GUID_PROCESSOR_CORE_PARKING_MIN_CORES* =
+    DEFINE_GUID("0cc5b647-c1df-4637-891a-dec35c318583")
+  GUID_PROCESSOR_CORE_PARKING_INCREASE_TIME* =
+    DEFINE_GUID("2ddd5a84-5a71-437e-912a-db0b8c788732")
+  GUID_PROCESSOR_CORE_PARKING_DECREASE_TIME* =
+    DEFINE_GUID("dfd10d17-d5eb-45dd-877a-9a34ddd15c82")
+  GUID_PROCESSOR_CORE_PARKING_AFFINITY_HISTORY_DECREASE_FACTOR* =
+    DEFINE_GUID("8f7b45e3-c393-480a-878c-f67ac3d07082")
+  GUID_PROCESSOR_CORE_PARKING_AFFINITY_HISTORY_THRESHOLD* =
+    DEFINE_GUID("5b33697b-e89d-4d38-aa46-9e7dfb7cd2f9")
+  GUID_PROCESSOR_CORE_PARKING_AFFINITY_WEIGHTING* =
+    DEFINE_GUID("e70867f1-fa2f-4f4e-aea1-4d8a0ba23b20")
+  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_HISTORY_DECREASE_FACTOR* =
+    DEFINE_GUID("1299023c-bc28-4f0a-81ec-d3295a8d815d")
+  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_HISTORY_THRESHOLD* =
+    DEFINE_GUID("9ac18e92-aa3c-4e27-b307-01ae37307129")
+  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_WEIGHTING* =
+    DEFINE_GUID("8809c2d8-b155-42d4-bcda-0d345651b1db")
+  GUID_PROCESSOR_CORE_PARKING_OVER_UTILIZATION_THRESHOLD* =
+    DEFINE_GUID("943c8cb6-6f93-4227-ad87-e9a3feec08d1")
+  GUID_PROCESSOR_PARKING_CORE_OVERRIDE* =
+    DEFINE_GUID("a55612aa-f624-42c6-a443-7397d064c04f")
+  GUID_PROCESSOR_PARKING_PERF_STATE* =
+    DEFINE_GUID("447235c7-6a8d-4cc0-8e24-9eaf70b96e2b")
+  GUID_PROCESSOR_PARKING_CONCURRENCY_THRESHOLD* =
+    DEFINE_GUID("2430ab6f-a520-44a2-9601-f7f23b5134b1")
+  GUID_PROCESSOR_PARKING_HEADROOM_THRESHOLD* =
+    DEFINE_GUID("f735a673-2066-4f80-a0c5-ddee0cf1bf5d")
   GUID_PROCESSOR_PERF_HISTORY* = DEFINE_GUID("7d24baa7-0b84-480f-840c-1b0743c00f5f")
-  GUID_PROCESSOR_PERF_LATENCY_HINT* = DEFINE_GUID("0822df31-9c83-441c-a079-0de4cf009c7b")
-  GUID_PROCESSOR_DISTRIBUTE_UTILITY* = DEFINE_GUID("e0007330-f589-42ed-a401-5ddb10e785d3")
+  GUID_PROCESSOR_PERF_LATENCY_HINT* =
+    DEFINE_GUID("0822df31-9c83-441c-a079-0de4cf009c7b")
+  GUID_PROCESSOR_DISTRIBUTE_UTILITY* =
+    DEFINE_GUID("e0007330-f589-42ed-a401-5ddb10e785d3")
   GUID_SYSTEM_COOLING_POLICY* = DEFINE_GUID("94d3a615-a899-4ac5-ae2b-e4d8f634367f")
   GUID_LOCK_CONSOLE_ON_WAKE* = DEFINE_GUID("0e796bdb-100d-47d6-a2d5-f7d2daa51f51")
   GUID_DEVICE_IDLE_POLICY* = DEFINE_GUID("4faab71a-92e5-4726-b531-224559672d19")
   GUID_ACDC_POWER_SOURCE* = DEFINE_GUID("5d3e9a59-e9d5-4b00-a6bd-ff34ff516548")
   GUID_LIDSWITCH_STATE_CHANGE* = DEFINE_GUID("ba3e0f4d-b817-4094-a2d1-d56379e6a0f3")
-  GUID_BATTERY_PERCENTAGE_REMAINING* = DEFINE_GUID("a7ad8041-b45a-4cae-87a3-eecbb468a9e1")
+  GUID_BATTERY_PERCENTAGE_REMAINING* =
+    DEFINE_GUID("a7ad8041-b45a-4cae-87a3-eecbb468a9e1")
   GUID_GLOBAL_USER_PRESENCE* = DEFINE_GUID("786e8a1d-b427-4344-9207-09e70bdcbea9")
   GUID_SESSION_DISPLAY_STATUS* = DEFINE_GUID("2b84c20e-ad23-4ddf-93db-05ffbd7efca5")
   GUID_SESSION_USER_PRESENCE* = DEFINE_GUID("3c0f4548-c03f-4c4d-b9f2-237ede686376")
   GUID_IDLE_BACKGROUND_TASK* = DEFINE_GUID("515c31d8-f734-163d-a0fd-11a08c91e8f1")
-  GUID_BACKGROUND_TASK_NOTIFICATION* = DEFINE_GUID("cf23f240-2a54-48d8-b114-de1518ff052e")
+  GUID_BACKGROUND_TASK_NOTIFICATION* =
+    DEFINE_GUID("cf23f240-2a54-48d8-b114-de1518ff052e")
   GUID_APPLAUNCH_BUTTON* = DEFINE_GUID("1a689231-7399-4e9a-8f99-b71f999db3fa")
-  GUID_PCIEXPRESS_SETTINGS_SUBGROUP* = DEFINE_GUID("501a4d13-42af-4429-9fd1-a8218c268e20")
+  GUID_PCIEXPRESS_SETTINGS_SUBGROUP* =
+    DEFINE_GUID("501a4d13-42af-4429-9fd1-a8218c268e20")
   GUID_PCIEXPRESS_ASPM_POLICY* = DEFINE_GUID("ee12f906-d277-404b-b6da-e5fa1a576df5")
-  GUID_ENABLE_SWITCH_FORCED_SHUTDOWN* = DEFINE_GUID("833a6b62-dfa4-46d1-82f8-e09e34d029d6")
+  GUID_ENABLE_SWITCH_FORCED_SHUTDOWN* =
+    DEFINE_GUID("833a6b62-dfa4-46d1-82f8-e09e34d029d6")
   powerSystemUnspecified* = 0
   powerSystemWorking* = 1
   powerSystemSleeping1* = 2
@@ -7596,9 +8199,9 @@ const
   platformRoleSlate* = 8
   platformRoleMaximum* = 9
   POWER_PLATFORM_ROLE_V1* = 0x00000001
-  POWER_PLATFORM_ROLE_V1_MAX* = platformRolePerformanceServer+1
+  POWER_PLATFORM_ROLE_V1_MAX* = platformRolePerformanceServer + 1
   POWER_PLATFORM_ROLE_V2* = 0x00000002
-  POWER_PLATFORM_ROLE_V2_MAX* = platformRoleSlate+1
+  POWER_PLATFORM_ROLE_V2_MAX* = platformRoleSlate + 1
   POWER_PLATFORM_ROLE_VERSION* = POWER_PLATFORM_ROLE_V2
   POWER_PLATFORM_ROLE_VERSION_MAX* = POWER_PLATFORM_ROLE_V2_MAX
   ACPI_PPM_SOFTWARE_ALL* = 0xfc
@@ -7633,7 +8236,8 @@ const
   PPM_IDLE_IMPLEMENTATION_CSTATES* = 0x1
   PPM_IDLE_IMPLEMENTATION_PEP* = 0x2
   PPM_PERFSTATE_CHANGE_GUID* = DEFINE_GUID("a5b32ddd-7f39-4abc-b892-900e43b59ebb")
-  PPM_PERFSTATE_DOMAIN_CHANGE_GUID* = DEFINE_GUID("995e6b7f-d653-497a-b978-36a30c29bf01")
+  PPM_PERFSTATE_DOMAIN_CHANGE_GUID* =
+    DEFINE_GUID("995e6b7f-d653-497a-b978-36a30c29bf01")
   PPM_IDLESTATE_CHANGE_GUID* = DEFINE_GUID("4838fe4f-f71c-4e51-9ecc-8430a7ac4c6c")
   PPM_PERFSTATES_DATA_GUID* = DEFINE_GUID("5708cc20-7d40-4bf4-b4aa-2b01338d0126")
   PPM_IDLESTATES_DATA_GUID* = DEFINE_GUID("ba138e10-e250-4ad7-8616-cf1a7ad410e7")
@@ -8308,7 +8912,8 @@ const
   SEF_MACL_NO_READ_UP* = 0x200
   SEF_MACL_NO_EXECUTE_UP* = 0x400
   SEF_AVOID_OWNER_RESTRICTION* = 0x1000
-  SEF_MACL_VALID_FLAGS* = SEF_MACL_NO_WRITE_UP or SEF_MACL_NO_READ_UP or SEF_MACL_NO_EXECUTE_UP
+  SEF_MACL_VALID_FLAGS* =
+    SEF_MACL_NO_WRITE_UP or SEF_MACL_NO_READ_UP or SEF_MACL_NO_EXECUTE_UP
   MESSAGE_RESOURCE_UNICODE* = 0x0001
   VER_EQUAL* = 1
   VER_GREATER* = 2
@@ -8359,7 +8964,14 @@ const
   RTL_CRITICAL_SECTION_FLAG_RESOURCE_TYPE* = 0x08000000
   RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFO* = 0x10000000
   RTL_CRITICAL_SECTION_ALL_FLAG_BITS* = 0xff000000'i32
-  RTL_CRITICAL_SECTION_FLAG_RESERVED* = RTL_CRITICAL_SECTION_ALL_FLAG_BITS and (not (RTL_CRITICAL_SECTION_FLAG_NO_DEBUG_INFO or RTL_CRITICAL_SECTION_FLAG_DYNAMIC_SPIN or RTL_CRITICAL_SECTION_FLAG_STATIC_INIT or RTL_CRITICAL_SECTION_FLAG_RESOURCE_TYPE or RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFO))
+  RTL_CRITICAL_SECTION_FLAG_RESERVED* =
+    RTL_CRITICAL_SECTION_ALL_FLAG_BITS and (
+      not (
+        RTL_CRITICAL_SECTION_FLAG_NO_DEBUG_INFO or RTL_CRITICAL_SECTION_FLAG_DYNAMIC_SPIN or
+        RTL_CRITICAL_SECTION_FLAG_STATIC_INIT or RTL_CRITICAL_SECTION_FLAG_RESOURCE_TYPE or
+        RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFO
+      )
+    )
   RTL_CRITICAL_SECTION_DEBUG_FLAG_STATIC_INIT* = 0x00000001
   RTL_SRWLOCK_INIT* = [0'u8]
   RTL_CONDITION_VARIABLE_INIT* = [0'u8]
@@ -8528,17 +9140,26 @@ const
   KEY_WOW64_64KEY* = 0x0100
   KEY_WOW64_32KEY* = 0x0200
   KEY_WOW64_RES* = 0x0300
-  KEY_READ* = (STANDARD_RIGHTS_READ or KEY_QUERY_VALUE or KEY_ENUMERATE_SUB_KEYS or KEY_NOTIFY) and (not SYNCHRONIZE)
-  KEY_WRITE* = (STANDARD_RIGHTS_WRITE or KEY_SET_VALUE or KEY_CREATE_SUB_KEY) and (not SYNCHRONIZE)
+  KEY_READ* =
+    (STANDARD_RIGHTS_READ or KEY_QUERY_VALUE or KEY_ENUMERATE_SUB_KEYS or KEY_NOTIFY) and
+    (not SYNCHRONIZE)
+  KEY_WRITE* =
+    (STANDARD_RIGHTS_WRITE or KEY_SET_VALUE or KEY_CREATE_SUB_KEY) and (not SYNCHRONIZE)
   KEY_EXECUTE* = (KEY_READ) and (not SYNCHRONIZE)
-  KEY_ALL_ACCESS* = (STANDARD_RIGHTS_ALL or KEY_QUERY_VALUE or KEY_SET_VALUE or KEY_CREATE_SUB_KEY or KEY_ENUMERATE_SUB_KEYS or KEY_NOTIFY or KEY_CREATE_LINK) and (not SYNCHRONIZE)
+  KEY_ALL_ACCESS* =
+    (
+      STANDARD_RIGHTS_ALL or KEY_QUERY_VALUE or KEY_SET_VALUE or KEY_CREATE_SUB_KEY or
+      KEY_ENUMERATE_SUB_KEYS or KEY_NOTIFY or KEY_CREATE_LINK
+    ) and (not SYNCHRONIZE)
   REG_OPTION_RESERVED* = 0x00000000
   REG_OPTION_NON_VOLATILE* = 0x00000000
   REG_OPTION_VOLATILE* = 0x00000001
   REG_OPTION_CREATE_LINK* = 0x00000002
   REG_OPTION_BACKUP_RESTORE* = 0x00000004
   REG_OPTION_OPEN_LINK* = 0x00000008
-  REG_LEGAL_OPTION* = REG_OPTION_RESERVED or REG_OPTION_NON_VOLATILE or REG_OPTION_VOLATILE or REG_OPTION_CREATE_LINK or REG_OPTION_BACKUP_RESTORE or REG_OPTION_OPEN_LINK
+  REG_LEGAL_OPTION* =
+    REG_OPTION_RESERVED or REG_OPTION_NON_VOLATILE or REG_OPTION_VOLATILE or
+    REG_OPTION_CREATE_LINK or REG_OPTION_BACKUP_RESTORE or REG_OPTION_OPEN_LINK
   REG_CREATED_NEW_KEY* = 0x00000001
   REG_OPENED_EXISTING_KEY* = 0x00000002
   REG_STANDARD_FORMAT* = 1
@@ -8561,7 +9182,9 @@ const
   REG_NOTIFY_CHANGE_LAST_SET* = 0x00000004
   REG_NOTIFY_CHANGE_SECURITY* = 0x00000008
   REG_NOTIFY_THREAD_AGNOSTIC* = 0x10000000
-  REG_LEGAL_CHANGE_FILTER* = REG_NOTIFY_CHANGE_NAME or REG_NOTIFY_CHANGE_ATTRIBUTES or REG_NOTIFY_CHANGE_LAST_SET or REG_NOTIFY_CHANGE_SECURITY or REG_NOTIFY_THREAD_AGNOSTIC
+  REG_LEGAL_CHANGE_FILTER* =
+    REG_NOTIFY_CHANGE_NAME or REG_NOTIFY_CHANGE_ATTRIBUTES or REG_NOTIFY_CHANGE_LAST_SET or
+    REG_NOTIFY_CHANGE_SECURITY or REG_NOTIFY_THREAD_AGNOSTIC
   REG_NONE* = 0
   REG_SZ* = 1
   REG_EXPAND_SZ* = 2
@@ -8580,12 +9203,14 @@ const
   SERVICE_FILE_SYSTEM_DRIVER* = 0x00000002
   SERVICE_ADAPTER* = 0x00000004
   SERVICE_RECOGNIZER_DRIVER* = 0x00000008
-  SERVICE_DRIVER* = SERVICE_KERNEL_DRIVER or SERVICE_FILE_SYSTEM_DRIVER or SERVICE_RECOGNIZER_DRIVER
+  SERVICE_DRIVER* =
+    SERVICE_KERNEL_DRIVER or SERVICE_FILE_SYSTEM_DRIVER or SERVICE_RECOGNIZER_DRIVER
   SERVICE_WIN32_OWN_PROCESS* = 0x00000010
   SERVICE_WIN32_SHARE_PROCESS* = 0x00000020
   SERVICE_WIN32* = SERVICE_WIN32_OWN_PROCESS or SERVICE_WIN32_SHARE_PROCESS
   SERVICE_INTERACTIVE_PROCESS* = 0x00000100
-  SERVICE_TYPE_ALL* = SERVICE_WIN32 or SERVICE_ADAPTER or SERVICE_DRIVER or SERVICE_INTERACTIVE_PROCESS
+  SERVICE_TYPE_ALL* =
+    SERVICE_WIN32 or SERVICE_ADAPTER or SERVICE_DRIVER or SERVICE_INTERACTIVE_PROCESS
   SERVICE_BOOT_START* = 0x00000000
   SERVICE_SYSTEM_START* = 0x00000001
   SERVICE_AUTO_START* = 0x00000002
@@ -8618,7 +9243,11 @@ const
   CM_SERVICE_MEASURED_BOOT_LOAD* = 0x00000020
   CM_SERVICE_VERIFIER_BOOT_LOAD* = 0x00000040
   CM_SERVICE_WINPE_BOOT_LOAD* = 0x00000080
-  CM_SERVICE_VALID_PROMOTION_MASK* = CM_SERVICE_NETWORK_BOOT_LOAD or CM_SERVICE_VIRTUAL_DISK_BOOT_LOAD or CM_SERVICE_USB_DISK_BOOT_LOAD or CM_SERVICE_SD_DISK_BOOT_LOAD or CM_SERVICE_USB3_DISK_BOOT_LOAD or CM_SERVICE_MEASURED_BOOT_LOAD or CM_SERVICE_VERIFIER_BOOT_LOAD or CM_SERVICE_WINPE_BOOT_LOAD
+  CM_SERVICE_VALID_PROMOTION_MASK* =
+    CM_SERVICE_NETWORK_BOOT_LOAD or CM_SERVICE_VIRTUAL_DISK_BOOT_LOAD or
+    CM_SERVICE_USB_DISK_BOOT_LOAD or CM_SERVICE_SD_DISK_BOOT_LOAD or
+    CM_SERVICE_USB3_DISK_BOOT_LOAD or CM_SERVICE_MEASURED_BOOT_LOAD or
+    CM_SERVICE_VERIFIER_BOOT_LOAD or CM_SERVICE_WINPE_BOOT_LOAD
   TAPE_ERASE_SHORT* = 0
   TAPE_ERASE_LONG* = 1
   TAPE_LOAD* = 0
@@ -8786,10 +9415,17 @@ const
   TRANSACTIONMANAGER_RENAME* = 0x00008
   TRANSACTIONMANAGER_CREATE_RM* = 0x00010
   TRANSACTIONMANAGER_BIND_TRANSACTION* = 0x00020
-  TRANSACTIONMANAGER_GENERIC_READ* = STANDARD_RIGHTS_READ or TRANSACTIONMANAGER_QUERY_INFORMATION
-  TRANSACTIONMANAGER_GENERIC_WRITE* = STANDARD_RIGHTS_WRITE or TRANSACTIONMANAGER_SET_INFORMATION or TRANSACTIONMANAGER_RECOVER or TRANSACTIONMANAGER_RENAME or TRANSACTIONMANAGER_CREATE_RM
+  TRANSACTIONMANAGER_GENERIC_READ* =
+    STANDARD_RIGHTS_READ or TRANSACTIONMANAGER_QUERY_INFORMATION
+  TRANSACTIONMANAGER_GENERIC_WRITE* =
+    STANDARD_RIGHTS_WRITE or TRANSACTIONMANAGER_SET_INFORMATION or
+    TRANSACTIONMANAGER_RECOVER or TRANSACTIONMANAGER_RENAME or
+    TRANSACTIONMANAGER_CREATE_RM
   TRANSACTIONMANAGER_GENERIC_EXECUTE* = STANDARD_RIGHTS_EXECUTE
-  TRANSACTIONMANAGER_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or TRANSACTIONMANAGER_GENERIC_READ or TRANSACTIONMANAGER_GENERIC_WRITE or TRANSACTIONMANAGER_GENERIC_EXECUTE or TRANSACTIONMANAGER_BIND_TRANSACTION
+  TRANSACTIONMANAGER_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or TRANSACTIONMANAGER_GENERIC_READ or
+    TRANSACTIONMANAGER_GENERIC_WRITE or TRANSACTIONMANAGER_GENERIC_EXECUTE or
+    TRANSACTIONMANAGER_BIND_TRANSACTION
   TRANSACTION_QUERY_INFORMATION* = 0x0001
   TRANSACTION_SET_INFORMATION* = 0x0002
   TRANSACTION_ENLIST* = 0x0004
@@ -8797,11 +9433,19 @@ const
   TRANSACTION_ROLLBACK* = 0x0010
   TRANSACTION_PROPAGATE* = 0x0020
   TRANSACTION_RIGHT_RESERVED1* = 0x0040
-  TRANSACTION_GENERIC_READ* = STANDARD_RIGHTS_READ or TRANSACTION_QUERY_INFORMATION or SYNCHRONIZE
-  TRANSACTION_GENERIC_WRITE* = STANDARD_RIGHTS_WRITE or TRANSACTION_SET_INFORMATION or TRANSACTION_COMMIT or TRANSACTION_ENLIST or TRANSACTION_ROLLBACK or TRANSACTION_PROPAGATE or SYNCHRONIZE
-  TRANSACTION_GENERIC_EXECUTE* = STANDARD_RIGHTS_EXECUTE or TRANSACTION_COMMIT or TRANSACTION_ROLLBACK or SYNCHRONIZE
-  TRANSACTION_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or TRANSACTION_GENERIC_READ or TRANSACTION_GENERIC_WRITE or TRANSACTION_GENERIC_EXECUTE
-  TRANSACTION_RESOURCE_MANAGER_RIGHTS* = TRANSACTION_GENERIC_READ or STANDARD_RIGHTS_WRITE or TRANSACTION_SET_INFORMATION or TRANSACTION_ENLIST or TRANSACTION_ROLLBACK or TRANSACTION_PROPAGATE or SYNCHRONIZE
+  TRANSACTION_GENERIC_READ* =
+    STANDARD_RIGHTS_READ or TRANSACTION_QUERY_INFORMATION or SYNCHRONIZE
+  TRANSACTION_GENERIC_WRITE* =
+    STANDARD_RIGHTS_WRITE or TRANSACTION_SET_INFORMATION or TRANSACTION_COMMIT or
+    TRANSACTION_ENLIST or TRANSACTION_ROLLBACK or TRANSACTION_PROPAGATE or SYNCHRONIZE
+  TRANSACTION_GENERIC_EXECUTE* =
+    STANDARD_RIGHTS_EXECUTE or TRANSACTION_COMMIT or TRANSACTION_ROLLBACK or SYNCHRONIZE
+  TRANSACTION_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or TRANSACTION_GENERIC_READ or TRANSACTION_GENERIC_WRITE or
+    TRANSACTION_GENERIC_EXECUTE
+  TRANSACTION_RESOURCE_MANAGER_RIGHTS* =
+    TRANSACTION_GENERIC_READ or STANDARD_RIGHTS_WRITE or TRANSACTION_SET_INFORMATION or
+    TRANSACTION_ENLIST or TRANSACTION_ROLLBACK or TRANSACTION_PROPAGATE or SYNCHRONIZE
   RESOURCEMANAGER_QUERY_INFORMATION* = 0x0001
   RESOURCEMANAGER_SET_INFORMATION* = 0x0002
   RESOURCEMANAGER_RECOVER* = 0x0004
@@ -8809,19 +9453,35 @@ const
   RESOURCEMANAGER_GET_NOTIFICATION* = 0x0010
   RESOURCEMANAGER_REGISTER_PROTOCOL* = 0x0020
   RESOURCEMANAGER_COMPLETE_PROPAGATION* = 0x0040
-  RESOURCEMANAGER_GENERIC_READ* = STANDARD_RIGHTS_READ or RESOURCEMANAGER_QUERY_INFORMATION or SYNCHRONIZE
-  RESOURCEMANAGER_GENERIC_WRITE* = STANDARD_RIGHTS_WRITE or RESOURCEMANAGER_SET_INFORMATION or RESOURCEMANAGER_RECOVER or RESOURCEMANAGER_ENLIST or RESOURCEMANAGER_GET_NOTIFICATION or RESOURCEMANAGER_REGISTER_PROTOCOL or RESOURCEMANAGER_COMPLETE_PROPAGATION or SYNCHRONIZE
-  RESOURCEMANAGER_GENERIC_EXECUTE* = STANDARD_RIGHTS_EXECUTE or RESOURCEMANAGER_RECOVER or RESOURCEMANAGER_ENLIST or RESOURCEMANAGER_GET_NOTIFICATION or RESOURCEMANAGER_COMPLETE_PROPAGATION or SYNCHRONIZE
-  RESOURCEMANAGER_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or RESOURCEMANAGER_GENERIC_READ or RESOURCEMANAGER_GENERIC_WRITE or RESOURCEMANAGER_GENERIC_EXECUTE
+  RESOURCEMANAGER_GENERIC_READ* =
+    STANDARD_RIGHTS_READ or RESOURCEMANAGER_QUERY_INFORMATION or SYNCHRONIZE
+  RESOURCEMANAGER_GENERIC_WRITE* =
+    STANDARD_RIGHTS_WRITE or RESOURCEMANAGER_SET_INFORMATION or RESOURCEMANAGER_RECOVER or
+    RESOURCEMANAGER_ENLIST or RESOURCEMANAGER_GET_NOTIFICATION or
+    RESOURCEMANAGER_REGISTER_PROTOCOL or RESOURCEMANAGER_COMPLETE_PROPAGATION or
+    SYNCHRONIZE
+  RESOURCEMANAGER_GENERIC_EXECUTE* =
+    STANDARD_RIGHTS_EXECUTE or RESOURCEMANAGER_RECOVER or RESOURCEMANAGER_ENLIST or
+    RESOURCEMANAGER_GET_NOTIFICATION or RESOURCEMANAGER_COMPLETE_PROPAGATION or
+    SYNCHRONIZE
+  RESOURCEMANAGER_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or RESOURCEMANAGER_GENERIC_READ or
+    RESOURCEMANAGER_GENERIC_WRITE or RESOURCEMANAGER_GENERIC_EXECUTE
   ENLISTMENT_QUERY_INFORMATION* = 1
   ENLISTMENT_SET_INFORMATION* = 2
   ENLISTMENT_RECOVER* = 4
   ENLISTMENT_SUBORDINATE_RIGHTS* = 8
   ENLISTMENT_SUPERIOR_RIGHTS* = 0x10
   ENLISTMENT_GENERIC_READ* = STANDARD_RIGHTS_READ or ENLISTMENT_QUERY_INFORMATION
-  ENLISTMENT_GENERIC_WRITE* = STANDARD_RIGHTS_WRITE or ENLISTMENT_SET_INFORMATION or ENLISTMENT_RECOVER or ENLISTMENT_SUBORDINATE_RIGHTS or ENLISTMENT_SUPERIOR_RIGHTS
-  ENLISTMENT_GENERIC_EXECUTE* = STANDARD_RIGHTS_EXECUTE or ENLISTMENT_RECOVER or ENLISTMENT_SUBORDINATE_RIGHTS or ENLISTMENT_SUPERIOR_RIGHTS
-  ENLISTMENT_ALL_ACCESS* = STANDARD_RIGHTS_REQUIRED or ENLISTMENT_GENERIC_READ or ENLISTMENT_GENERIC_WRITE or ENLISTMENT_GENERIC_EXECUTE
+  ENLISTMENT_GENERIC_WRITE* =
+    STANDARD_RIGHTS_WRITE or ENLISTMENT_SET_INFORMATION or ENLISTMENT_RECOVER or
+    ENLISTMENT_SUBORDINATE_RIGHTS or ENLISTMENT_SUPERIOR_RIGHTS
+  ENLISTMENT_GENERIC_EXECUTE* =
+    STANDARD_RIGHTS_EXECUTE or ENLISTMENT_RECOVER or ENLISTMENT_SUBORDINATE_RIGHTS or
+    ENLISTMENT_SUPERIOR_RIGHTS
+  ENLISTMENT_ALL_ACCESS* =
+    STANDARD_RIGHTS_REQUIRED or ENLISTMENT_GENERIC_READ or ENLISTMENT_GENERIC_WRITE or
+    ENLISTMENT_GENERIC_EXECUTE
   transactionOutcomeUndetermined* = 1
   transactionOutcomeCommitted* = 2
   transactionOutcomeAborted* = 3
@@ -8858,8 +9518,12 @@ const
   WOW64_CONTEXT_FLOATING_POINT* = WOW64_CONTEXT_i386 or 0x00000008
   WOW64_CONTEXT_DEBUG_REGISTERS* = WOW64_CONTEXT_i386 or 0x00000010
   WOW64_CONTEXT_EXTENDED_REGISTERS* = WOW64_CONTEXT_i386 or 0x00000020
-  WOW64_CONTEXT_FULL* = WOW64_CONTEXT_CONTROL or WOW64_CONTEXT_INTEGER or WOW64_CONTEXT_SEGMENTS
-  WOW64_CONTEXT_ALL* = WOW64_CONTEXT_CONTROL or WOW64_CONTEXT_INTEGER or WOW64_CONTEXT_SEGMENTS or WOW64_CONTEXT_FLOATING_POINT or WOW64_CONTEXT_DEBUG_REGISTERS or WOW64_CONTEXT_EXTENDED_REGISTERS
+  WOW64_CONTEXT_FULL* =
+    WOW64_CONTEXT_CONTROL or WOW64_CONTEXT_INTEGER or WOW64_CONTEXT_SEGMENTS
+  WOW64_CONTEXT_ALL* =
+    WOW64_CONTEXT_CONTROL or WOW64_CONTEXT_INTEGER or WOW64_CONTEXT_SEGMENTS or
+    WOW64_CONTEXT_FLOATING_POINT or WOW64_CONTEXT_DEBUG_REGISTERS or
+    WOW64_CONTEXT_EXTENDED_REGISTERS
   WOW64_CONTEXT_XSTATE* = WOW64_CONTEXT_i386 or 0x00000040
   WOW64_CONTEXT_EXCEPTION_ACTIVE* = 0x08000000
   WOW64_CONTEXT_SERVICE_ACTIVE* = 0x10000000
@@ -9098,34 +9762,58 @@ const
   NETWORKSERVICE_LUID* = LUID(LowPart: 0x3e4, HighPart: 0x0)
   IUSER_LUID* = LUID(LowPart: 0x3e3, HighPart: 0x0)
   SERVERNAME_CURRENT* = HANDLE 0
-  TRANSACTIONMANAGER_OBJECT_NAME_LENGTH_IN_BYTES* = (len(TRANSACTIONMANAGER_OBJECT_PATH)+1)+(38*sizeof(WCHAR))
-  TRANSACTION_OBJECT_NAME_LENGTH_IN_BYTES* = (len(TRANSACTION_OBJECT_PATH)+1)+(38*sizeof(WCHAR))
-  ENLISTMENT_OBJECT_NAME_LENGTH_IN_BYTES* = (len(ENLISTMENT_OBJECT_PATH)+1)+(38*sizeof(WCHAR))
-  RESOURCE_MANAGER_OBJECT_NAME_LENGTH_IN_BYTES* = (len(RESOURCE_MANAGER_OBJECT_PATH)+1)+(38*sizeof(WCHAR))
+  TRANSACTIONMANAGER_OBJECT_NAME_LENGTH_IN_BYTES* =
+    (len(TRANSACTIONMANAGER_OBJECT_PATH) + 1) + (38 * sizeof(WCHAR))
+  TRANSACTION_OBJECT_NAME_LENGTH_IN_BYTES* =
+    (len(TRANSACTION_OBJECT_PATH) + 1) + (38 * sizeof(WCHAR))
+  ENLISTMENT_OBJECT_NAME_LENGTH_IN_BYTES* =
+    (len(ENLISTMENT_OBJECT_PATH) + 1) + (38 * sizeof(WCHAR))
+  RESOURCE_MANAGER_OBJECT_NAME_LENGTH_IN_BYTES* =
+    (len(RESOURCE_MANAGER_OBJECT_PATH) + 1) + (38 * sizeof(WCHAR))
   IMAGE_SYM_CLASS_END_OF_FUNCTION* = not BYTE(0)
 type
-  PHNDLR* = proc (P1: int32): void {.stdcall.}
-  PEXCEPTION_HANDLER* = proc (P1: ptr EXCEPTION_RECORD, P2: pointer, P3: ptr CONTEXT, P4: pointer): EXCEPTION_DISPOSITION {.stdcall.}
-  PIMAGE_TLS_CALLBACK* = proc (DllHandle: PVOID, Reason: DWORD, Reserved: PVOID): VOID {.stdcall.}
-  PRTL_RUN_ONCE_INIT_FN* = proc (P1: PRTL_RUN_ONCE, P2: PVOID, P3: ptr PVOID): DWORD {.stdcall.}
-  PAPCFUNC* = proc (Parameter: ULONG_PTR): VOID {.stdcall.}
-  PVECTORED_EXCEPTION_HANDLER* = proc (ExceptionInfo: ptr EXCEPTION_POINTERS): LONG {.stdcall.}
-  WORKERCALLBACKFUNC* = proc (P1: PVOID): VOID {.stdcall.}
-  APC_CALLBACK_FUNCTION* = proc (P1: DWORD, P2: PVOID, P3: PVOID): VOID {.stdcall.}
-  PFLS_CALLBACK_FUNCTION* = proc (lpFlsData: PVOID): VOID {.stdcall.}
-  PSECURE_MEMORY_CACHE_CALLBACK* = proc (Addr: PVOID, Range: SIZE_T): BOOLEAN {.stdcall.}
-  PTP_WORK_CALLBACK* = proc (Instance: PTP_CALLBACK_INSTANCE, Context: PVOID, Work: PTP_WORK): VOID {.stdcall.}
-  PTP_TIMER_CALLBACK* = proc (Instance: PTP_CALLBACK_INSTANCE, Context: PVOID, Timer: PTP_TIMER): VOID {.stdcall.}
-  PTP_WAIT_CALLBACK* = proc (Instance: PTP_CALLBACK_INSTANCE, Context: PVOID, Wait: PTP_WAIT, WaitResult: TP_WAIT_RESULT): VOID {.stdcall.}
-  PIO_APC_ROUTINE* = proc (ApcContext: PVOID, IoStatusBlock: PIO_STATUS_BLOCK, Reserved: ULONG): VOID {.stdcall.}
-  PWINSTATIONQUERYINFORMATIONW* = proc (P1: HANDLE, P2: ULONG, P3: WINSTATIONINFOCLASS, P4: PVOID, P5: ULONG, P6: PULONG): BOOLEAN {.stdcall.}
+  PHNDLR* = proc(P1: int32): void {.stdcall.}
+  PEXCEPTION_HANDLER* = proc(
+    P1: ptr EXCEPTION_RECORD, P2: pointer, P3: ptr CONTEXT, P4: pointer
+  ): EXCEPTION_DISPOSITION {.stdcall.}
+  PIMAGE_TLS_CALLBACK* =
+    proc(DllHandle: PVOID, Reason: DWORD, Reserved: PVOID): VOID {.stdcall.}
+  PRTL_RUN_ONCE_INIT_FN* =
+    proc(P1: PRTL_RUN_ONCE, P2: PVOID, P3: ptr PVOID): DWORD {.stdcall.}
+  PAPCFUNC* = proc(Parameter: ULONG_PTR): VOID {.stdcall.}
+  PVECTORED_EXCEPTION_HANDLER* =
+    proc(ExceptionInfo: ptr EXCEPTION_POINTERS): LONG {.stdcall.}
+  WORKERCALLBACKFUNC* = proc(P1: PVOID): VOID {.stdcall.}
+  APC_CALLBACK_FUNCTION* = proc(P1: DWORD, P2: PVOID, P3: PVOID): VOID {.stdcall.}
+  PFLS_CALLBACK_FUNCTION* = proc(lpFlsData: PVOID): VOID {.stdcall.}
+  PSECURE_MEMORY_CACHE_CALLBACK* = proc(Addr: PVOID, Range: SIZE_T): BOOLEAN {.stdcall.}
+  PTP_WORK_CALLBACK* = proc(
+    Instance: PTP_CALLBACK_INSTANCE, Context: PVOID, Work: PTP_WORK
+  ): VOID {.stdcall.}
+  PTP_TIMER_CALLBACK* = proc(
+    Instance: PTP_CALLBACK_INSTANCE, Context: PVOID, Timer: PTP_TIMER
+  ): VOID {.stdcall.}
+  PTP_WAIT_CALLBACK* = proc(
+    Instance: PTP_CALLBACK_INSTANCE,
+    Context: PVOID,
+    Wait: PTP_WAIT,
+    WaitResult: TP_WAIT_RESULT,
+  ): VOID {.stdcall.}
+  PIO_APC_ROUTINE* = proc(
+    ApcContext: PVOID, IoStatusBlock: PIO_STATUS_BLOCK, Reserved: ULONG
+  ): VOID {.stdcall.}
+  PWINSTATIONQUERYINFORMATIONW* = proc(
+    P1: HANDLE, P2: ULONG, P3: WINSTATIONINFOCLASS, P4: PVOID, P5: ULONG, P6: PULONG
+  ): BOOLEAN {.stdcall.}
   XCPT_ACTION* {.pure.} = object
     XcptNum*: int32
     SigNum*: int32
     XcptAction*: PHNDLR
+
   OBJECTID* {.pure.} = object
     Lineage*: GUID
     Uniquifier*: DWORD
+
   ANON_OBJECT_HEADER* {.pure.} = object
     Sig1*: WORD
     Sig2*: WORD
@@ -9134,6 +9822,7 @@ type
     TimeDateStamp*: DWORD
     ClassID*: CLSID
     SizeOfData*: DWORD
+
   ANON_OBJECT_HEADER_V2* {.pure.} = object
     Sig1*: WORD
     Sig2*: WORD
@@ -9145,6 +9834,7 @@ type
     Flags*: DWORD
     MetaDataSize*: DWORD
     MetaDataOffset*: DWORD
+
   ANON_OBJECT_HEADER_BIGOBJ* {.pure.} = object
     Sig1*: WORD
     Sig2*: WORD
@@ -9159,9 +9849,11 @@ type
     NumberOfSections*: DWORD
     PointerToSymbolTable*: DWORD
     NumberOfSymbols*: DWORD
+
   IMPORT_OBJECT_HEADER_UNION1* {.pure, union.} = object
     Ordinal*: WORD
     Hint*: WORD
+
   IMPORT_OBJECT_HEADER* {.pure.} = object
     Sig1*: WORD
     Sig2*: WORD
@@ -9170,16 +9862,19 @@ type
     TimeDateStamp*: DWORD
     SizeOfData*: DWORD
     union1*: IMPORT_OBJECT_HEADER_UNION1
-    Type* {.bitsize:2.}: WORD
-    NameType* {.bitsize:3.}: WORD
-    Reserved* {.bitsize:11.}: WORD
+    Type* {.bitsize: 2.}: WORD
+    NameType* {.bitsize: 3.}: WORD
+    Reserved* {.bitsize: 11.}: WORD
+
   TP_CALLBACK_ENVIRON_V1_u_s* {.pure.} = object
-    LongFunction* {.bitsize:1.}: DWORD
-    Persistent* {.bitsize:1.}: DWORD
-    Private* {.bitsize:30.}: DWORD
+    LongFunction* {.bitsize: 1.}: DWORD
+    Persistent* {.bitsize: 1.}: DWORD
+    Private* {.bitsize: 30.}: DWORD
+
   TP_CALLBACK_ENVIRON_V1_u* {.pure, union.} = object
     Flags*: DWORD
     s*: TP_CALLBACK_ENVIRON_V1_u_s
+
   TP_CALLBACK_ENVIRON_V1* {.pure.} = object
     Version*: TP_VERSION
     Pool*: PTP_POOL
@@ -9189,390 +9884,1350 @@ type
     ActivationContext*: ptr ACTIVATION_CONTEXT
     FinalizationCallback*: PTP_SIMPLE_CALLBACK
     u*: TP_CALLBACK_ENVIRON_V1_u
-proc IsEqualGUID*(rguid1: REFGUID, rguid2: REFGUID): BOOL {.winapi, stdcall, dynlib: "ole32", importc.}
-proc IsEqualIID*(rguid1: REFIID, rguid2: REFIID): BOOL {.winapi, stdcall, dynlib: "ole32", importc: "IsEqualGUID".}
-proc IsEqualCLSID*(rguid1: REFCLSID, rguid2: REFCLSID): BOOL {.winapi, stdcall, dynlib: "ole32", importc: "IsEqualGUID".}
-proc IsEqualFMTID*(rguid1: REFFMTID, rguid2: REFFMTID): BOOL {.winapi, stdcall, dynlib: "ole32", importc: "IsEqualGUID".}
-proc RtlCaptureStackBackTrace*(FramesToSkip: DWORD, FramesToCapture: DWORD, BackTrace: ptr PVOID, BackTraceHash: PDWORD): WORD {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlCaptureContext*(ContextRecord: PCONTEXT): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlCompareMemory*(Source1: pointer, Source2: pointer, Length: SIZE_T): SIZE_T {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlUnwind*(TargetFrame: PVOID, TargetIp: PVOID, ExceptionRecord: PEXCEPTION_RECORD, ReturnValue: PVOID): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlPcToFileHeader*(PcValue: PVOID, BaseOfImage: ptr PVOID): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc IsEqualGUID*(
+  rguid1: REFGUID, rguid2: REFGUID
+): BOOL {.winapi, stdcall, dynlib: "ole32", importc.}
+
+proc IsEqualIID*(
+  rguid1: REFIID, rguid2: REFIID
+): BOOL {.winapi, stdcall, dynlib: "ole32", importc: "IsEqualGUID".}
+
+proc IsEqualCLSID*(
+  rguid1: REFCLSID, rguid2: REFCLSID
+): BOOL {.winapi, stdcall, dynlib: "ole32", importc: "IsEqualGUID".}
+
+proc IsEqualFMTID*(
+  rguid1: REFFMTID, rguid2: REFFMTID
+): BOOL {.winapi, stdcall, dynlib: "ole32", importc: "IsEqualGUID".}
+
+proc RtlCaptureStackBackTrace*(
+  FramesToSkip: DWORD,
+  FramesToCapture: DWORD,
+  BackTrace: ptr PVOID,
+  BackTraceHash: PDWORD,
+): WORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlCaptureContext*(
+  ContextRecord: PCONTEXT
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlCompareMemory*(
+  Source1: pointer, Source2: pointer, Length: SIZE_T
+): SIZE_T {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlUnwind*(
+  TargetFrame: PVOID,
+  TargetIp: PVOID,
+  ExceptionRecord: PEXCEPTION_RECORD,
+  ReturnValue: PVOID,
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlPcToFileHeader*(
+  PcValue: PVOID, BaseOfImage: ptr PVOID
+): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
 when winimCpu64:
-  type
-    SLIST_HEADER_STRUCT1* {.pure.} = object
-      Alignment*: ULONGLONG
-      Region*: ULONGLONG
+  type SLIST_HEADER_STRUCT1* {.pure.} = object
+    Alignment*: ULONGLONG
+    Region*: ULONGLONG
+
 when winimCpu32:
-  type
-    SLIST_ENTRY* = SINGLE_LIST_ENTRY
+  type SLIST_ENTRY* = SINGLE_LIST_ENTRY
 when winimCpu64:
-  type
-    SLIST_ENTRY* {.pure.} = object
-      Next*: ptr SLIST_ENTRY
-      padding*: array[8, byte]
+  type SLIST_ENTRY* {.pure.} = object
+    Next*: ptr SLIST_ENTRY
+    padding*: array[8, byte]
+
 when winimCpu32:
-  type
-    SLIST_HEADER_STRUCT1* {.pure.} = object
-      Next*: SLIST_ENTRY
-      Depth*: WORD
-      Sequence*: WORD
+  type SLIST_HEADER_STRUCT1* {.pure.} = object
+    Next*: SLIST_ENTRY
+    Depth*: WORD
+    Sequence*: WORD
+
 when winimCpu64:
   type
     SLIST_HEADER_Header8* {.pure.} = object
-      Depth* {.bitsize:16.}: ULONGLONG
-      Sequence* {.bitsize:9.}: ULONGLONG
-      NextEntry* {.bitsize:39.}: ULONGLONG
-      HeaderType* {.bitsize:1.}: ULONGLONG
-      Init* {.bitsize:1.}: ULONGLONG
-      Reserved* {.bitsize:59.}: ULONGLONG
-      Region* {.bitsize:3.}: ULONGLONG
+      Depth* {.bitsize: 16.}: ULONGLONG
+      Sequence* {.bitsize: 9.}: ULONGLONG
+      NextEntry* {.bitsize: 39.}: ULONGLONG
+      HeaderType* {.bitsize: 1.}: ULONGLONG
+      Init* {.bitsize: 1.}: ULONGLONG
+      Reserved* {.bitsize: 59.}: ULONGLONG
+      Region* {.bitsize: 3.}: ULONGLONG
+
     SLIST_HEADER_HeaderX64* {.pure.} = object
-      Depth* {.bitsize:16.}: ULONGLONG
-      Sequence* {.bitsize:48.}: ULONGLONG
-      HeaderType* {.bitsize:1.}: ULONGLONG
-      Reserved* {.bitsize:3.}: ULONGLONG
-      NextEntry* {.bitsize:60.}: ULONGLONG
+      Depth* {.bitsize: 16.}: ULONGLONG
+      Sequence* {.bitsize: 48.}: ULONGLONG
+      HeaderType* {.bitsize: 1.}: ULONGLONG
+      Reserved* {.bitsize: 3.}: ULONGLONG
+      NextEntry* {.bitsize: 60.}: ULONGLONG
+
     SLIST_HEADER* {.pure, union.} = object
       struct1*: SLIST_HEADER_STRUCT1
       Header8*: SLIST_HEADER_Header8
       HeaderX64*: SLIST_HEADER_HeaderX64
+
 when winimCpu32:
-  type
-    SLIST_HEADER* {.pure, union.} = object
-      Alignment*: ULONGLONG
-      struct1*: SLIST_HEADER_STRUCT1
+  type SLIST_HEADER* {.pure, union.} = object
+    Alignment*: ULONGLONG
+    struct1*: SLIST_HEADER_STRUCT1
+
 when winimCpu64:
-  type
-    PSLIST_HEADER* = ptr SLIST_HEADER
+  type PSLIST_HEADER* = ptr SLIST_HEADER
 when winimCpu32:
-  type
-    PSLIST_HEADER* = ptr SLIST_HEADER
-proc RtlInitializeSListHead*(ListHead: PSLIST_HEADER): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+  type PSLIST_HEADER* = ptr SLIST_HEADER
+proc RtlInitializeSListHead*(
+  ListHead: PSLIST_HEADER
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
 when winimCpu64:
-  type
-    PSLIST_ENTRY* = ptr SLIST_ENTRY
+  type PSLIST_ENTRY* = ptr SLIST_ENTRY
 when winimCpu32:
-  type
-    PSLIST_ENTRY* = ptr SINGLE_LIST_ENTRY
-proc RtlFirstEntrySList*(ListHead: ptr SLIST_HEADER): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlInterlockedPopEntrySList*(ListHead: PSLIST_HEADER): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlInterlockedPushEntrySList*(ListHead: PSLIST_HEADER, ListEntry: PSLIST_ENTRY): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlInterlockedPushListSListEx*(ListHead: PSLIST_HEADER, List: PSLIST_ENTRY, ListEnd: PSLIST_ENTRY, Count: DWORD): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlInterlockedFlushSList*(ListHead: PSLIST_HEADER): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlQueryDepthSList*(ListHead: PSLIST_HEADER): WORD {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc VerSetConditionMask*(ConditionMask: ULONGLONG, TypeMask: DWORD, Condition: BYTE): ULONGLONG {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc RtlGetProductInfo*(OSMajorVersion: DWORD, OSMinorVersion: DWORD, SpMajorVersion: DWORD, SpMinorVersion: DWORD, ReturnedProductType: PDWORD): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlCrc32*(Buffer: pointer, Size: int, InitialCrc: DWORD): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlCrc64*(Buffer: pointer, Size: int, InitialCrc: ULONGLONG): ULONGLONG {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlApplicationVerifierStop*(Code: ULONG_PTR, Message: PSTR, Param1: ULONG_PTR, Description1: PSTR, Param2: ULONG_PTR, Description2: PSTR, Param3: ULONG_PTR, Description3: PSTR, Param4: ULONG_PTR, Description4: PSTR): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlSetHeapInformation*(HeapHandle: PVOID, HeapInformationClass: HEAP_INFORMATION_CLASS, HeapInformation: PVOID, HeapInformationLength: SIZE_T): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlQueryHeapInformation*(HeapHandle: PVOID, HeapInformationClass: HEAP_INFORMATION_CLASS, HeapInformation: PVOID, HeapInformationLength: SIZE_T, ReturnLength: PSIZE_T): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlMultipleAllocateHeap*(HeapHandle: PVOID, Flags: DWORD, Size: SIZE_T, Count: DWORD, Array: ptr PVOID): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlMultipleFreeHeap*(HeapHandle: PVOID, Flags: DWORD, Count: DWORD, Array: ptr PVOID): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+  type PSLIST_ENTRY* = ptr SINGLE_LIST_ENTRY
+proc RtlFirstEntrySList*(
+  ListHead: ptr SLIST_HEADER
+): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlInterlockedPopEntrySList*(
+  ListHead: PSLIST_HEADER
+): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlInterlockedPushEntrySList*(
+  ListHead: PSLIST_HEADER, ListEntry: PSLIST_ENTRY
+): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlInterlockedPushListSListEx*(
+  ListHead: PSLIST_HEADER, List: PSLIST_ENTRY, ListEnd: PSLIST_ENTRY, Count: DWORD
+): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlInterlockedFlushSList*(
+  ListHead: PSLIST_HEADER
+): PSLIST_ENTRY {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlQueryDepthSList*(
+  ListHead: PSLIST_HEADER
+): WORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc VerSetConditionMask*(
+  ConditionMask: ULONGLONG, TypeMask: DWORD, Condition: BYTE
+): ULONGLONG {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc RtlGetProductInfo*(
+  OSMajorVersion: DWORD,
+  OSMinorVersion: DWORD,
+  SpMajorVersion: DWORD,
+  SpMinorVersion: DWORD,
+  ReturnedProductType: PDWORD,
+): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlCrc32*(
+  Buffer: pointer, Size: int, InitialCrc: DWORD
+): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlCrc64*(
+  Buffer: pointer, Size: int, InitialCrc: ULONGLONG
+): ULONGLONG {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlApplicationVerifierStop*(
+  Code: ULONG_PTR,
+  Message: PSTR,
+  Param1: ULONG_PTR,
+  Description1: PSTR,
+  Param2: ULONG_PTR,
+  Description2: PSTR,
+  Param3: ULONG_PTR,
+  Description3: PSTR,
+  Param4: ULONG_PTR,
+  Description4: PSTR,
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlSetHeapInformation*(
+  HeapHandle: PVOID,
+  HeapInformationClass: HEAP_INFORMATION_CLASS,
+  HeapInformation: PVOID,
+  HeapInformationLength: SIZE_T,
+): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlQueryHeapInformation*(
+  HeapHandle: PVOID,
+  HeapInformationClass: HEAP_INFORMATION_CLASS,
+  HeapInformation: PVOID,
+  HeapInformationLength: SIZE_T,
+  ReturnLength: PSIZE_T,
+): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlMultipleAllocateHeap*(
+  HeapHandle: PVOID, Flags: DWORD, Size: SIZE_T, Count: DWORD, Array: ptr PVOID
+): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlMultipleFreeHeap*(
+  HeapHandle: PVOID, Flags: DWORD, Count: DWORD, Array: ptr PVOID
+): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
 proc NtClose*(Handle: HANDLE): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtCreateFile*(FileHandle: PHANDLE, DesiredAccess: ACCESS_MASK, ObjectAttributes: POBJECT_ATTRIBUTES, IoStatusBlock: PIO_STATUS_BLOCK, AllocationSize: PLARGE_INTEGER, FileAttributes: ULONG, ShareAccess: ULONG, CreateDisposition: ULONG, CreateOptions: ULONG, EaBuffer: PVOID, EaLength: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtOpenFile*(FileHandle: PHANDLE, DesiredAccess: ACCESS_MASK, ObjectAttributes: POBJECT_ATTRIBUTES, IoStatusBlock: PIO_STATUS_BLOCK, ShareAccess: ULONG, OpenOptions: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtFsControlFile*(FileHandle: HANDLE, Event: HANDLE, ApcRoutine: PIO_APC_ROUTINE, ApcContext: PVOID, IoStatusBlock: PIO_STATUS_BLOCK, IoControlCode: ULONG, InputBuffer: PVOID, InputBufferLength: ULONG, OutputBuffer: PVOID, OutputBufferLength: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtDeviceIoControlFile*(FileHandle: HANDLE, Event: HANDLE, ApcRoutine: PIO_APC_ROUTINE, ApcContext: PVOID, IoStatusBlock: PIO_STATUS_BLOCK, IoControlCode: ULONG, InputBuffer: PVOID, InputBufferLength: ULONG, OutputBuffer: PVOID, OutputBufferLength: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtWaitForSingleObject*(Handle: HANDLE, Alertable: BOOLEAN, Timeout: PLARGE_INTEGER): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlIsNameLegalDOS8Dot3*(Name: PUNICODE_STRING, OemName: POEM_STRING, NameContainsSpaces: PBOOLEAN): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlNtStatusToDosError*(Status: NTSTATUS): ULONG {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtQueryInformationProcess*(ProcessHandle: HANDLE, ProcessInformationClass: PROCESSINFOCLASS, ProcessInformation: PVOID, ProcessInformationLength: ULONG, ReturnLength: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtQueryInformationThread*(ThreadHandle: HANDLE, ThreadInformationClass: THREADINFOCLASS, ThreadInformation: PVOID, ThreadInformationLength: ULONG, ReturnLength: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtQueryInformationFile*(hFile: HANDLE, io: PIO_STATUS_BLOCK, `ptr`: PVOID, len: ULONG, FileInformationClass: FILE_INFORMATION_CLASS): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtQueryObject*(Handle: HANDLE, ObjectInformationClass: OBJECT_INFORMATION_CLASS, ObjectInformation: PVOID, ObjectInformationLength: ULONG, ReturnLength: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtQuerySystemInformation*(SystemInformationClass: SYSTEM_INFORMATION_CLASS, SystemInformation: PVOID, SystemInformationLength: ULONG, ReturnLength: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtQuerySystemTime*(SystemTime: PLARGE_INTEGER): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtQueryVolumeInformationFile*(hFile: HANDLE, io: PIO_STATUS_BLOCK, `ptr`: PVOID, len: ULONG, FsInformationClass: FS_INFORMATION_CLASS): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtSetInformationFile*(hFile: HANDLE, io: PIO_STATUS_BLOCK, `ptr`: PVOID, len: ULONG, FileInformationClass: FILE_INFORMATION_CLASS): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtSetInformationProcess*(ProcessHandle: HANDLE, ProcessInformationClass: PROCESSINFOCLASS, ProcessInformation: PVOID, ProcessInformationLength: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc NtSetVolumeInformationFile*(hFile: HANDLE, io: PIO_STATUS_BLOCK, `ptr`: PVOID, len: ULONG, FileInformationClass: FILE_INFORMATION_CLASS): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlLocalTimeToSystemTime*(LocalTime: PLARGE_INTEGER, SystemTime: PLARGE_INTEGER): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlTimeToSecondsSince1970*(Time: PLARGE_INTEGER, ElapsedSeconds: PULONG): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlFreeAnsiString*(AnsiString: PANSI_STRING): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlFreeUnicodeString*(UnicodeString: PUNICODE_STRING): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlFreeOemString*(OemString: POEM_STRING): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlInitString*(DestinationString: PSTRING, SourceString: PCSZ): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlInitAnsiString*(DestinationString: PANSI_STRING, SourceString: PCSZ): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlInitUnicodeString*(DestinationString: PUNICODE_STRING, SourceString: PCWSTR): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlAnsiStringToUnicodeString*(DestinationString: PUNICODE_STRING, SourceString: PCANSI_STRING, AllocateDestinationString: BOOLEAN): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlUnicodeStringToAnsiString*(DestinationString: PANSI_STRING, SourceString: PCUNICODE_STRING, AllocateDestinationString: BOOLEAN): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlUnicodeStringToOemString*(DestinationString: POEM_STRING, SourceString: PCUNICODE_STRING, AllocateDestinationString: BOOLEAN): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlUnicodeToMultiByteSize*(BytesInMultiByteString: PULONG, UnicodeString: PWCH, BytesInUnicodeString: ULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlCharToInteger*(String: PCSZ, Base: ULONG, Value: PULONG): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlConvertSidToUnicodeString*(UnicodeString: PUNICODE_STRING, Sid: PSID, AllocateDestinationString: BOOLEAN): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+proc NtCreateFile*(
+  FileHandle: PHANDLE,
+  DesiredAccess: ACCESS_MASK,
+  ObjectAttributes: POBJECT_ATTRIBUTES,
+  IoStatusBlock: PIO_STATUS_BLOCK,
+  AllocationSize: PLARGE_INTEGER,
+  FileAttributes: ULONG,
+  ShareAccess: ULONG,
+  CreateDisposition: ULONG,
+  CreateOptions: ULONG,
+  EaBuffer: PVOID,
+  EaLength: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtOpenFile*(
+  FileHandle: PHANDLE,
+  DesiredAccess: ACCESS_MASK,
+  ObjectAttributes: POBJECT_ATTRIBUTES,
+  IoStatusBlock: PIO_STATUS_BLOCK,
+  ShareAccess: ULONG,
+  OpenOptions: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtFsControlFile*(
+  FileHandle: HANDLE,
+  Event: HANDLE,
+  ApcRoutine: PIO_APC_ROUTINE,
+  ApcContext: PVOID,
+  IoStatusBlock: PIO_STATUS_BLOCK,
+  IoControlCode: ULONG,
+  InputBuffer: PVOID,
+  InputBufferLength: ULONG,
+  OutputBuffer: PVOID,
+  OutputBufferLength: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtDeviceIoControlFile*(
+  FileHandle: HANDLE,
+  Event: HANDLE,
+  ApcRoutine: PIO_APC_ROUTINE,
+  ApcContext: PVOID,
+  IoStatusBlock: PIO_STATUS_BLOCK,
+  IoControlCode: ULONG,
+  InputBuffer: PVOID,
+  InputBufferLength: ULONG,
+  OutputBuffer: PVOID,
+  OutputBufferLength: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtWaitForSingleObject*(
+  Handle: HANDLE, Alertable: BOOLEAN, Timeout: PLARGE_INTEGER
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlIsNameLegalDOS8Dot3*(
+  Name: PUNICODE_STRING, OemName: POEM_STRING, NameContainsSpaces: PBOOLEAN
+): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlNtStatusToDosError*(
+  Status: NTSTATUS
+): ULONG {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtQueryInformationProcess*(
+  ProcessHandle: HANDLE,
+  ProcessInformationClass: PROCESSINFOCLASS,
+  ProcessInformation: PVOID,
+  ProcessInformationLength: ULONG,
+  ReturnLength: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtQueryInformationThread*(
+  ThreadHandle: HANDLE,
+  ThreadInformationClass: THREADINFOCLASS,
+  ThreadInformation: PVOID,
+  ThreadInformationLength: ULONG,
+  ReturnLength: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtQueryInformationFile*(
+  hFile: HANDLE,
+  io: PIO_STATUS_BLOCK,
+  `ptr`: PVOID,
+  len: ULONG,
+  FileInformationClass: FILE_INFORMATION_CLASS,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtQueryObject*(
+  Handle: HANDLE,
+  ObjectInformationClass: OBJECT_INFORMATION_CLASS,
+  ObjectInformation: PVOID,
+  ObjectInformationLength: ULONG,
+  ReturnLength: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtQuerySystemInformation*(
+  SystemInformationClass: SYSTEM_INFORMATION_CLASS,
+  SystemInformation: PVOID,
+  SystemInformationLength: ULONG,
+  ReturnLength: PULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtQuerySystemTime*(
+  SystemTime: PLARGE_INTEGER
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtQueryVolumeInformationFile*(
+  hFile: HANDLE,
+  io: PIO_STATUS_BLOCK,
+  `ptr`: PVOID,
+  len: ULONG,
+  FsInformationClass: FS_INFORMATION_CLASS,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtSetInformationFile*(
+  hFile: HANDLE,
+  io: PIO_STATUS_BLOCK,
+  `ptr`: PVOID,
+  len: ULONG,
+  FileInformationClass: FILE_INFORMATION_CLASS,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtSetInformationProcess*(
+  ProcessHandle: HANDLE,
+  ProcessInformationClass: PROCESSINFOCLASS,
+  ProcessInformation: PVOID,
+  ProcessInformationLength: ULONG,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc NtSetVolumeInformationFile*(
+  hFile: HANDLE,
+  io: PIO_STATUS_BLOCK,
+  `ptr`: PVOID,
+  len: ULONG,
+  FileInformationClass: FILE_INFORMATION_CLASS,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlLocalTimeToSystemTime*(
+  LocalTime: PLARGE_INTEGER, SystemTime: PLARGE_INTEGER
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlTimeToSecondsSince1970*(
+  Time: PLARGE_INTEGER, ElapsedSeconds: PULONG
+): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlFreeAnsiString*(
+  AnsiString: PANSI_STRING
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlFreeUnicodeString*(
+  UnicodeString: PUNICODE_STRING
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlFreeOemString*(
+  OemString: POEM_STRING
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlInitString*(
+  DestinationString: PSTRING, SourceString: PCSZ
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlInitAnsiString*(
+  DestinationString: PANSI_STRING, SourceString: PCSZ
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlInitUnicodeString*(
+  DestinationString: PUNICODE_STRING, SourceString: PCWSTR
+): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlAnsiStringToUnicodeString*(
+  DestinationString: PUNICODE_STRING,
+  SourceString: PCANSI_STRING,
+  AllocateDestinationString: BOOLEAN,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlUnicodeStringToAnsiString*(
+  DestinationString: PANSI_STRING,
+  SourceString: PCUNICODE_STRING,
+  AllocateDestinationString: BOOLEAN,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlUnicodeStringToOemString*(
+  DestinationString: POEM_STRING,
+  SourceString: PCUNICODE_STRING,
+  AllocateDestinationString: BOOLEAN,
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlUnicodeToMultiByteSize*(
+  BytesInMultiByteString: PULONG, UnicodeString: PWCH, BytesInUnicodeString: ULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlCharToInteger*(
+  String: PCSZ, Base: ULONG, Value: PULONG
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlConvertSidToUnicodeString*(
+  UnicodeString: PUNICODE_STRING, Sid: PSID, AllocateDestinationString: BOOLEAN
+): NTSTATUS {.winapi, stdcall, dynlib: "ntdll", importc.}
+
 proc RtlUniform*(Seed: PULONG): ULONG {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlDosPathNameToNtPathName_U*(DosPathName: PCWSTR, NtPathName: PUNICODE_STRING, NtFileNamePart: ptr PCWSTR, DirectoryInfo: pointer): BOOL {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlPrefixUnicodeString*(String1: PCUNICODE_STRING, String2: PCUNICODE_STRING, CaseInSensitive: BOOLEAN): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlCreateUnicodeStringFromAsciiz*(target: PUNICODE_STRING, src: LPCSTR): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlFreeHeap*(HeapHandle: PVOID, Flags: ULONG, HeapBase: PVOID): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlAllocateHeap*(HeapHandle: PVOID, Flags: ULONG, Size: SIZE_T): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlCreateHeap*(Flags: ULONG, HeapBase: PVOID, ReserveSize: SIZE_T, CommitSize: SIZE_T, Lock: PVOID, Parameters: PRTL_HEAP_PARAMETERS): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc RtlDestroyHeap*(HeapHandle: PVOID): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-proc CaptureStackBackTrace*(FramesToSkip: DWORD, FramesToCapture: DWORD, BackTrace: ptr PVOID, BackTraceHash: PDWORD): WORD {.winapi, stdcall, dynlib: "ntdll", importc: "RtlCaptureStackBackTrace".}
-template NT_SUCCESS*(status: untyped): bool = status.NTSTATUS >= 0
-template NT_INFORMATION*(status: untyped): bool = status.NTSTATUS shr 30 == 1
-template NT_WARNING*(status: untyped): bool = status.NTSTATUS shr 30 == 2
-template NT_ERROR*(status: untyped): bool = status.NTSTATUS shr 30 == 3
-template PRIMARYLANGID*(lgid: untyped): WORD = lgid.WORD and 0x3ff
-template SUBLANGID*(lgid: untyped): WORD = lgid.WORD shr 10
-template MAKESORTLCID*(lgid: untyped, srtid: untyped, ver: untyped): DWORD = MAKELCID(lgid, srtid) or (ver.DWORD shl 20)
-template LANGIDFROMLCID*(lcid: untyped): WORD = WORD(lcid and 0xffff)
-template SORTIDFROMLCID*(lcid: untyped): WORD = WORD((lcid shr 16) and 0xf)
-template SORTVERSIONFROMLCID*(lcid: untyped): WORD = WORD((lcid shr 20) and 0xf)
-template MAKEWORD*(a: untyped, b: untyped): WORD = WORD((b and 0xff) shl 8) or WORD(a and 0xff)
-template MAKELONG*(a: untyped, b: untyped): DWORD = cast[DWORD](b shl 16) or DWORD(a and 0xffff)
-template LOWORD*(l: untyped): WORD = WORD(l and 0xffff)
-template HIWORD*(l: untyped): WORD = WORD((l shr 16) and 0xffff)
-template LOBYTE*(w: untyped): BYTE = BYTE(w and 0xff)
-template HIBYTE*(w: untyped): BYTE = BYTE((w shr 8) and 0xff)
-template GET_X_LPARAM*(x: untyped): int = int cast[int16](LOWORD(x))
-template GET_Y_LPARAM*(x: untyped): int = int cast[int16](HIWORD(x))
-template IS_UNWINDING*(f: untyped): bool = (f and EXCEPTION_UNWIND) != 0
-template IS_DISPATCHING*(f: untyped): bool = (f and EXCEPTION_UNWIND) == 0
-template IS_TARGET_UNWIND*(f: untyped): bool = (f and EXCEPTION_TARGET_UNWIND) != 0
-template MANDATORY_LEVEL_TO_MANDATORY_RID*(IL: untyped): DWORD = IL.DWORD * 0x1000
-template VALID_IMPERSONATION_LEVEL*(L: untyped): bool = (L >= SECURITY_MIN_IMPERSONATION_LEVEL) and (L <= SECURITY_MAX_IMPERSONATION_LEVEL)
-template IsReparseTagMicrosoft*(tag: untyped): ULONG = tag.ULONG and 0x80000000'i32
-template IsReparseTagNameSurrogate*(tag: untyped): ULONG = tag.ULONG and 0x20000000'i32
+proc RtlDosPathNameToNtPathName_U*(
+  DosPathName: PCWSTR,
+  NtPathName: PUNICODE_STRING,
+  NtFileNamePart: ptr PCWSTR,
+  DirectoryInfo: pointer,
+): BOOL {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlPrefixUnicodeString*(
+  String1: PCUNICODE_STRING, String2: PCUNICODE_STRING, CaseInSensitive: BOOLEAN
+): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlCreateUnicodeStringFromAsciiz*(
+  target: PUNICODE_STRING, src: LPCSTR
+): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlFreeHeap*(
+  HeapHandle: PVOID, Flags: ULONG, HeapBase: PVOID
+): BOOLEAN {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlAllocateHeap*(
+  HeapHandle: PVOID, Flags: ULONG, Size: SIZE_T
+): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlCreateHeap*(
+  Flags: ULONG,
+  HeapBase: PVOID,
+  ReserveSize: SIZE_T,
+  CommitSize: SIZE_T,
+  Lock: PVOID,
+  Parameters: PRTL_HEAP_PARAMETERS,
+): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc RtlDestroyHeap*(
+  HeapHandle: PVOID
+): PVOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+proc CaptureStackBackTrace*(
+  FramesToSkip: DWORD,
+  FramesToCapture: DWORD,
+  BackTrace: ptr PVOID,
+  BackTraceHash: PDWORD,
+): WORD {.winapi, stdcall, dynlib: "ntdll", importc: "RtlCaptureStackBackTrace".}
+
+template NT_SUCCESS*(status: untyped): bool =
+  status.NTSTATUS >= 0
+
+template NT_INFORMATION*(status: untyped): bool =
+  status.NTSTATUS shr 30 == 1
+
+template NT_WARNING*(status: untyped): bool =
+  status.NTSTATUS shr 30 == 2
+
+template NT_ERROR*(status: untyped): bool =
+  status.NTSTATUS shr 30 == 3
+
+template PRIMARYLANGID*(lgid: untyped): WORD =
+  lgid.WORD and 0x3ff
+
+template SUBLANGID*(lgid: untyped): WORD =
+  lgid.WORD shr 10
+
+template MAKESORTLCID*(lgid: untyped, srtid: untyped, ver: untyped): DWORD =
+  MAKELCID(lgid, srtid) or (ver.DWORD shl 20)
+
+template LANGIDFROMLCID*(lcid: untyped): WORD =
+  WORD(lcid and 0xffff)
+
+template SORTIDFROMLCID*(lcid: untyped): WORD =
+  WORD((lcid shr 16) and 0xf)
+
+template SORTVERSIONFROMLCID*(lcid: untyped): WORD =
+  WORD((lcid shr 20) and 0xf)
+
+template MAKEWORD*(a: untyped, b: untyped): WORD =
+  WORD((b and 0xff) shl 8) or WORD(a and 0xff)
+
+template MAKELONG*(a: untyped, b: untyped): DWORD =
+  cast[DWORD](b shl 16) or DWORD(a and 0xffff)
+
+template LOWORD*(l: untyped): WORD =
+  WORD(l and 0xffff)
+
+template HIWORD*(l: untyped): WORD =
+  WORD((l shr 16) and 0xffff)
+
+template LOBYTE*(w: untyped): BYTE =
+  BYTE(w and 0xff)
+
+template HIBYTE*(w: untyped): BYTE =
+  BYTE((w shr 8) and 0xff)
+
+template GET_X_LPARAM*(x: untyped): int =
+  int cast[int16](LOWORD(x))
+
+template GET_Y_LPARAM*(x: untyped): int =
+  int cast[int16](HIWORD(x))
+
+template IS_UNWINDING*(f: untyped): bool =
+  (f and EXCEPTION_UNWIND) != 0
+
+template IS_DISPATCHING*(f: untyped): bool =
+  (f and EXCEPTION_UNWIND) == 0
+
+template IS_TARGET_UNWIND*(f: untyped): bool =
+  (f and EXCEPTION_TARGET_UNWIND) != 0
+
+template MANDATORY_LEVEL_TO_MANDATORY_RID*(IL: untyped): DWORD =
+  IL.DWORD * 0x1000
+
+template VALID_IMPERSONATION_LEVEL*(L: untyped): bool =
+  (L >= SECURITY_MIN_IMPERSONATION_LEVEL) and (L <= SECURITY_MAX_IMPERSONATION_LEVEL)
+
+template IsReparseTagMicrosoft*(tag: untyped): ULONG =
+  tag.ULONG and 0x80000000'i32
+
+template IsReparseTagNameSurrogate*(tag: untyped): ULONG =
+  tag.ULONG and 0x20000000'i32
+
 when winimCpu64:
-  type
-    PIMAGE_NT_HEADERS* = PIMAGE_NT_HEADERS64
+  type PIMAGE_NT_HEADERS* = PIMAGE_NT_HEADERS64
 when winimCpu32:
-  type
-    PIMAGE_NT_HEADERS* = PIMAGE_NT_HEADERS32
-template IMAGE_FIRST_SECTION*(ntheader: PIMAGE_NT_HEADERS): PIMAGE_SECTION_HEADER = cast[PIMAGE_SECTION_HEADER](cast[int](addr ntheader.OptionalHeader) + int(ntheader.FileHeader.SizeOfOptionalHeader))
-template BTYPE*(x: untyped): DWORD = x.DWORD and N_BTMASK
-template ISPTR*(x: untyped): bool = DWORD(x and N_TMASK) == DWORD(IMAGE_SYM_DTYPE_POINTER shl N_BTSHFT)
-template ISFCN*(x: untyped): bool = DWORD(x and N_TMASK) == DWORD(IMAGE_SYM_DTYPE_FUNCTION shl N_BTSHFT)
-template ISARY*(x: untyped): bool = DWORD(x and N_TMASK) == DWORD(IMAGE_SYM_DTYPE_ARRAY shl N_BTSHFT)
-template ISTAG*(x: untyped): bool = (x == IMAGE_SYM_CLASS_STRUCT_TAG) or (x == IMAGE_SYM_CLASS_UNION_TAG) or (x == IMAGE_SYM_CLASS_ENUM_TAG)
-template INCREF*(x: untyped): DWORD = ((x.DWORD and (not N_BTMASK)) shl N_TSHIFT) or DWORD(IMAGE_SYM_DTYPE_POINTER shl N_BTSHFT) or DWORD(x and N_BTMASK)
-template DECREF*(x: untyped): DWORD = (x.DWORD shr N_TSHIFT) and DWORD(not N_BTMASK) or (x.DWORD and N_BTMASK)
-template IMAGE_ORDINAL64*(Ordinal: untyped): int64 = Ordinal.int64 and 0xffff'i64
-template IMAGE_ORDINAL32*(Ordinal: untyped): int32 = Ordinal.int32 and 0xffff'i32
-template IMAGE_SNAP_BY_ORDINAL64*(Ordinal: untyped): bool = (Ordinal and IMAGE_ORDINAL_FLAG64) != 0
-template IMAGE_SNAP_BY_ORDINAL32*(Ordinal: untyped): bool = (Ordinal and IMAGE_ORDINAL_FLAG32) != 0
-template HEAP_MAKE_TAG_FLAGS*(b: untyped, o: untyped): DWORD = b.DWORD + (o.DWORD shl 18)
-template InitializeObjectAttributes*(p: POBJECT_ATTRIBUTES, n: PUNICODE_STRING, a: ULONG, r: HANDLE, s: PSECURITY_DESCRIPTOR) = p.Length = int32 sizeof(OBJECT_ATTRIBUTES); p.RootDirectory = r; p.Attributes = a; p.ObjectName = n; p.SecurityDescriptor = s; p.SecurityQualityOfService = nil
+  type PIMAGE_NT_HEADERS* = PIMAGE_NT_HEADERS32
+template IMAGE_FIRST_SECTION*(ntheader: PIMAGE_NT_HEADERS): PIMAGE_SECTION_HEADER =
+  cast[PIMAGE_SECTION_HEADER](cast[int](addr ntheader.OptionalHeader) +
+    int(ntheader.FileHeader.SizeOfOptionalHeader))
+
+template BTYPE*(x: untyped): DWORD =
+  x.DWORD and N_BTMASK
+
+template ISPTR*(x: untyped): bool =
+  DWORD(x and N_TMASK) == DWORD(IMAGE_SYM_DTYPE_POINTER shl N_BTSHFT)
+
+template ISFCN*(x: untyped): bool =
+  DWORD(x and N_TMASK) == DWORD(IMAGE_SYM_DTYPE_FUNCTION shl N_BTSHFT)
+
+template ISARY*(x: untyped): bool =
+  DWORD(x and N_TMASK) == DWORD(IMAGE_SYM_DTYPE_ARRAY shl N_BTSHFT)
+
+template ISTAG*(x: untyped): bool =
+  (x == IMAGE_SYM_CLASS_STRUCT_TAG) or (x == IMAGE_SYM_CLASS_UNION_TAG) or
+    (x == IMAGE_SYM_CLASS_ENUM_TAG)
+
+template INCREF*(x: untyped): DWORD =
+  ((x.DWORD and (not N_BTMASK)) shl N_TSHIFT) or
+    DWORD(IMAGE_SYM_DTYPE_POINTER shl N_BTSHFT) or DWORD(x and N_BTMASK)
+
+template DECREF*(x: untyped): DWORD =
+  (x.DWORD shr N_TSHIFT) and DWORD(not N_BTMASK) or (x.DWORD and N_BTMASK)
+
+template IMAGE_ORDINAL64*(Ordinal: untyped): int64 =
+  Ordinal.int64 and 0xffff'i64
+
+template IMAGE_ORDINAL32*(Ordinal: untyped): int32 =
+  Ordinal.int32 and 0xffff'i32
+
+template IMAGE_SNAP_BY_ORDINAL64*(Ordinal: untyped): bool =
+  (Ordinal and IMAGE_ORDINAL_FLAG64) != 0
+
+template IMAGE_SNAP_BY_ORDINAL32*(Ordinal: untyped): bool =
+  (Ordinal and IMAGE_ORDINAL_FLAG32) != 0
+
+template HEAP_MAKE_TAG_FLAGS*(b: untyped, o: untyped): DWORD =
+  b.DWORD + (o.DWORD shl 18)
+
+template InitializeObjectAttributes*(
+    p: POBJECT_ATTRIBUTES,
+    n: PUNICODE_STRING,
+    a: ULONG,
+    r: HANDLE,
+    s: PSECURITY_DESCRIPTOR,
+) =
+  p.Length = int32 sizeof(OBJECT_ATTRIBUTES)
+  p.RootDirectory = r
+  p.Attributes = a
+  p.ObjectName = n
+  p.SecurityDescriptor = s
+  p.SecurityQualityOfService = nil
+
 proc ReadTimeStampCounter*(): int64 {.importc: "__rdtsc".}
-proc RtlEqualMemory*(Destination: pointer, Source: pointer, Length: Natural): bool {.importc: "RtlEqualMemory", header: "<windows.h>".}
-proc RtlMoveMemory*(Destination: pointer, Source: pointer, Length: Natural) {.importc: "RtlMoveMemory", header: "<windows.h>".}
-proc RtlCopyMemory*(Destination: pointer, Source: pointer, Length: Natural) {.importc: "RtlCopyMemory", header: "<windows.h>".}
-proc RtlZeroMemory*(Destination: pointer, Length: Natural) {.importc: "RtlZeroMemory", header: "<windows.h>".}
-proc RtlSecureZeroMemory*(Destination: pointer, Length: Natural) {.importc: "RtlSecureZeroMemory", header: "<windows.h>".}
-proc RtlFillMemory*(Destination: pointer, Length: Natural, Fill: byte): void {.importc: "RtlFillMemory", header: "<windows.h>".}
-proc `UseThisFieldToCopy=`*(self: var QUAD, x: int64) {.inline.} = self.union1.UseThisFieldToCopy = x
-proc UseThisFieldToCopy*(self: QUAD): int64 {.inline.} = self.union1.UseThisFieldToCopy
-proc UseThisFieldToCopy*(self: var QUAD): var int64 {.inline.} = self.union1.UseThisFieldToCopy
-proc `DoNotUseThisField=`*(self: var QUAD, x: float64) {.inline.} = self.union1.DoNotUseThisField = x
-proc DoNotUseThisField*(self: QUAD): float64 {.inline.} = self.union1.DoNotUseThisField
-proc DoNotUseThisField*(self: var QUAD): var float64 {.inline.} = self.union1.DoNotUseThisField
-proc `LowPart=`*(self: var LARGE_INTEGER, x: ULONG) {.inline.} = self.struct1.LowPart = x
-proc LowPart*(self: LARGE_INTEGER): ULONG {.inline.} = self.struct1.LowPart
-proc LowPart*(self: var LARGE_INTEGER): var ULONG {.inline.} = self.struct1.LowPart
-proc `HighPart=`*(self: var LARGE_INTEGER, x: LONG) {.inline.} = self.struct1.HighPart = x
-proc HighPart*(self: LARGE_INTEGER): LONG {.inline.} = self.struct1.HighPart
-proc HighPart*(self: var LARGE_INTEGER): var LONG {.inline.} = self.struct1.HighPart
-proc `LowPart=`*(self: var ULARGE_INTEGER, x: ULONG) {.inline.} = self.struct1.LowPart = x
-proc LowPart*(self: ULARGE_INTEGER): ULONG {.inline.} = self.struct1.LowPart
-proc LowPart*(self: var ULARGE_INTEGER): var ULONG {.inline.} = self.struct1.LowPart
-proc `HighPart=`*(self: var ULARGE_INTEGER, x: ULONG) {.inline.} = self.struct1.HighPart = x
-proc HighPart*(self: ULARGE_INTEGER): ULONG {.inline.} = self.struct1.HighPart
-proc HighPart*(self: var ULARGE_INTEGER): var ULONG {.inline.} = self.struct1.HighPart
-proc `SymbolicLinkReparseBuffer=`*(self: var REPARSE_DATA_BUFFER, x: REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer) {.inline.} = self.union1.SymbolicLinkReparseBuffer = x
-proc SymbolicLinkReparseBuffer*(self: REPARSE_DATA_BUFFER): REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer {.inline.} = self.union1.SymbolicLinkReparseBuffer
-proc SymbolicLinkReparseBuffer*(self: var REPARSE_DATA_BUFFER): var REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer {.inline.} = self.union1.SymbolicLinkReparseBuffer
-proc `MountPointReparseBuffer=`*(self: var REPARSE_DATA_BUFFER, x: REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer) {.inline.} = self.union1.MountPointReparseBuffer = x
-proc MountPointReparseBuffer*(self: REPARSE_DATA_BUFFER): REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer {.inline.} = self.union1.MountPointReparseBuffer
-proc MountPointReparseBuffer*(self: var REPARSE_DATA_BUFFER): var REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer {.inline.} = self.union1.MountPointReparseBuffer
-proc `GenericReparseBuffer=`*(self: var REPARSE_DATA_BUFFER, x: REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer) {.inline.} = self.union1.GenericReparseBuffer = x
-proc GenericReparseBuffer*(self: REPARSE_DATA_BUFFER): REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer {.inline.} = self.union1.GenericReparseBuffer
-proc GenericReparseBuffer*(self: var REPARSE_DATA_BUFFER): var REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer {.inline.} = self.union1.GenericReparseBuffer
-proc `FiberData=`*(self: var NT_TIB, x: PVOID) {.inline.} = self.union1.FiberData = x
-proc FiberData*(self: NT_TIB): PVOID {.inline.} = self.union1.FiberData
-proc FiberData*(self: var NT_TIB): var PVOID {.inline.} = self.union1.FiberData
-proc `Version=`*(self: var NT_TIB, x: DWORD) {.inline.} = self.union1.Version = x
-proc Version*(self: NT_TIB): DWORD {.inline.} = self.union1.Version
-proc Version*(self: var NT_TIB): var DWORD {.inline.} = self.union1.Version
-proc `FiberData=`*(self: var NT_TIB32, x: DWORD) {.inline.} = self.union1.FiberData = x
-proc FiberData*(self: NT_TIB32): DWORD {.inline.} = self.union1.FiberData
-proc FiberData*(self: var NT_TIB32): var DWORD {.inline.} = self.union1.FiberData
-proc `Version=`*(self: var NT_TIB32, x: DWORD) {.inline.} = self.union1.Version = x
-proc Version*(self: NT_TIB32): DWORD {.inline.} = self.union1.Version
-proc Version*(self: var NT_TIB32): var DWORD {.inline.} = self.union1.Version
-proc `FiberData=`*(self: var NT_TIB64, x: DWORD64) {.inline.} = self.union1.FiberData = x
-proc FiberData*(self: NT_TIB64): DWORD64 {.inline.} = self.union1.FiberData
-proc FiberData*(self: var NT_TIB64): var DWORD64 {.inline.} = self.union1.FiberData
-proc `Version=`*(self: var NT_TIB64, x: DWORD) {.inline.} = self.union1.Version = x
-proc Version*(self: NT_TIB64): DWORD {.inline.} = self.union1.Version
-proc Version*(self: var NT_TIB64): var DWORD {.inline.} = self.union1.Version
-proc `RatePercent=`*(self: var RATE_QUOTA_LIMIT, x: DWORD) {.inline.} = self.struct1.RatePercent = x
-proc RatePercent*(self: RATE_QUOTA_LIMIT): DWORD {.inline.} = self.struct1.RatePercent
-proc `Reserved0=`*(self: var RATE_QUOTA_LIMIT, x: DWORD) {.inline.} = self.struct1.Reserved0 = x
-proc Reserved0*(self: RATE_QUOTA_LIMIT): DWORD {.inline.} = self.struct1.Reserved0
-proc `Flags=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} = self.union1.Flags = x
-proc Flags*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} = self.union1.Flags
-proc Flags*(self: var PROCESS_MITIGATION_ASLR_POLICY): var DWORD {.inline.} = self.union1.Flags
-proc `EnableBottomUpRandomization=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} = self.union1.struct1.EnableBottomUpRandomization = x
-proc EnableBottomUpRandomization*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} = self.union1.struct1.EnableBottomUpRandomization
-proc `EnableForceRelocateImages=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} = self.union1.struct1.EnableForceRelocateImages = x
-proc EnableForceRelocateImages*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} = self.union1.struct1.EnableForceRelocateImages
-proc `EnableHighEntropy=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} = self.union1.struct1.EnableHighEntropy = x
-proc EnableHighEntropy*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} = self.union1.struct1.EnableHighEntropy
-proc `DisallowStrippedImages=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} = self.union1.struct1.DisallowStrippedImages = x
-proc DisallowStrippedImages*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} = self.union1.struct1.DisallowStrippedImages
-proc `ReservedFlags=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} = self.union1.struct1.ReservedFlags = x
-proc ReservedFlags*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} = self.union1.struct1.ReservedFlags
-proc `Flags=`*(self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD) {.inline.} = self.union1.Flags = x
-proc Flags*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} = self.union1.Flags
-proc Flags*(self: var PROCESS_MITIGATION_DEP_POLICY): var DWORD {.inline.} = self.union1.Flags
-proc `Enable=`*(self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD) {.inline.} = self.union1.struct1.Enable = x
-proc Enable*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} = self.union1.struct1.Enable
-proc `DisableAtlThunkEmulation=`*(self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD) {.inline.} = self.union1.struct1.DisableAtlThunkEmulation = x
-proc DisableAtlThunkEmulation*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} = self.union1.struct1.DisableAtlThunkEmulation
-proc `ReservedFlags=`*(self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD) {.inline.} = self.union1.struct1.ReservedFlags = x
-proc ReservedFlags*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} = self.union1.struct1.ReservedFlags
-proc `Flags=`*(self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD) {.inline.} = self.union1.Flags = x
-proc Flags*(self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY): DWORD {.inline.} = self.union1.Flags
-proc Flags*(self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY): var DWORD {.inline.} = self.union1.Flags
-proc `RaiseExceptionOnInvalidHandleReference=`*(self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD) {.inline.} = self.union1.struct1.RaiseExceptionOnInvalidHandleReference = x
-proc RaiseExceptionOnInvalidHandleReference*(self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY): DWORD {.inline.} = self.union1.struct1.RaiseExceptionOnInvalidHandleReference
-proc `HandleExceptionsPermanentlyEnabled=`*(self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD) {.inline.} = self.union1.struct1.HandleExceptionsPermanentlyEnabled = x
-proc HandleExceptionsPermanentlyEnabled*(self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY): DWORD {.inline.} = self.union1.struct1.HandleExceptionsPermanentlyEnabled
-proc `ReservedFlags=`*(self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD) {.inline.} = self.union1.struct1.ReservedFlags = x
-proc ReservedFlags*(self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY): DWORD {.inline.} = self.union1.struct1.ReservedFlags
-proc `Flags=`*(self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY, x: DWORD) {.inline.} = self.union1.Flags = x
-proc Flags*(self: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY): DWORD {.inline.} = self.union1.Flags
-proc Flags*(self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY): var DWORD {.inline.} = self.union1.Flags
-proc `DisallowWin32kSystemCalls=`*(self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY, x: DWORD) {.inline.} = self.union1.struct1.DisallowWin32kSystemCalls = x
-proc DisallowWin32kSystemCalls*(self: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY): DWORD {.inline.} = self.union1.struct1.DisallowWin32kSystemCalls
-proc `ReservedFlags=`*(self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY, x: DWORD) {.inline.} = self.union1.struct1.ReservedFlags = x
-proc ReservedFlags*(self: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY): DWORD {.inline.} = self.union1.struct1.ReservedFlags
-proc `Flags=`*(self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY, x: DWORD) {.inline.} = self.union1.Flags = x
-proc Flags*(self: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY): DWORD {.inline.} = self.union1.Flags
-proc Flags*(self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY): var DWORD {.inline.} = self.union1.Flags
-proc `DisableExtensionPoints=`*(self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY, x: DWORD) {.inline.} = self.union1.struct1.DisableExtensionPoints = x
-proc DisableExtensionPoints*(self: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY): DWORD {.inline.} = self.union1.struct1.DisableExtensionPoints
-proc `ReservedFlags=`*(self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY, x: DWORD) {.inline.} = self.union1.struct1.ReservedFlags = x
-proc ReservedFlags*(self: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY): DWORD {.inline.} = self.union1.struct1.ReservedFlags
-proc `CpuRate=`*(self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION, x: DWORD) {.inline.} = self.union1.CpuRate = x
-proc CpuRate*(self: JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): DWORD {.inline.} = self.union1.CpuRate
-proc CpuRate*(self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): var DWORD {.inline.} = self.union1.CpuRate
-proc `Weight=`*(self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION, x: DWORD) {.inline.} = self.union1.Weight = x
-proc Weight*(self: JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): DWORD {.inline.} = self.union1.Weight
-proc Weight*(self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): var DWORD {.inline.} = self.union1.Weight
-proc `ProcessorCore=`*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION, x: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore) {.inline.} = self.union1.ProcessorCore = x
-proc ProcessorCore*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION): SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore {.inline.} = self.union1.ProcessorCore
-proc ProcessorCore*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION): var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore {.inline.} = self.union1.ProcessorCore
-proc `NumaNode=`*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION, x: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode) {.inline.} = self.union1.NumaNode = x
-proc NumaNode*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION): SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode {.inline.} = self.union1.NumaNode
-proc NumaNode*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION): var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode {.inline.} = self.union1.NumaNode
-proc `Cache=`*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION, x: CACHE_DESCRIPTOR) {.inline.} = self.union1.Cache = x
-proc Cache*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION): CACHE_DESCRIPTOR {.inline.} = self.union1.Cache
-proc Cache*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION): var CACHE_DESCRIPTOR {.inline.} = self.union1.Cache
-proc `Reserved=`*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION, x: array[2, ULONGLONG]) {.inline.} = self.union1.Reserved = x
-proc Reserved*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION): array[2, ULONGLONG] {.inline.} = self.union1.Reserved
-proc Reserved*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION): var array[2, ULONGLONG] {.inline.} = self.union1.Reserved
-proc `Processor=`*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, x: PROCESSOR_RELATIONSHIP) {.inline.} = self.union1.Processor = x
-proc Processor*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX): PROCESSOR_RELATIONSHIP {.inline.} = self.union1.Processor
-proc Processor*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX): var PROCESSOR_RELATIONSHIP {.inline.} = self.union1.Processor
-proc `NumaNode=`*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, x: NUMA_NODE_RELATIONSHIP) {.inline.} = self.union1.NumaNode = x
-proc NumaNode*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX): NUMA_NODE_RELATIONSHIP {.inline.} = self.union1.NumaNode
-proc NumaNode*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX): var NUMA_NODE_RELATIONSHIP {.inline.} = self.union1.NumaNode
-proc `Cache=`*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, x: CACHE_RELATIONSHIP) {.inline.} = self.union1.Cache = x
-proc Cache*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX): CACHE_RELATIONSHIP {.inline.} = self.union1.Cache
-proc Cache*(self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX): var CACHE_RELATIONSHIP {.inline.} = self.union1.Cache
-proc `AllowScaling=`*(self: var PROCESSOR_IDLESTATE_POLICY, x: WORD) {.inline.} = self.Flags.struct1.AllowScaling = x
-proc AllowScaling*(self: PROCESSOR_IDLESTATE_POLICY): WORD {.inline.} = self.Flags.struct1.AllowScaling
-proc `Disabled=`*(self: var PROCESSOR_IDLESTATE_POLICY, x: WORD) {.inline.} = self.Flags.struct1.Disabled = x
-proc Disabled*(self: PROCESSOR_IDLESTATE_POLICY): WORD {.inline.} = self.Flags.struct1.Disabled
-proc `Reserved=`*(self: var PROCESSOR_IDLESTATE_POLICY, x: WORD) {.inline.} = self.Flags.struct1.Reserved = x
-proc Reserved*(self: PROCESSOR_IDLESTATE_POLICY): WORD {.inline.} = self.Flags.struct1.Reserved
-proc `Spare=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} = self.union1.Spare = x
-proc Spare*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} = self.union1.Spare
-proc Spare*(self: var PROCESSOR_PERFSTATE_POLICY): var BYTE {.inline.} = self.union1.Spare
-proc `NoDomainAccounting=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} = self.union1.Flags.struct1.NoDomainAccounting = x
-proc NoDomainAccounting*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} = self.union1.Flags.struct1.NoDomainAccounting
-proc `IncreasePolicy=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} = self.union1.Flags.struct1.IncreasePolicy = x
-proc IncreasePolicy*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} = self.union1.Flags.struct1.IncreasePolicy
-proc `DecreasePolicy=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} = self.union1.Flags.struct1.DecreasePolicy = x
-proc DecreasePolicy*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} = self.union1.Flags.struct1.DecreasePolicy
-proc `Reserved=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} = self.union1.Flags.struct1.Reserved = x
-proc Reserved*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} = self.union1.Flags.struct1.Reserved
-proc `Flags=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: PROCESSOR_PERFSTATE_POLICY_UNION1_Flags) {.inline.} = self.union1.Flags = x
-proc Flags*(self: PROCESSOR_PERFSTATE_POLICY): PROCESSOR_PERFSTATE_POLICY_UNION1_Flags {.inline.} = self.union1.Flags
-proc Flags*(self: var PROCESSOR_PERFSTATE_POLICY): var PROCESSOR_PERFSTATE_POLICY_UNION1_Flags {.inline.} = self.union1.Flags
-proc `TokenDef=`*(self: var IMAGE_AUX_SYMBOL_EX, x: IMAGE_AUX_SYMBOL_TOKEN_DEF) {.inline.} = self.struct4.TokenDef = x
-proc TokenDef*(self: IMAGE_AUX_SYMBOL_EX): IMAGE_AUX_SYMBOL_TOKEN_DEF {.inline.} = self.struct4.TokenDef
-proc TokenDef*(self: var IMAGE_AUX_SYMBOL_EX): var IMAGE_AUX_SYMBOL_TOKEN_DEF {.inline.} = self.struct4.TokenDef
-proc `rgbReserved=`*(self: var IMAGE_AUX_SYMBOL_EX, x: array[2, BYTE]) {.inline.} = self.struct4.rgbReserved = x
-proc rgbReserved*(self: IMAGE_AUX_SYMBOL_EX): array[2, BYTE] {.inline.} = self.struct4.rgbReserved
-proc rgbReserved*(self: var IMAGE_AUX_SYMBOL_EX): var array[2, BYTE] {.inline.} = self.struct4.rgbReserved
-proc `VirtualAddress=`*(self: var IMAGE_RELOCATION, x: DWORD) {.inline.} = self.union1.VirtualAddress = x
-proc VirtualAddress*(self: IMAGE_RELOCATION): DWORD {.inline.} = self.union1.VirtualAddress
-proc VirtualAddress*(self: var IMAGE_RELOCATION): var DWORD {.inline.} = self.union1.VirtualAddress
-proc `RelocCount=`*(self: var IMAGE_RELOCATION, x: DWORD) {.inline.} = self.union1.RelocCount = x
-proc RelocCount*(self: IMAGE_RELOCATION): DWORD {.inline.} = self.union1.RelocCount
-proc RelocCount*(self: var IMAGE_RELOCATION): var DWORD {.inline.} = self.union1.RelocCount
-proc `Characteristics=`*(self: var IMAGE_IMPORT_DESCRIPTOR, x: DWORD) {.inline.} = self.union1.Characteristics = x
-proc Characteristics*(self: IMAGE_IMPORT_DESCRIPTOR): DWORD {.inline.} = self.union1.Characteristics
-proc Characteristics*(self: var IMAGE_IMPORT_DESCRIPTOR): var DWORD {.inline.} = self.union1.Characteristics
-proc `OriginalFirstThunk=`*(self: var IMAGE_IMPORT_DESCRIPTOR, x: DWORD) {.inline.} = self.union1.OriginalFirstThunk = x
-proc OriginalFirstThunk*(self: IMAGE_IMPORT_DESCRIPTOR): DWORD {.inline.} = self.union1.OriginalFirstThunk
-proc OriginalFirstThunk*(self: var IMAGE_IMPORT_DESCRIPTOR): var DWORD {.inline.} = self.union1.OriginalFirstThunk
-proc `RvaBased=`*(self: var IMAGE_DELAYLOAD_DESCRIPTOR, x: DWORD) {.inline.} = self.Attributes.struct1.RvaBased = x
-proc RvaBased*(self: IMAGE_DELAYLOAD_DESCRIPTOR): DWORD {.inline.} = self.Attributes.struct1.RvaBased
-proc `ReservedAttributes=`*(self: var IMAGE_DELAYLOAD_DESCRIPTOR, x: DWORD) {.inline.} = self.Attributes.struct1.ReservedAttributes = x
-proc ReservedAttributes*(self: IMAGE_DELAYLOAD_DESCRIPTOR): DWORD {.inline.} = self.Attributes.struct1.ReservedAttributes
-proc `NameOffset=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} = self.union1.struct1.NameOffset = x
-proc NameOffset*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} = self.union1.struct1.NameOffset
-proc `NameIsString=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} = self.union1.struct1.NameIsString = x
-proc NameIsString*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} = self.union1.struct1.NameIsString
-proc `Name=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} = self.union1.Name = x
-proc Name*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} = self.union1.Name
-proc Name*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY): var DWORD {.inline.} = self.union1.Name
-proc `Id=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: WORD) {.inline.} = self.union1.Id = x
-proc Id*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): WORD {.inline.} = self.union1.Id
-proc Id*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY): var WORD {.inline.} = self.union1.Id
-proc `OffsetToData=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} = self.union2.OffsetToData = x
-proc OffsetToData*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} = self.union2.OffsetToData
-proc OffsetToData*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY): var DWORD {.inline.} = self.union2.OffsetToData
-proc `OffsetToDirectory=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} = self.union2.struct1.OffsetToDirectory = x
-proc OffsetToDirectory*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} = self.union2.struct1.OffsetToDirectory
-proc `DataIsDirectory=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} = self.union2.struct1.DataIsDirectory = x
-proc DataIsDirectory*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} = self.union2.struct1.DataIsDirectory
-proc `EndOfPrologue=`*(self: var IMAGE_FUNCTION_ENTRY64, x: ULONGLONG) {.inline.} = self.union1.EndOfPrologue = x
-proc EndOfPrologue*(self: IMAGE_FUNCTION_ENTRY64): ULONGLONG {.inline.} = self.union1.EndOfPrologue
-proc EndOfPrologue*(self: var IMAGE_FUNCTION_ENTRY64): var ULONGLONG {.inline.} = self.union1.EndOfPrologue
-proc `UnwindInfoAddress=`*(self: var IMAGE_FUNCTION_ENTRY64, x: ULONGLONG) {.inline.} = self.union1.UnwindInfoAddress = x
-proc UnwindInfoAddress*(self: IMAGE_FUNCTION_ENTRY64): ULONGLONG {.inline.} = self.union1.UnwindInfoAddress
-proc UnwindInfoAddress*(self: var IMAGE_FUNCTION_ENTRY64): var ULONGLONG {.inline.} = self.union1.UnwindInfoAddress
-proc `Ordinal=`*(self: var IMPORT_OBJECT_HEADER, x: WORD) {.inline.} = self.union1.Ordinal = x
-proc Ordinal*(self: IMPORT_OBJECT_HEADER): WORD {.inline.} = self.union1.Ordinal
-proc Ordinal*(self: var IMPORT_OBJECT_HEADER): var WORD {.inline.} = self.union1.Ordinal
-proc `Hint=`*(self: var IMPORT_OBJECT_HEADER, x: WORD) {.inline.} = self.union1.Hint = x
-proc Hint*(self: IMPORT_OBJECT_HEADER): WORD {.inline.} = self.union1.Hint
-proc Hint*(self: var IMPORT_OBJECT_HEADER): var WORD {.inline.} = self.union1.Hint
-proc `EntryPointToken=`*(self: var IMAGE_COR20_HEADER, x: DWORD) {.inline.} = self.union1.EntryPointToken = x
-proc EntryPointToken*(self: IMAGE_COR20_HEADER): DWORD {.inline.} = self.union1.EntryPointToken
-proc EntryPointToken*(self: var IMAGE_COR20_HEADER): var DWORD {.inline.} = self.union1.EntryPointToken
-proc `EntryPointRVA=`*(self: var IMAGE_COR20_HEADER, x: DWORD) {.inline.} = self.union1.EntryPointRVA = x
-proc EntryPointRVA*(self: IMAGE_COR20_HEADER): DWORD {.inline.} = self.union1.EntryPointRVA
-proc EntryPointRVA*(self: var IMAGE_COR20_HEADER): var DWORD {.inline.} = self.union1.EntryPointRVA
-proc `CheckSum=`*(self: var LDR_DATA_TABLE_ENTRY, x: ULONG) {.inline.} = self.union1.CheckSum = x
-proc CheckSum*(self: LDR_DATA_TABLE_ENTRY): ULONG {.inline.} = self.union1.CheckSum
-proc CheckSum*(self: var LDR_DATA_TABLE_ENTRY): var ULONG {.inline.} = self.union1.CheckSum
-proc `Reserved6=`*(self: var LDR_DATA_TABLE_ENTRY, x: PVOID) {.inline.} = self.union1.Reserved6 = x
-proc Reserved6*(self: LDR_DATA_TABLE_ENTRY): PVOID {.inline.} = self.union1.Reserved6
-proc Reserved6*(self: var LDR_DATA_TABLE_ENTRY): var PVOID {.inline.} = self.union1.Reserved6
-proc `Status=`*(self: var IO_STATUS_BLOCK, x: NTSTATUS) {.inline.} = self.union1.Status = x
-proc Status*(self: IO_STATUS_BLOCK): NTSTATUS {.inline.} = self.union1.Status
-proc Status*(self: var IO_STATUS_BLOCK): var NTSTATUS {.inline.} = self.union1.Status
-proc `Pointer=`*(self: var IO_STATUS_BLOCK, x: PVOID) {.inline.} = self.union1.Pointer = x
-proc Pointer*(self: IO_STATUS_BLOCK): PVOID {.inline.} = self.union1.Pointer
-proc Pointer*(self: var IO_STATUS_BLOCK): var PVOID {.inline.} = self.union1.Pointer
+proc RtlEqualMemory*(
+  Destination: pointer, Source: pointer, Length: Natural
+): bool {.importc: "RtlEqualMemory", header: "<windows.h>".}
+
+proc RtlMoveMemory*(
+  Destination: pointer, Source: pointer, Length: Natural
+) {.importc: "RtlMoveMemory", header: "<windows.h>".}
+
+proc RtlCopyMemory*(
+  Destination: pointer, Source: pointer, Length: Natural
+) {.importc: "RtlCopyMemory", header: "<windows.h>".}
+
+proc RtlZeroMemory*(
+  Destination: pointer, Length: Natural
+) {.importc: "RtlZeroMemory", header: "<windows.h>".}
+
+proc RtlSecureZeroMemory*(
+  Destination: pointer, Length: Natural
+) {.importc: "RtlSecureZeroMemory", header: "<windows.h>".}
+
+proc RtlFillMemory*(
+  Destination: pointer, Length: Natural, Fill: byte
+): void {.importc: "RtlFillMemory", header: "<windows.h>".}
+
+proc `UseThisFieldToCopy=`*(self: var QUAD, x: int64) {.inline.} =
+  self.union1.UseThisFieldToCopy = x
+
+proc UseThisFieldToCopy*(self: QUAD): int64 {.inline.} =
+  self.union1.UseThisFieldToCopy
+
+proc UseThisFieldToCopy*(self: var QUAD): var int64 {.inline.} =
+  self.union1.UseThisFieldToCopy
+
+proc `DoNotUseThisField=`*(self: var QUAD, x: float64) {.inline.} =
+  self.union1.DoNotUseThisField = x
+
+proc DoNotUseThisField*(self: QUAD): float64 {.inline.} =
+  self.union1.DoNotUseThisField
+
+proc DoNotUseThisField*(self: var QUAD): var float64 {.inline.} =
+  self.union1.DoNotUseThisField
+
+proc `LowPart=`*(self: var LARGE_INTEGER, x: ULONG) {.inline.} =
+  self.struct1.LowPart = x
+
+proc LowPart*(self: LARGE_INTEGER): ULONG {.inline.} =
+  self.struct1.LowPart
+
+proc LowPart*(self: var LARGE_INTEGER): var ULONG {.inline.} =
+  self.struct1.LowPart
+
+proc `HighPart=`*(self: var LARGE_INTEGER, x: LONG) {.inline.} =
+  self.struct1.HighPart = x
+
+proc HighPart*(self: LARGE_INTEGER): LONG {.inline.} =
+  self.struct1.HighPart
+
+proc HighPart*(self: var LARGE_INTEGER): var LONG {.inline.} =
+  self.struct1.HighPart
+
+proc `LowPart=`*(self: var ULARGE_INTEGER, x: ULONG) {.inline.} =
+  self.struct1.LowPart = x
+
+proc LowPart*(self: ULARGE_INTEGER): ULONG {.inline.} =
+  self.struct1.LowPart
+
+proc LowPart*(self: var ULARGE_INTEGER): var ULONG {.inline.} =
+  self.struct1.LowPart
+
+proc `HighPart=`*(self: var ULARGE_INTEGER, x: ULONG) {.inline.} =
+  self.struct1.HighPart = x
+
+proc HighPart*(self: ULARGE_INTEGER): ULONG {.inline.} =
+  self.struct1.HighPart
+
+proc HighPart*(self: var ULARGE_INTEGER): var ULONG {.inline.} =
+  self.struct1.HighPart
+
+proc `SymbolicLinkReparseBuffer=`*(
+    self: var REPARSE_DATA_BUFFER,
+    x: REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer,
+) {.inline.} =
+  self.union1.SymbolicLinkReparseBuffer = x
+
+proc SymbolicLinkReparseBuffer*(
+    self: REPARSE_DATA_BUFFER
+): REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer {.inline.} =
+  self.union1.SymbolicLinkReparseBuffer
+
+proc SymbolicLinkReparseBuffer*(
+    self: var REPARSE_DATA_BUFFER
+): var REPARSE_DATA_BUFFER_UNION1_SymbolicLinkReparseBuffer {.inline.} =
+  self.union1.SymbolicLinkReparseBuffer
+
+proc `MountPointReparseBuffer=`*(
+    self: var REPARSE_DATA_BUFFER, x: REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer
+) {.inline.} =
+  self.union1.MountPointReparseBuffer = x
+
+proc MountPointReparseBuffer*(
+    self: REPARSE_DATA_BUFFER
+): REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer {.inline.} =
+  self.union1.MountPointReparseBuffer
+
+proc MountPointReparseBuffer*(
+    self: var REPARSE_DATA_BUFFER
+): var REPARSE_DATA_BUFFER_UNION1_MountPointReparseBuffer {.inline.} =
+  self.union1.MountPointReparseBuffer
+
+proc `GenericReparseBuffer=`*(
+    self: var REPARSE_DATA_BUFFER, x: REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer
+) {.inline.} =
+  self.union1.GenericReparseBuffer = x
+
+proc GenericReparseBuffer*(
+    self: REPARSE_DATA_BUFFER
+): REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer {.inline.} =
+  self.union1.GenericReparseBuffer
+
+proc GenericReparseBuffer*(
+    self: var REPARSE_DATA_BUFFER
+): var REPARSE_DATA_BUFFER_UNION1_GenericReparseBuffer {.inline.} =
+  self.union1.GenericReparseBuffer
+
+proc `FiberData=`*(self: var NT_TIB, x: PVOID) {.inline.} =
+  self.union1.FiberData = x
+
+proc FiberData*(self: NT_TIB): PVOID {.inline.} =
+  self.union1.FiberData
+
+proc FiberData*(self: var NT_TIB): var PVOID {.inline.} =
+  self.union1.FiberData
+
+proc `Version=`*(self: var NT_TIB, x: DWORD) {.inline.} =
+  self.union1.Version = x
+
+proc Version*(self: NT_TIB): DWORD {.inline.} =
+  self.union1.Version
+
+proc Version*(self: var NT_TIB): var DWORD {.inline.} =
+  self.union1.Version
+
+proc `FiberData=`*(self: var NT_TIB32, x: DWORD) {.inline.} =
+  self.union1.FiberData = x
+
+proc FiberData*(self: NT_TIB32): DWORD {.inline.} =
+  self.union1.FiberData
+
+proc FiberData*(self: var NT_TIB32): var DWORD {.inline.} =
+  self.union1.FiberData
+
+proc `Version=`*(self: var NT_TIB32, x: DWORD) {.inline.} =
+  self.union1.Version = x
+
+proc Version*(self: NT_TIB32): DWORD {.inline.} =
+  self.union1.Version
+
+proc Version*(self: var NT_TIB32): var DWORD {.inline.} =
+  self.union1.Version
+
+proc `FiberData=`*(self: var NT_TIB64, x: DWORD64) {.inline.} =
+  self.union1.FiberData = x
+
+proc FiberData*(self: NT_TIB64): DWORD64 {.inline.} =
+  self.union1.FiberData
+
+proc FiberData*(self: var NT_TIB64): var DWORD64 {.inline.} =
+  self.union1.FiberData
+
+proc `Version=`*(self: var NT_TIB64, x: DWORD) {.inline.} =
+  self.union1.Version = x
+
+proc Version*(self: NT_TIB64): DWORD {.inline.} =
+  self.union1.Version
+
+proc Version*(self: var NT_TIB64): var DWORD {.inline.} =
+  self.union1.Version
+
+proc `RatePercent=`*(self: var RATE_QUOTA_LIMIT, x: DWORD) {.inline.} =
+  self.struct1.RatePercent = x
+
+proc RatePercent*(self: RATE_QUOTA_LIMIT): DWORD {.inline.} =
+  self.struct1.RatePercent
+
+proc `Reserved0=`*(self: var RATE_QUOTA_LIMIT, x: DWORD) {.inline.} =
+  self.struct1.Reserved0 = x
+
+proc Reserved0*(self: RATE_QUOTA_LIMIT): DWORD {.inline.} =
+  self.struct1.Reserved0
+
+proc `Flags=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} =
+  self.union1.Flags = x
+
+proc Flags*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} =
+  self.union1.Flags
+
+proc Flags*(self: var PROCESS_MITIGATION_ASLR_POLICY): var DWORD {.inline.} =
+  self.union1.Flags
+
+proc `EnableBottomUpRandomization=`*(
+    self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.EnableBottomUpRandomization = x
+
+proc EnableBottomUpRandomization*(
+    self: PROCESS_MITIGATION_ASLR_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.EnableBottomUpRandomization
+
+proc `EnableForceRelocateImages=`*(
+    self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.EnableForceRelocateImages = x
+
+proc EnableForceRelocateImages*(
+    self: PROCESS_MITIGATION_ASLR_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.EnableForceRelocateImages
+
+proc `EnableHighEntropy=`*(
+    self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.EnableHighEntropy = x
+
+proc EnableHighEntropy*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} =
+  self.union1.struct1.EnableHighEntropy
+
+proc `DisallowStrippedImages=`*(
+    self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.DisallowStrippedImages = x
+
+proc DisallowStrippedImages*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} =
+  self.union1.struct1.DisallowStrippedImages
+
+proc `ReservedFlags=`*(self: var PROCESS_MITIGATION_ASLR_POLICY, x: DWORD) {.inline.} =
+  self.union1.struct1.ReservedFlags = x
+
+proc ReservedFlags*(self: PROCESS_MITIGATION_ASLR_POLICY): DWORD {.inline.} =
+  self.union1.struct1.ReservedFlags
+
+proc `Flags=`*(self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD) {.inline.} =
+  self.union1.Flags = x
+
+proc Flags*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} =
+  self.union1.Flags
+
+proc Flags*(self: var PROCESS_MITIGATION_DEP_POLICY): var DWORD {.inline.} =
+  self.union1.Flags
+
+proc `Enable=`*(self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD) {.inline.} =
+  self.union1.struct1.Enable = x
+
+proc Enable*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} =
+  self.union1.struct1.Enable
+
+proc `DisableAtlThunkEmulation=`*(
+    self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.DisableAtlThunkEmulation = x
+
+proc DisableAtlThunkEmulation*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} =
+  self.union1.struct1.DisableAtlThunkEmulation
+
+proc `ReservedFlags=`*(self: var PROCESS_MITIGATION_DEP_POLICY, x: DWORD) {.inline.} =
+  self.union1.struct1.ReservedFlags = x
+
+proc ReservedFlags*(self: PROCESS_MITIGATION_DEP_POLICY): DWORD {.inline.} =
+  self.union1.struct1.ReservedFlags
+
+proc `Flags=`*(
+    self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.Flags = x
+
+proc Flags*(self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY): DWORD {.inline.} =
+  self.union1.Flags
+
+proc Flags*(
+    self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY
+): var DWORD {.inline.} =
+  self.union1.Flags
+
+proc `RaiseExceptionOnInvalidHandleReference=`*(
+    self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.RaiseExceptionOnInvalidHandleReference = x
+
+proc RaiseExceptionOnInvalidHandleReference*(
+    self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.RaiseExceptionOnInvalidHandleReference
+
+proc `HandleExceptionsPermanentlyEnabled=`*(
+    self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.HandleExceptionsPermanentlyEnabled = x
+
+proc HandleExceptionsPermanentlyEnabled*(
+    self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.HandleExceptionsPermanentlyEnabled
+
+proc `ReservedFlags=`*(
+    self: var PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.ReservedFlags = x
+
+proc ReservedFlags*(
+    self: PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.ReservedFlags
+
+proc `Flags=`*(
+    self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.Flags = x
+
+proc Flags*(self: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY): DWORD {.inline.} =
+  self.union1.Flags
+
+proc Flags*(
+    self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY
+): var DWORD {.inline.} =
+  self.union1.Flags
+
+proc `DisallowWin32kSystemCalls=`*(
+    self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.DisallowWin32kSystemCalls = x
+
+proc DisallowWin32kSystemCalls*(
+    self: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.DisallowWin32kSystemCalls
+
+proc `ReservedFlags=`*(
+    self: var PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.ReservedFlags = x
+
+proc ReservedFlags*(
+    self: PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.ReservedFlags
+
+proc `Flags=`*(
+    self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.Flags = x
+
+proc Flags*(self: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY): DWORD {.inline.} =
+  self.union1.Flags
+
+proc Flags*(
+    self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY
+): var DWORD {.inline.} =
+  self.union1.Flags
+
+proc `DisableExtensionPoints=`*(
+    self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.DisableExtensionPoints = x
+
+proc DisableExtensionPoints*(
+    self: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.DisableExtensionPoints
+
+proc `ReservedFlags=`*(
+    self: var PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY, x: DWORD
+) {.inline.} =
+  self.union1.struct1.ReservedFlags = x
+
+proc ReservedFlags*(
+    self: PROCESS_MITIGATION_EXTENSION_POINT_DISABLE_POLICY
+): DWORD {.inline.} =
+  self.union1.struct1.ReservedFlags
+
+proc `CpuRate=`*(
+    self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION, x: DWORD
+) {.inline.} =
+  self.union1.CpuRate = x
+
+proc CpuRate*(self: JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): DWORD {.inline.} =
+  self.union1.CpuRate
+
+proc CpuRate*(self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): var DWORD {.inline.} =
+  self.union1.CpuRate
+
+proc `Weight=`*(self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION, x: DWORD) {.inline.} =
+  self.union1.Weight = x
+
+proc Weight*(self: JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): DWORD {.inline.} =
+  self.union1.Weight
+
+proc Weight*(self: var JOBOBJECT_CPU_RATE_CONTROL_INFORMATION): var DWORD {.inline.} =
+  self.union1.Weight
+
+proc `ProcessorCore=`*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
+    x: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore,
+) {.inline.} =
+  self.union1.ProcessorCore = x
+
+proc ProcessorCore*(
+    self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+): SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore {.inline.} =
+  self.union1.ProcessorCore
+
+proc ProcessorCore*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+): var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_ProcessorCore {.inline.} =
+  self.union1.ProcessorCore
+
+proc `NumaNode=`*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
+    x: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode,
+) {.inline.} =
+  self.union1.NumaNode = x
+
+proc NumaNode*(
+    self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+): SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode {.inline.} =
+  self.union1.NumaNode
+
+proc NumaNode*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+): var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION1_NumaNode {.inline.} =
+  self.union1.NumaNode
+
+proc `Cache=`*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION, x: CACHE_DESCRIPTOR
+) {.inline.} =
+  self.union1.Cache = x
+
+proc Cache*(self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION): CACHE_DESCRIPTOR {.inline.} =
+  self.union1.Cache
+
+proc Cache*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+): var CACHE_DESCRIPTOR {.inline.} =
+  self.union1.Cache
+
+proc `Reserved=`*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION, x: array[2, ULONGLONG]
+) {.inline.} =
+  self.union1.Reserved = x
+
+proc Reserved*(
+    self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+): array[2, ULONGLONG] {.inline.} =
+  self.union1.Reserved
+
+proc Reserved*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+): var array[2, ULONGLONG] {.inline.} =
+  self.union1.Reserved
+
+proc `Processor=`*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, x: PROCESSOR_RELATIONSHIP
+) {.inline.} =
+  self.union1.Processor = x
+
+proc Processor*(
+    self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+): PROCESSOR_RELATIONSHIP {.inline.} =
+  self.union1.Processor
+
+proc Processor*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+): var PROCESSOR_RELATIONSHIP {.inline.} =
+  self.union1.Processor
+
+proc `NumaNode=`*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, x: NUMA_NODE_RELATIONSHIP
+) {.inline.} =
+  self.union1.NumaNode = x
+
+proc NumaNode*(
+    self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+): NUMA_NODE_RELATIONSHIP {.inline.} =
+  self.union1.NumaNode
+
+proc NumaNode*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+): var NUMA_NODE_RELATIONSHIP {.inline.} =
+  self.union1.NumaNode
+
+proc `Cache=`*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, x: CACHE_RELATIONSHIP
+) {.inline.} =
+  self.union1.Cache = x
+
+proc Cache*(
+    self: SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+): CACHE_RELATIONSHIP {.inline.} =
+  self.union1.Cache
+
+proc Cache*(
+    self: var SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+): var CACHE_RELATIONSHIP {.inline.} =
+  self.union1.Cache
+
+proc `AllowScaling=`*(self: var PROCESSOR_IDLESTATE_POLICY, x: WORD) {.inline.} =
+  self.Flags.struct1.AllowScaling = x
+
+proc AllowScaling*(self: PROCESSOR_IDLESTATE_POLICY): WORD {.inline.} =
+  self.Flags.struct1.AllowScaling
+
+proc `Disabled=`*(self: var PROCESSOR_IDLESTATE_POLICY, x: WORD) {.inline.} =
+  self.Flags.struct1.Disabled = x
+
+proc Disabled*(self: PROCESSOR_IDLESTATE_POLICY): WORD {.inline.} =
+  self.Flags.struct1.Disabled
+
+proc `Reserved=`*(self: var PROCESSOR_IDLESTATE_POLICY, x: WORD) {.inline.} =
+  self.Flags.struct1.Reserved = x
+
+proc Reserved*(self: PROCESSOR_IDLESTATE_POLICY): WORD {.inline.} =
+  self.Flags.struct1.Reserved
+
+proc `Spare=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} =
+  self.union1.Spare = x
+
+proc Spare*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} =
+  self.union1.Spare
+
+proc Spare*(self: var PROCESSOR_PERFSTATE_POLICY): var BYTE {.inline.} =
+  self.union1.Spare
+
+proc `NoDomainAccounting=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} =
+  self.union1.Flags.struct1.NoDomainAccounting = x
+
+proc NoDomainAccounting*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} =
+  self.union1.Flags.struct1.NoDomainAccounting
+
+proc `IncreasePolicy=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} =
+  self.union1.Flags.struct1.IncreasePolicy = x
+
+proc IncreasePolicy*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} =
+  self.union1.Flags.struct1.IncreasePolicy
+
+proc `DecreasePolicy=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} =
+  self.union1.Flags.struct1.DecreasePolicy = x
+
+proc DecreasePolicy*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} =
+  self.union1.Flags.struct1.DecreasePolicy
+
+proc `Reserved=`*(self: var PROCESSOR_PERFSTATE_POLICY, x: BYTE) {.inline.} =
+  self.union1.Flags.struct1.Reserved = x
+
+proc Reserved*(self: PROCESSOR_PERFSTATE_POLICY): BYTE {.inline.} =
+  self.union1.Flags.struct1.Reserved
+
+proc `Flags=`*(
+    self: var PROCESSOR_PERFSTATE_POLICY, x: PROCESSOR_PERFSTATE_POLICY_UNION1_Flags
+) {.inline.} =
+  self.union1.Flags = x
+
+proc Flags*(
+    self: PROCESSOR_PERFSTATE_POLICY
+): PROCESSOR_PERFSTATE_POLICY_UNION1_Flags {.inline.} =
+  self.union1.Flags
+
+proc Flags*(
+    self: var PROCESSOR_PERFSTATE_POLICY
+): var PROCESSOR_PERFSTATE_POLICY_UNION1_Flags {.inline.} =
+  self.union1.Flags
+
+proc `TokenDef=`*(
+    self: var IMAGE_AUX_SYMBOL_EX, x: IMAGE_AUX_SYMBOL_TOKEN_DEF
+) {.inline.} =
+  self.struct4.TokenDef = x
+
+proc TokenDef*(self: IMAGE_AUX_SYMBOL_EX): IMAGE_AUX_SYMBOL_TOKEN_DEF {.inline.} =
+  self.struct4.TokenDef
+
+proc TokenDef*(
+    self: var IMAGE_AUX_SYMBOL_EX
+): var IMAGE_AUX_SYMBOL_TOKEN_DEF {.inline.} =
+  self.struct4.TokenDef
+
+proc `rgbReserved=`*(self: var IMAGE_AUX_SYMBOL_EX, x: array[2, BYTE]) {.inline.} =
+  self.struct4.rgbReserved = x
+
+proc rgbReserved*(self: IMAGE_AUX_SYMBOL_EX): array[2, BYTE] {.inline.} =
+  self.struct4.rgbReserved
+
+proc rgbReserved*(self: var IMAGE_AUX_SYMBOL_EX): var array[2, BYTE] {.inline.} =
+  self.struct4.rgbReserved
+
+proc `VirtualAddress=`*(self: var IMAGE_RELOCATION, x: DWORD) {.inline.} =
+  self.union1.VirtualAddress = x
+
+proc VirtualAddress*(self: IMAGE_RELOCATION): DWORD {.inline.} =
+  self.union1.VirtualAddress
+
+proc VirtualAddress*(self: var IMAGE_RELOCATION): var DWORD {.inline.} =
+  self.union1.VirtualAddress
+
+proc `RelocCount=`*(self: var IMAGE_RELOCATION, x: DWORD) {.inline.} =
+  self.union1.RelocCount = x
+
+proc RelocCount*(self: IMAGE_RELOCATION): DWORD {.inline.} =
+  self.union1.RelocCount
+
+proc RelocCount*(self: var IMAGE_RELOCATION): var DWORD {.inline.} =
+  self.union1.RelocCount
+
+proc `Characteristics=`*(self: var IMAGE_IMPORT_DESCRIPTOR, x: DWORD) {.inline.} =
+  self.union1.Characteristics = x
+
+proc Characteristics*(self: IMAGE_IMPORT_DESCRIPTOR): DWORD {.inline.} =
+  self.union1.Characteristics
+
+proc Characteristics*(self: var IMAGE_IMPORT_DESCRIPTOR): var DWORD {.inline.} =
+  self.union1.Characteristics
+
+proc `OriginalFirstThunk=`*(self: var IMAGE_IMPORT_DESCRIPTOR, x: DWORD) {.inline.} =
+  self.union1.OriginalFirstThunk = x
+
+proc OriginalFirstThunk*(self: IMAGE_IMPORT_DESCRIPTOR): DWORD {.inline.} =
+  self.union1.OriginalFirstThunk
+
+proc OriginalFirstThunk*(self: var IMAGE_IMPORT_DESCRIPTOR): var DWORD {.inline.} =
+  self.union1.OriginalFirstThunk
+
+proc `RvaBased=`*(self: var IMAGE_DELAYLOAD_DESCRIPTOR, x: DWORD) {.inline.} =
+  self.Attributes.struct1.RvaBased = x
+
+proc RvaBased*(self: IMAGE_DELAYLOAD_DESCRIPTOR): DWORD {.inline.} =
+  self.Attributes.struct1.RvaBased
+
+proc `ReservedAttributes=`*(self: var IMAGE_DELAYLOAD_DESCRIPTOR, x: DWORD) {.inline.} =
+  self.Attributes.struct1.ReservedAttributes = x
+
+proc ReservedAttributes*(self: IMAGE_DELAYLOAD_DESCRIPTOR): DWORD {.inline.} =
+  self.Attributes.struct1.ReservedAttributes
+
+proc `NameOffset=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} =
+  self.union1.struct1.NameOffset = x
+
+proc NameOffset*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} =
+  self.union1.struct1.NameOffset
+
+proc `NameIsString=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} =
+  self.union1.struct1.NameIsString = x
+
+proc NameIsString*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} =
+  self.union1.struct1.NameIsString
+
+proc `Name=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} =
+  self.union1.Name = x
+
+proc Name*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} =
+  self.union1.Name
+
+proc Name*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY): var DWORD {.inline.} =
+  self.union1.Name
+
+proc `Id=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: WORD) {.inline.} =
+  self.union1.Id = x
+
+proc Id*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): WORD {.inline.} =
+  self.union1.Id
+
+proc Id*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY): var WORD {.inline.} =
+  self.union1.Id
+
+proc `OffsetToData=`*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD) {.inline.} =
+  self.union2.OffsetToData = x
+
+proc OffsetToData*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} =
+  self.union2.OffsetToData
+
+proc OffsetToData*(self: var IMAGE_RESOURCE_DIRECTORY_ENTRY): var DWORD {.inline.} =
+  self.union2.OffsetToData
+
+proc `OffsetToDirectory=`*(
+    self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD
+) {.inline.} =
+  self.union2.struct1.OffsetToDirectory = x
+
+proc OffsetToDirectory*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} =
+  self.union2.struct1.OffsetToDirectory
+
+proc `DataIsDirectory=`*(
+    self: var IMAGE_RESOURCE_DIRECTORY_ENTRY, x: DWORD
+) {.inline.} =
+  self.union2.struct1.DataIsDirectory = x
+
+proc DataIsDirectory*(self: IMAGE_RESOURCE_DIRECTORY_ENTRY): DWORD {.inline.} =
+  self.union2.struct1.DataIsDirectory
+
+proc `EndOfPrologue=`*(self: var IMAGE_FUNCTION_ENTRY64, x: ULONGLONG) {.inline.} =
+  self.union1.EndOfPrologue = x
+
+proc EndOfPrologue*(self: IMAGE_FUNCTION_ENTRY64): ULONGLONG {.inline.} =
+  self.union1.EndOfPrologue
+
+proc EndOfPrologue*(self: var IMAGE_FUNCTION_ENTRY64): var ULONGLONG {.inline.} =
+  self.union1.EndOfPrologue
+
+proc `UnwindInfoAddress=`*(self: var IMAGE_FUNCTION_ENTRY64, x: ULONGLONG) {.inline.} =
+  self.union1.UnwindInfoAddress = x
+
+proc UnwindInfoAddress*(self: IMAGE_FUNCTION_ENTRY64): ULONGLONG {.inline.} =
+  self.union1.UnwindInfoAddress
+
+proc UnwindInfoAddress*(self: var IMAGE_FUNCTION_ENTRY64): var ULONGLONG {.inline.} =
+  self.union1.UnwindInfoAddress
+
+proc `Ordinal=`*(self: var IMPORT_OBJECT_HEADER, x: WORD) {.inline.} =
+  self.union1.Ordinal = x
+
+proc Ordinal*(self: IMPORT_OBJECT_HEADER): WORD {.inline.} =
+  self.union1.Ordinal
+
+proc Ordinal*(self: var IMPORT_OBJECT_HEADER): var WORD {.inline.} =
+  self.union1.Ordinal
+
+proc `Hint=`*(self: var IMPORT_OBJECT_HEADER, x: WORD) {.inline.} =
+  self.union1.Hint = x
+
+proc Hint*(self: IMPORT_OBJECT_HEADER): WORD {.inline.} =
+  self.union1.Hint
+
+proc Hint*(self: var IMPORT_OBJECT_HEADER): var WORD {.inline.} =
+  self.union1.Hint
+
+proc `EntryPointToken=`*(self: var IMAGE_COR20_HEADER, x: DWORD) {.inline.} =
+  self.union1.EntryPointToken = x
+
+proc EntryPointToken*(self: IMAGE_COR20_HEADER): DWORD {.inline.} =
+  self.union1.EntryPointToken
+
+proc EntryPointToken*(self: var IMAGE_COR20_HEADER): var DWORD {.inline.} =
+  self.union1.EntryPointToken
+
+proc `EntryPointRVA=`*(self: var IMAGE_COR20_HEADER, x: DWORD) {.inline.} =
+  self.union1.EntryPointRVA = x
+
+proc EntryPointRVA*(self: IMAGE_COR20_HEADER): DWORD {.inline.} =
+  self.union1.EntryPointRVA
+
+proc EntryPointRVA*(self: var IMAGE_COR20_HEADER): var DWORD {.inline.} =
+  self.union1.EntryPointRVA
+
+proc `CheckSum=`*(self: var LDR_DATA_TABLE_ENTRY, x: ULONG) {.inline.} =
+  self.union1.CheckSum = x
+
+proc CheckSum*(self: LDR_DATA_TABLE_ENTRY): ULONG {.inline.} =
+  self.union1.CheckSum
+
+proc CheckSum*(self: var LDR_DATA_TABLE_ENTRY): var ULONG {.inline.} =
+  self.union1.CheckSum
+
+proc `Reserved6=`*(self: var LDR_DATA_TABLE_ENTRY, x: PVOID) {.inline.} =
+  self.union1.Reserved6 = x
+
+proc Reserved6*(self: LDR_DATA_TABLE_ENTRY): PVOID {.inline.} =
+  self.union1.Reserved6
+
+proc Reserved6*(self: var LDR_DATA_TABLE_ENTRY): var PVOID {.inline.} =
+  self.union1.Reserved6
+
+proc `Status=`*(self: var IO_STATUS_BLOCK, x: NTSTATUS) {.inline.} =
+  self.union1.Status = x
+
+proc Status*(self: IO_STATUS_BLOCK): NTSTATUS {.inline.} =
+  self.union1.Status
+
+proc Status*(self: var IO_STATUS_BLOCK): var NTSTATUS {.inline.} =
+  self.union1.Status
+
+proc `Pointer=`*(self: var IO_STATUS_BLOCK, x: PVOID) {.inline.} =
+  self.union1.Pointer = x
+
+proc Pointer*(self: IO_STATUS_BLOCK): PVOID {.inline.} =
+  self.union1.Pointer
+
+proc Pointer*(self: var IO_STATUS_BLOCK): var PVOID {.inline.} =
+  self.union1.Pointer
+
 when winimUnicode:
   type
     PCZZTSTR* = PCZZWSTR
@@ -9586,6 +11241,7 @@ when winimUnicode:
     OSVERSIONINFOEX* = OSVERSIONINFOEXW
     POSVERSIONINFOEX* = POSVERSIONINFOEXW
     LPOSVERSIONINFOEX* = LPOSVERSIONINFOEXW
+
 when winimAnsi:
   type
     PCZZTSTR* = PCZZSTR
@@ -9600,6 +11256,7 @@ when winimAnsi:
     OSVERSIONINFOEX* = OSVERSIONINFOEXA
     POSVERSIONINFOEX* = POSVERSIONINFOEXA
     LPOSVERSIONINFOEX* = LPOSVERSIONINFOEXA
+
 when winimCpu64:
   type
     PXSAVE_FORMAT* = ptr XSAVE_FORMAT
@@ -9609,16 +11266,17 @@ when winimCpu64:
       Reserved1*: DWORD
       Area*: PXSAVE_AREA
       Buffer*: PVOID
+
 when winimCpu32:
-  type
-    XSTATE_CONTEXT* {.pure.} = object
-      Mask*: DWORD64
-      Length*: DWORD
-      Reserved1*: DWORD
-      Area*: PXSAVE_AREA
-      Reserved2*: DWORD
-      Buffer*: PVOID
-      Reserved3*: DWORD
+  type XSTATE_CONTEXT* {.pure.} = object
+    Mask*: DWORD64
+    Length*: DWORD
+    Reserved1*: DWORD
+    Area*: PXSAVE_AREA
+    Reserved2*: DWORD
+    Buffer*: PVOID
+    Reserved3*: DWORD
+
 when winimCpu64:
   type
     PXSTATE_CONTEXT* = ptr XSTATE_CONTEXT
@@ -9627,13 +11285,15 @@ when winimCpu64:
       BeginAddress*: DWORD
       EndAddress*: DWORD
       UnwindData*: DWORD
+
     PRUNTIME_FUNCTION* = ptr RUNTIME_FUNCTION
     UNWIND_HISTORY_TABLE_ENTRY* {.pure.} = object
       ImageBase*: ULONG64
       FunctionEntry*: PRUNTIME_FUNCTION
+
     PUNWIND_HISTORY_TABLE_ENTRY* = ptr UNWIND_HISTORY_TABLE_ENTRY
-  const
-    UNWIND_HISTORY_TABLE_SIZE* = 12
+
+  const UNWIND_HISTORY_TABLE_SIZE* = 12
   type
     UNWIND_HISTORY_TABLE* {.pure.} = object
       Count*: ULONG
@@ -9641,6 +11301,7 @@ when winimCpu64:
       LowAddress*: ULONG64
       HighAddress*: ULONG64
       Entry*: array[UNWIND_HISTORY_TABLE_SIZE, UNWIND_HISTORY_TABLE_ENTRY]
+
     PUNWIND_HISTORY_TABLE* = ptr UNWIND_HISTORY_TABLE
     DISPATCHER_CONTEXT* {.pure.} = object
       ControlPc*: ULONG64
@@ -9654,10 +11315,12 @@ when winimCpu64:
       HistoryTable*: PUNWIND_HISTORY_TABLE
       ScopeIndex*: ULONG
       Fill0*: ULONG
+
     PDISPATCHER_CONTEXT* = ptr DISPATCHER_CONTEXT
     KNONVOLATILE_CONTEXT_POINTERS* {.pure.} = object
       FloatingContext*: array[16, PM128A]
       IntegerContext*: array[16, PULONG64]
+
     PKNONVOLATILE_CONTEXT_POINTERS* = ptr KNONVOLATILE_CONTEXT_POINTERS
     IMAGE_OPTIONAL_HEADER* = IMAGE_OPTIONAL_HEADER64
     PIMAGE_OPTIONAL_HEADER* = PIMAGE_OPTIONAL_HEADER64
@@ -9668,6 +11331,7 @@ when winimCpu64:
     PIMAGE_TLS_DIRECTORY* = PIMAGE_TLS_DIRECTORY64
     IMAGE_LOAD_CONFIG_DIRECTORY* = IMAGE_LOAD_CONFIG_DIRECTORY64
     PIMAGE_LOAD_CONFIG_DIRECTORY* = PIMAGE_LOAD_CONFIG_DIRECTORY64
+
   const
     ADDRESS_TAG_BIT* = 0x40000000000
     EXCEPTION_READ_FAULT* = 0
@@ -9686,15 +11350,16 @@ when winimCpu32:
     CONTEXT_INTEGER* = CONTEXT_i386 or 0x00000002
     CONTEXT_FLOATING_POINT* = CONTEXT_i386 or 0x00000008
 when winimCpu64:
-  const
-    CONTEXT_FULL* = CONTEXT_CONTROL or CONTEXT_INTEGER or CONTEXT_FLOATING_POINT
+  const CONTEXT_FULL* = CONTEXT_CONTROL or CONTEXT_INTEGER or CONTEXT_FLOATING_POINT
 when winimCpu32:
   const
     CONTEXT_SEGMENTS* = CONTEXT_i386 or 0x00000004
     CONTEXT_DEBUG_REGISTERS* = CONTEXT_i386 or 0x00000010
 when winimCpu64:
   const
-    CONTEXT_ALL* = CONTEXT_CONTROL or CONTEXT_INTEGER or CONTEXT_SEGMENTS or CONTEXT_FLOATING_POINT or CONTEXT_DEBUG_REGISTERS
+    CONTEXT_ALL* =
+      CONTEXT_CONTROL or CONTEXT_INTEGER or CONTEXT_SEGMENTS or CONTEXT_FLOATING_POINT or
+      CONTEXT_DEBUG_REGISTERS
     CONTEXT_EXCEPTION_ACTIVE* = 0x8000000
     CONTEXT_SERVICE_ACTIVE* = 0x10000000
     CONTEXT_EXCEPTION_REQUEST* = 0x40000000
@@ -9703,7 +11368,8 @@ when winimCpu64:
     INITIAL_FPCSR* = 0x027f
     LEGACY_SAVE_AREA_LENGTH* = sizeof(XMM_SAVE_AREA32)
     RUNTIME_FUNCTION_INDIRECT* = 0x1
-    OUT_OF_PROCESS_FUNCTION_TABLE_CALLBACK_EXPORT_NAME* = "OutOfProcessFunctionTableCallback"
+    OUT_OF_PROCESS_FUNCTION_TABLE_CALLBACK_EXPORT_NAME* =
+      "OutOfProcessFunctionTableCallback"
     UNW_FLAG_NHANDLER* = 0x0
     UNW_FLAG_EHANDLER* = 0x1
     UNW_FLAG_UHANDLER* = 0x2
@@ -9715,86 +11381,281 @@ when winimCpu64:
     IMAGE_NT_OPTIONAL_HDR_MAGIC* = IMAGE_NT_OPTIONAL_HDR64_MAGIC
     IMAGE_ORDINAL_FLAG* = IMAGE_ORDINAL_FLAG64
   type
-    PGET_RUNTIME_FUNCTION_CALLBACK* = proc (ControlPc: DWORD64, Context: PVOID): PRUNTIME_FUNCTION {.stdcall.}
-    POUT_OF_PROCESS_FUNCTION_TABLE_CALLBACK* = proc (Process: HANDLE, TableAddress: PVOID, Entries: PDWORD, Functions: ptr PRUNTIME_FUNCTION): DWORD {.stdcall.}
-  proc RtlAddGrowableFunctionTable*(DynamicTable: ptr PVOID, FunctionTable: PRUNTIME_FUNCTION, EntryCount: DWORD, MaximumEntryCount: DWORD, RangeBase: ULONG_PTR, RangeEnd: ULONG_PTR): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
-  proc RtlGrowFunctionTable*(DynamicTable: PVOID, NewEntryCount: DWORD): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-  proc RtlDeleteGrowableFunctionTable*(DynamicTable: PVOID): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-  proc RtlAddFunctionTable*(FunctionTable: PRUNTIME_FUNCTION, EntryCount: DWORD, BaseAddress: DWORD64): BOOLEAN {.winapi, cdecl, dynlib: "ntdll", importc.}
-  proc RtlDeleteFunctionTable*(FunctionTable: PRUNTIME_FUNCTION): BOOLEAN {.winapi, cdecl, dynlib: "ntdll", importc.}
-  proc RtlInstallFunctionTableCallback*(TableIdentifier: DWORD64, BaseAddress: DWORD64, Length: DWORD, Callback: PGET_RUNTIME_FUNCTION_CALLBACK, Context: PVOID, OutOfProcessCallbackDll: PCWSTR): BOOLEAN {.winapi, cdecl, dynlib: "ntdll", importc.}
-  proc RtlRestoreContext*(ContextRecord: PCONTEXT, ExceptionRecord: ptr EXCEPTION_RECORD): VOID {.winapi, cdecl, dynlib: "ntdll", importc.}
-  proc RtlVirtualUnwind*(HandlerType: DWORD, ImageBase: DWORD64, ControlPc: DWORD64, FunctionEntry: PRUNTIME_FUNCTION, ContextRecord: PCONTEXT, HandlerData: ptr PVOID, EstablisherFrame: PDWORD64, ContextPointers: PKNONVOLATILE_CONTEXT_POINTERS): PEXCEPTION_ROUTINE {.winapi, stdcall, dynlib: "ntdll", importc.}
-  proc RtlLookupFunctionEntry*(ControlPc: DWORD64, ImageBase: PDWORD64, HistoryTable: PUNWIND_HISTORY_TABLE): PRUNTIME_FUNCTION {.winapi, stdcall, dynlib: "ntdll", importc.}
-  proc RtlUnwindEx*(TargetFrame: PVOID, TargetIp: PVOID, ExceptionRecord: PEXCEPTION_RECORD, ReturnValue: PVOID, ContextRecord: PCONTEXT, HistoryTable: PUNWIND_HISTORY_TABLE): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
-  template IMAGE_ORDINAL*(Ordinal: untyped): int64 = Ordinal.int64 and 0xffff'i64
-  template IMAGE_SNAP_BY_ORDINAL*(Ordinal: untyped): bool = (Ordinal and IMAGE_ORDINAL_FLAG64) != 0
-  proc `FltSave=`*(self: var CONTEXT, x: XMM_SAVE_AREA32) {.inline.} = self.union1.FltSave = x
-  proc FltSave*(self: CONTEXT): XMM_SAVE_AREA32 {.inline.} = self.union1.FltSave
-  proc FltSave*(self: var CONTEXT): var XMM_SAVE_AREA32 {.inline.} = self.union1.FltSave
-  proc `FloatSave=`*(self: var CONTEXT, x: XMM_SAVE_AREA32) {.inline.} = self.union1.FloatSave = x
-  proc FloatSave*(self: CONTEXT): XMM_SAVE_AREA32 {.inline.} = self.union1.FloatSave
-  proc FloatSave*(self: var CONTEXT): var XMM_SAVE_AREA32 {.inline.} = self.union1.FloatSave
-  proc `Header=`*(self: var CONTEXT, x: array[2, M128A]) {.inline.} = self.union1.struct1.Header = x
-  proc Header*(self: CONTEXT): array[2, M128A] {.inline.} = self.union1.struct1.Header
-  proc Header*(self: var CONTEXT): var array[2, M128A] {.inline.} = self.union1.struct1.Header
-  proc `Legacy=`*(self: var CONTEXT, x: array[8, M128A]) {.inline.} = self.union1.struct1.Legacy = x
-  proc Legacy*(self: CONTEXT): array[8, M128A] {.inline.} = self.union1.struct1.Legacy
-  proc Legacy*(self: var CONTEXT): var array[8, M128A] {.inline.} = self.union1.struct1.Legacy
-  proc `Xmm0=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm0 = x
-  proc Xmm0*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm0
-  proc Xmm0*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm0
-  proc `Xmm1=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm1 = x
-  proc Xmm1*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm1
-  proc Xmm1*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm1
-  proc `Xmm2=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm2 = x
-  proc Xmm2*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm2
-  proc Xmm2*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm2
-  proc `Xmm3=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm3 = x
-  proc Xmm3*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm3
-  proc Xmm3*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm3
-  proc `Xmm4=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm4 = x
-  proc Xmm4*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm4
-  proc Xmm4*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm4
-  proc `Xmm5=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm5 = x
-  proc Xmm5*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm5
-  proc Xmm5*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm5
-  proc `Xmm6=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm6 = x
-  proc Xmm6*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm6
-  proc Xmm6*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm6
-  proc `Xmm7=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm7 = x
-  proc Xmm7*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm7
-  proc Xmm7*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm7
-  proc `Xmm8=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm8 = x
-  proc Xmm8*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm8
-  proc Xmm8*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm8
-  proc `Xmm9=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm9 = x
-  proc Xmm9*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm9
-  proc Xmm9*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm9
-  proc `Xmm10=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm10 = x
-  proc Xmm10*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm10
-  proc Xmm10*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm10
-  proc `Xmm11=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm11 = x
-  proc Xmm11*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm11
-  proc Xmm11*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm11
-  proc `Xmm12=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm12 = x
-  proc Xmm12*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm12
-  proc Xmm12*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm12
-  proc `Xmm13=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm13 = x
-  proc Xmm13*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm13
-  proc Xmm13*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm13
-  proc `Xmm14=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm14 = x
-  proc Xmm14*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm14
-  proc Xmm14*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm14
-  proc `Xmm15=`*(self: var CONTEXT, x: M128A) {.inline.} = self.union1.struct1.Xmm15 = x
-  proc Xmm15*(self: CONTEXT): M128A {.inline.} = self.union1.struct1.Xmm15
-  proc Xmm15*(self: var CONTEXT): var M128A {.inline.} = self.union1.struct1.Xmm15
-  proc `Alignment=`*(self: var SLIST_HEADER, x: ULONGLONG) {.inline.} = self.struct1.Alignment = x
-  proc Alignment*(self: SLIST_HEADER): ULONGLONG {.inline.} = self.struct1.Alignment
-  proc Alignment*(self: var SLIST_HEADER): var ULONGLONG {.inline.} = self.struct1.Alignment
-  proc `Region=`*(self: var SLIST_HEADER, x: ULONGLONG) {.inline.} = self.struct1.Region = x
-  proc Region*(self: SLIST_HEADER): ULONGLONG {.inline.} = self.struct1.Region
-  proc Region*(self: var SLIST_HEADER): var ULONGLONG {.inline.} = self.struct1.Region
+    PGET_RUNTIME_FUNCTION_CALLBACK* =
+      proc(ControlPc: DWORD64, Context: PVOID): PRUNTIME_FUNCTION {.stdcall.}
+    POUT_OF_PROCESS_FUNCTION_TABLE_CALLBACK* = proc(
+      Process: HANDLE,
+      TableAddress: PVOID,
+      Entries: PDWORD,
+      Functions: ptr PRUNTIME_FUNCTION,
+    ): DWORD {.stdcall.}
+
+  proc RtlAddGrowableFunctionTable*(
+    DynamicTable: ptr PVOID,
+    FunctionTable: PRUNTIME_FUNCTION,
+    EntryCount: DWORD,
+    MaximumEntryCount: DWORD,
+    RangeBase: ULONG_PTR,
+    RangeEnd: ULONG_PTR,
+  ): DWORD {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+  proc RtlGrowFunctionTable*(
+    DynamicTable: PVOID, NewEntryCount: DWORD
+  ): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+  proc RtlDeleteGrowableFunctionTable*(
+    DynamicTable: PVOID
+  ): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+  proc RtlAddFunctionTable*(
+    FunctionTable: PRUNTIME_FUNCTION, EntryCount: DWORD, BaseAddress: DWORD64
+  ): BOOLEAN {.winapi, cdecl, dynlib: "ntdll", importc.}
+
+  proc RtlDeleteFunctionTable*(
+    FunctionTable: PRUNTIME_FUNCTION
+  ): BOOLEAN {.winapi, cdecl, dynlib: "ntdll", importc.}
+
+  proc RtlInstallFunctionTableCallback*(
+    TableIdentifier: DWORD64,
+    BaseAddress: DWORD64,
+    Length: DWORD,
+    Callback: PGET_RUNTIME_FUNCTION_CALLBACK,
+    Context: PVOID,
+    OutOfProcessCallbackDll: PCWSTR,
+  ): BOOLEAN {.winapi, cdecl, dynlib: "ntdll", importc.}
+
+  proc RtlRestoreContext*(
+    ContextRecord: PCONTEXT, ExceptionRecord: ptr EXCEPTION_RECORD
+  ): VOID {.winapi, cdecl, dynlib: "ntdll", importc.}
+
+  proc RtlVirtualUnwind*(
+    HandlerType: DWORD,
+    ImageBase: DWORD64,
+    ControlPc: DWORD64,
+    FunctionEntry: PRUNTIME_FUNCTION,
+    ContextRecord: PCONTEXT,
+    HandlerData: ptr PVOID,
+    EstablisherFrame: PDWORD64,
+    ContextPointers: PKNONVOLATILE_CONTEXT_POINTERS,
+  ): PEXCEPTION_ROUTINE {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+  proc RtlLookupFunctionEntry*(
+    ControlPc: DWORD64, ImageBase: PDWORD64, HistoryTable: PUNWIND_HISTORY_TABLE
+  ): PRUNTIME_FUNCTION {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+  proc RtlUnwindEx*(
+    TargetFrame: PVOID,
+    TargetIp: PVOID,
+    ExceptionRecord: PEXCEPTION_RECORD,
+    ReturnValue: PVOID,
+    ContextRecord: PCONTEXT,
+    HistoryTable: PUNWIND_HISTORY_TABLE,
+  ): VOID {.winapi, stdcall, dynlib: "ntdll", importc.}
+
+  template IMAGE_ORDINAL*(Ordinal: untyped): int64 =
+    Ordinal.int64 and 0xffff'i64
+
+  template IMAGE_SNAP_BY_ORDINAL*(Ordinal: untyped): bool =
+    (Ordinal and IMAGE_ORDINAL_FLAG64) != 0
+
+  proc `FltSave=`*(self: var CONTEXT, x: XMM_SAVE_AREA32) {.inline.} =
+    self.union1.FltSave = x
+
+  proc FltSave*(self: CONTEXT): XMM_SAVE_AREA32 {.inline.} =
+    self.union1.FltSave
+
+  proc FltSave*(self: var CONTEXT): var XMM_SAVE_AREA32 {.inline.} =
+    self.union1.FltSave
+
+  proc `FloatSave=`*(self: var CONTEXT, x: XMM_SAVE_AREA32) {.inline.} =
+    self.union1.FloatSave = x
+
+  proc FloatSave*(self: CONTEXT): XMM_SAVE_AREA32 {.inline.} =
+    self.union1.FloatSave
+
+  proc FloatSave*(self: var CONTEXT): var XMM_SAVE_AREA32 {.inline.} =
+    self.union1.FloatSave
+
+  proc `Header=`*(self: var CONTEXT, x: array[2, M128A]) {.inline.} =
+    self.union1.struct1.Header = x
+
+  proc Header*(self: CONTEXT): array[2, M128A] {.inline.} =
+    self.union1.struct1.Header
+
+  proc Header*(self: var CONTEXT): var array[2, M128A] {.inline.} =
+    self.union1.struct1.Header
+
+  proc `Legacy=`*(self: var CONTEXT, x: array[8, M128A]) {.inline.} =
+    self.union1.struct1.Legacy = x
+
+  proc Legacy*(self: CONTEXT): array[8, M128A] {.inline.} =
+    self.union1.struct1.Legacy
+
+  proc Legacy*(self: var CONTEXT): var array[8, M128A] {.inline.} =
+    self.union1.struct1.Legacy
+
+  proc `Xmm0=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm0 = x
+
+  proc Xmm0*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm0
+
+  proc Xmm0*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm0
+
+  proc `Xmm1=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm1 = x
+
+  proc Xmm1*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm1
+
+  proc Xmm1*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm1
+
+  proc `Xmm2=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm2 = x
+
+  proc Xmm2*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm2
+
+  proc Xmm2*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm2
+
+  proc `Xmm3=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm3 = x
+
+  proc Xmm3*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm3
+
+  proc Xmm3*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm3
+
+  proc `Xmm4=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm4 = x
+
+  proc Xmm4*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm4
+
+  proc Xmm4*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm4
+
+  proc `Xmm5=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm5 = x
+
+  proc Xmm5*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm5
+
+  proc Xmm5*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm5
+
+  proc `Xmm6=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm6 = x
+
+  proc Xmm6*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm6
+
+  proc Xmm6*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm6
+
+  proc `Xmm7=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm7 = x
+
+  proc Xmm7*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm7
+
+  proc Xmm7*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm7
+
+  proc `Xmm8=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm8 = x
+
+  proc Xmm8*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm8
+
+  proc Xmm8*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm8
+
+  proc `Xmm9=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm9 = x
+
+  proc Xmm9*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm9
+
+  proc Xmm9*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm9
+
+  proc `Xmm10=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm10 = x
+
+  proc Xmm10*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm10
+
+  proc Xmm10*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm10
+
+  proc `Xmm11=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm11 = x
+
+  proc Xmm11*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm11
+
+  proc Xmm11*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm11
+
+  proc `Xmm12=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm12 = x
+
+  proc Xmm12*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm12
+
+  proc Xmm12*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm12
+
+  proc `Xmm13=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm13 = x
+
+  proc Xmm13*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm13
+
+  proc Xmm13*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm13
+
+  proc `Xmm14=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm14 = x
+
+  proc Xmm14*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm14
+
+  proc Xmm14*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm14
+
+  proc `Xmm15=`*(self: var CONTEXT, x: M128A) {.inline.} =
+    self.union1.struct1.Xmm15 = x
+
+  proc Xmm15*(self: CONTEXT): M128A {.inline.} =
+    self.union1.struct1.Xmm15
+
+  proc Xmm15*(self: var CONTEXT): var M128A {.inline.} =
+    self.union1.struct1.Xmm15
+
+  proc `Alignment=`*(self: var SLIST_HEADER, x: ULONGLONG) {.inline.} =
+    self.struct1.Alignment = x
+
+  proc Alignment*(self: SLIST_HEADER): ULONGLONG {.inline.} =
+    self.struct1.Alignment
+
+  proc Alignment*(self: var SLIST_HEADER): var ULONGLONG {.inline.} =
+    self.struct1.Alignment
+
+  proc `Region=`*(self: var SLIST_HEADER, x: ULONGLONG) {.inline.} =
+    self.struct1.Region = x
+
+  proc Region*(self: SLIST_HEADER): ULONGLONG {.inline.} =
+    self.struct1.Region
+
+  proc Region*(self: var SLIST_HEADER): var ULONGLONG {.inline.} =
+    self.struct1.Region
+
 when winimCpu32:
   type
     HALF_PTR* = int16
@@ -9811,6 +11672,7 @@ when winimCpu32:
     PIMAGE_TLS_DIRECTORY* = PIMAGE_TLS_DIRECTORY32
     IMAGE_LOAD_CONFIG_DIRECTORY* = IMAGE_LOAD_CONFIG_DIRECTORY32
     PIMAGE_LOAD_CONFIG_DIRECTORY* = PIMAGE_LOAD_CONFIG_DIRECTORY32
+
   const
     ADDRESS_TAG_BIT* = 0x80000000'i32
     pcTeb* = 0x18
@@ -9820,18 +11682,41 @@ when winimCpu32:
     CONTEXT_i486* = 0x00010000
     CONTEXT_EXTENDED_REGISTERS* = CONTEXT_i386 or 0x00000020
     CONTEXT_FULL* = CONTEXT_CONTROL or CONTEXT_INTEGER or CONTEXT_SEGMENTS
-    CONTEXT_ALL* = CONTEXT_CONTROL or CONTEXT_INTEGER or CONTEXT_SEGMENTS or CONTEXT_FLOATING_POINT or CONTEXT_DEBUG_REGISTERS or CONTEXT_EXTENDED_REGISTERS
+    CONTEXT_ALL* =
+      CONTEXT_CONTROL or CONTEXT_INTEGER or CONTEXT_SEGMENTS or CONTEXT_FLOATING_POINT or
+      CONTEXT_DEBUG_REGISTERS or CONTEXT_EXTENDED_REGISTERS
     IMAGE_SIZEOF_NT_OPTIONAL_HEADER* = IMAGE_SIZEOF_NT_OPTIONAL32_HEADER
     IMAGE_NT_OPTIONAL_HDR_MAGIC* = IMAGE_NT_OPTIONAL_HDR32_MAGIC
     IMAGE_ORDINAL_FLAG* = IMAGE_ORDINAL_FLAG32
-  template IMAGE_ORDINAL*(Ordinal: untyped): int32 = Ordinal.int32 and 0xffff'i32
-  template IMAGE_SNAP_BY_ORDINAL*(Ordinal: untyped): bool = (Ordinal and IMAGE_ORDINAL_FLAG32) != 0
-  proc `Next=`*(self: var SLIST_HEADER, x: SLIST_ENTRY) {.inline.} = self.struct1.Next = x
-  proc Next*(self: SLIST_HEADER): SLIST_ENTRY {.inline.} = self.struct1.Next
-  proc Next*(self: var SLIST_HEADER): var SLIST_ENTRY {.inline.} = self.struct1.Next
-  proc `Depth=`*(self: var SLIST_HEADER, x: WORD) {.inline.} = self.struct1.Depth = x
-  proc Depth*(self: SLIST_HEADER): WORD {.inline.} = self.struct1.Depth
-  proc Depth*(self: var SLIST_HEADER): var WORD {.inline.} = self.struct1.Depth
-  proc `Sequence=`*(self: var SLIST_HEADER, x: WORD) {.inline.} = self.struct1.Sequence = x
-  proc Sequence*(self: SLIST_HEADER): WORD {.inline.} = self.struct1.Sequence
-  proc Sequence*(self: var SLIST_HEADER): var WORD {.inline.} = self.struct1.Sequence
+  template IMAGE_ORDINAL*(Ordinal: untyped): int32 =
+    Ordinal.int32 and 0xffff'i32
+
+  template IMAGE_SNAP_BY_ORDINAL*(Ordinal: untyped): bool =
+    (Ordinal and IMAGE_ORDINAL_FLAG32) != 0
+
+  proc `Next=`*(self: var SLIST_HEADER, x: SLIST_ENTRY) {.inline.} =
+    self.struct1.Next = x
+
+  proc Next*(self: SLIST_HEADER): SLIST_ENTRY {.inline.} =
+    self.struct1.Next
+
+  proc Next*(self: var SLIST_HEADER): var SLIST_ENTRY {.inline.} =
+    self.struct1.Next
+
+  proc `Depth=`*(self: var SLIST_HEADER, x: WORD) {.inline.} =
+    self.struct1.Depth = x
+
+  proc Depth*(self: SLIST_HEADER): WORD {.inline.} =
+    self.struct1.Depth
+
+  proc Depth*(self: var SLIST_HEADER): var WORD {.inline.} =
+    self.struct1.Depth
+
+  proc `Sequence=`*(self: var SLIST_HEADER, x: WORD) {.inline.} =
+    self.struct1.Sequence = x
+
+  proc Sequence*(self: SLIST_HEADER): WORD {.inline.} =
+    self.struct1.Sequence
+
+  proc Sequence*(self: var SLIST_HEADER): var WORD {.inline.} =
+    self.struct1.Sequence

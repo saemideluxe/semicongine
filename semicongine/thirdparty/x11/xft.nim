@@ -1,12 +1,7 @@
 # Converted from X11/Xft/Xft.h
-import
-  x,
-  xlib,
-  xrender,
-  xutil
+import x, xlib, xrender, xutil
 
-const
-  xftLib = "libXft.so"
+const xftLib = "libXft.so"
 
 # Defined in the FreeType library
 type
@@ -18,11 +13,16 @@ type
 # Defined in the fontconfig library
 type
   FcEndian* = enum
-    FcEndianBig, FcEndianLittle
+    FcEndianBig
+    FcEndianLittle
 
   FcResult* = enum
-    FcResultMatch, FcResultNoMatch, FcResultTypeMismatch,
-    FcResultNoId, FcResultOutOfMemory
+    FcResultMatch
+    FcResultNoMatch
+    FcResultTypeMismatch
+    FcResultNoId
+    FcResultOutOfMemory
+
   PFcResult* = ptr FcResult
 
   FcBool* = cint
@@ -37,6 +37,7 @@ type
     nfont*: cint
     sfont*: cint
     fonts*: ptr PFcPattern
+
   PFcFontSet* = ptr FcFontSet
 
   FcChar8* = cuchar
@@ -49,7 +50,7 @@ type
   PFcChar32* = ptr FcChar32
 
 type
-  XftFontInfo* = object 
+  XftFontInfo* = object
   PXftFontInfo* = ptr XftFontInfo
   XftFont* = object
     ascent*: cint
@@ -57,7 +58,8 @@ type
     height*: cint
     max_advance_width*: cint
     charset*: PFcCharSet
-    pattern*: PFcPattern    
+    pattern*: PFcPattern
+
   PXftFont* = ptr XftFont
 
   XftDraw* = object
@@ -66,12 +68,14 @@ type
   XftColor* = object
     pixel*: culong
     color*: XRenderColor
+
   PXftColor* = ptr XftColor
 
   XftCharSpec* = object
     ucs4*: FcChar32
     x*: cshort
     y*: cshort
+
   PXftCharSpec* = ptr XftCharSpec
 
   XftCharFontSpec* = object
@@ -79,12 +83,14 @@ type
     ucs4*: FcChar32
     x*: cshort
     y*: cshort
+
   PXftCharFontSpec* = ptr XftCharFontSpec
 
   XftGlyphSpec* = object
     glyph*: FT_UInt
     x*: cshort
     y*: cshort
+
   PXftGlyphSpec* = ptr XftGlyphSpec
 
   XftGlyphFontSpec* = object
@@ -92,15 +98,12 @@ type
     glyph*: FT_UInt
     x*: cshort
     y*: cshort
+
   PXftGlyphFontSpec = ptr XftGlyphFontSpec
 
 # xftcolor.c
 proc XftColorAllocName*(
-  display: PDisplay,
-  visual: PVisual,
-  cmap: Colormap,
-  name: cstring,
-  result: PXftColor
+  display: PDisplay, visual: PVisual, cmap: Colormap, name: cstring, result: PXftColor
 ): XBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftColorAllocValue*(
@@ -108,83 +111,55 @@ proc XftColorAllocValue*(
   visual: PVisual,
   cmap: Colormap,
   color: PXRenderColor,
-  result: PXftColor
+  result: PXftColor,
 ): XBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftColorFree*(
-  display: PDisplay,
-  visual: PVisual,
-  cmap: Colormap,
-  color: PXftColor
-) {.cdecl, dynlib: xftLib, importc.} 
+  display: PDisplay, visual: PVisual, cmap: Colormap, color: PXftColor
+) {.cdecl, dynlib: xftLib, importc.}
 
 # xftdpy.c
-proc XftDefaultHasRender*(
-  display: PDisplay
-): XBool {.cdecl, dynlib: xftLib, importc.}
+proc XftDefaultHasRender*(display: PDisplay): XBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDefaultSet*(
-  display: PDisplay,
-  defaults: PFcPattern
+  display: PDisplay, defaults: PFcPattern
 ): XBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDefaultSubstitute*(
-  display: PDisplay,
-  screen: cint,
-  pattern: PFcPattern
+  display: PDisplay, screen: cint, pattern: PFcPattern
 ) {.cdecl, dynlib: xftLib, importc.}
 
 # xftdraw.c
 proc XftDrawCreate*(
-  display: PDisplay,
-  drawable: Drawable,
-  visual: PVisual,
-  colormap: Colormap 
+  display: PDisplay, drawable: Drawable, visual: PVisual, colormap: Colormap
 ): PXftDraw {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawCreateBitmap*(
-  display: PDisplay,
-  bitmap: Pixmap
+  display: PDisplay, bitmap: Pixmap
 ): PXftDraw {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawCreateAlpha*(
-  display: PDisplay,
-  pixmap: Pixmap,
-  depth: cint
+  display: PDisplay, pixmap: Pixmap, depth: cint
 ): PXftDraw {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawChange*(
-  draw: PXftDraw,
-  drawable: Drawable
-) {.cdecl, dynlib: xftLib, importc.} 
-
-proc XftDrawDisplay*(
-  draw: PXftDraw
-): PDisplay {.cdecl, dynlib: xftLib, importc.}
-
-proc XftDrawDrawable*(
-  draw: PXftDraw
-): Drawable {.cdecl, dynlib: xftLib, importc.}
-
-proc XftDrawColormap*(
-  draw: PXftDraw
-): Colormap {.cdecl, dynlib: xftLib, importc.}
-
-proc XftDrawVisual*(
-  draw: PXftDraw
-): PVisual {.cdecl, dynlib: xftLib, importc.}
-
-proc XftDrawDestroy*(
-  draw: PXftDraw
+  draw: PXftDraw, drawable: Drawable
 ) {.cdecl, dynlib: xftLib, importc.}
 
-proc XftDrawPicture*(
-  draw: PXftDraw
-): Picture {.cdecl, dynlib: xftLib, importc.}
+proc XftDrawDisplay*(draw: PXftDraw): PDisplay {.cdecl, dynlib: xftLib, importc.}
+
+proc XftDrawDrawable*(draw: PXftDraw): Drawable {.cdecl, dynlib: xftLib, importc.}
+
+proc XftDrawColormap*(draw: PXftDraw): Colormap {.cdecl, dynlib: xftLib, importc.}
+
+proc XftDrawVisual*(draw: PXftDraw): PVisual {.cdecl, dynlib: xftLib, importc.}
+
+proc XftDrawDestroy*(draw: PXftDraw) {.cdecl, dynlib: xftLib, importc.}
+
+proc XftDrawPicture*(draw: PXftDraw): Picture {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawSrcPicture*(
-  draw: PXftDraw,
-  color: PXftColor
+  draw: PXftDraw, color: PXftColor
 ): Picture {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawGlyphs*(
@@ -194,8 +169,8 @@ proc XftDrawGlyphs*(
   x: cint,
   y: cint,
   glyphs: PFt_UInt,
-  nglyphs: cint
-) {.cdecl, dynlib: xftLib, importc.} 
+  nglyphs: cint,
+) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawString8*(
   draw: PXftDraw,
@@ -204,7 +179,7 @@ proc XftDrawString8*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawString16*(
@@ -214,7 +189,7 @@ proc XftDrawString16*(
   x: cint,
   y: cint,
   str: PFcChar16,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawString32*(
@@ -224,7 +199,7 @@ proc XftDrawString32*(
   x: cint,
   y: cint,
   str: PFcChar32,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawStringUtf8*(
@@ -234,7 +209,7 @@ proc XftDrawStringUtf8*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawStringUtf16*(
@@ -244,64 +219,39 @@ proc XftDrawStringUtf16*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawCharSpec*(
-  draw: PXftDraw,
-  color: PXftColor,
-  pub: PXftFont,
-  chars: PXftCharSpec,
-  len: cint
+  draw: PXftDraw, color: PXftColor, pub: PXftFont, chars: PXftCharSpec, len: cint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawCharFontSpec*(
-  draw: PXftDraw,
-  color: PXftColor,
-  chars: PXftCharFontSpec,
-  len: cint
+  draw: PXftDraw, color: PXftColor, chars: PXftCharFontSpec, len: cint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawGlyphSpec*(
-  draw: PXftDraw,
-  color: PXftColor,
-  pub: PXftFont,
-  glyphs: PXftGlyphSpec,
-  len: cint
+  draw: PXftDraw, color: PXftColor, pub: PXftFont, glyphs: PXftGlyphSpec, len: cint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawGlyphFontSpec*(
-  draw: PXftDraw,
-  color: PXftColor,
-  glyphs: PXftGlyphFontSpec,
-  len: cint
+  draw: PXftDraw, color: PXftColor, glyphs: PXftGlyphFontSpec, len: cint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawRect*(
-  draw: PXftDraw,
-  color: PXftColor,
-  x: cint,
-  y: cint,
-  width: cuint,
-  height: cuint
+  draw: PXftDraw, color: PXftColor, x: cint, y: cint, width: cuint, height: cuint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawSetClip*(
-  draw: PXftDraw,
-  r: Region
+  draw: PXftDraw, r: Region
 ): XBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawSetClipRectangles*(
-  draw: PXftDraw,
-  xOrigin: cint,
-  yOrigin: cint,
-  rects: PXRectangle,
-  n: cint
+  draw: PXftDraw, xOrigin: cint, yOrigin: cint, rects: PXRectangle, n: cint
 ): XBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftDrawSetSubwindowMode*(
-  draw: PXftDraw,
-  mode: cint
+  draw: PXftDraw, mode: cint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 # xftextent.c
@@ -310,39 +260,23 @@ proc XftGlyphExtents*(
   pub: PXftFont,
   glyphs: PFT_UInt,
   nglyphs: cint,
-  extends: PXGlyphInfo
+  extends: PXGlyphInfo,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextExtents8*(
-  display: PDisplay,
-  pub: PXftFont,
-  str: PFcChar8,
-  len: cint,
-  extents: PXGlyphInfo
+  display: PDisplay, pub: PXftFont, str: PFcChar8, len: cint, extents: PXGlyphInfo
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextExtents16*(
-  display: PDisplay,
-  pub: PXftFont,
-  str: PFcChar16,
-  len: cint,
-  extents: PXGlyphInfo
+  display: PDisplay, pub: PXftFont, str: PFcChar16, len: cint, extents: PXGlyphInfo
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextExtents32*(
-  display: PDisplay,
-  pub: PXftFont,
-  str: PFcChar32,
-  len: cint,
-  extents: PXGlyphInfo
+  display: PDisplay, pub: PXftFont, str: PFcChar32, len: cint, extents: PXGlyphInfo
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextExtentsUtf8*(
-  display: PDisplay,
-  pub: PXftFont,
-  str: PFcChar8,
-  len: cint,
-  extents: PXGlyphInfo
+  display: PDisplay, pub: PXftFont, str: PFcChar8, len: cint, extents: PXGlyphInfo
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextExtentsUtf16*(
@@ -351,100 +285,69 @@ proc XftTextExtentsUtf16*(
   str: PFcChar8,
   endian: FcEndian,
   len: cint,
-  extents: PXGlyphInfo
+  extents: PXGlyphInfo,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 # xftfont.c
 proc XftFontMatch*(
-  display: PDisplay,
-  screen: cint,
-  pattern: PFcPattern,
-  result: PFcResult
+  display: PDisplay, screen: cint, pattern: PFcPattern, result: PFcResult
 ): PFcPattern {.cdecl, dynlib: xftLib, importc.}
 
 # Expects display to be nil as an argument
 proc XftFontOpen*(
-  display: PDisplay,
-  screen: cint
+  display: PDisplay, screen: cint
 ): PXftFont {.cdecl, dynlib: xftLib, importc, varargs.}
 
 proc XftFontOpenName*(
-  display: PDisplay,
-  screen: cint,
-  name: cstring
+  display: PDisplay, screen: cint, name: cstring
 ): PXftFont {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontOpenXlfd*(
-  display: PDisplay,
-  screen: cint,
-  xlfd: cstring
+  display: PDisplay, screen: cint, xlfd: cstring
 ): PXftFont {.cdecl, dynlib: xftLib, importc.}
 
 # xftfreetype.c
-proc XftLockFace*(
-  pub: PXftFont
-): FT_Face {.cdecl, dynlib: xftLib, importc.}
+proc XftLockFace*(pub: PXftFont): FT_Face {.cdecl, dynlib: xftLib, importc.}
 
-proc XftUnlockFace*(
-  pub: PXftFont
-) {.cdecl, dynlib: xftLib, importc.}
+proc XftUnlockFace*(pub: PXftFont) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontInfoCreate*(
-  display: PDisplay,
-  pattern: PFcPattern
+  display: PDisplay, pattern: PFcPattern
 ): PXftFontInfo {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontInfoDestroy*(
-  display: PDisplay,
-  fi: PXftFontInfo
+  display: PDisplay, fi: PXftFontInfo
 ) {.cdecl, dynlib: xftLib, importc.}
 
-proc XftFontInfoHash*(
-  fi: PXftFontInfo
-): PFcChar32 {.cdecl, dynlib: xftLib, importc.}
+proc XftFontInfoHash*(fi: PXftFontInfo): PFcChar32 {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontInfoEqual*(
-  a: PXftFontInfo,
-  b: PXftFontInfo
+  a: PXftFontInfo, b: PXftFontInfo
 ): FcBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontOpenInfo*(
-  display: PDisplay,
-  pattern: PFcPattern,
-  fi: PXftFontInfo
+  display: PDisplay, pattern: PFcPattern, fi: PXftFontInfo
 ): PXftFont {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontOpenPattern*(
-  display: PDisplay,
-  pattern: PFcPattern
+  display: PDisplay, pattern: PFcPattern
 ): PXftFont {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontCopy*(
-  display: PDisplay,
-  pub: PXftFont
+  display: PDisplay, pub: PXftFont
 ): PXftFont {.cdecl, dynlib: xftLib, importc.}
 
-proc XftFontClose*(
-  display: PDisplay,
-  pub: PXftFont
-) {.cdecl, dynlib: xftLib, importc.}
+proc XftFontClose*(display: PDisplay, pub: PXftFont) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftInitFtLibrary*(): FcBool {.cdecl, dynlib: xftLib, importc.}
 
 # xftglyphs.c
 proc XftFontLoadGlyphs*(
-  display: PDisplay,
-  pub: PXftFont,
-  need_bitmaps: FcBool,
-  glyphs: PFT_UInt,
-  nglyph: cint
+  display: PDisplay, pub: PXftFont, need_bitmaps: FcBool, glyphs: PFT_UInt, nglyph: cint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftFontUnloadGlyphs*(
-  display: PDisplay,
-  pub: PXftFont,
-  glyphs: PFT_UInt,
-  nglyph: cint
+  display: PDisplay, pub: PXftFont, glyphs: PFT_UInt, nglyph: cint
 ) {.cdecl, dynlib: xftLib, importc.}
 
 const XFT_NMISSING* = 256
@@ -455,42 +358,34 @@ proc XftFontCheckGlyph*(
   need_bitmaps: FcBool,
   glyph: FT_UInt,
   missing: PFT_UInt,
-  nmissing: cint
+  nmissing: cint,
 ): FcBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftCharExists*(
-  display: PDisplay,
-  pub: PXftFont,
-  ucs4: FcChar32
+  display: PDisplay, pub: PXftFont, ucs4: FcChar32
 ): FcBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftCharIndex*(
-  display: PDisplay,
-  pub: PXftFont,
-  ucs4: FcChar32
+  display: PDisplay, pub: PXftFont, ucs4: FcChar32
 ): FT_UInt {.cdecl, dynlib: xftLib, importc.}
 
 # xftinit.c
-proc XftInit*(
-  config: cstring
-): FcBool {.cdecl, dynlib: xftLib, importc.}
+proc XftInit*(config: cstring): FcBool {.cdecl, dynlib: xftLib, importc.}
 
 proc XftGetVersion*(): cint {.cdecl, dynlib: xftLib, importc.}
 
 # xftlist.c
 # Expects display to be nil as an argument
 proc XftListFonts*(
-  display: PDisplay,
-  screen: cint
+  display: PDisplay, screen: cint
 ): PFcFontSet {.cdecl, dynlib: xftLib, importc, varargs.}
 
 # xftname.c
-proc XftNameParse*(
-  name: cstring
-): PFcPattern {.cdecl, dynlib: xftLib, importc.}
+proc XftNameParse*(name: cstring): PFcPattern {.cdecl, dynlib: xftLib, importc.}
 
 # xftrender.c
-proc XftGlyphRender*(display: PDisplay,
+proc XftGlyphRender*(
+  display: PDisplay,
   op: cint,
   src: Picture,
   pub: PXftFont,
@@ -500,10 +395,11 @@ proc XftGlyphRender*(display: PDisplay,
   x: cint,
   y: cint,
   glyphs: PFT_UInt,
-  nglyphs: cint
+  nglyphs: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
-proc XftGlyphSpecRender*(display: PDisplay,
+proc XftGlyphSpecRender*(
+  display: PDisplay,
   op: cint,
   src: Picture,
   pub: PXftFont,
@@ -511,10 +407,11 @@ proc XftGlyphSpecRender*(display: PDisplay,
   srcx: cint,
   srcy: cint,
   glyphs: PXftGlyphSpec,
-  nglyphs: cint
+  nglyphs: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
-proc XftCharSpecRender*(display: PDisplay,
+proc XftCharSpecRender*(
+  display: PDisplay,
   op: cint,
   src: Picture,
   pub: PXftFont,
@@ -522,30 +419,33 @@ proc XftCharSpecRender*(display: PDisplay,
   srcx: cint,
   srcy: cint,
   chars: PXftCharSpec,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
-proc XftGlyphFontSpecRender*(display: PDisplay,
+proc XftGlyphFontSpecRender*(
+  display: PDisplay,
   op: cint,
   src: Picture,
   dst: Picture,
   srcx: cint,
   srcy: cint,
   glyphs: PXftGlyphFontSpec,
-  nglyphs: cint
+  nglyphs: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
-proc XftCharFontSpecRender*(display: PDisplay,
+proc XftCharFontSpecRender*(
+  display: PDisplay,
   op: cint,
   src: Picture,
   dst: Picture,
   srcx: cint,
   srcy: cint,
   chars: PXftCharFontSpec,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
-proc XftTextRender8*(display: PDisplay,
+proc XftTextRender8*(
+  display: PDisplay,
   op: cint,
   src: Picture,
   pub: PXftFont,
@@ -555,7 +455,7 @@ proc XftTextRender8*(display: PDisplay,
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRender16*(
@@ -569,7 +469,7 @@ proc XftTextRender16*(
   x: cint,
   y: cint,
   str: PFcChar16,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRender16BE*(
@@ -583,7 +483,7 @@ proc XftTextRender16BE*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRender16LE*(
@@ -597,7 +497,7 @@ proc XftTextRender16LE*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRender32*(
@@ -611,7 +511,7 @@ proc XftTextRender32*(
   x: cint,
   y: cint,
   str: PFcChar32,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRender32BE*(
@@ -625,7 +525,7 @@ proc XftTextRender32BE*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRender32LE*(
@@ -639,7 +539,7 @@ proc XftTextRender32LE*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRenderUtf8*(
@@ -653,7 +553,7 @@ proc XftTextRenderUtf8*(
   x: cint,
   y: cint,
   str: PFcChar8,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 proc XftTextRenderUtf16*(
@@ -668,13 +568,10 @@ proc XftTextRenderUtf16*(
   y: cint,
   str: PFcChar8,
   endian: FcEndian,
-  len: cint
+  len: cint,
 ) {.cdecl, dynlib: xftLib, importc.}
 
 # xftxlfd.c
 proc XftXlfdParse8*(
-  xlfd_orig: cstring,
-  ignore_scalable: XBool,
-  complete: XBool
+  xlfd_orig: cstring, ignore_scalable: XBool, complete: XBool
 ): PFcPattern {.cdecl, dynlib: xftLib, importc.}
-

@@ -30,9 +30,9 @@ type
   HELPPOLY* = DWORD
   HRAWINPUT* = HANDLE
   HGESTUREINFO* = HANDLE
-  NAMEENUMPROCA* = proc (P1: LPSTR, P2: LPARAM): WINBOOL {.stdcall.}
+  NAMEENUMPROCA* = proc(P1: LPSTR, P2: LPARAM): WINBOOL {.stdcall.}
   WINSTAENUMPROCA* = NAMEENUMPROCA
-  NAMEENUMPROCW* = proc (P1: LPWSTR, P2: LPARAM): WINBOOL {.stdcall.}
+  NAMEENUMPROCW* = proc(P1: LPWSTR, P2: LPARAM): WINBOOL {.stdcall.}
   WINSTAENUMPROCW* = NAMEENUMPROCW
   DESKTOPENUMPROCA* = NAMEENUMPROCA
   DESKTOPENUMPROCW* = NAMEENUMPROCW
@@ -49,9 +49,11 @@ type
     lpszName*: LPCSTR
     lpszClass*: LPCSTR
     dwExStyle*: DWORD
+
   CBT_CREATEWNDA* {.pure.} = object
     lpcs*: ptr CREATESTRUCTA
     hwndInsertAfter*: HWND
+
   LPCBT_CREATEWNDA* = ptr CBT_CREATEWNDA
   CREATESTRUCTW* {.pure.} = object
     lpCreateParams*: LPVOID
@@ -66,21 +68,26 @@ type
     lpszName*: LPCWSTR
     lpszClass*: LPCWSTR
     dwExStyle*: DWORD
+
   CBT_CREATEWNDW* {.pure.} = object
     lpcs*: ptr CREATESTRUCTW
     hwndInsertAfter*: HWND
+
   LPCBT_CREATEWNDW* = ptr CBT_CREATEWNDW
   CBTACTIVATESTRUCT* {.pure.} = object
     fMouse*: WINBOOL
     hWndActive*: HWND
+
   LPCBTACTIVATESTRUCT* = ptr CBTACTIVATESTRUCT
   WTSSESSION_NOTIFICATION* {.pure.} = object
     cbSize*: DWORD
     dwSessionId*: DWORD
+
   PWTSSESSION_NOTIFICATION* = ptr WTSSESSION_NOTIFICATION
   SHELLHOOKINFO* {.pure.} = object
     hwnd*: HWND
     rc*: RECT
+
   LPSHELLHOOKINFO* = ptr SHELLHOOKINFO
   EVENTMSG* {.pure.} = object
     message*: UINT
@@ -88,6 +95,7 @@ type
     paramH*: UINT
     time*: DWORD
     hwnd*: HWND
+
   PEVENTMSGMSG* = ptr EVENTMSG
   NPEVENTMSGMSG* = ptr EVENTMSG
   LPEVENTMSGMSG* = ptr EVENTMSG
@@ -99,6 +107,7 @@ type
     wParam*: WPARAM
     message*: UINT
     hwnd*: HWND
+
   PCWPSTRUCT* = ptr CWPSTRUCT
   NPCWPSTRUCT* = ptr CWPSTRUCT
   LPCWPSTRUCT* = ptr CWPSTRUCT
@@ -108,6 +117,7 @@ type
     wParam*: WPARAM
     message*: UINT
     hwnd*: HWND
+
   PCWPRETSTRUCT* = ptr CWPRETSTRUCT
   NPCWPRETSTRUCT* = ptr CWPRETSTRUCT
   LPCWPRETSTRUCT* = ptr CWPRETSTRUCT
@@ -117,6 +127,7 @@ type
     flags*: DWORD
     time*: DWORD
     dwExtraInfo*: ULONG_PTR
+
   LPKBDLLHOOKSTRUCT* = ptr KBDLLHOOKSTRUCT
   PKBDLLHOOKSTRUCT* = ptr KBDLLHOOKSTRUCT
   MSLLHOOKSTRUCT* {.pure.} = object
@@ -125,6 +136,7 @@ type
     flags*: DWORD
     time*: DWORD
     dwExtraInfo*: ULONG_PTR
+
   LPMSLLHOOKSTRUCT* = ptr MSLLHOOKSTRUCT
   PMSLLHOOKSTRUCT* = ptr MSLLHOOKSTRUCT
   DEBUGHOOKINFO* {.pure.} = object
@@ -133,6 +145,7 @@ type
     lParam*: LPARAM
     wParam*: WPARAM
     code*: int32
+
   PDEBUGHOOKINFO* = ptr DEBUGHOOKINFO
   NPDEBUGHOOKINFO* = ptr DEBUGHOOKINFO
   LPDEBUGHOOKINFO* = ptr DEBUGHOOKINFO
@@ -141,11 +154,13 @@ type
     hwnd*: HWND
     wHitTestCode*: UINT
     dwExtraInfo*: ULONG_PTR
+
   LPMOUSEHOOKSTRUCT* = ptr MOUSEHOOKSTRUCT
   PMOUSEHOOKSTRUCT* = ptr MOUSEHOOKSTRUCT
   MOUSEHOOKSTRUCTEX* {.pure.} = object
     unnamed*: MOUSEHOOKSTRUCT
     mouseData*: DWORD
+
   LPMOUSEHOOKSTRUCTEX* = ptr MOUSEHOOKSTRUCTEX
   PMOUSEHOOKSTRUCTEX* = ptr MOUSEHOOKSTRUCTEX
   HARDWAREHOOKSTRUCT* {.pure.} = object
@@ -153,6 +168,7 @@ type
     message*: UINT
     wParam*: WPARAM
     lParam*: LPARAM
+
   LPHARDWAREHOOKSTRUCT* = ptr HARDWAREHOOKSTRUCT
   PHARDWAREHOOKSTRUCT* = ptr HARDWAREHOOKSTRUCT
   MOUSEMOVEPOINT* {.pure.} = object
@@ -160,14 +176,16 @@ type
     y*: int32
     time*: DWORD
     dwExtraInfo*: ULONG_PTR
+
   PMOUSEMOVEPOINT* = ptr MOUSEMOVEPOINT
   LPMOUSEMOVEPOINT* = ptr MOUSEMOVEPOINT
   USEROBJECTFLAGS* {.pure.} = object
     fInherit*: WINBOOL
     fReserved*: WINBOOL
     dwFlags*: DWORD
+
   PUSEROBJECTFLAGS* = ptr USEROBJECTFLAGS
-  WNDPROC* = proc (P1: HWND, P2: UINT, P3: WPARAM, P4: LPARAM): LRESULT {.stdcall.}
+  WNDPROC* = proc(P1: HWND, P2: UINT, P3: WPARAM, P4: LPARAM): LRESULT {.stdcall.}
   WNDCLASSEXA* {.pure.} = object
     cbSize*: UINT
     style*: UINT
@@ -181,6 +199,7 @@ type
     lpszMenuName*: LPCSTR
     lpszClassName*: LPCSTR
     hIconSm*: HICON
+
   PWNDCLASSEXA* = ptr WNDCLASSEXA
   NPWNDCLASSEXA* = ptr WNDCLASSEXA
   LPWNDCLASSEXA* = ptr WNDCLASSEXA
@@ -197,6 +216,7 @@ type
     lpszMenuName*: LPCWSTR
     lpszClassName*: LPCWSTR
     hIconSm*: HICON
+
   PWNDCLASSEXW* = ptr WNDCLASSEXW
   NPWNDCLASSEXW* = ptr WNDCLASSEXW
   LPWNDCLASSEXW* = ptr WNDCLASSEXW
@@ -211,6 +231,7 @@ type
     hbrBackground*: HBRUSH
     lpszMenuName*: LPCSTR
     lpszClassName*: LPCSTR
+
   PWNDCLASSA* = ptr WNDCLASSA
   NPWNDCLASSA* = ptr WNDCLASSA
   LPWNDCLASSA* = ptr WNDCLASSA
@@ -225,6 +246,7 @@ type
     hbrBackground*: HBRUSH
     lpszMenuName*: LPCWSTR
     lpszClassName*: LPCWSTR
+
   PWNDCLASSW* = ptr WNDCLASSW
   NPWNDCLASSW* = ptr WNDCLASSW
   LPWNDCLASSW* = ptr WNDCLASSW
@@ -235,6 +257,7 @@ type
     lParam*: LPARAM
     time*: DWORD
     pt*: POINT
+
   PMSG* = ptr MSG
   NPMSG* = ptr MSG
   LPMSG* = ptr MSG
@@ -244,23 +267,27 @@ type
     ptMaxPosition*: POINT
     ptMinTrackSize*: POINT
     ptMaxTrackSize*: POINT
+
   PMINMAXINFO* = ptr MINMAXINFO
   LPMINMAXINFO* = ptr MINMAXINFO
   COPYDATASTRUCT* {.pure.} = object
     dwData*: ULONG_PTR
     cbData*: DWORD
     lpData*: PVOID
+
   PCOPYDATASTRUCT* = ptr COPYDATASTRUCT
   MDINEXTMENU* {.pure.} = object
     hmenuIn*: HMENU
     hmenuNext*: HMENU
     hwndNext*: HWND
+
   PMDINEXTMENU* = ptr MDINEXTMENU
   LPMDINEXTMENU* = ptr MDINEXTMENU
   POWERBROADCAST_SETTING* {.pure.} = object
     PowerSetting*: GUID
     DataLength*: DWORD
     Data*: array[1, UCHAR]
+
   PPOWERBROADCAST_SETTING* = ptr POWERBROADCAST_SETTING
   WINDOWPOS* {.pure.} = object
     hwnd*: HWND
@@ -270,22 +297,26 @@ type
     cx*: int32
     cy*: int32
     flags*: UINT
+
   LPWINDOWPOS* = ptr WINDOWPOS
   PWINDOWPOS* = ptr WINDOWPOS
   NCCALCSIZE_PARAMS* {.pure.} = object
     rgrc*: array[3, RECT]
     lppos*: PWINDOWPOS
+
   LPNCCALCSIZE_PARAMS* = ptr NCCALCSIZE_PARAMS
   TTRACKMOUSEEVENT* {.pure.} = object
     cbSize*: DWORD
     dwFlags*: DWORD
     hwndTrack*: HWND
     dwHoverTime*: DWORD
+
   LPTRACKMOUSEEVENT* = ptr TTRACKMOUSEEVENT
   ACCEL* {.pure.} = object
     fVirt*: BYTE
     key*: WORD
     cmd*: WORD
+
   LPACCEL* = ptr ACCEL
   PAINTSTRUCT* {.pure.} = object
     hdc*: HDC
@@ -294,6 +325,7 @@ type
     fRestore*: WINBOOL
     fIncUpdate*: WINBOOL
     rgbReserved*: array[32, BYTE]
+
   PPAINTSTRUCT* = ptr PAINTSTRUCT
   NPPAINTSTRUCT* = ptr PAINTSTRUCT
   LPPAINTSTRUCT* = ptr PAINTSTRUCT
@@ -306,16 +338,19 @@ type
     ptMinPosition*: POINT
     ptMaxPosition*: POINT
     rcNormalPosition*: RECT
+
   PWINDOWPLACEMENT* = ptr WINDOWPLACEMENT
   LPWINDOWPLACEMENT* = ptr WINDOWPLACEMENT
   NMHDR* {.pure.} = object
     hwndFrom*: HWND
     idFrom*: UINT_PTR
     code*: UINT
+
   LPNMHDR* = ptr NMHDR
   STYLESTRUCT* {.pure.} = object
     styleOld*: DWORD
     styleNew*: DWORD
+
   LPSTYLESTRUCT* = ptr STYLESTRUCT
   MEASUREITEMSTRUCT* {.pure.} = object
     CtlType*: UINT
@@ -324,6 +359,7 @@ type
     itemWidth*: UINT
     itemHeight*: UINT
     itemData*: ULONG_PTR
+
   PMEASUREITEMSTRUCT* = ptr MEASUREITEMSTRUCT
   LPMEASUREITEMSTRUCT* = ptr MEASUREITEMSTRUCT
   DRAWITEMSTRUCT* {.pure.} = object
@@ -336,6 +372,7 @@ type
     hDC*: HDC
     rcItem*: RECT
     itemData*: ULONG_PTR
+
   PDRAWITEMSTRUCT* = ptr DRAWITEMSTRUCT
   LPDRAWITEMSTRUCT* = ptr DRAWITEMSTRUCT
   DELETEITEMSTRUCT* {.pure.} = object
@@ -344,6 +381,7 @@ type
     itemID*: UINT
     hwndItem*: HWND
     itemData*: ULONG_PTR
+
   PDELETEITEMSTRUCT* = ptr DELETEITEMSTRUCT
   LPDELETEITEMSTRUCT* = ptr DELETEITEMSTRUCT
   COMPAREITEMSTRUCT* {.pure.} = object
@@ -355,6 +393,7 @@ type
     itemID2*: UINT
     itemData2*: ULONG_PTR
     dwLocaleId*: DWORD
+
   PCOMPAREITEMSTRUCT* = ptr COMPAREITEMSTRUCT
   LPCOMPAREITEMSTRUCT* = ptr COMPAREITEMSTRUCT
   BSMINFO* {.pure.} = object
@@ -362,6 +401,7 @@ type
     hdesk*: HDESK
     hwnd*: HWND
     luid*: LUID
+
   PBSMINFO* = ptr BSMINFO
   PHDEVNOTIFY* = ptr HDEVNOTIFY
   PHPOWERNOTIFY* = ptr HPOWERNOTIFY
@@ -376,6 +416,7 @@ type
     pblend*: ptr BLENDFUNCTION
     dwFlags*: DWORD
     prcDirty*: ptr RECT
+
   PUPDATELAYEREDWINDOWINFO* = ptr UPDATELAYEREDWINDOWINFO
   FLASHWINFO* {.pure.} = object
     cbSize*: UINT
@@ -383,6 +424,7 @@ type
     dwFlags*: DWORD
     uCount*: UINT
     dwTimeout*: DWORD
+
   PFLASHWINFO* = ptr FLASHWINFO
   DLGTEMPLATE* {.pure, packed.} = object
     style*: DWORD
@@ -392,6 +434,7 @@ type
     y*: int16
     cx*: int16
     cy*: int16
+
   LPDLGTEMPLATEA* = ptr DLGTEMPLATE
   LPDLGTEMPLATEW* = ptr DLGTEMPLATE
   LPCDLGTEMPLATEA* = ptr DLGTEMPLATE
@@ -404,6 +447,7 @@ type
     cx*: int16
     cy*: int16
     id*: WORD
+
   PDLGITEMTEMPLATEA* = ptr DLGITEMTEMPLATE
   PDLGITEMTEMPLATEW* = ptr DLGITEMTEMPLATE
   LPDLGITEMTEMPLATEA* = ptr DLGITEMTEMPLATE
@@ -415,6 +459,7 @@ type
     dwFlags*: DWORD
     time*: DWORD
     dwExtraInfo*: ULONG_PTR
+
   PMOUSEINPUT* = ptr MOUSEINPUT
   LPMOUSEINPUT* = ptr MOUSEINPUT
   KEYBDINPUT* {.pure.} = object
@@ -423,21 +468,25 @@ type
     dwFlags*: DWORD
     time*: DWORD
     dwExtraInfo*: ULONG_PTR
+
   PKEYBDINPUT* = ptr KEYBDINPUT
   LPKEYBDINPUT* = ptr KEYBDINPUT
   HARDWAREINPUT* {.pure.} = object
     uMsg*: DWORD
     wParamL*: WORD
     wParamH*: WORD
+
   PHARDWAREINPUT* = ptr HARDWAREINPUT
   LPHARDWAREINPUT* = ptr HARDWAREINPUT
   INPUT_UNION1* {.pure, union.} = object
     mi*: MOUSEINPUT
     ki*: KEYBDINPUT
     hi*: HARDWAREINPUT
+
   INPUT* {.pure.} = object
     `type`*: DWORD
     union1*: INPUT_UNION1
+
   PINPUT* = ptr INPUT
   LPINPUT* = ptr INPUT
   TOUCHINPUT* {.pure.} = object
@@ -451,6 +500,7 @@ type
     dwExtraInfo*: ULONG_PTR
     cxContact*: DWORD
     cyContact*: DWORD
+
   PTOUCHINPUT* = ptr TOUCHINPUT
   PCTOUCHINPUT* = ptr TOUCHINPUT
   POINTER_FLAGS* = UINT32
@@ -461,6 +511,7 @@ type
   TOUCH_HIT_TESTING_PROXIMITY_EVALUATION* {.pure.} = object
     score*: UINT16
     adjustedPoint*: POINT
+
   PTOUCH_HIT_TESTING_PROXIMITY_EVALUATION* = ptr TOUCH_HIT_TESTING_PROXIMITY_EVALUATION
   TOUCH_HIT_TESTING_INPUT* {.pure.} = object
     pointerId*: UINT32
@@ -468,10 +519,12 @@ type
     boundingBox*: RECT
     nonOccludedBoundingBox*: RECT
     orientation*: UINT32
+
   PTOUCH_HIT_TESTING_INPUT* = ptr TOUCH_HIT_TESTING_INPUT
   LASTINPUTINFO* {.pure.} = object
     cbSize*: UINT
     dwTime*: DWORD
+
   PLASTINPUTINFO* = ptr LASTINPUTINFO
   MENUINFO* {.pure.} = object
     cbSize*: DWORD
@@ -481,10 +534,12 @@ type
     hbrBack*: HBRUSH
     dwContextHelpID*: DWORD
     dwMenuData*: ULONG_PTR
+
   LPMENUINFO* = ptr MENUINFO
   TPMPARAMS* {.pure.} = object
     cbSize*: UINT
     rcExclude*: RECT
+
   LPTPMPARAMS* = ptr TPMPARAMS
   LPCMENUINFO* = ptr MENUINFO
   MENUGETOBJECTINFO* {.pure.} = object
@@ -493,6 +548,7 @@ type
     hmenu*: HMENU
     riid*: PVOID
     pvObj*: PVOID
+
   PMENUGETOBJECTINFO* = ptr MENUGETOBJECTINFO
   MENUITEMINFOA* {.pure.} = object
     cbSize*: UINT
@@ -507,6 +563,7 @@ type
     dwTypeData*: LPSTR
     cch*: UINT
     hbmpItem*: HBITMAP
+
   LPMENUITEMINFOA* = ptr MENUITEMINFOA
   MENUITEMINFOW* {.pure.} = object
     cbSize*: UINT
@@ -521,6 +578,7 @@ type
     dwTypeData*: LPWSTR
     cch*: UINT
     hbmpItem*: HBITMAP
+
   LPMENUITEMINFOW* = ptr MENUITEMINFOW
   LPCMENUITEMINFOA* = ptr MENUITEMINFOA
   LPCMENUITEMINFOW* = ptr MENUITEMINFOW
@@ -531,6 +589,7 @@ type
     dwData*: ULONG_PTR
     ptDrop*: POINT
     dwControlData*: DWORD
+
   PDROPSTRUCT* = ptr DROPSTRUCT
   LPDROPSTRUCT* = ptr DROPSTRUCT
   DRAWTEXTPARAMS* {.pure.} = object
@@ -539,6 +598,7 @@ type
     iLeftMargin*: int32
     iRightMargin*: int32
     uiLengthDrawn*: UINT
+
   LPDRAWTEXTPARAMS* = ptr DRAWTEXTPARAMS
   HELPINFO* {.pure.} = object
     cbSize*: UINT
@@ -547,8 +607,9 @@ type
     hItemHandle*: HANDLE
     dwContextId*: DWORD_PTR
     MousePos*: POINT
+
   LPHELPINFO* = ptr HELPINFO
-  MSGBOXCALLBACK* = proc (lpHelpInfo: LPHELPINFO): VOID {.stdcall.}
+  MSGBOXCALLBACK* = proc(lpHelpInfo: LPHELPINFO): VOID {.stdcall.}
   MSGBOXPARAMSA* {.pure.} = object
     cbSize*: UINT
     hwndOwner*: HWND
@@ -560,6 +621,7 @@ type
     dwContextHelpId*: DWORD_PTR
     lpfnMsgBoxCallback*: MSGBOXCALLBACK
     dwLanguageId*: DWORD
+
   PMSGBOXPARAMSA* = ptr MSGBOXPARAMSA
   LPMSGBOXPARAMSA* = ptr MSGBOXPARAMSA
   MSGBOXPARAMSW* {.pure.} = object
@@ -573,16 +635,19 @@ type
     dwContextHelpId*: DWORD_PTR
     lpfnMsgBoxCallback*: MSGBOXCALLBACK
     dwLanguageId*: DWORD
+
   PMSGBOXPARAMSW* = ptr MSGBOXPARAMSW
   LPMSGBOXPARAMSW* = ptr MSGBOXPARAMSW
   MENUITEMTEMPLATEHEADER* {.pure.} = object
     versionNumber*: WORD
     offset*: WORD
+
   PMENUITEMTEMPLATEHEADER* = ptr MENUITEMTEMPLATEHEADER
   MENUITEMTEMPLATE* {.pure.} = object
     mtOption*: WORD
     mtID*: WORD
     mtString*: array[1, WCHAR]
+
   PMENUITEMTEMPLATE* = ptr MENUITEMTEMPLATE
   ICONINFO* {.pure.} = object
     fIcon*: WINBOOL
@@ -590,6 +655,7 @@ type
     yHotspot*: DWORD
     hbmMask*: HBITMAP
     hbmColor*: HBITMAP
+
   PICONINFO* = ptr ICONINFO
   CURSORSHAPE* {.pure.} = object
     xHotSpot*: int32
@@ -599,6 +665,7 @@ type
     cbWidth*: int32
     Planes*: BYTE
     BitsPixel*: BYTE
+
   LPCURSORSHAPE* = ptr CURSORSHAPE
   ICONINFOEXA* {.pure.} = object
     cbSize*: DWORD
@@ -610,6 +677,7 @@ type
     wResID*: WORD
     szModName*: array[MAX_PATH, CHAR]
     szResName*: array[MAX_PATH, CHAR]
+
   PICONINFOEXA* = ptr ICONINFOEXA
   ICONINFOEXW* {.pure.} = object
     cbSize*: DWORD
@@ -621,6 +689,7 @@ type
     wResID*: WORD
     szModName*: array[MAX_PATH, WCHAR]
     szResName*: array[MAX_PATH, WCHAR]
+
   PICONINFOEXW* = ptr ICONINFOEXW
   SCROLLINFO* {.pure.} = object
     cbSize*: UINT
@@ -630,6 +699,7 @@ type
     nPage*: UINT
     nPos*: int32
     nTrackPos*: int32
+
   LPSCROLLINFO* = ptr SCROLLINFO
   LPCSCROLLINFO* = ptr SCROLLINFO
   MDICREATESTRUCTA* {.pure.} = object
@@ -642,6 +712,7 @@ type
     cy*: int32
     style*: DWORD
     lParam*: LPARAM
+
   LPMDICREATESTRUCTA* = ptr MDICREATESTRUCTA
   MDICREATESTRUCTW* {.pure.} = object
     szClass*: LPCWSTR
@@ -653,21 +724,25 @@ type
     cy*: int32
     style*: DWORD
     lParam*: LPARAM
+
   LPMDICREATESTRUCTW* = ptr MDICREATESTRUCTW
   CLIENTCREATESTRUCT* {.pure.} = object
     hWindowMenu*: HANDLE
     idFirstChild*: UINT
+
   LPCLIENTCREATESTRUCT* = ptr CLIENTCREATESTRUCT
   MULTIKEYHELPA* {.pure.} = object
     mkSize*: DWORD
     mkKeylist*: CHAR
     szKeyphrase*: array[1, CHAR]
+
   PMULTIKEYHELPA* = ptr MULTIKEYHELPA
   LPMULTIKEYHELPA* = ptr MULTIKEYHELPA
   MULTIKEYHELPW* {.pure.} = object
     mkSize*: DWORD
     mkKeylist*: WCHAR
     szKeyphrase*: array[1, WCHAR]
+
   PMULTIKEYHELPW* = ptr MULTIKEYHELPW
   LPMULTIKEYHELPW* = ptr MULTIKEYHELPW
   HELPWININFOA* {.pure.} = object
@@ -678,6 +753,7 @@ type
     dy*: int32
     wMax*: int32
     rgchMember*: array[2, CHAR]
+
   PHELPWININFOA* = ptr HELPWININFOA
   LPHELPWININFOA* = ptr HELPWININFOA
   HELPWININFOW* {.pure.} = object
@@ -688,6 +764,7 @@ type
     dy*: int32
     wMax*: int32
     rgchMember*: array[2, WCHAR]
+
   PHELPWININFOW* = ptr HELPWININFOW
   LPHELPWININFOW* = ptr HELPWININFOW
   TOUCHPREDICTIONPARAMETERS* {.pure.} = object
@@ -695,6 +772,7 @@ type
     dwLatency*: UINT
     dwSampleTime*: UINT
     bUseHWTimeStamp*: UINT
+
   PTOUCHPREDICTIONPARAMETERS* = ptr TOUCHPREDICTIONPARAMETERS
   NONCLIENTMETRICSA* {.pure.} = object
     cbSize*: UINT
@@ -713,6 +791,7 @@ type
     lfStatusFont*: LOGFONTA
     lfMessageFont*: LOGFONTA
     iPaddedBorderWidth*: int32
+
   PNONCLIENTMETRICSA* = ptr NONCLIENTMETRICSA
   LPNONCLIENTMETRICSA* = ptr NONCLIENTMETRICSA
   NONCLIENTMETRICSW* {.pure.} = object
@@ -732,6 +811,7 @@ type
     lfStatusFont*: LOGFONTW
     lfMessageFont*: LOGFONTW
     iPaddedBorderWidth*: int32
+
   PNONCLIENTMETRICSW* = ptr NONCLIENTMETRICSW
   LPNONCLIENTMETRICSW* = ptr NONCLIENTMETRICSW
   MINIMIZEDMETRICS* {.pure.} = object
@@ -740,6 +820,7 @@ type
     iHorzGap*: int32
     iVertGap*: int32
     iArrange*: int32
+
   PMINIMIZEDMETRICS* = ptr MINIMIZEDMETRICS
   LPMINIMIZEDMETRICS* = ptr MINIMIZEDMETRICS
   ICONMETRICSA* {.pure.} = object
@@ -748,6 +829,7 @@ type
     iVertSpacing*: int32
     iTitleWrap*: int32
     lfFont*: LOGFONTA
+
   PICONMETRICSA* = ptr ICONMETRICSA
   LPICONMETRICSA* = ptr ICONMETRICSA
   ICONMETRICSW* {.pure.} = object
@@ -756,11 +838,13 @@ type
     iVertSpacing*: int32
     iTitleWrap*: int32
     lfFont*: LOGFONTW
+
   PICONMETRICSW* = ptr ICONMETRICSW
   LPICONMETRICSW* = ptr ICONMETRICSW
   ANIMATIONINFO* {.pure.} = object
     cbSize*: UINT
     iMinAnimate*: int32
+
   LPANIMATIONINFO* = ptr ANIMATIONINFO
   SERIALKEYSA* {.pure.} = object
     cbSize*: UINT
@@ -770,6 +854,7 @@ type
     iBaudRate*: UINT
     iPortState*: UINT
     iActive*: UINT
+
   LPSERIALKEYSA* = ptr SERIALKEYSA
   SERIALKEYSW* {.pure.} = object
     cbSize*: UINT
@@ -779,16 +864,19 @@ type
     iBaudRate*: UINT
     iPortState*: UINT
     iActive*: UINT
+
   LPSERIALKEYSW* = ptr SERIALKEYSW
   HIGHCONTRASTA* {.pure.} = object
     cbSize*: UINT
     dwFlags*: DWORD
     lpszDefaultScheme*: LPSTR
+
   LPHIGHCONTRASTA* = ptr HIGHCONTRASTA
   HIGHCONTRASTW* {.pure.} = object
     cbSize*: UINT
     dwFlags*: DWORD
     lpszDefaultScheme*: LPWSTR
+
   LPHIGHCONTRASTW* = ptr HIGHCONTRASTW
   VIDEOPARAMETERS* {.pure.} = object
     Guid*: GUID
@@ -814,6 +902,7 @@ type
     dwCPKey*: ULONG
     bCP_APSTriggerBits*: ULONG
     bOEMCopyProtection*: array[256, UCHAR]
+
   PVIDEOPARAMETERS* = ptr VIDEOPARAMETERS
   LPVIDEOPARAMETERS* = ptr VIDEOPARAMETERS
   FILTERKEYS* {.pure.} = object
@@ -823,10 +912,12 @@ type
     iDelayMSec*: DWORD
     iRepeatMSec*: DWORD
     iBounceMSec*: DWORD
+
   LPFILTERKEYS* = ptr FILTERKEYS
   STICKYKEYS* {.pure.} = object
     cbSize*: UINT
     dwFlags*: DWORD
+
   LPSTICKYKEYS* = ptr STICKYKEYS
   MOUSEKEYS* {.pure.} = object
     cbSize*: UINT
@@ -836,11 +927,13 @@ type
     iCtrlSpeed*: DWORD
     dwReserved1*: DWORD
     dwReserved2*: DWORD
+
   LPMOUSEKEYS* = ptr MOUSEKEYS
   ACCESSTIMEOUT* {.pure.} = object
     cbSize*: UINT
     dwFlags*: DWORD
     iTimeOutMSec*: DWORD
+
   LPACCESSTIMEOUT* = ptr ACCESSTIMEOUT
   SOUNDSENTRYA* {.pure.} = object
     cbSize*: UINT
@@ -855,6 +948,7 @@ type
     iWindowsEffectMSec*: DWORD
     lpszWindowsEffectDLL*: LPSTR
     iWindowsEffectOrdinal*: DWORD
+
   LPSOUNDSENTRYA* = ptr SOUNDSENTRYA
   SOUNDSENTRYW* {.pure.} = object
     cbSize*: UINT
@@ -869,39 +963,47 @@ type
     iWindowsEffectMSec*: DWORD
     lpszWindowsEffectDLL*: LPWSTR
     iWindowsEffectOrdinal*: DWORD
+
   LPSOUNDSENTRYW* = ptr SOUNDSENTRYW
   TOGGLEKEYS* {.pure.} = object
     cbSize*: UINT
     dwFlags*: DWORD
+
   LPTOGGLEKEYS* = ptr TOGGLEKEYS
   MONITORINFO* {.pure.} = object
     cbSize*: DWORD
     rcMonitor*: RECT
     rcWork*: RECT
     dwFlags*: DWORD
+
   LPMONITORINFO* = ptr MONITORINFO
   AUDIODESCRIPTION* {.pure.} = object
     cbSize*: UINT
     Enabled*: WINBOOL
     Locale*: LCID
+
   LPAUDIODESCRIPTION* = ptr AUDIODESCRIPTION
   MONITORINFOEXA_STRUCT1* {.pure.} = object
     cbSize*: DWORD
     rcMonitor*: RECT
     rcWork*: RECT
     dwFlags*: DWORD
+
   MONITORINFOEXA* {.pure.} = object
     struct1*: MONITORINFOEXA_STRUCT1
     szDevice*: array[CCHDEVICENAME, CHAR]
+
   LPMONITORINFOEXA* = ptr MONITORINFOEXA
   MONITORINFOEXW_STRUCT1* {.pure.} = object
     cbSize*: DWORD
     rcMonitor*: RECT
     rcWork*: RECT
     dwFlags*: DWORD
+
   MONITORINFOEXW* {.pure.} = object
     struct1*: MONITORINFOEXW_STRUCT1
     szDevice*: array[CCHDEVICENAME, WCHAR]
+
   LPMONITORINFOEXW* = ptr MONITORINFOEXW
   GUITHREADINFO* {.pure.} = object
     cbSize*: DWORD
@@ -913,6 +1015,7 @@ type
     hwndMoveSize*: HWND
     hwndCaret*: HWND
     rcCaret*: RECT
+
   PGUITHREADINFO* = ptr GUITHREADINFO
   LPGUITHREADINFO* = ptr GUITHREADINFO
   CURSORINFO* {.pure.} = object
@@ -920,6 +1023,7 @@ type
     flags*: DWORD
     hCursor*: HCURSOR
     ptScreenPos*: POINT
+
   PCURSORINFO* = ptr CURSORINFO
   LPCURSORINFO* = ptr CURSORINFO
   WINDOWINFO* {.pure.} = object
@@ -933,15 +1037,17 @@ type
     cyWindowBorders*: UINT
     atomWindowType*: ATOM
     wCreatorVersion*: WORD
+
   PWINDOWINFO* = ptr WINDOWINFO
   LPWINDOWINFO* = ptr WINDOWINFO
-const
-  CCHILDREN_TITLEBAR* = 5
+
+const CCHILDREN_TITLEBAR* = 5
 type
   TITLEBARINFO* {.pure.} = object
     cbSize*: DWORD
     rcTitleBar*: RECT
     rgstate*: array[CCHILDREN_TITLEBAR + 1, DWORD]
+
   PTITLEBARINFO* = ptr TITLEBARINFO
   LPTITLEBARINFO* = ptr TITLEBARINFO
   TITLEBARINFOEX* {.pure.} = object
@@ -949,6 +1055,7 @@ type
     rcTitleBar*: RECT
     rgstate*: array[CCHILDREN_TITLEBAR + 1, DWORD]
     rgrect*: array[CCHILDREN_TITLEBAR + 1, RECT]
+
   PTITLEBARINFOEX* = ptr TITLEBARINFOEX
   LPTITLEBARINFOEX* = ptr TITLEBARINFOEX
   MENUBARINFO* {.pure.} = object
@@ -956,12 +1063,13 @@ type
     rcBar*: RECT
     hMenu*: HMENU
     hwndMenu*: HWND
-    fBarFocused* {.bitsize:1.}: WINBOOL
-    fFocused* {.bitsize:1.}: WINBOOL
+    fBarFocused* {.bitsize: 1.}: WINBOOL
+    fFocused* {.bitsize: 1.}: WINBOOL
+
   PMENUBARINFO* = ptr MENUBARINFO
   LPMENUBARINFO* = ptr MENUBARINFO
-const
-  CCHILDREN_SCROLLBAR* = 5
+
+const CCHILDREN_SCROLLBAR* = 5
 type
   SCROLLBARINFO* {.pure.} = object
     cbSize*: DWORD
@@ -971,6 +1079,7 @@ type
     xyThumbBottom*: int32
     reserved*: int32
     rgstate*: array[CCHILDREN_SCROLLBAR + 1, DWORD]
+
   PSCROLLBARINFO* = ptr SCROLLBARINFO
   LPSCROLLBARINFO* = ptr SCROLLBARINFO
   COMBOBOXINFO* {.pure.} = object
@@ -981,6 +1090,7 @@ type
     hwndCombo*: HWND
     hwndItem*: HWND
     hwndList*: HWND
+
   PCOMBOBOXINFO* = ptr COMBOBOXINFO
   LPCOMBOBOXINFO* = ptr COMBOBOXINFO
   ALTTABINFO* {.pure.} = object
@@ -993,6 +1103,7 @@ type
     cxItem*: int32
     cyItem*: int32
     ptStart*: POINT
+
   PALTTABINFO* = ptr ALTTABINFO
   LPALTTABINFO* = ptr ALTTABINFO
   RAWINPUTHEADER* {.pure.} = object
@@ -1000,14 +1111,17 @@ type
     dwSize*: DWORD
     hDevice*: HANDLE
     wParam*: WPARAM
+
   PRAWINPUTHEADER* = ptr RAWINPUTHEADER
   LPRAWINPUTHEADER* = ptr RAWINPUTHEADER
   RAWMOUSE_UNION1_STRUCT1* {.pure.} = object
     usButtonFlags*: USHORT
     usButtonData*: USHORT
+
   RAWMOUSE_UNION1* {.pure, union.} = object
     ulButtons*: ULONG
     struct1*: RAWMOUSE_UNION1_STRUCT1
+
   RAWMOUSE* {.pure.} = object
     usFlags*: USHORT
     union1*: RAWMOUSE_UNION1
@@ -1015,6 +1129,7 @@ type
     lLastX*: LONG
     lLastY*: LONG
     ulExtraInformation*: ULONG
+
   PRAWMOUSE* = ptr RAWMOUSE
   LPRAWMOUSE* = ptr RAWMOUSE
   RAWKEYBOARD* {.pure.} = object
@@ -1024,21 +1139,25 @@ type
     VKey*: USHORT
     Message*: UINT
     ExtraInformation*: ULONG
+
   PRAWKEYBOARD* = ptr RAWKEYBOARD
   LPRAWKEYBOARD* = ptr RAWKEYBOARD
   RAWHID* {.pure.} = object
     dwSizeHid*: DWORD
     dwCount*: DWORD
     bRawData*: array[1, BYTE]
+
   PRAWHID* = ptr RAWHID
   LPRAWHID* = ptr RAWHID
   RAWINPUT_data* {.pure, union.} = object
     mouse*: RAWMOUSE
     keyboard*: RAWKEYBOARD
     hid*: RAWHID
+
   RAWINPUT* {.pure.} = object
     header*: RAWINPUTHEADER
     data*: RAWINPUT_data
+
   PRAWINPUT* = ptr RAWINPUT
   LPRAWINPUT* = ptr RAWINPUT
   RID_DEVICE_INFO_MOUSE* {.pure.} = object
@@ -1046,6 +1165,7 @@ type
     dwNumberOfButtons*: DWORD
     dwSampleRate*: DWORD
     fHasHorizontalWheel*: WINBOOL
+
   PRID_DEVICE_INFO_MOUSE* = ptr RID_DEVICE_INFO_MOUSE
   RID_DEVICE_INFO_KEYBOARD* {.pure.} = object
     dwType*: DWORD
@@ -1054,6 +1174,7 @@ type
     dwNumberOfFunctionKeys*: DWORD
     dwNumberOfIndicators*: DWORD
     dwNumberOfKeysTotal*: DWORD
+
   PRID_DEVICE_INFO_KEYBOARD* = ptr RID_DEVICE_INFO_KEYBOARD
   RID_DEVICE_INFO_HID* {.pure.} = object
     dwVendorId*: DWORD
@@ -1061,15 +1182,18 @@ type
     dwVersionNumber*: DWORD
     usUsagePage*: USHORT
     usUsage*: USHORT
+
   PRID_DEVICE_INFO_HID* = ptr RID_DEVICE_INFO_HID
   RID_DEVICE_INFO_UNION1* {.pure, union.} = object
     mouse*: RID_DEVICE_INFO_MOUSE
     keyboard*: RID_DEVICE_INFO_KEYBOARD
     hid*: RID_DEVICE_INFO_HID
+
   RID_DEVICE_INFO* {.pure.} = object
     cbSize*: DWORD
     dwType*: DWORD
     union1*: RID_DEVICE_INFO_UNION1
+
   PRID_DEVICE_INFO* = ptr RID_DEVICE_INFO
   LPRID_DEVICE_INFO* = ptr RID_DEVICE_INFO
   RAWINPUTDEVICE* {.pure.} = object
@@ -1077,16 +1201,19 @@ type
     usUsage*: USHORT
     dwFlags*: DWORD
     hwndTarget*: HWND
+
   PRAWINPUTDEVICE* = ptr RAWINPUTDEVICE
   LPRAWINPUTDEVICE* = ptr RAWINPUTDEVICE
   PCRAWINPUTDEVICE* = ptr RAWINPUTDEVICE
   RAWINPUTDEVICELIST* {.pure.} = object
     hDevice*: HANDLE
     dwType*: DWORD
+
   PRAWINPUTDEVICELIST* = ptr RAWINPUTDEVICELIST
   CHANGEFILTERSTRUCT* {.pure.} = object
     cbSize*: DWORD
     ExtStatus*: DWORD
+
   PCHANGEFILTERSTRUCT* = ptr CHANGEFILTERSTRUCT
   GESTUREINFO* {.pure.} = object
     cbSize*: UINT
@@ -1098,6 +1225,7 @@ type
     dwSequenceID*: DWORD
     ullArguments*: ULONGLONG
     cbExtraArgs*: UINT
+
   PGESTUREINFO* = ptr GESTUREINFO
   PCGESTUREINFO* = ptr GESTUREINFO
   GESTURENOTIFYSTRUCT* {.pure.} = object
@@ -1106,13 +1234,18 @@ type
     hwndTarget*: HWND
     ptsLocation*: POINTS
     dwInstanceID*: DWORD
+
   PGESTURENOTIFYSTRUCT* = ptr GESTURENOTIFYSTRUCT
   GESTURECONFIG* {.pure.} = object
     dwID*: DWORD
     dwWant*: DWORD
     dwBlock*: DWORD
+
   PGESTURECONFIG* = ptr GESTURECONFIG
-template MAKEINTRESOURCE*(i: untyped): untyped = cast[LPTSTR](i and 0xffff)
+
+template MAKEINTRESOURCE*(i: untyped): untyped =
+  cast[LPTSTR](i and 0xffff)
+
 const
   RT_CURSOR* = MAKEINTRESOURCE(1)
   RT_BITMAP* = MAKEINTRESOURCE(2)
@@ -1531,7 +1664,10 @@ const
   WINSTA_EXITWINDOWS* = 0x0040
   WINSTA_ENUMERATE* = 0x0100
   WINSTA_READSCREEN* = 0x0200
-  WINSTA_ALL_ACCESS* = WINSTA_ENUMDESKTOPS or WINSTA_READATTRIBUTES or WINSTA_ACCESSCLIPBOARD or WINSTA_CREATEDESKTOP or WINSTA_WRITEATTRIBUTES or WINSTA_ACCESSGLOBALATOMS or WINSTA_EXITWINDOWS or WINSTA_ENUMERATE or WINSTA_READSCREEN
+  WINSTA_ALL_ACCESS* =
+    WINSTA_ENUMDESKTOPS or WINSTA_READATTRIBUTES or WINSTA_ACCESSCLIPBOARD or
+    WINSTA_CREATEDESKTOP or WINSTA_WRITEATTRIBUTES or WINSTA_ACCESSGLOBALATOMS or
+    WINSTA_EXITWINDOWS or WINSTA_ENUMERATE or WINSTA_READSCREEN
   CWF_CREATE_ONLY* = 0x00000001
   WSF_VISIBLE* = 0x0001
   UOI_FLAGS* = 1
@@ -1960,7 +2096,9 @@ const
   WS_TILED* = WS_OVERLAPPED
   WS_ICONIC* = WS_MINIMIZE
   WS_SIZEBOX* = WS_THICKFRAME
-  WS_OVERLAPPEDWINDOW* = WS_OVERLAPPED or WS_CAPTION or WS_SYSMENU or WS_THICKFRAME or WS_MINIMIZEBOX or WS_MAXIMIZEBOX
+  WS_OVERLAPPEDWINDOW* =
+    WS_OVERLAPPED or WS_CAPTION or WS_SYSMENU or WS_THICKFRAME or WS_MINIMIZEBOX or
+    WS_MAXIMIZEBOX
   WS_TILEDWINDOW* = WS_OVERLAPPEDWINDOW
   WS_POPUPWINDOW* = WS_POPUP or WS_BORDER or WS_SYSMENU
   WS_CHILDWINDOW* = WS_CHILD
@@ -2372,7 +2510,8 @@ const
   MWMO_INPUTAVAILABLE* = 0x0004
   QS_ALLPOSTMESSAGE* = 0x0100
   QS_ALLEVENTS* = QS_INPUT or QS_POSTMESSAGE or QS_TIMER or QS_PAINT or QS_HOTKEY
-  QS_ALLINPUT* = QS_INPUT or QS_POSTMESSAGE or QS_TIMER or QS_PAINT or QS_HOTKEY or QS_SENDMESSAGE
+  QS_ALLINPUT* =
+    QS_INPUT or QS_POSTMESSAGE or QS_TIMER or QS_PAINT or QS_HOTKEY or QS_SENDMESSAGE
   USER_TIMER_MAXIMUM* = 0x7FFFFFFF
   USER_TIMER_MINIMUM* = 0x0000000A
   TIMERV_DEFAULT_COALESCING* = 0
@@ -3087,11 +3226,10 @@ const
   DWL_DLGPROC* = 4
   DWL_USER* = 8
   DWLP_MSGRESULT* = 0
-  DWLP_DLGPROC* = DWLP_MSGRESULT+sizeof(LRESULT)
-type
-  DLGPROC* = proc (P1: HWND, P2: UINT, P3: WPARAM, P4: LPARAM): INT_PTR {.stdcall.}
+  DWLP_DLGPROC* = DWLP_MSGRESULT + sizeof(LRESULT)
+type DLGPROC* = proc(P1: HWND, P2: UINT, P3: WPARAM, P4: LPARAM): INT_PTR {.stdcall.}
 const
-  DWLP_USER* = DWLP_DLGPROC+sizeof(DLGPROC)
+  DWLP_USER* = DWLP_DLGPROC + sizeof(DLGPROC)
   DDL_READWRITE* = 0x0000
   DDL_READONLY* = 0x0001
   DDL_HIDDEN* = 0x0002
@@ -3117,9 +3255,9 @@ const
   DS_CONTEXTHELP* = 0x2000
   DS_SHELLFONT* = DS_SETFONT or DS_FIXEDSYS
   DS_USEPIXELS* = 0x8000
-  DM_GETDEFID* = WM_USER+0
-  DM_SETDEFID* = WM_USER+1
-  DM_REPOSITION* = WM_USER+2
+  DM_GETDEFID* = WM_USER + 0
+  DM_SETDEFID* = WM_USER + 1
+  DM_REPOSITION* = WM_USER + 2
   DC_HASDEFID* = 0x534B
   DLGC_WANTARROWS* = 0x0001
   DLGC_WANTTAB* = 0x0002
@@ -4061,26 +4199,42 @@ const
   ORIENTATION_PREFERENCE_PORTRAIT* = 0x2
   ORIENTATION_PREFERENCE_LANDSCAPE_FLIPPED* = 0x4
   ORIENTATION_PREFERENCE_PORTRAIT_FLIPPED* = 0x8
-  RT_GROUP_CURSOR* = MAKEINTRESOURCE(1+DIFFERENCE)
-  RT_GROUP_ICON* = MAKEINTRESOURCE(3+DIFFERENCE)
+  RT_GROUP_CURSOR* = MAKEINTRESOURCE(1 + DIFFERENCE)
+  RT_GROUP_ICON* = MAKEINTRESOURCE(3 + DIFFERENCE)
   SETWALLPAPER_DEFAULT* = cast[LPWSTR](-1)
   WHEEL_PAGESCROLL* = 0xffffffff'i32
 type
-  TIMERPROC* = proc (P1: HWND, P2: UINT, P3: UINT_PTR, P4: DWORD): VOID {.stdcall.}
-  GRAYSTRINGPROC* = proc (P1: HDC, P2: LPARAM, P3: int32): WINBOOL {.stdcall.}
-  WNDENUMPROC* = proc (P1: HWND, P2: LPARAM): WINBOOL {.stdcall.}
-  HOOKPROC* = proc (code: int32, wParam: WPARAM, lParam: LPARAM): LRESULT {.stdcall.}
-  SENDASYNCPROC* = proc (P1: HWND, P2: UINT, P3: ULONG_PTR, P4: LRESULT): VOID {.stdcall.}
-  PROPENUMPROCA* = proc (P1: HWND, P2: LPCSTR, P3: HANDLE): WINBOOL {.stdcall.}
-  PROPENUMPROCW* = proc (P1: HWND, P2: LPCWSTR, P3: HANDLE): WINBOOL {.stdcall.}
-  PROPENUMPROCEXA* = proc (P1: HWND, P2: LPSTR, P3: HANDLE, P4: ULONG_PTR): WINBOOL {.stdcall.}
-  PROPENUMPROCEXW* = proc (P1: HWND, P2: LPWSTR, P3: HANDLE, P4: ULONG_PTR): WINBOOL {.stdcall.}
-  EDITWORDBREAKPROCA* = proc (lpch: LPSTR, ichCurrent: int32, cch: int32, code: int32): int32 {.stdcall.}
-  EDITWORDBREAKPROCW* = proc (lpch: LPWSTR, ichCurrent: int32, cch: int32, code: int32): int32 {.stdcall.}
-  DRAWSTATEPROC* = proc (hdc: HDC, lData: LPARAM, wData: WPARAM, cx: int32, cy: int32): WINBOOL {.stdcall.}
-  PREGISTERCLASSNAMEW* = proc (P1: LPCWSTR): BOOLEAN {.stdcall.}
-  MONITORENUMPROC* = proc (P1: HMONITOR, P2: HDC, P3: LPRECT, P4: LPARAM): WINBOOL {.stdcall.}
-  WINEVENTPROC* = proc (hWinEventHook: HWINEVENTHOOK, event: DWORD, hwnd: HWND, idObject: LONG, idChild: LONG, idEventThread: DWORD, dwmsEventTime: DWORD): VOID {.stdcall.}
+  TIMERPROC* = proc(P1: HWND, P2: UINT, P3: UINT_PTR, P4: DWORD): VOID {.stdcall.}
+  GRAYSTRINGPROC* = proc(P1: HDC, P2: LPARAM, P3: int32): WINBOOL {.stdcall.}
+  WNDENUMPROC* = proc(P1: HWND, P2: LPARAM): WINBOOL {.stdcall.}
+  HOOKPROC* = proc(code: int32, wParam: WPARAM, lParam: LPARAM): LRESULT {.stdcall.}
+  SENDASYNCPROC* =
+    proc(P1: HWND, P2: UINT, P3: ULONG_PTR, P4: LRESULT): VOID {.stdcall.}
+  PROPENUMPROCA* = proc(P1: HWND, P2: LPCSTR, P3: HANDLE): WINBOOL {.stdcall.}
+  PROPENUMPROCW* = proc(P1: HWND, P2: LPCWSTR, P3: HANDLE): WINBOOL {.stdcall.}
+  PROPENUMPROCEXA* =
+    proc(P1: HWND, P2: LPSTR, P3: HANDLE, P4: ULONG_PTR): WINBOOL {.stdcall.}
+  PROPENUMPROCEXW* =
+    proc(P1: HWND, P2: LPWSTR, P3: HANDLE, P4: ULONG_PTR): WINBOOL {.stdcall.}
+  EDITWORDBREAKPROCA* =
+    proc(lpch: LPSTR, ichCurrent: int32, cch: int32, code: int32): int32 {.stdcall.}
+  EDITWORDBREAKPROCW* =
+    proc(lpch: LPWSTR, ichCurrent: int32, cch: int32, code: int32): int32 {.stdcall.}
+  DRAWSTATEPROC* = proc(
+    hdc: HDC, lData: LPARAM, wData: WPARAM, cx: int32, cy: int32
+  ): WINBOOL {.stdcall.}
+  PREGISTERCLASSNAMEW* = proc(P1: LPCWSTR): BOOLEAN {.stdcall.}
+  MONITORENUMPROC* =
+    proc(P1: HMONITOR, P2: HDC, P3: LPRECT, P4: LPARAM): WINBOOL {.stdcall.}
+  WINEVENTPROC* = proc(
+    hWinEventHook: HWINEVENTHOOK,
+    event: DWORD,
+    hwnd: HWND,
+    idObject: LONG,
+    idChild: LONG,
+    idEventThread: DWORD,
+    dwmsEventTime: DWORD,
+  ): VOID {.stdcall.}
   POINTER_INFO* {.pure.} = object
     pointerType*: POINTER_INPUT_TYPE
     pointerId*: UINT32
@@ -4098,6 +4252,7 @@ type
     dwKeyStates*: DWORD
     PerformanceCount*: UINT64
     ButtonChangeType*: POINTER_BUTTON_CHANGE_TYPE
+
   POINTER_TOUCH_INFO* {.pure.} = object
     pointerInfo*: POINTER_INFO
     touchFlags*: TOUCH_FLAGS
@@ -4106,6 +4261,7 @@ type
     rcContactRaw*: RECT
     orientation*: UINT32
     pressure*: UINT32
+
   POINTER_PEN_INFO* {.pure.} = object
     pointerInfo*: POINTER_INFO
     penFlags*: PEN_FLAGS
@@ -4114,6 +4270,7 @@ type
     rotation*: UINT32
     tiltX*: INT32
     tiltY*: INT32
+
   POINTER_DEVICE_INFO* {.pure.} = object
     displayOrientation*: DWORD
     device*: HANDLE
@@ -4122,6 +4279,7 @@ type
     startingCursorId*: ULONG
     maxActiveContacts*: USHORT
     productString*: array[POINTER_DEVICE_PRODUCT_STRING_MAX, WCHAR]
+
   POINTER_DEVICE_PROPERTY* {.pure.} = object
     logicalMin*: INT32
     logicalMax*: INT32
@@ -4131,12 +4289,15 @@ type
     unitExponent*: UINT32
     usagePageId*: USHORT
     usageId*: USHORT
+
   POINTER_DEVICE_CURSOR_INFO* {.pure.} = object
     cursorId*: UINT32
     cursor*: POINTER_DEVICE_CURSOR_TYPE
+
   INPUT_MESSAGE_SOURCE* {.pure.} = object
     deviceType*: INPUT_MESSAGE_DEVICE_TYPE
     originId*: INPUT_MESSAGE_ORIGIN_ID
+
   INPUT_TRANSFORM_UNION1_STRUCT1* {.pure.} = object
     m11*: float32
     m12*: float32
@@ -4154,249 +4315,1010 @@ type
     m42*: float32
     m43*: float32
     m44*: float32
+
   INPUT_TRANSFORM_UNION1* {.pure, union.} = object
     struct1*: INPUT_TRANSFORM_UNION1_STRUCT1
     m*: array[4, array[4, float32]]
+
   INPUT_TRANSFORM* {.pure.} = object
     union1*: INPUT_TRANSFORM_UNION1
+
   MENUTEMPLATEA* {.pure.} = object
   MENUTEMPLATEW* {.pure.} = object
-proc wvsprintfA*(P1: LPSTR, P2: LPCSTR, arglist: va_list): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc wvsprintfW*(P1: LPWSTR, P2: LPCWSTR, arglist: va_list): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc wsprintfA*(P1: LPSTR, P2: LPCSTR): int32 {.winapi, cdecl, varargs, dynlib: "user32", importc.}
-proc wsprintfW*(P1: LPWSTR, P2: LPCWSTR): int32 {.winapi, cdecl, varargs, dynlib: "user32", importc.}
-proc LoadKeyboardLayoutA*(pwszKLID: LPCSTR, Flags: UINT): HKL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadKeyboardLayoutW*(pwszKLID: LPCWSTR, Flags: UINT): HKL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ActivateKeyboardLayout*(hkl: HKL, Flags: UINT): HKL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ToUnicodeEx*(wVirtKey: UINT, wScanCode: UINT, lpKeyState: ptr BYTE, pwszBuff: LPWSTR, cchBuff: int32, wFlags: UINT, dwhkl: HKL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnloadKeyboardLayout*(hkl: HKL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyboardLayoutNameA*(pwszKLID: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyboardLayoutNameW*(pwszKLID: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyboardLayoutList*(nBuff: int32, lpList: ptr HKL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyboardLayout*(idThread: DWORD): HKL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMouseMovePointsEx*(cbSize: UINT, lppt: LPMOUSEMOVEPOINT, lpptBuf: LPMOUSEMOVEPOINT, nBufPoints: int32, resolution: DWORD): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDesktopA*(lpszDesktop: LPCSTR, lpszDevice: LPCSTR, pDevmode: LPDEVMODEA, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDesktopW*(lpszDesktop: LPCWSTR, lpszDevice: LPCWSTR, pDevmode: LPDEVMODEW, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDesktopExA*(lpszDesktop: LPCSTR, lpszDevice: LPCSTR, pDevmode: ptr DEVMODEA, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES, ulHeapSize: ULONG, pvoid: PVOID): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDesktopExW*(lpszDesktop: LPCWSTR, lpszDevice: LPCWSTR, pDevmode: ptr DEVMODEW, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES, ulHeapSize: ULONG, pvoid: PVOID): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc OpenDesktopA*(lpszDesktop: LPCSTR, dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc OpenDesktopW*(lpszDesktop: LPCWSTR, dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc OpenInputDesktop*(dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDesktopsA*(hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCA, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDesktopsW*(hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCW, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDesktopWindows*(hDesktop: HDESK, lpfn: WNDENUMPROC, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SwitchDesktop*(hDesktop: HDESK): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetThreadDesktop*(hDesktop: HDESK): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CloseDesktop*(hDesktop: HDESK): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetThreadDesktop*(dwThreadId: DWORD): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateWindowStationA*(lpwinsta: LPCSTR, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateWindowStationW*(lpwinsta: LPCWSTR, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
-proc OpenWindowStationA*(lpszWinSta: LPCSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
-proc OpenWindowStationW*(lpszWinSta: LPCWSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumWindowStationsA*(lpEnumFunc: WINSTAENUMPROCA, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumWindowStationsW*(lpEnumFunc: WINSTAENUMPROCW, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CloseWindowStation*(hWinSta: HWINSTA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetProcessWindowStation*(hWinSta: HWINSTA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc wvsprintfA*(
+  P1: LPSTR, P2: LPCSTR, arglist: va_list
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc wvsprintfW*(
+  P1: LPWSTR, P2: LPCWSTR, arglist: va_list
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc wsprintfA*(
+  P1: LPSTR, P2: LPCSTR
+): int32 {.winapi, cdecl, varargs, dynlib: "user32", importc.}
+
+proc wsprintfW*(
+  P1: LPWSTR, P2: LPCWSTR
+): int32 {.winapi, cdecl, varargs, dynlib: "user32", importc.}
+
+proc LoadKeyboardLayoutA*(
+  pwszKLID: LPCSTR, Flags: UINT
+): HKL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadKeyboardLayoutW*(
+  pwszKLID: LPCWSTR, Flags: UINT
+): HKL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ActivateKeyboardLayout*(
+  hkl: HKL, Flags: UINT
+): HKL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ToUnicodeEx*(
+  wVirtKey: UINT,
+  wScanCode: UINT,
+  lpKeyState: ptr BYTE,
+  pwszBuff: LPWSTR,
+  cchBuff: int32,
+  wFlags: UINT,
+  dwhkl: HKL,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnloadKeyboardLayout*(
+  hkl: HKL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyboardLayoutNameA*(
+  pwszKLID: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyboardLayoutNameW*(
+  pwszKLID: LPWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyboardLayoutList*(
+  nBuff: int32, lpList: ptr HKL
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyboardLayout*(
+  idThread: DWORD
+): HKL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMouseMovePointsEx*(
+  cbSize: UINT,
+  lppt: LPMOUSEMOVEPOINT,
+  lpptBuf: LPMOUSEMOVEPOINT,
+  nBufPoints: int32,
+  resolution: DWORD,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateDesktopA*(
+  lpszDesktop: LPCSTR,
+  lpszDevice: LPCSTR,
+  pDevmode: LPDEVMODEA,
+  dwFlags: DWORD,
+  dwDesiredAccess: ACCESS_MASK,
+  lpsa: LPSECURITY_ATTRIBUTES,
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateDesktopW*(
+  lpszDesktop: LPCWSTR,
+  lpszDevice: LPCWSTR,
+  pDevmode: LPDEVMODEW,
+  dwFlags: DWORD,
+  dwDesiredAccess: ACCESS_MASK,
+  lpsa: LPSECURITY_ATTRIBUTES,
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateDesktopExA*(
+  lpszDesktop: LPCSTR,
+  lpszDevice: LPCSTR,
+  pDevmode: ptr DEVMODEA,
+  dwFlags: DWORD,
+  dwDesiredAccess: ACCESS_MASK,
+  lpsa: LPSECURITY_ATTRIBUTES,
+  ulHeapSize: ULONG,
+  pvoid: PVOID,
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateDesktopExW*(
+  lpszDesktop: LPCWSTR,
+  lpszDevice: LPCWSTR,
+  pDevmode: ptr DEVMODEW,
+  dwFlags: DWORD,
+  dwDesiredAccess: ACCESS_MASK,
+  lpsa: LPSECURITY_ATTRIBUTES,
+  ulHeapSize: ULONG,
+  pvoid: PVOID,
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OpenDesktopA*(
+  lpszDesktop: LPCSTR, dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OpenDesktopW*(
+  lpszDesktop: LPCWSTR, dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OpenInputDesktop*(
+  dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDesktopsA*(
+  hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCA, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDesktopsW*(
+  hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCW, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDesktopWindows*(
+  hDesktop: HDESK, lpfn: WNDENUMPROC, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SwitchDesktop*(
+  hDesktop: HDESK
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetThreadDesktop*(
+  hDesktop: HDESK
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CloseDesktop*(
+  hDesktop: HDESK
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetThreadDesktop*(
+  dwThreadId: DWORD
+): HDESK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateWindowStationA*(
+  lpwinsta: LPCSTR,
+  dwFlags: DWORD,
+  dwDesiredAccess: ACCESS_MASK,
+  lpsa: LPSECURITY_ATTRIBUTES,
+): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateWindowStationW*(
+  lpwinsta: LPCWSTR,
+  dwFlags: DWORD,
+  dwDesiredAccess: ACCESS_MASK,
+  lpsa: LPSECURITY_ATTRIBUTES,
+): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OpenWindowStationA*(
+  lpszWinSta: LPCSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OpenWindowStationW*(
+  lpszWinSta: LPCWSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumWindowStationsA*(
+  lpEnumFunc: WINSTAENUMPROCA, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumWindowStationsW*(
+  lpEnumFunc: WINSTAENUMPROCW, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CloseWindowStation*(
+  hWinSta: HWINSTA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetProcessWindowStation*(
+  hWinSta: HWINSTA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetProcessWindowStation*(): HWINSTA {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetUserObjectSecurity*(hObj: HANDLE, pSIRequested: PSECURITY_INFORMATION, pSID: PSECURITY_DESCRIPTOR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetUserObjectSecurity*(hObj: HANDLE, pSIRequested: PSECURITY_INFORMATION, pSID: PSECURITY_DESCRIPTOR, nLength: DWORD, lpnLengthNeeded: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetUserObjectInformationA*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetUserObjectInformationW*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetUserObjectInformationA*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetUserObjectInformationW*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsHungAppWindow*(hwnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DisableProcessWindowsGhosting*(): VOID {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterWindowMessageA*(lpString: LPCSTR): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterWindowMessageW*(lpString: LPCWSTR): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc TrackMouseEvent*(lpEventTrack: LPTRACKMOUSEEVENT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawEdge*(hdc: HDC, qrc: LPRECT, edge: UINT, grfFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawFrameControl*(P1: HDC, P2: LPRECT, P3: UINT, P4: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawCaption*(hwnd: HWND, hdc: HDC, lprect: ptr RECT, flags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawAnimatedRects*(hwnd: HWND, idAni: int32, lprcFrom: ptr RECT, lprcTo: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMessageA*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMessageW*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc TranslateMessage*(lpMsg: ptr MSG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DispatchMessageA*(lpMsg: ptr MSG): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DispatchMessageW*(lpMsg: ptr MSG): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMessageQueue*(cMessagesMax: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PeekMessageA*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PeekMessageW*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterHotKey*(hWnd: HWND, id: int32, fsModifiers: UINT, vk: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterHotKey*(hWnd: HWND, id: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ExitWindowsEx*(uFlags: UINT, dwReason: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SwapMouseButton*(fSwap: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetUserObjectSecurity*(
+  hObj: HANDLE, pSIRequested: PSECURITY_INFORMATION, pSID: PSECURITY_DESCRIPTOR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetUserObjectSecurity*(
+  hObj: HANDLE,
+  pSIRequested: PSECURITY_INFORMATION,
+  pSID: PSECURITY_DESCRIPTOR,
+  nLength: DWORD,
+  lpnLengthNeeded: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetUserObjectInformationA*(
+  hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetUserObjectInformationW*(
+  hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetUserObjectInformationA*(
+  hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetUserObjectInformationW*(
+  hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsHungAppWindow*(
+  hwnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DisableProcessWindowsGhosting*(): VOID {.
+  winapi, stdcall, dynlib: "user32", importc
+.}
+
+proc RegisterWindowMessageA*(
+  lpString: LPCSTR
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterWindowMessageW*(
+  lpString: LPCWSTR
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TrackMouseEvent*(
+  lpEventTrack: LPTRACKMOUSEEVENT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawEdge*(
+  hdc: HDC, qrc: LPRECT, edge: UINT, grfFlags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawFrameControl*(
+  P1: HDC, P2: LPRECT, P3: UINT, P4: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawCaption*(
+  hwnd: HWND, hdc: HDC, lprect: ptr RECT, flags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawAnimatedRects*(
+  hwnd: HWND, idAni: int32, lprcFrom: ptr RECT, lprcTo: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMessageA*(
+  lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMessageW*(
+  lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TranslateMessage*(
+  lpMsg: ptr MSG
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DispatchMessageA*(
+  lpMsg: ptr MSG
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DispatchMessageW*(
+  lpMsg: ptr MSG
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetMessageQueue*(
+  cMessagesMax: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PeekMessageA*(
+  lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PeekMessageW*(
+  lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterHotKey*(
+  hWnd: HWND, id: int32, fsModifiers: UINT, vk: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterHotKey*(
+  hWnd: HWND, id: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ExitWindowsEx*(
+  uFlags: UINT, dwReason: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SwapMouseButton*(
+  fSwap: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetMessagePos*(): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetMessageTime*(): LONG {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetMessageExtraInfo*(): LPARAM {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetUnpredictedMessagePos*(): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
 proc IsWow64Message*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMessageExtraInfo*(lParam: LPARAM): LPARAM {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendMessageA*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendMessageW*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendMessageTimeoutA*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, fuFlags: UINT, uTimeout: UINT, lpdwResult: PDWORD_PTR): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendMessageTimeoutW*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, fuFlags: UINT, uTimeout: UINT, lpdwResult: PDWORD_PTR): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendNotifyMessageA*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendNotifyMessageW*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendMessageCallbackA*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, lpResultCallBack: SENDASYNCPROC, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendMessageCallbackW*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, lpResultCallBack: SENDASYNCPROC, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc BroadcastSystemMessageExA*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM, pbsmInfo: PBSMINFO): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc BroadcastSystemMessageExW*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM, pbsmInfo: PBSMINFO): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc BroadcastSystemMessageA*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc BroadcastSystemMessageW*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterPowerSettingNotification*(hRecipient: HANDLE, PowerSettingGuid: LPCGUID, Flags: DWORD): HPOWERNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterPowerSettingNotification*(Handle: HPOWERNOTIFY): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterSuspendResumeNotification*(hRecipient: HANDLE, Flags: DWORD): HPOWERNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterSuspendResumeNotification*(Handle: HPOWERNOTIFY): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PostMessageA*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PostMessageW*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PostThreadMessageA*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PostThreadMessageW*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc AttachThreadInput*(idAttach: DWORD, idAttachTo: DWORD, fAttach: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ReplyMessage*(lResult: LRESULT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetMessageExtraInfo*(
+  lParam: LPARAM
+): LPARAM {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendMessageA*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendMessageW*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendMessageTimeoutA*(
+  hWnd: HWND,
+  Msg: UINT,
+  wParam: WPARAM,
+  lParam: LPARAM,
+  fuFlags: UINT,
+  uTimeout: UINT,
+  lpdwResult: PDWORD_PTR,
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendMessageTimeoutW*(
+  hWnd: HWND,
+  Msg: UINT,
+  wParam: WPARAM,
+  lParam: LPARAM,
+  fuFlags: UINT,
+  uTimeout: UINT,
+  lpdwResult: PDWORD_PTR,
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendNotifyMessageA*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendNotifyMessageW*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendMessageCallbackA*(
+  hWnd: HWND,
+  Msg: UINT,
+  wParam: WPARAM,
+  lParam: LPARAM,
+  lpResultCallBack: SENDASYNCPROC,
+  dwData: ULONG_PTR,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendMessageCallbackW*(
+  hWnd: HWND,
+  Msg: UINT,
+  wParam: WPARAM,
+  lParam: LPARAM,
+  lpResultCallBack: SENDASYNCPROC,
+  dwData: ULONG_PTR,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc BroadcastSystemMessageExA*(
+  flags: DWORD,
+  lpInfo: LPDWORD,
+  Msg: UINT,
+  wParam: WPARAM,
+  lParam: LPARAM,
+  pbsmInfo: PBSMINFO,
+): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc BroadcastSystemMessageExW*(
+  flags: DWORD,
+  lpInfo: LPDWORD,
+  Msg: UINT,
+  wParam: WPARAM,
+  lParam: LPARAM,
+  pbsmInfo: PBSMINFO,
+): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc BroadcastSystemMessageA*(
+  flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc BroadcastSystemMessageW*(
+  flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterPowerSettingNotification*(
+  hRecipient: HANDLE, PowerSettingGuid: LPCGUID, Flags: DWORD
+): HPOWERNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterPowerSettingNotification*(
+  Handle: HPOWERNOTIFY
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterSuspendResumeNotification*(
+  hRecipient: HANDLE, Flags: DWORD
+): HPOWERNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterSuspendResumeNotification*(
+  Handle: HPOWERNOTIFY
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PostMessageA*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PostMessageW*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PostThreadMessageA*(
+  idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PostThreadMessageW*(
+  idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AttachThreadInput*(
+  idAttach: DWORD, idAttachTo: DWORD, fAttach: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ReplyMessage*(
+  lResult: LRESULT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc WaitMessage*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc WaitForInputIdle*(hProcess: HANDLE, dwMilliseconds: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefWindowProcA*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefWindowProcW*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc PostQuitMessage*(nExitCode: int32): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+proc WaitForInputIdle*(
+  hProcess: HANDLE, dwMilliseconds: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefWindowProcA*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefWindowProcW*(
+  hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PostQuitMessage*(
+  nExitCode: int32
+): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc InSendMessage*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InSendMessageEx*(lpReserved: LPVOID): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+proc InSendMessageEx*(
+  lpReserved: LPVOID
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetDoubleClickTime*(): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetDoubleClickTime*(P1: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterClassA*(lpWndClass: ptr WNDCLASSA): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterClassW*(lpWndClass: ptr WNDCLASSW): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterClassA*(lpClassName: LPCSTR, hInstance: HINSTANCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterClassW*(lpClassName: LPCWSTR, hInstance: HINSTANCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassInfoA*(hInstance: HINSTANCE, lpClassName: LPCSTR, lpWndClass: LPWNDCLASSA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassInfoW*(hInstance: HINSTANCE, lpClassName: LPCWSTR, lpWndClass: LPWNDCLASSW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterClassExA*(P1: ptr WNDCLASSEXA): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterClassExW*(P1: ptr WNDCLASSEXW): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassInfoExA*(hInstance: HINSTANCE, lpszClass: LPCSTR, lpwcx: LPWNDCLASSEXA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassInfoExW*(hInstance: HINSTANCE, lpszClass: LPCWSTR, lpwcx: LPWNDCLASSEXW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CallWindowProcA*(lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc CallWindowProcW*(lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterDeviceNotificationA*(hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD): HDEVNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterDeviceNotificationW*(hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD): HDEVNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterDeviceNotification*(Handle: HDEVNOTIFY): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateWindowExA*(dwExStyle: DWORD, lpClassName: LPCSTR, lpWindowName: LPCSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateWindowExW*(dwExStyle: DWORD, lpClassName: LPCWSTR, lpWindowName: LPCWSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetDoubleClickTime*(
+  P1: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterClassA*(
+  lpWndClass: ptr WNDCLASSA
+): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterClassW*(
+  lpWndClass: ptr WNDCLASSW
+): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterClassA*(
+  lpClassName: LPCSTR, hInstance: HINSTANCE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterClassW*(
+  lpClassName: LPCWSTR, hInstance: HINSTANCE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassInfoA*(
+  hInstance: HINSTANCE, lpClassName: LPCSTR, lpWndClass: LPWNDCLASSA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassInfoW*(
+  hInstance: HINSTANCE, lpClassName: LPCWSTR, lpWndClass: LPWNDCLASSW
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterClassExA*(
+  P1: ptr WNDCLASSEXA
+): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterClassExW*(
+  P1: ptr WNDCLASSEXW
+): ATOM {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassInfoExA*(
+  hInstance: HINSTANCE, lpszClass: LPCSTR, lpwcx: LPWNDCLASSEXA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassInfoExW*(
+  hInstance: HINSTANCE, lpszClass: LPCWSTR, lpwcx: LPWNDCLASSEXW
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CallWindowProcA*(
+  lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CallWindowProcW*(
+  lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterDeviceNotificationA*(
+  hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD
+): HDEVNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterDeviceNotificationW*(
+  hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD
+): HDEVNOTIFY {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterDeviceNotification*(
+  Handle: HDEVNOTIFY
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateWindowExA*(
+  dwExStyle: DWORD,
+  lpClassName: LPCSTR,
+  lpWindowName: LPCSTR,
+  dwStyle: DWORD,
+  X: int32,
+  Y: int32,
+  nWidth: int32,
+  nHeight: int32,
+  hWndParent: HWND,
+  hMenu: HMENU,
+  hInstance: HINSTANCE,
+  lpParam: LPVOID,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateWindowExW*(
+  dwExStyle: DWORD,
+  lpClassName: LPCWSTR,
+  lpWindowName: LPCWSTR,
+  dwStyle: DWORD,
+  X: int32,
+  Y: int32,
+  nWidth: int32,
+  nHeight: int32,
+  hWndParent: HWND,
+  hMenu: HMENU,
+  hInstance: HINSTANCE,
+  lpParam: LPVOID,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc IsWindow*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc IsMenu*(hMenu: HMENU): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsChild*(hWndParent: HWND, hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc IsChild*(
+  hWndParent: HWND, hWnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc DestroyWindow*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ShowWindow*(hWnd: HWND, nCmdShow: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc AnimateWindow*(hWnd: HWND, dwTime: DWORD, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UpdateLayeredWindow*(hWnd: HWND, hdcDst: HDC, pptDst: ptr POINT, psize: ptr SIZE, hdcSrc: HDC, pptSrc: ptr POINT, crKey: COLORREF, pblend: ptr BLENDFUNCTION, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UpdateLayeredWindowIndirect*(hWnd: HWND, pULWInfo: ptr UPDATELAYEREDWINDOWINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetLayeredWindowAttributes*(hwnd: HWND, pcrKey: ptr COLORREF, pbAlpha: ptr BYTE, pdwFlags: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PrintWindow*(hwnd: HWND, hdcBlt: HDC, nFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetLayeredWindowAttributes*(hwnd: HWND, crKey: COLORREF, bAlpha: BYTE, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ShowWindowAsync*(hWnd: HWND, nCmdShow: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc FlashWindow*(hWnd: HWND, bInvert: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc FlashWindowEx*(pfwi: PFLASHWINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ShowOwnedPopups*(hWnd: HWND, fShow: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc ShowWindow*(
+  hWnd: HWND, nCmdShow: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AnimateWindow*(
+  hWnd: HWND, dwTime: DWORD, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UpdateLayeredWindow*(
+  hWnd: HWND,
+  hdcDst: HDC,
+  pptDst: ptr POINT,
+  psize: ptr SIZE,
+  hdcSrc: HDC,
+  pptSrc: ptr POINT,
+  crKey: COLORREF,
+  pblend: ptr BLENDFUNCTION,
+  dwFlags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UpdateLayeredWindowIndirect*(
+  hWnd: HWND, pULWInfo: ptr UPDATELAYEREDWINDOWINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetLayeredWindowAttributes*(
+  hwnd: HWND, pcrKey: ptr COLORREF, pbAlpha: ptr BYTE, pdwFlags: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PrintWindow*(
+  hwnd: HWND, hdcBlt: HDC, nFlags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetLayeredWindowAttributes*(
+  hwnd: HWND, crKey: COLORREF, bAlpha: BYTE, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ShowWindowAsync*(
+  hWnd: HWND, nCmdShow: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FlashWindow*(
+  hWnd: HWND, bInvert: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FlashWindowEx*(
+  pfwi: PFLASHWINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ShowOwnedPopups*(
+  hWnd: HWND, fShow: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc OpenIcon*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc CloseWindow*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc MoveWindow*(hWnd: HWND, X: int32, Y: int32, nWidth: int32, nHeight: int32, bRepaint: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowPos*(hWnd: HWND, hWndInsertAfter: HWND, X: int32, Y: int32, cx: int32, cy: int32, uFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowPlacement*(hWnd: HWND, lpwndpl: ptr WINDOWPLACEMENT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowPlacement*(hWnd: HWND, lpwndpl: ptr WINDOWPLACEMENT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowDisplayAffinity*(hWnd: HWND, pdwAffinity: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowDisplayAffinity*(hWnd: HWND, dwAffinity: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc BeginDeferWindowPos*(nNumWindows: int32): HDWP {.winapi, stdcall, dynlib: "user32", importc.}
-proc DeferWindowPos*(hWinPosInfo: HDWP, hWnd: HWND, hWndInsertAfter: HWND, x: int32, y: int32, cx: int32, cy: int32, uFlags: UINT): HDWP {.winapi, stdcall, dynlib: "user32", importc.}
-proc EndDeferWindowPos*(hWinPosInfo: HDWP): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsWindowVisible*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc MoveWindow*(
+  hWnd: HWND, X: int32, Y: int32, nWidth: int32, nHeight: int32, bRepaint: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowPos*(
+  hWnd: HWND,
+  hWndInsertAfter: HWND,
+  X: int32,
+  Y: int32,
+  cx: int32,
+  cy: int32,
+  uFlags: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowPlacement*(
+  hWnd: HWND, lpwndpl: ptr WINDOWPLACEMENT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowPlacement*(
+  hWnd: HWND, lpwndpl: ptr WINDOWPLACEMENT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowDisplayAffinity*(
+  hWnd: HWND, pdwAffinity: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowDisplayAffinity*(
+  hWnd: HWND, dwAffinity: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc BeginDeferWindowPos*(
+  nNumWindows: int32
+): HDWP {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DeferWindowPos*(
+  hWinPosInfo: HDWP,
+  hWnd: HWND,
+  hWndInsertAfter: HWND,
+  x: int32,
+  y: int32,
+  cx: int32,
+  cy: int32,
+  uFlags: UINT,
+): HDWP {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EndDeferWindowPos*(
+  hWinPosInfo: HDWP
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsWindowVisible*(
+  hWnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc IsIconic*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc AnyPopup*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc BringWindowToTop*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc BringWindowToTop*(
+  hWnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc IsZoomed*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDialogParamA*(hInstance: HINSTANCE, lpTemplateName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDialogParamW*(hInstance: HINSTANCE, lpTemplateName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDialogIndirectParamA*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateDialogIndirectParamW*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc DialogBoxParamA*(hInstance: HINSTANCE, lpTemplateName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc DialogBoxParamW*(hInstance: HINSTANCE, lpTemplateName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc DialogBoxIndirectParamA*(hInstance: HINSTANCE, hDialogTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc DialogBoxIndirectParamW*(hInstance: HINSTANCE, hDialogTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc EndDialog*(hDlg: HWND, nResult: INT_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetDlgItem*(hDlg: HWND, nIDDlgItem: int32): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetDlgItemInt*(hDlg: HWND, nIDDlgItem: int32, uValue: UINT, bSigned: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetDlgItemInt*(hDlg: HWND, nIDDlgItem: int32, lpTranslated: ptr WINBOOL, bSigned: WINBOOL): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetDlgItemTextA*(hDlg: HWND, nIDDlgItem: int32, lpString: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetDlgItemTextW*(hDlg: HWND, nIDDlgItem: int32, lpString: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetDlgItemTextA*(hDlg: HWND, nIDDlgItem: int32, lpString: LPSTR, cchMax: int32): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetDlgItemTextW*(hDlg: HWND, nIDDlgItem: int32, lpString: LPWSTR, cchMax: int32): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc CheckDlgButton*(hDlg: HWND, nIDButton: int32, uCheck: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CheckRadioButton*(hDlg: HWND, nIDFirstButton: int32, nIDLastButton: int32, nIDCheckButton: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsDlgButtonChecked*(hDlg: HWND, nIDButton: int32): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendDlgItemMessageA*(hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendDlgItemMessageW*(hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetNextDlgGroupItem*(hDlg: HWND, hCtl: HWND, bPrevious: WINBOOL): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetNextDlgTabItem*(hDlg: HWND, hCtl: HWND, bPrevious: WINBOOL): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+proc CreateDialogParamA*(
+  hInstance: HINSTANCE,
+  lpTemplateName: LPCSTR,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateDialogParamW*(
+  hInstance: HINSTANCE,
+  lpTemplateName: LPCWSTR,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateDialogIndirectParamA*(
+  hInstance: HINSTANCE,
+  lpTemplate: LPCDLGTEMPLATEA,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateDialogIndirectParamW*(
+  hInstance: HINSTANCE,
+  lpTemplate: LPCDLGTEMPLATEW,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DialogBoxParamA*(
+  hInstance: HINSTANCE,
+  lpTemplateName: LPCSTR,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DialogBoxParamW*(
+  hInstance: HINSTANCE,
+  lpTemplateName: LPCWSTR,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DialogBoxIndirectParamA*(
+  hInstance: HINSTANCE,
+  hDialogTemplate: LPCDLGTEMPLATEA,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DialogBoxIndirectParamW*(
+  hInstance: HINSTANCE,
+  hDialogTemplate: LPCDLGTEMPLATEW,
+  hWndParent: HWND,
+  lpDialogFunc: DLGPROC,
+  dwInitParam: LPARAM,
+): INT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EndDialog*(
+  hDlg: HWND, nResult: INT_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetDlgItem*(
+  hDlg: HWND, nIDDlgItem: int32
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetDlgItemInt*(
+  hDlg: HWND, nIDDlgItem: int32, uValue: UINT, bSigned: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetDlgItemInt*(
+  hDlg: HWND, nIDDlgItem: int32, lpTranslated: ptr WINBOOL, bSigned: WINBOOL
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetDlgItemTextA*(
+  hDlg: HWND, nIDDlgItem: int32, lpString: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetDlgItemTextW*(
+  hDlg: HWND, nIDDlgItem: int32, lpString: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetDlgItemTextA*(
+  hDlg: HWND, nIDDlgItem: int32, lpString: LPSTR, cchMax: int32
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetDlgItemTextW*(
+  hDlg: HWND, nIDDlgItem: int32, lpString: LPWSTR, cchMax: int32
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CheckDlgButton*(
+  hDlg: HWND, nIDButton: int32, uCheck: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CheckRadioButton*(
+  hDlg: HWND, nIDFirstButton: int32, nIDLastButton: int32, nIDCheckButton: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsDlgButtonChecked*(
+  hDlg: HWND, nIDButton: int32
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendDlgItemMessageA*(
+  hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendDlgItemMessageW*(
+  hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetNextDlgGroupItem*(
+  hDlg: HWND, hCtl: HWND, bPrevious: WINBOOL
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetNextDlgTabItem*(
+  hDlg: HWND, hCtl: HWND, bPrevious: WINBOOL
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetDlgCtrlID*(hWnd: HWND): int32 {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetDialogBaseUnits*(): LONG32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefDlgProcA*(hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefDlgProcW*(hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc CallMsgFilterA*(lpMsg: LPMSG, nCode: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CallMsgFilterW*(lpMsg: LPMSG, nCode: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc OpenClipboard*(hWndNewOwner: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc DefDlgProcA*(
+  hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefDlgProcW*(
+  hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CallMsgFilterA*(
+  lpMsg: LPMSG, nCode: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CallMsgFilterW*(
+  lpMsg: LPMSG, nCode: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OpenClipboard*(
+  hWndNewOwner: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CloseClipboard*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetClipboardSequenceNumber*(): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetClipboardOwner*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetClipboardViewer*(hWndNewViewer: HWND): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetClipboardViewer*(
+  hWndNewViewer: HWND
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetClipboardViewer*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeClipboardChain*(hWndRemove: HWND, hWndNewNext: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetClipboardData*(uFormat: UINT, hMem: HANDLE): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClipboardData*(uFormat: UINT): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterClipboardFormatA*(lpszFormat: LPCSTR): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterClipboardFormatW*(lpszFormat: LPCWSTR): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+proc ChangeClipboardChain*(
+  hWndRemove: HWND, hWndNewNext: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetClipboardData*(
+  uFormat: UINT, hMem: HANDLE
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClipboardData*(
+  uFormat: UINT
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterClipboardFormatA*(
+  lpszFormat: LPCSTR
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterClipboardFormatW*(
+  lpszFormat: LPCWSTR
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CountClipboardFormats*(): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumClipboardFormats*(format: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClipboardFormatNameA*(format: UINT, lpszFormatName: LPSTR, cchMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClipboardFormatNameW*(format: UINT, lpszFormatName: LPWSTR, cchMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc EnumClipboardFormats*(
+  format: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClipboardFormatNameA*(
+  format: UINT, lpszFormatName: LPSTR, cchMaxCount: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClipboardFormatNameW*(
+  format: UINT, lpszFormatName: LPWSTR, cchMaxCount: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc EmptyClipboard*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsClipboardFormatAvailable*(format: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPriorityClipboardFormat*(paFormatPriorityList: ptr UINT, cFormats: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc IsClipboardFormatAvailable*(
+  format: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPriorityClipboardFormat*(
+  paFormatPriorityList: ptr UINT, cFormats: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetOpenClipboardWindow*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc AddClipboardFormatListener*(hwnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RemoveClipboardFormatListener*(hwnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetUpdatedClipboardFormats*(lpuiFormats: PUINT, cFormats: UINT, pcFormatsOut: PUINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharToOemA*(lpszSrc: LPCSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharToOemW*(lpszSrc: LPCWSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc OemToCharA*(lpszSrc: LPCSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc OemToCharW*(lpszSrc: LPCSTR, lpszDst: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharToOemBuffA*(lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharToOemBuffW*(lpszSrc: LPCWSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc OemToCharBuffA*(lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc OemToCharBuffW*(lpszSrc: LPCSTR, lpszDst: LPWSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc AddClipboardFormatListener*(
+  hwnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RemoveClipboardFormatListener*(
+  hwnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetUpdatedClipboardFormats*(
+  lpuiFormats: PUINT, cFormats: UINT, pcFormatsOut: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharToOemA*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharToOemW*(
+  lpszSrc: LPCWSTR, lpszDst: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OemToCharA*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OemToCharW*(
+  lpszSrc: LPCSTR, lpszDst: LPWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharToOemBuffA*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharToOemBuffW*(
+  lpszSrc: LPCWSTR, lpszDst: LPSTR, cchDstLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OemToCharBuffA*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OemToCharBuffW*(
+  lpszSrc: LPCSTR, lpszDst: LPWSTR, cchDstLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CharUpperA*(lpsz: LPSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
 proc CharUpperW*(lpsz: LPWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharUpperBuffA*(lpsz: LPSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharUpperBuffW*(lpsz: LPWSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+proc CharUpperBuffA*(
+  lpsz: LPSTR, cchLength: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharUpperBuffW*(
+  lpsz: LPWSTR, cchLength: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CharLowerA*(lpsz: LPSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
 proc CharLowerW*(lpsz: LPWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharLowerBuffA*(lpsz: LPSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharLowerBuffW*(lpsz: LPWSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+proc CharLowerBuffA*(
+  lpsz: LPSTR, cchLength: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharLowerBuffW*(
+  lpsz: LPWSTR, cchLength: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CharNextA*(lpsz: LPCSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
 proc CharNextW*(lpsz: LPCWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharPrevA*(lpszStart: LPCSTR, lpszCurrent: LPCSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharPrevW*(lpszStart: LPCWSTR, lpszCurrent: LPCWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharNextExA*(CodePage: WORD, lpCurrentChar: LPCSTR, dwFlags: DWORD): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CharPrevExA*(CodePage: WORD, lpStart: LPCSTR, lpCurrentChar: LPCSTR, dwFlags: DWORD): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc AnsiToOem*(lpszSrc: LPCSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemA".}
-proc OemToAnsi*(lpszSrc: LPCSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharA".}
-proc AnsiToOemBuff*(lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemBuffA".}
-proc OemToAnsiBuff*(lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharBuffA".}
-proc AnsiUpper*(lpsz: LPSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharUpperA".}
-proc AnsiUpperBuff*(lpsz: LPSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharUpperBuffA".}
-proc AnsiLower*(lpsz: LPSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharLowerA".}
-proc AnsiLowerBuff*(lpsz: LPSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharLowerBuffA".}
-proc AnsiNext*(lpsz: LPCSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharNextA".}
-proc AnsiPrev*(lpszStart: LPCSTR, lpszCurrent: LPCSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharPrevA".}
+proc CharPrevA*(
+  lpszStart: LPCSTR, lpszCurrent: LPCSTR
+): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharPrevW*(
+  lpszStart: LPCWSTR, lpszCurrent: LPCWSTR
+): LPWSTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharNextExA*(
+  CodePage: WORD, lpCurrentChar: LPCSTR, dwFlags: DWORD
+): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CharPrevExA*(
+  CodePage: WORD, lpStart: LPCSTR, lpCurrentChar: LPCSTR, dwFlags: DWORD
+): LPSTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AnsiToOem*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemA".}
+
+proc OemToAnsi*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharA".}
+
+proc AnsiToOemBuff*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemBuffA".}
+
+proc OemToAnsiBuff*(
+  lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharBuffA".}
+
+proc AnsiUpper*(
+  lpsz: LPSTR
+): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharUpperA".}
+
+proc AnsiUpperBuff*(
+  lpsz: LPSTR, cchLength: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharUpperBuffA".}
+
+proc AnsiLower*(
+  lpsz: LPSTR
+): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharLowerA".}
+
+proc AnsiLowerBuff*(
+  lpsz: LPSTR, cchLength: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharLowerBuffA".}
+
+proc AnsiNext*(
+  lpsz: LPCSTR
+): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharNextA".}
+
+proc AnsiPrev*(
+  lpszStart: LPCSTR, lpszCurrent: LPCSTR
+): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharPrevA".}
+
 proc IsCharAlphaA*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc IsCharAlphaW*(ch: WCHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsCharAlphaNumericA*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsCharAlphaNumericW*(ch: WCHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc IsCharAlphaNumericA*(
+  ch: CHAR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsCharAlphaNumericW*(
+  ch: WCHAR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc IsCharUpperA*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc IsCharUpperW*(ch: WCHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc IsCharLowerA*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
@@ -4406,618 +5328,2506 @@ proc GetActiveWindow*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetFocus*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetKBCodePage*(): UINT {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetKeyState*(nVirtKey: int32): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetAsyncKeyState*(vKey: int32): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyboardState*(lpKeyState: PBYTE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetKeyboardState*(lpKeyState: LPBYTE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyNameTextA*(lParam: LONG, lpString: LPSTR, cchSize: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyNameTextW*(lParam: LONG, lpString: LPWSTR, cchSize: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetKeyboardType*(nTypeFlag: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc ToAscii*(uVirtKey: UINT, uScanCode: UINT, lpKeyState: ptr BYTE, lpChar: LPWORD, uFlags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc ToAsciiEx*(uVirtKey: UINT, uScanCode: UINT, lpKeyState: ptr BYTE, lpChar: LPWORD, uFlags: UINT, dwhkl: HKL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc ToUnicode*(wVirtKey: UINT, wScanCode: UINT, lpKeyState: ptr BYTE, pwszBuff: LPWSTR, cchBuff: int32, wFlags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetAsyncKeyState*(
+  vKey: int32
+): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyboardState*(
+  lpKeyState: PBYTE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetKeyboardState*(
+  lpKeyState: LPBYTE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyNameTextA*(
+  lParam: LONG, lpString: LPSTR, cchSize: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyNameTextW*(
+  lParam: LONG, lpString: LPWSTR, cchSize: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetKeyboardType*(
+  nTypeFlag: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ToAscii*(
+  uVirtKey: UINT, uScanCode: UINT, lpKeyState: ptr BYTE, lpChar: LPWORD, uFlags: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ToAsciiEx*(
+  uVirtKey: UINT,
+  uScanCode: UINT,
+  lpKeyState: ptr BYTE,
+  lpChar: LPWORD,
+  uFlags: UINT,
+  dwhkl: HKL,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ToUnicode*(
+  wVirtKey: UINT,
+  wScanCode: UINT,
+  lpKeyState: ptr BYTE,
+  pwszBuff: LPWSTR,
+  cchBuff: int32,
+  wFlags: UINT,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc OemKeyScan*(wOemChar: WORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
 proc VkKeyScanA*(ch: CHAR): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
 proc VkKeyScanW*(ch: WCHAR): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
-proc VkKeyScanExA*(ch: CHAR, dwhkl: HKL): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
-proc VkKeyScanExW*(ch: WCHAR, dwhkl: HKL): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
-proc keybd_event*(bVk: BYTE, bScan: BYTE, dwFlags: DWORD, dwExtraInfo: ULONG_PTR): VOID {.winapi, stdcall, dynlib: "user32", importc.}
-proc mouse_event*(dwFlags: DWORD, dx: DWORD, dy: DWORD, dwData: DWORD, dwExtraInfo: ULONG_PTR): VOID {.winapi, stdcall, dynlib: "user32", importc.}
-proc SendInput*(cInputs: UINT, pInputs: LPINPUT, cbSize: int32): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetTouchInputInfo*(hTouchInput: HTOUCHINPUT, cInputs: UINT, pInputs: PTOUCHINPUT, cbSize: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CloseTouchInputHandle*(hTouchInput: HTOUCHINPUT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterTouchWindow*(hwnd: HWND, ulFlags: ULONG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterTouchWindow*(hwnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsTouchWindow*(hwnd: HWND, pulFlags: PULONG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InitializeTouchInjection*(maxCount: UINT32, dwMode: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InjectTouchInput*(count: UINT32, contacts: ptr POINTER_TOUCH_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerType*(pointerId: UINT32, pointerType: ptr POINTER_INPUT_TYPE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerCursorId*(pointerId: UINT32, cursorId: ptr UINT32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerInfo*(pointerId: UINT32, pointerInfo: ptr POINTER_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerInfoHistory*(pointerId: UINT32, entriesCount: ptr UINT32, pointerInfo: ptr POINTER_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerFrameInfo*(pointerId: UINT32, pointerCount: ptr UINT32, pointerInfo: ptr POINTER_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerFrameInfoHistory*(pointerId: UINT32, entriesCount: ptr UINT32, pointerCount: ptr UINT32, pointerInfo: ptr POINTER_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerTouchInfo*(pointerId: UINT32, touchInfo: ptr POINTER_TOUCH_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerTouchInfoHistory*(pointerId: UINT32, entriesCount: ptr UINT32, touchInfo: ptr POINTER_TOUCH_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerFrameTouchInfo*(pointerId: UINT32, pointerCount: ptr UINT32, touchInfo: ptr POINTER_TOUCH_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerFrameTouchInfoHistory*(pointerId: UINT32, entriesCount: ptr UINT32, pointerCount: ptr UINT32, touchInfo: ptr POINTER_TOUCH_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerPenInfo*(pointerId: UINT32, penInfo: ptr POINTER_PEN_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerPenInfoHistory*(pointerId: UINT32, entriesCount: ptr UINT32, penInfo: ptr POINTER_PEN_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerFramePenInfo*(pointerId: UINT32, pointerCount: ptr UINT32, penInfo: ptr POINTER_PEN_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerFramePenInfoHistory*(pointerId: UINT32, entriesCount: ptr UINT32, pointerCount: ptr UINT32, penInfo: ptr POINTER_PEN_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SkipPointerFrameMessages*(pointerId: UINT32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterPointerInputTarget*(hwnd: HWND, pointerType: POINTER_INPUT_TYPE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnregisterPointerInputTarget*(hwnd: HWND, pointerType: POINTER_INPUT_TYPE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnableMouseInPointer*(fEnable: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc VkKeyScanExA*(
+  ch: CHAR, dwhkl: HKL
+): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc VkKeyScanExW*(
+  ch: WCHAR, dwhkl: HKL
+): SHORT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc keybd_event*(
+  bVk: BYTE, bScan: BYTE, dwFlags: DWORD, dwExtraInfo: ULONG_PTR
+): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc mouse_event*(
+  dwFlags: DWORD, dx: DWORD, dy: DWORD, dwData: DWORD, dwExtraInfo: ULONG_PTR
+): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SendInput*(
+  cInputs: UINT, pInputs: LPINPUT, cbSize: int32
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetTouchInputInfo*(
+  hTouchInput: HTOUCHINPUT, cInputs: UINT, pInputs: PTOUCHINPUT, cbSize: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CloseTouchInputHandle*(
+  hTouchInput: HTOUCHINPUT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterTouchWindow*(
+  hwnd: HWND, ulFlags: ULONG
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterTouchWindow*(
+  hwnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsTouchWindow*(
+  hwnd: HWND, pulFlags: PULONG
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InitializeTouchInjection*(
+  maxCount: UINT32, dwMode: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InjectTouchInput*(
+  count: UINT32, contacts: ptr POINTER_TOUCH_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerType*(
+  pointerId: UINT32, pointerType: ptr POINTER_INPUT_TYPE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerCursorId*(
+  pointerId: UINT32, cursorId: ptr UINT32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerInfo*(
+  pointerId: UINT32, pointerInfo: ptr POINTER_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerInfoHistory*(
+  pointerId: UINT32, entriesCount: ptr UINT32, pointerInfo: ptr POINTER_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerFrameInfo*(
+  pointerId: UINT32, pointerCount: ptr UINT32, pointerInfo: ptr POINTER_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerFrameInfoHistory*(
+  pointerId: UINT32,
+  entriesCount: ptr UINT32,
+  pointerCount: ptr UINT32,
+  pointerInfo: ptr POINTER_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerTouchInfo*(
+  pointerId: UINT32, touchInfo: ptr POINTER_TOUCH_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerTouchInfoHistory*(
+  pointerId: UINT32, entriesCount: ptr UINT32, touchInfo: ptr POINTER_TOUCH_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerFrameTouchInfo*(
+  pointerId: UINT32, pointerCount: ptr UINT32, touchInfo: ptr POINTER_TOUCH_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerFrameTouchInfoHistory*(
+  pointerId: UINT32,
+  entriesCount: ptr UINT32,
+  pointerCount: ptr UINT32,
+  touchInfo: ptr POINTER_TOUCH_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerPenInfo*(
+  pointerId: UINT32, penInfo: ptr POINTER_PEN_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerPenInfoHistory*(
+  pointerId: UINT32, entriesCount: ptr UINT32, penInfo: ptr POINTER_PEN_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerFramePenInfo*(
+  pointerId: UINT32, pointerCount: ptr UINT32, penInfo: ptr POINTER_PEN_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerFramePenInfoHistory*(
+  pointerId: UINT32,
+  entriesCount: ptr UINT32,
+  pointerCount: ptr UINT32,
+  penInfo: ptr POINTER_PEN_INFO,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SkipPointerFrameMessages*(
+  pointerId: UINT32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterPointerInputTarget*(
+  hwnd: HWND, pointerType: POINTER_INPUT_TYPE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnregisterPointerInputTarget*(
+  hwnd: HWND, pointerType: POINTER_INPUT_TYPE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnableMouseInPointer*(
+  fEnable: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc IsMouseInPointerEnabled*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterTouchHitTestingWindow*(hwnd: HWND, value: ULONG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EvaluateProximityToRect*(controlBoundingBox: ptr RECT, pHitTestingInput: ptr TOUCH_HIT_TESTING_INPUT, pProximityEval: ptr TOUCH_HIT_TESTING_PROXIMITY_EVALUATION): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EvaluateProximityToPolygon*(numVertices: UINT32, controlPolygon: ptr POINT, pHitTestingInput: ptr TOUCH_HIT_TESTING_INPUT, pProximityEval: ptr TOUCH_HIT_TESTING_PROXIMITY_EVALUATION): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PackTouchHitTestingProximityEvaluation*(pHitTestingInput: ptr TOUCH_HIT_TESTING_INPUT, pProximityEval: ptr TOUCH_HIT_TESTING_PROXIMITY_EVALUATION): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowFeedbackSetting*(hwnd: HWND, feedback: FEEDBACK_TYPE, dwFlags: DWORD, pSize: ptr UINT32, config: pointer): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowFeedbackSetting*(hwnd: HWND, feedback: FEEDBACK_TYPE, dwFlags: DWORD, size: UINT32, configuration: pointer): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetLastInputInfo*(plii: PLASTINPUTINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc MapVirtualKeyA*(uCode: UINT, uMapType: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc MapVirtualKeyW*(uCode: UINT, uMapType: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc MapVirtualKeyExA*(uCode: UINT, uMapType: UINT, dwhkl: HKL): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc MapVirtualKeyExW*(uCode: UINT, uMapType: UINT, dwhkl: HKL): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+proc RegisterTouchHitTestingWindow*(
+  hwnd: HWND, value: ULONG
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EvaluateProximityToRect*(
+  controlBoundingBox: ptr RECT,
+  pHitTestingInput: ptr TOUCH_HIT_TESTING_INPUT,
+  pProximityEval: ptr TOUCH_HIT_TESTING_PROXIMITY_EVALUATION,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EvaluateProximityToPolygon*(
+  numVertices: UINT32,
+  controlPolygon: ptr POINT,
+  pHitTestingInput: ptr TOUCH_HIT_TESTING_INPUT,
+  pProximityEval: ptr TOUCH_HIT_TESTING_PROXIMITY_EVALUATION,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PackTouchHitTestingProximityEvaluation*(
+  pHitTestingInput: ptr TOUCH_HIT_TESTING_INPUT,
+  pProximityEval: ptr TOUCH_HIT_TESTING_PROXIMITY_EVALUATION,
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowFeedbackSetting*(
+  hwnd: HWND,
+  feedback: FEEDBACK_TYPE,
+  dwFlags: DWORD,
+  pSize: ptr UINT32,
+  config: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowFeedbackSetting*(
+  hwnd: HWND,
+  feedback: FEEDBACK_TYPE,
+  dwFlags: DWORD,
+  size: UINT32,
+  configuration: pointer,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetLastInputInfo*(
+  plii: PLASTINPUTINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MapVirtualKeyA*(
+  uCode: UINT, uMapType: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MapVirtualKeyW*(
+  uCode: UINT, uMapType: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MapVirtualKeyExA*(
+  uCode: UINT, uMapType: UINT, dwhkl: HKL
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MapVirtualKeyExW*(
+  uCode: UINT, uMapType: UINT, dwhkl: HKL
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetInputState*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetQueueStatus*(flags: UINT): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetCapture*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc SetCapture*(hWnd: HWND): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc ReleaseCapture*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc MsgWaitForMultipleObjects*(nCount: DWORD, pHandles: ptr HANDLE, fWaitAll: WINBOOL, dwMilliseconds: DWORD, dwWakeMask: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc MsgWaitForMultipleObjectsEx*(nCount: DWORD, pHandles: ptr HANDLE, dwMilliseconds: DWORD, dwWakeMask: DWORD, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetTimer*(hWnd: HWND, nIDEvent: UINT_PTR, uElapse: UINT, lpTimerFunc: TIMERPROC): UINT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc KillTimer*(hWnd: HWND, uIDEvent: UINT_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsWindowUnicode*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnableWindow*(hWnd: HWND, bEnable: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsWindowEnabled*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadAcceleratorsA*(hInstance: HINSTANCE, lpTableName: LPCSTR): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadAcceleratorsW*(hInstance: HINSTANCE, lpTableName: LPCWSTR): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateAcceleratorTableA*(paccel: LPACCEL, cAccel: int32): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateAcceleratorTableW*(paccel: LPACCEL, cAccel: int32): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DestroyAcceleratorTable*(hAccel: HACCEL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CopyAcceleratorTableA*(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc CopyAcceleratorTableW*(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc TranslateAcceleratorA*(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc TranslateAcceleratorW*(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetCoalescableTimer*(hWnd: HWND, nIDEvent: UINT_PTR, uElapse: UINT, lpTimerFunc: TIMERPROC, uToleranceDelay: ULONG): UINT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetSystemMetrics*(nIndex: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadMenuA*(hInstance: HINSTANCE, lpMenuName: LPCSTR): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadMenuW*(hInstance: HINSTANCE, lpMenuName: LPCWSTR): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadMenuIndirectA*(lpMenuTemplate: ptr MENUTEMPLATEA): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadMenuIndirectW*(lpMenuTemplate: ptr MENUTEMPLATEW): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+proc MsgWaitForMultipleObjects*(
+  nCount: DWORD,
+  pHandles: ptr HANDLE,
+  fWaitAll: WINBOOL,
+  dwMilliseconds: DWORD,
+  dwWakeMask: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MsgWaitForMultipleObjectsEx*(
+  nCount: DWORD,
+  pHandles: ptr HANDLE,
+  dwMilliseconds: DWORD,
+  dwWakeMask: DWORD,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetTimer*(
+  hWnd: HWND, nIDEvent: UINT_PTR, uElapse: UINT, lpTimerFunc: TIMERPROC
+): UINT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc KillTimer*(
+  hWnd: HWND, uIDEvent: UINT_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsWindowUnicode*(
+  hWnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnableWindow*(
+  hWnd: HWND, bEnable: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsWindowEnabled*(
+  hWnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadAcceleratorsA*(
+  hInstance: HINSTANCE, lpTableName: LPCSTR
+): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadAcceleratorsW*(
+  hInstance: HINSTANCE, lpTableName: LPCWSTR
+): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateAcceleratorTableA*(
+  paccel: LPACCEL, cAccel: int32
+): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateAcceleratorTableW*(
+  paccel: LPACCEL, cAccel: int32
+): HACCEL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DestroyAcceleratorTable*(
+  hAccel: HACCEL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CopyAcceleratorTableA*(
+  hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CopyAcceleratorTableW*(
+  hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TranslateAcceleratorA*(
+  hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TranslateAcceleratorW*(
+  hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetCoalescableTimer*(
+  hWnd: HWND,
+  nIDEvent: UINT_PTR,
+  uElapse: UINT,
+  lpTimerFunc: TIMERPROC,
+  uToleranceDelay: ULONG,
+): UINT_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetSystemMetrics*(
+  nIndex: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadMenuA*(
+  hInstance: HINSTANCE, lpMenuName: LPCSTR
+): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadMenuW*(
+  hInstance: HINSTANCE, lpMenuName: LPCWSTR
+): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadMenuIndirectA*(
+  lpMenuTemplate: ptr MENUTEMPLATEA
+): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadMenuIndirectW*(
+  lpMenuTemplate: ptr MENUTEMPLATEW
+): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetMenu*(hWnd: HWND): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMenu*(hWnd: HWND, hMenu: HMENU): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeMenuA*(hMenu: HMENU, cmd: UINT, lpszNewItem: LPCSTR, cmdInsert: UINT, flags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeMenuW*(hMenu: HMENU, cmd: UINT, lpszNewItem: LPCWSTR, cmdInsert: UINT, flags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc HiliteMenuItem*(hWnd: HWND, hMenu: HMENU, uIDHiliteItem: UINT, uHilite: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuStringA*(hMenu: HMENU, uIDItem: UINT, lpString: LPSTR, cchMax: int32, flags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuStringW*(hMenu: HMENU, uIDItem: UINT, lpString: LPWSTR, cchMax: int32, flags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuState*(hMenu: HMENU, uId: UINT, uFlags: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetMenu*(
+  hWnd: HWND, hMenu: HMENU
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeMenuA*(
+  hMenu: HMENU, cmd: UINT, lpszNewItem: LPCSTR, cmdInsert: UINT, flags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeMenuW*(
+  hMenu: HMENU, cmd: UINT, lpszNewItem: LPCWSTR, cmdInsert: UINT, flags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc HiliteMenuItem*(
+  hWnd: HWND, hMenu: HMENU, uIDHiliteItem: UINT, uHilite: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuStringA*(
+  hMenu: HMENU, uIDItem: UINT, lpString: LPSTR, cchMax: int32, flags: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuStringW*(
+  hMenu: HMENU, uIDItem: UINT, lpString: LPWSTR, cchMax: int32, flags: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuState*(
+  hMenu: HMENU, uId: UINT, uFlags: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc DrawMenuBar*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetSystemMenu*(hWnd: HWND, bRevert: WINBOOL): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetSystemMenu*(
+  hWnd: HWND, bRevert: WINBOOL
+): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CreateMenu*(): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
 proc CreatePopupMenu*(): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
 proc DestroyMenu*(hMenu: HMENU): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CheckMenuItem*(hMenu: HMENU, uIDCheckItem: UINT, uCheck: UINT): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnableMenuItem*(hMenu: HMENU, uIDEnableItem: UINT, uEnable: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetSubMenu*(hMenu: HMENU, nPos: int32): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuItemID*(hMenu: HMENU, nPos: int32): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuItemCount*(hMenu: HMENU): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc InsertMenuA*(hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InsertMenuW*(hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc AppendMenuA*(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc AppendMenuW*(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ModifyMenuA*(hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ModifyMenuW*(hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RemoveMenu*(hMenu: HMENU, uPosition: UINT, uFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DeleteMenu*(hMenu: HMENU, uPosition: UINT, uFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMenuItemBitmaps*(hMenu: HMENU, uPosition: UINT, uFlags: UINT, hBitmapUnchecked: HBITMAP, hBitmapChecked: HBITMAP): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc CheckMenuItem*(
+  hMenu: HMENU, uIDCheckItem: UINT, uCheck: UINT
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnableMenuItem*(
+  hMenu: HMENU, uIDEnableItem: UINT, uEnable: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetSubMenu*(
+  hMenu: HMENU, nPos: int32
+): HMENU {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuItemID*(
+  hMenu: HMENU, nPos: int32
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuItemCount*(
+  hMenu: HMENU
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InsertMenuA*(
+  hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InsertMenuW*(
+  hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AppendMenuA*(
+  hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AppendMenuW*(
+  hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ModifyMenuA*(
+  hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ModifyMenuW*(
+  hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RemoveMenu*(
+  hMenu: HMENU, uPosition: UINT, uFlags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DeleteMenu*(
+  hMenu: HMENU, uPosition: UINT, uFlags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetMenuItemBitmaps*(
+  hMenu: HMENU,
+  uPosition: UINT,
+  uFlags: UINT,
+  hBitmapUnchecked: HBITMAP,
+  hBitmapChecked: HBITMAP,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetMenuCheckMarkDimensions*(): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc TrackPopupMenu*(hMenu: HMENU, uFlags: UINT, x: int32, y: int32, nReserved: int32, hWnd: HWND, prcRect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc TrackPopupMenuEx*(P1: HMENU, P2: UINT, P3: int32, P4: int32, P5: HWND, P6: LPTPMPARAMS): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuInfo*(P1: HMENU, P2: LPMENUINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMenuInfo*(P1: HMENU, P2: LPCMENUINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc TrackPopupMenu*(
+  hMenu: HMENU,
+  uFlags: UINT,
+  x: int32,
+  y: int32,
+  nReserved: int32,
+  hWnd: HWND,
+  prcRect: ptr RECT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TrackPopupMenuEx*(
+  P1: HMENU, P2: UINT, P3: int32, P4: int32, P5: HWND, P6: LPTPMPARAMS
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuInfo*(
+  P1: HMENU, P2: LPMENUINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetMenuInfo*(
+  P1: HMENU, P2: LPCMENUINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc EndMenu*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CalculatePopupWindowPosition*(anchorPoint: ptr POINT, windowSize: ptr SIZE, flags: UINT, excludeRect: ptr RECT, popupWindowPosition: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InsertMenuItemA*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InsertMenuItemW*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuItemInfoA*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuItemInfoW*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMenuItemInfoA*(hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMenuItemInfoW*(hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuDefaultItem*(hMenu: HMENU, fByPos: UINT, gmdiFlags: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMenuDefaultItem*(hMenu: HMENU, uItem: UINT, fByPos: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuItemRect*(hWnd: HWND, hMenu: HMENU, uItem: UINT, lprcItem: LPRECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc MenuItemFromPoint*(hWnd: HWND, hMenu: HMENU, ptScreen: POINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DragObject*(hwndParent: HWND, hwndFrom: HWND, fmt: UINT, data: ULONG_PTR, hcur: HCURSOR): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc DragDetect*(hwnd: HWND, pt: POINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawIcon*(hDC: HDC, X: int32, Y: int32, hIcon: HICON): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawTextA*(hdc: HDC, lpchText: LPCSTR, cchText: int32, lprc: LPRECT, format: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawTextW*(hdc: HDC, lpchText: LPCWSTR, cchText: int32, lprc: LPRECT, format: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawTextExA*(hdc: HDC, lpchText: LPSTR, cchText: int32, lprc: LPRECT, format: UINT, lpdtp: LPDRAWTEXTPARAMS): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawTextExW*(hdc: HDC, lpchText: LPWSTR, cchText: int32, lprc: LPRECT, format: UINT, lpdtp: LPDRAWTEXTPARAMS): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GrayStringA*(hDC: HDC, hBrush: HBRUSH, lpOutputFunc: GRAYSTRINGPROC, lpData: LPARAM, nCount: int32, X: int32, Y: int32, nWidth: int32, nHeight: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GrayStringW*(hDC: HDC, hBrush: HBRUSH, lpOutputFunc: GRAYSTRINGPROC, lpData: LPARAM, nCount: int32, X: int32, Y: int32, nWidth: int32, nHeight: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawStateA*(hdc: HDC, hbrFore: HBRUSH, qfnCallBack: DRAWSTATEPROC, lData: LPARAM, wData: WPARAM, x: int32, y: int32, cx: int32, cy: int32, uFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawStateW*(hdc: HDC, hbrFore: HBRUSH, qfnCallBack: DRAWSTATEPROC, lData: LPARAM, wData: WPARAM, x: int32, y: int32, cx: int32, cy: int32, uFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc TabbedTextOutA*(hdc: HDC, x: int32, y: int32, lpString: LPCSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT, nTabOrigin: int32): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc TabbedTextOutW*(hdc: HDC, x: int32, y: int32, lpString: LPCWSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT, nTabOrigin: int32): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetTabbedTextExtentA*(hdc: HDC, lpString: LPCSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetTabbedTextExtentW*(hdc: HDC, lpString: LPCWSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+proc CalculatePopupWindowPosition*(
+  anchorPoint: ptr POINT,
+  windowSize: ptr SIZE,
+  flags: UINT,
+  excludeRect: ptr RECT,
+  popupWindowPosition: ptr RECT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InsertMenuItemA*(
+  hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InsertMenuItemW*(
+  hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOW
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuItemInfoA*(
+  hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuItemInfoW*(
+  hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOW
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetMenuItemInfoA*(
+  hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetMenuItemInfoW*(
+  hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOW
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuDefaultItem*(
+  hMenu: HMENU, fByPos: UINT, gmdiFlags: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetMenuDefaultItem*(
+  hMenu: HMENU, uItem: UINT, fByPos: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuItemRect*(
+  hWnd: HWND, hMenu: HMENU, uItem: UINT, lprcItem: LPRECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MenuItemFromPoint*(
+  hWnd: HWND, hMenu: HMENU, ptScreen: POINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DragObject*(
+  hwndParent: HWND, hwndFrom: HWND, fmt: UINT, data: ULONG_PTR, hcur: HCURSOR
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DragDetect*(
+  hwnd: HWND, pt: POINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawIcon*(
+  hDC: HDC, X: int32, Y: int32, hIcon: HICON
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawTextA*(
+  hdc: HDC, lpchText: LPCSTR, cchText: int32, lprc: LPRECT, format: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawTextW*(
+  hdc: HDC, lpchText: LPCWSTR, cchText: int32, lprc: LPRECT, format: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawTextExA*(
+  hdc: HDC,
+  lpchText: LPSTR,
+  cchText: int32,
+  lprc: LPRECT,
+  format: UINT,
+  lpdtp: LPDRAWTEXTPARAMS,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawTextExW*(
+  hdc: HDC,
+  lpchText: LPWSTR,
+  cchText: int32,
+  lprc: LPRECT,
+  format: UINT,
+  lpdtp: LPDRAWTEXTPARAMS,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GrayStringA*(
+  hDC: HDC,
+  hBrush: HBRUSH,
+  lpOutputFunc: GRAYSTRINGPROC,
+  lpData: LPARAM,
+  nCount: int32,
+  X: int32,
+  Y: int32,
+  nWidth: int32,
+  nHeight: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GrayStringW*(
+  hDC: HDC,
+  hBrush: HBRUSH,
+  lpOutputFunc: GRAYSTRINGPROC,
+  lpData: LPARAM,
+  nCount: int32,
+  X: int32,
+  Y: int32,
+  nWidth: int32,
+  nHeight: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawStateA*(
+  hdc: HDC,
+  hbrFore: HBRUSH,
+  qfnCallBack: DRAWSTATEPROC,
+  lData: LPARAM,
+  wData: WPARAM,
+  x: int32,
+  y: int32,
+  cx: int32,
+  cy: int32,
+  uFlags: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawStateW*(
+  hdc: HDC,
+  hbrFore: HBRUSH,
+  qfnCallBack: DRAWSTATEPROC,
+  lData: LPARAM,
+  wData: WPARAM,
+  x: int32,
+  y: int32,
+  cx: int32,
+  cy: int32,
+  uFlags: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TabbedTextOutA*(
+  hdc: HDC,
+  x: int32,
+  y: int32,
+  lpString: LPCSTR,
+  chCount: int32,
+  nTabPositions: int32,
+  lpnTabStopPositions: ptr INT,
+  nTabOrigin: int32,
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TabbedTextOutW*(
+  hdc: HDC,
+  x: int32,
+  y: int32,
+  lpString: LPCWSTR,
+  chCount: int32,
+  nTabPositions: int32,
+  lpnTabStopPositions: ptr INT,
+  nTabOrigin: int32,
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetTabbedTextExtentA*(
+  hdc: HDC,
+  lpString: LPCSTR,
+  chCount: int32,
+  nTabPositions: int32,
+  lpnTabStopPositions: ptr INT,
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetTabbedTextExtentW*(
+  hdc: HDC,
+  lpString: LPCWSTR,
+  chCount: int32,
+  nTabPositions: int32,
+  lpnTabStopPositions: ptr INT,
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc UpdateWindow*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc SetActiveWindow*(hWnd: HWND): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetForegroundWindow*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc PaintDesktop*(hdc: HDC): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SwitchToThisWindow*(hwnd: HWND, fUnknown: WINBOOL): VOID {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetForegroundWindow*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc AllowSetForegroundWindow*(dwProcessId: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LockSetForegroundWindow*(uLockCode: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc SwitchToThisWindow*(
+  hwnd: HWND, fUnknown: WINBOOL
+): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetForegroundWindow*(
+  hWnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AllowSetForegroundWindow*(
+  dwProcessId: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LockSetForegroundWindow*(
+  uLockCode: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc WindowFromDC*(hDC: HDC): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetDC*(hWnd: HWND): HDC {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetDCEx*(hWnd: HWND, hrgnClip: HRGN, flags: DWORD): HDC {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetDCEx*(
+  hWnd: HWND, hrgnClip: HRGN, flags: DWORD
+): HDC {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetWindowDC*(hWnd: HWND): HDC {.winapi, stdcall, dynlib: "user32", importc.}
-proc ReleaseDC*(hWnd: HWND, hDC: HDC): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc BeginPaint*(hWnd: HWND, lpPaint: LPPAINTSTRUCT): HDC {.winapi, stdcall, dynlib: "user32", importc.}
-proc EndPaint*(hWnd: HWND, lpPaint: ptr PAINTSTRUCT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetUpdateRect*(hWnd: HWND, lpRect: LPRECT, bErase: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetUpdateRgn*(hWnd: HWND, hRgn: HRGN, bErase: WINBOOL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowRgn*(hWnd: HWND, hRgn: HRGN, bRedraw: WINBOOL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowRgn*(hWnd: HWND, hRgn: HRGN): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowRgnBox*(hWnd: HWND, lprc: LPRECT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc ExcludeUpdateRgn*(hDC: HDC, hWnd: HWND): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc InvalidateRect*(hWnd: HWND, lpRect: ptr RECT, bErase: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ValidateRect*(hWnd: HWND, lpRect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InvalidateRgn*(hWnd: HWND, hRgn: HRGN, bErase: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ValidateRgn*(hWnd: HWND, hRgn: HRGN): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RedrawWindow*(hWnd: HWND, lprcUpdate: ptr RECT, hrgnUpdate: HRGN, flags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LockWindowUpdate*(hWndLock: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ScrollWindow*(hWnd: HWND, XAmount: int32, YAmount: int32, lpRect: ptr RECT, lpClipRect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ScrollDC*(hDC: HDC, dx: int32, dy: int32, lprcScroll: ptr RECT, lprcClip: ptr RECT, hrgnUpdate: HRGN, lprcUpdate: LPRECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ScrollWindowEx*(hWnd: HWND, dx: int32, dy: int32, prcScroll: ptr RECT, prcClip: ptr RECT, hrgnUpdate: HRGN, prcUpdate: LPRECT, flags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetScrollPos*(hWnd: HWND, nBar: int32, nPos: int32, bRedraw: WINBOOL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetScrollPos*(hWnd: HWND, nBar: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetScrollRange*(hWnd: HWND, nBar: int32, nMinPos: int32, nMaxPos: int32, bRedraw: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetScrollRange*(hWnd: HWND, nBar: int32, lpMinPos: LPINT, lpMaxPos: LPINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ShowScrollBar*(hWnd: HWND, wBar: int32, bShow: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnableScrollBar*(hWnd: HWND, wSBflags: UINT, wArrows: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetPropA*(hWnd: HWND, lpString: LPCSTR, hData: HANDLE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetPropW*(hWnd: HWND, lpString: LPCWSTR, hData: HANDLE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPropA*(hWnd: HWND, lpString: LPCSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPropW*(hWnd: HWND, lpString: LPCWSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc RemovePropA*(hWnd: HWND, lpString: LPCSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc RemovePropW*(hWnd: HWND, lpString: LPCWSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumPropsExA*(hWnd: HWND, lpEnumFunc: PROPENUMPROCEXA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumPropsExW*(hWnd: HWND, lpEnumFunc: PROPENUMPROCEXW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumPropsA*(hWnd: HWND, lpEnumFunc: PROPENUMPROCA): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumPropsW*(hWnd: HWND, lpEnumFunc: PROPENUMPROCW): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowTextA*(hWnd: HWND, lpString: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowTextW*(hWnd: HWND, lpString: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowTextA*(hWnd: HWND, lpString: LPSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowTextW*(hWnd: HWND, lpString: LPWSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowTextLengthA*(hWnd: HWND): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowTextLengthW*(hWnd: HWND): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClientRect*(hWnd: HWND, lpRect: LPRECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowRect*(hWnd: HWND, lpRect: LPRECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc AdjustWindowRect*(lpRect: LPRECT, dwStyle: DWORD, bMenu: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc AdjustWindowRectEx*(lpRect: LPRECT, dwStyle: DWORD, bMenu: WINBOOL, dwExStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowContextHelpId*(P1: HWND, P2: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowContextHelpId*(P1: HWND): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetMenuContextHelpId*(P1: HMENU, P2: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuContextHelpId*(P1: HMENU): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc MessageBoxA*(hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc MessageBoxW*(hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc MessageBoxExA*(hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT, wLanguageId: WORD): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc MessageBoxExW*(hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT, wLanguageId: WORD): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc MessageBoxIndirectA*(lpmbp: ptr MSGBOXPARAMSA): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc MessageBoxIndirectW*(lpmbp: ptr MSGBOXPARAMSW): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc ReleaseDC*(
+  hWnd: HWND, hDC: HDC
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc BeginPaint*(
+  hWnd: HWND, lpPaint: LPPAINTSTRUCT
+): HDC {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EndPaint*(
+  hWnd: HWND, lpPaint: ptr PAINTSTRUCT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetUpdateRect*(
+  hWnd: HWND, lpRect: LPRECT, bErase: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetUpdateRgn*(
+  hWnd: HWND, hRgn: HRGN, bErase: WINBOOL
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowRgn*(
+  hWnd: HWND, hRgn: HRGN, bRedraw: WINBOOL
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowRgn*(
+  hWnd: HWND, hRgn: HRGN
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowRgnBox*(
+  hWnd: HWND, lprc: LPRECT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ExcludeUpdateRgn*(
+  hDC: HDC, hWnd: HWND
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InvalidateRect*(
+  hWnd: HWND, lpRect: ptr RECT, bErase: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ValidateRect*(
+  hWnd: HWND, lpRect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InvalidateRgn*(
+  hWnd: HWND, hRgn: HRGN, bErase: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ValidateRgn*(
+  hWnd: HWND, hRgn: HRGN
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RedrawWindow*(
+  hWnd: HWND, lprcUpdate: ptr RECT, hrgnUpdate: HRGN, flags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LockWindowUpdate*(
+  hWndLock: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ScrollWindow*(
+  hWnd: HWND, XAmount: int32, YAmount: int32, lpRect: ptr RECT, lpClipRect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ScrollDC*(
+  hDC: HDC,
+  dx: int32,
+  dy: int32,
+  lprcScroll: ptr RECT,
+  lprcClip: ptr RECT,
+  hrgnUpdate: HRGN,
+  lprcUpdate: LPRECT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ScrollWindowEx*(
+  hWnd: HWND,
+  dx: int32,
+  dy: int32,
+  prcScroll: ptr RECT,
+  prcClip: ptr RECT,
+  hrgnUpdate: HRGN,
+  prcUpdate: LPRECT,
+  flags: UINT,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetScrollPos*(
+  hWnd: HWND, nBar: int32, nPos: int32, bRedraw: WINBOOL
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetScrollPos*(
+  hWnd: HWND, nBar: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetScrollRange*(
+  hWnd: HWND, nBar: int32, nMinPos: int32, nMaxPos: int32, bRedraw: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetScrollRange*(
+  hWnd: HWND, nBar: int32, lpMinPos: LPINT, lpMaxPos: LPINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ShowScrollBar*(
+  hWnd: HWND, wBar: int32, bShow: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnableScrollBar*(
+  hWnd: HWND, wSBflags: UINT, wArrows: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetPropA*(
+  hWnd: HWND, lpString: LPCSTR, hData: HANDLE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetPropW*(
+  hWnd: HWND, lpString: LPCWSTR, hData: HANDLE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPropA*(
+  hWnd: HWND, lpString: LPCSTR
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPropW*(
+  hWnd: HWND, lpString: LPCWSTR
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RemovePropA*(
+  hWnd: HWND, lpString: LPCSTR
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RemovePropW*(
+  hWnd: HWND, lpString: LPCWSTR
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumPropsExA*(
+  hWnd: HWND, lpEnumFunc: PROPENUMPROCEXA, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumPropsExW*(
+  hWnd: HWND, lpEnumFunc: PROPENUMPROCEXW, lParam: LPARAM
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumPropsA*(
+  hWnd: HWND, lpEnumFunc: PROPENUMPROCA
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumPropsW*(
+  hWnd: HWND, lpEnumFunc: PROPENUMPROCW
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowTextA*(
+  hWnd: HWND, lpString: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowTextW*(
+  hWnd: HWND, lpString: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowTextA*(
+  hWnd: HWND, lpString: LPSTR, nMaxCount: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowTextW*(
+  hWnd: HWND, lpString: LPWSTR, nMaxCount: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowTextLengthA*(
+  hWnd: HWND
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowTextLengthW*(
+  hWnd: HWND
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClientRect*(
+  hWnd: HWND, lpRect: LPRECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowRect*(
+  hWnd: HWND, lpRect: LPRECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AdjustWindowRect*(
+  lpRect: LPRECT, dwStyle: DWORD, bMenu: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc AdjustWindowRectEx*(
+  lpRect: LPRECT, dwStyle: DWORD, bMenu: WINBOOL, dwExStyle: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowContextHelpId*(
+  P1: HWND, P2: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowContextHelpId*(
+  P1: HWND
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetMenuContextHelpId*(
+  P1: HMENU, P2: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuContextHelpId*(
+  P1: HMENU
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MessageBoxA*(
+  hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MessageBoxW*(
+  hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MessageBoxExA*(
+  hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT, wLanguageId: WORD
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MessageBoxExW*(
+  hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT, wLanguageId: WORD
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MessageBoxIndirectA*(
+  lpmbp: ptr MSGBOXPARAMSA
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MessageBoxIndirectW*(
+  lpmbp: ptr MSGBOXPARAMSW
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc MessageBeep*(uType: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc ShowCursor*(bShow: WINBOOL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetCursorPos*(X: int32, Y: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetCursor*(hCursor: HCURSOR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetCursorPos*(lpPoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ClipCursor*(lpRect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClipCursor*(lpRect: LPRECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetCursorPos*(
+  X: int32, Y: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetCursor*(
+  hCursor: HCURSOR
+): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetCursorPos*(
+  lpPoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ClipCursor*(
+  lpRect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClipCursor*(
+  lpRect: LPRECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetCursor*(): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateCaret*(hWnd: HWND, hBitmap: HBITMAP, nWidth: int32, nHeight: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc CreateCaret*(
+  hWnd: HWND, hBitmap: HBITMAP, nWidth: int32, nHeight: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetCaretBlinkTime*(): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetCaretBlinkTime*(uMSeconds: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetCaretBlinkTime*(
+  uMSeconds: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc DestroyCaret*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc HideCaret*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc ShowCaret*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetCaretPos*(X: int32, Y: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetCaretPos*(lpPoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ClientToScreen*(hWnd: HWND, lpPoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ScreenToClient*(hWnd: HWND, lpPoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc MapWindowPoints*(hWndFrom: HWND, hWndTo: HWND, lpPoints: LPPOINT, cPoints: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetCaretPos*(
+  X: int32, Y: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetCaretPos*(
+  lpPoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ClientToScreen*(
+  hWnd: HWND, lpPoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ScreenToClient*(
+  hWnd: HWND, lpPoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MapWindowPoints*(
+  hWndFrom: HWND, hWndTo: HWND, lpPoints: LPPOINT, cPoints: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc WindowFromPoint*(Point: POINT): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChildWindowFromPoint*(hWndParent: HWND, Point: POINT): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChildWindowFromPointEx*(hwnd: HWND, pt: POINT, flags: UINT): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetPhysicalCursorPos*(X: int32, Y: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPhysicalCursorPos*(lpPoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LogicalToPhysicalPoint*(hWnd: HWND, lpPoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PhysicalToLogicalPoint*(hWnd: HWND, lpPoint: LPPOINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc WindowFromPhysicalPoint*(Point: POINT): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+proc ChildWindowFromPoint*(
+  hWndParent: HWND, Point: POINT
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChildWindowFromPointEx*(
+  hwnd: HWND, pt: POINT, flags: UINT
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetPhysicalCursorPos*(
+  X: int32, Y: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPhysicalCursorPos*(
+  lpPoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LogicalToPhysicalPoint*(
+  hWnd: HWND, lpPoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PhysicalToLogicalPoint*(
+  hWnd: HWND, lpPoint: LPPOINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc WindowFromPhysicalPoint*(
+  Point: POINT
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetSysColor*(nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetSysColorBrush*(nIndex: int32): HBRUSH {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetSysColors*(cElements: int32, lpaElements: ptr INT, lpaRgbValues: ptr COLORREF): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawFocusRect*(hDC: HDC, lprc: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc FillRect*(hDC: HDC, lprc: ptr RECT, hbr: HBRUSH): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc FrameRect*(hDC: HDC, lprc: ptr RECT, hbr: HBRUSH): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc InvertRect*(hDC: HDC, lprc: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetRect*(lprc: LPRECT, xLeft: int32, yTop: int32, xRight: int32, yBottom: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetSysColorBrush*(
+  nIndex: int32
+): HBRUSH {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetSysColors*(
+  cElements: int32, lpaElements: ptr INT, lpaRgbValues: ptr COLORREF
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawFocusRect*(
+  hDC: HDC, lprc: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FillRect*(
+  hDC: HDC, lprc: ptr RECT, hbr: HBRUSH
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FrameRect*(
+  hDC: HDC, lprc: ptr RECT, hbr: HBRUSH
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InvertRect*(
+  hDC: HDC, lprc: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetRect*(
+  lprc: LPRECT, xLeft: int32, yTop: int32, xRight: int32, yBottom: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc SetRectEmpty*(lprc: LPRECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CopyRect*(lprcDst: LPRECT, lprcSrc: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc InflateRect*(lprc: LPRECT, dx: int32, dy: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IntersectRect*(lprcDst: LPRECT, lprcSrc1: ptr RECT, lprcSrc2: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnionRect*(lprcDst: LPRECT, lprcSrc1: ptr RECT, lprcSrc2: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SubtractRect*(lprcDst: LPRECT, lprcSrc1: ptr RECT, lprcSrc2: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc OffsetRect*(lprc: LPRECT, dx: int32, dy: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsRectEmpty*(lprc: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EqualRect*(lprc1: ptr RECT, lprc2: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PtInRect*(lprc: ptr RECT, pt: POINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowWord*(hWnd: HWND, nIndex: int32): WORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowWord*(hWnd: HWND, nIndex: int32, wNewWord: WORD): WORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowLongA*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowLongW*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowLongA*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowLongW*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassWord*(hWnd: HWND, nIndex: int32): WORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetClassWord*(hWnd: HWND, nIndex: int32, wNewWord: WORD): WORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassLongA*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassLongW*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetClassLongA*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetClassLongW*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetProcessDefaultLayout*(pdwDefaultLayout: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetProcessDefaultLayout*(dwDefaultLayout: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc CopyRect*(
+  lprcDst: LPRECT, lprcSrc: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InflateRect*(
+  lprc: LPRECT, dx: int32, dy: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IntersectRect*(
+  lprcDst: LPRECT, lprcSrc1: ptr RECT, lprcSrc2: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnionRect*(
+  lprcDst: LPRECT, lprcSrc1: ptr RECT, lprcSrc2: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SubtractRect*(
+  lprcDst: LPRECT, lprcSrc1: ptr RECT, lprcSrc2: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc OffsetRect*(
+  lprc: LPRECT, dx: int32, dy: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsRectEmpty*(
+  lprc: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EqualRect*(
+  lprc1: ptr RECT, lprc2: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PtInRect*(
+  lprc: ptr RECT, pt: POINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowWord*(
+  hWnd: HWND, nIndex: int32
+): WORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowWord*(
+  hWnd: HWND, nIndex: int32, wNewWord: WORD
+): WORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowLongA*(
+  hWnd: HWND, nIndex: int32
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowLongW*(
+  hWnd: HWND, nIndex: int32
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowLongA*(
+  hWnd: HWND, nIndex: int32, dwNewLong: LONG
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowLongW*(
+  hWnd: HWND, nIndex: int32, dwNewLong: LONG
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassWord*(
+  hWnd: HWND, nIndex: int32
+): WORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetClassWord*(
+  hWnd: HWND, nIndex: int32, wNewWord: WORD
+): WORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassLongA*(
+  hWnd: HWND, nIndex: int32
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassLongW*(
+  hWnd: HWND, nIndex: int32
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetClassLongA*(
+  hWnd: HWND, nIndex: int32, dwNewLong: LONG
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetClassLongW*(
+  hWnd: HWND, nIndex: int32, dwNewLong: LONG
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetProcessDefaultLayout*(
+  pdwDefaultLayout: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetProcessDefaultLayout*(
+  dwDefaultLayout: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetDesktopWindow*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
 proc GetParent*(hWnd: HWND): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetParent*(hWndChild: HWND, hWndNewParent: HWND): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumChildWindows*(hWndParent: HWND, lpEnumFunc: WNDENUMPROC, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc FindWindowA*(lpClassName: LPCSTR, lpWindowName: LPCSTR): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc FindWindowW*(lpClassName: LPCWSTR, lpWindowName: LPCWSTR): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc FindWindowExA*(hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCSTR, lpszWindow: LPCSTR): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc FindWindowExW*(hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCWSTR, lpszWindow: LPCWSTR): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+proc SetParent*(
+  hWndChild: HWND, hWndNewParent: HWND
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumChildWindows*(
+  hWndParent: HWND, lpEnumFunc: WNDENUMPROC, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FindWindowA*(
+  lpClassName: LPCSTR, lpWindowName: LPCSTR
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FindWindowW*(
+  lpClassName: LPCWSTR, lpWindowName: LPCWSTR
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FindWindowExA*(
+  hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCSTR, lpszWindow: LPCSTR
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc FindWindowExW*(
+  hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCWSTR, lpszWindow: LPCWSTR
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetShellWindow*(): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterShellHookWindow*(hwnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DeregisterShellHookWindow*(hwnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumWindows*(lpEnumFunc: WNDENUMPROC, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumThreadWindows*(dwThreadId: DWORD, lpfn: WNDENUMPROC, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassNameA*(hWnd: HWND, lpClassName: LPSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetClassNameW*(hWnd: HWND, lpClassName: LPWSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc RegisterShellHookWindow*(
+  hwnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DeregisterShellHookWindow*(
+  hwnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumWindows*(
+  lpEnumFunc: WNDENUMPROC, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumThreadWindows*(
+  dwThreadId: DWORD, lpfn: WNDENUMPROC, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassNameA*(
+  hWnd: HWND, lpClassName: LPSTR, nMaxCount: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetClassNameW*(
+  hWnd: HWND, lpClassName: LPWSTR, nMaxCount: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetTopWindow*(hWnd: HWND): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowThreadProcessId*(hWnd: HWND, lpdwProcessId: LPDWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsGUIThread*(bConvert: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetLastActivePopup*(hWnd: HWND): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindow*(hWnd: HWND, uCmd: UINT): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowsHookA*(nFilterType: int32, pfnFilterProc: HOOKPROC): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowsHookW*(nFilterType: int32, pfnFilterProc: HOOKPROC): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnhookWindowsHook*(nCode: int32, pfnFilterProc: HOOKPROC): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowsHookExA*(idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWindowsHookExW*(idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnhookWindowsHookEx*(hhk: HHOOK): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CallNextHookEx*(hhk: HHOOK, nCode: int32, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc CheckMenuRadioItem*(hmenu: HMENU, first: UINT, last: UINT, check: UINT, flags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadBitmapA*(hInstance: HINSTANCE, lpBitmapName: LPCSTR): HBITMAP {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadBitmapW*(hInstance: HINSTANCE, lpBitmapName: LPCWSTR): HBITMAP {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadCursorA*(hInstance: HINSTANCE, lpCursorName: LPCSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadCursorW*(hInstance: HINSTANCE, lpCursorName: LPCWSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadCursorFromFileA*(lpFileName: LPCSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadCursorFromFileW*(lpFileName: LPCWSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateCursor*(hInst: HINSTANCE, xHotSpot: int32, yHotSpot: int32, nWidth: int32, nHeight: int32, pvANDPlane: pointer, pvXORPlane: pointer): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc DestroyCursor*(hCursor: HCURSOR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetSystemCursor*(hcur: HCURSOR, id: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadIconA*(hInstance: HINSTANCE, lpIconName: LPCSTR): HICON {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadIconW*(hInstance: HINSTANCE, lpIconName: LPCWSTR): HICON {.winapi, stdcall, dynlib: "user32", importc.}
-proc PrivateExtractIconsA*(szFileName: LPCSTR, nIconIndex: int32, cxIcon: int32, cyIcon: int32, phicon: ptr HICON, piconid: ptr UINT, nIcons: UINT, flags: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc PrivateExtractIconsW*(szFileName: LPCWSTR, nIconIndex: int32, cxIcon: int32, cyIcon: int32, phicon: ptr HICON, piconid: ptr UINT, nIcons: UINT, flags: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateIcon*(hInstance: HINSTANCE, nWidth: int32, nHeight: int32, cPlanes: BYTE, cBitsPixel: BYTE, lpbANDbits: ptr BYTE, lpbXORbits: ptr BYTE): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetWindowThreadProcessId*(
+  hWnd: HWND, lpdwProcessId: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsGUIThread*(
+  bConvert: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetLastActivePopup*(
+  hWnd: HWND
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindow*(
+  hWnd: HWND, uCmd: UINT
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowsHookA*(
+  nFilterType: int32, pfnFilterProc: HOOKPROC
+): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowsHookW*(
+  nFilterType: int32, pfnFilterProc: HOOKPROC
+): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnhookWindowsHook*(
+  nCode: int32, pfnFilterProc: HOOKPROC
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowsHookExA*(
+  idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD
+): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWindowsHookExW*(
+  idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD
+): HHOOK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnhookWindowsHookEx*(
+  hhk: HHOOK
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CallNextHookEx*(
+  hhk: HHOOK, nCode: int32, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CheckMenuRadioItem*(
+  hmenu: HMENU, first: UINT, last: UINT, check: UINT, flags: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadBitmapA*(
+  hInstance: HINSTANCE, lpBitmapName: LPCSTR
+): HBITMAP {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadBitmapW*(
+  hInstance: HINSTANCE, lpBitmapName: LPCWSTR
+): HBITMAP {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadCursorA*(
+  hInstance: HINSTANCE, lpCursorName: LPCSTR
+): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadCursorW*(
+  hInstance: HINSTANCE, lpCursorName: LPCWSTR
+): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadCursorFromFileA*(
+  lpFileName: LPCSTR
+): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadCursorFromFileW*(
+  lpFileName: LPCWSTR
+): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateCursor*(
+  hInst: HINSTANCE,
+  xHotSpot: int32,
+  yHotSpot: int32,
+  nWidth: int32,
+  nHeight: int32,
+  pvANDPlane: pointer,
+  pvXORPlane: pointer,
+): HCURSOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DestroyCursor*(
+  hCursor: HCURSOR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetSystemCursor*(
+  hcur: HCURSOR, id: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadIconA*(
+  hInstance: HINSTANCE, lpIconName: LPCSTR
+): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadIconW*(
+  hInstance: HINSTANCE, lpIconName: LPCWSTR
+): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PrivateExtractIconsA*(
+  szFileName: LPCSTR,
+  nIconIndex: int32,
+  cxIcon: int32,
+  cyIcon: int32,
+  phicon: ptr HICON,
+  piconid: ptr UINT,
+  nIcons: UINT,
+  flags: UINT,
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PrivateExtractIconsW*(
+  szFileName: LPCWSTR,
+  nIconIndex: int32,
+  cxIcon: int32,
+  cyIcon: int32,
+  phicon: ptr HICON,
+  piconid: ptr UINT,
+  nIcons: UINT,
+  flags: UINT,
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateIcon*(
+  hInstance: HINSTANCE,
+  nWidth: int32,
+  nHeight: int32,
+  cPlanes: BYTE,
+  cBitsPixel: BYTE,
+  lpbANDbits: ptr BYTE,
+  lpbXORbits: ptr BYTE,
+): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc DestroyIcon*(hIcon: HICON): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc LookupIconIdFromDirectory*(presbits: PBYTE, fIcon: WINBOOL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc LookupIconIdFromDirectoryEx*(presbits: PBYTE, fIcon: WINBOOL, cxDesired: int32, cyDesired: int32, Flags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateIconFromResource*(presbits: PBYTE, dwResSize: DWORD, fIcon: WINBOOL, dwVer: DWORD): HICON {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateIconFromResourceEx*(presbits: PBYTE, dwResSize: DWORD, fIcon: WINBOOL, dwVer: DWORD, cxDesired: int32, cyDesired: int32, Flags: UINT): HICON {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadImageA*(hInst: HINSTANCE, name: LPCSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc LoadImageW*(hInst: HINSTANCE, name: LPCWSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc CopyImage*(h: HANDLE, `type`: UINT, cx: int32, cy: int32, flags: UINT): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
-proc DrawIconEx*(hdc: HDC, xLeft: int32, yTop: int32, hIcon: HICON, cxWidth: int32, cyWidth: int32, istepIfAniCur: UINT, hbrFlickerFreeDraw: HBRUSH, diFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateIconIndirect*(piconinfo: PICONINFO): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+proc LookupIconIdFromDirectory*(
+  presbits: PBYTE, fIcon: WINBOOL
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LookupIconIdFromDirectoryEx*(
+  presbits: PBYTE, fIcon: WINBOOL, cxDesired: int32, cyDesired: int32, Flags: UINT
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateIconFromResource*(
+  presbits: PBYTE, dwResSize: DWORD, fIcon: WINBOOL, dwVer: DWORD
+): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateIconFromResourceEx*(
+  presbits: PBYTE,
+  dwResSize: DWORD,
+  fIcon: WINBOOL,
+  dwVer: DWORD,
+  cxDesired: int32,
+  cyDesired: int32,
+  Flags: UINT,
+): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadImageA*(
+  hInst: HINSTANCE, name: LPCSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc LoadImageW*(
+  hInst: HINSTANCE, name: LPCWSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CopyImage*(
+  h: HANDLE, `type`: UINT, cx: int32, cy: int32, flags: UINT
+): HANDLE {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DrawIconEx*(
+  hdc: HDC,
+  xLeft: int32,
+  yTop: int32,
+  hIcon: HICON,
+  cxWidth: int32,
+  cyWidth: int32,
+  istepIfAniCur: UINT,
+  hbrFlickerFreeDraw: HBRUSH,
+  diFlags: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateIconIndirect*(
+  piconinfo: PICONINFO
+): HICON {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CopyIcon*(hIcon: HICON): HICON {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetIconInfo*(hIcon: HICON, piconinfo: PICONINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetIconInfoExA*(hicon: HICON, piconinfo: PICONINFOEXA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetIconInfoExW*(hicon: HICON, piconinfo: PICONINFOEXW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsDialogMessageA*(hDlg: HWND, lpMsg: LPMSG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsDialogMessageW*(hDlg: HWND, lpMsg: LPMSG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc MapDialogRect*(hDlg: HWND, lpRect: LPRECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirListA*(hDlg: HWND, lpPathSpec: LPSTR, nIDListBox: int32, nIDStaticPath: int32, uFileType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirListW*(hDlg: HWND, lpPathSpec: LPWSTR, nIDListBox: int32, nIDStaticPath: int32, uFileType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirSelectExA*(hwndDlg: HWND, lpString: LPSTR, chCount: int32, idListBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirSelectExW*(hwndDlg: HWND, lpString: LPWSTR, chCount: int32, idListBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirListComboBoxA*(hDlg: HWND, lpPathSpec: LPSTR, nIDComboBox: int32, nIDStaticPath: int32, uFiletype: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirListComboBoxW*(hDlg: HWND, lpPathSpec: LPWSTR, nIDComboBox: int32, nIDStaticPath: int32, uFiletype: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirSelectComboBoxExA*(hwndDlg: HWND, lpString: LPSTR, cchOut: int32, idComboBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DlgDirSelectComboBoxExW*(hwndDlg: HWND, lpString: LPWSTR, cchOut: int32, idComboBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetScrollInfo*(hwnd: HWND, nBar: int32, lpsi: LPCSCROLLINFO, redraw: WINBOOL): int32 {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetScrollInfo*(hwnd: HWND, nBar: int32, lpsi: LPSCROLLINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefFrameProcA*(hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefFrameProcW*(hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefMDIChildProcA*(hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefMDIChildProcW*(hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc TranslateMDISysAccel*(hWndClient: HWND, lpMsg: LPMSG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ArrangeIconicWindows*(hWnd: HWND): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateMDIWindowA*(lpClassName: LPCSTR, lpWindowName: LPCSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hInstance: HINSTANCE, lParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc CreateMDIWindowW*(lpClassName: LPCWSTR, lpWindowName: LPCWSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hInstance: HINSTANCE, lParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc TileWindows*(hwndParent: HWND, wHow: UINT, lpRect: ptr RECT, cKids: UINT, lpKids: ptr HWND): WORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc CascadeWindows*(hwndParent: HWND, wHow: UINT, lpRect: ptr RECT, cKids: UINT, lpKids: ptr HWND): WORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc WinHelpA*(hWndMain: HWND, lpszHelp: LPCSTR, uCommand: UINT, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc WinHelpW*(hWndMain: HWND, lpszHelp: LPCWSTR, uCommand: UINT, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetGuiResources*(hProcess: HANDLE, uiFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeDisplaySettingsA*(lpDevMode: LPDEVMODEA, dwFlags: DWORD): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeDisplaySettingsW*(lpDevMode: LPDEVMODEW, dwFlags: DWORD): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeDisplaySettingsExA*(lpszDeviceName: LPCSTR, lpDevMode: LPDEVMODEA, hwnd: HWND, dwflags: DWORD, lParam: LPVOID): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeDisplaySettingsExW*(lpszDeviceName: LPCWSTR, lpDevMode: LPDEVMODEW, hwnd: HWND, dwflags: DWORD, lParam: LPVOID): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDisplaySettingsA*(lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDisplaySettingsW*(lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDisplaySettingsExA*(lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDisplaySettingsExW*(lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDisplayDevicesA*(lpDevice: LPCSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDisplayDevicesW*(lpDevice: LPCWSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetDisplayConfigBufferSizes*(flags: UINT32, numPathArrayElements: ptr UINT32, numModeInfoArrayElements: ptr UINT32): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetDisplayConfig*(numPathArrayElements: UINT32, pathArray: ptr DISPLAYCONFIG_PATH_INFO, numModeInfoArrayElements: UINT32, modeInfoArray: ptr DISPLAYCONFIG_MODE_INFO, flags: UINT32): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc QueryDisplayConfig*(flags: UINT32, numPathArrayElements: ptr UINT32, pathArray: ptr DISPLAYCONFIG_PATH_INFO, numModeInfoArrayElements: ptr UINT32, modeInfoArray: ptr DISPLAYCONFIG_MODE_INFO, currentTopologyId: ptr DISPLAYCONFIG_TOPOLOGY_ID): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc DisplayConfigGetDeviceInfo*(requestPacket: ptr DISPLAYCONFIG_DEVICE_INFO_HEADER): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc DisplayConfigSetDeviceInfo*(setPacket: ptr DISPLAYCONFIG_DEVICE_INFO_HEADER): LONG {.winapi, stdcall, dynlib: "user32", importc.}
-proc SystemParametersInfoA*(uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SystemParametersInfoW*(uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetDebugErrorLevel*(dwLevel: DWORD): VOID {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetLastErrorEx*(dwErrCode: DWORD, dwType: DWORD): VOID {.winapi, stdcall, dynlib: "user32", importc.}
-proc InternalGetWindowText*(hWnd: HWND, pString: LPWSTR, cchMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetIconInfo*(
+  hIcon: HICON, piconinfo: PICONINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetIconInfoExA*(
+  hicon: HICON, piconinfo: PICONINFOEXA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetIconInfoExW*(
+  hicon: HICON, piconinfo: PICONINFOEXW
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsDialogMessageA*(
+  hDlg: HWND, lpMsg: LPMSG
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsDialogMessageW*(
+  hDlg: HWND, lpMsg: LPMSG
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MapDialogRect*(
+  hDlg: HWND, lpRect: LPRECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirListA*(
+  hDlg: HWND,
+  lpPathSpec: LPSTR,
+  nIDListBox: int32,
+  nIDStaticPath: int32,
+  uFileType: UINT,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirListW*(
+  hDlg: HWND,
+  lpPathSpec: LPWSTR,
+  nIDListBox: int32,
+  nIDStaticPath: int32,
+  uFileType: UINT,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirSelectExA*(
+  hwndDlg: HWND, lpString: LPSTR, chCount: int32, idListBox: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirSelectExW*(
+  hwndDlg: HWND, lpString: LPWSTR, chCount: int32, idListBox: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirListComboBoxA*(
+  hDlg: HWND,
+  lpPathSpec: LPSTR,
+  nIDComboBox: int32,
+  nIDStaticPath: int32,
+  uFiletype: UINT,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirListComboBoxW*(
+  hDlg: HWND,
+  lpPathSpec: LPWSTR,
+  nIDComboBox: int32,
+  nIDStaticPath: int32,
+  uFiletype: UINT,
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirSelectComboBoxExA*(
+  hwndDlg: HWND, lpString: LPSTR, cchOut: int32, idComboBox: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DlgDirSelectComboBoxExW*(
+  hwndDlg: HWND, lpString: LPWSTR, cchOut: int32, idComboBox: int32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetScrollInfo*(
+  hwnd: HWND, nBar: int32, lpsi: LPCSCROLLINFO, redraw: WINBOOL
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetScrollInfo*(
+  hwnd: HWND, nBar: int32, lpsi: LPSCROLLINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefFrameProcA*(
+  hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefFrameProcW*(
+  hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefMDIChildProcA*(
+  hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefMDIChildProcW*(
+  hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TranslateMDISysAccel*(
+  hWndClient: HWND, lpMsg: LPMSG
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ArrangeIconicWindows*(
+  hWnd: HWND
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateMDIWindowA*(
+  lpClassName: LPCSTR,
+  lpWindowName: LPCSTR,
+  dwStyle: DWORD,
+  X: int32,
+  Y: int32,
+  nWidth: int32,
+  nHeight: int32,
+  hWndParent: HWND,
+  hInstance: HINSTANCE,
+  lParam: LPARAM,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CreateMDIWindowW*(
+  lpClassName: LPCWSTR,
+  lpWindowName: LPCWSTR,
+  dwStyle: DWORD,
+  X: int32,
+  Y: int32,
+  nWidth: int32,
+  nHeight: int32,
+  hWndParent: HWND,
+  hInstance: HINSTANCE,
+  lParam: LPARAM,
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc TileWindows*(
+  hwndParent: HWND, wHow: UINT, lpRect: ptr RECT, cKids: UINT, lpKids: ptr HWND
+): WORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CascadeWindows*(
+  hwndParent: HWND, wHow: UINT, lpRect: ptr RECT, cKids: UINT, lpKids: ptr HWND
+): WORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc WinHelpA*(
+  hWndMain: HWND, lpszHelp: LPCSTR, uCommand: UINT, dwData: ULONG_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc WinHelpW*(
+  hWndMain: HWND, lpszHelp: LPCWSTR, uCommand: UINT, dwData: ULONG_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetGuiResources*(
+  hProcess: HANDLE, uiFlags: DWORD
+): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeDisplaySettingsA*(
+  lpDevMode: LPDEVMODEA, dwFlags: DWORD
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeDisplaySettingsW*(
+  lpDevMode: LPDEVMODEW, dwFlags: DWORD
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeDisplaySettingsExA*(
+  lpszDeviceName: LPCSTR,
+  lpDevMode: LPDEVMODEA,
+  hwnd: HWND,
+  dwflags: DWORD,
+  lParam: LPVOID,
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeDisplaySettingsExW*(
+  lpszDeviceName: LPCWSTR,
+  lpDevMode: LPDEVMODEW,
+  hwnd: HWND,
+  dwflags: DWORD,
+  lParam: LPVOID,
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDisplaySettingsA*(
+  lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDisplaySettingsW*(
+  lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDisplaySettingsExA*(
+  lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDisplaySettingsExW*(
+  lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDisplayDevicesA*(
+  lpDevice: LPCSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEA, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDisplayDevicesW*(
+  lpDevice: LPCWSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEW, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetDisplayConfigBufferSizes*(
+  flags: UINT32, numPathArrayElements: ptr UINT32, numModeInfoArrayElements: ptr UINT32
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetDisplayConfig*(
+  numPathArrayElements: UINT32,
+  pathArray: ptr DISPLAYCONFIG_PATH_INFO,
+  numModeInfoArrayElements: UINT32,
+  modeInfoArray: ptr DISPLAYCONFIG_MODE_INFO,
+  flags: UINT32,
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc QueryDisplayConfig*(
+  flags: UINT32,
+  numPathArrayElements: ptr UINT32,
+  pathArray: ptr DISPLAYCONFIG_PATH_INFO,
+  numModeInfoArrayElements: ptr UINT32,
+  modeInfoArray: ptr DISPLAYCONFIG_MODE_INFO,
+  currentTopologyId: ptr DISPLAYCONFIG_TOPOLOGY_ID,
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DisplayConfigGetDeviceInfo*(
+  requestPacket: ptr DISPLAYCONFIG_DEVICE_INFO_HEADER
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DisplayConfigSetDeviceInfo*(
+  setPacket: ptr DISPLAYCONFIG_DEVICE_INFO_HEADER
+): LONG {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SystemParametersInfoA*(
+  uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SystemParametersInfoW*(
+  uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetDebugErrorLevel*(
+  dwLevel: DWORD
+): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetLastErrorEx*(
+  dwErrCode: DWORD, dwType: DWORD
+): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc InternalGetWindowText*(
+  hWnd: HWND, pString: LPWSTR, cchMaxCount: int32
+): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc CancelShutdown*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc MonitorFromPoint*(pt: POINT, dwFlags: DWORD): HMONITOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc MonitorFromRect*(lprc: LPCRECT, dwFlags: DWORD): HMONITOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc MonitorFromWindow*(hwnd: HWND, dwFlags: DWORD): HMONITOR {.winapi, stdcall, dynlib: "user32", importc.}
-proc EndTask*(hWnd: HWND, fShutDown: WINBOOL, fForce: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc MonitorFromPoint*(
+  pt: POINT, dwFlags: DWORD
+): HMONITOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MonitorFromRect*(
+  lprc: LPCRECT, dwFlags: DWORD
+): HMONITOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc MonitorFromWindow*(
+  hwnd: HWND, dwFlags: DWORD
+): HMONITOR {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EndTask*(
+  hWnd: HWND, fShutDown: WINBOOL, fForce: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc SoundSentry*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMonitorInfoA*(hMonitor: HMONITOR, lpmi: LPMONITORINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMonitorInfoW*(hMonitor: HMONITOR, lpmi: LPMONITORINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc EnumDisplayMonitors*(hdc: HDC, lprcClip: LPCRECT, lpfnEnum: MONITORENUMPROC, dwData: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc NotifyWinEvent*(event: DWORD, hwnd: HWND, idObject: LONG, idChild: LONG): VOID {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetWinEventHook*(eventMin: DWORD, eventMax: DWORD, hmodWinEventProc: HMODULE, pfnWinEventProc: WINEVENTPROC, idProcess: DWORD, idThread: DWORD, dwFlags: DWORD): HWINEVENTHOOK {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsWinEventHookInstalled*(event: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UnhookWinEvent*(hWinEventHook: HWINEVENTHOOK): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetGUIThreadInfo*(idThread: DWORD, pgui: PGUITHREADINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc BlockInput*(fBlockIt: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowModuleFileNameA*(hwnd: HWND, pszFileName: LPSTR, cchFileNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowModuleFileNameW*(hwnd: HWND, pszFileName: LPWSTR, cchFileNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetMonitorInfoA*(
+  hMonitor: HMONITOR, lpmi: LPMONITORINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMonitorInfoW*(
+  hMonitor: HMONITOR, lpmi: LPMONITORINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc EnumDisplayMonitors*(
+  hdc: HDC, lprcClip: LPCRECT, lpfnEnum: MONITORENUMPROC, dwData: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc NotifyWinEvent*(
+  event: DWORD, hwnd: HWND, idObject: LONG, idChild: LONG
+): VOID {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetWinEventHook*(
+  eventMin: DWORD,
+  eventMax: DWORD,
+  hmodWinEventProc: HMODULE,
+  pfnWinEventProc: WINEVENTPROC,
+  idProcess: DWORD,
+  idThread: DWORD,
+  dwFlags: DWORD,
+): HWINEVENTHOOK {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsWinEventHookInstalled*(
+  event: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc UnhookWinEvent*(
+  hWinEventHook: HWINEVENTHOOK
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetGUIThreadInfo*(
+  idThread: DWORD, pgui: PGUITHREADINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc BlockInput*(
+  fBlockIt: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowModuleFileNameA*(
+  hwnd: HWND, pszFileName: LPSTR, cchFileNameMax: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowModuleFileNameW*(
+  hwnd: HWND, pszFileName: LPWSTR, cchFileNameMax: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc SetProcessDPIAware*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
 proc IsProcessDPIAware*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetCursorInfo*(pci: PCURSORINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetWindowInfo*(hwnd: HWND, pwi: PWINDOWINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetTitleBarInfo*(hwnd: HWND, pti: PTITLEBARINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetMenuBarInfo*(hwnd: HWND, idObject: LONG, idItem: LONG, pmbi: PMENUBARINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetScrollBarInfo*(hwnd: HWND, idObject: LONG, psbi: PSCROLLBARINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetComboBoxInfo*(hwndCombo: HWND, pcbi: PCOMBOBOXINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetAncestor*(hwnd: HWND, gaFlags: UINT): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc RealChildWindowFromPoint*(hwndParent: HWND, ptParentClientCoords: POINT): HWND {.winapi, stdcall, dynlib: "user32", importc.}
-proc RealGetWindowClassA*(hwnd: HWND, ptszClassName: LPSTR, cchClassNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc RealGetWindowClassW*(hwnd: HWND, ptszClassName: LPWSTR, cchClassNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetAltTabInfoA*(hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPSTR, cchItemText: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetAltTabInfoW*(hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPWSTR, cchItemText: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+proc GetCursorInfo*(
+  pci: PCURSORINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetWindowInfo*(
+  hwnd: HWND, pwi: PWINDOWINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetTitleBarInfo*(
+  hwnd: HWND, pti: PTITLEBARINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetMenuBarInfo*(
+  hwnd: HWND, idObject: LONG, idItem: LONG, pmbi: PMENUBARINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetScrollBarInfo*(
+  hwnd: HWND, idObject: LONG, psbi: PSCROLLBARINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetComboBoxInfo*(
+  hwndCombo: HWND, pcbi: PCOMBOBOXINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetAncestor*(
+  hwnd: HWND, gaFlags: UINT
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RealChildWindowFromPoint*(
+  hwndParent: HWND, ptParentClientCoords: POINT
+): HWND {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RealGetWindowClassA*(
+  hwnd: HWND, ptszClassName: LPSTR, cchClassNameMax: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RealGetWindowClassW*(
+  hwnd: HWND, ptszClassName: LPWSTR, cchClassNameMax: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetAltTabInfoA*(
+  hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPSTR, cchItemText: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetAltTabInfoW*(
+  hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPWSTR, cchItemText: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
 proc GetListBoxInfo*(hwnd: HWND): DWORD {.winapi, stdcall, dynlib: "user32", importc.}
 proc LockWorkStation*(): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc UserHandleGrantAccess*(hUserHandle: HANDLE, hJob: HANDLE, bGrant: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetRawInputData*(hRawInput: HRAWINPUT, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT, cbSizeHeader: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetRawInputDeviceInfoA*(hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetRawInputDeviceInfoW*(hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetRawInputBuffer*(pData: PRAWINPUT, pcbSize: PUINT, cbSizeHeader: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterRawInputDevices*(pRawInputDevices: PCRAWINPUTDEVICE, uiNumDevices: UINT, cbSize: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetRegisteredRawInputDevices*(pRawInputDevices: PRAWINPUTDEVICE, puiNumDevices: PUINT, cbSize: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetRawInputDeviceList*(pRawInputDeviceList: PRAWINPUTDEVICELIST, puiNumDevices: PUINT, cbSize: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc.}
-proc DefRawInputProc*(paRawInput: ptr PRAWINPUT, nInput: INT, cbSizeHeader: UINT): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerDevices*(deviceCount: ptr UINT32, pointerDevices: ptr POINTER_DEVICE_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerDevice*(device: HANDLE, pointerDevice: ptr POINTER_DEVICE_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerDeviceProperties*(device: HANDLE, propertyCount: ptr UINT32, pointerProperties: ptr POINTER_DEVICE_PROPERTY): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc RegisterPointerDeviceNotifications*(window: HWND, notifyRange: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerDeviceRects*(device: HANDLE, pointerDeviceRect: ptr RECT, displayRect: ptr RECT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerDeviceCursors*(device: HANDLE, cursorCount: ptr UINT32, deviceCursors: ptr POINTER_DEVICE_CURSOR_INFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetRawPointerDeviceData*(pointerId: UINT32, historyCount: UINT32, propertiesCount: UINT32, pProperties: ptr POINTER_DEVICE_PROPERTY, pValues: ptr LONG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeWindowMessageFilter*(message: UINT, dwFlag: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ChangeWindowMessageFilterEx*(hwnd: HWND, message: UINT, action: DWORD, pChangeFilterStruct: PCHANGEFILTERSTRUCT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetGestureInfo*(hGestureInfo: HGESTUREINFO, pGestureInfo: PGESTUREINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetGestureExtraArgs*(hGestureInfo: HGESTUREINFO, cbExtraArgs: UINT, pExtraArgs: PBYTE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc CloseGestureInfoHandle*(hGestureInfo: HGESTUREINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetGestureConfig*(hwnd: HWND, dwReserved: DWORD, cIDs: UINT, pGestureConfig: PGESTURECONFIG, cbSize: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetGestureConfig*(hwnd: HWND, dwReserved: DWORD, dwFlags: DWORD, pcIDs: PUINT, pGestureConfig: PGESTURECONFIG, cbSize: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ShutdownBlockReasonCreate*(hWnd: HWND, pwszReason: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ShutdownBlockReasonQuery*(hWnd: HWND, pwszBuff: LPWSTR, pcchBuff: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc ShutdownBlockReasonDestroy*(hWnd: HWND): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetCurrentInputMessageSource*(inputMessageSource: ptr INPUT_MESSAGE_SOURCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetCIMSSM*(inputMessageSource: ptr INPUT_MESSAGE_SOURCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetAutoRotationState*(pState: PAR_STATE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetDisplayAutoRotationPreferences*(pOrientation: ptr ORIENTATION_PREFERENCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetDisplayAutoRotationPreferences*(orientation: ORIENTATION_PREFERENCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc IsImmersiveProcess*(hProcess: HANDLE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc SetProcessRestrictionExemption*(fEnableExemption: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc GetPointerInputTransform*(pointerId: UINT32, historyCount: UINT32, inputTransform: ptr UINT32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
-proc PostAppMessageA*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageA".}
-proc PostAppMessageW*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageW".}
-proc GetNextWindow*(hWnd: HWND, uCmd: UINT): HWND {.winapi, stdcall, dynlib: "user32", importc: "GetWindow".}
-proc CopyCursor*(hIcon: HICON): HICON {.winapi, stdcall, dynlib: "user32", importc: "CopyIcon".}
-template MAKEINTRESOURCEA*(i: untyped): untyped = cast[LPSTR](i and 0xffff)
-template MAKEINTRESOURCEW*(i: untyped): untyped = cast[LPWSTR](i and 0xffff)
-template IS_INTRESOURCE*(r: untyped): bool = cast[int](r) shr 16 == 0
-template GET_APPCOMMAND_LPARAM*(lParam: untyped): SHORT = cast[SHORT](HIWORD(lParam) and (not WORD FAPPCOMMAND_MASK))
-template GET_DEVICE_LPARAM*(lParam: untyped): WORD = HIWORD(lParam) and WORD FAPPCOMMAND_MASK
-template GET_MOUSEORKEY_LPARAM*(lParam: untyped): WORD = HIWORD(lParam) and WORD FAPPCOMMAND_MASK
-template GET_FLAGS_LPARAM*(lParam: untyped): WORD = LOWORD(lParam)
-template GET_KEYSTATE_LPARAM*(lParam: untyped): WORD = LOWORD(lParam)
-template POINTSTOPOINT*(pt: POINT, pts: POINTS) = pt.x = pts.x; pt.y = pts.y
-template POINTTOPOINTS*(pt: POINT): POINTS = POINTS(x: int16 pt.x, y: int16 pt.y)
-template MAKEWPARAM*(l: untyped, h: untyped): WPARAM = WPARAM MAKELONG(l, h)
-template MAKELPARAM*(l: untyped, h: untyped): LPARAM = LPARAM MAKELONG(l, h)
-template MAKELRESULT*(l: untyped, h: untyped): LRESULT = LRESULT MAKELONG(l, h)
-template GET_WHEEL_DELTA_WPARAM*(wParam: untyped): SHORT = cast[SHORT](HIWORD(wParam))
-template GET_KEYSTATE_WPARAM*(wParam: untyped): WORD = LOWORD(wParam)
-template GET_NCHITTEST_WPARAM*(wParam: untyped): SHORT = cast[SHORT](LOWORD(wParam))
-template GET_XBUTTON_WPARAM*(wParam: untyped): WORD = HIWORD(wParam)
-template TOUCH_COORD_TO_PIXEL*(L: untyped): LONG = LONG((int L) / 100)
-template GET_POINTERID_WPARAM*(wParam: untyped): WORD = LOWORD(wParam)
-template IS_POINTER_FLAG_SET_WPARAM*(wParam: untyped, flag: untyped): bool = (DWORD(HIWORD(wParam)) and DWORD flag) == DWORD flag
-template IS_POINTER_NEW_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_NEW)
-template IS_POINTER_INRANGE_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_INRANGE)
-template IS_POINTER_INCONTACT_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_INCONTACT)
-template IS_POINTER_FIRSTBUTTON_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_FIRSTBUTTON)
-template IS_POINTER_SECONDBUTTON_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_SECONDBUTTON)
-template IS_POINTER_THIRDBUTTON_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_THIRDBUTTON)
-template IS_POINTER_FOURTHBUTTON_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_FOURTHBUTTON)
-template IS_POINTER_FIFTHBUTTON_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_FIFTHBUTTON)
-template IS_POINTER_PRIMARY_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_PRIMARY)
-template HAS_POINTER_CONFIDENCE_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_CONFIDENCE)
-template IS_POINTER_CANCELED_WPARAM*(wParam: untyped): bool = IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_CANCELED)
-template GET_RAWINPUT_CODE_WPARAM*(wParam: untyped): WPARAM = WPARAM(wParam and 0xff)
-template GET_SC_WPARAM*(wParam: untyped): LONG = LONG(wParam and 0xfff0)
-template RIDEV_EXMODE*(mode: untyped): DWORD = DWORD(mode and RIDEV_EXMODEMASK)
-template GET_DEVICE_CHANGE_WPARAM*(wParam: untyped): WPARAM = WPARAM(LOWORD(wParam))
-template GET_DEVICE_CHANGE_LPARAM*(lParam: untyped): LPARAM = LPARAM(LOWORD(lParam))
-template GID_ROTATE_ANGLE_TO_ARGUMENT*(arg: untyped): USHORT = USHORT((arg + 2.0 * 3.14159265) / (4.0 * 3.14159265) * 65535.0)
-template GID_ROTATE_ANGLE_FROM_ARGUMENT*(arg: untyped): DOUBLE = (((arg.DOUBLE / 65535.0) * 4.0 * 3.14159265) - 2.0 * 3.14159265)
-proc ExitWindows*(dwReserved: DWORD, uReserved: UINT): WINBOOL {.winapi, inline.} = ExitWindowsEx(EWX_LOGOFF, 0xFFFFFFFF'i32)
-proc EnumTaskWindows*(hTask: HANDLE, lpfn: WNDENUMPROC, lParam: LPARAM): WINBOOL {.winapi, inline.} = EnumThreadWindows(DWORD hTask, lpfn, lParam)
-proc GetWindowTask*(hWnd: HWND): DWORD {.winapi, inline.} = GetWindowThreadProcessId(hWnd, nil)
-proc DefHookProc*(nCode: int32, wParam: WPARAM, lParam: LPARAM, phhk: ptr HHOOK): LRESULT {.winapi, inline.} = CallNextHookEx(phhk[], nCode, wParam, lParam)
+proc UserHandleGrantAccess*(
+  hUserHandle: HANDLE, hJob: HANDLE, bGrant: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetRawInputData*(
+  hRawInput: HRAWINPUT,
+  uiCommand: UINT,
+  pData: LPVOID,
+  pcbSize: PUINT,
+  cbSizeHeader: UINT,
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetRawInputDeviceInfoA*(
+  hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetRawInputDeviceInfoW*(
+  hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetRawInputBuffer*(
+  pData: PRAWINPUT, pcbSize: PUINT, cbSizeHeader: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterRawInputDevices*(
+  pRawInputDevices: PCRAWINPUTDEVICE, uiNumDevices: UINT, cbSize: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetRegisteredRawInputDevices*(
+  pRawInputDevices: PRAWINPUTDEVICE, puiNumDevices: PUINT, cbSize: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetRawInputDeviceList*(
+  pRawInputDeviceList: PRAWINPUTDEVICELIST, puiNumDevices: PUINT, cbSize: UINT
+): UINT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc DefRawInputProc*(
+  paRawInput: ptr PRAWINPUT, nInput: INT, cbSizeHeader: UINT
+): LRESULT {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerDevices*(
+  deviceCount: ptr UINT32, pointerDevices: ptr POINTER_DEVICE_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerDevice*(
+  device: HANDLE, pointerDevice: ptr POINTER_DEVICE_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerDeviceProperties*(
+  device: HANDLE,
+  propertyCount: ptr UINT32,
+  pointerProperties: ptr POINTER_DEVICE_PROPERTY,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc RegisterPointerDeviceNotifications*(
+  window: HWND, notifyRange: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerDeviceRects*(
+  device: HANDLE, pointerDeviceRect: ptr RECT, displayRect: ptr RECT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerDeviceCursors*(
+  device: HANDLE, cursorCount: ptr UINT32, deviceCursors: ptr POINTER_DEVICE_CURSOR_INFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetRawPointerDeviceData*(
+  pointerId: UINT32,
+  historyCount: UINT32,
+  propertiesCount: UINT32,
+  pProperties: ptr POINTER_DEVICE_PROPERTY,
+  pValues: ptr LONG,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeWindowMessageFilter*(
+  message: UINT, dwFlag: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ChangeWindowMessageFilterEx*(
+  hwnd: HWND, message: UINT, action: DWORD, pChangeFilterStruct: PCHANGEFILTERSTRUCT
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetGestureInfo*(
+  hGestureInfo: HGESTUREINFO, pGestureInfo: PGESTUREINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetGestureExtraArgs*(
+  hGestureInfo: HGESTUREINFO, cbExtraArgs: UINT, pExtraArgs: PBYTE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc CloseGestureInfoHandle*(
+  hGestureInfo: HGESTUREINFO
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetGestureConfig*(
+  hwnd: HWND,
+  dwReserved: DWORD,
+  cIDs: UINT,
+  pGestureConfig: PGESTURECONFIG,
+  cbSize: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetGestureConfig*(
+  hwnd: HWND,
+  dwReserved: DWORD,
+  dwFlags: DWORD,
+  pcIDs: PUINT,
+  pGestureConfig: PGESTURECONFIG,
+  cbSize: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ShutdownBlockReasonCreate*(
+  hWnd: HWND, pwszReason: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ShutdownBlockReasonQuery*(
+  hWnd: HWND, pwszBuff: LPWSTR, pcchBuff: ptr DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc ShutdownBlockReasonDestroy*(
+  hWnd: HWND
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetCurrentInputMessageSource*(
+  inputMessageSource: ptr INPUT_MESSAGE_SOURCE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetCIMSSM*(
+  inputMessageSource: ptr INPUT_MESSAGE_SOURCE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetAutoRotationState*(
+  pState: PAR_STATE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetDisplayAutoRotationPreferences*(
+  pOrientation: ptr ORIENTATION_PREFERENCE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetDisplayAutoRotationPreferences*(
+  orientation: ORIENTATION_PREFERENCE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc IsImmersiveProcess*(
+  hProcess: HANDLE
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc SetProcessRestrictionExemption*(
+  fEnableExemption: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc GetPointerInputTransform*(
+  pointerId: UINT32, historyCount: UINT32, inputTransform: ptr UINT32
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc.}
+
+proc PostAppMessageA*(
+  idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageA".}
+
+proc PostAppMessageW*(
+  idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageW".}
+
+proc GetNextWindow*(
+  hWnd: HWND, uCmd: UINT
+): HWND {.winapi, stdcall, dynlib: "user32", importc: "GetWindow".}
+
+proc CopyCursor*(
+  hIcon: HICON
+): HICON {.winapi, stdcall, dynlib: "user32", importc: "CopyIcon".}
+
+template MAKEINTRESOURCEA*(i: untyped): untyped =
+  cast[LPSTR](i and 0xffff)
+
+template MAKEINTRESOURCEW*(i: untyped): untyped =
+  cast[LPWSTR](i and 0xffff)
+
+template IS_INTRESOURCE*(r: untyped): bool =
+  cast[int](r) shr 16 == 0
+
+template GET_APPCOMMAND_LPARAM*(lParam: untyped): SHORT =
+  cast[SHORT](HIWORD(lParam) and (not WORD FAPPCOMMAND_MASK))
+
+template GET_DEVICE_LPARAM*(lParam: untyped): WORD =
+  HIWORD(lParam) and WORD FAPPCOMMAND_MASK
+
+template GET_MOUSEORKEY_LPARAM*(lParam: untyped): WORD =
+  HIWORD(lParam) and WORD FAPPCOMMAND_MASK
+
+template GET_FLAGS_LPARAM*(lParam: untyped): WORD =
+  LOWORD(lParam)
+
+template GET_KEYSTATE_LPARAM*(lParam: untyped): WORD =
+  LOWORD(lParam)
+
+template POINTSTOPOINT*(pt: POINT, pts: POINTS) =
+  pt.x = pts.x
+  pt.y = pts.y
+
+template POINTTOPOINTS*(pt: POINT): POINTS =
+  POINTS(x: int16 pt.x, y: int16 pt.y)
+
+template MAKEWPARAM*(l: untyped, h: untyped): WPARAM =
+  WPARAM MAKELONG(l, h)
+
+template MAKELPARAM*(l: untyped, h: untyped): LPARAM =
+  LPARAM MAKELONG(l, h)
+
+template MAKELRESULT*(l: untyped, h: untyped): LRESULT =
+  LRESULT MAKELONG(l, h)
+
+template GET_WHEEL_DELTA_WPARAM*(wParam: untyped): SHORT =
+  cast[SHORT](HIWORD(wParam))
+
+template GET_KEYSTATE_WPARAM*(wParam: untyped): WORD =
+  LOWORD(wParam)
+
+template GET_NCHITTEST_WPARAM*(wParam: untyped): SHORT =
+  cast[SHORT](LOWORD(wParam))
+
+template GET_XBUTTON_WPARAM*(wParam: untyped): WORD =
+  HIWORD(wParam)
+
+template TOUCH_COORD_TO_PIXEL*(L: untyped): LONG =
+  LONG((int L) / 100)
+
+template GET_POINTERID_WPARAM*(wParam: untyped): WORD =
+  LOWORD(wParam)
+
+template IS_POINTER_FLAG_SET_WPARAM*(wParam: untyped, flag: untyped): bool =
+  (DWORD(HIWORD(wParam)) and DWORD flag) == DWORD flag
+
+template IS_POINTER_NEW_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_NEW)
+
+template IS_POINTER_INRANGE_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_INRANGE)
+
+template IS_POINTER_INCONTACT_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_INCONTACT)
+
+template IS_POINTER_FIRSTBUTTON_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_FIRSTBUTTON)
+
+template IS_POINTER_SECONDBUTTON_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_SECONDBUTTON)
+
+template IS_POINTER_THIRDBUTTON_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_THIRDBUTTON)
+
+template IS_POINTER_FOURTHBUTTON_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_FOURTHBUTTON)
+
+template IS_POINTER_FIFTHBUTTON_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_FIFTHBUTTON)
+
+template IS_POINTER_PRIMARY_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_PRIMARY)
+
+template HAS_POINTER_CONFIDENCE_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_CONFIDENCE)
+
+template IS_POINTER_CANCELED_WPARAM*(wParam: untyped): bool =
+  IS_POINTER_FLAG_SET_WPARAM(wParam, POINTER_MESSAGE_FLAG_CANCELED)
+
+template GET_RAWINPUT_CODE_WPARAM*(wParam: untyped): WPARAM =
+  WPARAM(wParam and 0xff)
+
+template GET_SC_WPARAM*(wParam: untyped): LONG =
+  LONG(wParam and 0xfff0)
+
+template RIDEV_EXMODE*(mode: untyped): DWORD =
+  DWORD(mode and RIDEV_EXMODEMASK)
+
+template GET_DEVICE_CHANGE_WPARAM*(wParam: untyped): WPARAM =
+  WPARAM(LOWORD(wParam))
+
+template GET_DEVICE_CHANGE_LPARAM*(lParam: untyped): LPARAM =
+  LPARAM(LOWORD(lParam))
+
+template GID_ROTATE_ANGLE_TO_ARGUMENT*(arg: untyped): USHORT =
+  USHORT((arg + 2.0 * 3.14159265) / (4.0 * 3.14159265) * 65535.0)
+
+template GID_ROTATE_ANGLE_FROM_ARGUMENT*(arg: untyped): DOUBLE =
+  (((arg.DOUBLE / 65535.0) * 4.0 * 3.14159265) - 2.0 * 3.14159265)
+
+proc ExitWindows*(dwReserved: DWORD, uReserved: UINT): WINBOOL {.winapi, inline.} =
+  ExitWindowsEx(EWX_LOGOFF, 0xFFFFFFFF'i32)
+
+proc EnumTaskWindows*(
+    hTask: HANDLE, lpfn: WNDENUMPROC, lParam: LPARAM
+): WINBOOL {.winapi, inline.} =
+  EnumThreadWindows(DWORD hTask, lpfn, lParam)
+
+proc GetWindowTask*(hWnd: HWND): DWORD {.winapi, inline.} =
+  GetWindowThreadProcessId(hWnd, nil)
+
+proc DefHookProc*(
+    nCode: int32, wParam: WPARAM, lParam: LPARAM, phhk: ptr HHOOK
+): LRESULT {.winapi, inline.} =
+  CallNextHookEx(phhk[], nCode, wParam, lParam)
+
 when winimAnsi:
-  proc CreateWindowEx*(dwExStyle: DWORD, lpClassName: LPCSTR, lpWindowName: LPCSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowExA".}
-proc CreateWindowA*(lpClassName: LPCSTR, lpWindowName: LPCSTR, dwStyle: DWORD, x: int32, y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, inline.} = CreateWindowExA(0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)
+  proc CreateWindowEx*(
+    dwExStyle: DWORD,
+    lpClassName: LPCSTR,
+    lpWindowName: LPCSTR,
+    dwStyle: DWORD,
+    X: int32,
+    Y: int32,
+    nWidth: int32,
+    nHeight: int32,
+    hWndParent: HWND,
+    hMenu: HMENU,
+    hInstance: HINSTANCE,
+    lpParam: LPVOID,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowExA".}
+
+proc CreateWindowA*(
+    lpClassName: LPCSTR,
+    lpWindowName: LPCSTR,
+    dwStyle: DWORD,
+    x: int32,
+    y: int32,
+    nWidth: int32,
+    nHeight: int32,
+    hWndParent: HWND,
+    hMenu: HMENU,
+    hInstance: HINSTANCE,
+    lpParam: LPVOID,
+): HWND {.winapi, inline.} =
+  CreateWindowExA(
+    0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu,
+    hInstance, lpParam,
+  )
+
 when winimUnicode:
-  proc CreateWindowEx*(dwExStyle: DWORD, lpClassName: LPCWSTR, lpWindowName: LPCWSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowExW".}
-proc CreateWindowW*(lpClassName: LPCWSTR, lpWindowName: LPCWSTR, dwStyle: DWORD, x: int32, y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, inline.} = CreateWindowExW(0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)
+  proc CreateWindowEx*(
+    dwExStyle: DWORD,
+    lpClassName: LPCWSTR,
+    lpWindowName: LPCWSTR,
+    dwStyle: DWORD,
+    X: int32,
+    Y: int32,
+    nWidth: int32,
+    nHeight: int32,
+    hWndParent: HWND,
+    hMenu: HMENU,
+    hInstance: HINSTANCE,
+    lpParam: LPVOID,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowExW".}
+
+proc CreateWindowW*(
+    lpClassName: LPCWSTR,
+    lpWindowName: LPCWSTR,
+    dwStyle: DWORD,
+    x: int32,
+    y: int32,
+    nWidth: int32,
+    nHeight: int32,
+    hWndParent: HWND,
+    hMenu: HMENU,
+    hInstance: HINSTANCE,
+    lpParam: LPVOID,
+): HWND {.winapi, inline.} =
+  CreateWindowExW(
+    0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu,
+    hInstance, lpParam,
+  )
+
 when winimAnsi:
-  proc CreateDialogParam*(hInstance: HINSTANCE, lpTemplateName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogParamA".}
-proc CreateDialogA*(hInstance: HINSTANCE, lpName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogParamA(hInstance, lpName, hWndParent, lpDialogFunc, 0)
+  proc CreateDialogParam*(
+    hInstance: HINSTANCE,
+    lpTemplateName: LPCSTR,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogParamA".}
+
+proc CreateDialogA*(
+    hInstance: HINSTANCE, lpName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+): HWND {.winapi, inline.} =
+  CreateDialogParamA(hInstance, lpName, hWndParent, lpDialogFunc, 0)
+
 when winimUnicode:
-  proc CreateDialogParam*(hInstance: HINSTANCE, lpTemplateName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogParamW".}
-proc CreateDialogW*(hInstance: HINSTANCE, lpName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogParamW(hInstance, lpName, hWndParent, lpDialogFunc, 0)
+  proc CreateDialogParam*(
+    hInstance: HINSTANCE,
+    lpTemplateName: LPCWSTR,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogParamW".}
+
+proc CreateDialogW*(
+    hInstance: HINSTANCE, lpName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+): HWND {.winapi, inline.} =
+  CreateDialogParamW(hInstance, lpName, hWndParent, lpDialogFunc, 0)
+
 when winimAnsi:
-  proc CreateDialogIndirectParam*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogIndirectParamA".}
-proc CreateDialogIndirectA*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+  proc CreateDialogIndirectParam*(
+    hInstance: HINSTANCE,
+    lpTemplate: LPCDLGTEMPLATEA,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogIndirectParamA".}
+
+proc CreateDialogIndirectA*(
+    hInstance: HINSTANCE,
+    lpTemplate: LPCDLGTEMPLATEA,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+): HWND {.winapi, inline.} =
+  CreateDialogIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
 when winimUnicode:
-  proc CreateDialogIndirectParam*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogIndirectParamW".}
-proc CreateDialogIndirectW*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+  proc CreateDialogIndirectParam*(
+    hInstance: HINSTANCE,
+    lpTemplate: LPCDLGTEMPLATEW,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateDialogIndirectParamW".}
+
+proc CreateDialogIndirectW*(
+    hInstance: HINSTANCE,
+    lpTemplate: LPCDLGTEMPLATEW,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+): HWND {.winapi, inline.} =
+  CreateDialogIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
 when winimAnsi:
-  proc DialogBoxParam*(hInstance: HINSTANCE, lpTemplateName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxParamA".}
-proc DialogBoxA*(hInstance: HINSTANCE, lpTemplate: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+  proc DialogBoxParam*(
+    hInstance: HINSTANCE,
+    lpTemplateName: LPCSTR,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxParamA".}
+
+proc DialogBoxA*(
+    hInstance: HINSTANCE, lpTemplate: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+): INT_PTR {.winapi, inline.} =
+  DialogBoxParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
 when winimUnicode:
-  proc DialogBoxParam*(hInstance: HINSTANCE, lpTemplateName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxParamW".}
-proc DialogBoxW*(hInstance: HINSTANCE, lpTemplate: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+  proc DialogBoxParam*(
+    hInstance: HINSTANCE,
+    lpTemplateName: LPCWSTR,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxParamW".}
+
+proc DialogBoxW*(
+    hInstance: HINSTANCE, lpTemplate: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+): INT_PTR {.winapi, inline.} =
+  DialogBoxParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
 when winimAnsi:
-  proc DialogBoxIndirectParam*(hInstance: HINSTANCE, hDialogTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxIndirectParamA".}
-proc DialogBoxIndirectA*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+  proc DialogBoxIndirectParam*(
+    hInstance: HINSTANCE,
+    hDialogTemplate: LPCDLGTEMPLATEA,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxIndirectParamA".}
+
+proc DialogBoxIndirectA*(
+    hInstance: HINSTANCE,
+    lpTemplate: LPCDLGTEMPLATEA,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+): INT_PTR {.winapi, inline.} =
+  DialogBoxIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
 when winimUnicode:
-  proc DialogBoxIndirectParam*(hInstance: HINSTANCE, hDialogTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC, dwInitParam: LPARAM): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxIndirectParamW".}
-proc DialogBoxIndirectW*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
-proc `mi=`*(self: var INPUT, x: MOUSEINPUT) {.inline.} = self.union1.mi = x
-proc mi*(self: INPUT): MOUSEINPUT {.inline.} = self.union1.mi
-proc mi*(self: var INPUT): var MOUSEINPUT {.inline.} = self.union1.mi
-proc `ki=`*(self: var INPUT, x: KEYBDINPUT) {.inline.} = self.union1.ki = x
-proc ki*(self: INPUT): KEYBDINPUT {.inline.} = self.union1.ki
-proc ki*(self: var INPUT): var KEYBDINPUT {.inline.} = self.union1.ki
-proc `hi=`*(self: var INPUT, x: HARDWAREINPUT) {.inline.} = self.union1.hi = x
-proc hi*(self: INPUT): HARDWAREINPUT {.inline.} = self.union1.hi
-proc hi*(self: var INPUT): var HARDWAREINPUT {.inline.} = self.union1.hi
-proc `cbSize=`*(self: var MONITORINFOEXA, x: DWORD) {.inline.} = self.struct1.cbSize = x
-proc cbSize*(self: MONITORINFOEXA): DWORD {.inline.} = self.struct1.cbSize
-proc cbSize*(self: var MONITORINFOEXA): var DWORD {.inline.} = self.struct1.cbSize
-proc `rcMonitor=`*(self: var MONITORINFOEXA, x: RECT) {.inline.} = self.struct1.rcMonitor = x
-proc rcMonitor*(self: MONITORINFOEXA): RECT {.inline.} = self.struct1.rcMonitor
-proc rcMonitor*(self: var MONITORINFOEXA): var RECT {.inline.} = self.struct1.rcMonitor
-proc `rcWork=`*(self: var MONITORINFOEXA, x: RECT) {.inline.} = self.struct1.rcWork = x
-proc rcWork*(self: MONITORINFOEXA): RECT {.inline.} = self.struct1.rcWork
-proc rcWork*(self: var MONITORINFOEXA): var RECT {.inline.} = self.struct1.rcWork
-proc `dwFlags=`*(self: var MONITORINFOEXA, x: DWORD) {.inline.} = self.struct1.dwFlags = x
-proc dwFlags*(self: MONITORINFOEXA): DWORD {.inline.} = self.struct1.dwFlags
-proc dwFlags*(self: var MONITORINFOEXA): var DWORD {.inline.} = self.struct1.dwFlags
-proc `cbSize=`*(self: var MONITORINFOEXW, x: DWORD) {.inline.} = self.struct1.cbSize = x
-proc cbSize*(self: MONITORINFOEXW): DWORD {.inline.} = self.struct1.cbSize
-proc cbSize*(self: var MONITORINFOEXW): var DWORD {.inline.} = self.struct1.cbSize
-proc `rcMonitor=`*(self: var MONITORINFOEXW, x: RECT) {.inline.} = self.struct1.rcMonitor = x
-proc rcMonitor*(self: MONITORINFOEXW): RECT {.inline.} = self.struct1.rcMonitor
-proc rcMonitor*(self: var MONITORINFOEXW): var RECT {.inline.} = self.struct1.rcMonitor
-proc `rcWork=`*(self: var MONITORINFOEXW, x: RECT) {.inline.} = self.struct1.rcWork = x
-proc rcWork*(self: MONITORINFOEXW): RECT {.inline.} = self.struct1.rcWork
-proc rcWork*(self: var MONITORINFOEXW): var RECT {.inline.} = self.struct1.rcWork
-proc `dwFlags=`*(self: var MONITORINFOEXW, x: DWORD) {.inline.} = self.struct1.dwFlags = x
-proc dwFlags*(self: MONITORINFOEXW): DWORD {.inline.} = self.struct1.dwFlags
-proc dwFlags*(self: var MONITORINFOEXW): var DWORD {.inline.} = self.struct1.dwFlags
-proc `ulButtons=`*(self: var RAWMOUSE, x: ULONG) {.inline.} = self.union1.ulButtons = x
-proc ulButtons*(self: RAWMOUSE): ULONG {.inline.} = self.union1.ulButtons
-proc ulButtons*(self: var RAWMOUSE): var ULONG {.inline.} = self.union1.ulButtons
-proc `usButtonFlags=`*(self: var RAWMOUSE, x: USHORT) {.inline.} = self.union1.struct1.usButtonFlags = x
-proc usButtonFlags*(self: RAWMOUSE): USHORT {.inline.} = self.union1.struct1.usButtonFlags
-proc usButtonFlags*(self: var RAWMOUSE): var USHORT {.inline.} = self.union1.struct1.usButtonFlags
-proc `usButtonData=`*(self: var RAWMOUSE, x: USHORT) {.inline.} = self.union1.struct1.usButtonData = x
-proc usButtonData*(self: RAWMOUSE): USHORT {.inline.} = self.union1.struct1.usButtonData
-proc usButtonData*(self: var RAWMOUSE): var USHORT {.inline.} = self.union1.struct1.usButtonData
-proc `mouse=`*(self: var RID_DEVICE_INFO, x: RID_DEVICE_INFO_MOUSE) {.inline.} = self.union1.mouse = x
-proc mouse*(self: RID_DEVICE_INFO): RID_DEVICE_INFO_MOUSE {.inline.} = self.union1.mouse
-proc mouse*(self: var RID_DEVICE_INFO): var RID_DEVICE_INFO_MOUSE {.inline.} = self.union1.mouse
-proc `keyboard=`*(self: var RID_DEVICE_INFO, x: RID_DEVICE_INFO_KEYBOARD) {.inline.} = self.union1.keyboard = x
-proc keyboard*(self: RID_DEVICE_INFO): RID_DEVICE_INFO_KEYBOARD {.inline.} = self.union1.keyboard
-proc keyboard*(self: var RID_DEVICE_INFO): var RID_DEVICE_INFO_KEYBOARD {.inline.} = self.union1.keyboard
-proc `hid=`*(self: var RID_DEVICE_INFO, x: RID_DEVICE_INFO_HID) {.inline.} = self.union1.hid = x
-proc hid*(self: RID_DEVICE_INFO): RID_DEVICE_INFO_HID {.inline.} = self.union1.hid
-proc hid*(self: var RID_DEVICE_INFO): var RID_DEVICE_INFO_HID {.inline.} = self.union1.hid
-proc `m11=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m11 = x
-proc m11*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m11
-proc m11*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m11
-proc `m12=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m12 = x
-proc m12*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m12
-proc m12*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m12
-proc `m13=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m13 = x
-proc m13*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m13
-proc m13*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m13
-proc `m14=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m14 = x
-proc m14*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m14
-proc m14*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m14
-proc `m21=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m21 = x
-proc m21*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m21
-proc m21*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m21
-proc `m22=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m22 = x
-proc m22*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m22
-proc m22*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m22
-proc `m23=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m23 = x
-proc m23*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m23
-proc m23*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m23
-proc `m24=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m24 = x
-proc m24*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m24
-proc m24*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m24
-proc `m31=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m31 = x
-proc m31*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m31
-proc m31*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m31
-proc `m32=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m32 = x
-proc m32*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m32
-proc m32*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m32
-proc `m33=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m33 = x
-proc m33*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m33
-proc m33*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m33
-proc `m34=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m34 = x
-proc m34*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m34
-proc m34*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m34
-proc `m41=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m41 = x
-proc m41*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m41
-proc m41*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m41
-proc `m42=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m42 = x
-proc m42*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m42
-proc m42*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m42
-proc `m43=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m43 = x
-proc m43*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m43
-proc m43*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m43
-proc `m44=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} = self.union1.struct1.m44 = x
-proc m44*(self: INPUT_TRANSFORM): float32 {.inline.} = self.union1.struct1.m44
-proc m44*(self: var INPUT_TRANSFORM): var float32 {.inline.} = self.union1.struct1.m44
-proc `m=`*(self: var INPUT_TRANSFORM, x: array[4, array[4, float32]]) {.inline.} = self.union1.m = x
-proc m*(self: INPUT_TRANSFORM): array[4, array[4, float32]] {.inline.} = self.union1.m
-proc m*(self: var INPUT_TRANSFORM): var array[4, array[4, float32]] {.inline.} = self.union1.m
+  proc DialogBoxIndirectParam*(
+    hInstance: HINSTANCE,
+    hDialogTemplate: LPCDLGTEMPLATEW,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+    dwInitParam: LPARAM,
+  ): INT_PTR {.winapi, stdcall, dynlib: "user32", importc: "DialogBoxIndirectParamW".}
+
+proc DialogBoxIndirectW*(
+    hInstance: HINSTANCE,
+    lpTemplate: LPCDLGTEMPLATEW,
+    hWndParent: HWND,
+    lpDialogFunc: DLGPROC,
+): INT_PTR {.winapi, inline.} =
+  DialogBoxIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
+proc `mi=`*(self: var INPUT, x: MOUSEINPUT) {.inline.} =
+  self.union1.mi = x
+
+proc mi*(self: INPUT): MOUSEINPUT {.inline.} =
+  self.union1.mi
+
+proc mi*(self: var INPUT): var MOUSEINPUT {.inline.} =
+  self.union1.mi
+
+proc `ki=`*(self: var INPUT, x: KEYBDINPUT) {.inline.} =
+  self.union1.ki = x
+
+proc ki*(self: INPUT): KEYBDINPUT {.inline.} =
+  self.union1.ki
+
+proc ki*(self: var INPUT): var KEYBDINPUT {.inline.} =
+  self.union1.ki
+
+proc `hi=`*(self: var INPUT, x: HARDWAREINPUT) {.inline.} =
+  self.union1.hi = x
+
+proc hi*(self: INPUT): HARDWAREINPUT {.inline.} =
+  self.union1.hi
+
+proc hi*(self: var INPUT): var HARDWAREINPUT {.inline.} =
+  self.union1.hi
+
+proc `cbSize=`*(self: var MONITORINFOEXA, x: DWORD) {.inline.} =
+  self.struct1.cbSize = x
+
+proc cbSize*(self: MONITORINFOEXA): DWORD {.inline.} =
+  self.struct1.cbSize
+
+proc cbSize*(self: var MONITORINFOEXA): var DWORD {.inline.} =
+  self.struct1.cbSize
+
+proc `rcMonitor=`*(self: var MONITORINFOEXA, x: RECT) {.inline.} =
+  self.struct1.rcMonitor = x
+
+proc rcMonitor*(self: MONITORINFOEXA): RECT {.inline.} =
+  self.struct1.rcMonitor
+
+proc rcMonitor*(self: var MONITORINFOEXA): var RECT {.inline.} =
+  self.struct1.rcMonitor
+
+proc `rcWork=`*(self: var MONITORINFOEXA, x: RECT) {.inline.} =
+  self.struct1.rcWork = x
+
+proc rcWork*(self: MONITORINFOEXA): RECT {.inline.} =
+  self.struct1.rcWork
+
+proc rcWork*(self: var MONITORINFOEXA): var RECT {.inline.} =
+  self.struct1.rcWork
+
+proc `dwFlags=`*(self: var MONITORINFOEXA, x: DWORD) {.inline.} =
+  self.struct1.dwFlags = x
+
+proc dwFlags*(self: MONITORINFOEXA): DWORD {.inline.} =
+  self.struct1.dwFlags
+
+proc dwFlags*(self: var MONITORINFOEXA): var DWORD {.inline.} =
+  self.struct1.dwFlags
+
+proc `cbSize=`*(self: var MONITORINFOEXW, x: DWORD) {.inline.} =
+  self.struct1.cbSize = x
+
+proc cbSize*(self: MONITORINFOEXW): DWORD {.inline.} =
+  self.struct1.cbSize
+
+proc cbSize*(self: var MONITORINFOEXW): var DWORD {.inline.} =
+  self.struct1.cbSize
+
+proc `rcMonitor=`*(self: var MONITORINFOEXW, x: RECT) {.inline.} =
+  self.struct1.rcMonitor = x
+
+proc rcMonitor*(self: MONITORINFOEXW): RECT {.inline.} =
+  self.struct1.rcMonitor
+
+proc rcMonitor*(self: var MONITORINFOEXW): var RECT {.inline.} =
+  self.struct1.rcMonitor
+
+proc `rcWork=`*(self: var MONITORINFOEXW, x: RECT) {.inline.} =
+  self.struct1.rcWork = x
+
+proc rcWork*(self: MONITORINFOEXW): RECT {.inline.} =
+  self.struct1.rcWork
+
+proc rcWork*(self: var MONITORINFOEXW): var RECT {.inline.} =
+  self.struct1.rcWork
+
+proc `dwFlags=`*(self: var MONITORINFOEXW, x: DWORD) {.inline.} =
+  self.struct1.dwFlags = x
+
+proc dwFlags*(self: MONITORINFOEXW): DWORD {.inline.} =
+  self.struct1.dwFlags
+
+proc dwFlags*(self: var MONITORINFOEXW): var DWORD {.inline.} =
+  self.struct1.dwFlags
+
+proc `ulButtons=`*(self: var RAWMOUSE, x: ULONG) {.inline.} =
+  self.union1.ulButtons = x
+
+proc ulButtons*(self: RAWMOUSE): ULONG {.inline.} =
+  self.union1.ulButtons
+
+proc ulButtons*(self: var RAWMOUSE): var ULONG {.inline.} =
+  self.union1.ulButtons
+
+proc `usButtonFlags=`*(self: var RAWMOUSE, x: USHORT) {.inline.} =
+  self.union1.struct1.usButtonFlags = x
+
+proc usButtonFlags*(self: RAWMOUSE): USHORT {.inline.} =
+  self.union1.struct1.usButtonFlags
+
+proc usButtonFlags*(self: var RAWMOUSE): var USHORT {.inline.} =
+  self.union1.struct1.usButtonFlags
+
+proc `usButtonData=`*(self: var RAWMOUSE, x: USHORT) {.inline.} =
+  self.union1.struct1.usButtonData = x
+
+proc usButtonData*(self: RAWMOUSE): USHORT {.inline.} =
+  self.union1.struct1.usButtonData
+
+proc usButtonData*(self: var RAWMOUSE): var USHORT {.inline.} =
+  self.union1.struct1.usButtonData
+
+proc `mouse=`*(self: var RID_DEVICE_INFO, x: RID_DEVICE_INFO_MOUSE) {.inline.} =
+  self.union1.mouse = x
+
+proc mouse*(self: RID_DEVICE_INFO): RID_DEVICE_INFO_MOUSE {.inline.} =
+  self.union1.mouse
+
+proc mouse*(self: var RID_DEVICE_INFO): var RID_DEVICE_INFO_MOUSE {.inline.} =
+  self.union1.mouse
+
+proc `keyboard=`*(self: var RID_DEVICE_INFO, x: RID_DEVICE_INFO_KEYBOARD) {.inline.} =
+  self.union1.keyboard = x
+
+proc keyboard*(self: RID_DEVICE_INFO): RID_DEVICE_INFO_KEYBOARD {.inline.} =
+  self.union1.keyboard
+
+proc keyboard*(self: var RID_DEVICE_INFO): var RID_DEVICE_INFO_KEYBOARD {.inline.} =
+  self.union1.keyboard
+
+proc `hid=`*(self: var RID_DEVICE_INFO, x: RID_DEVICE_INFO_HID) {.inline.} =
+  self.union1.hid = x
+
+proc hid*(self: RID_DEVICE_INFO): RID_DEVICE_INFO_HID {.inline.} =
+  self.union1.hid
+
+proc hid*(self: var RID_DEVICE_INFO): var RID_DEVICE_INFO_HID {.inline.} =
+  self.union1.hid
+
+proc `m11=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m11 = x
+
+proc m11*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m11
+
+proc m11*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m11
+
+proc `m12=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m12 = x
+
+proc m12*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m12
+
+proc m12*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m12
+
+proc `m13=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m13 = x
+
+proc m13*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m13
+
+proc m13*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m13
+
+proc `m14=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m14 = x
+
+proc m14*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m14
+
+proc m14*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m14
+
+proc `m21=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m21 = x
+
+proc m21*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m21
+
+proc m21*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m21
+
+proc `m22=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m22 = x
+
+proc m22*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m22
+
+proc m22*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m22
+
+proc `m23=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m23 = x
+
+proc m23*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m23
+
+proc m23*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m23
+
+proc `m24=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m24 = x
+
+proc m24*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m24
+
+proc m24*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m24
+
+proc `m31=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m31 = x
+
+proc m31*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m31
+
+proc m31*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m31
+
+proc `m32=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m32 = x
+
+proc m32*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m32
+
+proc m32*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m32
+
+proc `m33=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m33 = x
+
+proc m33*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m33
+
+proc m33*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m33
+
+proc `m34=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m34 = x
+
+proc m34*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m34
+
+proc m34*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m34
+
+proc `m41=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m41 = x
+
+proc m41*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m41
+
+proc m41*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m41
+
+proc `m42=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m42 = x
+
+proc m42*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m42
+
+proc m42*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m42
+
+proc `m43=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m43 = x
+
+proc m43*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m43
+
+proc m43*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m43
+
+proc `m44=`*(self: var INPUT_TRANSFORM, x: float32) {.inline.} =
+  self.union1.struct1.m44 = x
+
+proc m44*(self: INPUT_TRANSFORM): float32 {.inline.} =
+  self.union1.struct1.m44
+
+proc m44*(self: var INPUT_TRANSFORM): var float32 {.inline.} =
+  self.union1.struct1.m44
+
+proc `m=`*(self: var INPUT_TRANSFORM, x: array[4, array[4, float32]]) {.inline.} =
+  self.union1.m = x
+
+proc m*(self: INPUT_TRANSFORM): array[4, array[4, float32]] {.inline.} =
+  self.union1.m
+
+proc m*(self: var INPUT_TRANSFORM): var array[4, array[4, float32]] {.inline.} =
+  self.union1.m
+
 when winimUnicode:
   type
     MENUTEMPLATE* = MENUTEMPLATEW
@@ -5073,138 +7883,660 @@ when winimUnicode:
     LPSOUNDSENTRY* = LPSOUNDSENTRYW
     MONITORINFOEX* = MONITORINFOEXW
     LPMONITORINFOEX* = LPMONITORINFOEXW
-  proc wvsprintf*(P1: LPWSTR, P2: LPCWSTR, arglist: va_list): int32 {.winapi, stdcall, dynlib: "user32", importc: "wvsprintfW".}
-  proc wsprintf*(P1: LPWSTR, P2: LPCWSTR): int32 {.winapi, stdcall, dynlib: "user32", importc: "wsprintfW".}
-  proc LoadKeyboardLayout*(pwszKLID: LPCWSTR, Flags: UINT): HKL {.winapi, stdcall, dynlib: "user32", importc: "LoadKeyboardLayoutW".}
-  proc GetKeyboardLayoutName*(pwszKLID: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetKeyboardLayoutNameW".}
-  proc CreateDesktop*(lpszDesktop: LPCWSTR, lpszDevice: LPCWSTR, pDevmode: LPDEVMODEW, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopW".}
-  proc CreateDesktopEx*(lpszDesktop: LPCWSTR, lpszDevice: LPCWSTR, pDevmode: ptr DEVMODEW, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES, ulHeapSize: ULONG, pvoid: PVOID): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopExW".}
-  proc OpenDesktop*(lpszDesktop: LPCWSTR, dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HDESK {.winapi, stdcall, dynlib: "user32", importc: "OpenDesktopW".}
-  proc EnumDesktops*(hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCW, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDesktopsW".}
-  proc CreateWindowStation*(lpwinsta: LPCWSTR, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowStationW".}
-  proc OpenWindowStation*(lpszWinSta: LPCWSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "OpenWindowStationW".}
-  proc EnumWindowStations*(lpEnumFunc: WINSTAENUMPROCW, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumWindowStationsW".}
-  proc GetUserObjectInformation*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetUserObjectInformationW".}
-  proc SetUserObjectInformation*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetUserObjectInformationW".}
-  proc RegisterWindowMessage*(lpString: LPCWSTR): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterWindowMessageW".}
-  proc GetMessage*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMessageW".}
-  proc DispatchMessage*(lpMsg: ptr MSG): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DispatchMessageW".}
-  proc PeekMessage*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PeekMessageW".}
-  proc SendMessage*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageW".}
-  proc SendMessageTimeout*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, fuFlags: UINT, uTimeout: UINT, lpdwResult: PDWORD_PTR): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageTimeoutW".}
-  proc SendNotifyMessage*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendNotifyMessageW".}
-  proc SendMessageCallback*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, lpResultCallBack: SENDASYNCPROC, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendMessageCallbackW".}
-  proc BroadcastSystemMessageEx*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM, pbsmInfo: PBSMINFO): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageExW".}
-  proc BroadcastSystemMessage*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageW".}
-  proc RegisterDeviceNotification*(hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD): HDEVNOTIFY {.winapi, stdcall, dynlib: "user32", importc: "RegisterDeviceNotificationW".}
-  proc PostMessage*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostMessageW".}
-  proc PostThreadMessage*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageW".}
-  proc DefWindowProc*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefWindowProcW".}
-  proc CallWindowProc*(lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "CallWindowProcW".}
-  proc RegisterClass*(lpWndClass: ptr WNDCLASSW): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassW".}
-  proc UnregisterClass*(lpClassName: LPCWSTR, hInstance: HINSTANCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "UnregisterClassW".}
-  proc GetClassInfo*(hInstance: HINSTANCE, lpClassName: LPCWSTR, lpWndClass: LPWNDCLASSW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoW".}
-  proc RegisterClassEx*(P1: ptr WNDCLASSEXW): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassExW".}
-  proc GetClassInfoEx*(hInstance: HINSTANCE, lpszClass: LPCWSTR, lpwcx: LPWNDCLASSEXW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoExW".}
-  proc SetDlgItemText*(hDlg: HWND, nIDDlgItem: int32, lpString: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetDlgItemTextW".}
-  proc GetDlgItemText*(hDlg: HWND, nIDDlgItem: int32, lpString: LPWSTR, cchMax: int32): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetDlgItemTextW".}
-  proc SendDlgItemMessage*(hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendDlgItemMessageW".}
-  proc DefDlgProc*(hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefDlgProcW".}
-  proc CallMsgFilter*(lpMsg: LPMSG, nCode: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CallMsgFilterW".}
-  proc RegisterClipboardFormat*(lpszFormat: LPCWSTR): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterClipboardFormatW".}
-  proc GetClipboardFormatName*(format: UINT, lpszFormatName: LPWSTR, cchMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClipboardFormatNameW".}
-  proc CharToOem*(lpszSrc: LPCWSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemW".}
-  proc OemToChar*(lpszSrc: LPCSTR, lpszDst: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharW".}
-  proc CharToOemBuff*(lpszSrc: LPCWSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemBuffW".}
-  proc OemToCharBuff*(lpszSrc: LPCSTR, lpszDst: LPWSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharBuffW".}
-  proc CharUpper*(lpsz: LPWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharUpperW".}
-  proc CharUpperBuff*(lpsz: LPWSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharUpperBuffW".}
-  proc CharLower*(lpsz: LPWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharLowerW".}
-  proc CharLowerBuff*(lpsz: LPWSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharLowerBuffW".}
-  proc CharNext*(lpsz: LPCWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharNextW".}
-  proc CharPrev*(lpszStart: LPCWSTR, lpszCurrent: LPCWSTR): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharPrevW".}
-  proc IsCharAlpha*(ch: WCHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaW".}
-  proc IsCharAlphaNumeric*(ch: WCHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaNumericW".}
-  proc IsCharUpper*(ch: WCHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharUpperW".}
-  proc IsCharLower*(ch: WCHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharLowerW".}
-  proc GetKeyNameText*(lParam: LONG, lpString: LPWSTR, cchSize: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetKeyNameTextW".}
-  proc VkKeyScan*(ch: WCHAR): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanW".}
-  proc VkKeyScanEx*(ch: WCHAR, dwhkl: HKL): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanExW".}
-  proc MapVirtualKey*(uCode: UINT, uMapType: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyW".}
-  proc MapVirtualKeyEx*(uCode: UINT, uMapType: UINT, dwhkl: HKL): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyExW".}
-  proc LoadAccelerators*(hInstance: HINSTANCE, lpTableName: LPCWSTR): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "LoadAcceleratorsW".}
-  proc CreateAcceleratorTable*(paccel: LPACCEL, cAccel: int32): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "CreateAcceleratorTableW".}
-  proc CopyAcceleratorTable*(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "CopyAcceleratorTableW".}
-  proc TranslateAccelerator*(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG): int32 {.winapi, stdcall, dynlib: "user32", importc: "TranslateAcceleratorW".}
-  proc LoadMenu*(hInstance: HINSTANCE, lpMenuName: LPCWSTR): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuW".}
-  proc LoadMenuIndirect*(lpMenuTemplate: ptr MENUTEMPLATEW): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuIndirectW".}
-  proc ChangeMenu*(hMenu: HMENU, cmd: UINT, lpszNewItem: LPCWSTR, cmdInsert: UINT, flags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ChangeMenuW".}
-  proc GetMenuString*(hMenu: HMENU, uIDItem: UINT, lpString: LPWSTR, cchMax: int32, flags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetMenuStringW".}
-  proc InsertMenu*(hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuW".}
-  proc AppendMenu*(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "AppendMenuW".}
-  proc ModifyMenu*(hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ModifyMenuW".}
-  proc InsertMenuItem*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuItemW".}
-  proc GetMenuItemInfo*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMenuItemInfoW".}
-  proc SetMenuItemInfo*(hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetMenuItemInfoW".}
-  proc DrawText*(hdc: HDC, lpchText: LPCWSTR, cchText: int32, lprc: LPRECT, format: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextW".}
-  proc DrawTextEx*(hdc: HDC, lpchText: LPWSTR, cchText: int32, lprc: LPRECT, format: UINT, lpdtp: LPDRAWTEXTPARAMS): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextExW".}
-  proc GrayString*(hDC: HDC, hBrush: HBRUSH, lpOutputFunc: GRAYSTRINGPROC, lpData: LPARAM, nCount: int32, X: int32, Y: int32, nWidth: int32, nHeight: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GrayStringW".}
-  proc DrawState*(hdc: HDC, hbrFore: HBRUSH, qfnCallBack: DRAWSTATEPROC, lData: LPARAM, wData: WPARAM, x: int32, y: int32, cx: int32, cy: int32, uFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DrawStateW".}
-  proc TabbedTextOut*(hdc: HDC, x: int32, y: int32, lpString: LPCWSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT, nTabOrigin: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "TabbedTextOutW".}
-  proc GetTabbedTextExtent*(hdc: HDC, lpString: LPCWSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetTabbedTextExtentW".}
-  proc SetProp*(hWnd: HWND, lpString: LPCWSTR, hData: HANDLE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetPropW".}
-  proc GetProp*(hWnd: HWND, lpString: LPCWSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "GetPropW".}
-  proc RemoveProp*(hWnd: HWND, lpString: LPCWSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "RemovePropW".}
-  proc EnumPropsEx*(hWnd: HWND, lpEnumFunc: PROPENUMPROCEXW, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsExW".}
-  proc EnumProps*(hWnd: HWND, lpEnumFunc: PROPENUMPROCW): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsW".}
-  proc SetWindowText*(hWnd: HWND, lpString: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetWindowTextW".}
-  proc GetWindowText*(hWnd: HWND, lpString: LPWSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextW".}
-  proc GetWindowTextLength*(hWnd: HWND): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextLengthW".}
-  proc MessageBox*(hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxW".}
-  proc MessageBoxEx*(hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT, wLanguageId: WORD): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxExW".}
-  proc MessageBoxIndirect*(lpmbp: ptr MSGBOXPARAMSW): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxIndirectW".}
-  proc GetWindowLong*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongW".}
-  proc SetWindowLong*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongW".}
-  proc GetClassLong*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongW".}
-  proc SetClassLong*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongW".}
-  proc FindWindow*(lpClassName: LPCWSTR, lpWindowName: LPCWSTR): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowW".}
-  proc FindWindowEx*(hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCWSTR, lpszWindow: LPCWSTR): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowExW".}
-  proc GetClassName*(hWnd: HWND, lpClassName: LPWSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClassNameW".}
-  proc SetWindowsHook*(nFilterType: int32, pfnFilterProc: HOOKPROC): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookW".}
-  proc SetWindowsHookEx*(idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookExW".}
-  proc LoadBitmap*(hInstance: HINSTANCE, lpBitmapName: LPCWSTR): HBITMAP {.winapi, stdcall, dynlib: "user32", importc: "LoadBitmapW".}
-  proc LoadCursor*(hInstance: HINSTANCE, lpCursorName: LPCWSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorW".}
-  proc LoadCursorFromFile*(lpFileName: LPCWSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorFromFileW".}
-  proc LoadIcon*(hInstance: HINSTANCE, lpIconName: LPCWSTR): HICON {.winapi, stdcall, dynlib: "user32", importc: "LoadIconW".}
-  proc PrivateExtractIcons*(szFileName: LPCWSTR, nIconIndex: int32, cxIcon: int32, cyIcon: int32, phicon: ptr HICON, piconid: ptr UINT, nIcons: UINT, flags: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "PrivateExtractIconsW".}
-  proc LoadImage*(hInst: HINSTANCE, name: LPCWSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "LoadImageW".}
-  proc GetIconInfoEx*(hicon: HICON, piconinfo: PICONINFOEXW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetIconInfoExW".}
-  proc IsDialogMessage*(hDlg: HWND, lpMsg: LPMSG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsDialogMessageW".}
-  proc DlgDirList*(hDlg: HWND, lpPathSpec: LPWSTR, nIDListBox: int32, nIDStaticPath: int32, uFileType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListW".}
-  proc DlgDirSelectEx*(hwndDlg: HWND, lpString: LPWSTR, chCount: int32, idListBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectExW".}
-  proc DlgDirListComboBox*(hDlg: HWND, lpPathSpec: LPWSTR, nIDComboBox: int32, nIDStaticPath: int32, uFiletype: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListComboBoxW".}
-  proc DlgDirSelectComboBoxEx*(hwndDlg: HWND, lpString: LPWSTR, cchOut: int32, idComboBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectComboBoxExW".}
-  proc DefFrameProc*(hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefFrameProcW".}
-  proc DefMDIChildProc*(hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefMDIChildProcW".}
-  proc CreateMDIWindow*(lpClassName: LPCWSTR, lpWindowName: LPCWSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hInstance: HINSTANCE, lParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateMDIWindowW".}
-  proc WinHelp*(hWndMain: HWND, lpszHelp: LPCWSTR, uCommand: UINT, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "WinHelpW".}
-  proc ChangeDisplaySettings*(lpDevMode: LPDEVMODEW, dwFlags: DWORD): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsW".}
-  proc ChangeDisplaySettingsEx*(lpszDeviceName: LPCWSTR, lpDevMode: LPDEVMODEW, hwnd: HWND, dwflags: DWORD, lParam: LPVOID): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsExW".}
-  proc EnumDisplaySettings*(lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsW".}
-  proc EnumDisplaySettingsEx*(lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsExW".}
-  proc EnumDisplayDevices*(lpDevice: LPCWSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplayDevicesW".}
-  proc SystemParametersInfo*(uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SystemParametersInfoW".}
-  proc GetMonitorInfo*(hMonitor: HMONITOR, lpmi: LPMONITORINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMonitorInfoW".}
-  proc GetWindowModuleFileName*(hwnd: HWND, pszFileName: LPWSTR, cchFileNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetWindowModuleFileNameW".}
-  proc RealGetWindowClass*(hwnd: HWND, ptszClassName: LPWSTR, cchClassNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "RealGetWindowClassW".}
-  proc GetAltTabInfo*(hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPWSTR, cchItemText: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetAltTabInfoW".}
-  proc GetRawInputDeviceInfo*(hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetRawInputDeviceInfoW".}
-  proc PostAppMessage*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageW".}
-  proc CreateWindow*(lpClassName: LPCWSTR, lpWindowName: LPCWSTR, dwStyle: DWORD, x: int32, y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, inline.} = CreateWindowExW(0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)
-  proc CreateDialog*(hInstance: HINSTANCE, lpName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogParamW(hInstance, lpName, hWndParent, lpDialogFunc, 0)
-  proc CreateDialogIndirect*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
-  proc DialogBox*(hInstance: HINSTANCE, lpTemplate: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
-  proc DialogBoxIndirect*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEW, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
+  proc wvsprintf*(
+    P1: LPWSTR, P2: LPCWSTR, arglist: va_list
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "wvsprintfW".}
+
+  proc wsprintf*(
+    P1: LPWSTR, P2: LPCWSTR
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "wsprintfW".}
+
+  proc LoadKeyboardLayout*(
+    pwszKLID: LPCWSTR, Flags: UINT
+  ): HKL {.winapi, stdcall, dynlib: "user32", importc: "LoadKeyboardLayoutW".}
+
+  proc GetKeyboardLayoutName*(
+    pwszKLID: LPWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetKeyboardLayoutNameW".}
+
+  proc CreateDesktop*(
+    lpszDesktop: LPCWSTR,
+    lpszDevice: LPCWSTR,
+    pDevmode: LPDEVMODEW,
+    dwFlags: DWORD,
+    dwDesiredAccess: ACCESS_MASK,
+    lpsa: LPSECURITY_ATTRIBUTES,
+  ): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopW".}
+
+  proc CreateDesktopEx*(
+    lpszDesktop: LPCWSTR,
+    lpszDevice: LPCWSTR,
+    pDevmode: ptr DEVMODEW,
+    dwFlags: DWORD,
+    dwDesiredAccess: ACCESS_MASK,
+    lpsa: LPSECURITY_ATTRIBUTES,
+    ulHeapSize: ULONG,
+    pvoid: PVOID,
+  ): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopExW".}
+
+  proc OpenDesktop*(
+    lpszDesktop: LPCWSTR,
+    dwFlags: DWORD,
+    fInherit: WINBOOL,
+    dwDesiredAccess: ACCESS_MASK,
+  ): HDESK {.winapi, stdcall, dynlib: "user32", importc: "OpenDesktopW".}
+
+  proc EnumDesktops*(
+    hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCW, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDesktopsW".}
+
+  proc CreateWindowStation*(
+    lpwinsta: LPCWSTR,
+    dwFlags: DWORD,
+    dwDesiredAccess: ACCESS_MASK,
+    lpsa: LPSECURITY_ATTRIBUTES,
+  ): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowStationW".}
+
+  proc OpenWindowStation*(
+    lpszWinSta: LPCWSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+  ): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "OpenWindowStationW".}
+
+  proc EnumWindowStations*(
+    lpEnumFunc: WINSTAENUMPROCW, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumWindowStationsW".}
+
+  proc GetUserObjectInformation*(
+    hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetUserObjectInformationW".}
+
+  proc SetUserObjectInformation*(
+    hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetUserObjectInformationW".}
+
+  proc RegisterWindowMessage*(
+    lpString: LPCWSTR
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterWindowMessageW".}
+
+  proc GetMessage*(
+    lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMessageW".}
+
+  proc DispatchMessage*(
+    lpMsg: ptr MSG
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DispatchMessageW".}
+
+  proc PeekMessage*(
+    lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PeekMessageW".}
+
+  proc SendMessage*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageW".}
+
+  proc SendMessageTimeout*(
+    hWnd: HWND,
+    Msg: UINT,
+    wParam: WPARAM,
+    lParam: LPARAM,
+    fuFlags: UINT,
+    uTimeout: UINT,
+    lpdwResult: PDWORD_PTR,
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageTimeoutW".}
+
+  proc SendNotifyMessage*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendNotifyMessageW".}
+
+  proc SendMessageCallback*(
+    hWnd: HWND,
+    Msg: UINT,
+    wParam: WPARAM,
+    lParam: LPARAM,
+    lpResultCallBack: SENDASYNCPROC,
+    dwData: ULONG_PTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendMessageCallbackW".}
+
+  proc BroadcastSystemMessageEx*(
+    flags: DWORD,
+    lpInfo: LPDWORD,
+    Msg: UINT,
+    wParam: WPARAM,
+    lParam: LPARAM,
+    pbsmInfo: PBSMINFO,
+  ): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageExW".}
+
+  proc BroadcastSystemMessage*(
+    flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageW".}
+
+  proc RegisterDeviceNotification*(
+    hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD
+  ): HDEVNOTIFY {.
+    winapi, stdcall, dynlib: "user32", importc: "RegisterDeviceNotificationW"
+  .}
+
+  proc PostMessage*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostMessageW".}
+
+  proc PostThreadMessage*(
+    idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageW".}
+
+  proc DefWindowProc*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefWindowProcW".}
+
+  proc CallWindowProc*(
+    lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "CallWindowProcW".}
+
+  proc RegisterClass*(
+    lpWndClass: ptr WNDCLASSW
+  ): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassW".}
+
+  proc UnregisterClass*(
+    lpClassName: LPCWSTR, hInstance: HINSTANCE
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "UnregisterClassW".}
+
+  proc GetClassInfo*(
+    hInstance: HINSTANCE, lpClassName: LPCWSTR, lpWndClass: LPWNDCLASSW
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoW".}
+
+  proc RegisterClassEx*(
+    P1: ptr WNDCLASSEXW
+  ): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassExW".}
+
+  proc GetClassInfoEx*(
+    hInstance: HINSTANCE, lpszClass: LPCWSTR, lpwcx: LPWNDCLASSEXW
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoExW".}
+
+  proc SetDlgItemText*(
+    hDlg: HWND, nIDDlgItem: int32, lpString: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetDlgItemTextW".}
+
+  proc GetDlgItemText*(
+    hDlg: HWND, nIDDlgItem: int32, lpString: LPWSTR, cchMax: int32
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetDlgItemTextW".}
+
+  proc SendDlgItemMessage*(
+    hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendDlgItemMessageW".}
+
+  proc DefDlgProc*(
+    hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefDlgProcW".}
+
+  proc CallMsgFilter*(
+    lpMsg: LPMSG, nCode: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CallMsgFilterW".}
+
+  proc RegisterClipboardFormat*(
+    lpszFormat: LPCWSTR
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterClipboardFormatW".}
+
+  proc GetClipboardFormatName*(
+    format: UINT, lpszFormatName: LPWSTR, cchMaxCount: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClipboardFormatNameW".}
+
+  proc CharToOem*(
+    lpszSrc: LPCWSTR, lpszDst: LPSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemW".}
+
+  proc OemToChar*(
+    lpszSrc: LPCSTR, lpszDst: LPWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharW".}
+
+  proc CharToOemBuff*(
+    lpszSrc: LPCWSTR, lpszDst: LPSTR, cchDstLength: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemBuffW".}
+
+  proc OemToCharBuff*(
+    lpszSrc: LPCSTR, lpszDst: LPWSTR, cchDstLength: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharBuffW".}
+
+  proc CharUpper*(
+    lpsz: LPWSTR
+  ): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharUpperW".}
+
+  proc CharUpperBuff*(
+    lpsz: LPWSTR, cchLength: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharUpperBuffW".}
+
+  proc CharLower*(
+    lpsz: LPWSTR
+  ): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharLowerW".}
+
+  proc CharLowerBuff*(
+    lpsz: LPWSTR, cchLength: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharLowerBuffW".}
+
+  proc CharNext*(
+    lpsz: LPCWSTR
+  ): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharNextW".}
+
+  proc CharPrev*(
+    lpszStart: LPCWSTR, lpszCurrent: LPCWSTR
+  ): LPWSTR {.winapi, stdcall, dynlib: "user32", importc: "CharPrevW".}
+
+  proc IsCharAlpha*(
+    ch: WCHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaW".}
+
+  proc IsCharAlphaNumeric*(
+    ch: WCHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaNumericW".}
+
+  proc IsCharUpper*(
+    ch: WCHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharUpperW".}
+
+  proc IsCharLower*(
+    ch: WCHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharLowerW".}
+
+  proc GetKeyNameText*(
+    lParam: LONG, lpString: LPWSTR, cchSize: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetKeyNameTextW".}
+
+  proc VkKeyScan*(
+    ch: WCHAR
+  ): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanW".}
+
+  proc VkKeyScanEx*(
+    ch: WCHAR, dwhkl: HKL
+  ): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanExW".}
+
+  proc MapVirtualKey*(
+    uCode: UINT, uMapType: UINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyW".}
+
+  proc MapVirtualKeyEx*(
+    uCode: UINT, uMapType: UINT, dwhkl: HKL
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyExW".}
+
+  proc LoadAccelerators*(
+    hInstance: HINSTANCE, lpTableName: LPCWSTR
+  ): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "LoadAcceleratorsW".}
+
+  proc CreateAcceleratorTable*(
+    paccel: LPACCEL, cAccel: int32
+  ): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "CreateAcceleratorTableW".}
+
+  proc CopyAcceleratorTable*(
+    hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "CopyAcceleratorTableW".}
+
+  proc TranslateAccelerator*(
+    hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "TranslateAcceleratorW".}
+
+  proc LoadMenu*(
+    hInstance: HINSTANCE, lpMenuName: LPCWSTR
+  ): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuW".}
+
+  proc LoadMenuIndirect*(
+    lpMenuTemplate: ptr MENUTEMPLATEW
+  ): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuIndirectW".}
+
+  proc ChangeMenu*(
+    hMenu: HMENU, cmd: UINT, lpszNewItem: LPCWSTR, cmdInsert: UINT, flags: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ChangeMenuW".}
+
+  proc GetMenuString*(
+    hMenu: HMENU, uIDItem: UINT, lpString: LPWSTR, cchMax: int32, flags: UINT
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetMenuStringW".}
+
+  proc InsertMenu*(
+    hMenu: HMENU,
+    uPosition: UINT,
+    uFlags: UINT,
+    uIDNewItem: UINT_PTR,
+    lpNewItem: LPCWSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuW".}
+
+  proc AppendMenu*(
+    hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "AppendMenuW".}
+
+  proc ModifyMenu*(
+    hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ModifyMenuW".}
+
+  proc InsertMenuItem*(
+    hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOW
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuItemW".}
+
+  proc GetMenuItemInfo*(
+    hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOW
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMenuItemInfoW".}
+
+  proc SetMenuItemInfo*(
+    hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOW
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetMenuItemInfoW".}
+
+  proc DrawText*(
+    hdc: HDC, lpchText: LPCWSTR, cchText: int32, lprc: LPRECT, format: UINT
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextW".}
+
+  proc DrawTextEx*(
+    hdc: HDC,
+    lpchText: LPWSTR,
+    cchText: int32,
+    lprc: LPRECT,
+    format: UINT,
+    lpdtp: LPDRAWTEXTPARAMS,
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextExW".}
+
+  proc GrayString*(
+    hDC: HDC,
+    hBrush: HBRUSH,
+    lpOutputFunc: GRAYSTRINGPROC,
+    lpData: LPARAM,
+    nCount: int32,
+    X: int32,
+    Y: int32,
+    nWidth: int32,
+    nHeight: int32,
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GrayStringW".}
+
+  proc DrawState*(
+    hdc: HDC,
+    hbrFore: HBRUSH,
+    qfnCallBack: DRAWSTATEPROC,
+    lData: LPARAM,
+    wData: WPARAM,
+    x: int32,
+    y: int32,
+    cx: int32,
+    cy: int32,
+    uFlags: UINT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DrawStateW".}
+
+  proc TabbedTextOut*(
+    hdc: HDC,
+    x: int32,
+    y: int32,
+    lpString: LPCWSTR,
+    chCount: int32,
+    nTabPositions: int32,
+    lpnTabStopPositions: ptr INT,
+    nTabOrigin: int32,
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "TabbedTextOutW".}
+
+  proc GetTabbedTextExtent*(
+    hdc: HDC,
+    lpString: LPCWSTR,
+    chCount: int32,
+    nTabPositions: int32,
+    lpnTabStopPositions: ptr INT,
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetTabbedTextExtentW".}
+
+  proc SetProp*(
+    hWnd: HWND, lpString: LPCWSTR, hData: HANDLE
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetPropW".}
+
+  proc GetProp*(
+    hWnd: HWND, lpString: LPCWSTR
+  ): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "GetPropW".}
+
+  proc RemoveProp*(
+    hWnd: HWND, lpString: LPCWSTR
+  ): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "RemovePropW".}
+
+  proc EnumPropsEx*(
+    hWnd: HWND, lpEnumFunc: PROPENUMPROCEXW, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsExW".}
+
+  proc EnumProps*(
+    hWnd: HWND, lpEnumFunc: PROPENUMPROCW
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsW".}
+
+  proc SetWindowText*(
+    hWnd: HWND, lpString: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetWindowTextW".}
+
+  proc GetWindowText*(
+    hWnd: HWND, lpString: LPWSTR, nMaxCount: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextW".}
+
+  proc GetWindowTextLength*(
+    hWnd: HWND
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextLengthW".}
+
+  proc MessageBox*(
+    hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxW".}
+
+  proc MessageBoxEx*(
+    hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT, wLanguageId: WORD
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxExW".}
+
+  proc MessageBoxIndirect*(
+    lpmbp: ptr MSGBOXPARAMSW
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxIndirectW".}
+
+  proc GetWindowLong*(
+    hWnd: HWND, nIndex: int32
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongW".}
+
+  proc SetWindowLong*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongW".}
+
+  proc GetClassLong*(
+    hWnd: HWND, nIndex: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongW".}
+
+  proc SetClassLong*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongW".}
+
+  proc FindWindow*(
+    lpClassName: LPCWSTR, lpWindowName: LPCWSTR
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowW".}
+
+  proc FindWindowEx*(
+    hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCWSTR, lpszWindow: LPCWSTR
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowExW".}
+
+  proc GetClassName*(
+    hWnd: HWND, lpClassName: LPWSTR, nMaxCount: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClassNameW".}
+
+  proc SetWindowsHook*(
+    nFilterType: int32, pfnFilterProc: HOOKPROC
+  ): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookW".}
+
+  proc SetWindowsHookEx*(
+    idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD
+  ): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookExW".}
+
+  proc LoadBitmap*(
+    hInstance: HINSTANCE, lpBitmapName: LPCWSTR
+  ): HBITMAP {.winapi, stdcall, dynlib: "user32", importc: "LoadBitmapW".}
+
+  proc LoadCursor*(
+    hInstance: HINSTANCE, lpCursorName: LPCWSTR
+  ): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorW".}
+
+  proc LoadCursorFromFile*(
+    lpFileName: LPCWSTR
+  ): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorFromFileW".}
+
+  proc LoadIcon*(
+    hInstance: HINSTANCE, lpIconName: LPCWSTR
+  ): HICON {.winapi, stdcall, dynlib: "user32", importc: "LoadIconW".}
+
+  proc PrivateExtractIcons*(
+    szFileName: LPCWSTR,
+    nIconIndex: int32,
+    cxIcon: int32,
+    cyIcon: int32,
+    phicon: ptr HICON,
+    piconid: ptr UINT,
+    nIcons: UINT,
+    flags: UINT,
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "PrivateExtractIconsW".}
+
+  proc LoadImage*(
+    hInst: HINSTANCE, name: LPCWSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT
+  ): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "LoadImageW".}
+
+  proc GetIconInfoEx*(
+    hicon: HICON, piconinfo: PICONINFOEXW
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetIconInfoExW".}
+
+  proc IsDialogMessage*(
+    hDlg: HWND, lpMsg: LPMSG
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsDialogMessageW".}
+
+  proc DlgDirList*(
+    hDlg: HWND,
+    lpPathSpec: LPWSTR,
+    nIDListBox: int32,
+    nIDStaticPath: int32,
+    uFileType: UINT,
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListW".}
+
+  proc DlgDirSelectEx*(
+    hwndDlg: HWND, lpString: LPWSTR, chCount: int32, idListBox: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectExW".}
+
+  proc DlgDirListComboBox*(
+    hDlg: HWND,
+    lpPathSpec: LPWSTR,
+    nIDComboBox: int32,
+    nIDStaticPath: int32,
+    uFiletype: UINT,
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListComboBoxW".}
+
+  proc DlgDirSelectComboBoxEx*(
+    hwndDlg: HWND, lpString: LPWSTR, cchOut: int32, idComboBox: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectComboBoxExW".}
+
+  proc DefFrameProc*(
+    hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefFrameProcW".}
+
+  proc DefMDIChildProc*(
+    hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefMDIChildProcW".}
+
+  proc CreateMDIWindow*(
+    lpClassName: LPCWSTR,
+    lpWindowName: LPCWSTR,
+    dwStyle: DWORD,
+    X: int32,
+    Y: int32,
+    nWidth: int32,
+    nHeight: int32,
+    hWndParent: HWND,
+    hInstance: HINSTANCE,
+    lParam: LPARAM,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateMDIWindowW".}
+
+  proc WinHelp*(
+    hWndMain: HWND, lpszHelp: LPCWSTR, uCommand: UINT, dwData: ULONG_PTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "WinHelpW".}
+
+  proc ChangeDisplaySettings*(
+    lpDevMode: LPDEVMODEW, dwFlags: DWORD
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsW".}
+
+  proc ChangeDisplaySettingsEx*(
+    lpszDeviceName: LPCWSTR,
+    lpDevMode: LPDEVMODEW,
+    hwnd: HWND,
+    dwflags: DWORD,
+    lParam: LPVOID,
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsExW".}
+
+  proc EnumDisplaySettings*(
+    lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsW".}
+
+  proc EnumDisplaySettingsEx*(
+    lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEW, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsExW".}
+
+  proc EnumDisplayDevices*(
+    lpDevice: LPCWSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEW, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplayDevicesW".}
+
+  proc SystemParametersInfo*(
+    uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SystemParametersInfoW".}
+
+  proc GetMonitorInfo*(
+    hMonitor: HMONITOR, lpmi: LPMONITORINFO
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMonitorInfoW".}
+
+  proc GetWindowModuleFileName*(
+    hwnd: HWND, pszFileName: LPWSTR, cchFileNameMax: UINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetWindowModuleFileNameW".}
+
+  proc RealGetWindowClass*(
+    hwnd: HWND, ptszClassName: LPWSTR, cchClassNameMax: UINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "RealGetWindowClassW".}
+
+  proc GetAltTabInfo*(
+    hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPWSTR, cchItemText: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetAltTabInfoW".}
+
+  proc GetRawInputDeviceInfo*(
+    hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetRawInputDeviceInfoW".}
+
+  proc PostAppMessage*(
+    idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageW".}
+
+  proc CreateWindow*(
+      lpClassName: LPCWSTR,
+      lpWindowName: LPCWSTR,
+      dwStyle: DWORD,
+      x: int32,
+      y: int32,
+      nWidth: int32,
+      nHeight: int32,
+      hWndParent: HWND,
+      hMenu: HMENU,
+      hInstance: HINSTANCE,
+      lpParam: LPVOID,
+  ): HWND {.winapi, inline.} =
+    CreateWindowExW(
+      0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu,
+      hInstance, lpParam,
+    )
+
+  proc CreateDialog*(
+      hInstance: HINSTANCE, lpName: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+  ): HWND {.winapi, inline.} =
+    CreateDialogParamW(hInstance, lpName, hWndParent, lpDialogFunc, 0)
+
+  proc CreateDialogIndirect*(
+      hInstance: HINSTANCE,
+      lpTemplate: LPCDLGTEMPLATEW,
+      hWndParent: HWND,
+      lpDialogFunc: DLGPROC,
+  ): HWND {.winapi, inline.} =
+    CreateDialogIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
+  proc DialogBox*(
+      hInstance: HINSTANCE, lpTemplate: LPCWSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+  ): INT_PTR {.winapi, inline.} =
+    DialogBoxParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
+  proc DialogBoxIndirect*(
+      hInstance: HINSTANCE,
+      lpTemplate: LPCDLGTEMPLATEW,
+      hWndParent: HWND,
+      lpDialogFunc: DLGPROC,
+  ): INT_PTR {.winapi, inline.} =
+    DialogBoxIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
 when winimAnsi:
   type
     MENUTEMPLATE* = MENUTEMPLATEA
@@ -5260,179 +8592,789 @@ when winimAnsi:
     LPSOUNDSENTRY* = LPSOUNDSENTRYA
     MONITORINFOEX* = MONITORINFOEXA
     LPMONITORINFOEX* = LPMONITORINFOEXA
-  proc wvsprintf*(P1: LPSTR, P2: LPCSTR, arglist: va_list): int32 {.winapi, stdcall, dynlib: "user32", importc: "wvsprintfA".}
-  proc wsprintf*(P1: LPSTR, P2: LPCSTR): int32 {.winapi, stdcall, dynlib: "user32", importc: "wsprintfA".}
-  proc LoadKeyboardLayout*(pwszKLID: LPCSTR, Flags: UINT): HKL {.winapi, stdcall, dynlib: "user32", importc: "LoadKeyboardLayoutA".}
-  proc GetKeyboardLayoutName*(pwszKLID: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetKeyboardLayoutNameA".}
-  proc CreateDesktop*(lpszDesktop: LPCSTR, lpszDevice: LPCSTR, pDevmode: LPDEVMODEA, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopA".}
-  proc CreateDesktopEx*(lpszDesktop: LPCSTR, lpszDevice: LPCSTR, pDevmode: ptr DEVMODEA, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES, ulHeapSize: ULONG, pvoid: PVOID): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopExA".}
-  proc OpenDesktop*(lpszDesktop: LPCSTR, dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HDESK {.winapi, stdcall, dynlib: "user32", importc: "OpenDesktopA".}
-  proc EnumDesktops*(hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCA, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDesktopsA".}
-  proc CreateWindowStation*(lpwinsta: LPCSTR, dwFlags: DWORD, dwDesiredAccess: ACCESS_MASK, lpsa: LPSECURITY_ATTRIBUTES): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowStationA".}
-  proc OpenWindowStation*(lpszWinSta: LPCSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "OpenWindowStationA".}
-  proc EnumWindowStations*(lpEnumFunc: WINSTAENUMPROCA, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumWindowStationsA".}
-  proc GetUserObjectInformation*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetUserObjectInformationA".}
-  proc SetUserObjectInformation*(hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetUserObjectInformationA".}
-  proc RegisterWindowMessage*(lpString: LPCSTR): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterWindowMessageA".}
-  proc GetMessage*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMessageA".}
-  proc DispatchMessage*(lpMsg: ptr MSG): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DispatchMessageA".}
-  proc PeekMessage*(lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PeekMessageA".}
-  proc SendMessage*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageA".}
-  proc SendMessageTimeout*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, fuFlags: UINT, uTimeout: UINT, lpdwResult: PDWORD_PTR): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageTimeoutA".}
-  proc SendNotifyMessage*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendNotifyMessageA".}
-  proc SendMessageCallback*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM, lpResultCallBack: SENDASYNCPROC, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendMessageCallbackA".}
-  proc BroadcastSystemMessageEx*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM, pbsmInfo: PBSMINFO): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageExA".}
-  proc BroadcastSystemMessage*(flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageA".}
-  proc RegisterDeviceNotification*(hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD): HDEVNOTIFY {.winapi, stdcall, dynlib: "user32", importc: "RegisterDeviceNotificationA".}
-  proc PostMessage*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostMessageA".}
-  proc PostThreadMessage*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageA".}
-  proc DefWindowProc*(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefWindowProcA".}
-  proc CallWindowProc*(lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "CallWindowProcA".}
-  proc RegisterClass*(lpWndClass: ptr WNDCLASSA): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassA".}
-  proc UnregisterClass*(lpClassName: LPCSTR, hInstance: HINSTANCE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "UnregisterClassA".}
-  proc GetClassInfo*(hInstance: HINSTANCE, lpClassName: LPCSTR, lpWndClass: LPWNDCLASSA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoA".}
-  proc RegisterClassEx*(P1: ptr WNDCLASSEXA): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassExA".}
-  proc GetClassInfoEx*(hInstance: HINSTANCE, lpszClass: LPCSTR, lpwcx: LPWNDCLASSEXA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoExA".}
-  proc SetDlgItemText*(hDlg: HWND, nIDDlgItem: int32, lpString: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetDlgItemTextA".}
-  proc GetDlgItemText*(hDlg: HWND, nIDDlgItem: int32, lpString: LPSTR, cchMax: int32): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetDlgItemTextA".}
-  proc SendDlgItemMessage*(hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendDlgItemMessageA".}
-  proc DefDlgProc*(hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefDlgProcA".}
-  proc CallMsgFilter*(lpMsg: LPMSG, nCode: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CallMsgFilterA".}
-  proc RegisterClipboardFormat*(lpszFormat: LPCSTR): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterClipboardFormatA".}
-  proc GetClipboardFormatName*(format: UINT, lpszFormatName: LPSTR, cchMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClipboardFormatNameA".}
-  proc CharToOem*(lpszSrc: LPCSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemA".}
-  proc OemToChar*(lpszSrc: LPCSTR, lpszDst: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharA".}
-  proc CharToOemBuff*(lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemBuffA".}
-  proc OemToCharBuff*(lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharBuffA".}
-  proc CharUpper*(lpsz: LPSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharUpperA".}
-  proc CharUpperBuff*(lpsz: LPSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharUpperBuffA".}
-  proc CharLower*(lpsz: LPSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharLowerA".}
-  proc CharLowerBuff*(lpsz: LPSTR, cchLength: DWORD): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharLowerBuffA".}
-  proc CharNext*(lpsz: LPCSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharNextA".}
-  proc CharPrev*(lpszStart: LPCSTR, lpszCurrent: LPCSTR): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharPrevA".}
-  proc IsCharAlpha*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaA".}
-  proc IsCharAlphaNumeric*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaNumericA".}
-  proc IsCharUpper*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharUpperA".}
-  proc IsCharLower*(ch: CHAR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharLowerA".}
-  proc GetKeyNameText*(lParam: LONG, lpString: LPSTR, cchSize: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetKeyNameTextA".}
-  proc VkKeyScan*(ch: CHAR): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanA".}
-  proc VkKeyScanEx*(ch: CHAR, dwhkl: HKL): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanExA".}
-  proc MapVirtualKey*(uCode: UINT, uMapType: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyA".}
-  proc MapVirtualKeyEx*(uCode: UINT, uMapType: UINT, dwhkl: HKL): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyExA".}
-  proc LoadAccelerators*(hInstance: HINSTANCE, lpTableName: LPCSTR): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "LoadAcceleratorsA".}
-  proc CreateAcceleratorTable*(paccel: LPACCEL, cAccel: int32): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "CreateAcceleratorTableA".}
-  proc CopyAcceleratorTable*(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "CopyAcceleratorTableA".}
-  proc TranslateAccelerator*(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG): int32 {.winapi, stdcall, dynlib: "user32", importc: "TranslateAcceleratorA".}
-  proc LoadMenu*(hInstance: HINSTANCE, lpMenuName: LPCSTR): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuA".}
-  proc LoadMenuIndirect*(lpMenuTemplate: ptr MENUTEMPLATEA): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuIndirectA".}
-  proc ChangeMenu*(hMenu: HMENU, cmd: UINT, lpszNewItem: LPCSTR, cmdInsert: UINT, flags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ChangeMenuA".}
-  proc GetMenuString*(hMenu: HMENU, uIDItem: UINT, lpString: LPSTR, cchMax: int32, flags: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetMenuStringA".}
-  proc InsertMenu*(hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuA".}
-  proc AppendMenu*(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "AppendMenuA".}
-  proc ModifyMenu*(hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ModifyMenuA".}
-  proc InsertMenuItem*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuItemA".}
-  proc GetMenuItemInfo*(hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMenuItemInfoA".}
-  proc SetMenuItemInfo*(hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetMenuItemInfoA".}
-  proc DrawText*(hdc: HDC, lpchText: LPCSTR, cchText: int32, lprc: LPRECT, format: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextA".}
-  proc DrawTextEx*(hdc: HDC, lpchText: LPSTR, cchText: int32, lprc: LPRECT, format: UINT, lpdtp: LPDRAWTEXTPARAMS): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextExA".}
-  proc GrayString*(hDC: HDC, hBrush: HBRUSH, lpOutputFunc: GRAYSTRINGPROC, lpData: LPARAM, nCount: int32, X: int32, Y: int32, nWidth: int32, nHeight: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GrayStringA".}
-  proc DrawState*(hdc: HDC, hbrFore: HBRUSH, qfnCallBack: DRAWSTATEPROC, lData: LPARAM, wData: WPARAM, x: int32, y: int32, cx: int32, cy: int32, uFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DrawStateA".}
-  proc TabbedTextOut*(hdc: HDC, x: int32, y: int32, lpString: LPCSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT, nTabOrigin: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "TabbedTextOutA".}
-  proc GetTabbedTextExtent*(hdc: HDC, lpString: LPCSTR, chCount: int32, nTabPositions: int32, lpnTabStopPositions: ptr INT): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetTabbedTextExtentA".}
-  proc SetProp*(hWnd: HWND, lpString: LPCSTR, hData: HANDLE): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetPropA".}
-  proc GetProp*(hWnd: HWND, lpString: LPCSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "GetPropA".}
-  proc RemoveProp*(hWnd: HWND, lpString: LPCSTR): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "RemovePropA".}
-  proc EnumPropsEx*(hWnd: HWND, lpEnumFunc: PROPENUMPROCEXA, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsExA".}
-  proc EnumProps*(hWnd: HWND, lpEnumFunc: PROPENUMPROCA): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsA".}
-  proc SetWindowText*(hWnd: HWND, lpString: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetWindowTextA".}
-  proc GetWindowText*(hWnd: HWND, lpString: LPSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextA".}
-  proc GetWindowTextLength*(hWnd: HWND): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextLengthA".}
-  proc MessageBox*(hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxA".}
-  proc MessageBoxEx*(hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT, wLanguageId: WORD): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxExA".}
-  proc MessageBoxIndirect*(lpmbp: ptr MSGBOXPARAMSA): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxIndirectA".}
-  proc GetWindowLong*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongA".}
-  proc SetWindowLong*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongA".}
-  proc GetClassLong*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongA".}
-  proc SetClassLong*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongA".}
-  proc FindWindow*(lpClassName: LPCSTR, lpWindowName: LPCSTR): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowA".}
-  proc FindWindowEx*(hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCSTR, lpszWindow: LPCSTR): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowExA".}
-  proc GetClassName*(hWnd: HWND, lpClassName: LPSTR, nMaxCount: int32): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClassNameA".}
-  proc SetWindowsHook*(nFilterType: int32, pfnFilterProc: HOOKPROC): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookA".}
-  proc SetWindowsHookEx*(idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookExA".}
-  proc LoadBitmap*(hInstance: HINSTANCE, lpBitmapName: LPCSTR): HBITMAP {.winapi, stdcall, dynlib: "user32", importc: "LoadBitmapA".}
-  proc LoadCursor*(hInstance: HINSTANCE, lpCursorName: LPCSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorA".}
-  proc LoadCursorFromFile*(lpFileName: LPCSTR): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorFromFileA".}
-  proc LoadIcon*(hInstance: HINSTANCE, lpIconName: LPCSTR): HICON {.winapi, stdcall, dynlib: "user32", importc: "LoadIconA".}
-  proc PrivateExtractIcons*(szFileName: LPCSTR, nIconIndex: int32, cxIcon: int32, cyIcon: int32, phicon: ptr HICON, piconid: ptr UINT, nIcons: UINT, flags: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "PrivateExtractIconsA".}
-  proc LoadImage*(hInst: HINSTANCE, name: LPCSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "LoadImageA".}
-  proc GetIconInfoEx*(hicon: HICON, piconinfo: PICONINFOEXA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetIconInfoExA".}
-  proc IsDialogMessage*(hDlg: HWND, lpMsg: LPMSG): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsDialogMessageA".}
-  proc DlgDirList*(hDlg: HWND, lpPathSpec: LPSTR, nIDListBox: int32, nIDStaticPath: int32, uFileType: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListA".}
-  proc DlgDirSelectEx*(hwndDlg: HWND, lpString: LPSTR, chCount: int32, idListBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectExA".}
-  proc DlgDirListComboBox*(hDlg: HWND, lpPathSpec: LPSTR, nIDComboBox: int32, nIDStaticPath: int32, uFiletype: UINT): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListComboBoxA".}
-  proc DlgDirSelectComboBoxEx*(hwndDlg: HWND, lpString: LPSTR, cchOut: int32, idComboBox: int32): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectComboBoxExA".}
-  proc DefFrameProc*(hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefFrameProcA".}
-  proc DefMDIChildProc*(hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefMDIChildProcA".}
-  proc CreateMDIWindow*(lpClassName: LPCSTR, lpWindowName: LPCSTR, dwStyle: DWORD, X: int32, Y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hInstance: HINSTANCE, lParam: LPARAM): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateMDIWindowA".}
-  proc WinHelp*(hWndMain: HWND, lpszHelp: LPCSTR, uCommand: UINT, dwData: ULONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "WinHelpA".}
-  proc ChangeDisplaySettings*(lpDevMode: LPDEVMODEA, dwFlags: DWORD): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsA".}
-  proc ChangeDisplaySettingsEx*(lpszDeviceName: LPCSTR, lpDevMode: LPDEVMODEA, hwnd: HWND, dwflags: DWORD, lParam: LPVOID): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsExA".}
-  proc EnumDisplaySettings*(lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsA".}
-  proc EnumDisplaySettingsEx*(lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsExA".}
-  proc EnumDisplayDevices*(lpDevice: LPCSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplayDevicesA".}
-  proc SystemParametersInfo*(uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SystemParametersInfoA".}
-  proc GetMonitorInfo*(hMonitor: HMONITOR, lpmi: LPMONITORINFO): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMonitorInfoA".}
-  proc GetWindowModuleFileName*(hwnd: HWND, pszFileName: LPSTR, cchFileNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetWindowModuleFileNameA".}
-  proc RealGetWindowClass*(hwnd: HWND, ptszClassName: LPSTR, cchClassNameMax: UINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "RealGetWindowClassA".}
-  proc GetAltTabInfo*(hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPSTR, cchItemText: UINT): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetAltTabInfoA".}
-  proc GetRawInputDeviceInfo*(hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetRawInputDeviceInfoA".}
-  proc PostAppMessage*(idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageA".}
-  proc CreateWindow*(lpClassName: LPCSTR, lpWindowName: LPCSTR, dwStyle: DWORD, x: int32, y: int32, nWidth: int32, nHeight: int32, hWndParent: HWND, hMenu: HMENU, hInstance: HINSTANCE, lpParam: LPVOID): HWND {.winapi, inline.} = CreateWindowExA(0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)
-  proc CreateDialog*(hInstance: HINSTANCE, lpName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogParamA(hInstance, lpName, hWndParent, lpDialogFunc, 0)
-  proc CreateDialogIndirect*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC): HWND {.winapi, inline.} = CreateDialogIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
-  proc DialogBox*(hInstance: HINSTANCE, lpTemplate: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
-  proc DialogBoxIndirect*(hInstance: HINSTANCE, lpTemplate: LPCDLGTEMPLATEA, hWndParent: HWND, lpDialogFunc: DLGPROC): INT_PTR {.winapi, inline.} = DialogBoxIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
+  proc wvsprintf*(
+    P1: LPSTR, P2: LPCSTR, arglist: va_list
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "wvsprintfA".}
+
+  proc wsprintf*(
+    P1: LPSTR, P2: LPCSTR
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "wsprintfA".}
+
+  proc LoadKeyboardLayout*(
+    pwszKLID: LPCSTR, Flags: UINT
+  ): HKL {.winapi, stdcall, dynlib: "user32", importc: "LoadKeyboardLayoutA".}
+
+  proc GetKeyboardLayoutName*(
+    pwszKLID: LPSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetKeyboardLayoutNameA".}
+
+  proc CreateDesktop*(
+    lpszDesktop: LPCSTR,
+    lpszDevice: LPCSTR,
+    pDevmode: LPDEVMODEA,
+    dwFlags: DWORD,
+    dwDesiredAccess: ACCESS_MASK,
+    lpsa: LPSECURITY_ATTRIBUTES,
+  ): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopA".}
+
+  proc CreateDesktopEx*(
+    lpszDesktop: LPCSTR,
+    lpszDevice: LPCSTR,
+    pDevmode: ptr DEVMODEA,
+    dwFlags: DWORD,
+    dwDesiredAccess: ACCESS_MASK,
+    lpsa: LPSECURITY_ATTRIBUTES,
+    ulHeapSize: ULONG,
+    pvoid: PVOID,
+  ): HDESK {.winapi, stdcall, dynlib: "user32", importc: "CreateDesktopExA".}
+
+  proc OpenDesktop*(
+    lpszDesktop: LPCSTR, dwFlags: DWORD, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+  ): HDESK {.winapi, stdcall, dynlib: "user32", importc: "OpenDesktopA".}
+
+  proc EnumDesktops*(
+    hwinsta: HWINSTA, lpEnumFunc: DESKTOPENUMPROCA, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDesktopsA".}
+
+  proc CreateWindowStation*(
+    lpwinsta: LPCSTR,
+    dwFlags: DWORD,
+    dwDesiredAccess: ACCESS_MASK,
+    lpsa: LPSECURITY_ATTRIBUTES,
+  ): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "CreateWindowStationA".}
+
+  proc OpenWindowStation*(
+    lpszWinSta: LPCSTR, fInherit: WINBOOL, dwDesiredAccess: ACCESS_MASK
+  ): HWINSTA {.winapi, stdcall, dynlib: "user32", importc: "OpenWindowStationA".}
+
+  proc EnumWindowStations*(
+    lpEnumFunc: WINSTAENUMPROCA, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumWindowStationsA".}
+
+  proc GetUserObjectInformation*(
+    hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetUserObjectInformationA".}
+
+  proc SetUserObjectInformation*(
+    hObj: HANDLE, nIndex: int32, pvInfo: PVOID, nLength: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetUserObjectInformationA".}
+
+  proc RegisterWindowMessage*(
+    lpString: LPCSTR
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterWindowMessageA".}
+
+  proc GetMessage*(
+    lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMessageA".}
+
+  proc DispatchMessage*(
+    lpMsg: ptr MSG
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DispatchMessageA".}
+
+  proc PeekMessage*(
+    lpMsg: LPMSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT, wRemoveMsg: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PeekMessageA".}
+
+  proc SendMessage*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageA".}
+
+  proc SendMessageTimeout*(
+    hWnd: HWND,
+    Msg: UINT,
+    wParam: WPARAM,
+    lParam: LPARAM,
+    fuFlags: UINT,
+    uTimeout: UINT,
+    lpdwResult: PDWORD_PTR,
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendMessageTimeoutA".}
+
+  proc SendNotifyMessage*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendNotifyMessageA".}
+
+  proc SendMessageCallback*(
+    hWnd: HWND,
+    Msg: UINT,
+    wParam: WPARAM,
+    lParam: LPARAM,
+    lpResultCallBack: SENDASYNCPROC,
+    dwData: ULONG_PTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SendMessageCallbackA".}
+
+  proc BroadcastSystemMessageEx*(
+    flags: DWORD,
+    lpInfo: LPDWORD,
+    Msg: UINT,
+    wParam: WPARAM,
+    lParam: LPARAM,
+    pbsmInfo: PBSMINFO,
+  ): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageExA".}
+
+  proc BroadcastSystemMessage*(
+    flags: DWORD, lpInfo: LPDWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LONG32 {.winapi, stdcall, dynlib: "user32", importc: "BroadcastSystemMessageA".}
+
+  proc RegisterDeviceNotification*(
+    hRecipient: HANDLE, NotificationFilter: LPVOID, Flags: DWORD
+  ): HDEVNOTIFY {.
+    winapi, stdcall, dynlib: "user32", importc: "RegisterDeviceNotificationA"
+  .}
+
+  proc PostMessage*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostMessageA".}
+
+  proc PostThreadMessage*(
+    idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageA".}
+
+  proc DefWindowProc*(
+    hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefWindowProcA".}
+
+  proc CallWindowProc*(
+    lpPrevWndFunc: WNDPROC, hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "CallWindowProcA".}
+
+  proc RegisterClass*(
+    lpWndClass: ptr WNDCLASSA
+  ): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassA".}
+
+  proc UnregisterClass*(
+    lpClassName: LPCSTR, hInstance: HINSTANCE
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "UnregisterClassA".}
+
+  proc GetClassInfo*(
+    hInstance: HINSTANCE, lpClassName: LPCSTR, lpWndClass: LPWNDCLASSA
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoA".}
+
+  proc RegisterClassEx*(
+    P1: ptr WNDCLASSEXA
+  ): ATOM {.winapi, stdcall, dynlib: "user32", importc: "RegisterClassExA".}
+
+  proc GetClassInfoEx*(
+    hInstance: HINSTANCE, lpszClass: LPCSTR, lpwcx: LPWNDCLASSEXA
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetClassInfoExA".}
+
+  proc SetDlgItemText*(
+    hDlg: HWND, nIDDlgItem: int32, lpString: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetDlgItemTextA".}
+
+  proc GetDlgItemText*(
+    hDlg: HWND, nIDDlgItem: int32, lpString: LPSTR, cchMax: int32
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetDlgItemTextA".}
+
+  proc SendDlgItemMessage*(
+    hDlg: HWND, nIDDlgItem: int32, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "SendDlgItemMessageA".}
+
+  proc DefDlgProc*(
+    hDlg: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefDlgProcA".}
+
+  proc CallMsgFilter*(
+    lpMsg: LPMSG, nCode: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CallMsgFilterA".}
+
+  proc RegisterClipboardFormat*(
+    lpszFormat: LPCSTR
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "RegisterClipboardFormatA".}
+
+  proc GetClipboardFormatName*(
+    format: UINT, lpszFormatName: LPSTR, cchMaxCount: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClipboardFormatNameA".}
+
+  proc CharToOem*(
+    lpszSrc: LPCSTR, lpszDst: LPSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemA".}
+
+  proc OemToChar*(
+    lpszSrc: LPCSTR, lpszDst: LPSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharA".}
+
+  proc CharToOemBuff*(
+    lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "CharToOemBuffA".}
+
+  proc OemToCharBuff*(
+    lpszSrc: LPCSTR, lpszDst: LPSTR, cchDstLength: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "OemToCharBuffA".}
+
+  proc CharUpper*(
+    lpsz: LPSTR
+  ): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharUpperA".}
+
+  proc CharUpperBuff*(
+    lpsz: LPSTR, cchLength: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharUpperBuffA".}
+
+  proc CharLower*(
+    lpsz: LPSTR
+  ): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharLowerA".}
+
+  proc CharLowerBuff*(
+    lpsz: LPSTR, cchLength: DWORD
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "CharLowerBuffA".}
+
+  proc CharNext*(
+    lpsz: LPCSTR
+  ): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharNextA".}
+
+  proc CharPrev*(
+    lpszStart: LPCSTR, lpszCurrent: LPCSTR
+  ): LPSTR {.winapi, stdcall, dynlib: "user32", importc: "CharPrevA".}
+
+  proc IsCharAlpha*(
+    ch: CHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaA".}
+
+  proc IsCharAlphaNumeric*(
+    ch: CHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharAlphaNumericA".}
+
+  proc IsCharUpper*(
+    ch: CHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharUpperA".}
+
+  proc IsCharLower*(
+    ch: CHAR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsCharLowerA".}
+
+  proc GetKeyNameText*(
+    lParam: LONG, lpString: LPSTR, cchSize: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetKeyNameTextA".}
+
+  proc VkKeyScan*(
+    ch: CHAR
+  ): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanA".}
+
+  proc VkKeyScanEx*(
+    ch: CHAR, dwhkl: HKL
+  ): SHORT {.winapi, stdcall, dynlib: "user32", importc: "VkKeyScanExA".}
+
+  proc MapVirtualKey*(
+    uCode: UINT, uMapType: UINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyA".}
+
+  proc MapVirtualKeyEx*(
+    uCode: UINT, uMapType: UINT, dwhkl: HKL
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "MapVirtualKeyExA".}
+
+  proc LoadAccelerators*(
+    hInstance: HINSTANCE, lpTableName: LPCSTR
+  ): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "LoadAcceleratorsA".}
+
+  proc CreateAcceleratorTable*(
+    paccel: LPACCEL, cAccel: int32
+  ): HACCEL {.winapi, stdcall, dynlib: "user32", importc: "CreateAcceleratorTableA".}
+
+  proc CopyAcceleratorTable*(
+    hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "CopyAcceleratorTableA".}
+
+  proc TranslateAccelerator*(
+    hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "TranslateAcceleratorA".}
+
+  proc LoadMenu*(
+    hInstance: HINSTANCE, lpMenuName: LPCSTR
+  ): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuA".}
+
+  proc LoadMenuIndirect*(
+    lpMenuTemplate: ptr MENUTEMPLATEA
+  ): HMENU {.winapi, stdcall, dynlib: "user32", importc: "LoadMenuIndirectA".}
+
+  proc ChangeMenu*(
+    hMenu: HMENU, cmd: UINT, lpszNewItem: LPCSTR, cmdInsert: UINT, flags: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ChangeMenuA".}
+
+  proc GetMenuString*(
+    hMenu: HMENU, uIDItem: UINT, lpString: LPSTR, cchMax: int32, flags: UINT
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetMenuStringA".}
+
+  proc InsertMenu*(
+    hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuA".}
+
+  proc AppendMenu*(
+    hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "AppendMenuA".}
+
+  proc ModifyMenu*(
+    hMnu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "ModifyMenuA".}
+
+  proc InsertMenuItem*(
+    hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmi: LPCMENUITEMINFOA
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "InsertMenuItemA".}
+
+  proc GetMenuItemInfo*(
+    hmenu: HMENU, item: UINT, fByPosition: WINBOOL, lpmii: LPMENUITEMINFOA
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMenuItemInfoA".}
+
+  proc SetMenuItemInfo*(
+    hmenu: HMENU, item: UINT, fByPositon: WINBOOL, lpmii: LPCMENUITEMINFOA
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetMenuItemInfoA".}
+
+  proc DrawText*(
+    hdc: HDC, lpchText: LPCSTR, cchText: int32, lprc: LPRECT, format: UINT
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextA".}
+
+  proc DrawTextEx*(
+    hdc: HDC,
+    lpchText: LPSTR,
+    cchText: int32,
+    lprc: LPRECT,
+    format: UINT,
+    lpdtp: LPDRAWTEXTPARAMS,
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DrawTextExA".}
+
+  proc GrayString*(
+    hDC: HDC,
+    hBrush: HBRUSH,
+    lpOutputFunc: GRAYSTRINGPROC,
+    lpData: LPARAM,
+    nCount: int32,
+    X: int32,
+    Y: int32,
+    nWidth: int32,
+    nHeight: int32,
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GrayStringA".}
+
+  proc DrawState*(
+    hdc: HDC,
+    hbrFore: HBRUSH,
+    qfnCallBack: DRAWSTATEPROC,
+    lData: LPARAM,
+    wData: WPARAM,
+    x: int32,
+    y: int32,
+    cx: int32,
+    cy: int32,
+    uFlags: UINT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DrawStateA".}
+
+  proc TabbedTextOut*(
+    hdc: HDC,
+    x: int32,
+    y: int32,
+    lpString: LPCSTR,
+    chCount: int32,
+    nTabPositions: int32,
+    lpnTabStopPositions: ptr INT,
+    nTabOrigin: int32,
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "TabbedTextOutA".}
+
+  proc GetTabbedTextExtent*(
+    hdc: HDC,
+    lpString: LPCSTR,
+    chCount: int32,
+    nTabPositions: int32,
+    lpnTabStopPositions: ptr INT,
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetTabbedTextExtentA".}
+
+  proc SetProp*(
+    hWnd: HWND, lpString: LPCSTR, hData: HANDLE
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetPropA".}
+
+  proc GetProp*(
+    hWnd: HWND, lpString: LPCSTR
+  ): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "GetPropA".}
+
+  proc RemoveProp*(
+    hWnd: HWND, lpString: LPCSTR
+  ): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "RemovePropA".}
+
+  proc EnumPropsEx*(
+    hWnd: HWND, lpEnumFunc: PROPENUMPROCEXA, lParam: LPARAM
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsExA".}
+
+  proc EnumProps*(
+    hWnd: HWND, lpEnumFunc: PROPENUMPROCA
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "EnumPropsA".}
+
+  proc SetWindowText*(
+    hWnd: HWND, lpString: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SetWindowTextA".}
+
+  proc GetWindowText*(
+    hWnd: HWND, lpString: LPSTR, nMaxCount: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextA".}
+
+  proc GetWindowTextLength*(
+    hWnd: HWND
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetWindowTextLengthA".}
+
+  proc MessageBox*(
+    hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxA".}
+
+  proc MessageBoxEx*(
+    hWnd: HWND, lpText: LPCSTR, lpCaption: LPCSTR, uType: UINT, wLanguageId: WORD
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxExA".}
+
+  proc MessageBoxIndirect*(
+    lpmbp: ptr MSGBOXPARAMSA
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "MessageBoxIndirectA".}
+
+  proc GetWindowLong*(
+    hWnd: HWND, nIndex: int32
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongA".}
+
+  proc SetWindowLong*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongA".}
+
+  proc GetClassLong*(
+    hWnd: HWND, nIndex: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongA".}
+
+  proc SetClassLong*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongA".}
+
+  proc FindWindow*(
+    lpClassName: LPCSTR, lpWindowName: LPCSTR
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowA".}
+
+  proc FindWindowEx*(
+    hWndParent: HWND, hWndChildAfter: HWND, lpszClass: LPCSTR, lpszWindow: LPCSTR
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "FindWindowExA".}
+
+  proc GetClassName*(
+    hWnd: HWND, lpClassName: LPSTR, nMaxCount: int32
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "GetClassNameA".}
+
+  proc SetWindowsHook*(
+    nFilterType: int32, pfnFilterProc: HOOKPROC
+  ): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookA".}
+
+  proc SetWindowsHookEx*(
+    idHook: int32, lpfn: HOOKPROC, hmod: HINSTANCE, dwThreadId: DWORD
+  ): HHOOK {.winapi, stdcall, dynlib: "user32", importc: "SetWindowsHookExA".}
+
+  proc LoadBitmap*(
+    hInstance: HINSTANCE, lpBitmapName: LPCSTR
+  ): HBITMAP {.winapi, stdcall, dynlib: "user32", importc: "LoadBitmapA".}
+
+  proc LoadCursor*(
+    hInstance: HINSTANCE, lpCursorName: LPCSTR
+  ): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorA".}
+
+  proc LoadCursorFromFile*(
+    lpFileName: LPCSTR
+  ): HCURSOR {.winapi, stdcall, dynlib: "user32", importc: "LoadCursorFromFileA".}
+
+  proc LoadIcon*(
+    hInstance: HINSTANCE, lpIconName: LPCSTR
+  ): HICON {.winapi, stdcall, dynlib: "user32", importc: "LoadIconA".}
+
+  proc PrivateExtractIcons*(
+    szFileName: LPCSTR,
+    nIconIndex: int32,
+    cxIcon: int32,
+    cyIcon: int32,
+    phicon: ptr HICON,
+    piconid: ptr UINT,
+    nIcons: UINT,
+    flags: UINT,
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "PrivateExtractIconsA".}
+
+  proc LoadImage*(
+    hInst: HINSTANCE, name: LPCSTR, `type`: UINT, cx: int32, cy: int32, fuLoad: UINT
+  ): HANDLE {.winapi, stdcall, dynlib: "user32", importc: "LoadImageA".}
+
+  proc GetIconInfoEx*(
+    hicon: HICON, piconinfo: PICONINFOEXA
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetIconInfoExA".}
+
+  proc IsDialogMessage*(
+    hDlg: HWND, lpMsg: LPMSG
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "IsDialogMessageA".}
+
+  proc DlgDirList*(
+    hDlg: HWND,
+    lpPathSpec: LPSTR,
+    nIDListBox: int32,
+    nIDStaticPath: int32,
+    uFileType: UINT,
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListA".}
+
+  proc DlgDirSelectEx*(
+    hwndDlg: HWND, lpString: LPSTR, chCount: int32, idListBox: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectExA".}
+
+  proc DlgDirListComboBox*(
+    hDlg: HWND,
+    lpPathSpec: LPSTR,
+    nIDComboBox: int32,
+    nIDStaticPath: int32,
+    uFiletype: UINT,
+  ): int32 {.winapi, stdcall, dynlib: "user32", importc: "DlgDirListComboBoxA".}
+
+  proc DlgDirSelectComboBoxEx*(
+    hwndDlg: HWND, lpString: LPSTR, cchOut: int32, idComboBox: int32
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "DlgDirSelectComboBoxExA".}
+
+  proc DefFrameProc*(
+    hWnd: HWND, hWndMDIClient: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefFrameProcA".}
+
+  proc DefMDIChildProc*(
+    hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): LRESULT {.winapi, stdcall, dynlib: "user32", importc: "DefMDIChildProcA".}
+
+  proc CreateMDIWindow*(
+    lpClassName: LPCSTR,
+    lpWindowName: LPCSTR,
+    dwStyle: DWORD,
+    X: int32,
+    Y: int32,
+    nWidth: int32,
+    nHeight: int32,
+    hWndParent: HWND,
+    hInstance: HINSTANCE,
+    lParam: LPARAM,
+  ): HWND {.winapi, stdcall, dynlib: "user32", importc: "CreateMDIWindowA".}
+
+  proc WinHelp*(
+    hWndMain: HWND, lpszHelp: LPCSTR, uCommand: UINT, dwData: ULONG_PTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "WinHelpA".}
+
+  proc ChangeDisplaySettings*(
+    lpDevMode: LPDEVMODEA, dwFlags: DWORD
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsA".}
+
+  proc ChangeDisplaySettingsEx*(
+    lpszDeviceName: LPCSTR,
+    lpDevMode: LPDEVMODEA,
+    hwnd: HWND,
+    dwflags: DWORD,
+    lParam: LPVOID,
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "ChangeDisplaySettingsExA".}
+
+  proc EnumDisplaySettings*(
+    lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsA".}
+
+  proc EnumDisplaySettingsEx*(
+    lpszDeviceName: LPCSTR, iModeNum: DWORD, lpDevMode: LPDEVMODEA, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplaySettingsExA".}
+
+  proc EnumDisplayDevices*(
+    lpDevice: LPCSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEA, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "EnumDisplayDevicesA".}
+
+  proc SystemParametersInfo*(
+    uiAction: UINT, uiParam: UINT, pvParam: PVOID, fWinIni: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "SystemParametersInfoA".}
+
+  proc GetMonitorInfo*(
+    hMonitor: HMONITOR, lpmi: LPMONITORINFO
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetMonitorInfoA".}
+
+  proc GetWindowModuleFileName*(
+    hwnd: HWND, pszFileName: LPSTR, cchFileNameMax: UINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetWindowModuleFileNameA".}
+
+  proc RealGetWindowClass*(
+    hwnd: HWND, ptszClassName: LPSTR, cchClassNameMax: UINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "RealGetWindowClassA".}
+
+  proc GetAltTabInfo*(
+    hwnd: HWND, iItem: int32, pati: PALTTABINFO, pszItemText: LPSTR, cchItemText: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "GetAltTabInfoA".}
+
+  proc GetRawInputDeviceInfo*(
+    hDevice: HANDLE, uiCommand: UINT, pData: LPVOID, pcbSize: PUINT
+  ): UINT {.winapi, stdcall, dynlib: "user32", importc: "GetRawInputDeviceInfoA".}
+
+  proc PostAppMessage*(
+    idThread: DWORD, Msg: UINT, wParam: WPARAM, lParam: LPARAM
+  ): WINBOOL {.winapi, stdcall, dynlib: "user32", importc: "PostThreadMessageA".}
+
+  proc CreateWindow*(
+      lpClassName: LPCSTR,
+      lpWindowName: LPCSTR,
+      dwStyle: DWORD,
+      x: int32,
+      y: int32,
+      nWidth: int32,
+      nHeight: int32,
+      hWndParent: HWND,
+      hMenu: HMENU,
+      hInstance: HINSTANCE,
+      lpParam: LPVOID,
+  ): HWND {.winapi, inline.} =
+    CreateWindowExA(
+      0, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu,
+      hInstance, lpParam,
+    )
+
+  proc CreateDialog*(
+      hInstance: HINSTANCE, lpName: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+  ): HWND {.winapi, inline.} =
+    CreateDialogParamA(hInstance, lpName, hWndParent, lpDialogFunc, 0)
+
+  proc CreateDialogIndirect*(
+      hInstance: HINSTANCE,
+      lpTemplate: LPCDLGTEMPLATEA,
+      hWndParent: HWND,
+      lpDialogFunc: DLGPROC,
+  ): HWND {.winapi, inline.} =
+    CreateDialogIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
+  proc DialogBox*(
+      hInstance: HINSTANCE, lpTemplate: LPCSTR, hWndParent: HWND, lpDialogFunc: DLGPROC
+  ): INT_PTR {.winapi, inline.} =
+    DialogBoxParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
+  proc DialogBoxIndirect*(
+      hInstance: HINSTANCE,
+      lpTemplate: LPCDLGTEMPLATEA,
+      hWndParent: HWND,
+      lpDialogFunc: DLGPROC,
+  ): INT_PTR {.winapi, inline.} =
+    DialogBoxIndirectParamA(hInstance, lpTemplate, hWndParent, lpDialogFunc, 0)
+
 when winimCpu64:
   const
     CONSOLE_APPLICATION_16BIT* = 0x0000
     GUI_16BITTASK* = 0x00000000
-  proc GetWindowLongPtrA*(hWnd: HWND, nIndex: int32): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-  proc GetWindowLongPtrW*(hWnd: HWND, nIndex: int32): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-  proc SetWindowLongPtrA*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-  proc SetWindowLongPtrW*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-  proc GetClassLongPtrA*(hWnd: HWND, nIndex: int32): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-  proc GetClassLongPtrW*(hWnd: HWND, nIndex: int32): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-  proc SetClassLongPtrA*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
-  proc SetClassLongPtrW*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+  proc GetWindowLongPtrA*(
+    hWnd: HWND, nIndex: int32
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+  proc GetWindowLongPtrW*(
+    hWnd: HWND, nIndex: int32
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+  proc SetWindowLongPtrA*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+  proc SetWindowLongPtrW*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+  proc GetClassLongPtrA*(
+    hWnd: HWND, nIndex: int32
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+  proc GetClassLongPtrW*(
+    hWnd: HWND, nIndex: int32
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+  proc SetClassLongPtrA*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
+  proc SetClassLongPtrW*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc.}
+
 when winimUnicode and winimCpu64:
-  proc GetWindowLongPtr*(hWnd: HWND, nIndex: int32): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongPtrW".}
-  proc SetWindowLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongPtrW".}
-  proc GetClassLongPtr*(hWnd: HWND, nIndex: int32): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongPtrW".}
-  proc SetClassLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongPtrW".}
+  proc GetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongPtrW".}
+
+  proc SetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongPtrW".}
+
+  proc GetClassLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongPtrW".}
+
+  proc SetClassLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongPtrW".}
+
 when winimAnsi and winimCpu64:
-  proc GetWindowLongPtr*(hWnd: HWND, nIndex: int32): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongPtrA".}
-  proc SetWindowLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongPtrA".}
-  proc GetClassLongPtr*(hWnd: HWND, nIndex: int32): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongPtrA".}
-  proc SetClassLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongPtrA".}
+  proc GetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongPtrA".}
+
+  proc SetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): LONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongPtrA".}
+
+  proc GetClassLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongPtrA".}
+
+  proc SetClassLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG_PTR
+  ): ULONG_PTR {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongPtrA".}
+
 when winimCpu32:
   const
     CONSOLE_APPLICATION_16BIT* = 0x0001
     GUI_16BITTASK* = 0x00000020
-  proc GetWindowLongPtrA*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongA".}
-  proc GetWindowLongPtrW*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongW".}
-  proc SetWindowLongPtrA*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongA".}
-  proc SetWindowLongPtrW*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongW".}
-  proc GetClassLongPtrA*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongA".}
-  proc GetClassLongPtrW*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongW".}
-  proc SetClassLongPtrA*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongA".}
-  proc SetClassLongPtrW*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongW".}
+  proc GetWindowLongPtrA*(
+    hWnd: HWND, nIndex: int32
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongA".}
+
+  proc GetWindowLongPtrW*(
+    hWnd: HWND, nIndex: int32
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongW".}
+
+  proc SetWindowLongPtrA*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongA".}
+
+  proc SetWindowLongPtrW*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongW".}
+
+  proc GetClassLongPtrA*(
+    hWnd: HWND, nIndex: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongA".}
+
+  proc GetClassLongPtrW*(
+    hWnd: HWND, nIndex: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongW".}
+
+  proc SetClassLongPtrA*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongA".}
+
+  proc SetClassLongPtrW*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongW".}
+
 when winimUnicode and winimCpu32:
-  proc GetWindowLongPtr*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongW".}
-  proc SetWindowLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongW".}
-  proc GetClassLongPtr*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongW".}
-  proc SetClassLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongW".}
+  proc GetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongW".}
+
+  proc SetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongW".}
+
+  proc GetClassLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongW".}
+
+  proc SetClassLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongW".}
+
 when winimAnsi and winimCpu32:
-  proc GetWindowLongPtr*(hWnd: HWND, nIndex: int32): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongA".}
-  proc SetWindowLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongA".}
-  proc GetClassLongPtr*(hWnd: HWND, nIndex: int32): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongA".}
-  proc SetClassLongPtr*(hWnd: HWND, nIndex: int32, dwNewLong: LONG): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongA".}
+  proc GetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "GetWindowLongA".}
+
+  proc SetWindowLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): LONG {.winapi, stdcall, dynlib: "user32", importc: "SetWindowLongA".}
+
+  proc GetClassLongPtr*(
+    hWnd: HWND, nIndex: int32
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "GetClassLongA".}
+
+  proc SetClassLongPtr*(
+    hWnd: HWND, nIndex: int32, dwNewLong: LONG
+  ): DWORD {.winapi, stdcall, dynlib: "user32", importc: "SetClassLongA".}

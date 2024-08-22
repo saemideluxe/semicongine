@@ -4,6 +4,7 @@ when defined(clang):
   func bitreverse16(v: uint16): uint16 {.importc: "__builtin_bitreverse16", nodecl.}
   proc reverseBits(v: uint16): uint16 {.inline.} =
     bitreverse16(v)
+
 else:
   import std/bitops
 
@@ -52,8 +53,7 @@ proc initHuffman(codeLengths: openArray[uint8]): Huffman =
 
   for i, len in codeLengths:
     if len > 0.uint8:
-      let symbolId =
-        nextCode[len] - result.firstCode[len] + result.firstSymbol[len]
+      let symbolId = nextCode[len] - result.firstCode[len] + result.firstSymbol[len]
       # result.lengths[symbolId] = len
       result.values[symbolId] = i.uint16
       if len <= fastBits:
@@ -82,8 +82,7 @@ proc decodeSymbolSlow(b: var BitStreamReader, h: Huffman): uint16 =
     return uint16.high
 
   let symbolId =
-    (k shr (16.uint16 - codeLength)) -
-    h.firstCode[codeLength] +
+    (k shr (16.uint16 - codeLength)) - h.firstCode[codeLength] +
     h.firstSymbol[codeLength]
 
   result = h.values[symbolId]
@@ -102,10 +101,7 @@ proc decodeSymbol(b: var BitStreamReader, h: Huffman): uint16 {.inline.} =
     result = b.decodeSymbolSlow(h)
 
 proc inflateBlock(
-  dst: var string,
-  b: var BitStreamReader,
-  op: var int,
-  fixedCodes: bool
+    dst: var string, b: var BitStreamReader, op: var int, fixedCodes: bool
 ) =
   var literalsHuffman, distancesHuffman: Huffman
   if fixedCodes:
@@ -204,8 +200,8 @@ proc inflateBlock(
         failUncompress()
 
       let copyLength = (
-        baseLengths[lengthIdx] +
-        b.readBits(baseLengthsExtraBits[lengthIdx].int, false) # Up to 5
+        baseLengths[lengthIdx] + b.readBits(baseLengthsExtraBits[lengthIdx].int, false)
+          # Up to 5
       ).int
 
       let distanceIdx = decodeSymbol(b, distancesHuffman) # Up to 15
@@ -249,11 +245,7 @@ proc inflateBlock(
           remaining -= 8
       op += copyLength
 
-proc inflateNoCompression(
-  dst: var string,
-  b: var BitStreamReader,
-  op: var int
-) =
+proc inflateNoCompression(dst: var string, b: var BitStreamReader, op: var int) =
   b.skipRemainingBitsInCurrentByte()
   let
     len = b.readBits(16).int
@@ -278,7 +270,7 @@ proc inflate*(dst: var string, src: ptr UncheckedArray[uint8], len, pos: int) =
     if bfinal != 0.uint16:
       finalBlock = true
 
-    case btype:
+    case btype
     of 0: # No compression
       inflateNoCompression(dst, b, op)
     of 1: # Compressed with fixed Huffman codes

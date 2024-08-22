@@ -37,14 +37,10 @@ proc crc32(src: pointer, len: int, crc32: uint32): uint32 =
       one = read32(src, i) xor result
       two = read32(src, i + 4)
     result =
-      crcTables[7][one and 255] xor
-      crcTables[6][(one shr 8) and 255] xor
-      crcTables[5][(one shr 16) and 255] xor
-      crcTables[4][one shr 24] xor
-      crcTables[3][two and 255] xor
-      crcTables[2][(two shr 8) and 255] xor
-      crcTables[1][(two shr 16) and 255] xor
-      crcTables[0][two shr 24]
+      crcTables[7][one and 255] xor crcTables[6][(one shr 8) and 255] xor
+      crcTables[5][(one shr 16) and 255] xor crcTables[4][one shr 24] xor
+      crcTables[3][two and 255] xor crcTables[2][(two shr 8) and 255] xor
+      crcTables[1][(two shr 16) and 255] xor crcTables[0][two shr 24]
     i += 8
 
   for j in i ..< len:

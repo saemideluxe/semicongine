@@ -27,6 +27,7 @@ type
     levelLeft: Level
     levelRight: Level
     paused: bool
+
   Track = object
     playing: Table[uint64, Playback]
     level: Level
@@ -34,33 +35,29 @@ type
     fadeTime: float
     fadeStep: float
 
-proc `=copy`(dest: var Playback; source: Playback) {.error.}
-proc `=copy`(dest: var Track; source: Track) {.error.}
+proc `=copy`(dest: var Playback, source: Playback) {.error.}
+proc `=copy`(dest: var Track, source: Track) {.error.}
 
 when defined(windows):
   include ./platform/windows
 when defined(linux):
   include ./platform/linux
 
-type
-  Mixer* = object
-    playbackCounter: uint64
-    tracks: Table[string, Track]
-    sounds*: Table[string, SoundData]
-    level: Level
-    device: NativeSoundDevice
-    lock: Lock
-    buffers: seq[SoundData]
-    currentBuffer: int
-    lastUpdate: MonoTime
+type Mixer* = object
+  playbackCounter: uint64
+  tracks: Table[string, Track]
+  sounds*: Table[string, SoundData]
+  level: Level
+  device: NativeSoundDevice
+  lock: Lock
+  buffers: seq[SoundData]
+  currentBuffer: int
+  lastUpdate: MonoTime
 
-proc `=copy`(dest: var Mixer; source: Mixer) {.error.}
+proc `=copy`(dest: var Mixer, source: Mixer) {.error.}
 
 proc initMixer(): Mixer =
-  result = Mixer(
-    tracks: initTable[string, Track](),
-    level: 1'f,
-  )
+  result = Mixer(tracks: initTable[string, Track](), level: 1'f)
   result.tracks[""] = Track(level: 1)
   result.lock.initLock()
 
@@ -75,8 +72,8 @@ proc setupDevice(mixer: var Mixer) =
 
 # TODO: this should probably be in the load-code-stuff
 # proc LoadSound*(mixer: var Mixer, name: string, resource: string) =
-  # assert not (name in mixer.sounds)
-  # mixer.sounds[name] = LoadAudio(resource)
+# assert not (name in mixer.sounds)
+# mixer.sounds[name] = LoadAudio(resource)
 
 proc addSound*(mixer: var Mixer, name: string, sound: SoundData) =
   assert not (name in mixer.sounds)
@@ -88,13 +85,20 @@ proc replaceSound*(mixer: var Mixer, name: string, sound: SoundData) =
 
 proc addTrack*(mixer: var Mixer, name: string, level: Level = 1'f) =
   assert not (name in mixer.tracks)
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     mixer.tracks[name] = Track(level: level)
 
-proc play*(mixer: var Mixer, soundName: string, track = "", stopOtherSounds = false, loop = false, levelLeft, levelRight: Level): uint64 =
+proc play*(
+    mixer: var Mixer,
+    soundName: string,
+    track = "",
+    stopOtherSounds = false,
+    loop = false,
+    levelLeft, levelRight: Level,
+): uint64 =
   assert track in mixer.tracks, &"Track '{track}' does not exists"
   assert soundName in mixer.sounds, soundName & " not loaded"
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     if stopOtherSounds:
       mixer.tracks[track].playing.clear()
     mixer.tracks[track].playing[mixer.playbackCounter] = Playback(
@@ -108,7 +112,14 @@ proc play*(mixer: var Mixer, soundName: string, track = "", stopOtherSounds = fa
   result = mixer.playbackCounter
   inc mixer.playbackCounter
 
-proc play*(mixer: var Mixer, soundName: string, track = "", stopOtherSounds = false, loop = false, level: Level = 1'f): uint64 =
+proc play*(
+    mixer: var Mixer,
+    soundName: string,
+    track = "",
+    stopOtherSounds = false,
+    loop = false,
+    level: Level = 1'f,
+): uint64 =
   play(
     mixer = mixer,
     soundName = soundName,
@@ -116,69 +127,88 @@ proc play*(mixer: var Mixer, soundName: string, track = "", stopOtherSounds = fa
     stopOtherSounds = stopOtherSounds,
     loop = loop,
     levelLeft = level,
-    levelRight = level
+    levelRight = level,
   )
 
 proc stop*(mixer: var Mixer) =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     for track in mixer.tracks.mvalues:
       track.playing.clear()
 
-proc getLevel*(mixer: var Mixer): Level = mixer.level
-proc getLevel*(mixer: var Mixer, track: string): Level = mixer.tracks[track].level
+proc getLevel*(mixer: var Mixer): Level =
+  mixer.level
+
+proc getLevel*(mixer: var Mixer, track: string): Level =
+  mixer.tracks[track].level
+
 proc getLevel*(mixer: var Mixer, playbackId: uint64): (Level, Level) =
   for track in mixer.tracks.mvalues:
     if playbackId in track.playing:
       return (track.playing[playbackId].levelLeft, track.playing[playbackId].levelRight)
 
-proc setLevel*(mixer: var Mixer, level: Level) = mixer.level = level
+proc setLevel*(mixer: var Mixer, level: Level) =
+  mixer.level = level
+
 proc setLevel*(mixer: var Mixer, track: string, level: Level) =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     mixer.tracks[track].level = level
+
 proc setLevel*(mixer: var Mixer, playbackId: uint64, levelLeft, levelRight: Level) =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     for track in mixer.tracks.mvalues:
       if playbackId in track.playing:
         track.playing[playbackId].levelLeft = levelLeft
         track.playing[playbackId].levelRight = levelRight
+
 proc setLevel*(mixer: var Mixer, playbackId: uint64, level: Level) =
   setLevel(mixer, playbackId, level, level)
 
 proc stop*(mixer: var Mixer, track: string) =
   assert track in mixer.tracks
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     mixer.tracks[track].playing.clear()
 
 proc stop*(mixer: var Mixer, playbackId: uint64) =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     for track in mixer.tracks.mvalues:
       if playbackId in track.playing:
         track.playing.del(playbackId)
         break
 
 proc pause*(mixer: var Mixer, value: bool) =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     for track in mixer.tracks.mvalues:
       for playback in track.playing.mvalues:
         playback.paused = value
 
 proc pause*(mixer: var Mixer, track: string, value: bool) =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     for playback in mixer.tracks[track].playing.mvalues:
       playback.paused = value
 
 proc pause*(mixer: var Mixer, playbackId: uint64, value: bool) =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     for track in mixer.tracks.mvalues:
       if playbackId in track.playing:
         track.playing[playbackId].paused = value
 
-proc pause*(mixer: var Mixer) = mixer.pause(true)
-proc pause*(mixer: var Mixer, track: string) = mixer.pause(track, true)
-proc pause*(mixer: var Mixer, playbackId: uint64) = mixer.pause(playbackId, true)
-proc unpause*(mixer: var Mixer) = mixer.pause(false)
-proc unpause*(mixer: var Mixer, track: string) = mixer.pause(track, false)
-proc unpause*(mixer: var Mixer, playbackId: uint64) = mixer.pause(playbackId, false)
+proc pause*(mixer: var Mixer) =
+  mixer.pause(true)
+
+proc pause*(mixer: var Mixer, track: string) =
+  mixer.pause(track, true)
+
+proc pause*(mixer: var Mixer, playbackId: uint64) =
+  mixer.pause(playbackId, true)
+
+proc unpause*(mixer: var Mixer) =
+  mixer.pause(false)
+
+proc unpause*(mixer: var Mixer, track: string) =
+  mixer.pause(track, false)
+
+proc unpause*(mixer: var Mixer, playbackId: uint64) =
+  mixer.pause(playbackId, false)
 
 proc fadeTo*(mixer: var Mixer, track: string, level: Level, time: float) =
   mixer.tracks[track].targetLevel = level
@@ -186,7 +216,7 @@ proc fadeTo*(mixer: var Mixer, track: string, level: Level, time: float) =
   mixer.tracks[track].fadeStep = level.float - mixer.tracks[track].level.float / time
 
 proc isPlaying*(mixer: var Mixer): bool =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     for track in mixer.tracks.mvalues:
       for playback in track.playing.values:
         if not playback.paused:
@@ -194,7 +224,7 @@ proc isPlaying*(mixer: var Mixer): bool =
   return false
 
 proc isPlaying*(mixer: var Mixer, track: string): bool =
-  mixer.lock.withLock():
+  mixer.lock.withLock:
     if mixer.tracks.contains(track):
       for playback in mixer.tracks[track].playing.values:
         if not playback.paused:
@@ -209,10 +239,7 @@ func clip(value: int32): int16 =
 
 # used for combining sounds
 func mix(a, b: Sample): Sample =
-  [
-    clip(int32(a[0]) + int32(b[0])),
-    clip(int32(a[1]) + int32(b[1])),
-  ]
+  [clip(int32(a[0]) + int32(b[0])), clip(int32(a[1]) + int32(b[1]))]
 
 proc updateSoundBuffer(mixer: var Mixer) =
   let t = getMonoTime()
@@ -224,14 +251,15 @@ proc updateSoundBuffer(mixer: var Mixer) =
   for track in mixer.tracks.mvalues:
     if track.fadeTime > 0:
       track.fadeTime -= dt
-      track.level = (track.level.float64 + track.fadeStep.float64 * dt).clamp(Level.low, Level.high)
+      track.level =
+        (track.level.float64 + track.fadeStep.float64 * dt).clamp(Level.low, Level.high)
       if track.fadeTime <= 0:
         track.level = track.targetLevel
   # mix
   var hasData = false
   for i in 0 ..< mixer.buffers[mixer.currentBuffer].len:
     var mixedSample = [0'i16, 0'i16]
-    mixer.lock.withLock():
+    mixer.lock.withLock:
       for track in mixer.tracks.mvalues:
         var stoppedSounds: seq[uint64]
         for (id, playback) in track.playing.mpairs:
@@ -305,7 +333,11 @@ var
 
 proc audioWorker() {.thread.} =
   mixer[].setupDevice()
-  onThreadDestruction(proc() = mixer[].lock.withLock(mixer[].destroy()); freeShared(mixer))
+  onThreadDestruction(
+    proc() =
+      mixer[].lock.withLock(mixer[].destroy())
+      freeShared(mixer)
+  )
   while true:
     mixer[].updateSoundBuffer()
 

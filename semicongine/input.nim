@@ -6,21 +6,20 @@ import ./events
 import ./rendering
 import ./storage
 
-type
-  Input = object
-    keyIsDown: set[Key]
-    keyWasPressed: set[Key]
-    keyWasReleased: set[Key]
-    mouseIsDown: set[MouseButton]
-    mouseWasPressed: set[MouseButton]
-    mouseWasReleased: set[MouseButton]
-    mousePosition: Vec2i
-    mouseMove: Vec2i
-    mouseWheel: float32
-    windowWasResized: bool = true
-    windowIsMinimized: bool = false
-    lockMouse: bool = false
-    hasFocus: bool = false
+type Input = object
+  keyIsDown: set[Key]
+  keyWasPressed: set[Key]
+  keyWasReleased: set[Key]
+  mouseIsDown: set[MouseButton]
+  mouseWasPressed: set[MouseButton]
+  mouseWasReleased: set[MouseButton]
+  mousePosition: Vec2i
+  mouseMove: Vec2i
+  mouseWheel: float32
+  windowWasResized: bool = true
+  windowIsMinimized: bool = false
+  lockMouse: bool = false
+  hasFocus: bool = false
 
 # warning, shit is not thread safe
 var input = Input()
@@ -45,65 +44,99 @@ proc updateInputs*(): bool =
 
   var killed = false
   for event in vulkan.window.pendingEvents():
-    case event.eventType:
-      of Quit:
-        killed = true
-      of ResizedWindow:
-        input.windowWasResized = true
-      of KeyPressed:
-        input.keyWasPressed.incl event.key
-        input.keyIsDown.incl event.key
-      of KeyReleased:
-        input.keyWasReleased.incl event.key
-        input.keyIsDown.excl event.key
-      of MousePressed:
-        input.mouseWasPressed.incl event.button
-        input.mouseIsDown.incl event.button
-      of MouseReleased:
-        input.mouseWasReleased.incl event.button
-        input.mouseIsDown.excl event.button
-      of MouseWheel:
-        input.mouseWheel = event.amount
-      of MinimizedWindow:
-        input.windowIsMinimized = true
-      of RestoredWindow:
-        input.windowIsMinimized = false
-      of GotFocus:
-        input.hasFocus = true
-      of LostFocus:
-        input.hasFocus = false
+    case event.eventType
+    of Quit:
+      killed = true
+    of ResizedWindow:
+      input.windowWasResized = true
+    of KeyPressed:
+      input.keyWasPressed.incl event.key
+      input.keyIsDown.incl event.key
+    of KeyReleased:
+      input.keyWasReleased.incl event.key
+      input.keyIsDown.excl event.key
+    of MousePressed:
+      input.mouseWasPressed.incl event.button
+      input.mouseIsDown.incl event.button
+    of MouseReleased:
+      input.mouseWasReleased.incl event.button
+      input.mouseIsDown.excl event.button
+    of MouseWheel:
+      input.mouseWheel = event.amount
+    of MinimizedWindow:
+      input.windowIsMinimized = true
+    of RestoredWindow:
+      input.windowIsMinimized = false
+    of GotFocus:
+      input.hasFocus = true
+    of LostFocus:
+      input.hasFocus = false
 
   return not killed
 
-proc keyIsDown*(key: Key): bool = key in input.keyIsDown
-proc keyWasPressed*(key: Key): bool = key in input.keyWasPressed
-proc keyWasPressed*(): bool = input.keyWasPressed.len > 0
-proc keyWasReleased*(key: Key): bool = key in input.keyWasReleased
-proc mouseIsDown*(button: MouseButton): bool = button in input.mouseIsDown
-proc mouseWasPressed*(): bool = input.mouseWasPressed.len > 0
-proc mouseWasPressed*(button: MouseButton): bool = button in input.mouseWasPressed
-proc mousePressedButtons*(): set[MouseButton] = input.mouseWasPressed
-proc mouseWasReleased*(): bool = input.mouseWasReleased.len > 0
-proc mouseWasReleased*(button: MouseButton): bool = button in input.mouseWasReleased
-proc mouseReleasedButtons*(): set[MouseButton] = input.mouseWasReleased
-proc mousePositionPixel*(): Vec2i = input.mousePosition
+proc keyIsDown*(key: Key): bool =
+  key in input.keyIsDown
+
+proc keyWasPressed*(key: Key): bool =
+  key in input.keyWasPressed
+
+proc keyWasPressed*(): bool =
+  input.keyWasPressed.len > 0
+
+proc keyWasReleased*(key: Key): bool =
+  key in input.keyWasReleased
+
+proc mouseIsDown*(button: MouseButton): bool =
+  button in input.mouseIsDown
+
+proc mouseWasPressed*(): bool =
+  input.mouseWasPressed.len > 0
+
+proc mouseWasPressed*(button: MouseButton): bool =
+  button in input.mouseWasPressed
+
+proc mousePressedButtons*(): set[MouseButton] =
+  input.mouseWasPressed
+
+proc mouseWasReleased*(): bool =
+  input.mouseWasReleased.len > 0
+
+proc mouseWasReleased*(button: MouseButton): bool =
+  button in input.mouseWasReleased
+
+proc mouseReleasedButtons*(): set[MouseButton] =
+  input.mouseWasReleased
+
+proc mousePositionPixel*(): Vec2i =
+  input.mousePosition
+
 proc mousePosition*(): Vec2f =
   result = input.mousePosition.f32 / vulkan.window.size().f32 * 2.0'f32 - 1.0'f32
   result.y = result.y * -1
-proc mouseMove*(): Vec2i = input.mouseMove
-proc mouseWheel*(): float32 = input.mouseWheel
-proc windowWasResized*(): auto = input.windowWasResized
-proc windowIsMinimized*(): auto = input.windowIsMinimized
-proc lockMouse*(value: bool) = input.lockMouse = value
-proc hasFocus*(): bool = input.hasFocus
 
+proc mouseMove*(): Vec2i =
+  input.mouseMove
+
+proc mouseWheel*(): float32 =
+  input.mouseWheel
+
+proc windowWasResized*(): auto =
+  input.windowWasResized
+
+proc windowIsMinimized*(): auto =
+  input.windowIsMinimized
+
+proc lockMouse*(value: bool) =
+  input.lockMouse = value
+
+proc hasFocus*(): bool =
+  input.hasFocus
 
 # actions as a slight abstraction over raw input
 
-type
-  ActionMap = object
-    keyActions: Table[string, set[Key]]
-    mouseActions: Table[string, set[MouseButton]]
+type ActionMap = object
+  keyActions: Table[string, set[Key]]
+  mouseActions: Table[string, set[MouseButton]]
 
 # warning, shit is not thread safe
 var actionMap: ActionMap
@@ -118,7 +151,7 @@ proc mapAction*[T: enum](action: T, button: MouseButton) =
     actionMap.mouseActions[$action] = {}
   actionMap.mouseActions[$action].incl button
 
-proc mapAction*[T: enum](action: T, keys: openArray[Key|MouseButton]) =
+proc mapAction*[T: enum](action: T, keys: openArray[Key | MouseButton]) =
   for key in keys:
     mapAction(action, key)
 

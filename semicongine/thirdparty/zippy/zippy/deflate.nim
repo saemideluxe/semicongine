@@ -11,8 +11,7 @@ proc `<`(a, b: Node): bool {.inline.} =
   a.freq < b.freq
 
 proc huffmanCodes(
-  frequencies: openArray[uint32],
-  minCodes, codeLengthLimit: int
+    frequencies: openArray[uint32], minCodes, codeLengthLimit: int
 ): (seq[uint16], seq[uint8]) =
   # https://en.wikipedia.org/wiki/Huffman_coding#Length-limited_Huffman_coding
   # https://en.wikipedia.org/wiki/Canonical_Huffman_code
@@ -55,11 +54,7 @@ proc huffmanCodes(
         heap.push(node)
 
       while heap.len >= 2:
-        let node = Node(
-          symbol: -1,
-          left: heap.pop(),
-          right: heap.pop()
-        )
+        let node = Node(symbol: -1, left: heap.pop(), right: heap.pop())
         node.freq = node.left.freq + node.right.freq
         heap.push(node)
 
@@ -151,11 +146,11 @@ proc huffmanCodes(
   (codes, codeLens)
 
 proc encodeAllLiterals(
-  encoding: var seq[uint16],
-  ep: var int,
-  metadata: var BlockMetadata,
-  src: ptr UncheckedArray[uint8],
-  start, len: int
+    encoding: var seq[uint16],
+    ep: var int,
+    metadata: var BlockMetadata,
+    src: ptr UncheckedArray[uint8],
+    start, len: int,
 ) =
   for i in 0 ..< len:
     inc metadata.litLenFreq[src[start + i]]
@@ -177,24 +172,20 @@ proc encodeAllLiterals(
   metadata.numLiterals = len
 
 proc addNoCompressionBlock(
-  b: var BitStreamWriter,
-  dst: var string,
-  src: ptr UncheckedArray[uint8],
-  blockStart, blockLen: int,
-  finalBlock: bool
+    b: var BitStreamWriter,
+    dst: var string,
+    src: ptr UncheckedArray[uint8],
+    blockStart, blockLen: int,
+    finalBlock: bool,
 ) =
-  let uncompressedBlockCount = max(
-    (blockLen + maxUncompressedBlockSize - 1) div maxUncompressedBlockSize,
-    1
-  )
+  let uncompressedBlockCount =
+    max((blockLen + maxUncompressedBlockSize - 1) div maxUncompressedBlockSize, 1)
   for blockNum in 0 ..< uncompressedBlockCount:
     let
       uncompressedFinalBlock = blockNum == (uncompressedBlockCount - 1)
       uncompressedBlockStart = blockStart + blockNum * maxUncompressedBlockSize
-      uncompressedBlockLen = min(
-        blockStart + blockLen - uncompressedBlockStart,
-        maxUncompressedBlockSize
-      )
+      uncompressedBlockLen =
+        min(blockStart + blockLen - uncompressedBlockStart, maxUncompressedBlockSize)
 
     b.addBits(dst, if finalBlock and uncompressedFinalBlock: 1 else: 0, 1)
     b.addBits(dst, 0, 2)
@@ -212,10 +203,8 @@ proc deflate*(dst: var string, src: ptr UncheckedArray[uint8], len, level: int) 
   b.pos = dst.len
 
   if level == 0:
-    let blockCount = max(
-      (len + maxUncompressedBlockSize - 1) div maxUncompressedBlockSize,
-      1
-    )
+    let blockCount =
+      max((len + maxUncompressedBlockSize - 1) div maxUncompressedBlockSize, 1)
     for blockNum in 0 ..< blockCount:
       let
         finalBlock = blockNum == (blockCount - 1)
@@ -240,25 +229,11 @@ proc deflate*(dst: var string, src: ptr UncheckedArray[uint8], len, level: int) 
 
     var metadata: BlockMetadata
 
-    case level:
+    case level
     of -2:
-      encodeAllLiterals(
-        encoding,
-        encodingLen,
-        metadata,
-        src,
-        blockStart,
-        blockLen
-      )
+      encodeAllLiterals(encoding, encodingLen, metadata, src, blockStart, blockLen)
     of 1:
-      encodeSnappy(
-        encoding,
-        encodingLen,
-        metadata,
-        src,
-        blockStart,
-        blockLen
-      )
+      encodeSnappy(encoding, encodingLen, metadata, src, blockStart, blockLen)
     else:
       # -1 or [2, 9]
       encodeLz77(
@@ -268,7 +243,7 @@ proc deflate*(dst: var string, src: ptr UncheckedArray[uint8], len, level: int) 
         metadata,
         src,
         blockStart,
-        blockLen
+        blockLen,
       )
 
     # If encoding returned almost all literals then write uncompressed.
@@ -311,7 +286,7 @@ proc deflate*(dst: var string, src: ptr UncheckedArray[uint8], len, level: int) 
         while i < numCodes:
           var repeatCount: int
           while i + repeatCount + 1 < numCodes and
-            codeLengths[i + repeatCount + 1] == codeLengths[i]:
+              codeLengths[i + repeatCount + 1] == codeLengths[i]:
             inc repeatCount
 
           if codeLengths[i] == 0 and repeatCount >= 2:
@@ -431,7 +406,6 @@ proc deflate*(dst: var string, src: ptr UncheckedArray[uint8], len, level: int) 
 
           if bitLen > 0:
             b.addBits(dst, buf.uint32, bitLen)
-
         else:
           let literalsLength = encoding[encPos].int
           inc encPos

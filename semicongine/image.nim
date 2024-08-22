@@ -8,14 +8,16 @@ import ./rendering/vulkan/api
 
 {.emit: "#define STB_IMAGE_STATIC".}
 {.emit: "#define STB_IMAGE_IMPLEMENTATION".}
-{.emit: "#include \"" & currentSourcePath.parentDir() & "/thirdparty/stb/stb_image.h\"".}
+{.
+  emit: "#include \"" & currentSourcePath.parentDir() & "/thirdparty/stb/stb_image.h\""
+.}
 
 proc stbi_load_from_memory(
   buffer: ptr uint8,
   len: cint,
   x, y: ptr cint,
   channels_in_file: ptr cint,
-  desired_channels: cint
+  desired_channels: cint,
 ): ptr uint8 {.importc, nodecl.}
 
 type
@@ -38,16 +40,17 @@ type
     samples*: VkSampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT
     when IsArray:
       nLayers*: uint32
+
   Image*[T: PixelType] = ImageObject[T, false]
   ImageArray*[T: PixelType] = ImageObject[T, true]
 
 template nLayers*(image: Image): untyped =
   1
 
-proc `=copy`[S, T](dest: var ImageObject[S, T]; source: ImageObject[S, T]) {.error.}
+proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.error.}
 
 # loads single layer image
-proc loadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
+proc loadImageData*[T: PixelType](pngData: string | seq[uint8]): Image[T] =
   when T is Gray:
     let nChannels = 1.cint
   elif T is BGRA:
@@ -61,7 +64,7 @@ proc loadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
     x = addr(w),
     y = addr(h),
     channels_in_file = addr(c),
-    desired_channels = nChannels
+    desired_channels = nChannels,
   )
   if data == nil:
     raise newException(Exception, "An error occured while loading PNG file")
@@ -75,7 +78,7 @@ proc loadImageData*[T: PixelType](pngData: string|seq[uint8]): Image[T] =
     for i in 0 ..< result.data.len:
       swap(result.data[i][0], result.data[i][2])
 
-proc addImageLayer*[T: PixelType](image: var Image[T], pngData: string|seq[uint8]) =
+proc addImageLayer*[T: PixelType](image: var Image[T], pngData: string | seq[uint8]) =
   when T is Gray:
     const nChannels = 1.cint
   elif T is BGRA:
@@ -89,13 +92,15 @@ proc addImageLayer*[T: PixelType](image: var Image[T], pngData: string|seq[uint8
     x = addr(w),
     y = addr(h),
     channels_in_file = addr(c),
-    desired_channels = nChannels
+    desired_channels = nChannels,
   )
   if data == nil:
     raise newException(Exception, "An error occured while loading PNG file")
 
-  assert w == image.width, "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
-  assert h == image.height, "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
+  assert w == image.width,
+    "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
+  assert h == image.height,
+    "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
 
   let imagesize = image.width * image.height * nChannels
   let layerOffset = image.width * image.height * image.nLayers
@@ -109,7 +114,8 @@ proc addImageLayer*[T: PixelType](image: var Image[T], pngData: string|seq[uint8
       swap(image.data[layerOffset + i][0], image.data[layerOffset + i][2])
 
 proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
-  assert path.splitFile().ext.toLowerAscii == ".png", "Unsupported image type: " & path.splitFile().ext.toLowerAscii
+  assert path.splitFile().ext.toLowerAscii == ".png",
+    "Unsupported image type: " & path.splitFile().ext.toLowerAscii
   when T is Gray:
     let pngType = 0.cint
   elif T is BGRA:
@@ -130,16 +136,22 @@ proc `[]=`*[T](image: var Image[T], x, y: uint32, value: T) =
   image.data[y * image.width + x] = value
 
 proc `[]`*(image: ImageArray, layer, x, y: uint32): auto =
-  assert layer < image.nLayers, &"Tried to access image layer {layer}, but image has only {image.nLayers} layers"
-  assert x < image.width, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
-  assert y < image.height, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+  assert layer < image.nLayers,
+    &"Tried to access image layer {layer}, but image has only {image.nLayers} layers"
+  assert x < image.width,
+    &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+  assert y < image.height,
+    &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
 
   image.data[layer * (image.width * image.height) + y * image.width + x]
 
 proc `[]=`*[T](image: var ImageArray[T], layer, x, y: uint32, value: T) =
-  assert layer < image.nLayers, &"Tried to access image layer {layer}, but image has only {image.nLayers} layers"
-  assert x < image.width, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
-  assert y < image.height, &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+  assert layer < image.nLayers,
+    &"Tried to access image layer {layer}, but image has only {image.nLayers} layers"
+  assert x < image.width,
+    &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
+  assert y < image.height,
+    &"Tried to access pixel coordinate {(x, y)} but image has size {(image.width, image.height)}"
 
   image.data[layer * (image.width * image.height) + y * image.width + x] = value
 

@@ -1,31 +1,62 @@
 {.emit: "#define STBTT_STATIC".}
 {.emit: "#define STB_TRUETYPE_IMPLEMENTATION".}
-{.emit: "#include \"" & currentSourcePath.parentDir().parentDir() & "/thirdparty/stb/stb_truetype.h\"".}
+{.
+  emit:
+    "#include \"" & currentSourcePath.parentDir().parentDir() &
+    "/thirdparty/stb/stb_truetype.h\""
+.}
 
 const ASCII_CHARSET = PrintableChars.toSeq.toRunes
 
 type stbtt_fontinfo {.importc, incompleteStruct.} = object
 
-proc stbtt_InitFont(info: ptr stbtt_fontinfo, data: ptr char, offset: cint): cint {.importc, nodecl.}
-proc stbtt_ScaleForPixelHeight(info: ptr stbtt_fontinfo, pixels: cfloat): cfloat {.importc, nodecl.}
+proc stbtt_InitFont(
+  info: ptr stbtt_fontinfo, data: ptr char, offset: cint
+): cint {.importc, nodecl.}
 
-proc stbtt_GetCodepointBitmap(info: ptr stbtt_fontinfo, scale_x: cfloat, scale_y: cfloat, codepoint: cint, width, height, xoff, yoff: ptr cint): cstring {.importc, nodecl.}
+proc stbtt_ScaleForPixelHeight(
+  info: ptr stbtt_fontinfo, pixels: cfloat
+): cfloat {.importc, nodecl.}
+
+proc stbtt_GetCodepointBitmap(
+  info: ptr stbtt_fontinfo,
+  scale_x: cfloat,
+  scale_y: cfloat,
+  codepoint: cint,
+  width, height, xoff, yoff: ptr cint,
+): cstring {.importc, nodecl.}
+
 # proc stbtt_GetCodepointBitmapBox(info: ptr stbtt_fontinfo, codepoint: cint, scale_x, scale_y: cfloat, ix0, iy0, ix1, iy1: ptr cint) {.importc, nodecl.}
 
-proc stbtt_GetCodepointHMetrics(info: ptr stbtt_fontinfo, codepoint: cint, advance, leftBearing: ptr cint) {.importc, nodecl.}
-proc stbtt_GetCodepointKernAdvance(info: ptr stbtt_fontinfo, ch1, ch2: cint): cint {.importc, nodecl.}
-proc stbtt_FindGlyphIndex(info: ptr stbtt_fontinfo, codepoint: cint): cint {.importc, nodecl.}
+proc stbtt_GetCodepointHMetrics(
+  info: ptr stbtt_fontinfo, codepoint: cint, advance, leftBearing: ptr cint
+) {.importc, nodecl.}
 
-proc stbtt_GetFontVMetrics(info: ptr stbtt_fontinfo, ascent, descent, lineGap: ptr cint) {.importc, nodecl.}
+proc stbtt_GetCodepointKernAdvance(
+  info: ptr stbtt_fontinfo, ch1, ch2: cint
+): cint {.importc, nodecl.}
 
-proc readTrueType(stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32): Font =
+proc stbtt_FindGlyphIndex(
+  info: ptr stbtt_fontinfo, codepoint: cint
+): cint {.importc, nodecl.}
+
+proc stbtt_GetFontVMetrics(
+  info: ptr stbtt_fontinfo, ascent, descent, lineGap: ptr cint
+) {.importc, nodecl.}
+
+proc readTrueType(
+    stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32
+): Font =
   var
     indata = stream.readAll()
     fontinfo: stbtt_fontinfo
   if stbtt_InitFont(addr fontinfo, indata.ToCPointer, 0) == 0:
     raise newException(Exception, "An error occured while loading font file")
 
-  result = Font(fontscale: float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels))))
+  result = Font(
+    fontscale:
+      float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels)))
+  )
 
   var ascent, descent, lineGap: cint
   stbtt_GetFontVMetrics(addr fontinfo, addr ascent, addr descent, addr lineGap)
@@ -47,15 +78,16 @@ proc readTrueType(stream: Stream, name: string, codePoints: seq[Rune], lineHeigh
     var
       width, height: cint
       offX, offY: cint
-    let
-      data = stbtt_GetCodepointBitmap(
-        addr fontinfo,
-        result.fontscale,
-        result.fontscale,
-        cint(codePoint),
-        addr width, addr height,
-        addr offX, addr offY
-      )
+    let data = stbtt_GetCodepointBitmap(
+      addr fontinfo,
+      result.fontscale,
+      result.fontscale,
+      cint(codePoint),
+      addr width,
+      addr height,
+      addr offX,
+      addr offY,
+    )
     topOffsets[codePoint] = offY
 
     if char(codePoint) in UppercaseLetters:
@@ -88,7 +120,9 @@ proc readTrueType(stream: Stream, name: string, codePoints: seq[Rune], lineHeigh
       ih = float32(image.height)
     # horizontal spaces:
     var advance, leftBearing: cint
-    stbtt_GetCodepointHMetrics(addr fontinfo, cint(codePoint), addr advance, addr leftBearing)
+    stbtt_GetCodepointHMetrics(
+      addr fontinfo, cint(codePoint), addr advance, addr leftBearing
+    )
 
     result.glyphs[codePoint] = GlyphInfo(
       dimension: vec2(float32(image.width), float32(image.height)),
@@ -104,22 +138,25 @@ proc readTrueType(stream: Stream, name: string, codePoints: seq[Rune], lineHeigh
     )
 
     for codePointAfter in codePoints:
-      result.kerning[(codePoint, codePointAfter)] = float32(stbtt_GetCodepointKernAdvance(
-        addr fontinfo,
-        cint(codePoint),
-        cint(codePointAfter)
-      )) * result.fontscale
+      result.kerning[(codePoint, codePointAfter)] =
+        float32(
+          stbtt_GetCodepointKernAdvance(
+            addr fontinfo, cint(codePoint), cint(codePointAfter)
+          )
+        ) * result.fontscale
 
 proc loadFont*(
-  path: string,
-  lineHeightPixels = 80'f32,
-  additional_codepoints: openArray[Rune] = [],
-  charset = ASCII_CHARSET,
-  package = DEFAULT_PACKAGE
+    path: string,
+    lineHeightPixels = 80'f32,
+    additional_codepoints: openArray[Rune] = [],
+    charset = ASCII_CHARSET,
+    package = DEFAULT_PACKAGE,
 ): Font =
-  loadResource_intern(path, package = package).readTrueType(path.splitFile().name, charset & additional_codepoints.toSeq, lineHeightPixels)
+  loadResource_intern(path, package = package).readTrueType(
+    path.splitFile().name, charset & additional_codepoints.toSeq, lineHeightPixels
+  )
 
-func textWidth*(theText: seq[Rune]|string, font: FontObj): float32 =
+func textWidth*(theText: seq[Rune] | string, font: FontObj): float32 =
   var text = when theText is string: theText.toRunes else: theText
   var currentWidth = 0'f32
   var lineWidths: seq[float32]
@@ -163,7 +200,8 @@ func WordWrapped*(text: seq[Rune], font: FontObj, maxWidth: float32): seq[Rune] 
             break
           subWord.add c
         result.add subWord & NEWLINE
-        remaining.add currentWord[subWord.len .. ^1] # process rest of the word in next iteration
+        remaining.add currentWord[subWord.len .. ^1]
+          # process rest of the word in next iteration
       else:
         if (currentLine & SPACE & currentWord).textWidth(font) <= maxWidth:
           if currentLine.len == 0:
@@ -178,4 +216,3 @@ func WordWrapped*(text: seq[Rune], font: FontObj, maxWidth: float32): seq[Rune] 
     result.add currentLine
 
   return result
-

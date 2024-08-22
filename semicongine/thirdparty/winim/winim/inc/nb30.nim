@@ -7,14 +7,11 @@
 import winimbase
 import windef
 #include <nb30.h>
-const
-  NCBNAMSZ* = 16
+const NCBNAMSZ* = 16
 when winimCpu64:
-  type
-    NCB_RESERVE* = array[18, UCHAR]
+  type NCB_RESERVE* = array[18, UCHAR]
 when winimCpu32:
-  type
-    NCB_RESERVE* = array[10, UCHAR]
+  type NCB_RESERVE* = array[10, UCHAR]
 type
   NCB* {.pure.} = object
     ncb_command*: UCHAR
@@ -27,11 +24,12 @@ type
     ncb_name*: array[NCBNAMSZ, UCHAR]
     ncb_rto*: UCHAR
     ncb_sto*: UCHAR
-    ncb_post*: proc (P1: ptr NCB): void {.stdcall.}
+    ncb_post*: proc(P1: ptr NCB): void {.stdcall.}
     ncb_lana_num*: UCHAR
     ncb_cmd_cplt*: UCHAR
     ncb_reserve*: NCB_RESERVE
     ncb_event*: HANDLE
+
   PNCB* = ptr NCB
   ADAPTER_STATUS* {.pure.} = object
     adapter_address*: array[6, UCHAR]
@@ -61,17 +59,20 @@ type
     max_sess*: WORD
     max_sess_pkt_size*: WORD
     name_count*: WORD
+
   PADAPTER_STATUS* = ptr ADAPTER_STATUS
   NAME_BUFFER* {.pure.} = object
     name*: array[NCBNAMSZ, UCHAR]
     name_num*: UCHAR
     name_flags*: UCHAR
+
   PNAME_BUFFER* = ptr NAME_BUFFER
   SESSION_HEADER* {.pure.} = object
     sess_name*: UCHAR
     num_sess*: UCHAR
     rcv_dg_outstanding*: UCHAR
     rcv_any_outstanding*: UCHAR
+
   PSESSION_HEADER* = ptr SESSION_HEADER
   SESSION_BUFFER* {.pure.} = object
     lsn*: UCHAR
@@ -80,18 +81,21 @@ type
     remote_name*: array[NCBNAMSZ, UCHAR]
     rcvs_outstanding*: UCHAR
     sends_outstanding*: UCHAR
+
   PSESSION_BUFFER* = ptr SESSION_BUFFER
-const
-  MAX_LANA* = 254
+
+const MAX_LANA* = 254
 type
   LANA_ENUM* {.pure.} = object
     length*: UCHAR
-    lana*: array[MAX_LANA+1, UCHAR]
+    lana*: array[MAX_LANA + 1, UCHAR]
+
   PLANA_ENUM* = ptr LANA_ENUM
   FIND_NAME_HEADER* {.pure.} = object
     node_count*: WORD
     reserved*: UCHAR
     unique_group*: UCHAR
+
   PFIND_NAME_HEADER* = ptr FIND_NAME_HEADER
   FIND_NAME_BUFFER* {.pure.} = object
     length*: UCHAR
@@ -100,12 +104,15 @@ type
     destination_addr*: array[6, UCHAR]
     source_addr*: array[6, UCHAR]
     routing_info*: array[18, UCHAR]
+
   PFIND_NAME_BUFFER* = ptr FIND_NAME_BUFFER
   ACTION_HEADER* {.pure.} = object
     transport_id*: ULONG
     action_code*: USHORT
     reserved*: USHORT
+
   PACTION_HEADER* = ptr ACTION_HEADER
+
 const
   NAME_FLAGS_MASK* = 0x87
   GROUP_NAME* = 0x80

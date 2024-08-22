@@ -1,14 +1,14 @@
 const N_FRAMEBUFFERS = 3'u32
 
 proc initSwapchain(
-  renderPass: RenderPass,
-  vSync: bool = false,
-  oldSwapchain: Swapchain = nil,
+    renderPass: RenderPass, vSync: bool = false, oldSwapchain: Swapchain = nil
 ): Swapchain =
   assert vulkan.instance.Valid, "Vulkan not initialized"
 
   var capabilities: VkSurfaceCapabilitiesKHR
-  checkVkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, vulkan.surface, addr(capabilities))
+  checkVkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+    vulkan.physicalDevice, vulkan.surface, addr(capabilities)
+  )
   let
     width = capabilities.currentExtent.width
     height = capabilities.currentExtent.height
@@ -23,22 +23,33 @@ proc initSwapchain(
     minFramebufferCount = min(minFramebufferCount, capabilities.maxImageCount)
 
   # create swapchain
-  let hasTripleBuffering = VK_PRESENT_MODE_MAILBOX_KHR in svkGetPhysicalDeviceSurfacePresentModesKHR()
+  let hasTripleBuffering =
+    VK_PRESENT_MODE_MAILBOX_KHR in svkGetPhysicalDeviceSurfacePresentModesKHR()
   var swapchainCreateInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     surface: vulkan.surface,
     minImageCount: minFramebufferCount,
     imageFormat: SURFACE_FORMAT,
-    imageColorSpace: VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, # only one supported without special extensions
+    imageColorSpace: VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
+      # only one supported without special extensions
     imageExtent: capabilities.currentExtent,
     imageArrayLayers: 1,
     imageUsage: toBits [VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
     imageSharingMode: VK_SHARING_MODE_EXCLUSIVE,
     preTransform: capabilities.currentTransform,
-    compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,  # only used for blending with other windows, can be opaque
-    presentMode: if (vSync or not hasTripleBuffering): VK_PRESENT_MODE_FIFO_KHR else: VK_PRESENT_MODE_MAILBOX_KHR,
+    compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+      # only used for blending with other windows, can be opaque
+    presentMode:
+      if (vSync or not hasTripleBuffering):
+        VK_PRESENT_MODE_FIFO_KHR
+      else:
+        VK_PRESENT_MODE_MAILBOX_KHR,
     clipped: true,
-    oldSwapchain: if oldSwapchain != nil: oldSwapchain.vk else: VkSwapchainKHR(0),
+    oldSwapchain:
+      if oldSwapchain != nil:
+        oldSwapchain.vk
+      else:
+        VkSwapchainKHR(0),
   )
   var swapchain = Swapchain(
     width: width,
@@ -48,7 +59,9 @@ proc initSwapchain(
     oldSwapchain: oldSwapchain,
   )
 
-  if vkCreateSwapchainKHR(vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)) != VK_SUCCESS:
+  if vkCreateSwapchainKHR(
+    vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)
+  ) != VK_SUCCESS:
     return nil
 
   if swapchain.oldSwapchain != nil:
@@ -65,19 +78,15 @@ proc initSwapchain(
     )
     let requirements = svkGetImageMemoryRequirements(swapchain.depthImage)
     swapchain.depthMemory = svkAllocateMemory(
-      requirements.size,
-      bestMemory(mappable = false, filter = requirements.memoryTypes)
+      requirements.size, bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
-      vulkan.device,
-      swapchain.depthImage,
-      swapchain.depthMemory,
-      0,
+      vulkan.device, swapchain.depthImage, swapchain.depthMemory, 0
     )
     swapchain.depthImageView = svkCreate2DImageView(
       image = swapchain.depthImage,
       format = DEPTH_FORMAT,
-      aspect = VK_IMAGE_ASPECT_DEPTH_BIT
+      aspect = VK_IMAGE_ASPECT_DEPTH_BIT,
     )
 
   # create msaa image+view if desired
@@ -86,27 +95,29 @@ proc initSwapchain(
       width = width,
       height = height,
       format = SURFACE_FORMAT,
-      usage = [VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
+      usage =
+        [VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT],
       samples = renderPass.samples,
     )
     let requirements = svkGetImageMemoryRequirements(swapchain.msaaImage)
     swapchain.msaaMemory = svkAllocateMemory(
-      requirements.size,
-      bestMemory(mappable = false, filter = requirements.memoryTypes)
+      requirements.size, bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
-      vulkan.device,
-      swapchain.msaaImage,
-      swapchain.msaaMemory,
-      0,
+      vulkan.device, swapchain.msaaImage, swapchain.msaaMemory, 0
     )
-    swapchain.msaaImageView = svkCreate2DImageView(image = swapchain.msaaImage, format = SURFACE_FORMAT)
+    swapchain.msaaImageView =
+      svkCreate2DImageView(image = swapchain.msaaImage, format = SURFACE_FORMAT)
 
   # create framebuffers
   var actualNFramebuffers: uint32
-  checkVkResult vkGetSwapchainImagesKHR(vulkan.device, swapchain.vk, addr(actualNFramebuffers), nil)
+  checkVkResult vkGetSwapchainImagesKHR(
+    vulkan.device, swapchain.vk, addr(actualNFramebuffers), nil
+  )
   var framebuffers = newSeq[VkImage](actualNFramebuffers)
-  checkVkResult vkGetSwapchainImagesKHR(vulkan.device, swapchain.vk, addr(actualNFramebuffers), framebuffers.ToCPointer)
+  checkVkResult vkGetSwapchainImagesKHR(
+    vulkan.device, swapchain.vk, addr(actualNFramebuffers), framebuffers.ToCPointer
+  )
 
   for framebuffer in framebuffers:
     swapchain.framebufferViews.add svkCreate2DImageView(framebuffer, SURFACE_FORMAT)
@@ -118,7 +129,12 @@ proc initSwapchain(
         attachments = @[swapchain.framebufferViews[^1]]
     else:
       if renderPass.depthBuffer:
-        attachments = @[swapchain.msaaImageView, swapchain.depthImageView, swapchain.framebufferViews[^1]]
+        attachments =
+          @[
+            swapchain.msaaImageView,
+            swapchain.depthImageView,
+            swapchain.framebufferViews[^1],
+          ]
       else:
         attachments = @[swapchain.msaaImageView, swapchain.framebufferViews[^1]]
 
@@ -141,14 +157,18 @@ proc initSwapchain(
     flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
     queueFamilyIndex: vulkan.graphicsQueueFamily,
   )
-  checkVkResult vkCreateCommandPool(vulkan.device, addr(commandPoolCreateInfo), nil, addr(swapchain.commandBufferPool))
+  checkVkResult vkCreateCommandPool(
+    vulkan.device, addr(commandPoolCreateInfo), nil, addr(swapchain.commandBufferPool)
+  )
   var allocInfo = VkCommandBufferAllocateInfo(
     sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
     commandPool: swapchain.commandBufferPool,
     level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
     commandBufferCount: INFLIGHTFRAMES,
   )
-  checkVkResult vkAllocateCommandBuffers(vulkan.device, addr(allocInfo), swapchain.commandBuffers.ToCPointer)
+  checkVkResult vkAllocateCommandBuffers(
+    vulkan.device, addr(allocInfo), swapchain.commandBuffers.ToCPointer
+  )
 
   return swapchain
 
@@ -221,7 +241,7 @@ proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
     queue = vulkan.graphicsQueue,
     submitCount = 1,
     pSubmits = addr(submitInfo),
-    fence = swapchain.queueFinishedFence[swapchain.currentFiF]
+    fence = swapchain.queueFinishedFence[swapchain.currentFiF],
   )
 
   var presentInfo = VkPresentInfoKHR(
@@ -249,9 +269,7 @@ proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
 
 proc recreate(swapchain: Swapchain): Swapchain =
   initSwapchain(
-    renderPass = swapchain.renderPass,
-    vSync = swapchain.vSync,
-    oldSwapchain = swapchain,
+    renderPass = swapchain.renderPass, vSync = swapchain.vSync, oldSwapchain = swapchain
   )
 
 template withNextFrame*(framebufferName, commandBufferName, body: untyped): untyped =
@@ -260,12 +278,15 @@ template withNextFrame*(framebufferName, commandBufferName, body: untyped): unty
   if maybeFramebuffer.isSome:
     block:
       let `framebufferName` {.inject.} = maybeFramebuffer.get
-      let `commandBufferName` {.inject.} = vulkan.swapchain.commandBuffers[vulkan.swapchain.currentFiF]
+      let `commandBufferName` {.inject.} =
+        vulkan.swapchain.commandBuffers[vulkan.swapchain.currentFiF]
       let beginInfo = VkCommandBufferBeginInfo(
         sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
       )
-      checkVkResult vkResetCommandBuffer(`commandBufferName`, VkCommandBufferResetFlags(0))
+      checkVkResult vkResetCommandBuffer(
+        `commandBufferName`, VkCommandBufferResetFlags(0)
+      )
       checkVkResult vkBeginCommandBuffer(`commandBufferName`, addr(beginInfo))
 
       body

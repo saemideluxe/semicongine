@@ -22,24 +22,27 @@ type
     CurrentInf*: PVOID
     Section*: UINT
     Line*: UINT
+
   PINFCONTEXT* = ptr INFCONTEXT
+
 when winimCpu64:
-  type
-    SP_INF_INFORMATION* {.pure.} = object
-      InfStyle*: DWORD
-      InfCount*: DWORD
-      VersionData*: array[ANYSIZE_ARRAY, BYTE]
+  type SP_INF_INFORMATION* {.pure.} = object
+    InfStyle*: DWORD
+    InfCount*: DWORD
+    VersionData*: array[ANYSIZE_ARRAY, BYTE]
+
 when winimCpu32:
-  type
-    SP_INF_INFORMATION* {.pure, packed.} = object
-      InfStyle*: DWORD
-      InfCount*: DWORD
-      VersionData*: array[ANYSIZE_ARRAY, BYTE]
+  type SP_INF_INFORMATION* {.pure, packed.} = object
+    InfStyle*: DWORD
+    InfCount*: DWORD
+    VersionData*: array[ANYSIZE_ARRAY, BYTE]
+
 type
   PSP_INF_INFORMATION* = ptr SP_INF_INFORMATION
   SP_ALTPLATFORM_INFO_V2_UNION1* {.pure, union.} = object
     Reserved*: WORD
     Flags*: WORD
+
   SP_ALTPLATFORM_INFO_V2* {.pure.} = object
     cbSize*: DWORD
     Platform*: DWORD
@@ -49,6 +52,7 @@ type
     union1*: SP_ALTPLATFORM_INFO_V2_UNION1
     FirstValidatedMajorVersion*: DWORD
     FirstValidatedMinorVersion*: DWORD
+
   PSP_ALTPLATFORM_INFO_V2* = ptr SP_ALTPLATFORM_INFO_V2
   SP_ALTPLATFORM_INFO_V1* {.pure.} = object
     cbSize*: DWORD
@@ -57,6 +61,7 @@ type
     MinorVersion*: DWORD
     ProcessorArchitecture*: WORD
     Reserved*: WORD
+
   PSP_ALTPLATFORM_INFO_V1* = ptr SP_ALTPLATFORM_INFO_V1
   SP_ALTPLATFORM_INFO* = SP_ALTPLATFORM_INFO_V2
   PSP_ALTPLATFORM_INFO* = PSP_ALTPLATFORM_INFO_V2
@@ -64,23 +69,27 @@ type
     cbSize*: DWORD
     OriginalInfName*: array[MAX_PATH, CHAR]
     OriginalCatalogName*: array[MAX_PATH, CHAR]
+
   PSP_ORIGINAL_FILE_INFO_A* = ptr SP_ORIGINAL_FILE_INFO_A
   SP_ORIGINAL_FILE_INFO_W* {.pure.} = object
     cbSize*: DWORD
     OriginalInfName*: array[MAX_PATH, WCHAR]
     OriginalCatalogName*: array[MAX_PATH, WCHAR]
+
   PSP_ORIGINAL_FILE_INFO_W* = ptr SP_ORIGINAL_FILE_INFO_W
   FILEPATHS_A* {.pure.} = object
     Target*: PCSTR
     Source*: PCSTR
     Win32Error*: UINT
     Flags*: DWORD
+
   PFILEPATHS_A* = ptr FILEPATHS_A
   FILEPATHS_W* {.pure.} = object
     Target*: PCWSTR
     Source*: PCWSTR
     Win32Error*: UINT
     Flags*: DWORD
+
   PFILEPATHS_W* = ptr FILEPATHS_W
   FILEPATHS_SIGNERINFO_A* {.pure.} = object
     Target*: PCSTR
@@ -90,6 +99,7 @@ type
     DigitalSigner*: PCSTR
     Version*: PCSTR
     CatalogFile*: PCSTR
+
   PFILEPATHS_SIGNERINFO_A* = ptr FILEPATHS_SIGNERINFO_A
   FILEPATHS_SIGNERINFO_W* {.pure.} = object
     Target*: PCWSTR
@@ -99,6 +109,7 @@ type
     DigitalSigner*: PCWSTR
     Version*: PCWSTR
     CatalogFile*: PCWSTR
+
   PFILEPATHS_SIGNERINFO_W* = ptr FILEPATHS_SIGNERINFO_W
   SOURCE_MEDIA_A* {.pure.} = object
     Reserved*: PCSTR
@@ -107,6 +118,7 @@ type
     SourcePath*: PCSTR
     SourceFile*: PCSTR
     Flags*: DWORD
+
   PSOURCE_MEDIA_A* = ptr SOURCE_MEDIA_A
   SOURCE_MEDIA_W* {.pure.} = object
     Reserved*: PCWSTR
@@ -115,6 +127,7 @@ type
     SourcePath*: PCWSTR
     SourceFile*: PCWSTR
     Flags*: DWORD
+
   PSOURCE_MEDIA_W* = ptr SOURCE_MEDIA_W
   CABINET_INFO_A* {.pure.} = object
     CabinetPath*: PCSTR
@@ -122,6 +135,7 @@ type
     DiskName*: PCSTR
     SetId*: USHORT
     CabinetNumber*: USHORT
+
   PCABINET_INFO_A* = ptr CABINET_INFO_A
   CABINET_INFO_W* {.pure.} = object
     CabinetPath*: PCWSTR
@@ -129,49 +143,50 @@ type
     DiskName*: PCWSTR
     SetId*: USHORT
     CabinetNumber*: USHORT
+
   PCABINET_INFO_W* = ptr CABINET_INFO_W
+
 when winimCpu64:
-  type
-    FILE_IN_CABINET_INFO_A* {.pure.} = object
-      NameInCabinet*: PCSTR
-      FileSize*: DWORD
-      Win32Error*: DWORD
-      DosDate*: WORD
-      DosTime*: WORD
-      DosAttribs*: WORD
-      FullTargetName*: array[MAX_PATH, CHAR]
+  type FILE_IN_CABINET_INFO_A* {.pure.} = object
+    NameInCabinet*: PCSTR
+    FileSize*: DWORD
+    Win32Error*: DWORD
+    DosDate*: WORD
+    DosTime*: WORD
+    DosAttribs*: WORD
+    FullTargetName*: array[MAX_PATH, CHAR]
+
 when winimCpu32:
-  type
-    FILE_IN_CABINET_INFO_A* {.pure, packed.} = object
-      NameInCabinet*: PCSTR
-      FileSize*: DWORD
-      Win32Error*: DWORD
-      DosDate*: WORD
-      DosTime*: WORD
-      DosAttribs*: WORD
-      FullTargetName*: array[MAX_PATH, CHAR]
-type
-  PFILE_IN_CABINET_INFO_A* = ptr FILE_IN_CABINET_INFO_A
+  type FILE_IN_CABINET_INFO_A* {.pure, packed.} = object
+    NameInCabinet*: PCSTR
+    FileSize*: DWORD
+    Win32Error*: DWORD
+    DosDate*: WORD
+    DosTime*: WORD
+    DosAttribs*: WORD
+    FullTargetName*: array[MAX_PATH, CHAR]
+
+type PFILE_IN_CABINET_INFO_A* = ptr FILE_IN_CABINET_INFO_A
 when winimCpu64:
-  type
-    FILE_IN_CABINET_INFO_W* {.pure.} = object
-      NameInCabinet*: PCWSTR
-      FileSize*: DWORD
-      Win32Error*: DWORD
-      DosDate*: WORD
-      DosTime*: WORD
-      DosAttribs*: WORD
-      FullTargetName*: array[MAX_PATH, WCHAR]
+  type FILE_IN_CABINET_INFO_W* {.pure.} = object
+    NameInCabinet*: PCWSTR
+    FileSize*: DWORD
+    Win32Error*: DWORD
+    DosDate*: WORD
+    DosTime*: WORD
+    DosAttribs*: WORD
+    FullTargetName*: array[MAX_PATH, WCHAR]
+
 when winimCpu32:
-  type
-    FILE_IN_CABINET_INFO_W* {.pure, packed.} = object
-      NameInCabinet*: PCWSTR
-      FileSize*: DWORD
-      Win32Error*: DWORD
-      DosDate*: WORD
-      DosTime*: WORD
-      DosAttribs*: WORD
-      FullTargetName*: array[MAX_PATH, WCHAR]
+  type FILE_IN_CABINET_INFO_W* {.pure, packed.} = object
+    NameInCabinet*: PCWSTR
+    FileSize*: DWORD
+    Win32Error*: DWORD
+    DosDate*: WORD
+    DosTime*: WORD
+    DosAttribs*: WORD
+    FullTargetName*: array[MAX_PATH, WCHAR]
+
 type
   PFILE_IN_CABINET_INFO_W* = ptr FILE_IN_CABINET_INFO_W
   SP_REGISTER_CONTROL_STATUSA* {.pure.} = object
@@ -179,12 +194,14 @@ type
     FileName*: PCSTR
     Win32Error*: DWORD
     FailureCode*: DWORD
+
   PSP_REGISTER_CONTROL_STATUSA* = ptr SP_REGISTER_CONTROL_STATUSA
   SP_REGISTER_CONTROL_STATUSW* {.pure.} = object
     cbSize*: DWORD
     FileName*: PCWSTR
     Win32Error*: DWORD
     FailureCode*: DWORD
+
   PSP_REGISTER_CONTROL_STATUSW* = ptr SP_REGISTER_CONTROL_STATUSW
   SP_FILE_COPY_PARAMS_A* {.pure.} = object
     cbSize*: DWORD
@@ -199,6 +216,7 @@ type
     CopyStyle*: DWORD
     LayoutInf*: HINF
     SecurityDescriptor*: PCSTR
+
   PSP_FILE_COPY_PARAMS_A* = ptr SP_FILE_COPY_PARAMS_A
   SP_FILE_COPY_PARAMS_W* {.pure.} = object
     cbSize*: DWORD
@@ -213,93 +231,98 @@ type
     CopyStyle*: DWORD
     LayoutInf*: HINF
     SecurityDescriptor*: PCWSTR
+
   PSP_FILE_COPY_PARAMS_W* = ptr SP_FILE_COPY_PARAMS_W
   SP_DEVINFO_DATA* {.pure.} = object
     cbSize*: DWORD
     ClassGuid*: GUID
     DevInst*: DWORD
     Reserved*: ULONG_PTR
+
   PSP_DEVINFO_DATA* = ptr SP_DEVINFO_DATA
   SP_DEVICE_INTERFACE_DATA* {.pure.} = object
     cbSize*: DWORD
     InterfaceClassGuid*: GUID
     Flags*: DWORD
     Reserved*: ULONG_PTR
+
   PSP_DEVICE_INTERFACE_DATA* = ptr SP_DEVICE_INTERFACE_DATA
   SP_INTERFACE_DEVICE_DATA* = SP_DEVICE_INTERFACE_DATA
   PSP_INTERFACE_DEVICE_DATA* = PSP_DEVICE_INTERFACE_DATA
+
 when winimCpu64:
-  type
-    SP_DEVICE_INTERFACE_DETAIL_DATA_A* {.pure.} = object
-      cbSize*: DWORD
-      DevicePath*: array[ANYSIZE_ARRAY, CHAR]
+  type SP_DEVICE_INTERFACE_DETAIL_DATA_A* {.pure.} = object
+    cbSize*: DWORD
+    DevicePath*: array[ANYSIZE_ARRAY, CHAR]
+
 when winimCpu32:
-  type
-    SP_DEVICE_INTERFACE_DETAIL_DATA_A* {.pure, packed.} = object
-      cbSize*: DWORD
-      DevicePath*: array[ANYSIZE_ARRAY, CHAR]
-type
-  PSP_DEVICE_INTERFACE_DETAIL_DATA_A* = ptr SP_DEVICE_INTERFACE_DETAIL_DATA_A
+  type SP_DEVICE_INTERFACE_DETAIL_DATA_A* {.pure, packed.} = object
+    cbSize*: DWORD
+    DevicePath*: array[ANYSIZE_ARRAY, CHAR]
+
+type PSP_DEVICE_INTERFACE_DETAIL_DATA_A* = ptr SP_DEVICE_INTERFACE_DETAIL_DATA_A
 when winimCpu64:
-  type
-    SP_DEVICE_INTERFACE_DETAIL_DATA_W* {.pure.} = object
-      cbSize*: DWORD
-      DevicePath*: array[ANYSIZE_ARRAY, WCHAR]
+  type SP_DEVICE_INTERFACE_DETAIL_DATA_W* {.pure.} = object
+    cbSize*: DWORD
+    DevicePath*: array[ANYSIZE_ARRAY, WCHAR]
+
 when winimCpu32:
-  type
-    SP_DEVICE_INTERFACE_DETAIL_DATA_W* {.pure, packed.} = object
-      cbSize*: DWORD
-      DevicePath*: array[ANYSIZE_ARRAY, WCHAR]
+  type SP_DEVICE_INTERFACE_DETAIL_DATA_W* {.pure, packed.} = object
+    cbSize*: DWORD
+    DevicePath*: array[ANYSIZE_ARRAY, WCHAR]
+
 type
   PSP_DEVICE_INTERFACE_DETAIL_DATA_W* = ptr SP_DEVICE_INTERFACE_DETAIL_DATA_W
   SP_INTERFACE_DEVICE_DETAIL_DATA_W* = SP_DEVICE_INTERFACE_DETAIL_DATA_W
   PSP_INTERFACE_DEVICE_DETAIL_DATA_W* = PSP_DEVICE_INTERFACE_DETAIL_DATA_W
   SP_INTERFACE_DEVICE_DETAIL_DATA_A* = SP_DEVICE_INTERFACE_DETAIL_DATA_A
   PSP_INTERFACE_DEVICE_DETAIL_DATA_A* = PSP_DEVICE_INTERFACE_DETAIL_DATA_A
-const
-  SP_MAX_MACHINENAME_LENGTH* = MAX_PATH+3
+
+const SP_MAX_MACHINENAME_LENGTH* = MAX_PATH + 3
 when winimCpu64:
-  type
-    SP_DEVINFO_LIST_DETAIL_DATA_A* {.pure.} = object
-      cbSize*: DWORD
-      ClassGuid*: GUID
-      RemoteMachineHandle*: HANDLE
-      RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, CHAR]
+  type SP_DEVINFO_LIST_DETAIL_DATA_A* {.pure.} = object
+    cbSize*: DWORD
+    ClassGuid*: GUID
+    RemoteMachineHandle*: HANDLE
+    RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, CHAR]
+
 when winimCpu32:
-  type
-    SP_DEVINFO_LIST_DETAIL_DATA_A* {.pure, packed.} = object
-      cbSize*: DWORD
-      ClassGuid*: GUID
-      RemoteMachineHandle*: HANDLE
-      RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, CHAR]
-type
-  PSP_DEVINFO_LIST_DETAIL_DATA_A* = ptr SP_DEVINFO_LIST_DETAIL_DATA_A
+  type SP_DEVINFO_LIST_DETAIL_DATA_A* {.pure, packed.} = object
+    cbSize*: DWORD
+    ClassGuid*: GUID
+    RemoteMachineHandle*: HANDLE
+    RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, CHAR]
+
+type PSP_DEVINFO_LIST_DETAIL_DATA_A* = ptr SP_DEVINFO_LIST_DETAIL_DATA_A
 when winimCpu64:
-  type
-    SP_DEVINFO_LIST_DETAIL_DATA_W* {.pure.} = object
-      cbSize*: DWORD
-      ClassGuid*: GUID
-      RemoteMachineHandle*: HANDLE
-      RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, WCHAR]
+  type SP_DEVINFO_LIST_DETAIL_DATA_W* {.pure.} = object
+    cbSize*: DWORD
+    ClassGuid*: GUID
+    RemoteMachineHandle*: HANDLE
+    RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, WCHAR]
+
 when winimCpu32:
-  type
-    SP_DEVINFO_LIST_DETAIL_DATA_W* {.pure, packed.} = object
-      cbSize*: DWORD
-      ClassGuid*: GUID
-      RemoteMachineHandle*: HANDLE
-      RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, WCHAR]
+  type SP_DEVINFO_LIST_DETAIL_DATA_W* {.pure, packed.} = object
+    cbSize*: DWORD
+    ClassGuid*: GUID
+    RemoteMachineHandle*: HANDLE
+    RemoteMachineName*: array[SP_MAX_MACHINENAME_LENGTH, WCHAR]
+
 type
   PSP_DEVINFO_LIST_DETAIL_DATA_W* = ptr SP_DEVINFO_LIST_DETAIL_DATA_W
   DI_FUNCTION* = UINT
-  PSP_FILE_CALLBACK_W* = proc (Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR): UINT {.stdcall.}
+  PSP_FILE_CALLBACK_W* = proc(
+    Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR
+  ): UINT {.stdcall.}
+
 when winimUnicode:
-  type
-    PSP_FILE_CALLBACK* = PSP_FILE_CALLBACK_W
-type
-  PSP_FILE_CALLBACK_A* = proc (Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR): UINT {.stdcall.}
+  type PSP_FILE_CALLBACK* = PSP_FILE_CALLBACK_W
+type PSP_FILE_CALLBACK_A* = proc(
+  Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR
+): UINT {.stdcall.}
+
 when winimAnsi:
-  type
-    PSP_FILE_CALLBACK* = PSP_FILE_CALLBACK_A
+  type PSP_FILE_CALLBACK* = PSP_FILE_CALLBACK_A
 type
   SP_DEVINSTALL_PARAMS_A* {.pure.} = object
     cbSize*: DWORD
@@ -312,6 +335,7 @@ type
     ClassInstallReserved*: ULONG_PTR
     Reserved*: DWORD
     DriverPath*: array[MAX_PATH, CHAR]
+
   PSP_DEVINSTALL_PARAMS_A* = ptr SP_DEVINSTALL_PARAMS_A
   SP_DEVINSTALL_PARAMS_W* {.pure.} = object
     cbSize*: DWORD
@@ -324,32 +348,39 @@ type
     ClassInstallReserved*: ULONG_PTR
     Reserved*: DWORD
     DriverPath*: array[MAX_PATH, WCHAR]
+
   PSP_DEVINSTALL_PARAMS_W* = ptr SP_DEVINSTALL_PARAMS_W
   SP_CLASSINSTALL_HEADER* {.pure.} = object
     cbSize*: DWORD
     InstallFunction*: DI_FUNCTION
+
   PSP_CLASSINSTALL_HEADER* = ptr SP_CLASSINSTALL_HEADER
   SP_ENABLECLASS_PARAMS* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
     ClassGuid*: GUID
     EnableMessage*: DWORD
+
   PSP_ENABLECLASS_PARAMS* = ptr SP_ENABLECLASS_PARAMS
   SP_PROPCHANGE_PARAMS* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
     StateChange*: DWORD
     Scope*: DWORD
     HwProfile*: DWORD
+
   PSP_PROPCHANGE_PARAMS* = ptr SP_PROPCHANGE_PARAMS
   SP_REMOVEDEVICE_PARAMS* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
     Scope*: DWORD
     HwProfile*: DWORD
+
   PSP_REMOVEDEVICE_PARAMS* = ptr SP_REMOVEDEVICE_PARAMS
   SP_UNREMOVEDEVICE_PARAMS* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
     Scope*: DWORD
     HwProfile*: DWORD
+
   PSP_UNREMOVEDEVICE_PARAMS* = ptr SP_UNREMOVEDEVICE_PARAMS
+
 const
   MAX_TITLE_LEN* = 60
   MAX_INSTRUCTION_LEN* = 256
@@ -363,6 +394,7 @@ type
     ListLabel*: array[MAX_LABEL_LEN, CHAR]
     SubTitle*: array[MAX_SUBTITLE_LEN, CHAR]
     Reserved*: array[2, BYTE]
+
   PSP_SELECTDEVICE_PARAMS_A* = ptr SP_SELECTDEVICE_PARAMS_A
   SP_SELECTDEVICE_PARAMS_W* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
@@ -370,15 +402,18 @@ type
     Instructions*: array[MAX_INSTRUCTION_LEN, WCHAR]
     ListLabel*: array[MAX_LABEL_LEN, WCHAR]
     SubTitle*: array[MAX_SUBTITLE_LEN, WCHAR]
+
   PSP_SELECTDEVICE_PARAMS_W* = ptr SP_SELECTDEVICE_PARAMS_W
-  PDETECT_PROGRESS_NOTIFY* = proc (ProgressNotifyParam: PVOID, DetectComplete: DWORD): WINBOOL {.stdcall.}
+  PDETECT_PROGRESS_NOTIFY* =
+    proc(ProgressNotifyParam: PVOID, DetectComplete: DWORD): WINBOOL {.stdcall.}
   SP_DETECTDEVICE_PARAMS* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
     DetectProgressNotify*: PDETECT_PROGRESS_NOTIFY
     ProgressNotifyParam*: PVOID
+
   PSP_DETECTDEVICE_PARAMS* = ptr SP_DETECTDEVICE_PARAMS
-const
-  MAX_INSTALLWIZARD_DYNAPAGES* = 20
+
+const MAX_INSTALLWIZARD_DYNAPAGES* = 20
 type
   SP_INSTALLWIZARD_DATA* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
@@ -389,6 +424,7 @@ type
     PrivateFlags*: DWORD
     PrivateData*: LPARAM
     hwndWizardDlg*: HWND
+
   PSP_INSTALLWIZARD_DATA* = ptr SP_INSTALLWIZARD_DATA
   SP_NEWDEVICEWIZARD_DATA* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
@@ -396,6 +432,7 @@ type
     DynamicPages*: array[MAX_INSTALLWIZARD_DYNAPAGES, HPROPSHEETPAGE]
     NumDynamicPages*: DWORD
     hwndWizardDlg*: HWND
+
   PSP_NEWDEVICEWIZARD_DATA* = ptr SP_NEWDEVICEWIZARD_DATA
   SP_ADDPROPERTYPAGE_DATA* = SP_NEWDEVICEWIZARD_DATA
   PSP_ADDPROPERTYPAGE_DATA* = PSP_NEWDEVICEWIZARD_DATA
@@ -403,22 +440,26 @@ type
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
     ChmFile*: array[MAX_PATH, CHAR]
     HtmlTroubleShooter*: array[MAX_PATH, CHAR]
+
   PSP_TROUBLESHOOTER_PARAMS_A* = ptr SP_TROUBLESHOOTER_PARAMS_A
   SP_TROUBLESHOOTER_PARAMS_W* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
     ChmFile*: array[MAX_PATH, WCHAR]
     HtmlTroubleShooter*: array[MAX_PATH, WCHAR]
+
   PSP_TROUBLESHOOTER_PARAMS_W* = ptr SP_TROUBLESHOOTER_PARAMS_W
-const
-  LINE_LEN* = 256
+
+const LINE_LEN* = 256
 type
   SP_POWERMESSAGEWAKE_PARAMS_A* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
-    PowerMessageWake*: array[LINE_LEN*2, CHAR]
+    PowerMessageWake*: array[LINE_LEN * 2, CHAR]
+
   PSP_POWERMESSAGEWAKE_PARAMS_A* = ptr SP_POWERMESSAGEWAKE_PARAMS_A
   SP_POWERMESSAGEWAKE_PARAMS_W* {.pure.} = object
     ClassInstallHeader*: SP_CLASSINSTALL_HEADER
-    PowerMessageWake*: array[LINE_LEN*2, WCHAR]
+    PowerMessageWake*: array[LINE_LEN * 2, WCHAR]
+
   PSP_POWERMESSAGEWAKE_PARAMS_W* = ptr SP_POWERMESSAGEWAKE_PARAMS_W
   SP_DRVINFO_DATA_V2_A* {.pure, packed.} = object
     cbSize*: DWORD
@@ -429,6 +470,7 @@ type
     ProviderName*: array[LINE_LEN, CHAR]
     DriverDate*: FILETIME
     DriverVersion*: DWORDLONG
+
   PSP_DRVINFO_DATA_V2_A* = ptr SP_DRVINFO_DATA_V2_A
   SP_DRVINFO_DATA_V2_W* {.pure, packed.} = object
     cbSize*: DWORD
@@ -439,6 +481,7 @@ type
     ProviderName*: array[LINE_LEN, WCHAR]
     DriverDate*: FILETIME
     DriverVersion*: DWORDLONG
+
   PSP_DRVINFO_DATA_V2_W* = ptr SP_DRVINFO_DATA_V2_W
   SP_DRVINFO_DATA_V1_A* {.pure.} = object
     cbSize*: DWORD
@@ -447,6 +490,7 @@ type
     Description*: array[LINE_LEN, CHAR]
     MfgName*: array[LINE_LEN, CHAR]
     ProviderName*: array[LINE_LEN, CHAR]
+
   PSP_DRVINFO_DATA_V1_A* = ptr SP_DRVINFO_DATA_V1_A
   SP_DRVINFO_DATA_V1_W* {.pure.} = object
     cbSize*: DWORD
@@ -455,77 +499,72 @@ type
     Description*: array[LINE_LEN, WCHAR]
     MfgName*: array[LINE_LEN, WCHAR]
     ProviderName*: array[LINE_LEN, WCHAR]
+
   PSP_DRVINFO_DATA_V1_W* = ptr SP_DRVINFO_DATA_V1_W
   SP_DRVINFO_DATA_A* = SP_DRVINFO_DATA_V2_A
   PSP_DRVINFO_DATA_A* = PSP_DRVINFO_DATA_V2_A
   SP_DRVINFO_DATA_W* = SP_DRVINFO_DATA_V2_W
   PSP_DRVINFO_DATA_W* = PSP_DRVINFO_DATA_V2_W
+
 when winimUnicode:
-  type
-    SP_DRVINFO_DATA_V2* = SP_DRVINFO_DATA_V2_W
+  type SP_DRVINFO_DATA_V2* = SP_DRVINFO_DATA_V2_W
 when winimAnsi:
-  type
-    SP_DRVINFO_DATA_V2* = SP_DRVINFO_DATA_V2_A
-type
-  SP_DRVINFO_DATA* = SP_DRVINFO_DATA_V2
+  type SP_DRVINFO_DATA_V2* = SP_DRVINFO_DATA_V2_A
+type SP_DRVINFO_DATA* = SP_DRVINFO_DATA_V2
 when winimUnicode:
-  type
-    PSP_DRVINFO_DATA_V2* = PSP_DRVINFO_DATA_V2_W
+  type PSP_DRVINFO_DATA_V2* = PSP_DRVINFO_DATA_V2_W
 when winimAnsi:
-  type
-    PSP_DRVINFO_DATA_V2* = PSP_DRVINFO_DATA_V2_A
-type
-  PSP_DRVINFO_DATA* = PSP_DRVINFO_DATA_V2
+  type PSP_DRVINFO_DATA_V2* = PSP_DRVINFO_DATA_V2_A
+type PSP_DRVINFO_DATA* = PSP_DRVINFO_DATA_V2
 when winimCpu64:
-  type
-    SP_DRVINFO_DETAIL_DATA_A* {.pure.} = object
-      cbSize*: DWORD
-      InfDate*: FILETIME
-      CompatIDsOffset*: DWORD
-      CompatIDsLength*: DWORD
-      Reserved*: ULONG_PTR
-      SectionName*: array[LINE_LEN, CHAR]
-      InfFileName*: array[MAX_PATH, CHAR]
-      DrvDescription*: array[LINE_LEN, CHAR]
-      HardwareID*: array[ANYSIZE_ARRAY, CHAR]
+  type SP_DRVINFO_DETAIL_DATA_A* {.pure.} = object
+    cbSize*: DWORD
+    InfDate*: FILETIME
+    CompatIDsOffset*: DWORD
+    CompatIDsLength*: DWORD
+    Reserved*: ULONG_PTR
+    SectionName*: array[LINE_LEN, CHAR]
+    InfFileName*: array[MAX_PATH, CHAR]
+    DrvDescription*: array[LINE_LEN, CHAR]
+    HardwareID*: array[ANYSIZE_ARRAY, CHAR]
+
 when winimCpu32:
-  type
-    SP_DRVINFO_DETAIL_DATA_A* {.pure, packed.} = object
-      cbSize*: DWORD
-      InfDate*: FILETIME
-      CompatIDsOffset*: DWORD
-      CompatIDsLength*: DWORD
-      Reserved*: ULONG_PTR
-      SectionName*: array[LINE_LEN, CHAR]
-      InfFileName*: array[MAX_PATH, CHAR]
-      DrvDescription*: array[LINE_LEN, CHAR]
-      HardwareID*: array[ANYSIZE_ARRAY, CHAR]
-type
-  PSP_DRVINFO_DETAIL_DATA_A* = ptr SP_DRVINFO_DETAIL_DATA_A
+  type SP_DRVINFO_DETAIL_DATA_A* {.pure, packed.} = object
+    cbSize*: DWORD
+    InfDate*: FILETIME
+    CompatIDsOffset*: DWORD
+    CompatIDsLength*: DWORD
+    Reserved*: ULONG_PTR
+    SectionName*: array[LINE_LEN, CHAR]
+    InfFileName*: array[MAX_PATH, CHAR]
+    DrvDescription*: array[LINE_LEN, CHAR]
+    HardwareID*: array[ANYSIZE_ARRAY, CHAR]
+
+type PSP_DRVINFO_DETAIL_DATA_A* = ptr SP_DRVINFO_DETAIL_DATA_A
 when winimCpu64:
-  type
-    SP_DRVINFO_DETAIL_DATA_W* {.pure.} = object
-      cbSize*: DWORD
-      InfDate*: FILETIME
-      CompatIDsOffset*: DWORD
-      CompatIDsLength*: DWORD
-      Reserved*: ULONG_PTR
-      SectionName*: array[LINE_LEN, WCHAR]
-      InfFileName*: array[MAX_PATH, WCHAR]
-      DrvDescription*: array[LINE_LEN, WCHAR]
-      HardwareID*: array[ANYSIZE_ARRAY, WCHAR]
+  type SP_DRVINFO_DETAIL_DATA_W* {.pure.} = object
+    cbSize*: DWORD
+    InfDate*: FILETIME
+    CompatIDsOffset*: DWORD
+    CompatIDsLength*: DWORD
+    Reserved*: ULONG_PTR
+    SectionName*: array[LINE_LEN, WCHAR]
+    InfFileName*: array[MAX_PATH, WCHAR]
+    DrvDescription*: array[LINE_LEN, WCHAR]
+    HardwareID*: array[ANYSIZE_ARRAY, WCHAR]
+
 when winimCpu32:
-  type
-    SP_DRVINFO_DETAIL_DATA_W* {.pure, packed.} = object
-      cbSize*: DWORD
-      InfDate*: FILETIME
-      CompatIDsOffset*: DWORD
-      CompatIDsLength*: DWORD
-      Reserved*: ULONG_PTR
-      SectionName*: array[LINE_LEN, WCHAR]
-      InfFileName*: array[MAX_PATH, WCHAR]
-      DrvDescription*: array[LINE_LEN, WCHAR]
-      HardwareID*: array[ANYSIZE_ARRAY, WCHAR]
+  type SP_DRVINFO_DETAIL_DATA_W* {.pure, packed.} = object
+    cbSize*: DWORD
+    InfDate*: FILETIME
+    CompatIDsOffset*: DWORD
+    CompatIDsLength*: DWORD
+    Reserved*: ULONG_PTR
+    SectionName*: array[LINE_LEN, WCHAR]
+    InfFileName*: array[MAX_PATH, WCHAR]
+    DrvDescription*: array[LINE_LEN, WCHAR]
+    HardwareID*: array[ANYSIZE_ARRAY, WCHAR]
+
 type
   PSP_DRVINFO_DETAIL_DATA_W* = ptr SP_DRVINFO_DETAIL_DATA_W
   SP_DRVINSTALL_PARAMS* {.pure.} = object
@@ -534,63 +573,67 @@ type
     Flags*: DWORD
     PrivateData*: DWORD_PTR
     Reserved*: DWORD
+
   PSP_DRVINSTALL_PARAMS* = ptr SP_DRVINSTALL_PARAMS
   COINSTALLER_CONTEXT_DATA* {.pure.} = object
     PostProcessing*: WINBOOL
     InstallResult*: DWORD
     PrivateData*: PVOID
+
   PCOINSTALLER_CONTEXT_DATA* = ptr COINSTALLER_CONTEXT_DATA
   SP_CLASSIMAGELIST_DATA* {.pure.} = object
     cbSize*: DWORD
     ImageList*: HIMAGELIST
     Reserved*: ULONG_PTR
+
   PSP_CLASSIMAGELIST_DATA* = ptr SP_CLASSIMAGELIST_DATA
   SP_PROPSHEETPAGE_REQUEST* {.pure.} = object
     cbSize*: DWORD
     PageRequested*: DWORD
     DeviceInfoSet*: HDEVINFO
     DeviceInfoData*: PSP_DEVINFO_DATA
+
   PSP_PROPSHEETPAGE_REQUEST* = ptr SP_PROPSHEETPAGE_REQUEST
   SP_BACKUP_QUEUE_PARAMS_V2_A* {.pure.} = object
     cbSize*: DWORD
     FullInfPath*: array[MAX_PATH, CHAR]
     FilenameOffset*: INT
     ReinstallInstance*: array[MAX_PATH, CHAR]
+
   PSP_BACKUP_QUEUE_PARAMS_V2_A* = ptr SP_BACKUP_QUEUE_PARAMS_V2_A
   SP_BACKUP_QUEUE_PARAMS_V2_W* {.pure.} = object
     cbSize*: DWORD
     FullInfPath*: array[MAX_PATH, WCHAR]
     FilenameOffset*: INT
     ReinstallInstance*: array[MAX_PATH, WCHAR]
+
   PSP_BACKUP_QUEUE_PARAMS_V2_W* = ptr SP_BACKUP_QUEUE_PARAMS_V2_W
   SP_BACKUP_QUEUE_PARAMS_V1_A* {.pure.} = object
     cbSize*: DWORD
     FullInfPath*: array[MAX_PATH, CHAR]
     FilenameOffset*: INT
+
   PSP_BACKUP_QUEUE_PARAMS_V1_A* = ptr SP_BACKUP_QUEUE_PARAMS_V1_A
   SP_BACKUP_QUEUE_PARAMS_V1_W* {.pure.} = object
     cbSize*: DWORD
     FullInfPath*: array[MAX_PATH, WCHAR]
     FilenameOffset*: INT
+
   PSP_BACKUP_QUEUE_PARAMS_V1_W* = ptr SP_BACKUP_QUEUE_PARAMS_V1_W
   SP_BACKUP_QUEUE_PARAMS_A* = SP_BACKUP_QUEUE_PARAMS_V2_A
   PSP_BACKUP_QUEUE_PARAMS_A* = PSP_BACKUP_QUEUE_PARAMS_V2_A
   SP_BACKUP_QUEUE_PARAMS_W* = SP_BACKUP_QUEUE_PARAMS_V2_W
   PSP_BACKUP_QUEUE_PARAMS_W* = PSP_BACKUP_QUEUE_PARAMS_V2_W
+
 when winimUnicode:
-  type
-    SP_BACKUP_QUEUE_PARAMS_V2* = SP_BACKUP_QUEUE_PARAMS_V2_W
+  type SP_BACKUP_QUEUE_PARAMS_V2* = SP_BACKUP_QUEUE_PARAMS_V2_W
 when winimAnsi:
-  type
-    SP_BACKUP_QUEUE_PARAMS_V2* = SP_BACKUP_QUEUE_PARAMS_V2_A
-type
-  SP_BACKUP_QUEUE_PARAMS* = SP_BACKUP_QUEUE_PARAMS_V2
+  type SP_BACKUP_QUEUE_PARAMS_V2* = SP_BACKUP_QUEUE_PARAMS_V2_A
+type SP_BACKUP_QUEUE_PARAMS* = SP_BACKUP_QUEUE_PARAMS_V2
 when winimUnicode:
-  type
-    PSP_BACKUP_QUEUE_PARAMS_V2* = PSP_BACKUP_QUEUE_PARAMS_V2_W
+  type PSP_BACKUP_QUEUE_PARAMS_V2* = PSP_BACKUP_QUEUE_PARAMS_V2_W
 when winimAnsi:
-  type
-    PSP_BACKUP_QUEUE_PARAMS_V2* = PSP_BACKUP_QUEUE_PARAMS_V2_A
+  type PSP_BACKUP_QUEUE_PARAMS_V2* = PSP_BACKUP_QUEUE_PARAMS_V2_A
 type
   PSP_BACKUP_QUEUE_PARAMS* = PSP_BACKUP_QUEUE_PARAMS_V2
   SP_INF_SIGNER_INFO_A* {.pure.} = object
@@ -598,13 +641,16 @@ type
     CatalogFile*: array[MAX_PATH, CHAR]
     DigitalSigner*: array[MAX_PATH, CHAR]
     DigitalSignerVersion*: array[MAX_PATH, CHAR]
+
   PSP_INF_SIGNER_INFO_A* = ptr SP_INF_SIGNER_INFO_A
   SP_INF_SIGNER_INFO_W* {.pure.} = object
     cbSize*: DWORD
     CatalogFile*: array[MAX_PATH, WCHAR]
     DigitalSigner*: array[MAX_PATH, WCHAR]
     DigitalSignerVersion*: array[MAX_PATH, WCHAR]
+
   PSP_INF_SIGNER_INFO_W* = ptr SP_INF_SIGNER_INFO_W
+
 const
   SETUPAPI_VER* = 0x0502
   MAX_INF_STRING_LENGTH* = 4096
@@ -913,13 +959,16 @@ const
   ERROR_KEY_DOES_NOT_EXIST* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x204
   ERROR_INVALID_DEVINST_NAME* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x205
   ERROR_INVALID_CLASS* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x206
-  ERROR_DEVINST_ALREADY_EXISTS* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x207
-  ERROR_DEVINFO_NOT_REGISTERED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x208
+  ERROR_DEVINST_ALREADY_EXISTS* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x207
+  ERROR_DEVINFO_NOT_REGISTERED* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x208
   ERROR_INVALID_REG_PROPERTY* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x209
   ERROR_NO_INF* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x20A
   ERROR_NO_SUCH_DEVINST* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x20B
   ERROR_CANT_LOAD_CLASS_ICON* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x20C
-  ERROR_INVALID_CLASS_INSTALLER* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x20D
+  ERROR_INVALID_CLASS_INSTALLER* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x20D
   ERROR_DI_DO_DEFAULT* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x20E
   ERROR_DI_NOFILECOPY* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x20F
   ERROR_INVALID_HWPROFILE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x210
@@ -927,24 +976,35 @@ const
   ERROR_DEVINFO_LIST_LOCKED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x212
   ERROR_DEVINFO_DATA_LOCKED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x213
   ERROR_DI_BAD_PATH* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x214
-  ERROR_NO_CLASSINSTALL_PARAMS* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x215
+  ERROR_NO_CLASSINSTALL_PARAMS* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x215
   ERROR_FILEQUEUE_LOCKED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x216
-  ERROR_BAD_SERVICE_INSTALLSECT* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x217
+  ERROR_BAD_SERVICE_INSTALLSECT* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x217
   ERROR_NO_CLASS_DRIVER_LIST* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x218
   ERROR_NO_ASSOCIATED_SERVICE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x219
-  ERROR_NO_DEFAULT_DEVICE_INTERFACE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21A
-  ERROR_DEVICE_INTERFACE_ACTIVE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21B
-  ERROR_DEVICE_INTERFACE_REMOVED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21C
-  ERROR_BAD_INTERFACE_INSTALLSECT* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21D
-  ERROR_NO_SUCH_INTERFACE_CLASS* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21E
-  ERROR_INVALID_REFERENCE_STRING* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21F
+  ERROR_NO_DEFAULT_DEVICE_INTERFACE* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21A
+  ERROR_DEVICE_INTERFACE_ACTIVE* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21B
+  ERROR_DEVICE_INTERFACE_REMOVED* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21C
+  ERROR_BAD_INTERFACE_INSTALLSECT* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21D
+  ERROR_NO_SUCH_INTERFACE_CLASS* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21E
+  ERROR_INVALID_REFERENCE_STRING* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x21F
   ERROR_INVALID_MACHINENAME* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x220
   ERROR_REMOTE_COMM_FAILURE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x221
   ERROR_MACHINE_UNAVAILABLE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x222
   ERROR_NO_CONFIGMGR_SERVICES* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x223
-  ERROR_INVALID_PROPPAGE_PROVIDER* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x224
-  ERROR_NO_SUCH_DEVICE_INTERFACE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x225
-  ERROR_DI_POSTPROCESSING_REQUIRED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x226
+  ERROR_INVALID_PROPPAGE_PROVIDER* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x224
+  ERROR_NO_SUCH_DEVICE_INTERFACE* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x225
+  ERROR_DI_POSTPROCESSING_REQUIRED* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x226
   ERROR_INVALID_COINSTALLER* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x227
   ERROR_NO_COMPAT_DRIVERS* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x228
   ERROR_NO_DEVICE_ICON* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x229
@@ -953,30 +1013,44 @@ const
   ERROR_INVALID_FILTER_DRIVER* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x22C
   ERROR_NON_WINDOWS_NT_DRIVER* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x22D
   ERROR_NON_WINDOWS_DRIVER* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x22E
-  ERROR_NO_CATALOG_FOR_OEM_INF* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x22F
-  ERROR_DEVINSTALL_QUEUE_NONNATIVE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x230
+  ERROR_NO_CATALOG_FOR_OEM_INF* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x22F
+  ERROR_DEVINSTALL_QUEUE_NONNATIVE* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x230
   ERROR_NOT_DISABLEABLE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x231
   ERROR_CANT_REMOVE_DEVINST* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x232
   ERROR_INVALID_TARGET* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x233
   ERROR_DRIVER_NONNATIVE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x234
   ERROR_IN_WOW64* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x235
-  ERROR_SET_SYSTEM_RESTORE_POINT* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x236
-  ERROR_INCORRECTLY_COPIED_INF* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x237
+  ERROR_SET_SYSTEM_RESTORE_POINT* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x236
+  ERROR_INCORRECTLY_COPIED_INF* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x237
   ERROR_SCE_DISABLED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x238
   ERROR_UNKNOWN_EXCEPTION* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x239
   ERROR_PNP_REGISTRY_ERROR* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23A
-  ERROR_REMOTE_REQUEST_UNSUPPORTED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23B
-  ERROR_NOT_AN_INSTALLED_OEM_INF* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23C
+  ERROR_REMOTE_REQUEST_UNSUPPORTED* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23B
+  ERROR_NOT_AN_INSTALLED_OEM_INF* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23C
   ERROR_INF_IN_USE_BY_DEVICES* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23D
   ERROR_DI_FUNCTION_OBSOLETE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23E
-  ERROR_NO_AUTHENTICODE_CATALOG* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23F
-  ERROR_AUTHENTICODE_DISALLOWED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x240
-  ERROR_AUTHENTICODE_TRUSTED_PUBLISHER* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x241
-  ERROR_AUTHENTICODE_TRUST_NOT_ESTABLISHED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x242
-  ERROR_AUTHENTICODE_PUBLISHER_NOT_TRUSTED* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x243
-  ERROR_SIGNATURE_OSATTRIBUTE_MISMATCH* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x244
-  ERROR_ONLY_VALIDATE_VIA_AUTHENTICODE* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x245
-  ERROR_UNRECOVERABLE_STACK_OVERFLOW* = APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x300
+  ERROR_NO_AUTHENTICODE_CATALOG* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x23F
+  ERROR_AUTHENTICODE_DISALLOWED* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x240
+  ERROR_AUTHENTICODE_TRUSTED_PUBLISHER* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x241
+  ERROR_AUTHENTICODE_TRUST_NOT_ESTABLISHED* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x242
+  ERROR_AUTHENTICODE_PUBLISHER_NOT_TRUSTED* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x243
+  ERROR_SIGNATURE_OSATTRIBUTE_MISMATCH* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x244
+  ERROR_ONLY_VALIDATE_VIA_AUTHENTICODE* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x245
+  ERROR_UNRECOVERABLE_STACK_OVERFLOW* =
+    APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR or 0x300
   EXCEPTION_SPAPI_UNRECOVERABLE_STACK_OVERFLOW* = ERROR_UNRECOVERABLE_STACK_OVERFLOW
   ERROR_NO_DEFAULT_INTERFACE_DEVICE* = ERROR_NO_DEFAULT_DEVICE_INTERFACE
   ERROR_INTERFACE_DEVICE_ACTIVE* = ERROR_DEVICE_INTERFACE_ACTIVE
@@ -1102,7 +1176,8 @@ const
   FLG_DELREG_KEYONLY_COMMON* = FLG_ADDREG_KEYONLY_COMMON
   FLG_DELREG_32BITKEY* = FLG_ADDREG_32BITKEY
   FLG_DELREG_OPERATION_MASK* = 0x000000FE
-  FLG_DELREG_MULTI_SZ_DELSTRING* = FLG_DELREG_TYPE_MULTI_SZ or FLG_ADDREG_DELREG_BIT or 0x00000002
+  FLG_DELREG_MULTI_SZ_DELSTRING* =
+    FLG_DELREG_TYPE_MULTI_SZ or FLG_ADDREG_DELREG_BIT or 0x00000002
   FLG_BITREG_CLEARBITS* = 0x00000000
   FLG_BITREG_SETBITS* = 0x00000001
   FLG_BITREG_64BITKEY* = 0x00001000
@@ -1243,341 +1318,2260 @@ const
   SPWP_USE_DEVINFO_DATA* = 0x00000001
   DICUSTOMDEVPROP_MERGE_MULTISZ* = 0x00000001
   SCWMI_CLOBBER_SECURITY* = 0x00000001
-type
-  PSP_DETSIG_CMPPROC* = proc (DeviceInfoSet: HDEVINFO, NewDeviceData: PSP_DEVINFO_DATA, ExistingDeviceData: PSP_DEVINFO_DATA, CompareContext: PVOID): DWORD {.stdcall.}
-proc SetupGetInfInformationA*(InfSpec: LPCVOID, SearchControl: DWORD, ReturnBuffer: PSP_INF_INFORMATION, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetInfInformationW*(InfSpec: LPCVOID, SearchControl: DWORD, ReturnBuffer: PSP_INF_INFORMATION, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryInfFileInformationA*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryInfFileInformationW*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryInfOriginalFileInformationA*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryInfOriginalFileInformationW*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryInfVersionInformationA*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, Key: PCSTR, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryInfVersionInformationW*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, Key: PCWSTR, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetInfFileListA*(DirectoryPath: PCSTR, InfStyle: DWORD, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetInfFileListW*(DirectoryPath: PCWSTR, InfStyle: DWORD, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupOpenInfFileW*(FileName: PCWSTR, InfClass: PCWSTR, InfStyle: DWORD, ErrorLine: PUINT): HINF {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupOpenInfFileA*(FileName: PCSTR, InfClass: PCSTR, InfStyle: DWORD, ErrorLine: PUINT): HINF {.winapi, stdcall, dynlib: "setupapi", importc.}
+type PSP_DETSIG_CMPPROC* = proc(
+  DeviceInfoSet: HDEVINFO,
+  NewDeviceData: PSP_DEVINFO_DATA,
+  ExistingDeviceData: PSP_DEVINFO_DATA,
+  CompareContext: PVOID,
+): DWORD {.stdcall.}
+
+proc SetupGetInfInformationA*(
+  InfSpec: LPCVOID,
+  SearchControl: DWORD,
+  ReturnBuffer: PSP_INF_INFORMATION,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetInfInformationW*(
+  InfSpec: LPCVOID,
+  SearchControl: DWORD,
+  ReturnBuffer: PSP_INF_INFORMATION,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryInfFileInformationA*(
+  InfInformation: PSP_INF_INFORMATION,
+  InfIndex: UINT,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryInfFileInformationW*(
+  InfInformation: PSP_INF_INFORMATION,
+  InfIndex: UINT,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryInfOriginalFileInformationA*(
+  InfInformation: PSP_INF_INFORMATION,
+  InfIndex: UINT,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_A,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryInfOriginalFileInformationW*(
+  InfInformation: PSP_INF_INFORMATION,
+  InfIndex: UINT,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_W,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryInfVersionInformationA*(
+  InfInformation: PSP_INF_INFORMATION,
+  InfIndex: UINT,
+  Key: PCSTR,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryInfVersionInformationW*(
+  InfInformation: PSP_INF_INFORMATION,
+  InfIndex: UINT,
+  Key: PCWSTR,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetInfFileListA*(
+  DirectoryPath: PCSTR,
+  InfStyle: DWORD,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetInfFileListW*(
+  DirectoryPath: PCWSTR,
+  InfStyle: DWORD,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupOpenInfFileW*(
+  FileName: PCWSTR, InfClass: PCWSTR, InfStyle: DWORD, ErrorLine: PUINT
+): HINF {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupOpenInfFileA*(
+  FileName: PCSTR, InfClass: PCSTR, InfStyle: DWORD, ErrorLine: PUINT
+): HINF {.winapi, stdcall, dynlib: "setupapi", importc.}
+
 proc SetupOpenMasterInf*(): HINF {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupOpenAppendInfFileW*(FileName: PCWSTR, InfHandle: HINF, ErrorLine: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupOpenAppendInfFileA*(FileName: PCSTR, InfHandle: HINF, ErrorLine: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCloseInfFile*(InfHandle: HINF): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupFindFirstLineA*(InfHandle: HINF, Section: PCSTR, Key: PCSTR, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupFindFirstLineW*(InfHandle: HINF, Section: PCWSTR, Key: PCWSTR, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupFindNextLine*(ContextIn: PINFCONTEXT, ContextOut: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupFindNextMatchLineA*(ContextIn: PINFCONTEXT, Key: PCSTR, ContextOut: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupFindNextMatchLineW*(ContextIn: PINFCONTEXT, Key: PCWSTR, ContextOut: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetLineByIndexA*(InfHandle: HINF, Section: PCSTR, Index: DWORD, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetLineByIndexW*(InfHandle: HINF, Section: PCWSTR, Index: DWORD, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetLineCountA*(InfHandle: HINF, Section: PCSTR): LONG {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetLineCountW*(InfHandle: HINF, Section: PCWSTR): LONG {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetLineTextA*(Context: PINFCONTEXT, InfHandle: HINF, Section: PCSTR, Key: PCSTR, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetLineTextW*(Context: PINFCONTEXT, InfHandle: HINF, Section: PCWSTR, Key: PCWSTR, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetFieldCount*(Context: PINFCONTEXT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetStringFieldA*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetStringFieldW*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetIntField*(Context: PINFCONTEXT, FieldIndex: DWORD, IntegerValue: PINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetMultiSzFieldA*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetMultiSzFieldW*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetBinaryField*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PBYTE, ReturnBufferSize: DWORD, RequiredSize: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetFileCompressionInfoA*(SourceFileName: PCSTR, ActualSourceFileName: ptr PSTR, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetFileCompressionInfoW*(SourceFileName: PCWSTR, ActualSourceFileName: ptr PWSTR, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetFileCompressionInfoExA*(SourceFileName: PCSTR, ActualSourceFileNameBuffer: PSTR, ActualSourceFileNameBufferLen: DWORD, RequiredBufferLen: PDWORD, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetFileCompressionInfoExW*(SourceFileName: PCWSTR, ActualSourceFileNameBuffer: PWSTR, ActualSourceFileNameBufferLen: DWORD, RequiredBufferLen: PDWORD, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDecompressOrCopyFileA*(SourceFileName: PCSTR, TargetFileName: PCSTR, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDecompressOrCopyFileW*(SourceFileName: PCWSTR, TargetFileName: PCWSTR, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetSourceFileLocationA*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCSTR, SourceId: PUINT, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetSourceFileLocationW*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCWSTR, SourceId: PUINT, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetSourceFileSizeA*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCSTR, Section: PCSTR, FileSize: PDWORD, RoundingFactor: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetSourceFileSizeW*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCWSTR, Section: PCWSTR, FileSize: PDWORD, RoundingFactor: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetTargetPathA*(InfHandle: HINF, InfContext: PINFCONTEXT, Section: PCSTR, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetTargetPathW*(InfHandle: HINF, InfContext: PINFCONTEXT, Section: PCWSTR, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetSourceListA*(Flags: DWORD, SourceList: ptr PCSTR, SourceCount: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetSourceListW*(Flags: DWORD, SourceList: ptr PCWSTR, SourceCount: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCancelTemporarySourceList*(): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddToSourceListA*(Flags: DWORD, Source: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddToSourceListW*(Flags: DWORD, Source: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveFromSourceListA*(Flags: DWORD, Source: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveFromSourceListW*(Flags: DWORD, Source: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQuerySourceListA*(Flags: DWORD, List: ptr ptr PCSTR, Count: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQuerySourceListW*(Flags: DWORD, List: ptr ptr PCWSTR, Count: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupFreeSourceListA*(List: ptr ptr PCSTR, Count: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupFreeSourceListW*(List: ptr ptr PCWSTR, Count: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupPromptForDiskA*(hwndParent: HWND, DialogTitle: PCSTR, DiskName: PCSTR, PathToSource: PCSTR, FileSought: PCSTR, TagFile: PCSTR, DiskPromptStyle: DWORD, PathBuffer: PSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupPromptForDiskW*(hwndParent: HWND, DialogTitle: PCWSTR, DiskName: PCWSTR, PathToSource: PCWSTR, FileSought: PCWSTR, TagFile: PCWSTR, DiskPromptStyle: DWORD, PathBuffer: PWSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCopyErrorA*(hwndParent: HWND, DialogTitle: PCSTR, DiskName: PCSTR, PathToSource: PCSTR, SourceFile: PCSTR, TargetPathFile: PCSTR, Win32ErrorCode: UINT, Style: DWORD, PathBuffer: PSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCopyErrorW*(hwndParent: HWND, DialogTitle: PCWSTR, DiskName: PCWSTR, PathToSource: PCWSTR, SourceFile: PCWSTR, TargetPathFile: PCWSTR, Win32ErrorCode: UINT, Style: DWORD, PathBuffer: PWSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRenameErrorA*(hwndParent: HWND, DialogTitle: PCSTR, SourceFile: PCSTR, TargetFile: PCSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRenameErrorW*(hwndParent: HWND, DialogTitle: PCWSTR, SourceFile: PCWSTR, TargetFile: PCWSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDeleteErrorA*(hwndParent: HWND, DialogTitle: PCSTR, File: PCSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDeleteErrorW*(hwndParent: HWND, DialogTitle: PCWSTR, File: PCWSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupBackupErrorA*(hwndParent: HWND, DialogTitle: PCSTR, SourceFile: PCSTR, TargetFile: PCSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupBackupErrorW*(hwndParent: HWND, DialogTitle: PCWSTR, SourceFile: PCWSTR, TargetFile: PCWSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetDirectoryIdA*(InfHandle: HINF, Id: DWORD, Directory: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetDirectoryIdW*(InfHandle: HINF, Id: DWORD, Directory: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetDirectoryIdExA*(InfHandle: HINF, Id: DWORD, Directory: PCSTR, Flags: DWORD, Reserved1: DWORD, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetDirectoryIdExW*(InfHandle: HINF, Id: DWORD, Directory: PCWSTR, Flags: DWORD, Reserved1: DWORD, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetSourceInfoA*(InfHandle: HINF, SourceId: UINT, InfoDesired: UINT, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetSourceInfoW*(InfHandle: HINF, SourceId: UINT, InfoDesired: UINT, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFileA*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCSTR, SourcePathRoot: PCSTR, DestinationName: PCSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFileW*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCWSTR, SourcePathRoot: PCWSTR, DestinationName: PCWSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFileExA*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCSTR, SourcePathRoot: PCSTR, DestinationName: PCSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID, FileWasInUse: PBOOL): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFileExW*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCWSTR, SourcePathRoot: PCWSTR, DestinationName: PCWSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID, FileWasInUse: PBOOL): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+proc SetupOpenAppendInfFileW*(
+  FileName: PCWSTR, InfHandle: HINF, ErrorLine: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupOpenAppendInfFileA*(
+  FileName: PCSTR, InfHandle: HINF, ErrorLine: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCloseInfFile*(
+  InfHandle: HINF
+): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupFindFirstLineA*(
+  InfHandle: HINF, Section: PCSTR, Key: PCSTR, Context: PINFCONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupFindFirstLineW*(
+  InfHandle: HINF, Section: PCWSTR, Key: PCWSTR, Context: PINFCONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupFindNextLine*(
+  ContextIn: PINFCONTEXT, ContextOut: PINFCONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupFindNextMatchLineA*(
+  ContextIn: PINFCONTEXT, Key: PCSTR, ContextOut: PINFCONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupFindNextMatchLineW*(
+  ContextIn: PINFCONTEXT, Key: PCWSTR, ContextOut: PINFCONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetLineByIndexA*(
+  InfHandle: HINF, Section: PCSTR, Index: DWORD, Context: PINFCONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetLineByIndexW*(
+  InfHandle: HINF, Section: PCWSTR, Index: DWORD, Context: PINFCONTEXT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetLineCountA*(
+  InfHandle: HINF, Section: PCSTR
+): LONG {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetLineCountW*(
+  InfHandle: HINF, Section: PCWSTR
+): LONG {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetLineTextA*(
+  Context: PINFCONTEXT,
+  InfHandle: HINF,
+  Section: PCSTR,
+  Key: PCSTR,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetLineTextW*(
+  Context: PINFCONTEXT,
+  InfHandle: HINF,
+  Section: PCWSTR,
+  Key: PCWSTR,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetFieldCount*(
+  Context: PINFCONTEXT
+): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetStringFieldA*(
+  Context: PINFCONTEXT,
+  FieldIndex: DWORD,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetStringFieldW*(
+  Context: PINFCONTEXT,
+  FieldIndex: DWORD,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetIntField*(
+  Context: PINFCONTEXT, FieldIndex: DWORD, IntegerValue: PINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetMultiSzFieldA*(
+  Context: PINFCONTEXT,
+  FieldIndex: DWORD,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetMultiSzFieldW*(
+  Context: PINFCONTEXT,
+  FieldIndex: DWORD,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetBinaryField*(
+  Context: PINFCONTEXT,
+  FieldIndex: DWORD,
+  ReturnBuffer: PBYTE,
+  ReturnBufferSize: DWORD,
+  RequiredSize: LPDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetFileCompressionInfoA*(
+  SourceFileName: PCSTR,
+  ActualSourceFileName: ptr PSTR,
+  SourceFileSize: PDWORD,
+  TargetFileSize: PDWORD,
+  CompressionType: PUINT,
+): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetFileCompressionInfoW*(
+  SourceFileName: PCWSTR,
+  ActualSourceFileName: ptr PWSTR,
+  SourceFileSize: PDWORD,
+  TargetFileSize: PDWORD,
+  CompressionType: PUINT,
+): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetFileCompressionInfoExA*(
+  SourceFileName: PCSTR,
+  ActualSourceFileNameBuffer: PSTR,
+  ActualSourceFileNameBufferLen: DWORD,
+  RequiredBufferLen: PDWORD,
+  SourceFileSize: PDWORD,
+  TargetFileSize: PDWORD,
+  CompressionType: PUINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetFileCompressionInfoExW*(
+  SourceFileName: PCWSTR,
+  ActualSourceFileNameBuffer: PWSTR,
+  ActualSourceFileNameBufferLen: DWORD,
+  RequiredBufferLen: PDWORD,
+  SourceFileSize: PDWORD,
+  TargetFileSize: PDWORD,
+  CompressionType: PUINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDecompressOrCopyFileA*(
+  SourceFileName: PCSTR, TargetFileName: PCSTR, CompressionType: PUINT
+): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDecompressOrCopyFileW*(
+  SourceFileName: PCWSTR, TargetFileName: PCWSTR, CompressionType: PUINT
+): DWORD {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetSourceFileLocationA*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  FileName: PCSTR,
+  SourceId: PUINT,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetSourceFileLocationW*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  FileName: PCWSTR,
+  SourceId: PUINT,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetSourceFileSizeA*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  FileName: PCSTR,
+  Section: PCSTR,
+  FileSize: PDWORD,
+  RoundingFactor: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetSourceFileSizeW*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  FileName: PCWSTR,
+  Section: PCWSTR,
+  FileSize: PDWORD,
+  RoundingFactor: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetTargetPathA*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  Section: PCSTR,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetTargetPathW*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  Section: PCWSTR,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetSourceListA*(
+  Flags: DWORD, SourceList: ptr PCSTR, SourceCount: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetSourceListW*(
+  Flags: DWORD, SourceList: ptr PCWSTR, SourceCount: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCancelTemporarySourceList*(): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc
+.}
+
+proc SetupAddToSourceListA*(
+  Flags: DWORD, Source: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAddToSourceListW*(
+  Flags: DWORD, Source: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveFromSourceListA*(
+  Flags: DWORD, Source: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveFromSourceListW*(
+  Flags: DWORD, Source: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQuerySourceListA*(
+  Flags: DWORD, List: ptr ptr PCSTR, Count: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQuerySourceListW*(
+  Flags: DWORD, List: ptr ptr PCWSTR, Count: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupFreeSourceListA*(
+  List: ptr ptr PCSTR, Count: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupFreeSourceListW*(
+  List: ptr ptr PCWSTR, Count: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupPromptForDiskA*(
+  hwndParent: HWND,
+  DialogTitle: PCSTR,
+  DiskName: PCSTR,
+  PathToSource: PCSTR,
+  FileSought: PCSTR,
+  TagFile: PCSTR,
+  DiskPromptStyle: DWORD,
+  PathBuffer: PSTR,
+  PathBufferSize: DWORD,
+  PathRequiredSize: PDWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupPromptForDiskW*(
+  hwndParent: HWND,
+  DialogTitle: PCWSTR,
+  DiskName: PCWSTR,
+  PathToSource: PCWSTR,
+  FileSought: PCWSTR,
+  TagFile: PCWSTR,
+  DiskPromptStyle: DWORD,
+  PathBuffer: PWSTR,
+  PathBufferSize: DWORD,
+  PathRequiredSize: PDWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCopyErrorA*(
+  hwndParent: HWND,
+  DialogTitle: PCSTR,
+  DiskName: PCSTR,
+  PathToSource: PCSTR,
+  SourceFile: PCSTR,
+  TargetPathFile: PCSTR,
+  Win32ErrorCode: UINT,
+  Style: DWORD,
+  PathBuffer: PSTR,
+  PathBufferSize: DWORD,
+  PathRequiredSize: PDWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCopyErrorW*(
+  hwndParent: HWND,
+  DialogTitle: PCWSTR,
+  DiskName: PCWSTR,
+  PathToSource: PCWSTR,
+  SourceFile: PCWSTR,
+  TargetPathFile: PCWSTR,
+  Win32ErrorCode: UINT,
+  Style: DWORD,
+  PathBuffer: PWSTR,
+  PathBufferSize: DWORD,
+  PathRequiredSize: PDWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRenameErrorA*(
+  hwndParent: HWND,
+  DialogTitle: PCSTR,
+  SourceFile: PCSTR,
+  TargetFile: PCSTR,
+  Win32ErrorCode: UINT,
+  Style: DWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRenameErrorW*(
+  hwndParent: HWND,
+  DialogTitle: PCWSTR,
+  SourceFile: PCWSTR,
+  TargetFile: PCWSTR,
+  Win32ErrorCode: UINT,
+  Style: DWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDeleteErrorA*(
+  hwndParent: HWND, DialogTitle: PCSTR, File: PCSTR, Win32ErrorCode: UINT, Style: DWORD
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDeleteErrorW*(
+  hwndParent: HWND,
+  DialogTitle: PCWSTR,
+  File: PCWSTR,
+  Win32ErrorCode: UINT,
+  Style: DWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupBackupErrorA*(
+  hwndParent: HWND,
+  DialogTitle: PCSTR,
+  SourceFile: PCSTR,
+  TargetFile: PCSTR,
+  Win32ErrorCode: UINT,
+  Style: DWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupBackupErrorW*(
+  hwndParent: HWND,
+  DialogTitle: PCWSTR,
+  SourceFile: PCWSTR,
+  TargetFile: PCWSTR,
+  Win32ErrorCode: UINT,
+  Style: DWORD,
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetDirectoryIdA*(
+  InfHandle: HINF, Id: DWORD, Directory: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetDirectoryIdW*(
+  InfHandle: HINF, Id: DWORD, Directory: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetDirectoryIdExA*(
+  InfHandle: HINF,
+  Id: DWORD,
+  Directory: PCSTR,
+  Flags: DWORD,
+  Reserved1: DWORD,
+  Reserved2: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetDirectoryIdExW*(
+  InfHandle: HINF,
+  Id: DWORD,
+  Directory: PCWSTR,
+  Flags: DWORD,
+  Reserved1: DWORD,
+  Reserved2: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetSourceInfoA*(
+  InfHandle: HINF,
+  SourceId: UINT,
+  InfoDesired: UINT,
+  ReturnBuffer: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetSourceInfoW*(
+  InfHandle: HINF,
+  SourceId: UINT,
+  InfoDesired: UINT,
+  ReturnBuffer: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFileA*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  SourceFile: PCSTR,
+  SourcePathRoot: PCSTR,
+  DestinationName: PCSTR,
+  CopyStyle: DWORD,
+  CopyMsgHandler: PSP_FILE_CALLBACK_A,
+  Context: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFileW*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  SourceFile: PCWSTR,
+  SourcePathRoot: PCWSTR,
+  DestinationName: PCWSTR,
+  CopyStyle: DWORD,
+  CopyMsgHandler: PSP_FILE_CALLBACK_W,
+  Context: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFileExA*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  SourceFile: PCSTR,
+  SourcePathRoot: PCSTR,
+  DestinationName: PCSTR,
+  CopyStyle: DWORD,
+  CopyMsgHandler: PSP_FILE_CALLBACK_A,
+  Context: PVOID,
+  FileWasInUse: PBOOL,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFileExW*(
+  InfHandle: HINF,
+  InfContext: PINFCONTEXT,
+  SourceFile: PCWSTR,
+  SourcePathRoot: PCWSTR,
+  DestinationName: PCWSTR,
+  CopyStyle: DWORD,
+  CopyMsgHandler: PSP_FILE_CALLBACK_W,
+  Context: PVOID,
+  FileWasInUse: PBOOL,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
 proc SetupOpenFileQueue*(): HSPFILEQ {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCloseFileQueue*(QueueHandle: HSPFILEQ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetFileQueueAlternatePlatformA*(QueueHandle: HSPFILEQ, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, AlternateDefaultCatalogFile: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetFileQueueAlternatePlatformW*(QueueHandle: HSPFILEQ, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, AlternateDefaultCatalogFile: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetPlatformPathOverrideA*(Override: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetPlatformPathOverrideW*(Override: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueCopyA*(QueueHandle: HSPFILEQ, SourceRootPath: PCSTR, SourcePath: PCSTR, SourceFilename: PCSTR, SourceDescription: PCSTR, SourceTagfile: PCSTR, TargetDirectory: PCSTR, TargetFilename: PCSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueCopyW*(QueueHandle: HSPFILEQ, SourceRootPath: PCWSTR, SourcePath: PCWSTR, SourceFilename: PCWSTR, SourceDescription: PCWSTR, SourceTagfile: PCWSTR, TargetDirectory: PCWSTR, TargetFilename: PCWSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueCopyIndirectA*(CopyParams: PSP_FILE_COPY_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueCopyIndirectW*(CopyParams: PSP_FILE_COPY_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueDefaultCopyA*(QueueHandle: HSPFILEQ, InfHandle: HINF, SourceRootPath: PCSTR, SourceFilename: PCSTR, TargetFilename: PCSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueDefaultCopyW*(QueueHandle: HSPFILEQ, InfHandle: HINF, SourceRootPath: PCWSTR, SourceFilename: PCWSTR, TargetFilename: PCWSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueCopySectionA*(QueueHandle: HSPFILEQ, SourceRootPath: PCSTR, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueCopySectionW*(QueueHandle: HSPFILEQ, SourceRootPath: PCWSTR, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueDeleteA*(QueueHandle: HSPFILEQ, PathPart1: PCSTR, PathPart2: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueDeleteW*(QueueHandle: HSPFILEQ, PathPart1: PCWSTR, PathPart2: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueDeleteSectionA*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueDeleteSectionW*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueRenameA*(QueueHandle: HSPFILEQ, SourcePath: PCSTR, SourceFilename: PCSTR, TargetPath: PCSTR, TargetFilename: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueRenameW*(QueueHandle: HSPFILEQ, SourcePath: PCWSTR, SourceFilename: PCWSTR, TargetPath: PCWSTR, TargetFilename: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueRenameSectionA*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueueRenameSectionW*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCommitFileQueueA*(Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCommitFileQueueW*(Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupScanFileQueueA*(FileQueue: HSPFILEQ, Flags: DWORD, Window: HWND, CallbackRoutine: PSP_FILE_CALLBACK_A, CallbackContext: PVOID, Result: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupScanFileQueueW*(FileQueue: HSPFILEQ, Flags: DWORD, Window: HWND, CallbackRoutine: PSP_FILE_CALLBACK_W, CallbackContext: PVOID, Result: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetFileQueueCount*(FileQueue: HSPFILEQ, SubQueueFileOp: UINT, NumOperations: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetFileQueueFlags*(FileQueue: HSPFILEQ, Flags: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetFileQueueFlags*(FileQueue: HSPFILEQ, FlagMask: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCopyOEMInfA*(SourceInfFileName: PCSTR, OEMSourceMediaLocation: PCSTR, OEMSourceMediaType: DWORD, CopyStyle: DWORD, DestinationInfFileName: PSTR, DestinationInfFileNameSize: DWORD, RequiredSize: PDWORD, DestinationInfFileNameComponent: ptr PSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCopyOEMInfW*(SourceInfFileName: PCWSTR, OEMSourceMediaLocation: PCWSTR, OEMSourceMediaType: DWORD, CopyStyle: DWORD, DestinationInfFileName: PWSTR, DestinationInfFileNameSize: DWORD, RequiredSize: PDWORD, DestinationInfFileNameComponent: ptr PWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupUninstallOEMInfA*(InfFileName: PCSTR, Flags: DWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupUninstallOEMInfW*(InfFileName: PCWSTR, Flags: DWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupUninstallNewlyCopiedInfs*(FileQueue: HSPFILEQ, Flags: DWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCreateDiskSpaceListA*(Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupCreateDiskSpaceListW*(Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDuplicateDiskSpaceListA*(DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDuplicateDiskSpaceListW*(DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDestroyDiskSpaceList*(DiskSpace: HDSKSPC): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryDrivesInDiskSpaceListA*(DiskSpace: HDSKSPC, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryDrivesInDiskSpaceListW*(DiskSpace: HDSKSPC, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQuerySpaceRequiredOnDriveA*(DiskSpace: HDSKSPC, DriveSpec: PCSTR, SpaceRequired: ptr LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQuerySpaceRequiredOnDriveW*(DiskSpace: HDSKSPC, DriveSpec: PCWSTR, SpaceRequired: ptr LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAdjustDiskSpaceListA*(DiskSpace: HDSKSPC, DriveRoot: LPCSTR, Amount: LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAdjustDiskSpaceListW*(DiskSpace: HDSKSPC, DriveRoot: LPCWSTR, Amount: LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddToDiskSpaceListA*(DiskSpace: HDSKSPC, TargetFilespec: PCSTR, FileSize: LONGLONG, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddToDiskSpaceListW*(DiskSpace: HDSKSPC, TargetFilespec: PCWSTR, FileSize: LONGLONG, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddSectionToDiskSpaceListA*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddSectionToDiskSpaceListW*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCWSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddInstallSectionToDiskSpaceListA*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupAddInstallSectionToDiskSpaceListW*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCWSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveFromDiskSpaceListA*(DiskSpace: HDSKSPC, TargetFilespec: PCSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveFromDiskSpaceListW*(DiskSpace: HDSKSPC, TargetFilespec: PCWSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveSectionFromDiskSpaceListA*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveSectionFromDiskSpaceListW*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCWSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveInstallSectionFromDiskSpaceListA*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveInstallSectionFromDiskSpaceListW*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCWSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupIterateCabinetA*(CabinetFile: PCSTR, Reserved: DWORD, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupIterateCabinetW*(CabinetFile: PCWSTR, Reserved: DWORD, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupPromptReboot*(FileQueue: HSPFILEQ, Owner: HWND, ScanOnly: WINBOOL): INT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInitDefaultQueueCallback*(OwnerWindow: HWND): PVOID {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInitDefaultQueueCallbackEx*(OwnerWindow: HWND, AlternateProgressWindow: HWND, ProgressMessage: UINT, Reserved1: DWORD, Reserved2: PVOID): PVOID {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupTermDefaultQueueCallback*(Context: PVOID): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDefaultQueueCallbackA*(Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDefaultQueueCallbackW*(Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFromInfSectionA*(Owner: HWND, InfHandle: HINF, SectionName: PCSTR, Flags: UINT, RelativeKeyRoot: HKEY, SourceRootPath: PCSTR, CopyFlags: UINT, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFromInfSectionW*(Owner: HWND, InfHandle: HINF, SectionName: PCWSTR, Flags: UINT, RelativeKeyRoot: HKEY, SourceRootPath: PCWSTR, CopyFlags: UINT, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFilesFromInfSectionA*(InfHandle: HINF, LayoutInfHandle: HINF, FileQueue: HSPFILEQ, SectionName: PCSTR, SourceRootPath: PCSTR, CopyFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallFilesFromInfSectionW*(InfHandle: HINF, LayoutInfHandle: HINF, FileQueue: HSPFILEQ, SectionName: PCWSTR, SourceRootPath: PCWSTR, CopyFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallServicesFromInfSectionA*(InfHandle: HINF, SectionName: PCSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallServicesFromInfSectionW*(InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallServicesFromInfSectionExA*(InfHandle: HINF, SectionName: PCSTR, Flags: DWORD, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInstallServicesFromInfSectionExW*(InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc InstallHinfSectionA*(Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCSTR, ShowCommand: INT): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc InstallHinfSectionW*(Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCWSTR, ShowCommand: INT): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInitializeFileLogA*(LogFileName: PCSTR, Flags: DWORD): HSPFILELOG {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupInitializeFileLogW*(LogFileName: PCWSTR, Flags: DWORD): HSPFILELOG {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupTerminateFileLog*(FileLogHandle: HSPFILELOG): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupLogFileA*(FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, SourceFilename: PCSTR, TargetFilename: PCSTR, Checksum: DWORD, DiskTagfile: PCSTR, DiskDescription: PCSTR, OtherInfo: PCSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupLogFileW*(FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, SourceFilename: PCWSTR, TargetFilename: PCWSTR, Checksum: DWORD, DiskTagfile: PCWSTR, DiskDescription: PCWSTR, OtherInfo: PCWSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveFileLogEntryA*(FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, TargetFilename: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupRemoveFileLogEntryW*(FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, TargetFilename: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryFileLogA*(FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, TargetFilename: PCSTR, DesiredInfo: SetupFileLogInfo, DataOut: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupQueryFileLogW*(FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, TargetFilename: PCWSTR, DesiredInfo: SetupFileLogInfo, DataOut: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupOpenLog*(Erase: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupLogErrorA*(MessageString: LPCSTR, Severity: LogSeverity): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupLogErrorW*(MessageString: LPCWSTR, Severity: LogSeverity): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+proc SetupCloseFileQueue*(
+  QueueHandle: HSPFILEQ
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetFileQueueAlternatePlatformA*(
+  QueueHandle: HSPFILEQ,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  AlternateDefaultCatalogFile: PCSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetFileQueueAlternatePlatformW*(
+  QueueHandle: HSPFILEQ,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  AlternateDefaultCatalogFile: PCWSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetPlatformPathOverrideA*(
+  Override: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetPlatformPathOverrideW*(
+  Override: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueCopyA*(
+  QueueHandle: HSPFILEQ,
+  SourceRootPath: PCSTR,
+  SourcePath: PCSTR,
+  SourceFilename: PCSTR,
+  SourceDescription: PCSTR,
+  SourceTagfile: PCSTR,
+  TargetDirectory: PCSTR,
+  TargetFilename: PCSTR,
+  CopyStyle: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueCopyW*(
+  QueueHandle: HSPFILEQ,
+  SourceRootPath: PCWSTR,
+  SourcePath: PCWSTR,
+  SourceFilename: PCWSTR,
+  SourceDescription: PCWSTR,
+  SourceTagfile: PCWSTR,
+  TargetDirectory: PCWSTR,
+  TargetFilename: PCWSTR,
+  CopyStyle: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueCopyIndirectA*(
+  CopyParams: PSP_FILE_COPY_PARAMS_A
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueCopyIndirectW*(
+  CopyParams: PSP_FILE_COPY_PARAMS_W
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueDefaultCopyA*(
+  QueueHandle: HSPFILEQ,
+  InfHandle: HINF,
+  SourceRootPath: PCSTR,
+  SourceFilename: PCSTR,
+  TargetFilename: PCSTR,
+  CopyStyle: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueDefaultCopyW*(
+  QueueHandle: HSPFILEQ,
+  InfHandle: HINF,
+  SourceRootPath: PCWSTR,
+  SourceFilename: PCWSTR,
+  TargetFilename: PCWSTR,
+  CopyStyle: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueCopySectionA*(
+  QueueHandle: HSPFILEQ,
+  SourceRootPath: PCSTR,
+  InfHandle: HINF,
+  ListInfHandle: HINF,
+  Section: PCSTR,
+  CopyStyle: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueCopySectionW*(
+  QueueHandle: HSPFILEQ,
+  SourceRootPath: PCWSTR,
+  InfHandle: HINF,
+  ListInfHandle: HINF,
+  Section: PCWSTR,
+  CopyStyle: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueDeleteA*(
+  QueueHandle: HSPFILEQ, PathPart1: PCSTR, PathPart2: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueDeleteW*(
+  QueueHandle: HSPFILEQ, PathPart1: PCWSTR, PathPart2: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueDeleteSectionA*(
+  QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueDeleteSectionW*(
+  QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueRenameA*(
+  QueueHandle: HSPFILEQ,
+  SourcePath: PCSTR,
+  SourceFilename: PCSTR,
+  TargetPath: PCSTR,
+  TargetFilename: PCSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueRenameW*(
+  QueueHandle: HSPFILEQ,
+  SourcePath: PCWSTR,
+  SourceFilename: PCWSTR,
+  TargetPath: PCWSTR,
+  TargetFilename: PCWSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueRenameSectionA*(
+  QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueueRenameSectionW*(
+  QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCommitFileQueueA*(
+  Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCommitFileQueueW*(
+  Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupScanFileQueueA*(
+  FileQueue: HSPFILEQ,
+  Flags: DWORD,
+  Window: HWND,
+  CallbackRoutine: PSP_FILE_CALLBACK_A,
+  CallbackContext: PVOID,
+  Result: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupScanFileQueueW*(
+  FileQueue: HSPFILEQ,
+  Flags: DWORD,
+  Window: HWND,
+  CallbackRoutine: PSP_FILE_CALLBACK_W,
+  CallbackContext: PVOID,
+  Result: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetFileQueueCount*(
+  FileQueue: HSPFILEQ, SubQueueFileOp: UINT, NumOperations: PUINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetFileQueueFlags*(
+  FileQueue: HSPFILEQ, Flags: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetFileQueueFlags*(
+  FileQueue: HSPFILEQ, FlagMask: DWORD, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCopyOEMInfA*(
+  SourceInfFileName: PCSTR,
+  OEMSourceMediaLocation: PCSTR,
+  OEMSourceMediaType: DWORD,
+  CopyStyle: DWORD,
+  DestinationInfFileName: PSTR,
+  DestinationInfFileNameSize: DWORD,
+  RequiredSize: PDWORD,
+  DestinationInfFileNameComponent: ptr PSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCopyOEMInfW*(
+  SourceInfFileName: PCWSTR,
+  OEMSourceMediaLocation: PCWSTR,
+  OEMSourceMediaType: DWORD,
+  CopyStyle: DWORD,
+  DestinationInfFileName: PWSTR,
+  DestinationInfFileNameSize: DWORD,
+  RequiredSize: PDWORD,
+  DestinationInfFileNameComponent: ptr PWSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupUninstallOEMInfA*(
+  InfFileName: PCSTR, Flags: DWORD, Reserved: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupUninstallOEMInfW*(
+  InfFileName: PCWSTR, Flags: DWORD, Reserved: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupUninstallNewlyCopiedInfs*(
+  FileQueue: HSPFILEQ, Flags: DWORD, Reserved: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCreateDiskSpaceListA*(
+  Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupCreateDiskSpaceListW*(
+  Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDuplicateDiskSpaceListA*(
+  DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDuplicateDiskSpaceListW*(
+  DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDestroyDiskSpaceList*(
+  DiskSpace: HDSKSPC
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryDrivesInDiskSpaceListA*(
+  DiskSpace: HDSKSPC, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryDrivesInDiskSpaceListW*(
+  DiskSpace: HDSKSPC, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQuerySpaceRequiredOnDriveA*(
+  DiskSpace: HDSKSPC,
+  DriveSpec: PCSTR,
+  SpaceRequired: ptr LONGLONG,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQuerySpaceRequiredOnDriveW*(
+  DiskSpace: HDSKSPC,
+  DriveSpec: PCWSTR,
+  SpaceRequired: ptr LONGLONG,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAdjustDiskSpaceListA*(
+  DiskSpace: HDSKSPC,
+  DriveRoot: LPCSTR,
+  Amount: LONGLONG,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAdjustDiskSpaceListW*(
+  DiskSpace: HDSKSPC,
+  DriveRoot: LPCWSTR,
+  Amount: LONGLONG,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAddToDiskSpaceListA*(
+  DiskSpace: HDSKSPC,
+  TargetFilespec: PCSTR,
+  FileSize: LONGLONG,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAddToDiskSpaceListW*(
+  DiskSpace: HDSKSPC,
+  TargetFilespec: PCWSTR,
+  FileSize: LONGLONG,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAddSectionToDiskSpaceListA*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  ListInfHandle: HINF,
+  SectionName: PCSTR,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAddSectionToDiskSpaceListW*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  ListInfHandle: HINF,
+  SectionName: PCWSTR,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAddInstallSectionToDiskSpaceListA*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  LayoutInfHandle: HINF,
+  SectionName: PCSTR,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupAddInstallSectionToDiskSpaceListW*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  LayoutInfHandle: HINF,
+  SectionName: PCWSTR,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveFromDiskSpaceListA*(
+  DiskSpace: HDSKSPC,
+  TargetFilespec: PCSTR,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveFromDiskSpaceListW*(
+  DiskSpace: HDSKSPC,
+  TargetFilespec: PCWSTR,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveSectionFromDiskSpaceListA*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  ListInfHandle: HINF,
+  SectionName: PCSTR,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveSectionFromDiskSpaceListW*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  ListInfHandle: HINF,
+  SectionName: PCWSTR,
+  Operation: UINT,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveInstallSectionFromDiskSpaceListA*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  LayoutInfHandle: HINF,
+  SectionName: PCSTR,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveInstallSectionFromDiskSpaceListW*(
+  DiskSpace: HDSKSPC,
+  InfHandle: HINF,
+  LayoutInfHandle: HINF,
+  SectionName: PCWSTR,
+  Reserved1: PVOID,
+  Reserved2: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupIterateCabinetA*(
+  CabinetFile: PCSTR, Reserved: DWORD, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupIterateCabinetW*(
+  CabinetFile: PCWSTR, Reserved: DWORD, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupPromptReboot*(
+  FileQueue: HSPFILEQ, Owner: HWND, ScanOnly: WINBOOL
+): INT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInitDefaultQueueCallback*(
+  OwnerWindow: HWND
+): PVOID {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInitDefaultQueueCallbackEx*(
+  OwnerWindow: HWND,
+  AlternateProgressWindow: HWND,
+  ProgressMessage: UINT,
+  Reserved1: DWORD,
+  Reserved2: PVOID,
+): PVOID {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupTermDefaultQueueCallback*(
+  Context: PVOID
+): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDefaultQueueCallbackA*(
+  Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDefaultQueueCallbackW*(
+  Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR
+): UINT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFromInfSectionA*(
+  Owner: HWND,
+  InfHandle: HINF,
+  SectionName: PCSTR,
+  Flags: UINT,
+  RelativeKeyRoot: HKEY,
+  SourceRootPath: PCSTR,
+  CopyFlags: UINT,
+  MsgHandler: PSP_FILE_CALLBACK_A,
+  Context: PVOID,
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFromInfSectionW*(
+  Owner: HWND,
+  InfHandle: HINF,
+  SectionName: PCWSTR,
+  Flags: UINT,
+  RelativeKeyRoot: HKEY,
+  SourceRootPath: PCWSTR,
+  CopyFlags: UINT,
+  MsgHandler: PSP_FILE_CALLBACK_W,
+  Context: PVOID,
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFilesFromInfSectionA*(
+  InfHandle: HINF,
+  LayoutInfHandle: HINF,
+  FileQueue: HSPFILEQ,
+  SectionName: PCSTR,
+  SourceRootPath: PCSTR,
+  CopyFlags: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallFilesFromInfSectionW*(
+  InfHandle: HINF,
+  LayoutInfHandle: HINF,
+  FileQueue: HSPFILEQ,
+  SectionName: PCWSTR,
+  SourceRootPath: PCWSTR,
+  CopyFlags: UINT,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallServicesFromInfSectionA*(
+  InfHandle: HINF, SectionName: PCSTR, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallServicesFromInfSectionW*(
+  InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallServicesFromInfSectionExA*(
+  InfHandle: HINF,
+  SectionName: PCSTR,
+  Flags: DWORD,
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Reserved1: PVOID,
+  Reserved2: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInstallServicesFromInfSectionExW*(
+  InfHandle: HINF,
+  SectionName: PCWSTR,
+  Flags: DWORD,
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Reserved1: PVOID,
+  Reserved2: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc InstallHinfSectionA*(
+  Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCSTR, ShowCommand: INT
+): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc InstallHinfSectionW*(
+  Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCWSTR, ShowCommand: INT
+): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInitializeFileLogA*(
+  LogFileName: PCSTR, Flags: DWORD
+): HSPFILELOG {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupInitializeFileLogW*(
+  LogFileName: PCWSTR, Flags: DWORD
+): HSPFILELOG {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupTerminateFileLog*(
+  FileLogHandle: HSPFILELOG
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupLogFileA*(
+  FileLogHandle: HSPFILELOG,
+  LogSectionName: PCSTR,
+  SourceFilename: PCSTR,
+  TargetFilename: PCSTR,
+  Checksum: DWORD,
+  DiskTagfile: PCSTR,
+  DiskDescription: PCSTR,
+  OtherInfo: PCSTR,
+  Flags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupLogFileW*(
+  FileLogHandle: HSPFILELOG,
+  LogSectionName: PCWSTR,
+  SourceFilename: PCWSTR,
+  TargetFilename: PCWSTR,
+  Checksum: DWORD,
+  DiskTagfile: PCWSTR,
+  DiskDescription: PCWSTR,
+  OtherInfo: PCWSTR,
+  Flags: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveFileLogEntryA*(
+  FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, TargetFilename: PCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupRemoveFileLogEntryW*(
+  FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, TargetFilename: PCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryFileLogA*(
+  FileLogHandle: HSPFILELOG,
+  LogSectionName: PCSTR,
+  TargetFilename: PCSTR,
+  DesiredInfo: SetupFileLogInfo,
+  DataOut: PSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupQueryFileLogW*(
+  FileLogHandle: HSPFILELOG,
+  LogSectionName: PCWSTR,
+  TargetFilename: PCWSTR,
+  DesiredInfo: SetupFileLogInfo,
+  DataOut: PWSTR,
+  ReturnBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupOpenLog*(
+  Erase: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupLogErrorA*(
+  MessageString: LPCSTR, Severity: LogSeverity
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupLogErrorW*(
+  MessageString: LPCWSTR, Severity: LogSeverity
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
 proc SetupCloseLog*(): VOID {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetBackupInformationA*(QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetBackupInformationW*(QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupPrepareQueueForRestoreA*(QueueHandle: HSPFILEQ, BackupPath: PCSTR, RestoreFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupPrepareQueueForRestoreW*(QueueHandle: HSPFILEQ, BackupPath: PCWSTR, RestoreFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupSetNonInteractiveMode*(NonInteractiveFlag: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupGetNonInteractiveMode*(): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInfoList*(ClassGuid: ptr GUID, hwndParent: HWND): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInfoListExA*(ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInfoListExW*(ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCWSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInfoListClass*(DeviceInfoSet: HDEVINFO, ClassGuid: LPGUID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInfoListDetailA*(DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInfoListDetailW*(DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInfoA*(DeviceInfoSet: HDEVINFO, DeviceName: PCSTR, ClassGuid: ptr GUID, DeviceDescription: PCSTR, hwndParent: HWND, CreationFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInfoW*(DeviceInfoSet: HDEVINFO, DeviceName: PCWSTR, ClassGuid: ptr GUID, DeviceDescription: PCWSTR, hwndParent: HWND, CreationFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenDeviceInfoA*(DeviceInfoSet: HDEVINFO, DeviceInstanceId: PCSTR, hwndParent: HWND, OpenFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenDeviceInfoW*(DeviceInfoSet: HDEVINFO, DeviceInstanceId: PCWSTR, hwndParent: HWND, OpenFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInstanceIdA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstanceId: PSTR, DeviceInstanceIdSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInstanceIdW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstanceId: PWSTR, DeviceInstanceIdSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDeleteDeviceInfo*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiEnumDeviceInfo*(DeviceInfoSet: HDEVINFO, MemberIndex: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDestroyDeviceInfoList*(DeviceInfoSet: HDEVINFO): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiEnumDeviceInterfaces*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, MemberIndex: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiEnumInterfaceDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, MemberIndex: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiEnumDeviceInterfaces".}
-proc SetupDiCreateDeviceInterfaceA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInterfaceW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCWSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateInterfaceDeviceW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCWSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceW".}
-proc SetupDiCreateInterfaceDeviceA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceA".}
-proc SetupDiOpenDeviceInterfaceA*(DeviceInfoSet: HDEVINFO, DevicePath: PCSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenDeviceInterfaceW*(DeviceInfoSet: HDEVINFO, DevicePath: PCWSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenInterfaceDeviceW*(DeviceInfoSet: HDEVINFO, DevicePath: PCWSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceW".}
-proc SetupDiOpenInterfaceDeviceA*(DeviceInfoSet: HDEVINFO, DevicePath: PCSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceA".}
-proc SetupDiGetDeviceInterfaceAlias*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, AliasInterfaceClassGuid: ptr GUID, AliasDeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetInterfaceDeviceAlias*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, AliasInterfaceClassGuid: ptr GUID, AliasDeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceAlias".}
-proc SetupDiDeleteDeviceInterfaceData*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDeleteInterfaceDeviceData*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiDeleteDeviceInterfaceData".}
-proc SetupDiRemoveDeviceInterface*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiRemoveInterfaceDevice*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiRemoveDeviceInterface".}
-proc SetupDiGetDeviceInterfaceDetailA*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInterfaceDetailW*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetInterfaceDeviceDetailW*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailW".}
-proc SetupDiGetInterfaceDeviceDetailA*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailA".}
-proc SetupDiInstallDeviceInterfaces*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiInstallInterfaceDevices*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallDeviceInterfaces".}
-proc SetupDiSetDeviceInterfaceDefault*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Flags: DWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiRegisterDeviceInfo*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Flags: DWORD, CompareProc: PSP_DETSIG_CMPPROC, CompareContext: PVOID, DupDeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiBuildDriverInfoList*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCancelDriverInfoSearch*(DeviceInfoSet: HDEVINFO): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiEnumDriverInfoA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD, MemberIndex: DWORD, DriverInfoData: PSP_DRVINFO_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiEnumDriverInfoW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD, MemberIndex: DWORD, DriverInfoData: PSP_DRVINFO_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetSelectedDriverA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetSelectedDriverW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetSelectedDriverA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetSelectedDriverW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDriverInfoDetailA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A, DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_A, DriverInfoDetailDataSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDriverInfoDetailW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W, DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_W, DriverInfoDetailDataSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDestroyDriverInfoList*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDevsA*(ClassGuid: ptr GUID, Enumerator: PCSTR, hwndParent: HWND, Flags: DWORD): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDevsW*(ClassGuid: ptr GUID, Enumerator: PCWSTR, hwndParent: HWND, Flags: DWORD): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDevsExA*(ClassGuid: ptr GUID, Enumerator: PCSTR, hwndParent: HWND, Flags: DWORD, DeviceInfoSet: HDEVINFO, MachineName: PCSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDevsExW*(ClassGuid: ptr GUID, Enumerator: PCWSTR, hwndParent: HWND, Flags: DWORD, DeviceInfoSet: HDEVINFO, MachineName: PCWSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetINFClassA*(InfName: PCSTR, ClassGuid: LPGUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetINFClassW*(InfName: PCWSTR, ClassGuid: LPGUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiBuildClassInfoList*(Flags: DWORD, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiBuildClassInfoListExA*(Flags: DWORD, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiBuildClassInfoListExW*(Flags: DWORD, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDescriptionA*(ClassGuid: ptr GUID, ClassDescription: PSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDescriptionW*(ClassGuid: ptr GUID, ClassDescription: PWSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDescriptionExA*(ClassGuid: ptr GUID, ClassDescription: PSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDescriptionExW*(ClassGuid: ptr GUID, ClassDescription: PWSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCallClassInstaller*(InstallFunction: DI_FUNCTION, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSelectDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSelectBestCompatDrv*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiInstallDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiInstallDriverFiles*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiRegisterCoDeviceInstallers*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiRemoveDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiUnremoveDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiRestartDevices*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiChangeState*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiInstallClassA*(hwndParent: HWND, InfFileName: PCSTR, Flags: DWORD, FileQueue: HSPFILEQ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiInstallClassW*(hwndParent: HWND, InfFileName: PCWSTR, Flags: DWORD, FileQueue: HSPFILEQ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiInstallClassExA*(hwndParent: HWND, InfFileName: PCSTR, Flags: DWORD, FileQueue: HSPFILEQ, InterfaceClassGuid: ptr GUID, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiInstallClassExW*(hwndParent: HWND, InfFileName: PCWSTR, Flags: DWORD, FileQueue: HSPFILEQ, InterfaceClassGuid: ptr GUID, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenClassRegKey*(ClassGuid: ptr GUID, samDesired: REGSAM): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenClassRegKeyExA*(ClassGuid: ptr GUID, samDesired: REGSAM, Flags: DWORD, MachineName: PCSTR, Reserved: PVOID): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenClassRegKeyExW*(ClassGuid: ptr GUID, samDesired: REGSAM, Flags: DWORD, MachineName: PCWSTR, Reserved: PVOID): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInterfaceRegKeyA*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDeviceInterfaceRegKeyW*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCWSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateInterfaceDeviceRegKeyW*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCWSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyW".}
-proc SetupDiCreateInterfaceDeviceRegKeyA*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyA".}
-proc SetupDiOpenDeviceInterfaceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenInterfaceDeviceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceRegKey".}
-proc SetupDiDeleteDeviceInterfaceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDeleteInterfaceDeviceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiDeleteDeviceInterfaceRegKey".}
-proc SetupDiCreateDevRegKeyA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Scope: DWORD, HwProfile: DWORD, KeyType: DWORD, InfHandle: HINF, InfSectionName: PCSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiCreateDevRegKeyW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Scope: DWORD, HwProfile: DWORD, KeyType: DWORD, InfHandle: HINF, InfSectionName: PCWSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiOpenDevRegKey*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Scope: DWORD, HwProfile: DWORD, KeyType: DWORD, samDesired: REGSAM): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDeleteDevRegKey*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Scope: DWORD, HwProfile: DWORD, KeyType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetHwProfileList*(HwProfileList: PDWORD, HwProfileListSize: DWORD, RequiredSize: PDWORD, CurrentlyActiveIndex: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetHwProfileListExA*(HwProfileList: PDWORD, HwProfileListSize: DWORD, RequiredSize: PDWORD, CurrentlyActiveIndex: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetHwProfileListExW*(HwProfileList: PDWORD, HwProfileListSize: DWORD, RequiredSize: PDWORD, CurrentlyActiveIndex: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceRegistryPropertyA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceRegistryPropertyW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassRegistryPropertyA*(ClassGuid: ptr GUID, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassRegistryPropertyW*(ClassGuid: ptr GUID, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetDeviceRegistryPropertyA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetDeviceRegistryPropertyW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetClassRegistryPropertyA*(ClassGuid: ptr GUID, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetClassRegistryPropertyW*(ClassGuid: ptr GUID, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInstallParamsA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDeviceInstallParamsW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassInstallParamsA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassInstallParamsW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetDeviceInstallParamsA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetDeviceInstallParamsW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetClassInstallParamsA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetClassInstallParamsW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDriverInstallParamsA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetDriverInstallParamsW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetDriverInstallParamsA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetDriverInstallParamsW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiLoadClassIcon*(ClassGuid: ptr GUID, LargeIcon: ptr HICON, MiniIconIndex: PINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDrawMiniIcon*(hdc: HDC, rc: RECT, MiniIconIndex: INT, Flags: DWORD): INT {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassBitmapIndex*(ClassGuid: ptr GUID, MiniIconIndex: PINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassImageList*(ClassImageListData: PSP_CLASSIMAGELIST_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassImageListExA*(ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassImageListExW*(ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassImageIndex*(ClassImageListData: PSP_CLASSIMAGELIST_DATA, ClassGuid: ptr GUID, ImageIndex: PINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiDestroyClassImageList*(ClassImageListData: PSP_CLASSIMAGELIST_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDevPropertySheetsA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, PropertySheetHeader: LPPROPSHEETHEADERA, PropertySheetHeaderPageListSize: DWORD, RequiredSize: PDWORD, PropertySheetType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetClassDevPropertySheetsW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, PropertySheetHeader: LPPROPSHEETHEADERW, PropertySheetHeaderPageListSize: DWORD, RequiredSize: PDWORD, PropertySheetType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiAskForOEMDisk*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSelectOEMDrv*(hwndParent: HWND, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassNameFromGuidA*(ClassGuid: ptr GUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassNameFromGuidW*(ClassGuid: ptr GUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassNameFromGuidExA*(ClassGuid: ptr GUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassNameFromGuidExW*(ClassGuid: ptr GUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassGuidsFromNameA*(ClassName: PCSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassGuidsFromNameW*(ClassName: PCWSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassGuidsFromNameExA*(ClassName: PCSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiClassGuidsFromNameExW*(ClassName: PCWSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetHwProfileFriendlyNameA*(HwProfile: DWORD, FriendlyName: PSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetHwProfileFriendlyNameW*(HwProfile: DWORD, FriendlyName: PWSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetHwProfileFriendlyNameExA*(HwProfile: DWORD, FriendlyName: PSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetHwProfileFriendlyNameExW*(HwProfile: DWORD, FriendlyName: PWSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetWizardPage*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InstallWizardData: PSP_INSTALLWIZARD_DATA, PageType: DWORD, Flags: DWORD): HPROPSHEETPAGE {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetSelectedDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiSetSelectedDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetActualModelsSectionA*(Context: PINFCONTEXT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetActualModelsSectionW*(Context: PINFCONTEXT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PWSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetActualSectionToInstallA*(InfHandle: HINF, InfSectionName: PCSTR, InfSectionWithExt: PSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetActualSectionToInstallW*(InfHandle: HINF, InfSectionName: PCWSTR, InfSectionWithExt: PWSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetActualSectionToInstallExA*(InfHandle: HINF, InfSectionName: PCSTR, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetActualSectionToInstallExW*(InfHandle: HINF, InfSectionName: PCWSTR, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PWSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupEnumInfSectionsA*(InfHandle: HINF, Index: UINT, Buffer: PSTR, Size: UINT, SizeNeeded: ptr UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupEnumInfSectionsW*(InfHandle: HINF, Index: UINT, Buffer: PWSTR, Size: UINT, SizeNeeded: ptr UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupVerifyInfFileA*(InfName: PCSTR, AltPlatformInfo: PSP_ALTPLATFORM_INFO, InfSignerInfo: PSP_INF_SIGNER_INFO_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupVerifyInfFileW*(InfName: PCWSTR, AltPlatformInfo: PSP_ALTPLATFORM_INFO, InfSignerInfo: PSP_INF_SIGNER_INFO_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetCustomDevicePropertyA*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, CustomPropertyName: PCSTR, Flags: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupDiGetCustomDevicePropertyW*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, CustomPropertyName: PCWSTR, Flags: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupConfigureWmiFromInfSectionA*(InfHandle: HINF, SectionName: PCSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc SetupConfigureWmiFromInfSectionW*(InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
-proc `Reserved=`*(self: var SP_ALTPLATFORM_INFO_V2, x: WORD) {.inline.} = self.union1.Reserved = x
-proc Reserved*(self: SP_ALTPLATFORM_INFO_V2): WORD {.inline.} = self.union1.Reserved
-proc Reserved*(self: var SP_ALTPLATFORM_INFO_V2): var WORD {.inline.} = self.union1.Reserved
-proc `Flags=`*(self: var SP_ALTPLATFORM_INFO_V2, x: WORD) {.inline.} = self.union1.Flags = x
-proc Flags*(self: SP_ALTPLATFORM_INFO_V2): WORD {.inline.} = self.union1.Flags
-proc Flags*(self: var SP_ALTPLATFORM_INFO_V2): var WORD {.inline.} = self.union1.Flags
+proc SetupGetBackupInformationA*(
+  QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_A
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetBackupInformationW*(
+  QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_W
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupPrepareQueueForRestoreA*(
+  QueueHandle: HSPFILEQ, BackupPath: PCSTR, RestoreFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupPrepareQueueForRestoreW*(
+  QueueHandle: HSPFILEQ, BackupPath: PCWSTR, RestoreFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupSetNonInteractiveMode*(
+  NonInteractiveFlag: WINBOOL
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupGetNonInteractiveMode*(): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc
+.}
+
+proc SetupDiCreateDeviceInfoList*(
+  ClassGuid: ptr GUID, hwndParent: HWND
+): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDeviceInfoListExA*(
+  ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCSTR, Reserved: PVOID
+): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDeviceInfoListExW*(
+  ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCWSTR, Reserved: PVOID
+): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInfoListClass*(
+  DeviceInfoSet: HDEVINFO, ClassGuid: LPGUID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInfoListDetailA*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_A
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInfoListDetailW*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_W
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDeviceInfoA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceName: PCSTR,
+  ClassGuid: ptr GUID,
+  DeviceDescription: PCSTR,
+  hwndParent: HWND,
+  CreationFlags: DWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDeviceInfoW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceName: PCWSTR,
+  ClassGuid: ptr GUID,
+  DeviceDescription: PCWSTR,
+  hwndParent: HWND,
+  CreationFlags: DWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenDeviceInfoA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInstanceId: PCSTR,
+  hwndParent: HWND,
+  OpenFlags: DWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenDeviceInfoW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInstanceId: PCWSTR,
+  hwndParent: HWND,
+  OpenFlags: DWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInstanceIdA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DeviceInstanceId: PSTR,
+  DeviceInstanceIdSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInstanceIdW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DeviceInstanceId: PWSTR,
+  DeviceInstanceIdSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDeleteDeviceInfo*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiEnumDeviceInfo*(
+  DeviceInfoSet: HDEVINFO, MemberIndex: DWORD, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDestroyDeviceInfoList*(
+  DeviceInfoSet: HDEVINFO
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiEnumDeviceInterfaces*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  InterfaceClassGuid: ptr GUID,
+  MemberIndex: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiEnumInterfaceDevice*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  InterfaceClassGuid: ptr GUID,
+  MemberIndex: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiEnumDeviceInterfaces"
+.}
+
+proc SetupDiCreateDeviceInterfaceA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  InterfaceClassGuid: ptr GUID,
+  ReferenceString: PCSTR,
+  CreationFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDeviceInterfaceW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  InterfaceClassGuid: ptr GUID,
+  ReferenceString: PCWSTR,
+  CreationFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateInterfaceDeviceW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  InterfaceClassGuid: ptr GUID,
+  ReferenceString: PCWSTR,
+  CreationFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceW"
+.}
+
+proc SetupDiCreateInterfaceDeviceA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  InterfaceClassGuid: ptr GUID,
+  ReferenceString: PCSTR,
+  CreationFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceA"
+.}
+
+proc SetupDiOpenDeviceInterfaceA*(
+  DeviceInfoSet: HDEVINFO,
+  DevicePath: PCSTR,
+  OpenFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenDeviceInterfaceW*(
+  DeviceInfoSet: HDEVINFO,
+  DevicePath: PCWSTR,
+  OpenFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenInterfaceDeviceW*(
+  DeviceInfoSet: HDEVINFO,
+  DevicePath: PCWSTR,
+  OpenFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceW"
+.}
+
+proc SetupDiOpenInterfaceDeviceA*(
+  DeviceInfoSet: HDEVINFO,
+  DevicePath: PCSTR,
+  OpenFlags: DWORD,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceA"
+.}
+
+proc SetupDiGetDeviceInterfaceAlias*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  AliasInterfaceClassGuid: ptr GUID,
+  AliasDeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetInterfaceDeviceAlias*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  AliasInterfaceClassGuid: ptr GUID,
+  AliasDeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceAlias"
+.}
+
+proc SetupDiDeleteDeviceInterfaceData*(
+  DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDeleteInterfaceDeviceData*(
+  DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiDeleteDeviceInterfaceData"
+.}
+
+proc SetupDiRemoveDeviceInterface*(
+  DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiRemoveInterfaceDevice*(
+  DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiRemoveDeviceInterface"
+.}
+
+proc SetupDiGetDeviceInterfaceDetailA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A,
+  DeviceInterfaceDetailDataSize: DWORD,
+  RequiredSize: PDWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInterfaceDetailW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W,
+  DeviceInterfaceDetailDataSize: DWORD,
+  RequiredSize: PDWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetInterfaceDeviceDetailW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W,
+  DeviceInterfaceDetailDataSize: DWORD,
+  RequiredSize: PDWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailW"
+.}
+
+proc SetupDiGetInterfaceDeviceDetailA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A,
+  DeviceInterfaceDetailDataSize: DWORD,
+  RequiredSize: PDWORD,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailA"
+.}
+
+proc SetupDiInstallDeviceInterfaces*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiInstallInterfaceDevices*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallDeviceInterfaces"
+.}
+
+proc SetupDiSetDeviceInterfaceDefault*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Flags: DWORD,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiRegisterDeviceInfo*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Flags: DWORD,
+  CompareProc: PSP_DETSIG_CMPPROC,
+  CompareContext: PVOID,
+  DupDeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiBuildDriverInfoList*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCancelDriverInfoSearch*(
+  DeviceInfoSet: HDEVINFO
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiEnumDriverInfoA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverType: DWORD,
+  MemberIndex: DWORD,
+  DriverInfoData: PSP_DRVINFO_DATA_A,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiEnumDriverInfoW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverType: DWORD,
+  MemberIndex: DWORD,
+  DriverInfoData: PSP_DRVINFO_DATA_W,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetSelectedDriverA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_A,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetSelectedDriverW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_W,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetSelectedDriverA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_A,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetSelectedDriverW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_W,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDriverInfoDetailA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_A,
+  DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_A,
+  DriverInfoDetailDataSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDriverInfoDetailW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_W,
+  DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_W,
+  DriverInfoDetailDataSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDestroyDriverInfoList*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDevsA*(
+  ClassGuid: ptr GUID, Enumerator: PCSTR, hwndParent: HWND, Flags: DWORD
+): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDevsW*(
+  ClassGuid: ptr GUID, Enumerator: PCWSTR, hwndParent: HWND, Flags: DWORD
+): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDevsExA*(
+  ClassGuid: ptr GUID,
+  Enumerator: PCSTR,
+  hwndParent: HWND,
+  Flags: DWORD,
+  DeviceInfoSet: HDEVINFO,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDevsExW*(
+  ClassGuid: ptr GUID,
+  Enumerator: PCWSTR,
+  hwndParent: HWND,
+  Flags: DWORD,
+  DeviceInfoSet: HDEVINFO,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetINFClassA*(
+  InfName: PCSTR,
+  ClassGuid: LPGUID,
+  ClassName: PSTR,
+  ClassNameSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetINFClassW*(
+  InfName: PCWSTR,
+  ClassGuid: LPGUID,
+  ClassName: PWSTR,
+  ClassNameSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiBuildClassInfoList*(
+  Flags: DWORD, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiBuildClassInfoListExA*(
+  Flags: DWORD,
+  ClassGuidList: LPGUID,
+  ClassGuidListSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiBuildClassInfoListExW*(
+  Flags: DWORD,
+  ClassGuidList: LPGUID,
+  ClassGuidListSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDescriptionA*(
+  ClassGuid: ptr GUID,
+  ClassDescription: PSTR,
+  ClassDescriptionSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDescriptionW*(
+  ClassGuid: ptr GUID,
+  ClassDescription: PWSTR,
+  ClassDescriptionSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDescriptionExA*(
+  ClassGuid: ptr GUID,
+  ClassDescription: PSTR,
+  ClassDescriptionSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDescriptionExW*(
+  ClassGuid: ptr GUID,
+  ClassDescription: PWSTR,
+  ClassDescriptionSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCallClassInstaller*(
+  InstallFunction: DI_FUNCTION,
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSelectDevice*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSelectBestCompatDrv*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiInstallDevice*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiInstallDriverFiles*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiRegisterCoDeviceInstallers*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiRemoveDevice*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiUnremoveDevice*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiRestartDevices*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiChangeState*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiInstallClassA*(
+  hwndParent: HWND, InfFileName: PCSTR, Flags: DWORD, FileQueue: HSPFILEQ
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiInstallClassW*(
+  hwndParent: HWND, InfFileName: PCWSTR, Flags: DWORD, FileQueue: HSPFILEQ
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiInstallClassExA*(
+  hwndParent: HWND,
+  InfFileName: PCSTR,
+  Flags: DWORD,
+  FileQueue: HSPFILEQ,
+  InterfaceClassGuid: ptr GUID,
+  Reserved1: PVOID,
+  Reserved2: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiInstallClassExW*(
+  hwndParent: HWND,
+  InfFileName: PCWSTR,
+  Flags: DWORD,
+  FileQueue: HSPFILEQ,
+  InterfaceClassGuid: ptr GUID,
+  Reserved1: PVOID,
+  Reserved2: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenClassRegKey*(
+  ClassGuid: ptr GUID, samDesired: REGSAM
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenClassRegKeyExA*(
+  ClassGuid: ptr GUID,
+  samDesired: REGSAM,
+  Flags: DWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenClassRegKeyExW*(
+  ClassGuid: ptr GUID,
+  samDesired: REGSAM,
+  Flags: DWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDeviceInterfaceRegKeyA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+  samDesired: REGSAM,
+  InfHandle: HINF,
+  InfSectionName: PCSTR,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDeviceInterfaceRegKeyW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+  samDesired: REGSAM,
+  InfHandle: HINF,
+  InfSectionName: PCWSTR,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateInterfaceDeviceRegKeyW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+  samDesired: REGSAM,
+  InfHandle: HINF,
+  InfSectionName: PCWSTR,
+): HKEY {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyW"
+.}
+
+proc SetupDiCreateInterfaceDeviceRegKeyA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+  samDesired: REGSAM,
+  InfHandle: HINF,
+  InfSectionName: PCSTR,
+): HKEY {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyA"
+.}
+
+proc SetupDiOpenDeviceInterfaceRegKey*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+  samDesired: REGSAM,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenInterfaceDeviceRegKey*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+  samDesired: REGSAM,
+): HKEY {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceRegKey"
+.}
+
+proc SetupDiDeleteDeviceInterfaceRegKey*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDeleteInterfaceDeviceRegKey*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  Reserved: DWORD,
+): WINBOOL {.
+  winapi, stdcall, dynlib: "setupapi", importc: "SetupDiDeleteDeviceInterfaceRegKey"
+.}
+
+proc SetupDiCreateDevRegKeyA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Scope: DWORD,
+  HwProfile: DWORD,
+  KeyType: DWORD,
+  InfHandle: HINF,
+  InfSectionName: PCSTR,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiCreateDevRegKeyW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Scope: DWORD,
+  HwProfile: DWORD,
+  KeyType: DWORD,
+  InfHandle: HINF,
+  InfSectionName: PCWSTR,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiOpenDevRegKey*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Scope: DWORD,
+  HwProfile: DWORD,
+  KeyType: DWORD,
+  samDesired: REGSAM,
+): HKEY {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDeleteDevRegKey*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Scope: DWORD,
+  HwProfile: DWORD,
+  KeyType: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetHwProfileList*(
+  HwProfileList: PDWORD,
+  HwProfileListSize: DWORD,
+  RequiredSize: PDWORD,
+  CurrentlyActiveIndex: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetHwProfileListExA*(
+  HwProfileList: PDWORD,
+  HwProfileListSize: DWORD,
+  RequiredSize: PDWORD,
+  CurrentlyActiveIndex: PDWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetHwProfileListExW*(
+  HwProfileList: PDWORD,
+  HwProfileListSize: DWORD,
+  RequiredSize: PDWORD,
+  CurrentlyActiveIndex: PDWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceRegistryPropertyA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Property: DWORD,
+  PropertyRegDataType: PDWORD,
+  PropertyBuffer: PBYTE,
+  PropertyBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceRegistryPropertyW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Property: DWORD,
+  PropertyRegDataType: PDWORD,
+  PropertyBuffer: PBYTE,
+  PropertyBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassRegistryPropertyA*(
+  ClassGuid: ptr GUID,
+  Property: DWORD,
+  PropertyRegDataType: PDWORD,
+  PropertyBuffer: PBYTE,
+  PropertyBufferSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassRegistryPropertyW*(
+  ClassGuid: ptr GUID,
+  Property: DWORD,
+  PropertyRegDataType: PDWORD,
+  PropertyBuffer: PBYTE,
+  PropertyBufferSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetDeviceRegistryPropertyA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Property: DWORD,
+  PropertyBuffer: ptr BYTE,
+  PropertyBufferSize: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetDeviceRegistryPropertyW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  Property: DWORD,
+  PropertyBuffer: ptr BYTE,
+  PropertyBufferSize: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetClassRegistryPropertyA*(
+  ClassGuid: ptr GUID,
+  Property: DWORD,
+  PropertyBuffer: ptr BYTE,
+  PropertyBufferSize: DWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetClassRegistryPropertyW*(
+  ClassGuid: ptr GUID,
+  Property: DWORD,
+  PropertyBuffer: ptr BYTE,
+  PropertyBufferSize: DWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInstallParamsA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDeviceInstallParamsW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassInstallParamsA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+  ClassInstallParamsSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassInstallParamsW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+  ClassInstallParamsSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetDeviceInstallParamsA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetDeviceInstallParamsW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetClassInstallParamsA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+  ClassInstallParamsSize: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetClassInstallParamsW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+  ClassInstallParamsSize: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDriverInstallParamsA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_A,
+  DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetDriverInstallParamsW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_W,
+  DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetDriverInstallParamsA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_A,
+  DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetDriverInstallParamsW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  DriverInfoData: PSP_DRVINFO_DATA_W,
+  DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiLoadClassIcon*(
+  ClassGuid: ptr GUID, LargeIcon: ptr HICON, MiniIconIndex: PINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDrawMiniIcon*(
+  hdc: HDC, rc: RECT, MiniIconIndex: INT, Flags: DWORD
+): INT {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassBitmapIndex*(
+  ClassGuid: ptr GUID, MiniIconIndex: PINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassImageList*(
+  ClassImageListData: PSP_CLASSIMAGELIST_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassImageListExA*(
+  ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCSTR, Reserved: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassImageListExW*(
+  ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCWSTR, Reserved: PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassImageIndex*(
+  ClassImageListData: PSP_CLASSIMAGELIST_DATA, ClassGuid: ptr GUID, ImageIndex: PINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiDestroyClassImageList*(
+  ClassImageListData: PSP_CLASSIMAGELIST_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDevPropertySheetsA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  PropertySheetHeader: LPPROPSHEETHEADERA,
+  PropertySheetHeaderPageListSize: DWORD,
+  RequiredSize: PDWORD,
+  PropertySheetType: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetClassDevPropertySheetsW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  PropertySheetHeader: LPPROPSHEETHEADERW,
+  PropertySheetHeaderPageListSize: DWORD,
+  RequiredSize: PDWORD,
+  PropertySheetType: DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiAskForOEMDisk*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSelectOEMDrv*(
+  hwndParent: HWND, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassNameFromGuidA*(
+  ClassGuid: ptr GUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassNameFromGuidW*(
+  ClassGuid: ptr GUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassNameFromGuidExA*(
+  ClassGuid: ptr GUID,
+  ClassName: PSTR,
+  ClassNameSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassNameFromGuidExW*(
+  ClassGuid: ptr GUID,
+  ClassName: PWSTR,
+  ClassNameSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassGuidsFromNameA*(
+  ClassName: PCSTR,
+  ClassGuidList: LPGUID,
+  ClassGuidListSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassGuidsFromNameW*(
+  ClassName: PCWSTR,
+  ClassGuidList: LPGUID,
+  ClassGuidListSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassGuidsFromNameExA*(
+  ClassName: PCSTR,
+  ClassGuidList: LPGUID,
+  ClassGuidListSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiClassGuidsFromNameExW*(
+  ClassName: PCWSTR,
+  ClassGuidList: LPGUID,
+  ClassGuidListSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetHwProfileFriendlyNameA*(
+  HwProfile: DWORD, FriendlyName: PSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetHwProfileFriendlyNameW*(
+  HwProfile: DWORD, FriendlyName: PWSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetHwProfileFriendlyNameExA*(
+  HwProfile: DWORD,
+  FriendlyName: PSTR,
+  FriendlyNameSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetHwProfileFriendlyNameExW*(
+  HwProfile: DWORD,
+  FriendlyName: PWSTR,
+  FriendlyNameSize: DWORD,
+  RequiredSize: PDWORD,
+  MachineName: PCWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetWizardPage*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  InstallWizardData: PSP_INSTALLWIZARD_DATA,
+  PageType: DWORD,
+  Flags: DWORD,
+): HPROPSHEETPAGE {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetSelectedDevice*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiSetSelectedDevice*(
+  DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetActualModelsSectionA*(
+  Context: PINFCONTEXT,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  InfSectionWithExt: PSTR,
+  InfSectionWithExtSize: DWORD,
+  RequiredSize: PDWORD,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetActualModelsSectionW*(
+  Context: PINFCONTEXT,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  InfSectionWithExt: PWSTR,
+  InfSectionWithExtSize: DWORD,
+  RequiredSize: PDWORD,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetActualSectionToInstallA*(
+  InfHandle: HINF,
+  InfSectionName: PCSTR,
+  InfSectionWithExt: PSTR,
+  InfSectionWithExtSize: DWORD,
+  RequiredSize: PDWORD,
+  Extension: ptr PSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetActualSectionToInstallW*(
+  InfHandle: HINF,
+  InfSectionName: PCWSTR,
+  InfSectionWithExt: PWSTR,
+  InfSectionWithExtSize: DWORD,
+  RequiredSize: PDWORD,
+  Extension: ptr PWSTR,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetActualSectionToInstallExA*(
+  InfHandle: HINF,
+  InfSectionName: PCSTR,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  InfSectionWithExt: PSTR,
+  InfSectionWithExtSize: DWORD,
+  RequiredSize: PDWORD,
+  Extension: ptr PSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetActualSectionToInstallExW*(
+  InfHandle: HINF,
+  InfSectionName: PCWSTR,
+  AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+  InfSectionWithExt: PWSTR,
+  InfSectionWithExtSize: DWORD,
+  RequiredSize: PDWORD,
+  Extension: ptr PWSTR,
+  Reserved: PVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupEnumInfSectionsA*(
+  InfHandle: HINF, Index: UINT, Buffer: PSTR, Size: UINT, SizeNeeded: ptr UINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupEnumInfSectionsW*(
+  InfHandle: HINF, Index: UINT, Buffer: PWSTR, Size: UINT, SizeNeeded: ptr UINT
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupVerifyInfFileA*(
+  InfName: PCSTR,
+  AltPlatformInfo: PSP_ALTPLATFORM_INFO,
+  InfSignerInfo: PSP_INF_SIGNER_INFO_A,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupVerifyInfFileW*(
+  InfName: PCWSTR,
+  AltPlatformInfo: PSP_ALTPLATFORM_INFO,
+  InfSignerInfo: PSP_INF_SIGNER_INFO_W,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetCustomDevicePropertyA*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  CustomPropertyName: PCSTR,
+  Flags: DWORD,
+  PropertyRegDataType: PDWORD,
+  PropertyBuffer: PBYTE,
+  PropertyBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupDiGetCustomDevicePropertyW*(
+  DeviceInfoSet: HDEVINFO,
+  DeviceInfoData: PSP_DEVINFO_DATA,
+  CustomPropertyName: PCWSTR,
+  Flags: DWORD,
+  PropertyRegDataType: PDWORD,
+  PropertyBuffer: PBYTE,
+  PropertyBufferSize: DWORD,
+  RequiredSize: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupConfigureWmiFromInfSectionA*(
+  InfHandle: HINF, SectionName: PCSTR, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc SetupConfigureWmiFromInfSectionW*(
+  InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc.}
+
+proc `Reserved=`*(self: var SP_ALTPLATFORM_INFO_V2, x: WORD) {.inline.} =
+  self.union1.Reserved = x
+
+proc Reserved*(self: SP_ALTPLATFORM_INFO_V2): WORD {.inline.} =
+  self.union1.Reserved
+
+proc Reserved*(self: var SP_ALTPLATFORM_INFO_V2): var WORD {.inline.} =
+  self.union1.Reserved
+
+proc `Flags=`*(self: var SP_ALTPLATFORM_INFO_V2, x: WORD) {.inline.} =
+  self.union1.Flags = x
+
+proc Flags*(self: SP_ALTPLATFORM_INFO_V2): WORD {.inline.} =
+  self.union1.Flags
+
+proc Flags*(self: var SP_ALTPLATFORM_INFO_V2): var WORD {.inline.} =
+  self.union1.Flags
+
 when winimUnicode:
   type
     SP_ORIGINAL_FILE_INFO* = SP_ORIGINAL_FILE_INFO_W
@@ -1618,133 +3612,1102 @@ when winimUnicode:
     PSP_BACKUP_QUEUE_PARAMS_V1* = PSP_BACKUP_QUEUE_PARAMS_V1_W
     SP_INF_SIGNER_INFO* = SP_INF_SIGNER_INFO_W
     PSP_INF_SIGNER_INFO* = PSP_INF_SIGNER_INFO_W
-  proc SetupGetInfInformation*(InfSpec: LPCVOID, SearchControl: DWORD, ReturnBuffer: PSP_INF_INFORMATION, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfInformationW".}
-  proc SetupQueryInfFileInformation*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfFileInformationW".}
-  proc SetupQueryInfOriginalFileInformation*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfOriginalFileInformationW".}
-  proc SetupQueryInfVersionInformation*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, Key: PCWSTR, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfVersionInformationW".}
-  proc SetupGetInfFileList*(DirectoryPath: PCWSTR, InfStyle: DWORD, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfFileListW".}
-  proc SetupOpenInfFile*(FileName: PCWSTR, InfClass: PCWSTR, InfStyle: DWORD, ErrorLine: PUINT): HINF {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenInfFileW".}
-  proc SetupOpenAppendInfFile*(FileName: PCWSTR, InfHandle: HINF, ErrorLine: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenAppendInfFileW".}
-  proc SetupFindFirstLine*(InfHandle: HINF, Section: PCWSTR, Key: PCWSTR, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindFirstLineW".}
-  proc SetupFindNextMatchLine*(ContextIn: PINFCONTEXT, Key: PCWSTR, ContextOut: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindNextMatchLineW".}
-  proc SetupGetLineByIndex*(InfHandle: HINF, Section: PCWSTR, Index: DWORD, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineByIndexW".}
-  proc SetupGetLineCount*(InfHandle: HINF, Section: PCWSTR): LONG {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineCountW".}
-  proc SetupGetLineText*(Context: PINFCONTEXT, InfHandle: HINF, Section: PCWSTR, Key: PCWSTR, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineTextW".}
-  proc SetupGetStringField*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetStringFieldW".}
-  proc SetupGetMultiSzField*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetMultiSzFieldW".}
-  proc SetupGetFileCompressionInfo*(SourceFileName: PCWSTR, ActualSourceFileName: ptr PWSTR, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoW".}
-  proc SetupGetFileCompressionInfoEx*(SourceFileName: PCWSTR, ActualSourceFileNameBuffer: PWSTR, ActualSourceFileNameBufferLen: DWORD, RequiredBufferLen: PDWORD, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoExW".}
-  proc SetupDecompressOrCopyFile*(SourceFileName: PCWSTR, TargetFileName: PCWSTR, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDecompressOrCopyFileW".}
-  proc SetupGetSourceFileLocation*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCWSTR, SourceId: PUINT, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileLocationW".}
-  proc SetupGetSourceFileSize*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCWSTR, Section: PCWSTR, FileSize: PDWORD, RoundingFactor: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileSizeW".}
-  proc SetupGetTargetPath*(InfHandle: HINF, InfContext: PINFCONTEXT, Section: PCWSTR, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetTargetPathW".}
-  proc SetupSetSourceList*(Flags: DWORD, SourceList: ptr PCWSTR, SourceCount: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetSourceListW".}
-  proc SetupAddToSourceList*(Flags: DWORD, Source: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToSourceListW".}
-  proc SetupRemoveFromSourceList*(Flags: DWORD, Source: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromSourceListW".}
-  proc SetupQuerySourceList*(Flags: DWORD, List: ptr ptr PCWSTR, Count: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySourceListW".}
-  proc SetupFreeSourceList*(List: ptr ptr PCWSTR, Count: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFreeSourceListW".}
-  proc SetupPromptForDisk*(hwndParent: HWND, DialogTitle: PCWSTR, DiskName: PCWSTR, PathToSource: PCWSTR, FileSought: PCWSTR, TagFile: PCWSTR, DiskPromptStyle: DWORD, PathBuffer: PWSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupPromptForDiskW".}
-  proc SetupCopyError*(hwndParent: HWND, DialogTitle: PCWSTR, DiskName: PCWSTR, PathToSource: PCWSTR, SourceFile: PCWSTR, TargetPathFile: PCWSTR, Win32ErrorCode: UINT, Style: DWORD, PathBuffer: PWSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyErrorW".}
-  proc SetupRenameError*(hwndParent: HWND, DialogTitle: PCWSTR, SourceFile: PCWSTR, TargetFile: PCWSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRenameErrorW".}
-  proc SetupDeleteError*(hwndParent: HWND, DialogTitle: PCWSTR, File: PCWSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDeleteErrorW".}
-  proc SetupBackupError*(hwndParent: HWND, DialogTitle: PCWSTR, SourceFile: PCWSTR, TargetFile: PCWSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupBackupErrorW".}
-  proc SetupSetDirectoryId*(InfHandle: HINF, Id: DWORD, Directory: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdW".}
-  proc SetupSetDirectoryIdEx*(InfHandle: HINF, Id: DWORD, Directory: PCWSTR, Flags: DWORD, Reserved1: DWORD, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdExW".}
-  proc SetupGetSourceInfo*(InfHandle: HINF, SourceId: UINT, InfoDesired: UINT, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceInfoW".}
-  proc SetupInstallFile*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCWSTR, SourcePathRoot: PCWSTR, DestinationName: PCWSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileW".}
-  proc SetupInstallFileEx*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCWSTR, SourcePathRoot: PCWSTR, DestinationName: PCWSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID, FileWasInUse: PBOOL): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileExW".}
-  proc SetupSetFileQueueAlternatePlatform*(QueueHandle: HSPFILEQ, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, AlternateDefaultCatalogFile: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetFileQueueAlternatePlatformW".}
-  proc SetupQueueDeleteSection*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteSectionW".}
-  proc SetupQueueRename*(QueueHandle: HSPFILEQ, SourcePath: PCWSTR, SourceFilename: PCWSTR, TargetPath: PCWSTR, TargetFilename: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameW".}
-  proc SetupQueueRenameSection*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameSectionW".}
-  proc SetupCommitFileQueue*(Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCommitFileQueueW".}
-  proc SetupScanFileQueue*(FileQueue: HSPFILEQ, Flags: DWORD, Window: HWND, CallbackRoutine: PSP_FILE_CALLBACK_W, CallbackContext: PVOID, Result: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupScanFileQueueW".}
-  proc SetupSetPlatformPathOverride*(Override: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetPlatformPathOverrideW".}
-  proc SetupQueueCopy*(QueueHandle: HSPFILEQ, SourceRootPath: PCWSTR, SourcePath: PCWSTR, SourceFilename: PCWSTR, SourceDescription: PCWSTR, SourceTagfile: PCWSTR, TargetDirectory: PCWSTR, TargetFilename: PCWSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyW".}
-  proc SetupQueueCopyIndirect*(CopyParams: PSP_FILE_COPY_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyIndirectW".}
-  proc SetupQueueDefaultCopy*(QueueHandle: HSPFILEQ, InfHandle: HINF, SourceRootPath: PCWSTR, SourceFilename: PCWSTR, TargetFilename: PCWSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDefaultCopyW".}
-  proc SetupQueueCopySection*(QueueHandle: HSPFILEQ, SourceRootPath: PCWSTR, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopySectionW".}
-  proc SetupQueueDelete*(QueueHandle: HSPFILEQ, PathPart1: PCWSTR, PathPart2: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteW".}
-  proc SetupCopyOEMInf*(SourceInfFileName: PCWSTR, OEMSourceMediaLocation: PCWSTR, OEMSourceMediaType: DWORD, CopyStyle: DWORD, DestinationInfFileName: PWSTR, DestinationInfFileNameSize: DWORD, RequiredSize: PDWORD, DestinationInfFileNameComponent: ptr PWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyOEMInfW".}
-  proc SetupUninstallOEMInf*(InfFileName: PCWSTR, Flags: DWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupUninstallOEMInfW".}
-  proc SetupCreateDiskSpaceList*(Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCreateDiskSpaceListW".}
-  proc SetupDuplicateDiskSpaceList*(DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDuplicateDiskSpaceListW".}
-  proc SetupQueryDrivesInDiskSpaceList*(DiskSpace: HDSKSPC, ReturnBuffer: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryDrivesInDiskSpaceListW".}
-  proc SetupQuerySpaceRequiredOnDrive*(DiskSpace: HDSKSPC, DriveSpec: PCWSTR, SpaceRequired: ptr LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySpaceRequiredOnDriveW".}
-  proc SetupAdjustDiskSpaceList*(DiskSpace: HDSKSPC, DriveRoot: LPCWSTR, Amount: LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAdjustDiskSpaceListW".}
-  proc SetupAddToDiskSpaceList*(DiskSpace: HDSKSPC, TargetFilespec: PCWSTR, FileSize: LONGLONG, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToDiskSpaceListW".}
-  proc SetupAddSectionToDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCWSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddSectionToDiskSpaceListW".}
-  proc SetupAddInstallSectionToDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCWSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddInstallSectionToDiskSpaceListW".}
-  proc SetupRemoveFromDiskSpaceList*(DiskSpace: HDSKSPC, TargetFilespec: PCWSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromDiskSpaceListW".}
-  proc SetupRemoveSectionFromDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCWSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveSectionFromDiskSpaceListW".}
-  proc SetupRemoveInstallSectionFromDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCWSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveInstallSectionFromDiskSpaceListW".}
-  proc SetupIterateCabinet*(CabinetFile: PCWSTR, Reserved: DWORD, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupIterateCabinetW".}
-  proc SetupDefaultQueueCallback*(Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDefaultQueueCallbackW".}
-  proc SetupInstallFromInfSection*(Owner: HWND, InfHandle: HINF, SectionName: PCWSTR, Flags: UINT, RelativeKeyRoot: HKEY, SourceRootPath: PCWSTR, CopyFlags: UINT, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFromInfSectionW".}
-  proc SetupInstallFilesFromInfSection*(InfHandle: HINF, LayoutInfHandle: HINF, FileQueue: HSPFILEQ, SectionName: PCWSTR, SourceRootPath: PCWSTR, CopyFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFilesFromInfSectionW".}
-  proc SetupInstallServicesFromInfSection*(InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallServicesFromInfSectionW".}
-  proc SetupInstallServicesFromInfSectionEx*(InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallServicesFromInfSectionExW".}
-  proc InstallHinfSection*(Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCWSTR, ShowCommand: INT): VOID {.winapi, stdcall, dynlib: "setupapi", importc: "InstallHinfSectionW".}
-  proc SetupInitializeFileLog*(LogFileName: PCWSTR, Flags: DWORD): HSPFILELOG {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInitializeFileLogW".}
-  proc SetupLogFile*(FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, SourceFilename: PCWSTR, TargetFilename: PCWSTR, Checksum: DWORD, DiskTagfile: PCWSTR, DiskDescription: PCWSTR, OtherInfo: PCWSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogFileW".}
-  proc SetupRemoveFileLogEntry*(FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, TargetFilename: PCWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFileLogEntryW".}
-  proc SetupQueryFileLog*(FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, TargetFilename: PCWSTR, DesiredInfo: SetupFileLogInfo, DataOut: PWSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryFileLogW".}
-  proc SetupLogError*(MessageString: LPCWSTR, Severity: LogSeverity): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogErrorW".}
-  proc SetupGetBackupInformation*(QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetBackupInformationW".}
-  proc SetupPrepareQueueForRestore*(QueueHandle: HSPFILEQ, BackupPath: PCWSTR, RestoreFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupPrepareQueueForRestoreW".}
-  proc SetupDiCreateDeviceInfoListEx*(ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCWSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoListExW".}
-  proc SetupDiGetDeviceInfoListDetail*(DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInfoListDetailW".}
-  proc SetupDiCreateDeviceInfo*(DeviceInfoSet: HDEVINFO, DeviceName: PCWSTR, ClassGuid: ptr GUID, DeviceDescription: PCWSTR, hwndParent: HWND, CreationFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoW".}
-  proc SetupDiOpenDeviceInfo*(DeviceInfoSet: HDEVINFO, DeviceInstanceId: PCWSTR, hwndParent: HWND, OpenFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInfoW".}
-  proc SetupDiGetDeviceInstanceId*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstanceId: PWSTR, DeviceInstanceIdSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstanceIdW".}
-  proc SetupDiCreateDeviceInterface*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCWSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceW".}
-  proc SetupDiCreateInterfaceDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCWSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceW".}
-  proc SetupDiOpenDeviceInterface*(DeviceInfoSet: HDEVINFO, DevicePath: PCWSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceW".}
-  proc SetupDiOpenInterfaceDevice*(DeviceInfoSet: HDEVINFO, DevicePath: PCWSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceW".}
-  proc SetupDiGetDeviceInterfaceDetail*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailW".}
-  proc SetupDiGetInterfaceDeviceDetail*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailW".}
-  proc SetupDiEnumDriverInfo*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD, MemberIndex: DWORD, DriverInfoData: PSP_DRVINFO_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiEnumDriverInfoW".}
-  proc SetupDiGetSelectedDriver*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetSelectedDriverW".}
-  proc SetupDiSetSelectedDriver*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetSelectedDriverW".}
-  proc SetupDiGetDriverInfoDetail*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W, DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_W, DriverInfoDetailDataSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInfoDetailW".}
-  proc SetupDiGetClassDevs*(ClassGuid: ptr GUID, Enumerator: PCWSTR, hwndParent: HWND, Flags: DWORD): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsW".}
-  proc SetupDiGetClassDevsEx*(ClassGuid: ptr GUID, Enumerator: PCWSTR, hwndParent: HWND, Flags: DWORD, DeviceInfoSet: HDEVINFO, MachineName: PCWSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsExW".}
-  proc SetupDiGetINFClass*(InfName: PCWSTR, ClassGuid: LPGUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetINFClassW".}
-  proc SetupDiBuildClassInfoListEx*(Flags: DWORD, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiBuildClassInfoListExW".}
-  proc SetupDiGetClassDescription*(ClassGuid: ptr GUID, ClassDescription: PWSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionW".}
-  proc SetupDiGetClassDescriptionEx*(ClassGuid: ptr GUID, ClassDescription: PWSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionExW".}
-  proc SetupDiInstallClass*(hwndParent: HWND, InfFileName: PCWSTR, Flags: DWORD, FileQueue: HSPFILEQ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassW".}
-  proc SetupDiInstallClassEx*(hwndParent: HWND, InfFileName: PCWSTR, Flags: DWORD, FileQueue: HSPFILEQ, InterfaceClassGuid: ptr GUID, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassExW".}
-  proc SetupDiOpenClassRegKeyEx*(ClassGuid: ptr GUID, samDesired: REGSAM, Flags: DWORD, MachineName: PCWSTR, Reserved: PVOID): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenClassRegKeyExW".}
-  proc SetupDiCreateDeviceInterfaceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCWSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyW".}
-  proc SetupDiCreateInterfaceDeviceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCWSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyW".}
-  proc SetupDiCreateDevRegKey*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Scope: DWORD, HwProfile: DWORD, KeyType: DWORD, InfHandle: HINF, InfSectionName: PCWSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDevRegKeyW".}
-  proc SetupDiGetHwProfileListEx*(HwProfileList: PDWORD, HwProfileListSize: DWORD, RequiredSize: PDWORD, CurrentlyActiveIndex: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileListExW".}
-  proc SetupDiGetDeviceRegistryProperty*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceRegistryPropertyW".}
-  proc SetupDiGetClassRegistryProperty*(ClassGuid: ptr GUID, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassRegistryPropertyW".}
-  proc SetupDiSetDeviceRegistryProperty*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceRegistryPropertyW".}
-  proc SetupDiSetClassRegistryProperty*(ClassGuid: ptr GUID, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassRegistryPropertyW".}
-  proc SetupDiGetDeviceInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstallParamsW".}
-  proc SetupDiGetClassInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassInstallParamsW".}
-  proc SetupDiSetDeviceInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceInstallParamsW".}
-  proc SetupDiSetClassInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassInstallParamsW".}
-  proc SetupDiGetDriverInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInstallParamsW".}
-  proc SetupDiSetDriverInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_W, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDriverInstallParamsW".}
-  proc SetupDiGetClassImageListEx*(ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassImageListExW".}
-  proc SetupDiGetClassDevPropertySheets*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, PropertySheetHeader: LPPROPSHEETHEADERW, PropertySheetHeaderPageListSize: DWORD, RequiredSize: PDWORD, PropertySheetType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevPropertySheetsW".}
-  proc SetupDiClassNameFromGuid*(ClassGuid: ptr GUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidW".}
-  proc SetupDiClassNameFromGuidEx*(ClassGuid: ptr GUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidExW".}
-  proc SetupDiClassGuidsFromName*(ClassName: PCWSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameW".}
-  proc SetupDiClassGuidsFromNameEx*(ClassName: PCWSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameExW".}
-  proc SetupDiGetHwProfileFriendlyName*(HwProfile: DWORD, FriendlyName: PWSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameW".}
-  proc SetupDiGetHwProfileFriendlyNameEx*(HwProfile: DWORD, FriendlyName: PWSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameExW".}
-  proc SetupDiGetActualModelsSection*(Context: PINFCONTEXT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PWSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualModelsSectionW".}
-  proc SetupDiGetActualSectionToInstall*(InfHandle: HINF, InfSectionName: PCWSTR, InfSectionWithExt: PWSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PWSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallW".}
-  proc SetupDiGetActualSectionToInstallEx*(InfHandle: HINF, InfSectionName: PCWSTR, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PWSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PWSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallExW".}
-  proc SetupEnumInfSections*(InfHandle: HINF, Index: UINT, Buffer: PWSTR, Size: UINT, SizeNeeded: ptr UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupEnumInfSectionsW".}
-  proc SetupVerifyInfFile*(InfName: PCWSTR, AltPlatformInfo: PSP_ALTPLATFORM_INFO, InfSignerInfo: PSP_INF_SIGNER_INFO_W): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupVerifyInfFileW".}
-  proc SetupDiGetCustomDeviceProperty*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, CustomPropertyName: PCWSTR, Flags: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetCustomDevicePropertyW".}
-  proc SetupConfigureWmiFromInfSection*(InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupConfigureWmiFromInfSectionW".}
+
+  proc SetupGetInfInformation*(
+    InfSpec: LPCVOID,
+    SearchControl: DWORD,
+    ReturnBuffer: PSP_INF_INFORMATION,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfInformationW".}
+
+  proc SetupQueryInfFileInformation*(
+    InfInformation: PSP_INF_INFORMATION,
+    InfIndex: UINT,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfFileInformationW"
+  .}
+
+  proc SetupQueryInfOriginalFileInformation*(
+    InfInformation: PSP_INF_INFORMATION,
+    InfIndex: UINT,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_W,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupQueryInfOriginalFileInformationW"
+  .}
+
+  proc SetupQueryInfVersionInformation*(
+    InfInformation: PSP_INF_INFORMATION,
+    InfIndex: UINT,
+    Key: PCWSTR,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfVersionInformationW"
+  .}
+
+  proc SetupGetInfFileList*(
+    DirectoryPath: PCWSTR,
+    InfStyle: DWORD,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfFileListW".}
+
+  proc SetupOpenInfFile*(
+    FileName: PCWSTR, InfClass: PCWSTR, InfStyle: DWORD, ErrorLine: PUINT
+  ): HINF {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenInfFileW".}
+
+  proc SetupOpenAppendInfFile*(
+    FileName: PCWSTR, InfHandle: HINF, ErrorLine: PUINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenAppendInfFileW".}
+
+  proc SetupFindFirstLine*(
+    InfHandle: HINF, Section: PCWSTR, Key: PCWSTR, Context: PINFCONTEXT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindFirstLineW".}
+
+  proc SetupFindNextMatchLine*(
+    ContextIn: PINFCONTEXT, Key: PCWSTR, ContextOut: PINFCONTEXT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindNextMatchLineW".}
+
+  proc SetupGetLineByIndex*(
+    InfHandle: HINF, Section: PCWSTR, Index: DWORD, Context: PINFCONTEXT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineByIndexW".}
+
+  proc SetupGetLineCount*(
+    InfHandle: HINF, Section: PCWSTR
+  ): LONG {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineCountW".}
+
+  proc SetupGetLineText*(
+    Context: PINFCONTEXT,
+    InfHandle: HINF,
+    Section: PCWSTR,
+    Key: PCWSTR,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineTextW".}
+
+  proc SetupGetStringField*(
+    Context: PINFCONTEXT,
+    FieldIndex: DWORD,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetStringFieldW".}
+
+  proc SetupGetMultiSzField*(
+    Context: PINFCONTEXT,
+    FieldIndex: DWORD,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: LPDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetMultiSzFieldW".}
+
+  proc SetupGetFileCompressionInfo*(
+    SourceFileName: PCWSTR,
+    ActualSourceFileName: ptr PWSTR,
+    SourceFileSize: PDWORD,
+    TargetFileSize: PDWORD,
+    CompressionType: PUINT,
+  ): DWORD {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoW"
+  .}
+
+  proc SetupGetFileCompressionInfoEx*(
+    SourceFileName: PCWSTR,
+    ActualSourceFileNameBuffer: PWSTR,
+    ActualSourceFileNameBufferLen: DWORD,
+    RequiredBufferLen: PDWORD,
+    SourceFileSize: PDWORD,
+    TargetFileSize: PDWORD,
+    CompressionType: PUINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoExW"
+  .}
+
+  proc SetupDecompressOrCopyFile*(
+    SourceFileName: PCWSTR, TargetFileName: PCWSTR, CompressionType: PUINT
+  ): DWORD {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDecompressOrCopyFileW"
+  .}
+
+  proc SetupGetSourceFileLocation*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    FileName: PCWSTR,
+    SourceId: PUINT,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileLocationW"
+  .}
+
+  proc SetupGetSourceFileSize*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    FileName: PCWSTR,
+    Section: PCWSTR,
+    FileSize: PDWORD,
+    RoundingFactor: UINT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileSizeW".}
+
+  proc SetupGetTargetPath*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    Section: PCWSTR,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetTargetPathW".}
+
+  proc SetupSetSourceList*(
+    Flags: DWORD, SourceList: ptr PCWSTR, SourceCount: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetSourceListW".}
+
+  proc SetupAddToSourceList*(
+    Flags: DWORD, Source: PCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToSourceListW".}
+
+  proc SetupRemoveFromSourceList*(
+    Flags: DWORD, Source: PCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromSourceListW"
+  .}
+
+  proc SetupQuerySourceList*(
+    Flags: DWORD, List: ptr ptr PCWSTR, Count: PUINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySourceListW".}
+
+  proc SetupFreeSourceList*(
+    List: ptr ptr PCWSTR, Count: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFreeSourceListW".}
+
+  proc SetupPromptForDisk*(
+    hwndParent: HWND,
+    DialogTitle: PCWSTR,
+    DiskName: PCWSTR,
+    PathToSource: PCWSTR,
+    FileSought: PCWSTR,
+    TagFile: PCWSTR,
+    DiskPromptStyle: DWORD,
+    PathBuffer: PWSTR,
+    PathBufferSize: DWORD,
+    PathRequiredSize: PDWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupPromptForDiskW".}
+
+  proc SetupCopyError*(
+    hwndParent: HWND,
+    DialogTitle: PCWSTR,
+    DiskName: PCWSTR,
+    PathToSource: PCWSTR,
+    SourceFile: PCWSTR,
+    TargetPathFile: PCWSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+    PathBuffer: PWSTR,
+    PathBufferSize: DWORD,
+    PathRequiredSize: PDWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyErrorW".}
+
+  proc SetupRenameError*(
+    hwndParent: HWND,
+    DialogTitle: PCWSTR,
+    SourceFile: PCWSTR,
+    TargetFile: PCWSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRenameErrorW".}
+
+  proc SetupDeleteError*(
+    hwndParent: HWND,
+    DialogTitle: PCWSTR,
+    File: PCWSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDeleteErrorW".}
+
+  proc SetupBackupError*(
+    hwndParent: HWND,
+    DialogTitle: PCWSTR,
+    SourceFile: PCWSTR,
+    TargetFile: PCWSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupBackupErrorW".}
+
+  proc SetupSetDirectoryId*(
+    InfHandle: HINF, Id: DWORD, Directory: PCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdW".}
+
+  proc SetupSetDirectoryIdEx*(
+    InfHandle: HINF,
+    Id: DWORD,
+    Directory: PCWSTR,
+    Flags: DWORD,
+    Reserved1: DWORD,
+    Reserved2: PVOID,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdExW".}
+
+  proc SetupGetSourceInfo*(
+    InfHandle: HINF,
+    SourceId: UINT,
+    InfoDesired: UINT,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceInfoW".}
+
+  proc SetupInstallFile*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    SourceFile: PCWSTR,
+    SourcePathRoot: PCWSTR,
+    DestinationName: PCWSTR,
+    CopyStyle: DWORD,
+    CopyMsgHandler: PSP_FILE_CALLBACK_W,
+    Context: PVOID,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileW".}
+
+  proc SetupInstallFileEx*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    SourceFile: PCWSTR,
+    SourcePathRoot: PCWSTR,
+    DestinationName: PCWSTR,
+    CopyStyle: DWORD,
+    CopyMsgHandler: PSP_FILE_CALLBACK_W,
+    Context: PVOID,
+    FileWasInUse: PBOOL,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileExW".}
+
+  proc SetupSetFileQueueAlternatePlatform*(
+    QueueHandle: HSPFILEQ,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    AlternateDefaultCatalogFile: PCWSTR,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupSetFileQueueAlternatePlatformW"
+  .}
+
+  proc SetupQueueDeleteSection*(
+    QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteSectionW"
+  .}
+
+  proc SetupQueueRename*(
+    QueueHandle: HSPFILEQ,
+    SourcePath: PCWSTR,
+    SourceFilename: PCWSTR,
+    TargetPath: PCWSTR,
+    TargetFilename: PCWSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameW".}
+
+  proc SetupQueueRenameSection*(
+    QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameSectionW"
+  .}
+
+  proc SetupCommitFileQueue*(
+    Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_W, Context: PVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCommitFileQueueW".}
+
+  proc SetupScanFileQueue*(
+    FileQueue: HSPFILEQ,
+    Flags: DWORD,
+    Window: HWND,
+    CallbackRoutine: PSP_FILE_CALLBACK_W,
+    CallbackContext: PVOID,
+    Result: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupScanFileQueueW".}
+
+  proc SetupSetPlatformPathOverride*(
+    Override: PCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupSetPlatformPathOverrideW"
+  .}
+
+  proc SetupQueueCopy*(
+    QueueHandle: HSPFILEQ,
+    SourceRootPath: PCWSTR,
+    SourcePath: PCWSTR,
+    SourceFilename: PCWSTR,
+    SourceDescription: PCWSTR,
+    SourceTagfile: PCWSTR,
+    TargetDirectory: PCWSTR,
+    TargetFilename: PCWSTR,
+    CopyStyle: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyW".}
+
+  proc SetupQueueCopyIndirect*(
+    CopyParams: PSP_FILE_COPY_PARAMS_W
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyIndirectW".}
+
+  proc SetupQueueDefaultCopy*(
+    QueueHandle: HSPFILEQ,
+    InfHandle: HINF,
+    SourceRootPath: PCWSTR,
+    SourceFilename: PCWSTR,
+    TargetFilename: PCWSTR,
+    CopyStyle: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDefaultCopyW".}
+
+  proc SetupQueueCopySection*(
+    QueueHandle: HSPFILEQ,
+    SourceRootPath: PCWSTR,
+    InfHandle: HINF,
+    ListInfHandle: HINF,
+    Section: PCWSTR,
+    CopyStyle: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopySectionW".}
+
+  proc SetupQueueDelete*(
+    QueueHandle: HSPFILEQ, PathPart1: PCWSTR, PathPart2: PCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteW".}
+
+  proc SetupCopyOEMInf*(
+    SourceInfFileName: PCWSTR,
+    OEMSourceMediaLocation: PCWSTR,
+    OEMSourceMediaType: DWORD,
+    CopyStyle: DWORD,
+    DestinationInfFileName: PWSTR,
+    DestinationInfFileNameSize: DWORD,
+    RequiredSize: PDWORD,
+    DestinationInfFileNameComponent: ptr PWSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyOEMInfW".}
+
+  proc SetupUninstallOEMInf*(
+    InfFileName: PCWSTR, Flags: DWORD, Reserved: PVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupUninstallOEMInfW".}
+
+  proc SetupCreateDiskSpaceList*(
+    Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+  ): HDSKSPC {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupCreateDiskSpaceListW"
+  .}
+
+  proc SetupDuplicateDiskSpaceList*(
+    DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+  ): HDSKSPC {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDuplicateDiskSpaceListW"
+  .}
+
+  proc SetupQueryDrivesInDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    ReturnBuffer: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryDrivesInDiskSpaceListW"
+  .}
+
+  proc SetupQuerySpaceRequiredOnDrive*(
+    DiskSpace: HDSKSPC,
+    DriveSpec: PCWSTR,
+    SpaceRequired: ptr LONGLONG,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySpaceRequiredOnDriveW"
+  .}
+
+  proc SetupAdjustDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    DriveRoot: LPCWSTR,
+    Amount: LONGLONG,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupAdjustDiskSpaceListW"
+  .}
+
+  proc SetupAddToDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    TargetFilespec: PCWSTR,
+    FileSize: LONGLONG,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToDiskSpaceListW"
+  .}
+
+  proc SetupAddSectionToDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    ListInfHandle: HINF,
+    SectionName: PCWSTR,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupAddSectionToDiskSpaceListW"
+  .}
+
+  proc SetupAddInstallSectionToDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    LayoutInfHandle: HINF,
+    SectionName: PCWSTR,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupAddInstallSectionToDiskSpaceListW"
+  .}
+
+  proc SetupRemoveFromDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    TargetFilespec: PCWSTR,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromDiskSpaceListW"
+  .}
+
+  proc SetupRemoveSectionFromDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    ListInfHandle: HINF,
+    SectionName: PCWSTR,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveSectionFromDiskSpaceListW"
+  .}
+
+  proc SetupRemoveInstallSectionFromDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    LayoutInfHandle: HINF,
+    SectionName: PCWSTR,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupRemoveInstallSectionFromDiskSpaceListW"
+  .}
+
+  proc SetupIterateCabinet*(
+    CabinetFile: PCWSTR,
+    Reserved: DWORD,
+    MsgHandler: PSP_FILE_CALLBACK_W,
+    Context: PVOID,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupIterateCabinetW".}
+
+  proc SetupDefaultQueueCallback*(
+    Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDefaultQueueCallbackW".}
+
+  proc SetupInstallFromInfSection*(
+    Owner: HWND,
+    InfHandle: HINF,
+    SectionName: PCWSTR,
+    Flags: UINT,
+    RelativeKeyRoot: HKEY,
+    SourceRootPath: PCWSTR,
+    CopyFlags: UINT,
+    MsgHandler: PSP_FILE_CALLBACK_W,
+    Context: PVOID,
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFromInfSectionW"
+  .}
+
+  proc SetupInstallFilesFromInfSection*(
+    InfHandle: HINF,
+    LayoutInfHandle: HINF,
+    FileQueue: HSPFILEQ,
+    SectionName: PCWSTR,
+    SourceRootPath: PCWSTR,
+    CopyFlags: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFilesFromInfSectionW"
+  .}
+
+  proc SetupInstallServicesFromInfSection*(
+    InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallServicesFromInfSectionW"
+  .}
+
+  proc SetupInstallServicesFromInfSectionEx*(
+    InfHandle: HINF,
+    SectionName: PCWSTR,
+    Flags: DWORD,
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Reserved1: PVOID,
+    Reserved2: PVOID,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupInstallServicesFromInfSectionExW"
+  .}
+
+  proc InstallHinfSection*(
+    Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCWSTR, ShowCommand: INT
+  ): VOID {.winapi, stdcall, dynlib: "setupapi", importc: "InstallHinfSectionW".}
+
+  proc SetupInitializeFileLog*(
+    LogFileName: PCWSTR, Flags: DWORD
+  ): HSPFILELOG {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInitializeFileLogW"
+  .}
+
+  proc SetupLogFile*(
+    FileLogHandle: HSPFILELOG,
+    LogSectionName: PCWSTR,
+    SourceFilename: PCWSTR,
+    TargetFilename: PCWSTR,
+    Checksum: DWORD,
+    DiskTagfile: PCWSTR,
+    DiskDescription: PCWSTR,
+    OtherInfo: PCWSTR,
+    Flags: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogFileW".}
+
+  proc SetupRemoveFileLogEntry*(
+    FileLogHandle: HSPFILELOG, LogSectionName: PCWSTR, TargetFilename: PCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFileLogEntryW"
+  .}
+
+  proc SetupQueryFileLog*(
+    FileLogHandle: HSPFILELOG,
+    LogSectionName: PCWSTR,
+    TargetFilename: PCWSTR,
+    DesiredInfo: SetupFileLogInfo,
+    DataOut: PWSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryFileLogW".}
+
+  proc SetupLogError*(
+    MessageString: LPCWSTR, Severity: LogSeverity
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogErrorW".}
+
+  proc SetupGetBackupInformation*(
+    QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_W
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetBackupInformationW"
+  .}
+
+  proc SetupPrepareQueueForRestore*(
+    QueueHandle: HSPFILEQ, BackupPath: PCWSTR, RestoreFlags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupPrepareQueueForRestoreW"
+  .}
+
+  proc SetupDiCreateDeviceInfoListEx*(
+    ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCWSTR, Reserved: PVOID
+  ): HDEVINFO {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoListExW"
+  .}
+
+  proc SetupDiGetDeviceInfoListDetail*(
+    DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_W
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInfoListDetailW"
+  .}
+
+  proc SetupDiCreateDeviceInfo*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceName: PCWSTR,
+    ClassGuid: ptr GUID,
+    DeviceDescription: PCWSTR,
+    hwndParent: HWND,
+    CreationFlags: DWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoW"
+  .}
+
+  proc SetupDiOpenDeviceInfo*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInstanceId: PCWSTR,
+    hwndParent: HWND,
+    OpenFlags: DWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInfoW".}
+
+  proc SetupDiGetDeviceInstanceId*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DeviceInstanceId: PWSTR,
+    DeviceInstanceIdSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstanceIdW"
+  .}
+
+  proc SetupDiCreateDeviceInterface*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    InterfaceClassGuid: ptr GUID,
+    ReferenceString: PCWSTR,
+    CreationFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceW"
+  .}
+
+  proc SetupDiCreateInterfaceDevice*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    InterfaceClassGuid: ptr GUID,
+    ReferenceString: PCWSTR,
+    CreationFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceW"
+  .}
+
+  proc SetupDiOpenDeviceInterface*(
+    DeviceInfoSet: HDEVINFO,
+    DevicePath: PCWSTR,
+    OpenFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceW"
+  .}
+
+  proc SetupDiOpenInterfaceDevice*(
+    DeviceInfoSet: HDEVINFO,
+    DevicePath: PCWSTR,
+    OpenFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceW"
+  .}
+
+  proc SetupDiGetDeviceInterfaceDetail*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W,
+    DeviceInterfaceDetailDataSize: DWORD,
+    RequiredSize: PDWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailW"
+  .}
+
+  proc SetupDiGetInterfaceDeviceDetail*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_W,
+    DeviceInterfaceDetailDataSize: DWORD,
+    RequiredSize: PDWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailW"
+  .}
+
+  proc SetupDiEnumDriverInfo*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverType: DWORD,
+    MemberIndex: DWORD,
+    DriverInfoData: PSP_DRVINFO_DATA_W,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiEnumDriverInfoW".}
+
+  proc SetupDiGetSelectedDriver*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_W,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetSelectedDriverW"
+  .}
+
+  proc SetupDiSetSelectedDriver*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_W,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetSelectedDriverW"
+  .}
+
+  proc SetupDiGetDriverInfoDetail*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_W,
+    DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_W,
+    DriverInfoDetailDataSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInfoDetailW"
+  .}
+
+  proc SetupDiGetClassDevs*(
+    ClassGuid: ptr GUID, Enumerator: PCWSTR, hwndParent: HWND, Flags: DWORD
+  ): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsW".}
+
+  proc SetupDiGetClassDevsEx*(
+    ClassGuid: ptr GUID,
+    Enumerator: PCWSTR,
+    hwndParent: HWND,
+    Flags: DWORD,
+    DeviceInfoSet: HDEVINFO,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsExW".}
+
+  proc SetupDiGetINFClass*(
+    InfName: PCWSTR,
+    ClassGuid: LPGUID,
+    ClassName: PWSTR,
+    ClassNameSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetINFClassW".}
+
+  proc SetupDiBuildClassInfoListEx*(
+    Flags: DWORD,
+    ClassGuidList: LPGUID,
+    ClassGuidListSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiBuildClassInfoListExW"
+  .}
+
+  proc SetupDiGetClassDescription*(
+    ClassGuid: ptr GUID,
+    ClassDescription: PWSTR,
+    ClassDescriptionSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionW"
+  .}
+
+  proc SetupDiGetClassDescriptionEx*(
+    ClassGuid: ptr GUID,
+    ClassDescription: PWSTR,
+    ClassDescriptionSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionExW"
+  .}
+
+  proc SetupDiInstallClass*(
+    hwndParent: HWND, InfFileName: PCWSTR, Flags: DWORD, FileQueue: HSPFILEQ
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassW".}
+
+  proc SetupDiInstallClassEx*(
+    hwndParent: HWND,
+    InfFileName: PCWSTR,
+    Flags: DWORD,
+    FileQueue: HSPFILEQ,
+    InterfaceClassGuid: ptr GUID,
+    Reserved1: PVOID,
+    Reserved2: PVOID,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassExW".}
+
+  proc SetupDiOpenClassRegKeyEx*(
+    ClassGuid: ptr GUID,
+    samDesired: REGSAM,
+    Flags: DWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenClassRegKeyExW".}
+
+  proc SetupDiCreateDeviceInterfaceRegKey*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    Reserved: DWORD,
+    samDesired: REGSAM,
+    InfHandle: HINF,
+    InfSectionName: PCWSTR,
+  ): HKEY {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyW"
+  .}
+
+  proc SetupDiCreateInterfaceDeviceRegKey*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    Reserved: DWORD,
+    samDesired: REGSAM,
+    InfHandle: HINF,
+    InfSectionName: PCWSTR,
+  ): HKEY {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyW"
+  .}
+
+  proc SetupDiCreateDevRegKey*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Scope: DWORD,
+    HwProfile: DWORD,
+    KeyType: DWORD,
+    InfHandle: HINF,
+    InfSectionName: PCWSTR,
+  ): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDevRegKeyW".}
+
+  proc SetupDiGetHwProfileListEx*(
+    HwProfileList: PDWORD,
+    HwProfileListSize: DWORD,
+    RequiredSize: PDWORD,
+    CurrentlyActiveIndex: PDWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileListExW"
+  .}
+
+  proc SetupDiGetDeviceRegistryProperty*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Property: DWORD,
+    PropertyRegDataType: PDWORD,
+    PropertyBuffer: PBYTE,
+    PropertyBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceRegistryPropertyW"
+  .}
+
+  proc SetupDiGetClassRegistryProperty*(
+    ClassGuid: ptr GUID,
+    Property: DWORD,
+    PropertyRegDataType: PDWORD,
+    PropertyBuffer: PBYTE,
+    PropertyBufferSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassRegistryPropertyW"
+  .}
+
+  proc SetupDiSetDeviceRegistryProperty*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Property: DWORD,
+    PropertyBuffer: ptr BYTE,
+    PropertyBufferSize: DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceRegistryPropertyW"
+  .}
+
+  proc SetupDiSetClassRegistryProperty*(
+    ClassGuid: ptr GUID,
+    Property: DWORD,
+    PropertyBuffer: ptr BYTE,
+    PropertyBufferSize: DWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassRegistryPropertyW"
+  .}
+
+  proc SetupDiGetDeviceInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstallParamsW"
+  .}
+
+  proc SetupDiGetClassInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+    ClassInstallParamsSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassInstallParamsW"
+  .}
+
+  proc SetupDiSetDeviceInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DeviceInstallParams: PSP_DEVINSTALL_PARAMS_W,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceInstallParamsW"
+  .}
+
+  proc SetupDiSetClassInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+    ClassInstallParamsSize: DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassInstallParamsW"
+  .}
+
+  proc SetupDiGetDriverInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_W,
+    DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInstallParamsW"
+  .}
+
+  proc SetupDiSetDriverInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_W,
+    DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDriverInstallParamsW"
+  .}
+
+  proc SetupDiGetClassImageListEx*(
+    ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCWSTR, Reserved: PVOID
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassImageListExW"
+  .}
+
+  proc SetupDiGetClassDevPropertySheets*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    PropertySheetHeader: LPPROPSHEETHEADERW,
+    PropertySheetHeaderPageListSize: DWORD,
+    RequiredSize: PDWORD,
+    PropertySheetType: DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevPropertySheetsW"
+  .}
+
+  proc SetupDiClassNameFromGuid*(
+    ClassGuid: ptr GUID, ClassName: PWSTR, ClassNameSize: DWORD, RequiredSize: PDWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidW"
+  .}
+
+  proc SetupDiClassNameFromGuidEx*(
+    ClassGuid: ptr GUID,
+    ClassName: PWSTR,
+    ClassNameSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidExW"
+  .}
+
+  proc SetupDiClassGuidsFromName*(
+    ClassName: PCWSTR,
+    ClassGuidList: LPGUID,
+    ClassGuidListSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameW"
+  .}
+
+  proc SetupDiClassGuidsFromNameEx*(
+    ClassName: PCWSTR,
+    ClassGuidList: LPGUID,
+    ClassGuidListSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameExW"
+  .}
+
+  proc SetupDiGetHwProfileFriendlyName*(
+    HwProfile: DWORD, FriendlyName: PWSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameW"
+  .}
+
+  proc SetupDiGetHwProfileFriendlyNameEx*(
+    HwProfile: DWORD,
+    FriendlyName: PWSTR,
+    FriendlyNameSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameExW"
+  .}
+
+  proc SetupDiGetActualModelsSection*(
+    Context: PINFCONTEXT,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    InfSectionWithExt: PWSTR,
+    InfSectionWithExtSize: DWORD,
+    RequiredSize: PDWORD,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualModelsSectionW"
+  .}
+
+  proc SetupDiGetActualSectionToInstall*(
+    InfHandle: HINF,
+    InfSectionName: PCWSTR,
+    InfSectionWithExt: PWSTR,
+    InfSectionWithExtSize: DWORD,
+    RequiredSize: PDWORD,
+    Extension: ptr PWSTR,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallW"
+  .}
+
+  proc SetupDiGetActualSectionToInstallEx*(
+    InfHandle: HINF,
+    InfSectionName: PCWSTR,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    InfSectionWithExt: PWSTR,
+    InfSectionWithExtSize: DWORD,
+    RequiredSize: PDWORD,
+    Extension: ptr PWSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallExW"
+  .}
+
+  proc SetupEnumInfSections*(
+    InfHandle: HINF, Index: UINT, Buffer: PWSTR, Size: UINT, SizeNeeded: ptr UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupEnumInfSectionsW".}
+
+  proc SetupVerifyInfFile*(
+    InfName: PCWSTR,
+    AltPlatformInfo: PSP_ALTPLATFORM_INFO,
+    InfSignerInfo: PSP_INF_SIGNER_INFO_W,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupVerifyInfFileW".}
+
+  proc SetupDiGetCustomDeviceProperty*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    CustomPropertyName: PCWSTR,
+    Flags: DWORD,
+    PropertyRegDataType: PDWORD,
+    PropertyBuffer: PBYTE,
+    PropertyBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetCustomDevicePropertyW"
+  .}
+
+  proc SetupConfigureWmiFromInfSection*(
+    InfHandle: HINF, SectionName: PCWSTR, Flags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupConfigureWmiFromInfSectionW"
+  .}
+
 when winimAnsi:
   type
     SP_ORIGINAL_FILE_INFO* = SP_ORIGINAL_FILE_INFO_A
@@ -1785,130 +4748,1095 @@ when winimAnsi:
     PSP_BACKUP_QUEUE_PARAMS_V1* = PSP_BACKUP_QUEUE_PARAMS_V1_A
     SP_INF_SIGNER_INFO* = SP_INF_SIGNER_INFO_A
     PSP_INF_SIGNER_INFO* = PSP_INF_SIGNER_INFO_A
-  proc SetupGetInfInformation*(InfSpec: LPCVOID, SearchControl: DWORD, ReturnBuffer: PSP_INF_INFORMATION, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfInformationA".}
-  proc SetupQueryInfFileInformation*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfFileInformationA".}
-  proc SetupQueryInfOriginalFileInformation*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfOriginalFileInformationA".}
-  proc SetupQueryInfVersionInformation*(InfInformation: PSP_INF_INFORMATION, InfIndex: UINT, Key: PCSTR, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfVersionInformationA".}
-  proc SetupGetInfFileList*(DirectoryPath: PCSTR, InfStyle: DWORD, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfFileListA".}
-  proc SetupOpenInfFile*(FileName: PCSTR, InfClass: PCSTR, InfStyle: DWORD, ErrorLine: PUINT): HINF {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenInfFileA".}
-  proc SetupOpenAppendInfFile*(FileName: PCSTR, InfHandle: HINF, ErrorLine: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenAppendInfFileA".}
-  proc SetupFindFirstLine*(InfHandle: HINF, Section: PCSTR, Key: PCSTR, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindFirstLineA".}
-  proc SetupFindNextMatchLine*(ContextIn: PINFCONTEXT, Key: PCSTR, ContextOut: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindNextMatchLineA".}
-  proc SetupGetLineByIndex*(InfHandle: HINF, Section: PCSTR, Index: DWORD, Context: PINFCONTEXT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineByIndexA".}
-  proc SetupGetLineCount*(InfHandle: HINF, Section: PCSTR): LONG {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineCountA".}
-  proc SetupGetLineText*(Context: PINFCONTEXT, InfHandle: HINF, Section: PCSTR, Key: PCSTR, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineTextA".}
-  proc SetupGetStringField*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetStringFieldA".}
-  proc SetupGetMultiSzField*(Context: PINFCONTEXT, FieldIndex: DWORD, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetMultiSzFieldA".}
-  proc SetupGetFileCompressionInfo*(SourceFileName: PCSTR, ActualSourceFileName: ptr PSTR, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoA".}
-  proc SetupGetFileCompressionInfoEx*(SourceFileName: PCSTR, ActualSourceFileNameBuffer: PSTR, ActualSourceFileNameBufferLen: DWORD, RequiredBufferLen: PDWORD, SourceFileSize: PDWORD, TargetFileSize: PDWORD, CompressionType: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoExA".}
-  proc SetupDecompressOrCopyFile*(SourceFileName: PCSTR, TargetFileName: PCSTR, CompressionType: PUINT): DWORD {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDecompressOrCopyFileA".}
-  proc SetupGetSourceFileLocation*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCSTR, SourceId: PUINT, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileLocationA".}
-  proc SetupGetSourceFileSize*(InfHandle: HINF, InfContext: PINFCONTEXT, FileName: PCSTR, Section: PCSTR, FileSize: PDWORD, RoundingFactor: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileSizeA".}
-  proc SetupGetTargetPath*(InfHandle: HINF, InfContext: PINFCONTEXT, Section: PCSTR, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetTargetPathA".}
-  proc SetupSetSourceList*(Flags: DWORD, SourceList: ptr PCSTR, SourceCount: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetSourceListA".}
-  proc SetupAddToSourceList*(Flags: DWORD, Source: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToSourceListA".}
-  proc SetupRemoveFromSourceList*(Flags: DWORD, Source: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromSourceListA".}
-  proc SetupQuerySourceList*(Flags: DWORD, List: ptr ptr PCSTR, Count: PUINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySourceListA".}
-  proc SetupFreeSourceList*(List: ptr ptr PCSTR, Count: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFreeSourceListA".}
-  proc SetupPromptForDisk*(hwndParent: HWND, DialogTitle: PCSTR, DiskName: PCSTR, PathToSource: PCSTR, FileSought: PCSTR, TagFile: PCSTR, DiskPromptStyle: DWORD, PathBuffer: PSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupPromptForDiskA".}
-  proc SetupCopyError*(hwndParent: HWND, DialogTitle: PCSTR, DiskName: PCSTR, PathToSource: PCSTR, SourceFile: PCSTR, TargetPathFile: PCSTR, Win32ErrorCode: UINT, Style: DWORD, PathBuffer: PSTR, PathBufferSize: DWORD, PathRequiredSize: PDWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyErrorA".}
-  proc SetupRenameError*(hwndParent: HWND, DialogTitle: PCSTR, SourceFile: PCSTR, TargetFile: PCSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRenameErrorA".}
-  proc SetupDeleteError*(hwndParent: HWND, DialogTitle: PCSTR, File: PCSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDeleteErrorA".}
-  proc SetupBackupError*(hwndParent: HWND, DialogTitle: PCSTR, SourceFile: PCSTR, TargetFile: PCSTR, Win32ErrorCode: UINT, Style: DWORD): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupBackupErrorA".}
-  proc SetupSetDirectoryId*(InfHandle: HINF, Id: DWORD, Directory: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdA".}
-  proc SetupSetDirectoryIdEx*(InfHandle: HINF, Id: DWORD, Directory: PCSTR, Flags: DWORD, Reserved1: DWORD, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdExA".}
-  proc SetupGetSourceInfo*(InfHandle: HINF, SourceId: UINT, InfoDesired: UINT, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceInfoA".}
-  proc SetupInstallFile*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCSTR, SourcePathRoot: PCSTR, DestinationName: PCSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileA".}
-  proc SetupInstallFileEx*(InfHandle: HINF, InfContext: PINFCONTEXT, SourceFile: PCSTR, SourcePathRoot: PCSTR, DestinationName: PCSTR, CopyStyle: DWORD, CopyMsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID, FileWasInUse: PBOOL): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileExA".}
-  proc SetupSetFileQueueAlternatePlatform*(QueueHandle: HSPFILEQ, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, AlternateDefaultCatalogFile: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetFileQueueAlternatePlatformA".}
-  proc SetupQueueDeleteSection*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteSectionA".}
-  proc SetupQueueRename*(QueueHandle: HSPFILEQ, SourcePath: PCSTR, SourceFilename: PCSTR, TargetPath: PCSTR, TargetFilename: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameA".}
-  proc SetupQueueRenameSection*(QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameSectionA".}
-  proc SetupCommitFileQueue*(Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCommitFileQueueA".}
-  proc SetupScanFileQueue*(FileQueue: HSPFILEQ, Flags: DWORD, Window: HWND, CallbackRoutine: PSP_FILE_CALLBACK_A, CallbackContext: PVOID, Result: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupScanFileQueueA".}
-  proc SetupSetPlatformPathOverride*(Override: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetPlatformPathOverrideA".}
-  proc SetupQueueCopy*(QueueHandle: HSPFILEQ, SourceRootPath: PCSTR, SourcePath: PCSTR, SourceFilename: PCSTR, SourceDescription: PCSTR, SourceTagfile: PCSTR, TargetDirectory: PCSTR, TargetFilename: PCSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyA".}
-  proc SetupQueueCopyIndirect*(CopyParams: PSP_FILE_COPY_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyIndirectA".}
-  proc SetupQueueDefaultCopy*(QueueHandle: HSPFILEQ, InfHandle: HINF, SourceRootPath: PCSTR, SourceFilename: PCSTR, TargetFilename: PCSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDefaultCopyA".}
-  proc SetupQueueCopySection*(QueueHandle: HSPFILEQ, SourceRootPath: PCSTR, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR, CopyStyle: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopySectionA".}
-  proc SetupQueueDelete*(QueueHandle: HSPFILEQ, PathPart1: PCSTR, PathPart2: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteA".}
-  proc SetupCopyOEMInf*(SourceInfFileName: PCSTR, OEMSourceMediaLocation: PCSTR, OEMSourceMediaType: DWORD, CopyStyle: DWORD, DestinationInfFileName: PSTR, DestinationInfFileNameSize: DWORD, RequiredSize: PDWORD, DestinationInfFileNameComponent: ptr PSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyOEMInfA".}
-  proc SetupUninstallOEMInf*(InfFileName: PCSTR, Flags: DWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupUninstallOEMInfA".}
-  proc SetupCreateDiskSpaceList*(Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCreateDiskSpaceListA".}
-  proc SetupDuplicateDiskSpaceList*(DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT): HDSKSPC {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDuplicateDiskSpaceListA".}
-  proc SetupQueryDrivesInDiskSpaceList*(DiskSpace: HDSKSPC, ReturnBuffer: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryDrivesInDiskSpaceListA".}
-  proc SetupQuerySpaceRequiredOnDrive*(DiskSpace: HDSKSPC, DriveSpec: PCSTR, SpaceRequired: ptr LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySpaceRequiredOnDriveA".}
-  proc SetupAdjustDiskSpaceList*(DiskSpace: HDSKSPC, DriveRoot: LPCSTR, Amount: LONGLONG, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAdjustDiskSpaceListA".}
-  proc SetupAddToDiskSpaceList*(DiskSpace: HDSKSPC, TargetFilespec: PCSTR, FileSize: LONGLONG, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToDiskSpaceListA".}
-  proc SetupAddSectionToDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddSectionToDiskSpaceListA".}
-  proc SetupAddInstallSectionToDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddInstallSectionToDiskSpaceListA".}
-  proc SetupRemoveFromDiskSpaceList*(DiskSpace: HDSKSPC, TargetFilespec: PCSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromDiskSpaceListA".}
-  proc SetupRemoveSectionFromDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, ListInfHandle: HINF, SectionName: PCSTR, Operation: UINT, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveSectionFromDiskSpaceListA".}
-  proc SetupRemoveInstallSectionFromDiskSpaceList*(DiskSpace: HDSKSPC, InfHandle: HINF, LayoutInfHandle: HINF, SectionName: PCSTR, Reserved1: PVOID, Reserved2: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveInstallSectionFromDiskSpaceListA".}
-  proc SetupIterateCabinet*(CabinetFile: PCSTR, Reserved: DWORD, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupIterateCabinetA".}
-  proc SetupDefaultQueueCallback*(Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDefaultQueueCallbackA".}
-  proc SetupInstallFromInfSection*(Owner: HWND, InfHandle: HINF, SectionName: PCSTR, Flags: UINT, RelativeKeyRoot: HKEY, SourceRootPath: PCSTR, CopyFlags: UINT, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFromInfSectionA".}
-  proc SetupInstallFilesFromInfSection*(InfHandle: HINF, LayoutInfHandle: HINF, FileQueue: HSPFILEQ, SectionName: PCSTR, SourceRootPath: PCSTR, CopyFlags: UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFilesFromInfSectionA".}
-  proc SetupInstallServicesFromInfSection*(InfHandle: HINF, SectionName: PCSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallServicesFromInfSectionA".}
-  proc SetupInstallServicesFromInfSectionEx*(InfHandle: HINF, SectionName: PCSTR, Flags: DWORD, DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallServicesFromInfSectionExA".}
-  proc InstallHinfSection*(Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCSTR, ShowCommand: INT): VOID {.winapi, stdcall, dynlib: "setupapi", importc: "InstallHinfSectionA".}
-  proc SetupInitializeFileLog*(LogFileName: PCSTR, Flags: DWORD): HSPFILELOG {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInitializeFileLogA".}
-  proc SetupLogFile*(FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, SourceFilename: PCSTR, TargetFilename: PCSTR, Checksum: DWORD, DiskTagfile: PCSTR, DiskDescription: PCSTR, OtherInfo: PCSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogFileA".}
-  proc SetupRemoveFileLogEntry*(FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, TargetFilename: PCSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFileLogEntryA".}
-  proc SetupQueryFileLog*(FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, TargetFilename: PCSTR, DesiredInfo: SetupFileLogInfo, DataOut: PSTR, ReturnBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryFileLogA".}
-  proc SetupLogError*(MessageString: LPCSTR, Severity: LogSeverity): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogErrorA".}
-  proc SetupGetBackupInformation*(QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetBackupInformationA".}
-  proc SetupPrepareQueueForRestore*(QueueHandle: HSPFILEQ, BackupPath: PCSTR, RestoreFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupPrepareQueueForRestoreA".}
-  proc SetupDiCreateDeviceInfoListEx*(ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoListExA".}
-  proc SetupDiGetDeviceInfoListDetail*(DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInfoListDetailA".}
-  proc SetupDiCreateDeviceInfo*(DeviceInfoSet: HDEVINFO, DeviceName: PCSTR, ClassGuid: ptr GUID, DeviceDescription: PCSTR, hwndParent: HWND, CreationFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoA".}
-  proc SetupDiOpenDeviceInfo*(DeviceInfoSet: HDEVINFO, DeviceInstanceId: PCSTR, hwndParent: HWND, OpenFlags: DWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInfoA".}
-  proc SetupDiGetDeviceInstanceId*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstanceId: PSTR, DeviceInstanceIdSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstanceIdA".}
-  proc SetupDiCreateDeviceInterface*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceA".}
-  proc SetupDiCreateInterfaceDevice*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, InterfaceClassGuid: ptr GUID, ReferenceString: PCSTR, CreationFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceA".}
-  proc SetupDiOpenDeviceInterface*(DeviceInfoSet: HDEVINFO, DevicePath: PCSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceA".}
-  proc SetupDiOpenInterfaceDevice*(DeviceInfoSet: HDEVINFO, DevicePath: PCSTR, OpenFlags: DWORD, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceA".}
-  proc SetupDiGetDeviceInterfaceDetail*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailA".}
-  proc SetupDiGetInterfaceDeviceDetail*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A, DeviceInterfaceDetailDataSize: DWORD, RequiredSize: PDWORD, DeviceInfoData: PSP_DEVINFO_DATA): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailA".}
-  proc SetupDiEnumDriverInfo*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverType: DWORD, MemberIndex: DWORD, DriverInfoData: PSP_DRVINFO_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiEnumDriverInfoA".}
-  proc SetupDiGetSelectedDriver*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetSelectedDriverA".}
-  proc SetupDiSetSelectedDriver*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetSelectedDriverA".}
-  proc SetupDiGetDriverInfoDetail*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A, DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_A, DriverInfoDetailDataSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInfoDetailA".}
-  proc SetupDiGetClassDevs*(ClassGuid: ptr GUID, Enumerator: PCSTR, hwndParent: HWND, Flags: DWORD): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsA".}
-  proc SetupDiGetClassDevsEx*(ClassGuid: ptr GUID, Enumerator: PCSTR, hwndParent: HWND, Flags: DWORD, DeviceInfoSet: HDEVINFO, MachineName: PCSTR, Reserved: PVOID): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsExA".}
-  proc SetupDiGetINFClass*(InfName: PCSTR, ClassGuid: LPGUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetINFClassA".}
-  proc SetupDiBuildClassInfoListEx*(Flags: DWORD, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiBuildClassInfoListExA".}
-  proc SetupDiGetClassDescription*(ClassGuid: ptr GUID, ClassDescription: PSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionA".}
-  proc SetupDiGetClassDescriptionEx*(ClassGuid: ptr GUID, ClassDescription: PSTR, ClassDescriptionSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionExA".}
-  proc SetupDiInstallClass*(hwndParent: HWND, InfFileName: PCSTR, Flags: DWORD, FileQueue: HSPFILEQ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassA".}
-  proc SetupDiInstallClassEx*(hwndParent: HWND, InfFileName: PCSTR, Flags: DWORD, FileQueue: HSPFILEQ, InterfaceClassGuid: ptr GUID, Reserved1: PVOID, Reserved2: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassExA".}
-  proc SetupDiOpenClassRegKeyEx*(ClassGuid: ptr GUID, samDesired: REGSAM, Flags: DWORD, MachineName: PCSTR, Reserved: PVOID): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenClassRegKeyExA".}
-  proc SetupDiCreateDeviceInterfaceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyA".}
-  proc SetupDiCreateInterfaceDeviceRegKey*(DeviceInfoSet: HDEVINFO, DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA, Reserved: DWORD, samDesired: REGSAM, InfHandle: HINF, InfSectionName: PCSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyA".}
-  proc SetupDiCreateDevRegKey*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Scope: DWORD, HwProfile: DWORD, KeyType: DWORD, InfHandle: HINF, InfSectionName: PCSTR): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDevRegKeyA".}
-  proc SetupDiGetHwProfileListEx*(HwProfileList: PDWORD, HwProfileListSize: DWORD, RequiredSize: PDWORD, CurrentlyActiveIndex: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileListExA".}
-  proc SetupDiGetDeviceRegistryProperty*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceRegistryPropertyA".}
-  proc SetupDiGetClassRegistryProperty*(ClassGuid: ptr GUID, Property: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassRegistryPropertyA".}
-  proc SetupDiSetDeviceRegistryProperty*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceRegistryPropertyA".}
-  proc SetupDiSetClassRegistryProperty*(ClassGuid: ptr GUID, Property: DWORD, PropertyBuffer: ptr BYTE, PropertyBufferSize: DWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassRegistryPropertyA".}
-  proc SetupDiGetDeviceInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstallParamsA".}
-  proc SetupDiGetClassInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassInstallParamsA".}
-  proc SetupDiSetDeviceInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceInstallParamsA".}
-  proc SetupDiSetClassInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, ClassInstallParams: PSP_CLASSINSTALL_HEADER, ClassInstallParamsSize: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassInstallParamsA".}
-  proc SetupDiGetDriverInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInstallParamsA".}
-  proc SetupDiSetDriverInstallParams*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, DriverInfoData: PSP_DRVINFO_DATA_A, DriverInstallParams: PSP_DRVINSTALL_PARAMS): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDriverInstallParamsA".}
-  proc SetupDiGetClassImageListEx*(ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassImageListExA".}
-  proc SetupDiGetClassDevPropertySheets*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, PropertySheetHeader: LPPROPSHEETHEADERA, PropertySheetHeaderPageListSize: DWORD, RequiredSize: PDWORD, PropertySheetType: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevPropertySheetsA".}
-  proc SetupDiClassNameFromGuid*(ClassGuid: ptr GUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidA".}
-  proc SetupDiClassNameFromGuidEx*(ClassGuid: ptr GUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidExA".}
-  proc SetupDiClassGuidsFromName*(ClassName: PCSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameA".}
-  proc SetupDiClassGuidsFromNameEx*(ClassName: PCSTR, ClassGuidList: LPGUID, ClassGuidListSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameExA".}
-  proc SetupDiGetHwProfileFriendlyName*(HwProfile: DWORD, FriendlyName: PSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameA".}
-  proc SetupDiGetHwProfileFriendlyNameEx*(HwProfile: DWORD, FriendlyName: PSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD, MachineName: PCSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameExA".}
-  proc SetupDiGetActualModelsSection*(Context: PINFCONTEXT, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualModelsSectionA".}
-  proc SetupDiGetActualSectionToInstall*(InfHandle: HINF, InfSectionName: PCSTR, InfSectionWithExt: PSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PSTR): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallA".}
-  proc SetupDiGetActualSectionToInstallEx*(InfHandle: HINF, InfSectionName: PCSTR, AlternatePlatformInfo: PSP_ALTPLATFORM_INFO, InfSectionWithExt: PSTR, InfSectionWithExtSize: DWORD, RequiredSize: PDWORD, Extension: ptr PSTR, Reserved: PVOID): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallExA".}
-  proc SetupEnumInfSections*(InfHandle: HINF, Index: UINT, Buffer: PSTR, Size: UINT, SizeNeeded: ptr UINT): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupEnumInfSectionsA".}
-  proc SetupVerifyInfFile*(InfName: PCSTR, AltPlatformInfo: PSP_ALTPLATFORM_INFO, InfSignerInfo: PSP_INF_SIGNER_INFO_A): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupVerifyInfFileA".}
-  proc SetupDiGetCustomDeviceProperty*(DeviceInfoSet: HDEVINFO, DeviceInfoData: PSP_DEVINFO_DATA, CustomPropertyName: PCSTR, Flags: DWORD, PropertyRegDataType: PDWORD, PropertyBuffer: PBYTE, PropertyBufferSize: DWORD, RequiredSize: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetCustomDevicePropertyA".}
-  proc SetupConfigureWmiFromInfSection*(InfHandle: HINF, SectionName: PCSTR, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupConfigureWmiFromInfSectionA".}
+
+  proc SetupGetInfInformation*(
+    InfSpec: LPCVOID,
+    SearchControl: DWORD,
+    ReturnBuffer: PSP_INF_INFORMATION,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfInformationA".}
+
+  proc SetupQueryInfFileInformation*(
+    InfInformation: PSP_INF_INFORMATION,
+    InfIndex: UINT,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfFileInformationA"
+  .}
+
+  proc SetupQueryInfOriginalFileInformation*(
+    InfInformation: PSP_INF_INFORMATION,
+    InfIndex: UINT,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    OriginalFileInfo: PSP_ORIGINAL_FILE_INFO_A,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupQueryInfOriginalFileInformationA"
+  .}
+
+  proc SetupQueryInfVersionInformation*(
+    InfInformation: PSP_INF_INFORMATION,
+    InfIndex: UINT,
+    Key: PCSTR,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryInfVersionInformationA"
+  .}
+
+  proc SetupGetInfFileList*(
+    DirectoryPath: PCSTR,
+    InfStyle: DWORD,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetInfFileListA".}
+
+  proc SetupOpenInfFile*(
+    FileName: PCSTR, InfClass: PCSTR, InfStyle: DWORD, ErrorLine: PUINT
+  ): HINF {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenInfFileA".}
+
+  proc SetupOpenAppendInfFile*(
+    FileName: PCSTR, InfHandle: HINF, ErrorLine: PUINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupOpenAppendInfFileA".}
+
+  proc SetupFindFirstLine*(
+    InfHandle: HINF, Section: PCSTR, Key: PCSTR, Context: PINFCONTEXT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindFirstLineA".}
+
+  proc SetupFindNextMatchLine*(
+    ContextIn: PINFCONTEXT, Key: PCSTR, ContextOut: PINFCONTEXT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFindNextMatchLineA".}
+
+  proc SetupGetLineByIndex*(
+    InfHandle: HINF, Section: PCSTR, Index: DWORD, Context: PINFCONTEXT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineByIndexA".}
+
+  proc SetupGetLineCount*(
+    InfHandle: HINF, Section: PCSTR
+  ): LONG {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineCountA".}
+
+  proc SetupGetLineText*(
+    Context: PINFCONTEXT,
+    InfHandle: HINF,
+    Section: PCSTR,
+    Key: PCSTR,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetLineTextA".}
+
+  proc SetupGetStringField*(
+    Context: PINFCONTEXT,
+    FieldIndex: DWORD,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetStringFieldA".}
+
+  proc SetupGetMultiSzField*(
+    Context: PINFCONTEXT,
+    FieldIndex: DWORD,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: LPDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetMultiSzFieldA".}
+
+  proc SetupGetFileCompressionInfo*(
+    SourceFileName: PCSTR,
+    ActualSourceFileName: ptr PSTR,
+    SourceFileSize: PDWORD,
+    TargetFileSize: PDWORD,
+    CompressionType: PUINT,
+  ): DWORD {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoA"
+  .}
+
+  proc SetupGetFileCompressionInfoEx*(
+    SourceFileName: PCSTR,
+    ActualSourceFileNameBuffer: PSTR,
+    ActualSourceFileNameBufferLen: DWORD,
+    RequiredBufferLen: PDWORD,
+    SourceFileSize: PDWORD,
+    TargetFileSize: PDWORD,
+    CompressionType: PUINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetFileCompressionInfoExA"
+  .}
+
+  proc SetupDecompressOrCopyFile*(
+    SourceFileName: PCSTR, TargetFileName: PCSTR, CompressionType: PUINT
+  ): DWORD {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDecompressOrCopyFileA"
+  .}
+
+  proc SetupGetSourceFileLocation*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    FileName: PCSTR,
+    SourceId: PUINT,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileLocationA"
+  .}
+
+  proc SetupGetSourceFileSize*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    FileName: PCSTR,
+    Section: PCSTR,
+    FileSize: PDWORD,
+    RoundingFactor: UINT,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceFileSizeA".}
+
+  proc SetupGetTargetPath*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    Section: PCSTR,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetTargetPathA".}
+
+  proc SetupSetSourceList*(
+    Flags: DWORD, SourceList: ptr PCSTR, SourceCount: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetSourceListA".}
+
+  proc SetupAddToSourceList*(
+    Flags: DWORD, Source: PCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToSourceListA".}
+
+  proc SetupRemoveFromSourceList*(
+    Flags: DWORD, Source: PCSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromSourceListA"
+  .}
+
+  proc SetupQuerySourceList*(
+    Flags: DWORD, List: ptr ptr PCSTR, Count: PUINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySourceListA".}
+
+  proc SetupFreeSourceList*(
+    List: ptr ptr PCSTR, Count: UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupFreeSourceListA".}
+
+  proc SetupPromptForDisk*(
+    hwndParent: HWND,
+    DialogTitle: PCSTR,
+    DiskName: PCSTR,
+    PathToSource: PCSTR,
+    FileSought: PCSTR,
+    TagFile: PCSTR,
+    DiskPromptStyle: DWORD,
+    PathBuffer: PSTR,
+    PathBufferSize: DWORD,
+    PathRequiredSize: PDWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupPromptForDiskA".}
+
+  proc SetupCopyError*(
+    hwndParent: HWND,
+    DialogTitle: PCSTR,
+    DiskName: PCSTR,
+    PathToSource: PCSTR,
+    SourceFile: PCSTR,
+    TargetPathFile: PCSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+    PathBuffer: PSTR,
+    PathBufferSize: DWORD,
+    PathRequiredSize: PDWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyErrorA".}
+
+  proc SetupRenameError*(
+    hwndParent: HWND,
+    DialogTitle: PCSTR,
+    SourceFile: PCSTR,
+    TargetFile: PCSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupRenameErrorA".}
+
+  proc SetupDeleteError*(
+    hwndParent: HWND,
+    DialogTitle: PCSTR,
+    File: PCSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDeleteErrorA".}
+
+  proc SetupBackupError*(
+    hwndParent: HWND,
+    DialogTitle: PCSTR,
+    SourceFile: PCSTR,
+    TargetFile: PCSTR,
+    Win32ErrorCode: UINT,
+    Style: DWORD,
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupBackupErrorA".}
+
+  proc SetupSetDirectoryId*(
+    InfHandle: HINF, Id: DWORD, Directory: PCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdA".}
+
+  proc SetupSetDirectoryIdEx*(
+    InfHandle: HINF,
+    Id: DWORD,
+    Directory: PCSTR,
+    Flags: DWORD,
+    Reserved1: DWORD,
+    Reserved2: PVOID,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupSetDirectoryIdExA".}
+
+  proc SetupGetSourceInfo*(
+    InfHandle: HINF,
+    SourceId: UINT,
+    InfoDesired: UINT,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupGetSourceInfoA".}
+
+  proc SetupInstallFile*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    SourceFile: PCSTR,
+    SourcePathRoot: PCSTR,
+    DestinationName: PCSTR,
+    CopyStyle: DWORD,
+    CopyMsgHandler: PSP_FILE_CALLBACK_A,
+    Context: PVOID,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileA".}
+
+  proc SetupInstallFileEx*(
+    InfHandle: HINF,
+    InfContext: PINFCONTEXT,
+    SourceFile: PCSTR,
+    SourcePathRoot: PCSTR,
+    DestinationName: PCSTR,
+    CopyStyle: DWORD,
+    CopyMsgHandler: PSP_FILE_CALLBACK_A,
+    Context: PVOID,
+    FileWasInUse: PBOOL,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFileExA".}
+
+  proc SetupSetFileQueueAlternatePlatform*(
+    QueueHandle: HSPFILEQ,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    AlternateDefaultCatalogFile: PCSTR,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupSetFileQueueAlternatePlatformA"
+  .}
+
+  proc SetupQueueDeleteSection*(
+    QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteSectionA"
+  .}
+
+  proc SetupQueueRename*(
+    QueueHandle: HSPFILEQ,
+    SourcePath: PCSTR,
+    SourceFilename: PCSTR,
+    TargetPath: PCSTR,
+    TargetFilename: PCSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameA".}
+
+  proc SetupQueueRenameSection*(
+    QueueHandle: HSPFILEQ, InfHandle: HINF, ListInfHandle: HINF, Section: PCSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueRenameSectionA"
+  .}
+
+  proc SetupCommitFileQueue*(
+    Owner: HWND, QueueHandle: HSPFILEQ, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCommitFileQueueA".}
+
+  proc SetupScanFileQueue*(
+    FileQueue: HSPFILEQ,
+    Flags: DWORD,
+    Window: HWND,
+    CallbackRoutine: PSP_FILE_CALLBACK_A,
+    CallbackContext: PVOID,
+    Result: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupScanFileQueueA".}
+
+  proc SetupSetPlatformPathOverride*(
+    Override: PCSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupSetPlatformPathOverrideA"
+  .}
+
+  proc SetupQueueCopy*(
+    QueueHandle: HSPFILEQ,
+    SourceRootPath: PCSTR,
+    SourcePath: PCSTR,
+    SourceFilename: PCSTR,
+    SourceDescription: PCSTR,
+    SourceTagfile: PCSTR,
+    TargetDirectory: PCSTR,
+    TargetFilename: PCSTR,
+    CopyStyle: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyA".}
+
+  proc SetupQueueCopyIndirect*(
+    CopyParams: PSP_FILE_COPY_PARAMS_A
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopyIndirectA".}
+
+  proc SetupQueueDefaultCopy*(
+    QueueHandle: HSPFILEQ,
+    InfHandle: HINF,
+    SourceRootPath: PCSTR,
+    SourceFilename: PCSTR,
+    TargetFilename: PCSTR,
+    CopyStyle: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDefaultCopyA".}
+
+  proc SetupQueueCopySection*(
+    QueueHandle: HSPFILEQ,
+    SourceRootPath: PCSTR,
+    InfHandle: HINF,
+    ListInfHandle: HINF,
+    Section: PCSTR,
+    CopyStyle: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueCopySectionA".}
+
+  proc SetupQueueDelete*(
+    QueueHandle: HSPFILEQ, PathPart1: PCSTR, PathPart2: PCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueueDeleteA".}
+
+  proc SetupCopyOEMInf*(
+    SourceInfFileName: PCSTR,
+    OEMSourceMediaLocation: PCSTR,
+    OEMSourceMediaType: DWORD,
+    CopyStyle: DWORD,
+    DestinationInfFileName: PSTR,
+    DestinationInfFileNameSize: DWORD,
+    RequiredSize: PDWORD,
+    DestinationInfFileNameComponent: ptr PSTR,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupCopyOEMInfA".}
+
+  proc SetupUninstallOEMInf*(
+    InfFileName: PCSTR, Flags: DWORD, Reserved: PVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupUninstallOEMInfA".}
+
+  proc SetupCreateDiskSpaceList*(
+    Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+  ): HDSKSPC {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupCreateDiskSpaceListA"
+  .}
+
+  proc SetupDuplicateDiskSpaceList*(
+    DiskSpace: HDSKSPC, Reserved1: PVOID, Reserved2: DWORD, Flags: UINT
+  ): HDSKSPC {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDuplicateDiskSpaceListA"
+  .}
+
+  proc SetupQueryDrivesInDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    ReturnBuffer: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryDrivesInDiskSpaceListA"
+  .}
+
+  proc SetupQuerySpaceRequiredOnDrive*(
+    DiskSpace: HDSKSPC,
+    DriveSpec: PCSTR,
+    SpaceRequired: ptr LONGLONG,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupQuerySpaceRequiredOnDriveA"
+  .}
+
+  proc SetupAdjustDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    DriveRoot: LPCSTR,
+    Amount: LONGLONG,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupAdjustDiskSpaceListA"
+  .}
+
+  proc SetupAddToDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    TargetFilespec: PCSTR,
+    FileSize: LONGLONG,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupAddToDiskSpaceListA"
+  .}
+
+  proc SetupAddSectionToDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    ListInfHandle: HINF,
+    SectionName: PCSTR,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupAddSectionToDiskSpaceListA"
+  .}
+
+  proc SetupAddInstallSectionToDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    LayoutInfHandle: HINF,
+    SectionName: PCSTR,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupAddInstallSectionToDiskSpaceListA"
+  .}
+
+  proc SetupRemoveFromDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    TargetFilespec: PCSTR,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFromDiskSpaceListA"
+  .}
+
+  proc SetupRemoveSectionFromDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    ListInfHandle: HINF,
+    SectionName: PCSTR,
+    Operation: UINT,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveSectionFromDiskSpaceListA"
+  .}
+
+  proc SetupRemoveInstallSectionFromDiskSpaceList*(
+    DiskSpace: HDSKSPC,
+    InfHandle: HINF,
+    LayoutInfHandle: HINF,
+    SectionName: PCSTR,
+    Reserved1: PVOID,
+    Reserved2: UINT,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupRemoveInstallSectionFromDiskSpaceListA"
+  .}
+
+  proc SetupIterateCabinet*(
+    CabinetFile: PCSTR, Reserved: DWORD, MsgHandler: PSP_FILE_CALLBACK_A, Context: PVOID
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupIterateCabinetA".}
+
+  proc SetupDefaultQueueCallback*(
+    Context: PVOID, Notification: UINT, Param1: UINT_PTR, Param2: UINT_PTR
+  ): UINT {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDefaultQueueCallbackA".}
+
+  proc SetupInstallFromInfSection*(
+    Owner: HWND,
+    InfHandle: HINF,
+    SectionName: PCSTR,
+    Flags: UINT,
+    RelativeKeyRoot: HKEY,
+    SourceRootPath: PCSTR,
+    CopyFlags: UINT,
+    MsgHandler: PSP_FILE_CALLBACK_A,
+    Context: PVOID,
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFromInfSectionA"
+  .}
+
+  proc SetupInstallFilesFromInfSection*(
+    InfHandle: HINF,
+    LayoutInfHandle: HINF,
+    FileQueue: HSPFILEQ,
+    SectionName: PCSTR,
+    SourceRootPath: PCSTR,
+    CopyFlags: UINT,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallFilesFromInfSectionA"
+  .}
+
+  proc SetupInstallServicesFromInfSection*(
+    InfHandle: HINF, SectionName: PCSTR, Flags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInstallServicesFromInfSectionA"
+  .}
+
+  proc SetupInstallServicesFromInfSectionEx*(
+    InfHandle: HINF,
+    SectionName: PCSTR,
+    Flags: DWORD,
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Reserved1: PVOID,
+    Reserved2: PVOID,
+  ): WINBOOL {.
+    winapi,
+    stdcall,
+    dynlib: "setupapi",
+    importc: "SetupInstallServicesFromInfSectionExA"
+  .}
+
+  proc InstallHinfSection*(
+    Window: HWND, ModuleHandle: HINSTANCE, CommandLine: PCSTR, ShowCommand: INT
+  ): VOID {.winapi, stdcall, dynlib: "setupapi", importc: "InstallHinfSectionA".}
+
+  proc SetupInitializeFileLog*(
+    LogFileName: PCSTR, Flags: DWORD
+  ): HSPFILELOG {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupInitializeFileLogA"
+  .}
+
+  proc SetupLogFile*(
+    FileLogHandle: HSPFILELOG,
+    LogSectionName: PCSTR,
+    SourceFilename: PCSTR,
+    TargetFilename: PCSTR,
+    Checksum: DWORD,
+    DiskTagfile: PCSTR,
+    DiskDescription: PCSTR,
+    OtherInfo: PCSTR,
+    Flags: DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogFileA".}
+
+  proc SetupRemoveFileLogEntry*(
+    FileLogHandle: HSPFILELOG, LogSectionName: PCSTR, TargetFilename: PCSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupRemoveFileLogEntryA"
+  .}
+
+  proc SetupQueryFileLog*(
+    FileLogHandle: HSPFILELOG,
+    LogSectionName: PCSTR,
+    TargetFilename: PCSTR,
+    DesiredInfo: SetupFileLogInfo,
+    DataOut: PSTR,
+    ReturnBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupQueryFileLogA".}
+
+  proc SetupLogError*(
+    MessageString: LPCSTR, Severity: LogSeverity
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupLogErrorA".}
+
+  proc SetupGetBackupInformation*(
+    QueueHandle: HSPFILEQ, BackupParams: PSP_BACKUP_QUEUE_PARAMS_A
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupGetBackupInformationA"
+  .}
+
+  proc SetupPrepareQueueForRestore*(
+    QueueHandle: HSPFILEQ, BackupPath: PCSTR, RestoreFlags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupPrepareQueueForRestoreA"
+  .}
+
+  proc SetupDiCreateDeviceInfoListEx*(
+    ClassGuid: ptr GUID, hwndParent: HWND, MachineName: PCSTR, Reserved: PVOID
+  ): HDEVINFO {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoListExA"
+  .}
+
+  proc SetupDiGetDeviceInfoListDetail*(
+    DeviceInfoSet: HDEVINFO, DeviceInfoSetDetailData: PSP_DEVINFO_LIST_DETAIL_DATA_A
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInfoListDetailA"
+  .}
+
+  proc SetupDiCreateDeviceInfo*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceName: PCSTR,
+    ClassGuid: ptr GUID,
+    DeviceDescription: PCSTR,
+    hwndParent: HWND,
+    CreationFlags: DWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInfoA"
+  .}
+
+  proc SetupDiOpenDeviceInfo*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInstanceId: PCSTR,
+    hwndParent: HWND,
+    OpenFlags: DWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInfoA".}
+
+  proc SetupDiGetDeviceInstanceId*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DeviceInstanceId: PSTR,
+    DeviceInstanceIdSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstanceIdA"
+  .}
+
+  proc SetupDiCreateDeviceInterface*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    InterfaceClassGuid: ptr GUID,
+    ReferenceString: PCSTR,
+    CreationFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceA"
+  .}
+
+  proc SetupDiCreateInterfaceDevice*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    InterfaceClassGuid: ptr GUID,
+    ReferenceString: PCSTR,
+    CreationFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceA"
+  .}
+
+  proc SetupDiOpenDeviceInterface*(
+    DeviceInfoSet: HDEVINFO,
+    DevicePath: PCSTR,
+    OpenFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceA"
+  .}
+
+  proc SetupDiOpenInterfaceDevice*(
+    DeviceInfoSet: HDEVINFO,
+    DevicePath: PCSTR,
+    OpenFlags: DWORD,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenDeviceInterfaceA"
+  .}
+
+  proc SetupDiGetDeviceInterfaceDetail*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A,
+    DeviceInterfaceDetailDataSize: DWORD,
+    RequiredSize: PDWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailA"
+  .}
+
+  proc SetupDiGetInterfaceDeviceDetail*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    DeviceInterfaceDetailData: PSP_DEVICE_INTERFACE_DETAIL_DATA_A,
+    DeviceInterfaceDetailDataSize: DWORD,
+    RequiredSize: PDWORD,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInterfaceDetailA"
+  .}
+
+  proc SetupDiEnumDriverInfo*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverType: DWORD,
+    MemberIndex: DWORD,
+    DriverInfoData: PSP_DRVINFO_DATA_A,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiEnumDriverInfoA".}
+
+  proc SetupDiGetSelectedDriver*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_A,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetSelectedDriverA"
+  .}
+
+  proc SetupDiSetSelectedDriver*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_A,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetSelectedDriverA"
+  .}
+
+  proc SetupDiGetDriverInfoDetail*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_A,
+    DriverInfoDetailData: PSP_DRVINFO_DETAIL_DATA_A,
+    DriverInfoDetailDataSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInfoDetailA"
+  .}
+
+  proc SetupDiGetClassDevs*(
+    ClassGuid: ptr GUID, Enumerator: PCSTR, hwndParent: HWND, Flags: DWORD
+  ): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsA".}
+
+  proc SetupDiGetClassDevsEx*(
+    ClassGuid: ptr GUID,
+    Enumerator: PCSTR,
+    hwndParent: HWND,
+    Flags: DWORD,
+    DeviceInfoSet: HDEVINFO,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): HDEVINFO {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevsExA".}
+
+  proc SetupDiGetINFClass*(
+    InfName: PCSTR,
+    ClassGuid: LPGUID,
+    ClassName: PSTR,
+    ClassNameSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetINFClassA".}
+
+  proc SetupDiBuildClassInfoListEx*(
+    Flags: DWORD,
+    ClassGuidList: LPGUID,
+    ClassGuidListSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiBuildClassInfoListExA"
+  .}
+
+  proc SetupDiGetClassDescription*(
+    ClassGuid: ptr GUID,
+    ClassDescription: PSTR,
+    ClassDescriptionSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionA"
+  .}
+
+  proc SetupDiGetClassDescriptionEx*(
+    ClassGuid: ptr GUID,
+    ClassDescription: PSTR,
+    ClassDescriptionSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDescriptionExA"
+  .}
+
+  proc SetupDiInstallClass*(
+    hwndParent: HWND, InfFileName: PCSTR, Flags: DWORD, FileQueue: HSPFILEQ
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassA".}
+
+  proc SetupDiInstallClassEx*(
+    hwndParent: HWND,
+    InfFileName: PCSTR,
+    Flags: DWORD,
+    FileQueue: HSPFILEQ,
+    InterfaceClassGuid: ptr GUID,
+    Reserved1: PVOID,
+    Reserved2: PVOID,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiInstallClassExA".}
+
+  proc SetupDiOpenClassRegKeyEx*(
+    ClassGuid: ptr GUID,
+    samDesired: REGSAM,
+    Flags: DWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiOpenClassRegKeyExA".}
+
+  proc SetupDiCreateDeviceInterfaceRegKey*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    Reserved: DWORD,
+    samDesired: REGSAM,
+    InfHandle: HINF,
+    InfSectionName: PCSTR,
+  ): HKEY {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyA"
+  .}
+
+  proc SetupDiCreateInterfaceDeviceRegKey*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: PSP_DEVICE_INTERFACE_DATA,
+    Reserved: DWORD,
+    samDesired: REGSAM,
+    InfHandle: HINF,
+    InfSectionName: PCSTR,
+  ): HKEY {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDeviceInterfaceRegKeyA"
+  .}
+
+  proc SetupDiCreateDevRegKey*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Scope: DWORD,
+    HwProfile: DWORD,
+    KeyType: DWORD,
+    InfHandle: HINF,
+    InfSectionName: PCSTR,
+  ): HKEY {.winapi, stdcall, dynlib: "setupapi", importc: "SetupDiCreateDevRegKeyA".}
+
+  proc SetupDiGetHwProfileListEx*(
+    HwProfileList: PDWORD,
+    HwProfileListSize: DWORD,
+    RequiredSize: PDWORD,
+    CurrentlyActiveIndex: PDWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileListExA"
+  .}
+
+  proc SetupDiGetDeviceRegistryProperty*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Property: DWORD,
+    PropertyRegDataType: PDWORD,
+    PropertyBuffer: PBYTE,
+    PropertyBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceRegistryPropertyA"
+  .}
+
+  proc SetupDiGetClassRegistryProperty*(
+    ClassGuid: ptr GUID,
+    Property: DWORD,
+    PropertyRegDataType: PDWORD,
+    PropertyBuffer: PBYTE,
+    PropertyBufferSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassRegistryPropertyA"
+  .}
+
+  proc SetupDiSetDeviceRegistryProperty*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    Property: DWORD,
+    PropertyBuffer: ptr BYTE,
+    PropertyBufferSize: DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceRegistryPropertyA"
+  .}
+
+  proc SetupDiSetClassRegistryProperty*(
+    ClassGuid: ptr GUID,
+    Property: DWORD,
+    PropertyBuffer: ptr BYTE,
+    PropertyBufferSize: DWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassRegistryPropertyA"
+  .}
+
+  proc SetupDiGetDeviceInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDeviceInstallParamsA"
+  .}
+
+  proc SetupDiGetClassInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+    ClassInstallParamsSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassInstallParamsA"
+  .}
+
+  proc SetupDiSetDeviceInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DeviceInstallParams: PSP_DEVINSTALL_PARAMS_A,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDeviceInstallParamsA"
+  .}
+
+  proc SetupDiSetClassInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    ClassInstallParams: PSP_CLASSINSTALL_HEADER,
+    ClassInstallParamsSize: DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetClassInstallParamsA"
+  .}
+
+  proc SetupDiGetDriverInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_A,
+    DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetDriverInstallParamsA"
+  .}
+
+  proc SetupDiSetDriverInstallParams*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    DriverInfoData: PSP_DRVINFO_DATA_A,
+    DriverInstallParams: PSP_DRVINSTALL_PARAMS,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiSetDriverInstallParamsA"
+  .}
+
+  proc SetupDiGetClassImageListEx*(
+    ClassImageListData: PSP_CLASSIMAGELIST_DATA, MachineName: PCSTR, Reserved: PVOID
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassImageListExA"
+  .}
+
+  proc SetupDiGetClassDevPropertySheets*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    PropertySheetHeader: LPPROPSHEETHEADERA,
+    PropertySheetHeaderPageListSize: DWORD,
+    RequiredSize: PDWORD,
+    PropertySheetType: DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetClassDevPropertySheetsA"
+  .}
+
+  proc SetupDiClassNameFromGuid*(
+    ClassGuid: ptr GUID, ClassName: PSTR, ClassNameSize: DWORD, RequiredSize: PDWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidA"
+  .}
+
+  proc SetupDiClassNameFromGuidEx*(
+    ClassGuid: ptr GUID,
+    ClassName: PSTR,
+    ClassNameSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassNameFromGuidExA"
+  .}
+
+  proc SetupDiClassGuidsFromName*(
+    ClassName: PCSTR,
+    ClassGuidList: LPGUID,
+    ClassGuidListSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameA"
+  .}
+
+  proc SetupDiClassGuidsFromNameEx*(
+    ClassName: PCSTR,
+    ClassGuidList: LPGUID,
+    ClassGuidListSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiClassGuidsFromNameExA"
+  .}
+
+  proc SetupDiGetHwProfileFriendlyName*(
+    HwProfile: DWORD, FriendlyName: PSTR, FriendlyNameSize: DWORD, RequiredSize: PDWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameA"
+  .}
+
+  proc SetupDiGetHwProfileFriendlyNameEx*(
+    HwProfile: DWORD,
+    FriendlyName: PSTR,
+    FriendlyNameSize: DWORD,
+    RequiredSize: PDWORD,
+    MachineName: PCSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetHwProfileFriendlyNameExA"
+  .}
+
+  proc SetupDiGetActualModelsSection*(
+    Context: PINFCONTEXT,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    InfSectionWithExt: PSTR,
+    InfSectionWithExtSize: DWORD,
+    RequiredSize: PDWORD,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualModelsSectionA"
+  .}
+
+  proc SetupDiGetActualSectionToInstall*(
+    InfHandle: HINF,
+    InfSectionName: PCSTR,
+    InfSectionWithExt: PSTR,
+    InfSectionWithExtSize: DWORD,
+    RequiredSize: PDWORD,
+    Extension: ptr PSTR,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallA"
+  .}
+
+  proc SetupDiGetActualSectionToInstallEx*(
+    InfHandle: HINF,
+    InfSectionName: PCSTR,
+    AlternatePlatformInfo: PSP_ALTPLATFORM_INFO,
+    InfSectionWithExt: PSTR,
+    InfSectionWithExtSize: DWORD,
+    RequiredSize: PDWORD,
+    Extension: ptr PSTR,
+    Reserved: PVOID,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetActualSectionToInstallExA"
+  .}
+
+  proc SetupEnumInfSections*(
+    InfHandle: HINF, Index: UINT, Buffer: PSTR, Size: UINT, SizeNeeded: ptr UINT
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupEnumInfSectionsA".}
+
+  proc SetupVerifyInfFile*(
+    InfName: PCSTR,
+    AltPlatformInfo: PSP_ALTPLATFORM_INFO,
+    InfSignerInfo: PSP_INF_SIGNER_INFO_A,
+  ): WINBOOL {.winapi, stdcall, dynlib: "setupapi", importc: "SetupVerifyInfFileA".}
+
+  proc SetupDiGetCustomDeviceProperty*(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: PSP_DEVINFO_DATA,
+    CustomPropertyName: PCSTR,
+    Flags: DWORD,
+    PropertyRegDataType: PDWORD,
+    PropertyBuffer: PBYTE,
+    PropertyBufferSize: DWORD,
+    RequiredSize: PDWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupDiGetCustomDevicePropertyA"
+  .}
+
+  proc SetupConfigureWmiFromInfSection*(
+    InfHandle: HINF, SectionName: PCSTR, Flags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "setupapi", importc: "SetupConfigureWmiFromInfSectionA"
+  .}

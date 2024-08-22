@@ -9,7 +9,8 @@ proc getBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
     var props: VkPhysicalDeviceProperties
     # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
     vkGetPhysicalDeviceProperties(pDevice, addr(props))
-    if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU and props.limits.maxImageDimension2D > score:
+    if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU and
+        props.limits.maxImageDimension2D > score:
       score = props.limits.maxImageDimension2D
       result = pDevice
 
@@ -18,7 +19,8 @@ proc getBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
       var props: VkPhysicalDeviceProperties
       # CANNOT use svkGetPhysicalDeviceProperties (not initialized yet)
       vkGetPhysicalDeviceProperties(pDevice, addr(props))
-      if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU and props.limits.maxImageDimension2D > score:
+      if props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU and
+          props.limits.maxImageDimension2D > score:
         score = props.limits.maxImageDimension2D
         result = pDevice
 
@@ -26,14 +28,18 @@ proc getBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
 
 proc svkGetPhysicalDeviceSurfaceSupportKHR*(queueFamily: uint32): bool =
   var presentation = VkBool32(false)
-  checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(vulkan.physicalDevice, queueFamily, vulkan.surface, addr(presentation))
+  checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(
+    vulkan.physicalDevice, queueFamily, vulkan.surface, addr(presentation)
+  )
   return bool(presentation)
 
 proc getQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
-  vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, queuFamilies.ToCPointer)
+  vkGetPhysicalDeviceQueueFamilyProperties(
+    pDevice, addr nQueuefamilies, queuFamilies.ToCPointer
+  )
   for i in 0'u32 ..< nQueuefamilies:
     if qType in toEnums(queuFamilies[i].queueFlags):
       # for graphics queues we always also want prsentation, they seem never to be separated in practice
@@ -41,25 +47,24 @@ proc getQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
         return i
   assert false, &"Queue of type {qType} not found"
 
-proc svkGetDeviceQueue*(device: VkDevice, queueFamilyIndex: uint32, qType: VkQueueFlagBits): VkQueue =
-  vkGetDeviceQueue(
-    device,
-    queueFamilyIndex,
-    0,
-    addr(result),
-  )
+proc svkGetDeviceQueue*(
+    device: VkDevice, queueFamilyIndex: uint32, qType: VkQueueFlagBits
+): VkQueue =
+  vkGetDeviceQueue(device, queueFamilyIndex, 0, addr(result))
 
 func size(format: VkFormat): uint64 =
-  const formatSize = [
-    VK_FORMAT_B8G8R8A8_SRGB.int: 4'u64,
-  ]
+  const formatSize = [VK_FORMAT_B8G8R8A8_SRGB.int: 4'u64]
   return formatSize[format.int]
 
 proc svkGetPhysicalDeviceSurfacePresentModesKHR*(): seq[VkPresentModeKHR] =
   var n_modes: uint32
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.physicalDevice, vulkan.surface, addr(n_modes), nil)
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
+    vulkan.physicalDevice, vulkan.surface, addr(n_modes), nil
+  )
   result = newSeq[VkPresentModeKHR](n_modes)
-  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan.physicalDevice, vulkan.surface, addr(n_modes), result.ToCPointer)
+  checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
+    vulkan.physicalDevice, vulkan.surface, addr(n_modes), result.ToCPointer
+  )
 
 proc hasValidationLayer*(): bool =
   var n_layers: uint32
@@ -97,13 +102,16 @@ proc svkAllocateMemory*(size: uint64, typeIndex: uint32): VkDeviceMemory =
     memoryTypeIndex: typeIndex,
   )
   checkVkResult vkAllocateMemory(
-    vulkan.device,
-    addr(memoryAllocationInfo),
-    nil,
-    addr(result),
+    vulkan.device, addr(memoryAllocationInfo), nil, addr(result)
   )
 
-proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray[VkImageUsageFlagBits], samples = VK_SAMPLE_COUNT_1_BIT, nLayers = 1'u32): VkImage =
+proc svkCreate2DImage*(
+    width, height: uint32,
+    format: VkFormat,
+    usage: openArray[VkImageUsageFlagBits],
+    samples = VK_SAMPLE_COUNT_1_BIT,
+    nLayers = 1'u32,
+): VkImage =
   var imageProps: VkImageFormatProperties
   checkVkResult vkGetPhysicalDeviceImageFormatProperties(
     vulkan.physicalDevice,
@@ -112,7 +120,7 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
     VK_IMAGE_TILING_OPTIMAL,
     usage.toBits,
     VkImageCreateFlags(0),
-    addr(imageProps)
+    addr(imageProps),
   )
 
   var imageInfo = VkImageCreateInfo(
@@ -130,7 +138,12 @@ proc svkCreate2DImage*(width, height: uint32, format: VkFormat, usage: openArray
   )
   checkVkResult vkCreateImage(vulkan.device, addr imageInfo, nil, addr(result))
 
-proc svkCreate2DImageView*(image: VkImage, format: VkFormat, aspect = VK_IMAGE_ASPECT_COLOR_BIT, nLayers=1'u32): VkImageView =
+proc svkCreate2DImageView*(
+    image: VkImage,
+    format: VkFormat,
+    aspect = VK_IMAGE_ASPECT_COLOR_BIT,
+    nLayers = 1'u32,
+): VkImageView =
   var createInfo = VkImageViewCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
     image: image,
@@ -152,7 +165,9 @@ proc svkCreate2DImageView*(image: VkImage, format: VkFormat, aspect = VK_IMAGE_A
   )
   checkVkResult vkCreateImageView(vulkan.device, addr(createInfo), nil, addr(result))
 
-proc svkCreateFramebuffer*(renderpass: VkRenderPass, width, height: uint32, attachments: openArray[VkImageView]): VkFramebuffer =
+proc svkCreateFramebuffer*(
+    renderpass: VkRenderPass, width, height: uint32, attachments: openArray[VkImageView]
+): VkFramebuffer =
   var framebufferInfo = VkFramebufferCreateInfo(
     sType: VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
     renderPass: renderpass,
@@ -162,9 +177,13 @@ proc svkCreateFramebuffer*(renderpass: VkRenderPass, width, height: uint32, atta
     height: height,
     layers: 1,
   )
-  checkVkResult vkCreateFramebuffer(vulkan.device, addr(framebufferInfo), nil, addr(result))
+  checkVkResult vkCreateFramebuffer(
+    vulkan.device, addr(framebufferInfo), nil, addr(result)
+  )
 
-proc svkGetBufferMemoryRequirements*(buffer: VkBuffer): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
+proc svkGetBufferMemoryRequirements*(
+    buffer: VkBuffer
+): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
   var reqs: VkMemoryRequirements
   vkGetBufferMemoryRequirements(vulkan.device, buffer, addr(reqs))
   result.size = reqs.size
@@ -173,7 +192,9 @@ proc svkGetBufferMemoryRequirements*(buffer: VkBuffer): tuple[size: uint64, alig
     if ((1'u32 shl i) and reqs.memoryTypeBits) > 0:
       result.memoryTypes.add i
 
-proc svkGetImageMemoryRequirements*(image: VkImage): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
+proc svkGetImageMemoryRequirements*(
+    image: VkImage
+): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
   var reqs: VkMemoryRequirements
   vkGetImageMemoryRequirements(vulkan.device, image, addr(reqs))
   result.size = reqs.size
@@ -185,12 +206,17 @@ proc svkGetImageMemoryRequirements*(image: VkImage): tuple[size: uint64, alignme
 proc svkCreateFence*(signaled = false): VkFence =
   var fenceInfo = VkFenceCreateInfo(
     sType: VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-    flags: if signaled: toBits [VK_FENCE_CREATE_SIGNALED_BIT] else: VkFenceCreateFlags(0)
+    flags:
+      if signaled:
+        toBits [VK_FENCE_CREATE_SIGNALED_BIT]
+      else:
+        VkFenceCreateFlags(0),
   )
   checkVkResult vkCreateFence(vulkan.device, addr(fenceInfo), nil, addr(result))
 
 proc svkCreateSemaphore*(): VkSemaphore =
-  var semaphoreInfo = VkSemaphoreCreateInfo(sType: VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
+  var semaphoreInfo =
+    VkSemaphoreCreateInfo(sType: VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
   checkVkResult vkCreateSemaphore(vulkan.device, addr(semaphoreInfo), nil, addr(result))
 
 proc await*(fence: VkFence, timeout = high(uint64)): bool =
@@ -203,7 +229,11 @@ proc await*(fence: VkFence, timeout = high(uint64)): bool =
 proc svkResetFences*(fence: VkFence) =
   checkVkResult vkResetFences(vulkan.device, 1, addr(fence))
 
-proc svkCmdBindDescriptorSets(commandBuffer: VkCommandBuffer, descriptorSets: openArray[VkDescriptorSet], layout: VkPipelineLayout) =
+proc svkCmdBindDescriptorSets(
+    commandBuffer: VkCommandBuffer,
+    descriptorSets: openArray[VkDescriptorSet],
+    layout: VkPipelineLayout,
+) =
   vkCmdBindDescriptorSets(
     commandBuffer = commandBuffer,
     pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -212,10 +242,15 @@ proc svkCmdBindDescriptorSets(commandBuffer: VkCommandBuffer, descriptorSets: op
     descriptorSetCount = descriptorSets.len.uint32,
     pDescriptorSets = descriptorSets.ToCPointer,
     dynamicOffsetCount = 0,
-    pDynamicOffsets = nil
+    pDynamicOffsets = nil,
   )
 
-proc svkCmdBindDescriptorSet(commandBuffer: VkCommandBuffer, descriptorSet: VkDescriptorSet, index: DescriptorSetIndex, layout: VkPipelineLayout) =
+proc svkCmdBindDescriptorSet(
+    commandBuffer: VkCommandBuffer,
+    descriptorSet: VkDescriptorSet,
+    index: DescriptorSetIndex,
+    layout: VkPipelineLayout,
+) =
   vkCmdBindDescriptorSets(
     commandBuffer = commandBuffer,
     pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -224,16 +259,15 @@ proc svkCmdBindDescriptorSet(commandBuffer: VkCommandBuffer, descriptorSet: VkDe
     descriptorSetCount = 1,
     pDescriptorSets = addr(descriptorSet),
     dynamicOffsetCount = 0,
-    pDynamicOffsets = nil
+    pDynamicOffsets = nil,
   )
 
-
 proc svkCreateRenderPass(
-  attachments: openArray[VkAttachmentDescription],
-  colorAttachments: openArray[VkAttachmentReference],
-  depthAttachments: openArray[VkAttachmentReference],
-  resolveAttachments: openArray[VkAttachmentReference],
-  dependencies: openArray[VkSubpassDependency],
+    attachments: openArray[VkAttachmentDescription],
+    colorAttachments: openArray[VkAttachmentReference],
+    depthAttachments: openArray[VkAttachmentReference],
+    resolveAttachments: openArray[VkAttachmentReference],
+    dependencies: openArray[VkSubpassDependency],
 ): VkRenderPass =
   assert colorAttachments.len == resolveAttachments.len or resolveAttachments.len == 0
   var subpass = VkSubpassDescription(
@@ -249,14 +283,14 @@ proc svkCreateRenderPass(
     pPreserveAttachments: nil,
   )
   var createInfo = VkRenderPassCreateInfo(
-      sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-      attachmentCount: uint32(attachments.len),
-      pAttachments: attachments.ToCPointer,
-      subpassCount: 1,
-      pSubpasses: addr(subpass),
-      dependencyCount: uint32(dependencies.len),
-      pDependencies: dependencies.ToCPointer,
-    )
+    sType: VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+    attachmentCount: uint32(attachments.len),
+    pAttachments: attachments.ToCPointer,
+    subpassCount: 1,
+    pSubpasses: addr(subpass),
+    dependencyCount: uint32(dependencies.len),
+    pDependencies: dependencies.ToCPointer,
+  )
   checkVkResult vkCreateRenderPass(vulkan.device, addr(createInfo), nil, addr(result))
 
 proc bestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
@@ -270,13 +304,21 @@ proc bestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
       let flags = toEnums(physicalProperties.memoryTypes[index].propertyFlags)
       if not mappable or VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags:
         var score: float = 0
-        if VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT in flags: score += 1_000_000
-        if VK_MEMORY_PROPERTY_HOST_CACHED_BIT in flags: score += 1_000
-        score += float(physicalProperties.memoryHeaps[physicalProperties.memoryTypes[index].heapIndex].size) / 1_000_000_000
+        if VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT in flags:
+          score += 1_000_000
+        if VK_MEMORY_PROPERTY_HOST_CACHED_BIT in flags:
+          score += 1_000
+        score +=
+          float(
+            physicalProperties.memoryHeaps[
+              physicalProperties.memoryTypes[index].heapIndex
+            ].size
+          ) / 1_000_000_000
         if score > maxScore:
           maxScore = score
           maxIndex = index
-  assert maxScore > 0, &"Unable to find memory type (mappable: {mappable}, filter: {filter})"
+  assert maxScore > 0,
+    &"Unable to find memory type (mappable: {mappable}, filter: {filter})"
   return maxIndex
 
 template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
@@ -288,7 +330,9 @@ template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
         flags: VkCommandPoolCreateFlags(0),
         queueFamilyIndex: vulkan.graphicsQueueFamily,
       )
-    checkVkResult vkCreateCommandPool(vulkan.device, addr createInfo, nil, addr(commandBufferPool))
+    checkVkResult vkCreateCommandPool(
+      vulkan.device, addr createInfo, nil, addr(commandBufferPool)
+    )
     var
       `cmd` {.inject.}: VkCommandBuffer
       allocInfo = VkCommandBufferAllocateInfo(
@@ -319,11 +363,8 @@ template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
     vkDestroyFence(vulkan.device, fence, nil)
     vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
 
-template withStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
-  target: T,
-  bufferSize: uint64,
-  dataPointer,
-  body: untyped
+template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32)](
+    target: T, bufferSize: uint64, dataPointer, body: untyped
 ): untyped =
   var `dataPointer` {.inject.}: pointer
   let stagingBuffer = svkCreateBuffer(bufferSize, [VK_BUFFER_USAGE_TRANSFER_SRC_BIT])
@@ -336,7 +377,7 @@ template withStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
     offset = 0'u64,
     size = VK_WHOLE_SIZE,
     flags = VkMemoryMapFlags(0),
-    ppData = addr(`dataPointer`)
+    ppData = addr(`dataPointer`),
   )
   checkVkResult vkBindBufferMemory(vulkan.device, stagingBuffer, stagingMemory, 0)
 
@@ -369,17 +410,14 @@ template withStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
         pImageMemoryBarriers = nil,
       )
       # now copy stuff
-      let copyRegion = VkBufferCopy(
-        size: bufferSize,
-        dstOffset: target[1],
-        srcOffset: 0
-      )
+      let copyRegion =
+        VkBufferCopy(size: bufferSize, dstOffset: target[1], srcOffset: 0)
       vkCmdCopyBuffer(
         commandBuffer = commandBuffer,
         srcBuffer = stagingBuffer,
         dstBuffer = target[0],
         regionCount = 1,
-        pRegions = addr(copyRegion)
+        pRegions = addr(copyRegion),
       )
     elif T is (VkImage, uint32, uint32):
       let region = VkBufferImageCopy(
@@ -393,7 +431,7 @@ template withStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
           layerCount: 1,
         ),
         imageOffset: VkOffset3D(x: 0, y: 0, z: 0),
-        imageExtent: VkExtent3D(width: target[1], height: target[2], depth: 1)
+        imageExtent: VkExtent3D(width: target[1], height: target[2], depth: 1),
       )
       vkCmdCopyBufferToImage(
         commandBuffer = commandBuffer,
@@ -401,9 +439,8 @@ template withStagingBuffer*[T: (VkBuffer, uint64)|(VkImage, uint32, uint32)](
         dstImage = target[0],
         dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         regionCount = 1,
-        pRegions = addr(region)
+        pRegions = addr(region),
       )
 
   vkDestroyBuffer(vulkan.device, stagingBuffer, nil)
   vkFreeMemory(vulkan.device, stagingMemory, nil)
-

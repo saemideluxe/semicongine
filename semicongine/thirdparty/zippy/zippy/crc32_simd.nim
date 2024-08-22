@@ -17,7 +17,9 @@ when defined(amd64):
   func mm_loadu_si128(p: pointer): M128i {.importc: "_mm_loadu_si128".}
   func mm_loadl_epi64(p: pointer): M128i {.importc: "_mm_loadl_epi64".}
   func mm_setr_epi32(a, b, c, d: int32 | uint32): M128i {.importc: "_mm_setr_epi32".}
-  func mm_srli_si128(a: M128i, imm8: int32 | uint32): M128i {.importc: "_mm_srli_si128".}
+  func mm_srli_si128(
+    a: M128i, imm8: int32 | uint32
+  ): M128i {.importc: "_mm_srli_si128".}
   func mm_xor_si128(a, b: M128i): M128i {.importc: "_mm_xor_si128".}
   func mm_and_si128(a, b: M128i): M128i {.importc: "_mm_and_si128".}
   func mm_cvtsi32_si128(a: int32 | uint32): M128i {.importc: "_mm_cvtsi32_si128".}
@@ -26,13 +28,17 @@ when defined(amd64):
 
   {.push header: "smmintrin.h".}
 
-  func mm_extract_epi32(a: M128i, imm8: int32 | uint32): int32 {.importc: "_mm_extract_epi32".}
+  func mm_extract_epi32(
+    a: M128i, imm8: int32 | uint32
+  ): int32 {.importc: "_mm_extract_epi32".}
 
   {.pop.}
 
   {.push header: "wmmintrin.h".}
 
-  func mm_clmulepi64_si128(a, b: M128i, imm8: int32 | uint32): M128i {.importc: "_mm_clmulepi64_si128".}
+  func mm_clmulepi64_si128(
+    a, b: M128i, imm8: int32 | uint32
+  ): M128i {.importc: "_mm_clmulepi64_si128".}
 
   {.pop.}
 
@@ -145,7 +151,9 @@ when defined(amd64):
 
 elif defined(arm64):
   func crc32b(crc: uint32, v: uint8): uint32 {.importc: "__builtin_arm_crc32b", nodecl.}
-  func crc32d(crc: uint32, v: uint64): uint32 {.importc: "__builtin_arm_crc32d", nodecl.}
+  func crc32d(
+    crc: uint32, v: uint64
+  ): uint32 {.importc: "__builtin_arm_crc32d", nodecl.}
 
   proc crc32_armv8a_crypto*(src: pointer, len: int): uint32 =
     let src = cast[ptr UncheckedArray[uint8]](src)

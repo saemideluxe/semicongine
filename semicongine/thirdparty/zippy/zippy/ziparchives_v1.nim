@@ -1,5 +1,13 @@
-import common, crc, internal, std/os, std/streams, std/strutils, std/tables,
-    std/times, ../zippy
+import
+  common,
+  crc,
+  internal,
+  std/os,
+  std/streams,
+  std/strutils,
+  std/tables,
+  std/times,
+  ../zippy
 
 export common
 
@@ -10,7 +18,8 @@ export common
 
 type
   EntryKind* = enum
-    ekFile, ekDirectory
+    ekFile
+    ekDirectory
 
   ArchiveEntry* = object
     kind*: EntryKind
@@ -27,7 +36,7 @@ proc addDir(archive: ZipArchive, base, relative: string) =
       ArchiveEntry(kind: ekDirectory)
 
   for kind, path in walkDir(base / relative, relative = true):
-    case kind:
+    case kind
     of pcFile:
       archive.contents[(relative / path).toUnixPath()] = ArchiveEntry(
         kind: ekFile,
@@ -41,25 +50,24 @@ proc addDir(archive: ZipArchive, base, relative: string) =
       discard
 
 proc addDir*(
-  archive: ZipArchive, dir: string
+    archive: ZipArchive, dir: string
 ) {.raises: [IOError, OSError, ZippyError].} =
   ## Recursively adds all of the files and directories inside dir to archive.
   if splitFile(dir).ext.len > 0:
     raise newException(
-      ZippyError,
-      "Error adding dir " & dir & " to archive, appears to be a file?"
+      ZippyError, "Error adding dir " & dir & " to archive, appears to be a file?"
     )
 
   let (head, tail) = splitPath(dir)
   archive.addDir(head, tail)
 
 proc addFile*(
-  archive: ZipArchive, path: string
+    archive: ZipArchive, path: string
 ) {.raises: [IOError, OSError, ZippyError].} =
   ## Adds a single file to the archive.
 
   let fileInfo = getFileInfo(path)
-  case fileInfo.kind:
+  case fileInfo.kind
   of {pcFile, pcLinkToFile}:
     archive.contents[path.extractFilename] = ArchiveEntry(
       kind: ekFile,
@@ -70,7 +78,7 @@ proc addFile*(
   else:
     raise newException(
       ZippyError,
-      "Error adding file " & path & " to archive, appears to be a directory?"
+      "Error adding file " & path & " to archive, appears to be a directory?",
     )
 
 proc clear*(archive: ZipArchive) {.raises: [].} =
@@ -92,15 +100,24 @@ proc extractPermissions(externalFileAttr: uint32): set[FilePermission] =
     result.incl fpGroupWrite
     result.incl fpOthersRead
   else:
-    if (permissions and 0o00400) != 0: result.incl fpUserRead
-    if (permissions and 0o00200) != 0: result.incl fpUserWrite
-    if (permissions and 0o00100) != 0: result.incl fpUserExec
-    if (permissions and 0o00040) != 0: result.incl fpGroupRead
-    if (permissions and 0o00020) != 0: result.incl fpGroupWrite
-    if (permissions and 0o00010) != 0: result.incl fpGroupExec
-    if (permissions and 0o00004) != 0: result.incl fpOthersRead
-    if (permissions and 0o00002) != 0: result.incl fpOthersWrite
-    if (permissions and 0o00001) != 0: result.incl fpOthersExec
+    if (permissions and 0o00400) != 0:
+      result.incl fpUserRead
+    if (permissions and 0o00200) != 0:
+      result.incl fpUserWrite
+    if (permissions and 0o00100) != 0:
+      result.incl fpUserExec
+    if (permissions and 0o00040) != 0:
+      result.incl fpGroupRead
+    if (permissions and 0o00020) != 0:
+      result.incl fpGroupWrite
+    if (permissions and 0o00010) != 0:
+      result.incl fpGroupExec
+    if (permissions and 0o00004) != 0:
+      result.incl fpOthersRead
+    if (permissions and 0o00002) != 0:
+      result.incl fpOthersWrite
+    if (permissions and 0o00001) != 0:
+      result.incl fpOthersExec
 
 proc openStreamImpl*(archive: ZipArchive, stream: Stream) =
   let data = stream.readAll() # TODO: actually treat as a stream
@@ -116,7 +133,7 @@ proc openStreamImpl*(archive: ZipArchive, stream: Stream) =
       failEOF()
 
     let signature = read32(data, pos)
-    case signature:
+    case signature
     of 0x04034b50: # Local file header
       if pos + 30 > data.len:
         failEOF()
@@ -136,16 +153,11 @@ proc openStreamImpl*(archive: ZipArchive, stream: Stream) =
       pos += 30 # Move to end of fixed-size entries
 
       if (generalPurposeFlag and 0b100) != 0:
-        raise newException(
-          ZippyError,
-          "Unsupported zip archive, data descriptor bit set"
-        )
+        raise
+          newException(ZippyError, "Unsupported zip archive, data descriptor bit set")
 
       if (generalPurposeFlag and 0b1000) != 0:
-        raise newException(
-          ZippyError,
-          "Unsupported zip archive, uses deflate64"
-        )
+        raise newException(ZippyError, "Unsupported zip archive, uses deflate64")
 
       # echo minVersionToExtract
       # echo generalPurposeFlag
@@ -169,19 +181,19 @@ proc openStreamImpl*(archive: ZipArchive, stream: Stream) =
       var lastModified: times.Time
       if seconds <= 59 and minutes <= 59 and hours <= 23:
         lastModified = initDateTime(
-          days.MonthdayRange,
-          months.Month,
-          years + 1980,
-          hours.HourRange,
-          minutes.MinuteRange,
-          seconds.SecondRange,
-          local()
-        ).toTime()
+            days.MonthdayRange,
+            months.Month,
+            years + 1980,
+            hours.HourRange,
+            minutes.MinuteRange,
+            seconds.SecondRange,
+            local(),
+          )
+          .toTime()
 
       if compressionMethod notin [0.uint16, 8]:
         raise newException(
-          ZippyError,
-          "Unsupported zip archive compression method " & $compressionMethod
+          ZippyError, "Unsupported zip archive compression method " & $compressionMethod
         )
 
       if pos + fileNameLength + extraFieldLength > data.len:
@@ -207,23 +219,17 @@ proc openStreamImpl*(archive: ZipArchive, stream: Stream) =
 
       if crc32(uncompressed) != uncompressedCrc32:
         raise newException(
-          ZippyError,
-          "Verifying archive entry " & fileName & " CRC-32 failed"
+          ZippyError, "Verifying archive entry " & fileName & " CRC-32 failed"
         )
       if uncompressed.len != uncompressedSize:
         raise newException(
-          ZippyError,
-          "Unexpected error verifying " & fileName & " uncompressed size"
+          ZippyError, "Unexpected error verifying " & fileName & " uncompressed size"
         )
 
       archive.contents[fileName.toUnixPath()] =
-        ArchiveEntry(
-          contents: uncompressed,
-          lastModified: lastModified,
-        )
+        ArchiveEntry(contents: uncompressed, lastModified: lastModified)
 
       pos += compressedSize
-
     of 0x02014b50: # Central directory header
       if pos + 46 > data.len:
         failEOF()
@@ -291,7 +297,6 @@ proc openStreamImpl*(archive: ZipArchive, stream: Stream) =
         archive.contents[fileName].permissions = externalFileAttr.extractPermissions()
       except KeyError:
         failOpen()
-
     of 0x06054b50: # End of central directory record
       if pos + 22 > data.len:
         failEOF()
@@ -324,20 +329,20 @@ proc openStreamImpl*(archive: ZipArchive, stream: Stream) =
       # echo comment
 
       break
-
     else:
       failOpen()
 
 when (NimMajor, NimMinor, NimPatch) >= (1, 4, 0):
   proc open*(
-    archive: ZipArchive, stream: Stream
+      archive: ZipArchive, stream: Stream
   ) {.raises: [IOError, OSError, ZippyError].} =
     ## Opens the zip archive from a stream and reads its contents into
     ## archive.contents (clears any existing archive.contents entries).
     openStreamImpl(archive, stream)
+
 else:
   proc open*(
-    archive: ZipArchive, stream: Stream
+      archive: ZipArchive, stream: Stream
   ) {.raises: [Defect, IOError, OSError, ZippyError].} =
     ## Opens the zip archive from a stream and reads its contents into
     ## archive.contents (clears any existing archive.contents entries).
@@ -369,7 +374,7 @@ proc toMsDos(time: times.Time): (uint16, uint16) =
   (lastModifiedTime, lastModifiedDate)
 
 proc writeZipArchive*(
-  archive: ZipArchive, path: string
+    archive: ZipArchive, path: string
 ) {.raises: [IOError, ZippyError].} =
   ## Writes archive.contents to a zip file at path.
 
@@ -459,7 +464,7 @@ proc writeZipArchive*(
     data.add([0.uint8, 0]) # Internal file attrib
 
     # External file attrib
-    case entry.kind:
+    case entry.kind
     of ekDirectory:
       data.add([0x10.uint8, 0, 0, 0])
     of ekFile:
@@ -486,44 +491,39 @@ proc writeZipArchive*(
     writeFile(path, cast[string](data))
 
 proc extractAll*(
-  archive: ZipArchive, dest: string
+    archive: ZipArchive, dest: string
 ) {.raises: [IOError, OSError, ZippyError].} =
   ## Extracts the files stored in archive to the destination directory.
   ## The path to the destination directory must exist.
   ## The destination directory itself must not exist (it is not overwitten).
   if dirExists(dest):
-    raise newException(
-      ZippyError, "Destination " & dest & " already exists"
-    )
+    raise newException(ZippyError, "Destination " & dest & " already exists")
 
   let (head, tail) = splitPath(dest)
   if tail != "" and not dirExists(head):
-    raise newException(
-      ZippyError, "Path to destination " & dest & " does not exist"
-    )
+    raise newException(ZippyError, "Path to destination " & dest & " does not exist")
 
   # Ensure we only raise exceptions we handle below
   proc writeContents(
-    archive: ZipArchive, dest: string
+      archive: ZipArchive, dest: string
   ) {.raises: [IOError, OSError, ZippyError].} =
     for path, entry in archive.contents:
       if path.isAbsolute():
         raise newException(
-          ZippyError,
-          "Extracting absolute paths is not supported (" & path & ")"
+          ZippyError, "Extracting absolute paths is not supported (" & path & ")"
         )
       if path.startsWith("../") or path.startsWith(r"..\"):
         raise newException(
           ZippyError,
-          "Extracting paths starting with `..` is not supported (" & path & ")"
+          "Extracting paths starting with `..` is not supported (" & path & ")",
         )
       if "/../" in path or r"\..\" in path:
         raise newException(
           ZippyError,
-          "Extracting paths containing `/../` is not supported (" & path & ")"
+          "Extracting paths containing `/../` is not supported (" & path & ")",
         )
 
-      case entry.kind:
+      case entry.kind
       of ekDirectory:
         createDir(dest / path)
       of ekFile:
@@ -546,7 +546,7 @@ proc extractAll*(
     raise e
 
 proc createZipArchive*(
-  source, dest: string
+    source, dest: string
 ) {.raises: [IOError, OSError, ZippyError].} =
   ## Creates an archive containing all of the files and directories inside
   ## source and writes the zip file to dest.

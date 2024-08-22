@@ -8,14 +8,13 @@ when defined(release):
   {.push checks: off.}
 
 proc encodeLz77*(
-  encoding: var seq[uint16],
-  ep: var int,
-  config: CompressionConfig,
-  metadata: var BlockMetadata,
-  src: ptr UncheckedArray[uint8],
-  blockStart, blockLen: int
+    encoding: var seq[uint16],
+    ep: var int,
+    config: CompressionConfig,
+    metadata: var BlockMetadata,
+    src: ptr UncheckedArray[uint8],
+    blockStart, blockLen: int,
 ) =
-
   template addLiteral(start, length: int) =
     for i in 0 ..< length:
       inc metadata.litLenFreq[src[start + i]]
@@ -60,7 +59,7 @@ proc encodeLz77*(
     literalLen: int
     hash: uint32
     windowPos: uint16
-    head = newSeq[uint16](hashSize)       # hash -> pos
+    head = newSeq[uint16](hashSize) # hash -> pos
     chain = newSeq[uint16](maxWindowSize) # pos a -> pos b
 
   template hash4(start: int): uint32 =

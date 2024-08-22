@@ -1,4 +1,3 @@
-
 #
 #  Automatically converted by H2Pas 0.99.15 from x.h
 #  The following command line parameters were used:

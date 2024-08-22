@@ -12,14 +12,13 @@ import std/tables
 
 import ./core
 
-type
-  ResourceBundlingType = enum
-    Dir # Directories
-    Zip # Zip files
-    Exe # Embeded in executable
+type ResourceBundlingType = enum
+  Dir # Directories
+  Zip # Zip files
+  Exe # Embeded in executable
 
-const
-  thebundletype = parseEnum[ResourceBundlingType](PACKAGETYPE.toLowerAscii().capitalizeAscii())
+const thebundletype =
+  parseEnum[ResourceBundlingType](PACKAGETYPE.toLowerAscii().capitalizeAscii())
 
 # resource loading
 
@@ -34,9 +33,9 @@ func normalizeDir(dir: string): string =
     result = result & "/"
 
 when thebundletype == Dir:
-
   proc resourceRoot(): string =
     getAppDir().absolutePath().joinPath(RESOURCEROOT)
+
   proc packageRoot(package: string): string =
     resourceRoot().joinPath(package)
 
@@ -55,16 +54,18 @@ when thebundletype == Dir:
     for file in walkDirRec(package.packageRoot().joinPath(dir), relative = true):
       yield file
 
-  iterator ls_intern(dir: string, package: string): tuple[kind: PathComponent, path: string] =
+  iterator ls_intern(
+      dir: string, package: string
+  ): tuple[kind: PathComponent, path: string] =
     for i in walkDir(package.packageRoot().joinPath(dir), relative = true):
       yield i
 
 elif thebundletype == Zip:
-
   import ./thirdparty/zippy/zippy/ziparchives
 
   proc resourceRoot(): string =
     absolutePath(getAppDir()).joinPath(RESOURCEROOT)
+
   proc packageRoot(package: string): string =
     resourceRoot().joinPath(package)
 
@@ -89,7 +90,9 @@ elif thebundletype == Zip:
         yield i
     archive.close()
 
-  iterator ls_intern(dir: string, package: string): tuple[kind: PathComponent, path: string] =
+  iterator ls_intern(
+      dir: string, package: string
+  ): tuple[kind: PathComponent, path: string] =
     let archive = openZipArchive(package.packageRoot() & ".zip")
     let normDir = dir.normalizeDir()
     var yielded: HashSet[string]
@@ -107,7 +110,6 @@ elif thebundletype == Zip:
     archive.close()
 
 elif thebundletype == Exe:
-
   const BUILD_RESOURCEROOT* {.strdefine.}: string = ""
 
   proc loadResources(): Table[string, Table[string, string]] {.compileTime.} =
@@ -120,7 +122,9 @@ elif thebundletype == Exe:
           let package = packageDir.splitPath.tail
           result[package] = Table[string, string]()
           for resourcefile in walkDirRec(packageDir, relative = true):
-            result[package][resourcefile.replace('\\', '/')] = staticRead(packageDir.joinPath(resourcefile))
+            result[package][resourcefile.replace('\\', '/')] =
+              staticRead(packageDir.joinPath(resourcefile))
+
   const bundledResources = loadResources()
 
   proc loadResource_intern*(path: string, package: string): Stream =
@@ -135,7 +139,9 @@ elif thebundletype == Exe:
     for i in bundledResources[package].keys:
       yield i
 
-  iterator ls_intern(dir: string, package: string): tuple[kind: PathComponent, path: string] =
+  iterator ls_intern(
+      dir: string, package: string
+  ): tuple[kind: PathComponent, path: string] =
     let normDir = dir.normalizeDir()
     var yielded: HashSet[string]
 
@@ -168,7 +174,9 @@ proc walkResources*(dir = "", package = DEFAULT_PACKAGE): seq[string] =
       result.add i
   result.sort()
 
-proc list*(dir: string, package = DEFAULT_PACKAGE): seq[tuple[kind: PathComponent, path: string]] =
+proc list*(
+    dir: string, package = DEFAULT_PACKAGE
+): seq[tuple[kind: PathComponent, path: string]] =
   for i in ls_intern(dir = dir, package = package):
     result.add i
   result.sort()

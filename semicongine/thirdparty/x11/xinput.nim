@@ -223,11 +223,12 @@ type
     window*: Window ##  "event" window reported relative to
     deviceid*: XID
     mode*: cint ##  NotifyNormal, NotifyGrab, NotifyUngrab
-    detail*: cint ##
-                    ##  NotifyAncestor, NotifyVirtual, NotifyInferior,
-                    ##  NotifyNonLinear,NotifyNonLinearVirtual, NotifyPointer,
-                    ##  NotifyPointerRoot, NotifyDetailNone
-                    ##
+    detail*: cint
+      ##
+      ##  NotifyAncestor, NotifyVirtual, NotifyInferior,
+      ##  NotifyNonLinear,NotifyNonLinearVirtual, NotifyPointer,
+      ##  NotifyPointerRoot, NotifyDetailNone
+      ##
     time*: Time
 
   PXDeviceFocusInEvent* = PXDeviceFocusChangeEvent
@@ -318,8 +319,9 @@ type
     window*: Window ##  unused
     deviceid*: XID
     time*: Time
-    request*: cint ##  one of MappingModifier, MappingKeyboard,
-                     ##  MappingPointer
+    request*: cint
+      ##  one of MappingModifier, MappingKeyboard,
+      ##  MappingPointer
     first_keycode*: cint ##  first keycode
     count*: cint ##  defines range of change w. first_keycode
 
@@ -360,14 +362,14 @@ type
   PXDevicePropertyNotifyEvent* = ptr XDevicePropertyNotifyEvent
   XDevicePropertyNotifyEvent* {.final.} = object
     `type`*: cint
-    serial*: culong    ##  # of last request processed by server
+    serial*: culong ##  # of last request processed by server
     send_event*: XBool ##  true if this came from a SendEvent request
     display*: PDisplay ##  Display the event was read from
-    window*: Window    ##  unused
+    window*: Window ##  unused
     time*: Time
-    deviceid*: XID     ##  id of the device that changed
-    atom*: Atom        ##  the property that changed
-    state*: cint       ##  PropertyNewValue or PropertyDeleted
+    deviceid*: XID ##  id of the device that changed
+    atom*: Atom ##  the property that changed
+    state*: cint ##  PropertyNewValue or PropertyDeleted
 
   PXFeedbackState* = ptr XFeedbackState
   XFeedbackState* {.final.} = object
@@ -659,41 +661,83 @@ type
     num_buttons*: cshort
     buttons*: array[32, char]
 
-
 {.push cdecl, importc, dynlib: libXi.}
 
 proc XChangeKeyboardDevice*(a1: PDisplay, a2: PXDevice): cint
 proc XChangePointerDevice*(a1: PDisplay, a2: PXDevice, a3, a4: cint): cint
-proc XGrabDevice*(a1: PDisplay, a2: PXDevice, a3: Window, a4: XBool, a5: cint,
-                 a6: ptr UncheckedArray[XEventClass], a7, a8: cint, a9: Time): cint
+proc XGrabDevice*(
+  a1: PDisplay,
+  a2: PXDevice,
+  a3: Window,
+  a4: XBool,
+  a5: cint,
+  a6: ptr UncheckedArray[XEventClass],
+  a7, a8: cint,
+  a9: Time,
+): cint
+
 proc XUngrabDevice*(a1: PDisplay, a2: PXDevice, a3: Time): cint
-proc XGrabDeviceKey*(a1: PDisplay, a2: PXDevice, a3, a4: cuint,
-                    a5: PXDevice, a6: Window, a7: XBool, a8: cuint,
-                    a9: ptr UncheckedArray[XEventClass], a10, a11: cint): cint
-proc XUngrabDeviceKey*(a1: PDisplay, a2: PXDevice, a3: cuint, a4: cuint,
-                      a5: PXDevice, a6: Window): cint
-proc XGrabDeviceButton*(a1: PDisplay, a2: PXDevice, a3: cuint, a4: cuint,
-                       a5: PXDevice, a6: Window, a7: XBool, a8: cuint,
-                       a9: ptr UncheckedArray[XEventClass], a10: cint, a11: cint): cint
-proc XUngrabDeviceButton*(a1: PDisplay, a2: PXDevice, a3: cuint, a4: cuint,
-                         a5: PXDevice, a6: Window): cint
+proc XGrabDeviceKey*(
+  a1: PDisplay,
+  a2: PXDevice,
+  a3, a4: cuint,
+  a5: PXDevice,
+  a6: Window,
+  a7: XBool,
+  a8: cuint,
+  a9: ptr UncheckedArray[XEventClass],
+  a10, a11: cint,
+): cint
+
+proc XUngrabDeviceKey*(
+  a1: PDisplay, a2: PXDevice, a3: cuint, a4: cuint, a5: PXDevice, a6: Window
+): cint
+
+proc XGrabDeviceButton*(
+  a1: PDisplay,
+  a2: PXDevice,
+  a3: cuint,
+  a4: cuint,
+  a5: PXDevice,
+  a6: Window,
+  a7: XBool,
+  a8: cuint,
+  a9: ptr UncheckedArray[XEventClass],
+  a10: cint,
+  a11: cint,
+): cint
+
+proc XUngrabDeviceButton*(
+  a1: PDisplay, a2: PXDevice, a3: cuint, a4: cuint, a5: PXDevice, a6: Window
+): cint
+
 proc XAllowDeviceEvents*(a1: PDisplay, a2: PXDevice, a3: cint, a4: Time): cint
-proc XGetDeviceFocus*(a1: PDisplay, a2: PXDevice, a3: PWindow, a4: ptr cint,
-                     a5: ptr Time): cint
+proc XGetDeviceFocus*(
+  a1: PDisplay, a2: PXDevice, a3: PWindow, a4: ptr cint, a5: ptr Time
+): cint
+
 proc XSetDeviceFocus*(a1: PDisplay, a2: PXDevice, a3: Window, a4: cint, a5: Time): cint
 proc XGetFeedbackControl*(a1: PDisplay, a2: PXDevice, a3: ptr cint): PXFeedbackState
 proc XFreeFeedbackList*(a1: PXFeedbackState)
-proc XChangeFeedbackControl*(a1: PDisplay, a2: PXDevice, a3: culong,
-                            a4: PXFeedbackControl): cint
+proc XChangeFeedbackControl*(
+  a1: PDisplay, a2: PXDevice, a3: culong, a4: PXFeedbackControl
+): cint
+
 proc XDeviceBell*(a1: PDisplay, a2: PXDevice, a3, a4: XID, a5: cint): cint
-proc XGetDeviceKeyMapping*(a1: PDisplay, a2: PXDevice,
+proc XGetDeviceKeyMapping*(
+  a1: PDisplay,
+  a2: PXDevice,
   a3: (when xNeedWidePrototypes: cuint else: KeyCode),
-  a4: cint, a5: ptr cint): PKeySym
-proc XChangeDeviceKeyMapping*(a1: PDisplay, a2: PXDevice, a3: cint, a4: cint,
-                             a5: PKeySym, a6: cint): cint
+  a4: cint,
+  a5: ptr cint,
+): PKeySym
+
+proc XChangeDeviceKeyMapping*(
+  a1: PDisplay, a2: PXDevice, a3: cint, a4: cint, a5: PKeySym, a6: cint
+): cint
+
 proc XGetDeviceModifierMapping*(a1: PDisplay, a2: PXDevice): PXModifierKeymap
-proc XSetDeviceModifierMapping*(a1: PDisplay, a2: PXDevice,
-                               a3: PXModifierKeymap): cint
+proc XSetDeviceModifierMapping*(a1: PDisplay, a2: PXDevice, a3: PXModifierKeymap): cint
 proc XSetDeviceButtonMapping*(a1: PDisplay, a2: PXDevice, a3: cstring, a4: cint): cint
 proc XGetDeviceButtonMapping*(a1: PDisplay, a2: PXDevice, a3: cstring, a4: cuint): cint
 proc XQueryDeviceState*(a1: PDisplay, a2: PXDevice): PXDeviceState
@@ -704,29 +748,77 @@ proc XFreeDeviceList*(a1: PXDeviceInfo)
 proc XOpenDevice*(a1: PDisplay, a2: XID): PXDevice
 proc XCloseDevice*(a1: PDisplay, a2: PXDevice): cint
 proc XSetDeviceMode*(a1: PDisplay, a2: PXDevice, a3: cint): cint
-proc XSetDeviceValuators*(a1: PDisplay, a2: PXDevice, a3: ptr cint, a4: cint, a5: cint): cint
+proc XSetDeviceValuators*(
+  a1: PDisplay, a2: PXDevice, a3: ptr cint, a4: cint, a5: cint
+): cint
+
 proc XGetDeviceControl*(a1: PDisplay, a2: PXDevice, a3: cint): PXDeviceControl
-proc XChangeDeviceControl*(a1: PDisplay, a2: PXDevice, a3: cint,
-                          a4: PXDeviceControl): cint
-proc XSelectExtensionEvent*(a1: PDisplay, a2: Window, a3: ptr UncheckedArray[XEventClass], a4: cint): cint
-proc XGetSelectedExtensionEvents*(a1: PDisplay, a2: Window, a3: ptr cint,
-                                 a4: ptr ptr UncheckedArray[XEventClass], a5: ptr cint,
-                                 a6: ptr ptr UncheckedArray[XEventClass]): cint
-proc XChangeDeviceDontPropagateList*(a1: PDisplay, a2: Window, a3: cint,
-                                    a4: ptr UncheckedArray[XEventClass], a5: cint): cint
-proc XGetDeviceDontPropagateList*(a1: PDisplay, a2: Window, a3: ptr cint): ptr UncheckedArray[XEventClass]
-proc XSendExtensionEvent*(a1: PDisplay, a2: PXDevice, a3: Window, a4: XBool, a5: cint,
-                         a6: ptr UncheckedArray[XEventClass], a7: PXEvent): Status
-proc XGetDeviceMotionEvents*(a1: PDisplay, a2: PXDevice, a3, a4: Time,
-                            a5, a6, a7: ptr cint): PXDeviceTimeCoord
+proc XChangeDeviceControl*(
+  a1: PDisplay, a2: PXDevice, a3: cint, a4: PXDeviceControl
+): cint
+
+proc XSelectExtensionEvent*(
+  a1: PDisplay, a2: Window, a3: ptr UncheckedArray[XEventClass], a4: cint
+): cint
+
+proc XGetSelectedExtensionEvents*(
+  a1: PDisplay,
+  a2: Window,
+  a3: ptr cint,
+  a4: ptr ptr UncheckedArray[XEventClass],
+  a5: ptr cint,
+  a6: ptr ptr UncheckedArray[XEventClass],
+): cint
+
+proc XChangeDeviceDontPropagateList*(
+  a1: PDisplay, a2: Window, a3: cint, a4: ptr UncheckedArray[XEventClass], a5: cint
+): cint
+
+proc XGetDeviceDontPropagateList*(
+  a1: PDisplay, a2: Window, a3: ptr cint
+): ptr UncheckedArray[XEventClass]
+
+proc XSendExtensionEvent*(
+  a1: PDisplay,
+  a2: PXDevice,
+  a3: Window,
+  a4: XBool,
+  a5: cint,
+  a6: ptr UncheckedArray[XEventClass],
+  a7: PXEvent,
+): Status
+
+proc XGetDeviceMotionEvents*(
+  a1: PDisplay, a2: PXDevice, a3, a4: Time, a5, a6, a7: ptr cint
+): PXDeviceTimeCoord
+
 proc XFreeDeviceMotionEvents*(a1: PXDeviceTimeCoord)
 proc XFreeDeviceControl*(a1: PXDeviceControl)
 proc XListDeviceProperties*(a1: PDisplay, a2: PXDevice, a3: ptr cint): PAtom
-proc XChangeDeviceProperty*(a1: PDisplay, a2: PXDevice, a3: Atom, a4: Atom, a5: cint,
-                           a6: cint, a7: cstring, a8: cint)
+proc XChangeDeviceProperty*(
+  a1: PDisplay,
+  a2: PXDevice,
+  a3: Atom,
+  a4: Atom,
+  a5: cint,
+  a6: cint,
+  a7: cstring,
+  a8: cint,
+)
+
 proc XDeleteDeviceProperty*(a1: PDisplay, a2: PXDevice, a3: Atom)
-proc XGetDeviceProperty*(a1: PDisplay, a2: PXDevice, a3: Atom, a4, a5: clong,
-                        a6: XBool, a7: Atom, a8: PAtom, a9: ptr cint, a10: ptr culong,
-                        a11: ptr culong, a12: ptr cstring): Status
+proc XGetDeviceProperty*(
+  a1: PDisplay,
+  a2: PXDevice,
+  a3: Atom,
+  a4, a5: clong,
+  a6: XBool,
+  a7: Atom,
+  a8: PAtom,
+  a9: ptr cint,
+  a10: ptr culong,
+  a11: ptr culong,
+  a12: ptr cstring,
+): Status
 
 {.pop.}

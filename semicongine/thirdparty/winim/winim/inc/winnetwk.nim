@@ -19,6 +19,7 @@ type
     lpRemoteName*: LPSTR
     lpComment*: LPSTR
     lpProvider*: LPSTR
+
   LPNETRESOURCEA* = ptr NETRESOURCEA
   NETRESOURCEW* {.pure.} = object
     dwScope*: DWORD
@@ -29,6 +30,7 @@ type
     lpRemoteName*: LPWSTR
     lpComment*: LPWSTR
     lpProvider*: LPWSTR
+
   LPNETRESOURCEW* = ptr NETRESOURCEW
   CONNECTDLGSTRUCTA* {.pure.} = object
     cbStructure*: DWORD
@@ -36,6 +38,7 @@ type
     lpConnRes*: LPNETRESOURCEA
     dwFlags*: DWORD
     dwDevNum*: DWORD
+
   LPCONNECTDLGSTRUCTA* = ptr CONNECTDLGSTRUCTA
   CONNECTDLGSTRUCTW* {.pure.} = object
     cbStructure*: DWORD
@@ -43,6 +46,7 @@ type
     lpConnRes*: LPNETRESOURCEW
     dwFlags*: DWORD
     dwDevNum*: DWORD
+
   LPCONNECTDLGSTRUCTW* = ptr CONNECTDLGSTRUCTW
   DISCDLGSTRUCTA* {.pure.} = object
     cbStructure*: DWORD
@@ -50,6 +54,7 @@ type
     lpLocalName*: LPSTR
     lpRemoteName*: LPSTR
     dwFlags*: DWORD
+
   LPDISCDLGSTRUCTA* = ptr DISCDLGSTRUCTA
   DISCDLGSTRUCTW* {.pure.} = object
     cbStructure*: DWORD
@@ -57,22 +62,27 @@ type
     lpLocalName*: LPWSTR
     lpRemoteName*: LPWSTR
     dwFlags*: DWORD
+
   LPDISCDLGSTRUCTW* = ptr DISCDLGSTRUCTW
   UNIVERSAL_NAME_INFOA* {.pure.} = object
     lpUniversalName*: LPSTR
+
   LPUNIVERSAL_NAME_INFOA* = ptr UNIVERSAL_NAME_INFOA
   UNIVERSAL_NAME_INFOW* {.pure.} = object
     lpUniversalName*: LPWSTR
+
   LPUNIVERSAL_NAME_INFOW* = ptr UNIVERSAL_NAME_INFOW
   REMOTE_NAME_INFOA* {.pure.} = object
     lpUniversalName*: LPSTR
     lpConnectionName*: LPSTR
     lpRemainingPath*: LPSTR
+
   LPREMOTE_NAME_INFOA* = ptr REMOTE_NAME_INFOA
   REMOTE_NAME_INFOW* {.pure.} = object
     lpUniversalName*: LPWSTR
     lpConnectionName*: LPWSTR
     lpRemainingPath*: LPWSTR
+
   LPREMOTE_NAME_INFOW* = ptr REMOTE_NAME_INFOW
   NETINFOSTRUCT* {.pure.} = object
     cbStructure*: DWORD
@@ -83,6 +93,7 @@ type
     wNetType*: WORD
     dwPrinters*: DWORD
     dwDrives*: DWORD
+
   LPNETINFOSTRUCT* = ptr NETINFOSTRUCT
   NETCONNECTINFOSTRUCT* {.pure.} = object
     cbStructure*: DWORD
@@ -90,7 +101,9 @@ type
     dwSpeed*: DWORD
     dwDelay*: DWORD
     dwOptDataSize*: DWORD
+
   LPNETCONNECTINFOSTRUCT* = ptr NETCONNECTINFOSTRUCT
+
 const
   WNNC_NET_MSNET* = 0x00010000
   WNNC_NET_SMB* = 0x00020000
@@ -176,7 +189,8 @@ const
   RESOURCEUSAGE_NOLOCALDEVICE* = 0x00000004
   RESOURCEUSAGE_SIBLING* = 0x00000008
   RESOURCEUSAGE_ATTACHED* = 0x00000010
-  RESOURCEUSAGE_ALL* = RESOURCEUSAGE_CONNECTABLE or RESOURCEUSAGE_CONTAINER or RESOURCEUSAGE_ATTACHED
+  RESOURCEUSAGE_ALL* =
+    RESOURCEUSAGE_CONNECTABLE or RESOURCEUSAGE_CONTAINER or RESOURCEUSAGE_ATTACHED
   RESOURCEUSAGE_RESERVED* = 0x80000000'i32
   RESOURCEDISPLAYTYPE_GENERIC* = 0x00000000
   RESOURCEDISPLAYTYPE_DOMAIN* = 0x00000001
@@ -273,54 +287,242 @@ const
   WNCON_SLOWLINK* = 0x00000004
   WNCON_DYNAMIC* = 0x00000008
 type
-  PFNGETPROFILEPATHA* = proc (pszUsername: LPCSTR, pszBuffer: LPSTR, cbBuffer: UINT): UINT {.stdcall.}
-  PFNGETPROFILEPATHW* = proc (pszUsername: LPCWSTR, pszBuffer: LPWSTR, cbBuffer: UINT): UINT {.stdcall.}
-  PFNRECONCILEPROFILEA* = proc (pszCentralFile: LPCSTR, pszLocalFile: LPCSTR, dwFlags: DWORD): UINT {.stdcall.}
-  PFNRECONCILEPROFILEW* = proc (pszCentralFile: LPCWSTR, pszLocalFile: LPCWSTR, dwFlags: DWORD): UINT {.stdcall.}
-  PFNPROCESSPOLICIESA* = proc (hwnd: HWND, pszPath: LPCSTR, pszUsername: LPCSTR, pszComputerName: LPCSTR, dwFlags: DWORD): WINBOOL {.stdcall.}
-  PFNPROCESSPOLICIESW* = proc (hwnd: HWND, pszPath: LPCWSTR, pszUsername: LPCWSTR, pszComputerName: LPCWSTR, dwFlags: DWORD): WINBOOL {.stdcall.}
-proc WNetAddConnectionA*(lpRemoteName: LPCSTR, lpPassword: LPCSTR, lpLocalName: LPCSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetAddConnectionW*(lpRemoteName: LPCWSTR, lpPassword: LPCWSTR, lpLocalName: LPCWSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetAddConnection2A*(lpNetResource: LPNETRESOURCEA, lpPassword: LPCSTR, lpUserName: LPCSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetAddConnection2W*(lpNetResource: LPNETRESOURCEW, lpPassword: LPCWSTR, lpUserName: LPCWSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetAddConnection3A*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEA, lpPassword: LPCSTR, lpUserName: LPCSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetAddConnection3W*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEW, lpPassword: LPCWSTR, lpUserName: LPCWSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetCancelConnectionA*(lpName: LPCSTR, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetCancelConnectionW*(lpName: LPCWSTR, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetCancelConnection2A*(lpName: LPCSTR, dwFlags: DWORD, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetCancelConnection2W*(lpName: LPCWSTR, dwFlags: DWORD, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetConnectionA*(lpLocalName: LPCSTR, lpRemoteName: LPSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetConnectionW*(lpLocalName: LPCWSTR, lpRemoteName: LPWSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetUseConnectionA*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEA, lpPassword: LPCSTR, lpUserID: LPCSTR, dwFlags: DWORD, lpAccessName: LPSTR, lpBufferSize: LPDWORD, lpResult: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetUseConnectionW*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEW, lpPassword: LPCWSTR, lpUserID: LPCWSTR, dwFlags: DWORD, lpAccessName: LPWSTR, lpBufferSize: LPDWORD, lpResult: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetConnectionDialog*(hwnd: HWND, dwType: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetDisconnectDialog*(hwnd: HWND, dwType: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetRestoreSingleConnectionW*(hwndParent: HWND, lpDevice: LPCWSTR, fUseUI: BOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetConnectionDialog1A*(lpConnDlgStruct: LPCONNECTDLGSTRUCTA): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetConnectionDialog1W*(lpConnDlgStruct: LPCONNECTDLGSTRUCTW): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetDisconnectDialog1A*(lpConnDlgStruct: LPDISCDLGSTRUCTA): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetDisconnectDialog1W*(lpConnDlgStruct: LPDISCDLGSTRUCTW): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetOpenEnumA*(dwScope: DWORD, dwType: DWORD, dwUsage: DWORD, lpNetResource: LPNETRESOURCEA, lphEnum: LPHANDLE): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetOpenEnumW*(dwScope: DWORD, dwType: DWORD, dwUsage: DWORD, lpNetResource: LPNETRESOURCEW, lphEnum: LPHANDLE): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetEnumResourceA*(hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetEnumResourceW*(hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+  PFNGETPROFILEPATHA* =
+    proc(pszUsername: LPCSTR, pszBuffer: LPSTR, cbBuffer: UINT): UINT {.stdcall.}
+  PFNGETPROFILEPATHW* =
+    proc(pszUsername: LPCWSTR, pszBuffer: LPWSTR, cbBuffer: UINT): UINT {.stdcall.}
+  PFNRECONCILEPROFILEA* =
+    proc(pszCentralFile: LPCSTR, pszLocalFile: LPCSTR, dwFlags: DWORD): UINT {.stdcall.}
+  PFNRECONCILEPROFILEW* = proc(
+    pszCentralFile: LPCWSTR, pszLocalFile: LPCWSTR, dwFlags: DWORD
+  ): UINT {.stdcall.}
+  PFNPROCESSPOLICIESA* = proc(
+    hwnd: HWND,
+    pszPath: LPCSTR,
+    pszUsername: LPCSTR,
+    pszComputerName: LPCSTR,
+    dwFlags: DWORD,
+  ): WINBOOL {.stdcall.}
+  PFNPROCESSPOLICIESW* = proc(
+    hwnd: HWND,
+    pszPath: LPCWSTR,
+    pszUsername: LPCWSTR,
+    pszComputerName: LPCWSTR,
+    dwFlags: DWORD,
+  ): WINBOOL {.stdcall.}
+
+proc WNetAddConnectionA*(
+  lpRemoteName: LPCSTR, lpPassword: LPCSTR, lpLocalName: LPCSTR
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetAddConnectionW*(
+  lpRemoteName: LPCWSTR, lpPassword: LPCWSTR, lpLocalName: LPCWSTR
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetAddConnection2A*(
+  lpNetResource: LPNETRESOURCEA, lpPassword: LPCSTR, lpUserName: LPCSTR, dwFlags: DWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetAddConnection2W*(
+  lpNetResource: LPNETRESOURCEW,
+  lpPassword: LPCWSTR,
+  lpUserName: LPCWSTR,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetAddConnection3A*(
+  hwndOwner: HWND,
+  lpNetResource: LPNETRESOURCEA,
+  lpPassword: LPCSTR,
+  lpUserName: LPCSTR,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetAddConnection3W*(
+  hwndOwner: HWND,
+  lpNetResource: LPNETRESOURCEW,
+  lpPassword: LPCWSTR,
+  lpUserName: LPCWSTR,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetCancelConnectionA*(
+  lpName: LPCSTR, fForce: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetCancelConnectionW*(
+  lpName: LPCWSTR, fForce: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetCancelConnection2A*(
+  lpName: LPCSTR, dwFlags: DWORD, fForce: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetCancelConnection2W*(
+  lpName: LPCWSTR, dwFlags: DWORD, fForce: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetConnectionA*(
+  lpLocalName: LPCSTR, lpRemoteName: LPSTR, lpnLength: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetConnectionW*(
+  lpLocalName: LPCWSTR, lpRemoteName: LPWSTR, lpnLength: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetUseConnectionA*(
+  hwndOwner: HWND,
+  lpNetResource: LPNETRESOURCEA,
+  lpPassword: LPCSTR,
+  lpUserID: LPCSTR,
+  dwFlags: DWORD,
+  lpAccessName: LPSTR,
+  lpBufferSize: LPDWORD,
+  lpResult: LPDWORD,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetUseConnectionW*(
+  hwndOwner: HWND,
+  lpNetResource: LPNETRESOURCEW,
+  lpPassword: LPCWSTR,
+  lpUserID: LPCWSTR,
+  dwFlags: DWORD,
+  lpAccessName: LPWSTR,
+  lpBufferSize: LPDWORD,
+  lpResult: LPDWORD,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetConnectionDialog*(
+  hwnd: HWND, dwType: DWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetDisconnectDialog*(
+  hwnd: HWND, dwType: DWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetRestoreSingleConnectionW*(
+  hwndParent: HWND, lpDevice: LPCWSTR, fUseUI: BOOL
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetConnectionDialog1A*(
+  lpConnDlgStruct: LPCONNECTDLGSTRUCTA
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetConnectionDialog1W*(
+  lpConnDlgStruct: LPCONNECTDLGSTRUCTW
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetDisconnectDialog1A*(
+  lpConnDlgStruct: LPDISCDLGSTRUCTA
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetDisconnectDialog1W*(
+  lpConnDlgStruct: LPDISCDLGSTRUCTW
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetOpenEnumA*(
+  dwScope: DWORD,
+  dwType: DWORD,
+  dwUsage: DWORD,
+  lpNetResource: LPNETRESOURCEA,
+  lphEnum: LPHANDLE,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetOpenEnumW*(
+  dwScope: DWORD,
+  dwType: DWORD,
+  dwUsage: DWORD,
+  lpNetResource: LPNETRESOURCEW,
+  lphEnum: LPHANDLE,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetEnumResourceA*(
+  hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetEnumResourceW*(
+  hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
 proc WNetCloseEnum*(hEnum: HANDLE): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetResourceParentA*(lpNetResource: LPNETRESOURCEA, lpBuffer: LPVOID, lpcbBuffer: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetResourceParentW*(lpNetResource: LPNETRESOURCEW, lpBuffer: LPVOID, lpcbBuffer: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetResourceInformationA*(lpNetResource: LPNETRESOURCEA, lpBuffer: LPVOID, lpcbBuffer: LPDWORD, lplpSystem: ptr LPSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetResourceInformationW*(lpNetResource: LPNETRESOURCEW, lpBuffer: LPVOID, lpcbBuffer: LPDWORD, lplpSystem: ptr LPWSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetUniversalNameA*(lpLocalPath: LPCSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetUniversalNameW*(lpLocalPath: LPCWSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetUserA*(lpName: LPCSTR, lpUserName: LPSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetUserW*(lpName: LPCWSTR, lpUserName: LPWSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetProviderNameA*(dwNetType: DWORD, lpProviderName: LPSTR, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetProviderNameW*(dwNetType: DWORD, lpProviderName: LPWSTR, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetNetworkInformationA*(lpProvider: LPCSTR, lpNetInfoStruct: LPNETINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetNetworkInformationW*(lpProvider: LPCWSTR, lpNetInfoStruct: LPNETINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetLastErrorA*(lpError: LPDWORD, lpErrorBuf: LPSTR, nErrorBufSize: DWORD, lpNameBuf: LPSTR, nNameBufSize: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc WNetGetLastErrorW*(lpError: LPDWORD, lpErrorBuf: LPWSTR, nErrorBufSize: DWORD, lpNameBuf: LPWSTR, nNameBufSize: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc MultinetGetConnectionPerformanceA*(lpNetResource: LPNETRESOURCEA, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
-proc MultinetGetConnectionPerformanceW*(lpNetResource: LPNETRESOURCEW, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+proc WNetGetResourceParentA*(
+  lpNetResource: LPNETRESOURCEA, lpBuffer: LPVOID, lpcbBuffer: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetResourceParentW*(
+  lpNetResource: LPNETRESOURCEW, lpBuffer: LPVOID, lpcbBuffer: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetResourceInformationA*(
+  lpNetResource: LPNETRESOURCEA,
+  lpBuffer: LPVOID,
+  lpcbBuffer: LPDWORD,
+  lplpSystem: ptr LPSTR,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetResourceInformationW*(
+  lpNetResource: LPNETRESOURCEW,
+  lpBuffer: LPVOID,
+  lpcbBuffer: LPDWORD,
+  lplpSystem: ptr LPWSTR,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetUniversalNameA*(
+  lpLocalPath: LPCSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetUniversalNameW*(
+  lpLocalPath: LPCWSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetUserA*(
+  lpName: LPCSTR, lpUserName: LPSTR, lpnLength: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetUserW*(
+  lpName: LPCWSTR, lpUserName: LPWSTR, lpnLength: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetProviderNameA*(
+  dwNetType: DWORD, lpProviderName: LPSTR, lpBufferSize: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetProviderNameW*(
+  dwNetType: DWORD, lpProviderName: LPWSTR, lpBufferSize: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetNetworkInformationA*(
+  lpProvider: LPCSTR, lpNetInfoStruct: LPNETINFOSTRUCT
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetNetworkInformationW*(
+  lpProvider: LPCWSTR, lpNetInfoStruct: LPNETINFOSTRUCT
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetLastErrorA*(
+  lpError: LPDWORD,
+  lpErrorBuf: LPSTR,
+  nErrorBufSize: DWORD,
+  lpNameBuf: LPSTR,
+  nNameBufSize: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc WNetGetLastErrorW*(
+  lpError: LPDWORD,
+  lpErrorBuf: LPWSTR,
+  nErrorBufSize: DWORD,
+  lpNameBuf: LPWSTR,
+  nNameBufSize: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc MultinetGetConnectionPerformanceA*(
+  lpNetResource: LPNETRESOURCEA, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
+proc MultinetGetConnectionPerformanceW*(
+  lpNetResource: LPNETRESOURCEW, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT
+): DWORD {.winapi, stdcall, dynlib: "mpr", importc.}
+
 when winimUnicode:
   type
     NETRESOURCE* = NETRESOURCEW
@@ -336,25 +538,110 @@ when winimUnicode:
     PFNGETPROFILEPATH* = PFNGETPROFILEPATHW
     PFNRECONCILEPROFILE* = PFNRECONCILEPROFILEW
     PFNPROCESSPOLICIES* = PFNPROCESSPOLICIESW
-  proc WNetAddConnection*(lpRemoteName: LPCWSTR, lpPassword: LPCWSTR, lpLocalName: LPCWSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnectionW".}
-  proc WNetAddConnection2*(lpNetResource: LPNETRESOURCEW, lpPassword: LPCWSTR, lpUserName: LPCWSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection2W".}
-  proc WNetAddConnection3*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEW, lpPassword: LPCWSTR, lpUserName: LPCWSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection3W".}
-  proc WNetCancelConnection*(lpName: LPCWSTR, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnectionW".}
-  proc WNetCancelConnection2*(lpName: LPCWSTR, dwFlags: DWORD, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnection2W".}
-  proc WNetGetConnection*(lpLocalName: LPCWSTR, lpRemoteName: LPWSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetConnectionW".}
-  proc WNetUseConnection*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEW, lpPassword: LPCWSTR, lpUserID: LPCWSTR, dwFlags: DWORD, lpAccessName: LPWSTR, lpBufferSize: LPDWORD, lpResult: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetUseConnectionW".}
-  proc WNetConnectionDialog1*(lpConnDlgStruct: LPCONNECTDLGSTRUCTW): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetConnectionDialog1W".}
-  proc WNetDisconnectDialog1*(lpConnDlgStruct: LPDISCDLGSTRUCTW): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetDisconnectDialog1W".}
-  proc WNetOpenEnum*(dwScope: DWORD, dwType: DWORD, dwUsage: DWORD, lpNetResource: LPNETRESOURCEW, lphEnum: LPHANDLE): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetOpenEnumW".}
-  proc WNetEnumResource*(hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetEnumResourceW".}
-  proc WNetGetResourceParent*(lpNetResource: LPNETRESOURCEW, lpBuffer: LPVOID, lpcbBuffer: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceParentW".}
-  proc WNetGetResourceInformation*(lpNetResource: LPNETRESOURCEW, lpBuffer: LPVOID, lpcbBuffer: LPDWORD, lplpSystem: ptr LPWSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceInformationW".}
-  proc WNetGetUniversalName*(lpLocalPath: LPCWSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUniversalNameW".}
-  proc WNetGetUser*(lpName: LPCWSTR, lpUserName: LPWSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUserW".}
-  proc WNetGetProviderName*(dwNetType: DWORD, lpProviderName: LPWSTR, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetProviderNameW".}
-  proc WNetGetNetworkInformation*(lpProvider: LPCWSTR, lpNetInfoStruct: LPNETINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetNetworkInformationW".}
-  proc WNetGetLastError*(lpError: LPDWORD, lpErrorBuf: LPWSTR, nErrorBufSize: DWORD, lpNameBuf: LPWSTR, nNameBufSize: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetLastErrorW".}
-  proc MultinetGetConnectionPerformance*(lpNetResource: LPNETRESOURCEW, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "MultinetGetConnectionPerformanceW".}
+
+  proc WNetAddConnection*(
+    lpRemoteName: LPCWSTR, lpPassword: LPCWSTR, lpLocalName: LPCWSTR
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnectionW".}
+
+  proc WNetAddConnection2*(
+    lpNetResource: LPNETRESOURCEW,
+    lpPassword: LPCWSTR,
+    lpUserName: LPCWSTR,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection2W".}
+
+  proc WNetAddConnection3*(
+    hwndOwner: HWND,
+    lpNetResource: LPNETRESOURCEW,
+    lpPassword: LPCWSTR,
+    lpUserName: LPCWSTR,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection3W".}
+
+  proc WNetCancelConnection*(
+    lpName: LPCWSTR, fForce: WINBOOL
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnectionW".}
+
+  proc WNetCancelConnection2*(
+    lpName: LPCWSTR, dwFlags: DWORD, fForce: WINBOOL
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnection2W".}
+
+  proc WNetGetConnection*(
+    lpLocalName: LPCWSTR, lpRemoteName: LPWSTR, lpnLength: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetConnectionW".}
+
+  proc WNetUseConnection*(
+    hwndOwner: HWND,
+    lpNetResource: LPNETRESOURCEW,
+    lpPassword: LPCWSTR,
+    lpUserID: LPCWSTR,
+    dwFlags: DWORD,
+    lpAccessName: LPWSTR,
+    lpBufferSize: LPDWORD,
+    lpResult: LPDWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetUseConnectionW".}
+
+  proc WNetConnectionDialog1*(
+    lpConnDlgStruct: LPCONNECTDLGSTRUCTW
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetConnectionDialog1W".}
+
+  proc WNetDisconnectDialog1*(
+    lpConnDlgStruct: LPDISCDLGSTRUCTW
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetDisconnectDialog1W".}
+
+  proc WNetOpenEnum*(
+    dwScope: DWORD,
+    dwType: DWORD,
+    dwUsage: DWORD,
+    lpNetResource: LPNETRESOURCEW,
+    lphEnum: LPHANDLE,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetOpenEnumW".}
+
+  proc WNetEnumResource*(
+    hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetEnumResourceW".}
+
+  proc WNetGetResourceParent*(
+    lpNetResource: LPNETRESOURCEW, lpBuffer: LPVOID, lpcbBuffer: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceParentW".}
+
+  proc WNetGetResourceInformation*(
+    lpNetResource: LPNETRESOURCEW,
+    lpBuffer: LPVOID,
+    lpcbBuffer: LPDWORD,
+    lplpSystem: ptr LPWSTR,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceInformationW".}
+
+  proc WNetGetUniversalName*(
+    lpLocalPath: LPCWSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUniversalNameW".}
+
+  proc WNetGetUser*(
+    lpName: LPCWSTR, lpUserName: LPWSTR, lpnLength: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUserW".}
+
+  proc WNetGetProviderName*(
+    dwNetType: DWORD, lpProviderName: LPWSTR, lpBufferSize: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetProviderNameW".}
+
+  proc WNetGetNetworkInformation*(
+    lpProvider: LPCWSTR, lpNetInfoStruct: LPNETINFOSTRUCT
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetNetworkInformationW".}
+
+  proc WNetGetLastError*(
+    lpError: LPDWORD,
+    lpErrorBuf: LPWSTR,
+    nErrorBufSize: DWORD,
+    lpNameBuf: LPWSTR,
+    nNameBufSize: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetLastErrorW".}
+
+  proc MultinetGetConnectionPerformance*(
+    lpNetResource: LPNETRESOURCEW, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT
+  ): DWORD {.
+    winapi, stdcall, dynlib: "mpr", importc: "MultinetGetConnectionPerformanceW"
+  .}
+
 when winimAnsi:
   type
     NETRESOURCE* = NETRESOURCEA
@@ -370,22 +657,106 @@ when winimAnsi:
     PFNGETPROFILEPATH* = PFNGETPROFILEPATHA
     PFNRECONCILEPROFILE* = PFNRECONCILEPROFILEA
     PFNPROCESSPOLICIES* = PFNPROCESSPOLICIESA
-  proc WNetAddConnection*(lpRemoteName: LPCSTR, lpPassword: LPCSTR, lpLocalName: LPCSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnectionA".}
-  proc WNetAddConnection2*(lpNetResource: LPNETRESOURCEA, lpPassword: LPCSTR, lpUserName: LPCSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection2A".}
-  proc WNetAddConnection3*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEA, lpPassword: LPCSTR, lpUserName: LPCSTR, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection3A".}
-  proc WNetCancelConnection*(lpName: LPCSTR, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnectionA".}
-  proc WNetCancelConnection2*(lpName: LPCSTR, dwFlags: DWORD, fForce: WINBOOL): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnection2A".}
-  proc WNetGetConnection*(lpLocalName: LPCSTR, lpRemoteName: LPSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetConnectionA".}
-  proc WNetUseConnection*(hwndOwner: HWND, lpNetResource: LPNETRESOURCEA, lpPassword: LPCSTR, lpUserID: LPCSTR, dwFlags: DWORD, lpAccessName: LPSTR, lpBufferSize: LPDWORD, lpResult: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetUseConnectionA".}
-  proc WNetConnectionDialog1*(lpConnDlgStruct: LPCONNECTDLGSTRUCTA): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetConnectionDialog1A".}
-  proc WNetDisconnectDialog1*(lpConnDlgStruct: LPDISCDLGSTRUCTA): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetDisconnectDialog1A".}
-  proc WNetOpenEnum*(dwScope: DWORD, dwType: DWORD, dwUsage: DWORD, lpNetResource: LPNETRESOURCEA, lphEnum: LPHANDLE): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetOpenEnumA".}
-  proc WNetEnumResource*(hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetEnumResourceA".}
-  proc WNetGetResourceParent*(lpNetResource: LPNETRESOURCEA, lpBuffer: LPVOID, lpcbBuffer: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceParentA".}
-  proc WNetGetResourceInformation*(lpNetResource: LPNETRESOURCEA, lpBuffer: LPVOID, lpcbBuffer: LPDWORD, lplpSystem: ptr LPSTR): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceInformationA".}
-  proc WNetGetUniversalName*(lpLocalPath: LPCSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUniversalNameA".}
-  proc WNetGetUser*(lpName: LPCSTR, lpUserName: LPSTR, lpnLength: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUserA".}
-  proc WNetGetProviderName*(dwNetType: DWORD, lpProviderName: LPSTR, lpBufferSize: LPDWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetProviderNameA".}
-  proc WNetGetNetworkInformation*(lpProvider: LPCSTR, lpNetInfoStruct: LPNETINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetNetworkInformationA".}
-  proc WNetGetLastError*(lpError: LPDWORD, lpErrorBuf: LPSTR, nErrorBufSize: DWORD, lpNameBuf: LPSTR, nNameBufSize: DWORD): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetLastErrorA".}
-  proc MultinetGetConnectionPerformance*(lpNetResource: LPNETRESOURCEA, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "MultinetGetConnectionPerformanceA".}
+
+  proc WNetAddConnection*(
+    lpRemoteName: LPCSTR, lpPassword: LPCSTR, lpLocalName: LPCSTR
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnectionA".}
+
+  proc WNetAddConnection2*(
+    lpNetResource: LPNETRESOURCEA,
+    lpPassword: LPCSTR,
+    lpUserName: LPCSTR,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection2A".}
+
+  proc WNetAddConnection3*(
+    hwndOwner: HWND,
+    lpNetResource: LPNETRESOURCEA,
+    lpPassword: LPCSTR,
+    lpUserName: LPCSTR,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetAddConnection3A".}
+
+  proc WNetCancelConnection*(
+    lpName: LPCSTR, fForce: WINBOOL
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnectionA".}
+
+  proc WNetCancelConnection2*(
+    lpName: LPCSTR, dwFlags: DWORD, fForce: WINBOOL
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetCancelConnection2A".}
+
+  proc WNetGetConnection*(
+    lpLocalName: LPCSTR, lpRemoteName: LPSTR, lpnLength: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetConnectionA".}
+
+  proc WNetUseConnection*(
+    hwndOwner: HWND,
+    lpNetResource: LPNETRESOURCEA,
+    lpPassword: LPCSTR,
+    lpUserID: LPCSTR,
+    dwFlags: DWORD,
+    lpAccessName: LPSTR,
+    lpBufferSize: LPDWORD,
+    lpResult: LPDWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetUseConnectionA".}
+
+  proc WNetConnectionDialog1*(
+    lpConnDlgStruct: LPCONNECTDLGSTRUCTA
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetConnectionDialog1A".}
+
+  proc WNetDisconnectDialog1*(
+    lpConnDlgStruct: LPDISCDLGSTRUCTA
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetDisconnectDialog1A".}
+
+  proc WNetOpenEnum*(
+    dwScope: DWORD,
+    dwType: DWORD,
+    dwUsage: DWORD,
+    lpNetResource: LPNETRESOURCEA,
+    lphEnum: LPHANDLE,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetOpenEnumA".}
+
+  proc WNetEnumResource*(
+    hEnum: HANDLE, lpcCount: LPDWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetEnumResourceA".}
+
+  proc WNetGetResourceParent*(
+    lpNetResource: LPNETRESOURCEA, lpBuffer: LPVOID, lpcbBuffer: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceParentA".}
+
+  proc WNetGetResourceInformation*(
+    lpNetResource: LPNETRESOURCEA,
+    lpBuffer: LPVOID,
+    lpcbBuffer: LPDWORD,
+    lplpSystem: ptr LPSTR,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetResourceInformationA".}
+
+  proc WNetGetUniversalName*(
+    lpLocalPath: LPCSTR, dwInfoLevel: DWORD, lpBuffer: LPVOID, lpBufferSize: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUniversalNameA".}
+
+  proc WNetGetUser*(
+    lpName: LPCSTR, lpUserName: LPSTR, lpnLength: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetUserA".}
+
+  proc WNetGetProviderName*(
+    dwNetType: DWORD, lpProviderName: LPSTR, lpBufferSize: LPDWORD
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetProviderNameA".}
+
+  proc WNetGetNetworkInformation*(
+    lpProvider: LPCSTR, lpNetInfoStruct: LPNETINFOSTRUCT
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetNetworkInformationA".}
+
+  proc WNetGetLastError*(
+    lpError: LPDWORD,
+    lpErrorBuf: LPSTR,
+    nErrorBufSize: DWORD,
+    lpNameBuf: LPSTR,
+    nNameBufSize: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "mpr", importc: "WNetGetLastErrorA".}
+
+  proc MultinetGetConnectionPerformance*(
+    lpNetResource: LPNETRESOURCEA, lpNetConnectInfoStruct: LPNETCONNECTINFOSTRUCT
+  ): DWORD {.
+    winapi, stdcall, dynlib: "mpr", importc: "MultinetGetConnectionPerformanceA"
+  .}

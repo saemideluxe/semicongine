@@ -25,6 +25,7 @@ type
     fEnable*: BOOL
     hRgnBlur*: HRGN
     fTransitionOnMaximized*: BOOL
+
   PDWM_BLURBEHIND* = ptr DWM_BLURBEHIND
   PHTHUMBNAIL* = ptr HTHUMBNAIL
   DWM_THUMBNAIL_PROPERTIES* {.pure.} = object
@@ -34,7 +35,9 @@ type
     opacity*: BYTE
     fVisible*: BOOL
     fSourceClientAreaOnly*: BOOL
+
   PDWM_THUMBNAIL_PROPERTIES* = ptr DWM_THUMBNAIL_PROPERTIES
+
 const
   DWM_BB_ENABLE* = 0x00000001
   DWM_BB_BLURREGION* = 0x00000002
@@ -116,6 +119,7 @@ type
   UNSIGNED_RATIO* {.pure.} = object
     uiNumerator*: UINT32
     uiDenominator*: UINT32
+
   DWM_TIMING_INFO* {.pure.} = object
     cbSize*: UINT32
     rateRefresh*: UNSIGNED_RATIO
@@ -157,6 +161,7 @@ type
     cPixelsReceived*: ULONGLONG
     cPixelsDrawn*: ULONGLONG
     cBuffersEmpty*: DWM_FRAME_COUNT
+
   DWM_PRESENT_PARAMETERS* {.pure.} = object
     cbSize*: UINT32
     fQueue*: BOOL
@@ -166,6 +171,7 @@ type
     rateSource*: UNSIGNED_RATIO
     cRefreshesPerFrame*: UINT
     eSampling*: DWM_SOURCE_FRAME_SAMPLING
+
   MIL_MATRIX3X2D* {.pure.} = object
     S_11*: DOUBLE
     S_12*: DOUBLE
@@ -173,34 +179,124 @@ type
     S_22*: DOUBLE
     DX*: DOUBLE
     DY*: DOUBLE
-proc DwmDefWindowProc*(hWnd: HWND, msg: UINT, wParam: WPARAM, lParam: LPARAM, plResult: ptr LRESULT): BOOL {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmEnableBlurBehindWindow*(hWnd: HWND, pBlurBehind: ptr DWM_BLURBEHIND): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmEnableComposition*(uCompositionAction: UINT): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmEnableMMCSS*(fEnableMMCSS: BOOL): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmExtendFrameIntoClientArea*(hWnd: HWND, pMarInset: ptr MARGINS): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmGetColorizationColor*(pcrColorization: ptr DWORD, pfOpaqueBlend: ptr BOOL): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmGetCompositionTimingInfo*(hwnd: HWND, pTimingInfo: ptr DWM_TIMING_INFO): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmGetWindowAttribute*(hwnd: HWND, dwAttribute: DWORD, pvAttribute: PVOID, cbAttribute: DWORD): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmIsCompositionEnabled*(pfEnabled: ptr BOOL): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmModifyPreviousDxFrameDuration*(hwnd: HWND, cRefreshes: INT, fRelative: BOOL): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmQueryThumbnailSourceSize*(hThumbnail: HTHUMBNAIL, pSize: PSIZE): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmRegisterThumbnail*(hwndDestination: HWND, hwndSource: HWND, phThumbnailId: PHTHUMBNAIL): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmSetDxFrameDuration*(hwnd: HWND, cRefreshes: INT): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmSetPresentParameters*(hwnd: HWND, pPresentParams: ptr DWM_PRESENT_PARAMETERS): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmSetWindowAttribute*(hwnd: HWND, dwAttribute: DWORD, pvAttribute: LPCVOID, cbAttribute: DWORD): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmUnregisterThumbnail*(hThumbnailId: HTHUMBNAIL): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmUpdateThumbnailProperties*(hThumbnailId: HTHUMBNAIL, ptnProperties: ptr DWM_THUMBNAIL_PROPERTIES): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmSetIconicThumbnail*(hwnd: HWND, hbmp: HBITMAP, dwSITFlags: DWORD): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmSetIconicLivePreviewBitmap*(hwnd: HWND, hbmp: HBITMAP, pptClient: ptr POINT, dwSITFlags: DWORD): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmInvalidateIconicBitmaps*(hwnd: HWND): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmAttachMilContent*(hwnd: HWND): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmDetachMilContent*(hwnd: HWND): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmDefWindowProc*(
+  hWnd: HWND, msg: UINT, wParam: WPARAM, lParam: LPARAM, plResult: ptr LRESULT
+): BOOL {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmEnableBlurBehindWindow*(
+  hWnd: HWND, pBlurBehind: ptr DWM_BLURBEHIND
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmEnableComposition*(
+  uCompositionAction: UINT
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmEnableMMCSS*(
+  fEnableMMCSS: BOOL
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmExtendFrameIntoClientArea*(
+  hWnd: HWND, pMarInset: ptr MARGINS
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmGetColorizationColor*(
+  pcrColorization: ptr DWORD, pfOpaqueBlend: ptr BOOL
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmGetCompositionTimingInfo*(
+  hwnd: HWND, pTimingInfo: ptr DWM_TIMING_INFO
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmGetWindowAttribute*(
+  hwnd: HWND, dwAttribute: DWORD, pvAttribute: PVOID, cbAttribute: DWORD
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmIsCompositionEnabled*(
+  pfEnabled: ptr BOOL
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmModifyPreviousDxFrameDuration*(
+  hwnd: HWND, cRefreshes: INT, fRelative: BOOL
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmQueryThumbnailSourceSize*(
+  hThumbnail: HTHUMBNAIL, pSize: PSIZE
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmRegisterThumbnail*(
+  hwndDestination: HWND, hwndSource: HWND, phThumbnailId: PHTHUMBNAIL
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmSetDxFrameDuration*(
+  hwnd: HWND, cRefreshes: INT
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmSetPresentParameters*(
+  hwnd: HWND, pPresentParams: ptr DWM_PRESENT_PARAMETERS
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmSetWindowAttribute*(
+  hwnd: HWND, dwAttribute: DWORD, pvAttribute: LPCVOID, cbAttribute: DWORD
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmUnregisterThumbnail*(
+  hThumbnailId: HTHUMBNAIL
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmUpdateThumbnailProperties*(
+  hThumbnailId: HTHUMBNAIL, ptnProperties: ptr DWM_THUMBNAIL_PROPERTIES
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmSetIconicThumbnail*(
+  hwnd: HWND, hbmp: HBITMAP, dwSITFlags: DWORD
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmSetIconicLivePreviewBitmap*(
+  hwnd: HWND, hbmp: HBITMAP, pptClient: ptr POINT, dwSITFlags: DWORD
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmInvalidateIconicBitmaps*(
+  hwnd: HWND
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmAttachMilContent*(
+  hwnd: HWND
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmDetachMilContent*(
+  hwnd: HWND
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
 proc DwmFlush*(): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmGetGraphicsStreamTransformHint*(uIndex: UINT, pTransform: ptr MIL_MATRIX3X2D): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmGetGraphicsStreamClient*(uIndex: UINT, pClientUuid: ptr GUID): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmGetTransportAttributes*(pfIsRemoting: ptr BOOL, pfIsConnected: ptr BOOL, pDwGeneration: ptr DWORD): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmTransitionOwnedWindow*(hwnd: HWND, target: DWMTRANSITION_OWNEDWINDOW_TARGET): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmRenderGesture*(gt: GESTURE_TYPE, cContacts: UINT, pdwPointerID: ptr DWORD, pPoints: ptr POINT): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmTetherContact*(dwPointerID: DWORD, fEnable: BOOL, ptTether: POINT): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmShowContact*(dwPointerID: DWORD, eShowContact: DWM_SHOWCONTACT_ENUM): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
-proc DwmGetUnmetTabRequirements*(appWindow: HWND, value: ptr DWM_TAB_WINDOW_REQUIREMENTS): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+proc DwmGetGraphicsStreamTransformHint*(
+  uIndex: UINT, pTransform: ptr MIL_MATRIX3X2D
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmGetGraphicsStreamClient*(
+  uIndex: UINT, pClientUuid: ptr GUID
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmGetTransportAttributes*(
+  pfIsRemoting: ptr BOOL, pfIsConnected: ptr BOOL, pDwGeneration: ptr DWORD
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmTransitionOwnedWindow*(
+  hwnd: HWND, target: DWMTRANSITION_OWNEDWINDOW_TARGET
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmRenderGesture*(
+  gt: GESTURE_TYPE, cContacts: UINT, pdwPointerID: ptr DWORD, pPoints: ptr POINT
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmTetherContact*(
+  dwPointerID: DWORD, fEnable: BOOL, ptTether: POINT
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmShowContact*(
+  dwPointerID: DWORD, eShowContact: DWM_SHOWCONTACT_ENUM
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}
+
+proc DwmGetUnmetTabRequirements*(
+  appWindow: HWND, value: ptr DWM_TAB_WINDOW_REQUIREMENTS
+): HRESULT {.winapi, stdcall, dynlib: "dwmapi", importc.}

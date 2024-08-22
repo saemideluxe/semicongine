@@ -3,6 +3,7 @@ type
     Left
     Center
     Right
+
   VerticalAlignment* = enum
     Top
     Center
@@ -15,17 +16,20 @@ func CleanString*(str: openArray[char]): string =
       break
 
 func ToCPointer*[T](list: openArray[T]): ptr T =
-  if list.len > 0: addr(list[0]) else: nil
+  if list.len > 0:
+    addr(list[0])
+  else:
+    nil
 
 # required for some external libraries
 proc nativeFree*(p: pointer) {.importc: "free".}
 
 proc StaticExecChecked*(command: string, input = ""): string {.compileTime.} =
-  let (output, exitcode) = gorgeEx(
-      command = command,
-      input = input)
+  let (output, exitcode) = gorgeEx(command = command, input = input)
   if exitcode != 0:
-    raise newException(Exception, &"Running '{command}' produced exit code: {exitcode}" & output)
+    raise newException(
+      Exception, &"Running '{command}' produced exit code: {exitcode}" & output
+    )
   return output
 
 proc AppName*(): string =
@@ -59,5 +63,6 @@ iterator litems*[IX, T](a: array[IX, T]): lent T {.inline.} =
     var i = low(IX)
     while true:
       yield a[i]
-      if i >= high(IX): break
+      if i >= high(IX):
+        break
       inc(i)

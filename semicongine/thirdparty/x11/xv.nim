@@ -23,8 +23,7 @@
 #******************************************************************
 # $XFree86: xc/include/extensions/Xv.h,v 1.3 1999/05/23 06:33:22 dawes Exp $
 
-import
-  x
+import x
 
 const
   XvName* = "libXVideo.so"
@@ -53,10 +52,10 @@ const
   XvPacked* = 0
   XvPlanar* = 1
   XvTopToBottom* = 0
-  XvBottomToTop* = 1        # Events
+  XvBottomToTop* = 1 # Events
   XvVideoNotify* = 0
   XvPortNotify* = 1
-  XvNumEvents* = 2          # Video Notify Reasons
+  XvNumEvents* = 2 # Video Notify Reasons
   XvStarted* = 0
   XvStopped* = 1
   XvBusy* = 2
@@ -70,11 +69,11 @@ const
   XvPreemptedMask* = 1 shl XvPreempted
   XvHardErrorMask* = 1 shl XvHardError
   XvAnyReasonMask* = (1 shl XvNumReasons) - 1
-  XvNoReasonMask* = 0       # Errors
+  XvNoReasonMask* = 0 # Errors
   XvBadPort* = 0
   XvBadEncoding* = 1
   XvBadControl* = 2
-  XvNumErrors* = 3          # Status
+  XvNumErrors* = 3 # Status
   XvBadExtension* = 1
   XvAlreadyGrabbed* = 2
   XvInvalidTime* = 3

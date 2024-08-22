@@ -53,15 +53,15 @@ type
 
   PXRecordRange* = ptr XRecordRange
   XRecordRange* {.final.} = object
-    core_requests*: XRecordRange8    ##  core X requests
-    core_replies*: XRecordRange8     ##  core X replies
-    ext_requests*: XRecordExtRange   ##  extension requests
-    ext_replies*: XRecordExtRange    ##  extension replies
+    core_requests*: XRecordRange8 ##  core X requests
+    core_replies*: XRecordRange8 ##  core X replies
+    ext_requests*: XRecordExtRange ##  extension requests
+    ext_replies*: XRecordExtRange ##  extension replies
     delivered_events*: XRecordRange8 ##  delivered core and ext events
-    device_events*: XRecordRange8    ##  all core and ext device events
-    errors*: XRecordRange8           ##  core X and ext errors
-    client_started*: XBool           ##  connection setup reply
-    client_died*: XBool              ##  notice of client disconnect
+    device_events*: XRecordRange8 ##  all core and ext device events
+    errors*: XRecordRange8 ##  core X and ext errors
+    client_started*: XBool ##  connection setup reply
+    client_died*: XBool ##  notice of client disconnect
 
   PXRecordClientInfo* = ptr XRecordClientInfo
   XRecordClientInfo* {.final.} = object
@@ -86,37 +86,49 @@ type
     data*: cstring
     data_len*: culong ##  in 4-byte units
 
-  XRecordInterceptProc* = proc (a1: XPointer, a2: PXRecordInterceptData)
+  XRecordInterceptProc* = proc(a1: XPointer, a2: PXRecordInterceptData)
 
 {.push cdecl, importc, dynlib: libXtst.}
 
 proc XRecordIdBaseMask*(dpy: PDisplay): XID
 proc XRecordQueryVersion*(a1: PDisplay, a2, a3: ptr cint): Status
-proc XRecordCreateContext*(a1: PDisplay,
-                          a2: cint, a3: PXRecordClientSpec,
-                          a4: cint, a5: ptr UncheckedArray[XRecordRange],
-                          a6: cint): XRecordContext
-proc XRecordAllocRange*: PXRecordRange
-proc XRecordRegisterClients*(a1: PDisplay,
-                            a2: XRecordContext,
-                            a3: cint, a4: PXRecordClientSpec,
-                            a5: cint, a6: ptr UncheckedArray[XRecordRange],
-                            a7: cint): Status
-proc XRecordUnregisterClients*(a1: PDisplay,
-                              a2: XRecordContext,
-                              a3: PXRecordClientSpec,
-                              a4: cint): Status
-proc XRecordGetContext*(a1: PDisplay,
-                       a2: XRecordContext,
-                       a3: ptr UncheckedArray[XRecordState]): Status
+proc XRecordCreateContext*(
+  a1: PDisplay,
+  a2: cint,
+  a3: PXRecordClientSpec,
+  a4: cint,
+  a5: ptr UncheckedArray[XRecordRange],
+  a6: cint,
+): XRecordContext
+
+proc XRecordAllocRange*(): PXRecordRange
+proc XRecordRegisterClients*(
+  a1: PDisplay,
+  a2: XRecordContext,
+  a3: cint,
+  a4: PXRecordClientSpec,
+  a5: cint,
+  a6: ptr UncheckedArray[XRecordRange],
+  a7: cint,
+): Status
+
+proc XRecordUnregisterClients*(
+  a1: PDisplay, a2: XRecordContext, a3: PXRecordClientSpec, a4: cint
+): Status
+
+proc XRecordGetContext*(
+  a1: PDisplay, a2: XRecordContext, a3: ptr UncheckedArray[XRecordState]
+): Status
+
 proc XRecordFreeState*(a1: PXRecordState)
-proc XRecordEnableContext*(a1: PDisplay,
-                          a2: XRecordContext,
-                          a3: XRecordInterceptProc,
-                          a4: XPointer): Status
-proc XRecordEnableContextAsync*(a1: PDisplay, a2: XRecordContext,
-                               a3: XRecordInterceptProc,
-                               a4: XPointer): Status
+proc XRecordEnableContext*(
+  a1: PDisplay, a2: XRecordContext, a3: XRecordInterceptProc, a4: XPointer
+): Status
+
+proc XRecordEnableContextAsync*(
+  a1: PDisplay, a2: XRecordContext, a3: XRecordInterceptProc, a4: XPointer
+): Status
+
 proc XRecordProcessReplies*(a1: PDisplay)
 proc XRecordFreeData*(a1: PXRecordInterceptData)
 proc XRecordDisableContext*(a1: PDisplay, a2: XRecordContext): Status
@@ -128,14 +140,22 @@ proc XTestFakeKeyEvent*(a1: PDisplay, a2: cuint, a3: XBool, a4: culong): cint
 proc XTestFakeButtonEvent*(a1: PDisplay, a2: cuint, a3: XBool, a4: culong): cint
 proc XTestFakeMotionEvent*(a1: PDisplay, a2, a3, a4: cint, a5: culong): cint
 proc XTestFakeRelativeMotionEvent*(a1: PDisplay, a2, a3: cint, a4: culong): cint
-proc XTestFakeDeviceKeyEvent*(a1: PDisplay, a2: PXDevice, a3: cuint, a4: XBool,
-                             a5: ptr cint, a6: cint, a7: culong): cint
-proc XTestFakeDeviceButtonEvent*(a1: PDisplay, a2: PXDevice, a3: cuint, a4: XBool,
-                                a5: ptr cint, a6: cint, a7: culong): cint
-proc XTestFakeProximityEvent*(a1: PDisplay, a2: PXDevice, a3: XBool, a4: ptr cint,
-                             a5: cint, a6: culong): cint
-proc XTestFakeDeviceMotionEvent*(a1: PDisplay, a2: PXDevice, a3: XBool, a4: cint,
-                                a5: ptr cint, a6: cint, a7: culong): cint
+proc XTestFakeDeviceKeyEvent*(
+  a1: PDisplay, a2: PXDevice, a3: cuint, a4: XBool, a5: ptr cint, a6: cint, a7: culong
+): cint
+
+proc XTestFakeDeviceButtonEvent*(
+  a1: PDisplay, a2: PXDevice, a3: cuint, a4: XBool, a5: ptr cint, a6: cint, a7: culong
+): cint
+
+proc XTestFakeProximityEvent*(
+  a1: PDisplay, a2: PXDevice, a3: XBool, a4: ptr cint, a5: cint, a6: culong
+): cint
+
+proc XTestFakeDeviceMotionEvent*(
+  a1: PDisplay, a2: PXDevice, a3: XBool, a4: cint, a5: ptr cint, a6: cint, a7: culong
+): cint
+
 proc XTestGrabControl*(a1: PDisplay, a2: XBool): cint
 proc XTestSetGContextOfGC*(a1: GC, a2: GContext)
 proc XTestSetVisualIDOfVisual*(a1: PVisual, a2: VisualID)

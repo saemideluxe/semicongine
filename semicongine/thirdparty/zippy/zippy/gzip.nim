@@ -1,10 +1,7 @@
 import common, crc, inflate, internal
 
 proc uncompressGzip*(
-  dst: var string,
-  src: ptr UncheckedArray[uint8],
-  len: int,
-  trustSize = false
+    dst: var string, src: ptr UncheckedArray[uint8], len: int, trustSize = false
 ) =
   # Assumes the gzip src data only contains one file.
   if len < 18:

@@ -25,13 +25,19 @@ when defined(amd64):
   func mm_loadu_si128(p: pointer): M128i {.importc: "_mm_loadu_si128".}
   func mm_setzero_si128(): M128i {.importc: "_mm_setzero_si128".}
   func mm_set_epi32(a, b, c, d: int32 | uint32): M128i {.importc: "_mm_set_epi32".}
-  func mm_setr_epi8(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p: int8 | uint8): M128i {.importc: "_mm_setr_epi8".}
+  func mm_setr_epi8(
+    a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p: int8 | uint8
+  ): M128i {.importc: "_mm_setr_epi8".}
   func mm_set1_epi16(a: int16 | uint16): M128i {.importc: "_mm_set1_epi16".}
   func mm_add_epi32(a, b: M128i): M128i {.importc: "_mm_add_epi32".}
   func mm_sad_epu8(a, b: M128i): M128i {.importc: "_mm_sad_epu8".}
   func mm_madd_epi16(a, b: M128i): M128i {.importc: "_mm_madd_epi16".}
-  func mm_slli_epi32(a: M128i, imm8: int32 | uint32): M128i {.importc: "_mm_slli_epi32".}
-  func mm_shuffle_epi32(a: M128i, imm8: int32 | uint32): M128i {.importc: "_mm_shuffle_epi32".}
+  func mm_slli_epi32(
+    a: M128i, imm8: int32 | uint32
+  ): M128i {.importc: "_mm_slli_epi32".}
+  func mm_shuffle_epi32(
+    a: M128i, imm8: int32 | uint32
+  ): M128i {.importc: "_mm_shuffle_epi32".}
   func mm_cvtsi128_si32(a: M128i): int32 {.importc: "_mm_cvtsi128_si32".}
 
   {.pop.}
@@ -64,7 +70,8 @@ when defined(amd64):
     remaining -= (blocks * blockSize)
 
     let
-      tap1 = mm_setr_epi8(32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17)
+      tap1 =
+        mm_setr_epi8(32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17)
       tap2 = mm_setr_epi8(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
       zero = mm_setzero_si128()
       ones = mm_set1_epi16(1)

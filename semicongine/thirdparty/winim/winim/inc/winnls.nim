@@ -23,6 +23,7 @@ type
   GEOID* = LONG
   GEOTYPE* = DWORD
   GEOCLASS* = DWORD
+
 const
   MAX_DEFAULTCHAR* = 2
   MAX_LEADBYTES* = 12
@@ -31,6 +32,7 @@ type
     MaxCharSize*: UINT
     DefaultChar*: array[MAX_DEFAULTCHAR, BYTE]
     LeadByte*: array[MAX_LEADBYTES, BYTE]
+
   LPCPINFO* = ptr CPINFO
   CPINFOEXA* {.pure.} = object
     MaxCharSize*: UINT
@@ -39,6 +41,7 @@ type
     UnicodeDefaultChar*: WCHAR
     CodePage*: UINT
     CodePageName*: array[MAX_PATH, CHAR]
+
   LPCPINFOEXA* = ptr CPINFOEXA
   CPINFOEXW* {.pure.} = object
     MaxCharSize*: UINT
@@ -47,6 +50,7 @@ type
     UnicodeDefaultChar*: WCHAR
     CodePage*: UINT
     CodePageName*: array[MAX_PATH, WCHAR]
+
   LPCPINFOEXW* = ptr CPINFOEXW
   NUMBERFMTA* {.pure.} = object
     NumDigits*: UINT
@@ -55,6 +59,7 @@ type
     lpDecimalSep*: LPSTR
     lpThousandSep*: LPSTR
     NegativeOrder*: UINT
+
   LPNUMBERFMTA* = ptr NUMBERFMTA
   NUMBERFMTW* {.pure.} = object
     NumDigits*: UINT
@@ -63,6 +68,7 @@ type
     lpDecimalSep*: LPWSTR
     lpThousandSep*: LPWSTR
     NegativeOrder*: UINT
+
   LPNUMBERFMTW* = ptr NUMBERFMTW
   CURRENCYFMTA* {.pure.} = object
     NumDigits*: UINT
@@ -73,6 +79,7 @@ type
     NegativeOrder*: UINT
     PositiveOrder*: UINT
     lpCurrencySymbol*: LPSTR
+
   LPCURRENCYFMTA* = ptr CURRENCYFMTA
   CURRENCYFMTW* {.pure.} = object
     NumDigits*: UINT
@@ -83,6 +90,7 @@ type
     NegativeOrder*: UINT
     PositiveOrder*: UINT
     lpCurrencySymbol*: LPWSTR
+
   LPCURRENCYFMTW* = ptr CURRENCYFMTW
   NLSVERSIONINFO* {.pure.} = object
     dwNLSVersionInfoSize*: DWORD
@@ -90,6 +98,7 @@ type
     dwDefinedVersion*: DWORD
     dwEffectiveId*: DWORD
     guidCustomVersion*: GUID
+
   LPNLSVERSIONINFO* = ptr NLSVERSIONINFO
   NLSVERSIONINFOEX* {.pure.} = object
     dwNLSVersionInfoSize*: DWORD
@@ -97,6 +106,7 @@ type
     dwDefinedVersion*: DWORD
     dwEffectiveId*: DWORD
     guidCustomVersion*: GUID
+
   LPNLSVERSIONINFOEX* = ptr NLSVERSIONINFOEX
   FILEMUIINFO* {.pure.} = object
     dwSize*: DWORD
@@ -112,7 +122,9 @@ type
     dwTypeIDMUIOffset*: DWORD
     dwTypeNameMUIOffset*: DWORD
     abBuffer*: array[8, BYTE]
+
   PFILEMUIINFO* = ptr FILEMUIINFO
+
 const
   HIGH_SURROGATE_START* = 0xd800
   HIGH_SURROGATE_END* = 0xdbff
@@ -661,159 +673,783 @@ const
   LOCALE_NAME_INVARIANT* = ""
   LOCALE_NAME_SYSTEM_DEFAULT* = "!x-sys-default-locale"
 type
-  LANGUAGEGROUP_ENUMPROCA* = proc (P1: LGRPID, P2: LPSTR, P3: LPSTR, P4: DWORD, P5: LONG_PTR): WINBOOL {.stdcall.}
-  LANGGROUPLOCALE_ENUMPROCA* = proc (P1: LGRPID, P2: LCID, P3: LPSTR, P4: LONG_PTR): WINBOOL {.stdcall.}
-  UILANGUAGE_ENUMPROCA* = proc (P1: LPSTR, P2: LONG_PTR): WINBOOL {.stdcall.}
-  CODEPAGE_ENUMPROCA* = proc (P1: LPSTR): WINBOOL {.stdcall.}
-  DATEFMT_ENUMPROCA* = proc (P1: LPSTR): WINBOOL {.stdcall.}
-  DATEFMT_ENUMPROCEXA* = proc (P1: LPSTR, P2: CALID): WINBOOL {.stdcall.}
-  TIMEFMT_ENUMPROCA* = proc (P1: LPSTR): WINBOOL {.stdcall.}
-  CALINFO_ENUMPROCA* = proc (P1: LPSTR): WINBOOL {.stdcall.}
-  CALINFO_ENUMPROCEXA* = proc (P1: LPSTR, P2: CALID): WINBOOL {.stdcall.}
-  LOCALE_ENUMPROCA* = proc (P1: LPSTR): WINBOOL {.stdcall.}
-  LOCALE_ENUMPROCW* = proc (P1: LPWSTR): WINBOOL {.stdcall.}
-  LANGUAGEGROUP_ENUMPROCW* = proc (P1: LGRPID, P2: LPWSTR, P3: LPWSTR, P4: DWORD, P5: LONG_PTR): WINBOOL {.stdcall.}
-  LANGGROUPLOCALE_ENUMPROCW* = proc (P1: LGRPID, P2: LCID, P3: LPWSTR, P4: LONG_PTR): WINBOOL {.stdcall.}
-  UILANGUAGE_ENUMPROCW* = proc (P1: LPWSTR, P2: LONG_PTR): WINBOOL {.stdcall.}
-  CODEPAGE_ENUMPROCW* = proc (P1: LPWSTR): WINBOOL {.stdcall.}
-  DATEFMT_ENUMPROCW* = proc (P1: LPWSTR): WINBOOL {.stdcall.}
-  DATEFMT_ENUMPROCEXW* = proc (P1: LPWSTR, P2: CALID): WINBOOL {.stdcall.}
-  TIMEFMT_ENUMPROCW* = proc (P1: LPWSTR): WINBOOL {.stdcall.}
-  CALINFO_ENUMPROCW* = proc (P1: LPWSTR): WINBOOL {.stdcall.}
-  CALINFO_ENUMPROCEXW* = proc (P1: LPWSTR, P2: CALID): WINBOOL {.stdcall.}
-  GEO_ENUMPROC* = proc (P1: GEOID): WINBOOL {.stdcall.}
-  CALINFO_ENUMPROCEXEX* = proc (P1: LPWSTR, P2: CALID, P3: LPWSTR, P4: LPARAM): WINBOOL {.stdcall.}
-  DATEFMT_ENUMPROCEXEX* = proc (P1: LPWSTR, P2: CALID, P3: LPARAM): WINBOOL {.stdcall.}
-  TIMEFMT_ENUMPROCEX* = proc (P1: LPWSTR, P2: LPARAM): WINBOOL {.stdcall.}
-  LOCALE_ENUMPROCEX* = proc (P1: LPWSTR, P2: DWORD, P3: LPARAM): WINBOOL {.stdcall.}
-proc GetTimeFormatEx*(lpLocaleName: LPCWSTR, dwFlags: DWORD, lpTime: ptr SYSTEMTIME, lpFormat: LPCWSTR, lpTimeStr: LPWSTR, cchTime: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetDateFormatEx*(lpLocaleName: LPCWSTR, dwFlags: DWORD, lpDate: ptr SYSTEMTIME, lpFormat: LPCWSTR, lpDateStr: LPWSTR, cchDate: int32, lpCalendar: LPCWSTR): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetDateFormatA*(Locale: LCID, dwFlags: DWORD, lpDate: ptr SYSTEMTIME, lpFormat: LPCSTR, lpDateStr: LPSTR, cchDate: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetDateFormatW*(Locale: LCID, dwFlags: DWORD, lpDate: ptr SYSTEMTIME, lpFormat: LPCWSTR, lpDateStr: LPWSTR, cchDate: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetTimeFormatA*(Locale: LCID, dwFlags: DWORD, lpTime: ptr SYSTEMTIME, lpFormat: LPCSTR, lpTimeStr: LPSTR, cchTime: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetTimeFormatW*(Locale: LCID, dwFlags: DWORD, lpTime: ptr SYSTEMTIME, lpFormat: LPCWSTR, lpTimeStr: LPWSTR, cchTime: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc CompareStringW*(Locale: LCID, dwCmpFlags: DWORD, lpString1: PCNZWCH, cchCount1: int32, lpString2: PCNZWCH, cchCount2: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc FoldStringW*(dwMapFlags: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpDestStr: LPWSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetStringTypeExW*(Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpCharType: LPWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc CompareStringEx*(lpLocaleName: LPCWSTR, dwCmpFlags: DWORD, lpString1: LPCWCH, cchCount1: int32, lpString2: LPCWCH, cchCount2: int32, lpVersionInformation: LPNLSVERSIONINFO, lpReserved: LPVOID, lParam: LPARAM): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc CompareStringOrdinal*(lpString1: LPCWCH, cchCount1: int32, lpString2: LPCWCH, cchCount2: int32, bIgnoreCase: WINBOOL): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetStringTypeW*(dwInfoType: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpCharType: LPWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc MultiByteToWideChar*(CodePage: UINT, dwFlags: DWORD, lpMultiByteStr: LPCCH, cbMultiByte: int32, lpWideCharStr: LPWSTR, cchWideChar: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc WideCharToMultiByte*(CodePage: UINT, dwFlags: DWORD, lpWideCharStr: LPCWCH, cchWideChar: int32, lpMultiByteStr: LPSTR, cbMultiByte: int32, lpDefaultChar: LPCCH, lpUsedDefaultChar: LPBOOL): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsValidCodePage*(CodePage: UINT): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+  LANGUAGEGROUP_ENUMPROCA* =
+    proc(P1: LGRPID, P2: LPSTR, P3: LPSTR, P4: DWORD, P5: LONG_PTR): WINBOOL {.stdcall.}
+  LANGGROUPLOCALE_ENUMPROCA* =
+    proc(P1: LGRPID, P2: LCID, P3: LPSTR, P4: LONG_PTR): WINBOOL {.stdcall.}
+  UILANGUAGE_ENUMPROCA* = proc(P1: LPSTR, P2: LONG_PTR): WINBOOL {.stdcall.}
+  CODEPAGE_ENUMPROCA* = proc(P1: LPSTR): WINBOOL {.stdcall.}
+  DATEFMT_ENUMPROCA* = proc(P1: LPSTR): WINBOOL {.stdcall.}
+  DATEFMT_ENUMPROCEXA* = proc(P1: LPSTR, P2: CALID): WINBOOL {.stdcall.}
+  TIMEFMT_ENUMPROCA* = proc(P1: LPSTR): WINBOOL {.stdcall.}
+  CALINFO_ENUMPROCA* = proc(P1: LPSTR): WINBOOL {.stdcall.}
+  CALINFO_ENUMPROCEXA* = proc(P1: LPSTR, P2: CALID): WINBOOL {.stdcall.}
+  LOCALE_ENUMPROCA* = proc(P1: LPSTR): WINBOOL {.stdcall.}
+  LOCALE_ENUMPROCW* = proc(P1: LPWSTR): WINBOOL {.stdcall.}
+  LANGUAGEGROUP_ENUMPROCW* = proc(
+    P1: LGRPID, P2: LPWSTR, P3: LPWSTR, P4: DWORD, P5: LONG_PTR
+  ): WINBOOL {.stdcall.}
+  LANGGROUPLOCALE_ENUMPROCW* =
+    proc(P1: LGRPID, P2: LCID, P3: LPWSTR, P4: LONG_PTR): WINBOOL {.stdcall.}
+  UILANGUAGE_ENUMPROCW* = proc(P1: LPWSTR, P2: LONG_PTR): WINBOOL {.stdcall.}
+  CODEPAGE_ENUMPROCW* = proc(P1: LPWSTR): WINBOOL {.stdcall.}
+  DATEFMT_ENUMPROCW* = proc(P1: LPWSTR): WINBOOL {.stdcall.}
+  DATEFMT_ENUMPROCEXW* = proc(P1: LPWSTR, P2: CALID): WINBOOL {.stdcall.}
+  TIMEFMT_ENUMPROCW* = proc(P1: LPWSTR): WINBOOL {.stdcall.}
+  CALINFO_ENUMPROCW* = proc(P1: LPWSTR): WINBOOL {.stdcall.}
+  CALINFO_ENUMPROCEXW* = proc(P1: LPWSTR, P2: CALID): WINBOOL {.stdcall.}
+  GEO_ENUMPROC* = proc(P1: GEOID): WINBOOL {.stdcall.}
+  CALINFO_ENUMPROCEXEX* =
+    proc(P1: LPWSTR, P2: CALID, P3: LPWSTR, P4: LPARAM): WINBOOL {.stdcall.}
+  DATEFMT_ENUMPROCEXEX* = proc(P1: LPWSTR, P2: CALID, P3: LPARAM): WINBOOL {.stdcall.}
+  TIMEFMT_ENUMPROCEX* = proc(P1: LPWSTR, P2: LPARAM): WINBOOL {.stdcall.}
+  LOCALE_ENUMPROCEX* = proc(P1: LPWSTR, P2: DWORD, P3: LPARAM): WINBOOL {.stdcall.}
+
+proc GetTimeFormatEx*(
+  lpLocaleName: LPCWSTR,
+  dwFlags: DWORD,
+  lpTime: ptr SYSTEMTIME,
+  lpFormat: LPCWSTR,
+  lpTimeStr: LPWSTR,
+  cchTime: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetDateFormatEx*(
+  lpLocaleName: LPCWSTR,
+  dwFlags: DWORD,
+  lpDate: ptr SYSTEMTIME,
+  lpFormat: LPCWSTR,
+  lpDateStr: LPWSTR,
+  cchDate: int32,
+  lpCalendar: LPCWSTR,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetDateFormatA*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpDate: ptr SYSTEMTIME,
+  lpFormat: LPCSTR,
+  lpDateStr: LPSTR,
+  cchDate: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetDateFormatW*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpDate: ptr SYSTEMTIME,
+  lpFormat: LPCWSTR,
+  lpDateStr: LPWSTR,
+  cchDate: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetTimeFormatA*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpTime: ptr SYSTEMTIME,
+  lpFormat: LPCSTR,
+  lpTimeStr: LPSTR,
+  cchTime: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetTimeFormatW*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpTime: ptr SYSTEMTIME,
+  lpFormat: LPCWSTR,
+  lpTimeStr: LPWSTR,
+  cchTime: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc CompareStringW*(
+  Locale: LCID,
+  dwCmpFlags: DWORD,
+  lpString1: PCNZWCH,
+  cchCount1: int32,
+  lpString2: PCNZWCH,
+  cchCount2: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc FoldStringW*(
+  dwMapFlags: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpDestStr: LPWSTR, cchDest: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetStringTypeExW*(
+  Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpCharType: LPWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc CompareStringEx*(
+  lpLocaleName: LPCWSTR,
+  dwCmpFlags: DWORD,
+  lpString1: LPCWCH,
+  cchCount1: int32,
+  lpString2: LPCWCH,
+  cchCount2: int32,
+  lpVersionInformation: LPNLSVERSIONINFO,
+  lpReserved: LPVOID,
+  lParam: LPARAM,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc CompareStringOrdinal*(
+  lpString1: LPCWCH,
+  cchCount1: int32,
+  lpString2: LPCWCH,
+  cchCount2: int32,
+  bIgnoreCase: WINBOOL,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetStringTypeW*(
+  dwInfoType: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpCharType: LPWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc MultiByteToWideChar*(
+  CodePage: UINT,
+  dwFlags: DWORD,
+  lpMultiByteStr: LPCCH,
+  cbMultiByte: int32,
+  lpWideCharStr: LPWSTR,
+  cchWideChar: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc WideCharToMultiByte*(
+  CodePage: UINT,
+  dwFlags: DWORD,
+  lpWideCharStr: LPCWCH,
+  cchWideChar: int32,
+  lpMultiByteStr: LPSTR,
+  cbMultiByte: int32,
+  lpDefaultChar: LPCCH,
+  lpUsedDefaultChar: LPBOOL,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsValidCodePage*(
+  CodePage: UINT
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
 proc GetACP*(): UINT {.winapi, stdcall, dynlib: "kernel32", importc.}
 proc GetOEMCP*(): UINT {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc CompareStringA*(Locale: LCID, dwCmpFlags: DWORD, lpString1: PCNZCH, cchCount1: int32, lpString2: PCNZCH, cchCount2: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc LCMapStringW*(Locale: LCID, dwMapFlags: DWORD, lpSrcStr: LPCWSTR, cchSrc: int32, lpDestStr: LPWSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc LCMapStringA*(Locale: LCID, dwMapFlags: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpDestStr: LPSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetLocaleInfoW*(Locale: LCID, LCType: LCTYPE, lpLCData: LPWSTR, cchData: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetLocaleInfoA*(Locale: LCID, LCType: LCTYPE, lpLCData: LPSTR, cchData: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsDBCSLeadByte*(TestChar: BYTE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsDBCSLeadByteEx*(CodePage: UINT, TestChar: BYTE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetNumberFormatA*(Locale: LCID, dwFlags: DWORD, lpValue: LPCSTR, lpFormat: ptr NUMBERFMTA, lpNumberStr: LPSTR, cchNumber: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetNumberFormatW*(Locale: LCID, dwFlags: DWORD, lpValue: LPCWSTR, lpFormat: ptr NUMBERFMTW, lpNumberStr: LPWSTR, cchNumber: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCurrencyFormatA*(Locale: LCID, dwFlags: DWORD, lpValue: LPCSTR, lpFormat: ptr CURRENCYFMTA, lpCurrencyStr: LPSTR, cchCurrency: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCurrencyFormatW*(Locale: LCID, dwFlags: DWORD, lpValue: LPCWSTR, lpFormat: ptr CURRENCYFMTW, lpCurrencyStr: LPWSTR, cchCurrency: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumCalendarInfoA*(lpCalInfoEnumProc: CALINFO_ENUMPROCA, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumCalendarInfoW*(lpCalInfoEnumProc: CALINFO_ENUMPROCW, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumCalendarInfoExA*(lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXA, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumCalendarInfoExW*(lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXW, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumTimeFormatsA*(lpTimeFmtEnumProc: TIMEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumTimeFormatsW*(lpTimeFmtEnumProc: TIMEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumDateFormatsA*(lpDateFmtEnumProc: DATEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumDateFormatsW*(lpDateFmtEnumProc: DATEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumDateFormatsExA*(lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXA, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumDateFormatsExW*(lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXW, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsValidLanguageGroup*(LanguageGroup: LGRPID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetNLSVersion*(Function: NLS_FUNCTION, Locale: LCID, lpVersionInformation: LPNLSVERSIONINFO): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsNLSDefinedString*(Function: NLS_FUNCTION, dwFlags: DWORD, lpVersionInformation: LPNLSVERSIONINFO, lpString: LPCWSTR, cchStr: INT): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsValidLocale*(Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetLocaleInfoA*(Locale: LCID, LCType: LCTYPE, lpLCData: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetLocaleInfoW*(Locale: LCID, LCType: LCTYPE, lpLCData: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCalendarInfoA*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPSTR, cchData: int32, lpValue: LPDWORD): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCalendarInfoW*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPWSTR, cchData: int32, lpValue: LPDWORD): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetCalendarInfoA*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetCalendarInfoW*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetDurationFormat*(Locale: LCID, dwFlags: DWORD, lpDuration: ptr SYSTEMTIME, ullDuration: ULONGLONG, lpFormat: LPCWSTR, lpDurationStr: LPWSTR, cchDuration: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc FindNLSString*(Locale: LCID, dwFindNLSStringFlags: DWORD, lpStringSource: LPCWSTR, cchSource: int32, lpStringValue: LPCWSTR, cchValue: int32, pcchFound: LPINT): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetGeoInfoA*(Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPSTR, cchData: int32, LangId: LANGID): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetGeoInfoW*(Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPWSTR, cchData: int32, LangId: LANGID): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemGeoID*(GeoClass: GEOCLASS, ParentGeoId: GEOID, lpGeoEnumProc: GEO_ENUMPROC): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetUserGeoID*(GeoClass: GEOCLASS): GEOID {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCPInfo*(CodePage: UINT, lpCPInfo: LPCPINFO): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCPInfoExA*(CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXA): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCPInfoExW*(CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXW): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc LCIDToLocaleName*(Locale: LCID, lpName: LPWSTR, cchName: int32, dwFlags: DWORD): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc LocaleNameToLCID*(lpName: LPCWSTR, dwFlags: DWORD): LCID {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetUserGeoID*(GeoId: GEOID): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc ConvertDefaultLocale*(Locale: LCID): LCID {.winapi, stdcall, dynlib: "kernel32", importc.}
+proc CompareStringA*(
+  Locale: LCID,
+  dwCmpFlags: DWORD,
+  lpString1: PCNZCH,
+  cchCount1: int32,
+  lpString2: PCNZCH,
+  cchCount2: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc LCMapStringW*(
+  Locale: LCID,
+  dwMapFlags: DWORD,
+  lpSrcStr: LPCWSTR,
+  cchSrc: int32,
+  lpDestStr: LPWSTR,
+  cchDest: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc LCMapStringA*(
+  Locale: LCID,
+  dwMapFlags: DWORD,
+  lpSrcStr: LPCSTR,
+  cchSrc: int32,
+  lpDestStr: LPSTR,
+  cchDest: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetLocaleInfoW*(
+  Locale: LCID, LCType: LCTYPE, lpLCData: LPWSTR, cchData: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetLocaleInfoA*(
+  Locale: LCID, LCType: LCTYPE, lpLCData: LPSTR, cchData: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsDBCSLeadByte*(
+  TestChar: BYTE
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsDBCSLeadByteEx*(
+  CodePage: UINT, TestChar: BYTE
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetNumberFormatA*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpValue: LPCSTR,
+  lpFormat: ptr NUMBERFMTA,
+  lpNumberStr: LPSTR,
+  cchNumber: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetNumberFormatW*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpValue: LPCWSTR,
+  lpFormat: ptr NUMBERFMTW,
+  lpNumberStr: LPWSTR,
+  cchNumber: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCurrencyFormatA*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpValue: LPCSTR,
+  lpFormat: ptr CURRENCYFMTA,
+  lpCurrencyStr: LPSTR,
+  cchCurrency: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCurrencyFormatW*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpValue: LPCWSTR,
+  lpFormat: ptr CURRENCYFMTW,
+  lpCurrencyStr: LPWSTR,
+  cchCurrency: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumCalendarInfoA*(
+  lpCalInfoEnumProc: CALINFO_ENUMPROCA, Locale: LCID, Calendar: CALID, CalType: CALTYPE
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumCalendarInfoW*(
+  lpCalInfoEnumProc: CALINFO_ENUMPROCW, Locale: LCID, Calendar: CALID, CalType: CALTYPE
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumCalendarInfoExA*(
+  lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXA,
+  Locale: LCID,
+  Calendar: CALID,
+  CalType: CALTYPE,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumCalendarInfoExW*(
+  lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXW,
+  Locale: LCID,
+  Calendar: CALID,
+  CalType: CALTYPE,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumTimeFormatsA*(
+  lpTimeFmtEnumProc: TIMEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumTimeFormatsW*(
+  lpTimeFmtEnumProc: TIMEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumDateFormatsA*(
+  lpDateFmtEnumProc: DATEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumDateFormatsW*(
+  lpDateFmtEnumProc: DATEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumDateFormatsExA*(
+  lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXA, Locale: LCID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumDateFormatsExW*(
+  lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXW, Locale: LCID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsValidLanguageGroup*(
+  LanguageGroup: LGRPID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetNLSVersion*(
+  Function: NLS_FUNCTION, Locale: LCID, lpVersionInformation: LPNLSVERSIONINFO
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsNLSDefinedString*(
+  Function: NLS_FUNCTION,
+  dwFlags: DWORD,
+  lpVersionInformation: LPNLSVERSIONINFO,
+  lpString: LPCWSTR,
+  cchStr: INT,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsValidLocale*(
+  Locale: LCID, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc SetLocaleInfoA*(
+  Locale: LCID, LCType: LCTYPE, lpLCData: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc SetLocaleInfoW*(
+  Locale: LCID, LCType: LCTYPE, lpLCData: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCalendarInfoA*(
+  Locale: LCID,
+  Calendar: CALID,
+  CalType: CALTYPE,
+  lpCalData: LPSTR,
+  cchData: int32,
+  lpValue: LPDWORD,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCalendarInfoW*(
+  Locale: LCID,
+  Calendar: CALID,
+  CalType: CALTYPE,
+  lpCalData: LPWSTR,
+  cchData: int32,
+  lpValue: LPDWORD,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc SetCalendarInfoA*(
+  Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc SetCalendarInfoW*(
+  Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetDurationFormat*(
+  Locale: LCID,
+  dwFlags: DWORD,
+  lpDuration: ptr SYSTEMTIME,
+  ullDuration: ULONGLONG,
+  lpFormat: LPCWSTR,
+  lpDurationStr: LPWSTR,
+  cchDuration: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc FindNLSString*(
+  Locale: LCID,
+  dwFindNLSStringFlags: DWORD,
+  lpStringSource: LPCWSTR,
+  cchSource: int32,
+  lpStringValue: LPCWSTR,
+  cchValue: int32,
+  pcchFound: LPINT,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetGeoInfoA*(
+  Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPSTR, cchData: int32, LangId: LANGID
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetGeoInfoW*(
+  Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPWSTR, cchData: int32, LangId: LANGID
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemGeoID*(
+  GeoClass: GEOCLASS, ParentGeoId: GEOID, lpGeoEnumProc: GEO_ENUMPROC
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetUserGeoID*(
+  GeoClass: GEOCLASS
+): GEOID {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCPInfo*(
+  CodePage: UINT, lpCPInfo: LPCPINFO
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCPInfoExA*(
+  CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXA
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCPInfoExW*(
+  CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXW
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc LCIDToLocaleName*(
+  Locale: LCID, lpName: LPWSTR, cchName: int32, dwFlags: DWORD
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc LocaleNameToLCID*(
+  lpName: LPCWSTR, dwFlags: DWORD
+): LCID {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc SetUserGeoID*(
+  GeoId: GEOID
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc ConvertDefaultLocale*(
+  Locale: LCID
+): LCID {.winapi, stdcall, dynlib: "kernel32", importc.}
+
 proc GetThreadLocale*(): LCID {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetThreadLocale*(Locale: LCID): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetSystemDefaultUILanguage*(): LANGID {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetUserDefaultUILanguage*(): LANGID {.winapi, stdcall, dynlib: "kernel32", importc.}
+proc SetThreadLocale*(
+  Locale: LCID
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetSystemDefaultUILanguage*(): LANGID {.
+  winapi, stdcall, dynlib: "kernel32", importc
+.}
+
+proc GetUserDefaultUILanguage*(): LANGID {.
+  winapi, stdcall, dynlib: "kernel32", importc
+.}
+
 proc GetSystemDefaultLangID*(): LANGID {.winapi, stdcall, dynlib: "kernel32", importc.}
 proc GetUserDefaultLangID*(): LANGID {.winapi, stdcall, dynlib: "kernel32", importc.}
 proc GetSystemDefaultLCID*(): LCID {.winapi, stdcall, dynlib: "kernel32", importc.}
 proc GetUserDefaultLCID*(): LCID {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetThreadUILanguage*(LangId: LANGID): LANGID {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetStringTypeExA*(Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpCharType: LPWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetStringTypeA*(Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpCharType: LPWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc FoldStringA*(dwMapFlags: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpDestStr: LPSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemLocalesA*(lpLocaleEnumProc: LOCALE_ENUMPROCA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemLocalesW*(lpLocaleEnumProc: LOCALE_ENUMPROCW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemLanguageGroupsA*(lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemLanguageGroupsW*(lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumLanguageGroupLocalesA*(lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCA, LanguageGroup: LGRPID, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumLanguageGroupLocalesW*(lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCW, LanguageGroup: LGRPID, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumUILanguagesA*(lpUILanguageEnumProc: UILANGUAGE_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumUILanguagesW*(lpUILanguageEnumProc: UILANGUAGE_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+proc SetThreadUILanguage*(
+  LangId: LANGID
+): LANGID {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetStringTypeExA*(
+  Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpCharType: LPWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetStringTypeA*(
+  Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpCharType: LPWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc FoldStringA*(
+  dwMapFlags: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpDestStr: LPSTR, cchDest: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemLocalesA*(
+  lpLocaleEnumProc: LOCALE_ENUMPROCA, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemLocalesW*(
+  lpLocaleEnumProc: LOCALE_ENUMPROCW, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemLanguageGroupsA*(
+  lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemLanguageGroupsW*(
+  lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumLanguageGroupLocalesA*(
+  lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCA,
+  LanguageGroup: LGRPID,
+  dwFlags: DWORD,
+  lParam: LONG_PTR,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumLanguageGroupLocalesW*(
+  lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCW,
+  LanguageGroup: LGRPID,
+  dwFlags: DWORD,
+  lParam: LONG_PTR,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumUILanguagesA*(
+  lpUILanguageEnumProc: UILANGUAGE_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumUILanguagesW*(
+  lpUILanguageEnumProc: UILANGUAGE_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
 proc GetThreadUILanguage*(): LANGID {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetProcessPreferredUILanguages*(dwFlags: DWORD, pulNumLanguages: PULONG, pwszLanguagesBuffer: PZZWSTR, pcchLanguagesBuffer: PULONG): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetProcessPreferredUILanguages*(dwFlags: DWORD, pwszLanguagesBuffer: PCZZWSTR, pulNumLanguages: PULONG): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetUserPreferredUILanguages*(dwFlags: DWORD, pulNumLanguages: PULONG, pwszLanguagesBuffer: PZZWSTR, pcchLanguagesBuffer: PULONG): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetSystemPreferredUILanguages*(dwFlags: DWORD, pulNumLanguages: PULONG, pwszLanguagesBuffer: PZZWSTR, pcchLanguagesBuffer: PULONG): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetThreadPreferredUILanguages*(dwFlags: DWORD, pulNumLanguages: PULONG, pwszLanguagesBuffer: PZZWSTR, pcchLanguagesBuffer: PULONG): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc SetThreadPreferredUILanguages*(dwFlags: DWORD, pwszLanguagesBuffer: PCZZWSTR, pulNumLanguages: PULONG): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetFileMUIInfo*(dwFlags: DWORD, pcwszFilePath: PCWSTR, pFileMUIInfo: PFILEMUIINFO, pcbFileMUIInfo: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetFileMUIPath*(dwFlags: DWORD, pcwszFilePath: PCWSTR, pwszLanguage: PWSTR, pcchLanguage: PULONG, pwszFileMUIPath: PWSTR, pcchFileMUIPath: PULONG, pululEnumerator: PULONGLONG): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetUILanguageInfo*(dwFlags: DWORD, pwmszLanguage: PCZZWSTR, pwszFallbackLanguages: PZZWSTR, pcchFallbackLanguages: PDWORD, pAttributes: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc NotifyUILanguageChange*(dwFlags: DWORD, pcwstrNewLanguage: PCWSTR, pcwstrPreviousLanguage: PCWSTR, dwReserved: DWORD, pdwStatusRtrn: PDWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemCodePagesA*(lpCodePageEnumProc: CODEPAGE_ENUMPROCA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemCodePagesW*(lpCodePageEnumProc: CODEPAGE_ENUMPROCW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc NormalizeString*(NormForm: NORM_FORM, lpSrcString: LPCWSTR, cwSrcLength: int32, lpDstString: LPWSTR, cwDstLength: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsNormalizedString*(NormForm: NORM_FORM, lpString: LPCWSTR, cwLength: int32): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IdnToAscii*(dwFlags: DWORD, lpUnicodeCharStr: LPCWSTR, cchUnicodeChar: int32, lpASCIICharStr: LPWSTR, cchASCIIChar: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IdnToNameprepUnicode*(dwFlags: DWORD, lpUnicodeCharStr: LPCWSTR, cchUnicodeChar: int32, lpNameprepCharStr: LPWSTR, cchNameprepChar: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IdnToUnicode*(dwFlags: DWORD, lpASCIICharStr: LPCWSTR, cchASCIIChar: int32, lpUnicodeCharStr: LPWSTR, cchUnicodeChar: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc VerifyScripts*(dwFlags: DWORD, lpLocaleScripts: LPCWSTR, cchLocaleScripts: int32, lpTestScripts: LPCWSTR, cchTestScripts: int32): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetStringScripts*(dwFlags: DWORD, lpString: LPCWSTR, cchString: int32, lpScripts: LPWSTR, cchScripts: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetLocaleInfoEx*(lpLocaleName: LPCWSTR, LCType: LCTYPE, lpLCData: LPWSTR, cchData: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCalendarInfoEx*(lpLocaleName: LPCWSTR, Calendar: CALID, lpReserved: LPCWSTR, CalType: CALTYPE, lpCalData: LPWSTR, cchData: int32, lpValue: LPDWORD): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetDurationFormatEx*(lpLocaleName: LPCWSTR, dwFlags: DWORD, lpDuration: ptr SYSTEMTIME, ullDuration: ULONGLONG, lpFormat: LPCWSTR, lpDurationStr: LPWSTR, cchDuration: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetNumberFormatEx*(lpLocaleName: LPCWSTR, dwFlags: DWORD, lpValue: LPCWSTR, lpFormat: ptr NUMBERFMTW, lpNumberStr: LPWSTR, cchNumber: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetCurrencyFormatEx*(lpLocaleName: LPCWSTR, dwFlags: DWORD, lpValue: LPCWSTR, lpFormat: ptr CURRENCYFMTW, lpCurrencyStr: LPWSTR, cchCurrency: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetUserDefaultLocaleName*(lpLocaleName: LPWSTR, cchLocaleName: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetSystemDefaultLocaleName*(lpLocaleName: LPWSTR, cchLocaleName: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc GetNLSVersionEx*(function: NLS_FUNCTION, lpLocaleName: LPCWSTR, lpVersionInformation: LPNLSVERSIONINFOEX): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc FindNLSStringEx*(lpLocaleName: LPCWSTR, dwFindNLSStringFlags: DWORD, lpStringSource: LPCWSTR, cchSource: int32, lpStringValue: LPCWSTR, cchValue: int32, pcchFound: LPINT, lpVersionInformation: LPNLSVERSIONINFO, lpReserved: LPVOID, sortHandle: LPARAM): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc LCMapStringEx*(lpLocaleName: LPCWSTR, dwMapFlags: DWORD, lpSrcStr: LPCWSTR, cchSrc: int32, lpDestStr: LPWSTR, cchDest: int32, lpVersionInformation: LPNLSVERSIONINFO, lpReserved: LPVOID, sortHandle: LPARAM): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsValidLocaleName*(lpLocaleName: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumCalendarInfoExEx*(pCalInfoEnumProcExEx: CALINFO_ENUMPROCEXEX, lpLocaleName: LPCWSTR, Calendar: CALID, lpReserved: LPCWSTR, CalType: CALTYPE, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumDateFormatsExEx*(lpDateFmtEnumProcExEx: DATEFMT_ENUMPROCEXEX, lpLocaleName: LPCWSTR, dwFlags: DWORD, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumTimeFormatsEx*(lpTimeFmtEnumProcEx: TIMEFMT_ENUMPROCEX, lpLocaleName: LPCWSTR, dwFlags: DWORD, lParam: LPARAM): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc EnumSystemLocalesEx*(lpLocaleEnumProcEx: LOCALE_ENUMPROCEX, dwFlags: DWORD, lParam: LPARAM, lpReserved: LPVOID): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc ResolveLocaleName*(lpNameToResolve: LPCWSTR, lpLocaleName: LPWSTR, cchLocaleName: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
-proc IsValidNLSVersion*(function: NLS_FUNCTION, lpLocaleName: LPCWSTR, lpVersionInformation: LPNLSVERSIONINFOEX): DWORD {.winapi, stdcall, dynlib: "kernel32", importc.}
-template IS_HIGH_SURROGATE*(wch: untyped): bool = (wch >= HIGH_SURROGATE_START) and (wch <= HIGH_SURROGATE_END)
-template IS_LOW_SURROGATE*(wch: untyped): bool = (wch >= LOW_SURROGATE_START) and (wch <= LOW_SURROGATE_END)
-template IS_SURROGATE_PAIR*(hs: untyped, ls: untyped): bool = IS_HIGH_SURROGATE(hs) and IS_LOW_SURROGATE(ls)
-template FILEMUIINFO_GET_CULTURE*(pInfo: PFILEMUIINFO): LPWSTR = cast[LPWSTR](if pInfo.dwLanguageNameOffset > 0: cast[int](pInfo) + pInfo.dwLanguageNameOffset else: 0)
-template FILEMUIINFO_GET_MAIN_TYPEIDS*(pInfo: PFILEMUIINFO): PDWORD = cast[PDWORD](if pInfo.dwTypeIDMainOffset > 0: cast[int](pInfo) + pInfo.dwTypeIDMainOffset else: 0)
-template FILEMUIINFO_GET_MAIN_TYPEID*(pInfo: PFILEMUIINFO, iType: DWORD): DWORD = (if (iType < pInfo.dwTypeIDMainSize) and (pInfo.dwTypeIDMainOffset > 0): (cast[PDWORD](cast[int](pInfo) + pInfo.dwTypeIDMainOffset + iType * sizeof(DWORD)))[] else: 0)
-template FILEMUIINFO_GET_MAIN_TYPENAMES*(pInfo: PFILEMUIINFO): LPWSTR = cast[LPWSTR](if pInfo.dwTypeNameMainOffset > 0: cast[int](pInfo) + pInfo.dwTypeNameMainOffset else: 0)
-template FILEMUIINFO_GET_MUI_TYPEIDS*(pInfo: PFILEMUIINFO): PDWORD = cast[PDWORD](if pInfo.dwTypeIDMUIOffset > 0: cast[int](pInfo) + pInfo.dwTypeIDMUIOffset else: 0)
-template FILEMUIINFO_GET_MUI_TYPEID*(pInfo: PFILEMUIINFO, iType): DWORD = (if (iType < pInfo.dwTypeIDMUISize) and (pInfo.dwTypeIDMUIOffset > 0): (cast[PDWORD](cast[int](pInfo) + pInfo.dwTypeIDMUIOffset + iType * sizeof(DWORD)))[] else: 0)
-template FILEMUIINFO_GET_MUI_TYPENAMES*(pInfo: PFILEMUIINFO): LPWSTR = cast[LPWSTR](if pInfo.dwTypeNameMUIOffset > 0: cast[int](pInfo) + pInfo.dwTypeNameMUIOffset else: 0)
+proc GetProcessPreferredUILanguages*(
+  dwFlags: DWORD,
+  pulNumLanguages: PULONG,
+  pwszLanguagesBuffer: PZZWSTR,
+  pcchLanguagesBuffer: PULONG,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc SetProcessPreferredUILanguages*(
+  dwFlags: DWORD, pwszLanguagesBuffer: PCZZWSTR, pulNumLanguages: PULONG
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetUserPreferredUILanguages*(
+  dwFlags: DWORD,
+  pulNumLanguages: PULONG,
+  pwszLanguagesBuffer: PZZWSTR,
+  pcchLanguagesBuffer: PULONG,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetSystemPreferredUILanguages*(
+  dwFlags: DWORD,
+  pulNumLanguages: PULONG,
+  pwszLanguagesBuffer: PZZWSTR,
+  pcchLanguagesBuffer: PULONG,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetThreadPreferredUILanguages*(
+  dwFlags: DWORD,
+  pulNumLanguages: PULONG,
+  pwszLanguagesBuffer: PZZWSTR,
+  pcchLanguagesBuffer: PULONG,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc SetThreadPreferredUILanguages*(
+  dwFlags: DWORD, pwszLanguagesBuffer: PCZZWSTR, pulNumLanguages: PULONG
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetFileMUIInfo*(
+  dwFlags: DWORD,
+  pcwszFilePath: PCWSTR,
+  pFileMUIInfo: PFILEMUIINFO,
+  pcbFileMUIInfo: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetFileMUIPath*(
+  dwFlags: DWORD,
+  pcwszFilePath: PCWSTR,
+  pwszLanguage: PWSTR,
+  pcchLanguage: PULONG,
+  pwszFileMUIPath: PWSTR,
+  pcchFileMUIPath: PULONG,
+  pululEnumerator: PULONGLONG,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetUILanguageInfo*(
+  dwFlags: DWORD,
+  pwmszLanguage: PCZZWSTR,
+  pwszFallbackLanguages: PZZWSTR,
+  pcchFallbackLanguages: PDWORD,
+  pAttributes: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc NotifyUILanguageChange*(
+  dwFlags: DWORD,
+  pcwstrNewLanguage: PCWSTR,
+  pcwstrPreviousLanguage: PCWSTR,
+  dwReserved: DWORD,
+  pdwStatusRtrn: PDWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemCodePagesA*(
+  lpCodePageEnumProc: CODEPAGE_ENUMPROCA, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemCodePagesW*(
+  lpCodePageEnumProc: CODEPAGE_ENUMPROCW, dwFlags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc NormalizeString*(
+  NormForm: NORM_FORM,
+  lpSrcString: LPCWSTR,
+  cwSrcLength: int32,
+  lpDstString: LPWSTR,
+  cwDstLength: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsNormalizedString*(
+  NormForm: NORM_FORM, lpString: LPCWSTR, cwLength: int32
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IdnToAscii*(
+  dwFlags: DWORD,
+  lpUnicodeCharStr: LPCWSTR,
+  cchUnicodeChar: int32,
+  lpASCIICharStr: LPWSTR,
+  cchASCIIChar: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IdnToNameprepUnicode*(
+  dwFlags: DWORD,
+  lpUnicodeCharStr: LPCWSTR,
+  cchUnicodeChar: int32,
+  lpNameprepCharStr: LPWSTR,
+  cchNameprepChar: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IdnToUnicode*(
+  dwFlags: DWORD,
+  lpASCIICharStr: LPCWSTR,
+  cchASCIIChar: int32,
+  lpUnicodeCharStr: LPWSTR,
+  cchUnicodeChar: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc VerifyScripts*(
+  dwFlags: DWORD,
+  lpLocaleScripts: LPCWSTR,
+  cchLocaleScripts: int32,
+  lpTestScripts: LPCWSTR,
+  cchTestScripts: int32,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetStringScripts*(
+  dwFlags: DWORD,
+  lpString: LPCWSTR,
+  cchString: int32,
+  lpScripts: LPWSTR,
+  cchScripts: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetLocaleInfoEx*(
+  lpLocaleName: LPCWSTR, LCType: LCTYPE, lpLCData: LPWSTR, cchData: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCalendarInfoEx*(
+  lpLocaleName: LPCWSTR,
+  Calendar: CALID,
+  lpReserved: LPCWSTR,
+  CalType: CALTYPE,
+  lpCalData: LPWSTR,
+  cchData: int32,
+  lpValue: LPDWORD,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetDurationFormatEx*(
+  lpLocaleName: LPCWSTR,
+  dwFlags: DWORD,
+  lpDuration: ptr SYSTEMTIME,
+  ullDuration: ULONGLONG,
+  lpFormat: LPCWSTR,
+  lpDurationStr: LPWSTR,
+  cchDuration: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetNumberFormatEx*(
+  lpLocaleName: LPCWSTR,
+  dwFlags: DWORD,
+  lpValue: LPCWSTR,
+  lpFormat: ptr NUMBERFMTW,
+  lpNumberStr: LPWSTR,
+  cchNumber: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetCurrencyFormatEx*(
+  lpLocaleName: LPCWSTR,
+  dwFlags: DWORD,
+  lpValue: LPCWSTR,
+  lpFormat: ptr CURRENCYFMTW,
+  lpCurrencyStr: LPWSTR,
+  cchCurrency: int32,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetUserDefaultLocaleName*(
+  lpLocaleName: LPWSTR, cchLocaleName: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetSystemDefaultLocaleName*(
+  lpLocaleName: LPWSTR, cchLocaleName: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc GetNLSVersionEx*(
+  function: NLS_FUNCTION,
+  lpLocaleName: LPCWSTR,
+  lpVersionInformation: LPNLSVERSIONINFOEX,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc FindNLSStringEx*(
+  lpLocaleName: LPCWSTR,
+  dwFindNLSStringFlags: DWORD,
+  lpStringSource: LPCWSTR,
+  cchSource: int32,
+  lpStringValue: LPCWSTR,
+  cchValue: int32,
+  pcchFound: LPINT,
+  lpVersionInformation: LPNLSVERSIONINFO,
+  lpReserved: LPVOID,
+  sortHandle: LPARAM,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc LCMapStringEx*(
+  lpLocaleName: LPCWSTR,
+  dwMapFlags: DWORD,
+  lpSrcStr: LPCWSTR,
+  cchSrc: int32,
+  lpDestStr: LPWSTR,
+  cchDest: int32,
+  lpVersionInformation: LPNLSVERSIONINFO,
+  lpReserved: LPVOID,
+  sortHandle: LPARAM,
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsValidLocaleName*(
+  lpLocaleName: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumCalendarInfoExEx*(
+  pCalInfoEnumProcExEx: CALINFO_ENUMPROCEXEX,
+  lpLocaleName: LPCWSTR,
+  Calendar: CALID,
+  lpReserved: LPCWSTR,
+  CalType: CALTYPE,
+  lParam: LPARAM,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumDateFormatsExEx*(
+  lpDateFmtEnumProcExEx: DATEFMT_ENUMPROCEXEX,
+  lpLocaleName: LPCWSTR,
+  dwFlags: DWORD,
+  lParam: LPARAM,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumTimeFormatsEx*(
+  lpTimeFmtEnumProcEx: TIMEFMT_ENUMPROCEX,
+  lpLocaleName: LPCWSTR,
+  dwFlags: DWORD,
+  lParam: LPARAM,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc EnumSystemLocalesEx*(
+  lpLocaleEnumProcEx: LOCALE_ENUMPROCEX,
+  dwFlags: DWORD,
+  lParam: LPARAM,
+  lpReserved: LPVOID,
+): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc ResolveLocaleName*(
+  lpNameToResolve: LPCWSTR, lpLocaleName: LPWSTR, cchLocaleName: int32
+): int32 {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+proc IsValidNLSVersion*(
+  function: NLS_FUNCTION,
+  lpLocaleName: LPCWSTR,
+  lpVersionInformation: LPNLSVERSIONINFOEX,
+): DWORD {.winapi, stdcall, dynlib: "kernel32", importc.}
+
+template IS_HIGH_SURROGATE*(wch: untyped): bool =
+  (wch >= HIGH_SURROGATE_START) and (wch <= HIGH_SURROGATE_END)
+
+template IS_LOW_SURROGATE*(wch: untyped): bool =
+  (wch >= LOW_SURROGATE_START) and (wch <= LOW_SURROGATE_END)
+
+template IS_SURROGATE_PAIR*(hs: untyped, ls: untyped): bool =
+  IS_HIGH_SURROGATE(hs) and IS_LOW_SURROGATE(ls)
+
+template FILEMUIINFO_GET_CULTURE*(pInfo: PFILEMUIINFO): LPWSTR =
+  cast[LPWSTR](if pInfo.dwLanguageNameOffset > 0:
+    cast[int](pInfo) + pInfo.dwLanguageNameOffset
+  else:
+    0)
+
+template FILEMUIINFO_GET_MAIN_TYPEIDS*(pInfo: PFILEMUIINFO): PDWORD =
+  cast[PDWORD](if pInfo.dwTypeIDMainOffset > 0:
+    cast[int](pInfo) + pInfo.dwTypeIDMainOffset
+  else:
+    0)
+
+template FILEMUIINFO_GET_MAIN_TYPEID*(pInfo: PFILEMUIINFO, iType: DWORD): DWORD =
+  (
+    if (iType < pInfo.dwTypeIDMainSize) and (pInfo.dwTypeIDMainOffset > 0): (
+      cast[PDWORD](cast[int](pInfo) + pInfo.dwTypeIDMainOffset + iType * sizeof(DWORD))
+    )[]
+    else: 0
+  )
+
+template FILEMUIINFO_GET_MAIN_TYPENAMES*(pInfo: PFILEMUIINFO): LPWSTR =
+  cast[LPWSTR](if pInfo.dwTypeNameMainOffset > 0:
+    cast[int](pInfo) + pInfo.dwTypeNameMainOffset
+  else:
+    0)
+
+template FILEMUIINFO_GET_MUI_TYPEIDS*(pInfo: PFILEMUIINFO): PDWORD =
+  cast[PDWORD](if pInfo.dwTypeIDMUIOffset > 0:
+    cast[int](pInfo) + pInfo.dwTypeIDMUIOffset
+  else:
+    0)
+
+template FILEMUIINFO_GET_MUI_TYPEID*(pInfo: PFILEMUIINFO, iType): DWORD =
+  (
+    if (iType < pInfo.dwTypeIDMUISize) and (pInfo.dwTypeIDMUIOffset > 0):
+    (cast[PDWORD](cast[int](pInfo) + pInfo.dwTypeIDMUIOffset + iType * sizeof(DWORD)))[]
+    else: 0
+  )
+
+template FILEMUIINFO_GET_MUI_TYPENAMES*(pInfo: PFILEMUIINFO): LPWSTR =
+  cast[LPWSTR](if pInfo.dwTypeNameMUIOffset > 0:
+    cast[int](pInfo) + pInfo.dwTypeNameMUIOffset
+  else:
+    0)
+
 when winimUnicode:
   type
     LANGUAGEGROUP_ENUMPROC* = LANGUAGEGROUP_ENUMPROCW
@@ -832,30 +1468,155 @@ when winimUnicode:
     LPNUMBERFMT* = LPNUMBERFMTW
     CURRENCYFMT* = CURRENCYFMTW
     LPCURRENCYFMT* = LPCURRENCYFMTW
-  proc CompareString*(Locale: LCID, dwCmpFlags: DWORD, lpString1: PCNZWCH, cchCount1: int32, lpString2: PCNZWCH, cchCount2: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "CompareStringW".}
-  proc FoldString*(dwMapFlags: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpDestStr: LPWSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "FoldStringW".}
-  proc GetStringTypeEx*(Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpCharType: LPWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetStringTypeExW".}
-  proc LCMapString*(Locale: LCID, dwMapFlags: DWORD, lpSrcStr: LPCWSTR, cchSrc: int32, lpDestStr: LPWSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "LCMapStringW".}
-  proc GetLocaleInfo*(Locale: LCID, LCType: LCTYPE, lpLCData: LPWSTR, cchData: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetLocaleInfoW".}
-  proc GetDateFormat*(Locale: LCID, dwFlags: DWORD, lpDate: ptr SYSTEMTIME, lpFormat: LPCWSTR, lpDateStr: LPWSTR, cchDate: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetDateFormatW".}
-  proc GetTimeFormat*(Locale: LCID, dwFlags: DWORD, lpTime: ptr SYSTEMTIME, lpFormat: LPCWSTR, lpTimeStr: LPWSTR, cchTime: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetTimeFormatW".}
-  proc SetLocaleInfo*(Locale: LCID, LCType: LCTYPE, lpLCData: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetLocaleInfoW".}
-  proc GetCalendarInfo*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPWSTR, cchData: int32, lpValue: LPDWORD): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCalendarInfoW".}
-  proc SetCalendarInfo*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetCalendarInfoW".}
-  proc GetNumberFormat*(Locale: LCID, dwFlags: DWORD, lpValue: LPCWSTR, lpFormat: ptr NUMBERFMTW, lpNumberStr: LPWSTR, cchNumber: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetNumberFormatW".}
-  proc GetCurrencyFormat*(Locale: LCID, dwFlags: DWORD, lpValue: LPCWSTR, lpFormat: ptr CURRENCYFMTW, lpCurrencyStr: LPWSTR, cchCurrency: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCurrencyFormatW".}
-  proc EnumCalendarInfo*(lpCalInfoEnumProc: CALINFO_ENUMPROCW, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoW".}
-  proc EnumCalendarInfoEx*(lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXW, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoExW".}
-  proc EnumTimeFormats*(lpTimeFmtEnumProc: TIMEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumTimeFormatsW".}
-  proc EnumDateFormats*(lpDateFmtEnumProc: DATEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsW".}
-  proc EnumDateFormatsEx*(lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXW, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsExW".}
-  proc GetGeoInfo*(Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPWSTR, cchData: int32, LangId: LANGID): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetGeoInfoW".}
-  proc GetCPInfoEx*(CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXW): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetCPInfoExW".}
-  proc EnumSystemLocales*(lpLocaleEnumProc: LOCALE_ENUMPROCW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLocalesW".}
-  proc EnumSystemLanguageGroups*(lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLanguageGroupsW".}
-  proc EnumLanguageGroupLocales*(lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCW, LanguageGroup: LGRPID, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumLanguageGroupLocalesW".}
-  proc EnumUILanguages*(lpUILanguageEnumProc: UILANGUAGE_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumUILanguagesW".}
-  proc EnumSystemCodePages*(lpCodePageEnumProc: CODEPAGE_ENUMPROCW, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemCodePagesW".}
+
+  proc CompareString*(
+    Locale: LCID,
+    dwCmpFlags: DWORD,
+    lpString1: PCNZWCH,
+    cchCount1: int32,
+    lpString2: PCNZWCH,
+    cchCount2: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "CompareStringW".}
+
+  proc FoldString*(
+    dwMapFlags: DWORD,
+    lpSrcStr: LPCWCH,
+    cchSrc: int32,
+    lpDestStr: LPWSTR,
+    cchDest: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "FoldStringW".}
+
+  proc GetStringTypeEx*(
+    Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCWCH, cchSrc: int32, lpCharType: LPWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetStringTypeExW".}
+
+  proc LCMapString*(
+    Locale: LCID,
+    dwMapFlags: DWORD,
+    lpSrcStr: LPCWSTR,
+    cchSrc: int32,
+    lpDestStr: LPWSTR,
+    cchDest: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "LCMapStringW".}
+
+  proc GetLocaleInfo*(
+    Locale: LCID, LCType: LCTYPE, lpLCData: LPWSTR, cchData: int32
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetLocaleInfoW".}
+
+  proc GetDateFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpDate: ptr SYSTEMTIME,
+    lpFormat: LPCWSTR,
+    lpDateStr: LPWSTR,
+    cchDate: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetDateFormatW".}
+
+  proc GetTimeFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpTime: ptr SYSTEMTIME,
+    lpFormat: LPCWSTR,
+    lpTimeStr: LPWSTR,
+    cchTime: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetTimeFormatW".}
+
+  proc SetLocaleInfo*(
+    Locale: LCID, LCType: LCTYPE, lpLCData: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetLocaleInfoW".}
+
+  proc GetCalendarInfo*(
+    Locale: LCID,
+    Calendar: CALID,
+    CalType: CALTYPE,
+    lpCalData: LPWSTR,
+    cchData: int32,
+    lpValue: LPDWORD,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCalendarInfoW".}
+
+  proc SetCalendarInfo*(
+    Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetCalendarInfoW".}
+
+  proc GetNumberFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpValue: LPCWSTR,
+    lpFormat: ptr NUMBERFMTW,
+    lpNumberStr: LPWSTR,
+    cchNumber: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetNumberFormatW".}
+
+  proc GetCurrencyFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpValue: LPCWSTR,
+    lpFormat: ptr CURRENCYFMTW,
+    lpCurrencyStr: LPWSTR,
+    cchCurrency: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCurrencyFormatW".}
+
+  proc EnumCalendarInfo*(
+    lpCalInfoEnumProc: CALINFO_ENUMPROCW,
+    Locale: LCID,
+    Calendar: CALID,
+    CalType: CALTYPE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoW".}
+
+  proc EnumCalendarInfoEx*(
+    lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXW,
+    Locale: LCID,
+    Calendar: CALID,
+    CalType: CALTYPE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoExW".}
+
+  proc EnumTimeFormats*(
+    lpTimeFmtEnumProc: TIMEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumTimeFormatsW".}
+
+  proc EnumDateFormats*(
+    lpDateFmtEnumProc: DATEFMT_ENUMPROCW, Locale: LCID, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsW".}
+
+  proc EnumDateFormatsEx*(
+    lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXW, Locale: LCID, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsExW".}
+
+  proc GetGeoInfo*(
+    Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPWSTR, cchData: int32, LangId: LANGID
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetGeoInfoW".}
+
+  proc GetCPInfoEx*(
+    CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXW
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetCPInfoExW".}
+
+  proc EnumSystemLocales*(
+    lpLocaleEnumProc: LOCALE_ENUMPROCW, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLocalesW".}
+
+  proc EnumSystemLanguageGroups*(
+    lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLanguageGroupsW"
+  .}
+
+  proc EnumLanguageGroupLocales*(
+    lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCW,
+    LanguageGroup: LGRPID,
+    dwFlags: DWORD,
+    lParam: LONG_PTR,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "kernel32", importc: "EnumLanguageGroupLocalesW"
+  .}
+
+  proc EnumUILanguages*(
+    lpUILanguageEnumProc: UILANGUAGE_ENUMPROCW, dwFlags: DWORD, lParam: LONG_PTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumUILanguagesW".}
+
+  proc EnumSystemCodePages*(
+    lpCodePageEnumProc: CODEPAGE_ENUMPROCW, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemCodePagesW".}
+
 when winimAnsi:
   type
     LANGUAGEGROUP_ENUMPROC* = LANGUAGEGROUP_ENUMPROCA
@@ -874,27 +1635,147 @@ when winimAnsi:
     LPNUMBERFMT* = LPNUMBERFMTA
     CURRENCYFMT* = CURRENCYFMTA
     LPCURRENCYFMT* = LPCURRENCYFMTA
-  proc CompareString*(Locale: LCID, dwCmpFlags: DWORD, lpString1: PCNZCH, cchCount1: int32, lpString2: PCNZCH, cchCount2: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "CompareStringA".}
-  proc LCMapString*(Locale: LCID, dwMapFlags: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpDestStr: LPSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "LCMapStringA".}
-  proc GetLocaleInfo*(Locale: LCID, LCType: LCTYPE, lpLCData: LPSTR, cchData: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetLocaleInfoA".}
-  proc FoldString*(dwMapFlags: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpDestStr: LPSTR, cchDest: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "FoldStringA".}
-  proc GetStringTypeEx*(Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpCharType: LPWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetStringTypeExA".}
-  proc GetDateFormat*(Locale: LCID, dwFlags: DWORD, lpDate: ptr SYSTEMTIME, lpFormat: LPCSTR, lpDateStr: LPSTR, cchDate: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetDateFormatA".}
-  proc GetTimeFormat*(Locale: LCID, dwFlags: DWORD, lpTime: ptr SYSTEMTIME, lpFormat: LPCSTR, lpTimeStr: LPSTR, cchTime: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetTimeFormatA".}
-  proc SetLocaleInfo*(Locale: LCID, LCType: LCTYPE, lpLCData: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetLocaleInfoA".}
-  proc GetCalendarInfo*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPSTR, cchData: int32, lpValue: LPDWORD): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCalendarInfoA".}
-  proc SetCalendarInfo*(Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetCalendarInfoA".}
-  proc GetNumberFormat*(Locale: LCID, dwFlags: DWORD, lpValue: LPCSTR, lpFormat: ptr NUMBERFMTA, lpNumberStr: LPSTR, cchNumber: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetNumberFormatA".}
-  proc GetCurrencyFormat*(Locale: LCID, dwFlags: DWORD, lpValue: LPCSTR, lpFormat: ptr CURRENCYFMTA, lpCurrencyStr: LPSTR, cchCurrency: int32): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCurrencyFormatA".}
-  proc EnumCalendarInfo*(lpCalInfoEnumProc: CALINFO_ENUMPROCA, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoA".}
-  proc EnumCalendarInfoEx*(lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXA, Locale: LCID, Calendar: CALID, CalType: CALTYPE): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoExA".}
-  proc EnumTimeFormats*(lpTimeFmtEnumProc: TIMEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumTimeFormatsA".}
-  proc EnumDateFormats*(lpDateFmtEnumProc: DATEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsA".}
-  proc EnumDateFormatsEx*(lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXA, Locale: LCID, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsExA".}
-  proc GetGeoInfo*(Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPSTR, cchData: int32, LangId: LANGID): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetGeoInfoA".}
-  proc GetCPInfoEx*(CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXA): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetCPInfoExA".}
-  proc EnumSystemLocales*(lpLocaleEnumProc: LOCALE_ENUMPROCA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLocalesA".}
-  proc EnumSystemLanguageGroups*(lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLanguageGroupsA".}
-  proc EnumLanguageGroupLocales*(lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCA, LanguageGroup: LGRPID, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumLanguageGroupLocalesA".}
-  proc EnumUILanguages*(lpUILanguageEnumProc: UILANGUAGE_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumUILanguagesA".}
-  proc EnumSystemCodePages*(lpCodePageEnumProc: CODEPAGE_ENUMPROCA, dwFlags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemCodePagesA".}
+
+  proc CompareString*(
+    Locale: LCID,
+    dwCmpFlags: DWORD,
+    lpString1: PCNZCH,
+    cchCount1: int32,
+    lpString2: PCNZCH,
+    cchCount2: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "CompareStringA".}
+
+  proc LCMapString*(
+    Locale: LCID,
+    dwMapFlags: DWORD,
+    lpSrcStr: LPCSTR,
+    cchSrc: int32,
+    lpDestStr: LPSTR,
+    cchDest: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "LCMapStringA".}
+
+  proc GetLocaleInfo*(
+    Locale: LCID, LCType: LCTYPE, lpLCData: LPSTR, cchData: int32
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetLocaleInfoA".}
+
+  proc FoldString*(
+    dwMapFlags: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpDestStr: LPSTR, cchDest: int32
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "FoldStringA".}
+
+  proc GetStringTypeEx*(
+    Locale: LCID, dwInfoType: DWORD, lpSrcStr: LPCSTR, cchSrc: int32, lpCharType: LPWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetStringTypeExA".}
+
+  proc GetDateFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpDate: ptr SYSTEMTIME,
+    lpFormat: LPCSTR,
+    lpDateStr: LPSTR,
+    cchDate: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetDateFormatA".}
+
+  proc GetTimeFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpTime: ptr SYSTEMTIME,
+    lpFormat: LPCSTR,
+    lpTimeStr: LPSTR,
+    cchTime: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetTimeFormatA".}
+
+  proc SetLocaleInfo*(
+    Locale: LCID, LCType: LCTYPE, lpLCData: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetLocaleInfoA".}
+
+  proc GetCalendarInfo*(
+    Locale: LCID,
+    Calendar: CALID,
+    CalType: CALTYPE,
+    lpCalData: LPSTR,
+    cchData: int32,
+    lpValue: LPDWORD,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCalendarInfoA".}
+
+  proc SetCalendarInfo*(
+    Locale: LCID, Calendar: CALID, CalType: CALTYPE, lpCalData: LPCSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "SetCalendarInfoA".}
+
+  proc GetNumberFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpValue: LPCSTR,
+    lpFormat: ptr NUMBERFMTA,
+    lpNumberStr: LPSTR,
+    cchNumber: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetNumberFormatA".}
+
+  proc GetCurrencyFormat*(
+    Locale: LCID,
+    dwFlags: DWORD,
+    lpValue: LPCSTR,
+    lpFormat: ptr CURRENCYFMTA,
+    lpCurrencyStr: LPSTR,
+    cchCurrency: int32,
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetCurrencyFormatA".}
+
+  proc EnumCalendarInfo*(
+    lpCalInfoEnumProc: CALINFO_ENUMPROCA,
+    Locale: LCID,
+    Calendar: CALID,
+    CalType: CALTYPE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoA".}
+
+  proc EnumCalendarInfoEx*(
+    lpCalInfoEnumProcEx: CALINFO_ENUMPROCEXA,
+    Locale: LCID,
+    Calendar: CALID,
+    CalType: CALTYPE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumCalendarInfoExA".}
+
+  proc EnumTimeFormats*(
+    lpTimeFmtEnumProc: TIMEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumTimeFormatsA".}
+
+  proc EnumDateFormats*(
+    lpDateFmtEnumProc: DATEFMT_ENUMPROCA, Locale: LCID, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsA".}
+
+  proc EnumDateFormatsEx*(
+    lpDateFmtEnumProcEx: DATEFMT_ENUMPROCEXA, Locale: LCID, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumDateFormatsExA".}
+
+  proc GetGeoInfo*(
+    Location: GEOID, GeoType: GEOTYPE, lpGeoData: LPSTR, cchData: int32, LangId: LANGID
+  ): int32 {.winapi, stdcall, dynlib: "kernel32", importc: "GetGeoInfoA".}
+
+  proc GetCPInfoEx*(
+    CodePage: UINT, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXA
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "GetCPInfoExA".}
+
+  proc EnumSystemLocales*(
+    lpLocaleEnumProc: LOCALE_ENUMPROCA, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLocalesA".}
+
+  proc EnumSystemLanguageGroups*(
+    lpLanguageGroupEnumProc: LANGUAGEGROUP_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemLanguageGroupsA"
+  .}
+
+  proc EnumLanguageGroupLocales*(
+    lpLangGroupLocaleEnumProc: LANGGROUPLOCALE_ENUMPROCA,
+    LanguageGroup: LGRPID,
+    dwFlags: DWORD,
+    lParam: LONG_PTR,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "kernel32", importc: "EnumLanguageGroupLocalesA"
+  .}
+
+  proc EnumUILanguages*(
+    lpUILanguageEnumProc: UILANGUAGE_ENUMPROCA, dwFlags: DWORD, lParam: LONG_PTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumUILanguagesA".}
+
+  proc EnumSystemCodePages*(
+    lpCodePageEnumProc: CODEPAGE_ENUMPROCA, dwFlags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "kernel32", importc: "EnumSystemCodePagesA".}

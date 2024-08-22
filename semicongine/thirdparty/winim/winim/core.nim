@@ -7,8 +7,12 @@
 #
 #====================================================================
 
-import inc/[windef, winerror, winbase, wingdi, winuser, wincon, winnls,
-  winver, winreg, winnetwk, winsvc, virtdisk, winsock, wincrypt]
+import
+  inc/[
+    windef, winerror, winbase, wingdi, winuser, wincon, winnls, winver, winreg,
+    winnetwk, winsvc, virtdisk, winsock, wincrypt,
+  ]
 
-export windef, winerror, winbase, wingdi, winuser, wincon, winnls,
-  winver, winreg, winnetwk, winsvc, virtdisk, winsock, wincrypt
+export
+  windef, winerror, winbase, wingdi, winuser, wincon, winnls, winver, winreg, winnetwk,
+  winsvc, virtdisk, winsock, wincrypt

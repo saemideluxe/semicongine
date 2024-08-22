@@ -14,6 +14,7 @@ type
     IsVendor*: WINBOOL
     Data*: LPBYTE
     nBytesData*: DWORD
+
   PDHCPAPI_PARAMS* = ptr DHCPAPI_PARAMS
   LPDHCPAPI_PARAMS* = ptr DHCPAPI_PARAMS
   DHCPCAPI_PARAMS* = DHCPAPI_PARAMS
@@ -22,14 +23,17 @@ type
   DHCPCAPI_PARAMS_ARRAY* {.pure.} = object
     nParams*: ULONG
     Params*: LPDHCPCAPI_PARAMS
+
   PDHCPCAPI_PARAMS_ARRAY* = ptr DHCPCAPI_PARAMS_ARRAY
   LPDHCPCAPI_PARAMS_ARRAY* = ptr DHCPCAPI_PARAMS_ARRAY
   DHCPCAPI_CLASSID* {.pure.} = object
     Flags*: ULONG
     Data*: LPBYTE
     nBytesData*: ULONG
+
   PDHCPCAPI_CLASSID* = ptr DHCPCAPI_CLASSID
   LPDHCPCAPI_CLASSID* = ptr DHCPCAPI_CLASSID
+
 const
   OPTION_PAD* = 0
   OPTION_SUBNET_MASK* = 1
@@ -103,10 +107,40 @@ const
   DHCPCAPI_REQUEST_MASK* = 0x0F
   DHCPCAPI_REGISTER_HANDLE_EVENT* = 0x01
   DHCPCAPI_DEREGISTER_HANDLE_EVENT* = 0x01
-proc DhcpCApiInitialize*(Version: LPDWORD): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
+proc DhcpCApiInitialize*(
+  Version: LPDWORD
+): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
+
 proc DhcpCApiCleanup*(): VOID {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
-proc DhcpRequestParams*(Flags: DWORD, Reserved: LPVOID, AdapterName: LPWSTR, ClassId: LPDHCPCAPI_CLASSID, SendParams: DHCPCAPI_PARAMS_ARRAY, RecdParams: DHCPCAPI_PARAMS_ARRAY, Buffer: LPBYTE, pSize: LPDWORD, RequestIdStr: LPWSTR): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
-proc DhcpUndoRequestParams*(Flags: DWORD, Reserved: LPVOID, AdapterName: LPWSTR, RequestIdStr: LPWSTR): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
-proc DhcpRegisterParamChange*(Flags: DWORD, Reserved: LPVOID, AdapterName: LPWSTR, ClassId: LPDHCPCAPI_CLASSID, Params: DHCPCAPI_PARAMS_ARRAY, Handle: LPVOID): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
-proc DhcpDeRegisterParamChange*(Flags: DWORD, Reserved: LPVOID, Event: LPVOID): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
-proc DhcpRemoveDNSRegistrations*(): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
+proc DhcpRequestParams*(
+  Flags: DWORD,
+  Reserved: LPVOID,
+  AdapterName: LPWSTR,
+  ClassId: LPDHCPCAPI_CLASSID,
+  SendParams: DHCPCAPI_PARAMS_ARRAY,
+  RecdParams: DHCPCAPI_PARAMS_ARRAY,
+  Buffer: LPBYTE,
+  pSize: LPDWORD,
+  RequestIdStr: LPWSTR,
+): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
+
+proc DhcpUndoRequestParams*(
+  Flags: DWORD, Reserved: LPVOID, AdapterName: LPWSTR, RequestIdStr: LPWSTR
+): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
+
+proc DhcpRegisterParamChange*(
+  Flags: DWORD,
+  Reserved: LPVOID,
+  AdapterName: LPWSTR,
+  ClassId: LPDHCPCAPI_CLASSID,
+  Params: DHCPCAPI_PARAMS_ARRAY,
+  Handle: LPVOID,
+): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
+
+proc DhcpDeRegisterParamChange*(
+  Flags: DWORD, Reserved: LPVOID, Event: LPVOID
+): DWORD {.winapi, stdcall, dynlib: "dhcpcsvc", importc.}
+
+proc DhcpRemoveDNSRegistrations*(): DWORD {.
+  winapi, stdcall, dynlib: "dhcpcsvc", importc
+.}

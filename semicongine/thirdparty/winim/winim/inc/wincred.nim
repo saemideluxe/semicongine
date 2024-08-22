@@ -18,12 +18,14 @@ type
     Flags*: DWORD
     ValueSize*: DWORD
     Value*: LPBYTE
+
   PCREDENTIAL_ATTRIBUTEA* = ptr CREDENTIAL_ATTRIBUTEA
   CREDENTIAL_ATTRIBUTEW* {.pure.} = object
     Keyword*: LPWSTR
     Flags*: DWORD
     ValueSize*: DWORD
     Value*: LPBYTE
+
   PCREDENTIAL_ATTRIBUTEW* = ptr CREDENTIAL_ATTRIBUTEW
   CREDENTIALA* {.pure.} = object
     Flags*: DWORD
@@ -38,6 +40,7 @@ type
     Attributes*: PCREDENTIAL_ATTRIBUTEA
     TargetAlias*: LPSTR
     UserName*: LPSTR
+
   PCREDENTIALA* = ptr CREDENTIALA
   CREDENTIALW* {.pure.} = object
     Flags*: DWORD
@@ -52,6 +55,7 @@ type
     Attributes*: PCREDENTIAL_ATTRIBUTEW
     TargetAlias*: LPWSTR
     UserName*: LPWSTR
+
   PCREDENTIALW* = ptr CREDENTIALW
   CREDENTIAL_TARGET_INFORMATIONA* {.pure.} = object
     TargetName*: LPSTR
@@ -64,6 +68,7 @@ type
     Flags*: ULONG
     CredTypeCount*: DWORD
     CredTypes*: LPDWORD
+
   PCREDENTIAL_TARGET_INFORMATIONA* = ptr CREDENTIAL_TARGET_INFORMATIONA
   CREDENTIAL_TARGET_INFORMATIONW* {.pure.} = object
     TargetName*: LPWSTR
@@ -76,16 +81,19 @@ type
     Flags*: ULONG
     CredTypeCount*: DWORD
     CredTypes*: LPDWORD
+
   PCREDENTIAL_TARGET_INFORMATIONW* = ptr CREDENTIAL_TARGET_INFORMATIONW
-const
-  CERT_HASH_LENGTH* = 20
+
+const CERT_HASH_LENGTH* = 20
 type
   CERT_CREDENTIAL_INFO* {.pure.} = object
     cbSize*: ULONG
     rgbHashOfCert*: array[CERT_HASH_LENGTH, UCHAR]
+
   PCERT_CREDENTIAL_INFO* = ptr CERT_CREDENTIAL_INFO
   USERNAME_TARGET_CREDENTIAL_INFO* {.pure.} = object
     UserName*: LPWSTR
+
   PUSERNAME_TARGET_CREDENTIAL_INFO* = ptr USERNAME_TARGET_CREDENTIAL_INFO
   CREDUI_INFOA* {.pure.} = object
     cbSize*: DWORD
@@ -93,6 +101,7 @@ type
     pszMessageText*: PCSTR
     pszCaptionText*: PCSTR
     hbmBanner*: HBITMAP
+
   PCREDUI_INFOA* = ptr CREDUI_INFOA
   CREDUI_INFOW* {.pure.} = object
     cbSize*: DWORD
@@ -100,12 +109,14 @@ type
     pszMessageText*: PCWSTR
     pszCaptionText*: PCWSTR
     hbmBanner*: HBITMAP
+
   PCREDUI_INFOW* = ptr CREDUI_INFOW
+
 const
   CRED_MAX_STRING_LENGTH* = 256
-  CRED_MAX_USERNAME_LENGTH* = 256+1+256
+  CRED_MAX_USERNAME_LENGTH* = 256 + 1 + 256
   CRED_MAX_GENERIC_TARGET_NAME_LENGTH* = 32767
-  CRED_MAX_DOMAIN_TARGET_NAME_LENGTH* = 256+1+80
+  CRED_MAX_DOMAIN_TARGET_NAME_LENGTH* = 256 + 1 + 80
   CRED_MAX_VALUE_SIZE* = 256
   CRED_MAX_ATTRIBUTES* = 64
   CRED_SESSION_WILDCARD_NAME_W* = "*Session"
@@ -120,7 +131,7 @@ const
   CRED_TYPE_DOMAIN_CERTIFICATE* = 3
   CRED_TYPE_DOMAIN_VISIBLE_PASSWORD* = 4
   CRED_TYPE_MAXIMUM* = 5
-  CRED_TYPE_MAXIMUM_EX* = CRED_TYPE_MAXIMUM+1000
+  CRED_TYPE_MAXIMUM_EX* = CRED_TYPE_MAXIMUM + 1000
   CRED_MAX_CREDENTIAL_BLOB_SIZE* = 512
   CRED_PERSIST_NONE* = 0
   CRED_PERSIST_SESSION* = 1
@@ -140,7 +151,7 @@ const
   CREDUI_MAX_GENERIC_TARGET_LENGTH* = CRED_MAX_GENERIC_TARGET_NAME_LENGTH
   CREDUI_MAX_DOMAIN_TARGET_LENGTH* = CRED_MAX_DOMAIN_TARGET_NAME_LENGTH
   CREDUI_MAX_USERNAME_LENGTH* = CRED_MAX_USERNAME_LENGTH
-  CREDUI_MAX_PASSWORD_LENGTH* = CRED_MAX_CREDENTIAL_BLOB_SIZE/2
+  CREDUI_MAX_PASSWORD_LENGTH* = CRED_MAX_CREDENTIAL_BLOB_SIZE / 2
   CREDUI_FLAGS_INCORRECT_PASSWORD* = 0x00001
   CREDUI_FLAGS_DO_NOT_PERSIST* = 0x00002
   CREDUI_FLAGS_REQUEST_ADMINISTRATOR* = 0x00004
@@ -158,7 +169,16 @@ const
   CREDUI_FLAGS_GENERIC_CREDENTIALS* = 0x40000
   CREDUI_FLAGS_USERNAME_TARGET_CREDENTIALS* = 0x80000
   CREDUI_FLAGS_KEEP_USERNAME* = 0x100000
-  CREDUI_FLAGS_PROMPT_VALID* = CREDUI_FLAGS_INCORRECT_PASSWORD or CREDUI_FLAGS_DO_NOT_PERSIST or CREDUI_FLAGS_REQUEST_ADMINISTRATOR or CREDUI_FLAGS_EXCLUDE_CERTIFICATES or CREDUI_FLAGS_REQUIRE_CERTIFICATE or CREDUI_FLAGS_SHOW_SAVE_CHECK_BOX or CREDUI_FLAGS_ALWAYS_SHOW_UI or CREDUI_FLAGS_REQUIRE_SMARTCARD or CREDUI_FLAGS_PASSWORD_ONLY_OK or CREDUI_FLAGS_VALIDATE_USERNAME or CREDUI_FLAGS_COMPLETE_USERNAME or CREDUI_FLAGS_PERSIST or CREDUI_FLAGS_SERVER_CREDENTIAL or CREDUI_FLAGS_EXPECT_CONFIRMATION or CREDUI_FLAGS_GENERIC_CREDENTIALS or CREDUI_FLAGS_USERNAME_TARGET_CREDENTIALS or CREDUI_FLAGS_KEEP_USERNAME
+  CREDUI_FLAGS_PROMPT_VALID* =
+    CREDUI_FLAGS_INCORRECT_PASSWORD or CREDUI_FLAGS_DO_NOT_PERSIST or
+    CREDUI_FLAGS_REQUEST_ADMINISTRATOR or CREDUI_FLAGS_EXCLUDE_CERTIFICATES or
+    CREDUI_FLAGS_REQUIRE_CERTIFICATE or CREDUI_FLAGS_SHOW_SAVE_CHECK_BOX or
+    CREDUI_FLAGS_ALWAYS_SHOW_UI or CREDUI_FLAGS_REQUIRE_SMARTCARD or
+    CREDUI_FLAGS_PASSWORD_ONLY_OK or CREDUI_FLAGS_VALIDATE_USERNAME or
+    CREDUI_FLAGS_COMPLETE_USERNAME or CREDUI_FLAGS_PERSIST or
+    CREDUI_FLAGS_SERVER_CREDENTIAL or CREDUI_FLAGS_EXPECT_CONFIRMATION or
+    CREDUI_FLAGS_GENERIC_CREDENTIALS or CREDUI_FLAGS_USERNAME_TARGET_CREDENTIALS or
+    CREDUI_FLAGS_KEEP_USERNAME
   CRED_PRESERVE_CREDENTIAL_BLOB* = 0x1
   CRED_CACHE_TARGET_INFORMATION* = 0x1
   CRED_ALLOW_NAME_RESOLUTION* = 0x1
@@ -174,61 +194,305 @@ const
   credUserProtection* = 1
   credTrustedProtection* = 2
 when winimUnicode:
-  const
-    CRED_SESSION_WILDCARD_NAME* = CRED_SESSION_WILDCARD_NAME_W
+  const CRED_SESSION_WILDCARD_NAME* = CRED_SESSION_WILDCARD_NAME_W
 when winimAnsi:
-  const
-    CRED_SESSION_WILDCARD_NAME* = CRED_SESSION_WILDCARD_NAME_A
-const
-  CRED_SESSION_WILDCARD_NAME_LENGTH* = CRED_SESSION_WILDCARD_NAME.len
-proc CredWriteW*(Credential: PCREDENTIALW, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredWriteA*(Credential: PCREDENTIALA, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredReadW*(TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredReadA*(TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredEnumerateW*(Filter: LPCWSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredEnumerateA*(Filter: LPCSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredWriteDomainCredentialsW*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW, Credential: PCREDENTIALW, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredWriteDomainCredentialsA*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA, Credential: PCREDENTIALA, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredReadDomainCredentialsW*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredReadDomainCredentialsA*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredDeleteW*(TargetName: LPCWSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredDeleteA*(TargetName: LPCSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredRenameW*(OldTargetName: LPCWSTR, NewTargetName: LPCWSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredRenameA*(OldTargetName: LPCSTR, NewTargetName: LPCSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredGetTargetInfoW*(TargetName: LPCWSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredGetTargetInfoA*(TargetName: LPCSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredMarshalCredentialW*(CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredMarshalCredentialA*(CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredUnmarshalCredentialW*(MarshaledCredential: LPCWSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredUnmarshalCredentialA*(MarshaledCredential: LPCSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredIsMarshaledCredentialW*(MarshaledCredential: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredIsMarshaledCredentialA*(MarshaledCredential: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredGetSessionTypes*(MaximumPersistCount: DWORD, MaximumPersist: LPDWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+  const CRED_SESSION_WILDCARD_NAME* = CRED_SESSION_WILDCARD_NAME_A
+const CRED_SESSION_WILDCARD_NAME_LENGTH* = CRED_SESSION_WILDCARD_NAME.len
+proc CredWriteW*(
+  Credential: PCREDENTIALW, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredWriteA*(
+  Credential: PCREDENTIALA, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredReadW*(
+  TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredReadA*(
+  TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredEnumerateW*(
+  Filter: LPCWSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALW
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredEnumerateA*(
+  Filter: LPCSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALA
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredWriteDomainCredentialsW*(
+  TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW, Credential: PCREDENTIALW, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredWriteDomainCredentialsA*(
+  TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA, Credential: PCREDENTIALA, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredReadDomainCredentialsW*(
+  TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW,
+  Flags: DWORD,
+  Count: ptr DWORD,
+  Credential: ptr ptr PCREDENTIALW,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredReadDomainCredentialsA*(
+  TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA,
+  Flags: DWORD,
+  Count: ptr DWORD,
+  Credential: ptr ptr PCREDENTIALA,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredDeleteW*(
+  TargetName: LPCWSTR, Type: DWORD, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredDeleteA*(
+  TargetName: LPCSTR, Type: DWORD, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredRenameW*(
+  OldTargetName: LPCWSTR, NewTargetName: LPCWSTR, Type: DWORD, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredRenameA*(
+  OldTargetName: LPCSTR, NewTargetName: LPCSTR, Type: DWORD, Flags: DWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredGetTargetInfoW*(
+  TargetName: LPCWSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONW
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredGetTargetInfoA*(
+  TargetName: LPCSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONA
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredMarshalCredentialW*(
+  CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredMarshalCredentialA*(
+  CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredUnmarshalCredentialW*(
+  MarshaledCredential: LPCWSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredUnmarshalCredentialA*(
+  MarshaledCredential: LPCSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredIsMarshaledCredentialW*(
+  MarshaledCredential: LPCWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredIsMarshaledCredentialA*(
+  MarshaledCredential: LPCSTR
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredGetSessionTypes*(
+  MaximumPersistCount: DWORD, MaximumPersist: LPDWORD
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
 proc CredFree*(Buffer: PVOID): VOID {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredUIPromptForCredentialsW*(pUiInfo: PCREDUI_INFOW, pszTargetName: PCWSTR, pContext: PCtxtHandle, dwAuthError: DWORD, pszUserName: PWSTR, ulUserNameBufferSize: ULONG, pszPassword: PWSTR, ulPasswordBufferSize: ULONG, save: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIPromptForCredentialsA*(pUiInfo: PCREDUI_INFOA, pszTargetName: PCSTR, pContext: PCtxtHandle, dwAuthError: DWORD, pszUserName: PSTR, ulUserNameBufferSize: ULONG, pszPassword: PSTR, ulPasswordBufferSize: ULONG, save: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIParseUserNameW*(UserName: ptr WCHAR, user: ptr WCHAR, userBufferSize: ULONG, domain: ptr WCHAR, domainBufferSize: ULONG): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIParseUserNameA*(userName: ptr CHAR, user: ptr CHAR, userBufferSize: ULONG, domain: ptr CHAR, domainBufferSize: ULONG): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUICmdLinePromptForCredentialsW*(pszTargetName: PCWSTR, pContext: PCtxtHandle, dwAuthError: DWORD, UserName: PWSTR, ulUserBufferSize: ULONG, pszPassword: PWSTR, ulPasswordBufferSize: ULONG, pfSave: PBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUICmdLinePromptForCredentialsA*(pszTargetName: PCSTR, pContext: PCtxtHandle, dwAuthError: DWORD, UserName: PSTR, ulUserBufferSize: ULONG, pszPassword: PSTR, ulPasswordBufferSize: ULONG, pfSave: PBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIConfirmCredentialsW*(pszTargetName: PCWSTR, bConfirm: WINBOOL): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIConfirmCredentialsA*(pszTargetName: PCSTR, bConfirm: WINBOOL): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIStoreSSOCredW*(pszRealm: PCWSTR, pszUsername: PCWSTR, pszPassword: PCWSTR, bPersist: WINBOOL): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIReadSSOCredW*(pszRealm: PCWSTR, ppszUsername: ptr PWSTR): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredFindBestCredentialA*(TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredFindBestCredentialW*(TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredIsProtectedA*(pszProtectedCredentials: LPSTR, pProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredIsProtectedW*(pszProtectedCredentials: LPWSTR, pProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredPackAuthenticationBufferA*(dwFlags: DWORD, pszUserName: LPSTR, pszPassword: LPSTR, pPackedCredentials: PBYTE, pcbPackedCredentials: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredPackAuthenticationBufferW*(dwFlags: DWORD, pszUserName: LPWSTR, pszPassword: LPWSTR, pPackedCredentials: PBYTE, pcbPackedCredentials: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredProtectW*(fAsSelf: WINBOOL, pszCredentials: LPWSTR, cchCredentials: DWORD, pszProtectedCredentials: LPWSTR, pcchMaxChars: ptr DWORD, ProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredProtectA*(fAsSelf: WINBOOL, pszCredentials: LPSTR, cchCredentials: DWORD, pszProtectedCredentials: LPSTR, pcchMaxChars: ptr DWORD, ProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredUIPromptForWindowsCredentialsA*(pUiInfo: PCREDUI_INFOA, dwAuthError: DWORD, pulAuthPackage: ptr ULONG, pvInAuthBuffer: LPCVOID, ulInAuthBufferSize: ULONG, ppvOutAuthBuffer: ptr LPVOID, pulOutAuthBufferSize: ptr ULONG, pfSave: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUIPromptForWindowsCredentialsW*(pUiInfo: PCREDUI_INFOW, dwAuthError: DWORD, pulAuthPackage: ptr ULONG, pvInAuthBuffer: LPCVOID, ulInAuthBufferSize: ULONG, ppvOutAuthBuffer: ptr LPVOID, pulOutAuthBufferSize: ptr ULONG, pfSave: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUnPackAuthenticationBufferA*(dwFlags: DWORD, pAuthBuffer: PVOID, cbAuthBuffer: DWORD, pszUserName: LPSTR, pcchMaxUserName: ptr DWORD, pszDomainName: LPSTR, pcchMaxDomainame: ptr DWORD, pszPassword: LPSTR, pcchMaxPassword: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUnPackAuthenticationBufferW*(dwFlags: DWORD, pAuthBuffer: PVOID, cbAuthBuffer: DWORD, pszUserName: LPWSTR, pcchMaxUserName: ptr DWORD, pszDomainName: LPWSTR, pcchMaxDomainame: ptr DWORD, pszPassword: LPWSTR, pcchMaxPassword: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
-proc CredUnprotectA*(fAsSelf: WINBOOL, pszProtectedCredentials: LPSTR, cchCredentials: DWORD, pszCredentials: LPSTR, pcchMaxChars: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
-proc CredUnprotectW*(fAsSelf: WINBOOL, pszProtectedCredentials: LPWSTR, cchCredentials: DWORD, pszCredentials: LPWSTR, pcchMaxChars: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+proc CredUIPromptForCredentialsW*(
+  pUiInfo: PCREDUI_INFOW,
+  pszTargetName: PCWSTR,
+  pContext: PCtxtHandle,
+  dwAuthError: DWORD,
+  pszUserName: PWSTR,
+  ulUserNameBufferSize: ULONG,
+  pszPassword: PWSTR,
+  ulPasswordBufferSize: ULONG,
+  save: ptr WINBOOL,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIPromptForCredentialsA*(
+  pUiInfo: PCREDUI_INFOA,
+  pszTargetName: PCSTR,
+  pContext: PCtxtHandle,
+  dwAuthError: DWORD,
+  pszUserName: PSTR,
+  ulUserNameBufferSize: ULONG,
+  pszPassword: PSTR,
+  ulPasswordBufferSize: ULONG,
+  save: ptr WINBOOL,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIParseUserNameW*(
+  UserName: ptr WCHAR,
+  user: ptr WCHAR,
+  userBufferSize: ULONG,
+  domain: ptr WCHAR,
+  domainBufferSize: ULONG,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIParseUserNameA*(
+  userName: ptr CHAR,
+  user: ptr CHAR,
+  userBufferSize: ULONG,
+  domain: ptr CHAR,
+  domainBufferSize: ULONG,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUICmdLinePromptForCredentialsW*(
+  pszTargetName: PCWSTR,
+  pContext: PCtxtHandle,
+  dwAuthError: DWORD,
+  UserName: PWSTR,
+  ulUserBufferSize: ULONG,
+  pszPassword: PWSTR,
+  ulPasswordBufferSize: ULONG,
+  pfSave: PBOOL,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUICmdLinePromptForCredentialsA*(
+  pszTargetName: PCSTR,
+  pContext: PCtxtHandle,
+  dwAuthError: DWORD,
+  UserName: PSTR,
+  ulUserBufferSize: ULONG,
+  pszPassword: PSTR,
+  ulPasswordBufferSize: ULONG,
+  pfSave: PBOOL,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIConfirmCredentialsW*(
+  pszTargetName: PCWSTR, bConfirm: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIConfirmCredentialsA*(
+  pszTargetName: PCSTR, bConfirm: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIStoreSSOCredW*(
+  pszRealm: PCWSTR, pszUsername: PCWSTR, pszPassword: PCWSTR, bPersist: WINBOOL
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIReadSSOCredW*(
+  pszRealm: PCWSTR, ppszUsername: ptr PWSTR
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredFindBestCredentialA*(
+  TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredFindBestCredentialW*(
+  TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredIsProtectedA*(
+  pszProtectedCredentials: LPSTR, pProtectionType: ptr CRED_PROTECTION_TYPE
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredIsProtectedW*(
+  pszProtectedCredentials: LPWSTR, pProtectionType: ptr CRED_PROTECTION_TYPE
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredPackAuthenticationBufferA*(
+  dwFlags: DWORD,
+  pszUserName: LPSTR,
+  pszPassword: LPSTR,
+  pPackedCredentials: PBYTE,
+  pcbPackedCredentials: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredPackAuthenticationBufferW*(
+  dwFlags: DWORD,
+  pszUserName: LPWSTR,
+  pszPassword: LPWSTR,
+  pPackedCredentials: PBYTE,
+  pcbPackedCredentials: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredProtectW*(
+  fAsSelf: WINBOOL,
+  pszCredentials: LPWSTR,
+  cchCredentials: DWORD,
+  pszProtectedCredentials: LPWSTR,
+  pcchMaxChars: ptr DWORD,
+  ProtectionType: ptr CRED_PROTECTION_TYPE,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredProtectA*(
+  fAsSelf: WINBOOL,
+  pszCredentials: LPSTR,
+  cchCredentials: DWORD,
+  pszProtectedCredentials: LPSTR,
+  pcchMaxChars: ptr DWORD,
+  ProtectionType: ptr CRED_PROTECTION_TYPE,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredUIPromptForWindowsCredentialsA*(
+  pUiInfo: PCREDUI_INFOA,
+  dwAuthError: DWORD,
+  pulAuthPackage: ptr ULONG,
+  pvInAuthBuffer: LPCVOID,
+  ulInAuthBufferSize: ULONG,
+  ppvOutAuthBuffer: ptr LPVOID,
+  pulOutAuthBufferSize: ptr ULONG,
+  pfSave: ptr WINBOOL,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUIPromptForWindowsCredentialsW*(
+  pUiInfo: PCREDUI_INFOW,
+  dwAuthError: DWORD,
+  pulAuthPackage: ptr ULONG,
+  pvInAuthBuffer: LPCVOID,
+  ulInAuthBufferSize: ULONG,
+  ppvOutAuthBuffer: ptr LPVOID,
+  pulOutAuthBufferSize: ptr ULONG,
+  pfSave: ptr WINBOOL,
+  dwFlags: DWORD,
+): DWORD {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUnPackAuthenticationBufferA*(
+  dwFlags: DWORD,
+  pAuthBuffer: PVOID,
+  cbAuthBuffer: DWORD,
+  pszUserName: LPSTR,
+  pcchMaxUserName: ptr DWORD,
+  pszDomainName: LPSTR,
+  pcchMaxDomainame: ptr DWORD,
+  pszPassword: LPSTR,
+  pcchMaxPassword: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUnPackAuthenticationBufferW*(
+  dwFlags: DWORD,
+  pAuthBuffer: PVOID,
+  cbAuthBuffer: DWORD,
+  pszUserName: LPWSTR,
+  pcchMaxUserName: ptr DWORD,
+  pszDomainName: LPWSTR,
+  pcchMaxDomainame: ptr DWORD,
+  pszPassword: LPWSTR,
+  pcchMaxPassword: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "credui", importc.}
+
+proc CredUnprotectA*(
+  fAsSelf: WINBOOL,
+  pszProtectedCredentials: LPSTR,
+  cchCredentials: DWORD,
+  pszCredentials: LPSTR,
+  pcchMaxChars: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
+proc CredUnprotectW*(
+  fAsSelf: WINBOOL,
+  pszProtectedCredentials: LPWSTR,
+  cchCredentials: DWORD,
+  pszCredentials: LPWSTR,
+  pcchMaxChars: ptr DWORD,
+): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc.}
+
 when winimUnicode:
   type
     CREDENTIAL_ATTRIBUTE* = CREDENTIAL_ATTRIBUTEW
@@ -239,28 +503,164 @@ when winimUnicode:
     PCREDENTIAL_TARGET_INFORMATION* = PCREDENTIAL_TARGET_INFORMATIONW
     CREDUI_INFO* = CREDUI_INFOW
     PCREDUI_INFO* = PCREDUI_INFOW
-  proc CredWrite*(Credential: PCREDENTIALW, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredWriteW".}
-  proc CredRead*(TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredReadW".}
-  proc CredEnumerate*(Filter: LPCWSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredEnumerateW".}
-  proc CredWriteDomainCredentials*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW, Credential: PCREDENTIALW, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredWriteDomainCredentialsW".}
-  proc CredReadDomainCredentials*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredReadDomainCredentialsW".}
-  proc CredDelete*(TargetName: LPCWSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredDeleteW".}
-  proc CredRename*(OldTargetName: LPCWSTR, NewTargetName: LPCWSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredRenameW".}
-  proc CredGetTargetInfo*(TargetName: LPCWSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredGetTargetInfoW".}
-  proc CredMarshalCredential*(CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredMarshalCredentialW".}
-  proc CredUnmarshalCredential*(MarshaledCredential: LPCWSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredUnmarshalCredentialW".}
-  proc CredIsMarshaledCredential*(MarshaledCredential: LPCWSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredIsMarshaledCredentialW".}
-  proc CredUIPromptForCredentials*(pUiInfo: PCREDUI_INFOW, pszTargetName: PCWSTR, pContext: PCtxtHandle, dwAuthError: DWORD, pszUserName: PWSTR, ulUserNameBufferSize: ULONG, pszPassword: PWSTR, ulPasswordBufferSize: ULONG, save: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForCredentialsW".}
-  proc CredUIParseUserName*(UserName: ptr WCHAR, user: ptr WCHAR, userBufferSize: ULONG, domain: ptr WCHAR, domainBufferSize: ULONG): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIParseUserNameW".}
-  proc CredUICmdLinePromptForCredentials*(pszTargetName: PCWSTR, pContext: PCtxtHandle, dwAuthError: DWORD, UserName: PWSTR, ulUserBufferSize: ULONG, pszPassword: PWSTR, ulPasswordBufferSize: ULONG, pfSave: PBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUICmdLinePromptForCredentialsW".}
-  proc CredUIConfirmCredentials*(pszTargetName: PCWSTR, bConfirm: WINBOOL): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIConfirmCredentialsW".}
-  proc CredFindBestCredential*(TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredFindBestCredentialW".}
-  proc CredIsProtected*(pszProtectedCredentials: LPWSTR, pProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredIsProtectedW".}
-  proc CredPackAuthenticationBuffer*(dwFlags: DWORD, pszUserName: LPWSTR, pszPassword: LPWSTR, pPackedCredentials: PBYTE, pcbPackedCredentials: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc: "CredPackAuthenticationBufferW".}
-  proc CredProtect*(fAsSelf: WINBOOL, pszCredentials: LPWSTR, cchCredentials: DWORD, pszProtectedCredentials: LPWSTR, pcchMaxChars: ptr DWORD, ProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredProtectW".}
-  proc CredUIPromptForWindowsCredentials*(pUiInfo: PCREDUI_INFOW, dwAuthError: DWORD, pulAuthPackage: ptr ULONG, pvInAuthBuffer: LPCVOID, ulInAuthBufferSize: ULONG, ppvOutAuthBuffer: ptr LPVOID, pulOutAuthBufferSize: ptr ULONG, pfSave: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForWindowsCredentialsW".}
-  proc CredUnPackAuthenticationBuffer*(dwFlags: DWORD, pAuthBuffer: PVOID, cbAuthBuffer: DWORD, pszUserName: LPWSTR, pcchMaxUserName: ptr DWORD, pszDomainName: LPWSTR, pcchMaxDomainame: ptr DWORD, pszPassword: LPWSTR, pcchMaxPassword: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc: "CredUnPackAuthenticationBufferW".}
-  proc CredUnprotect*(fAsSelf: WINBOOL, pszProtectedCredentials: LPWSTR, cchCredentials: DWORD, pszCredentials: LPWSTR, pcchMaxChars: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredUnprotectW".}
+
+  proc CredWrite*(
+    Credential: PCREDENTIALW, Flags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredWriteW".}
+
+  proc CredRead*(
+    TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredReadW".}
+
+  proc CredEnumerate*(
+    Filter: LPCWSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALW
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredEnumerateW".}
+
+  proc CredWriteDomainCredentials*(
+    TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW, Credential: PCREDENTIALW, Flags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredWriteDomainCredentialsW"
+  .}
+
+  proc CredReadDomainCredentials*(
+    TargetInfo: PCREDENTIAL_TARGET_INFORMATIONW,
+    Flags: DWORD,
+    Count: ptr DWORD,
+    Credential: ptr ptr PCREDENTIALW,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredReadDomainCredentialsW"
+  .}
+
+  proc CredDelete*(
+    TargetName: LPCWSTR, Type: DWORD, Flags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredDeleteW".}
+
+  proc CredRename*(
+    OldTargetName: LPCWSTR, NewTargetName: LPCWSTR, Type: DWORD, Flags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredRenameW".}
+
+  proc CredGetTargetInfo*(
+    TargetName: LPCWSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONW
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredGetTargetInfoW".}
+
+  proc CredMarshalCredential*(
+    CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPWSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredMarshalCredentialW".}
+
+  proc CredUnmarshalCredential*(
+    MarshaledCredential: LPCWSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredUnmarshalCredentialW"
+  .}
+
+  proc CredIsMarshaledCredential*(
+    MarshaledCredential: LPCWSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredIsMarshaledCredentialW"
+  .}
+
+  proc CredUIPromptForCredentials*(
+    pUiInfo: PCREDUI_INFOW,
+    pszTargetName: PCWSTR,
+    pContext: PCtxtHandle,
+    dwAuthError: DWORD,
+    pszUserName: PWSTR,
+    ulUserNameBufferSize: ULONG,
+    pszPassword: PWSTR,
+    ulPasswordBufferSize: ULONG,
+    save: ptr WINBOOL,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForCredentialsW".}
+
+  proc CredUIParseUserName*(
+    UserName: ptr WCHAR,
+    user: ptr WCHAR,
+    userBufferSize: ULONG,
+    domain: ptr WCHAR,
+    domainBufferSize: ULONG,
+  ): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIParseUserNameW".}
+
+  proc CredUICmdLinePromptForCredentials*(
+    pszTargetName: PCWSTR,
+    pContext: PCtxtHandle,
+    dwAuthError: DWORD,
+    UserName: PWSTR,
+    ulUserBufferSize: ULONG,
+    pszPassword: PWSTR,
+    ulPasswordBufferSize: ULONG,
+    pfSave: PBOOL,
+    dwFlags: DWORD,
+  ): DWORD {.
+    winapi, stdcall, dynlib: "credui", importc: "CredUICmdLinePromptForCredentialsW"
+  .}
+
+  proc CredUIConfirmCredentials*(
+    pszTargetName: PCWSTR, bConfirm: WINBOOL
+  ): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIConfirmCredentialsW".}
+
+  proc CredFindBestCredential*(
+    TargetName: LPCWSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALW
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredFindBestCredentialW".}
+
+  proc CredIsProtected*(
+    pszProtectedCredentials: LPWSTR, pProtectionType: ptr CRED_PROTECTION_TYPE
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredIsProtectedW".}
+
+  proc CredPackAuthenticationBuffer*(
+    dwFlags: DWORD,
+    pszUserName: LPWSTR,
+    pszPassword: LPWSTR,
+    pPackedCredentials: PBYTE,
+    pcbPackedCredentials: ptr DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "credui", importc: "CredPackAuthenticationBufferW"
+  .}
+
+  proc CredProtect*(
+    fAsSelf: WINBOOL,
+    pszCredentials: LPWSTR,
+    cchCredentials: DWORD,
+    pszProtectedCredentials: LPWSTR,
+    pcchMaxChars: ptr DWORD,
+    ProtectionType: ptr CRED_PROTECTION_TYPE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredProtectW".}
+
+  proc CredUIPromptForWindowsCredentials*(
+    pUiInfo: PCREDUI_INFOW,
+    dwAuthError: DWORD,
+    pulAuthPackage: ptr ULONG,
+    pvInAuthBuffer: LPCVOID,
+    ulInAuthBufferSize: ULONG,
+    ppvOutAuthBuffer: ptr LPVOID,
+    pulOutAuthBufferSize: ptr ULONG,
+    pfSave: ptr WINBOOL,
+    dwFlags: DWORD,
+  ): DWORD {.
+    winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForWindowsCredentialsW"
+  .}
+
+  proc CredUnPackAuthenticationBuffer*(
+    dwFlags: DWORD,
+    pAuthBuffer: PVOID,
+    cbAuthBuffer: DWORD,
+    pszUserName: LPWSTR,
+    pcchMaxUserName: ptr DWORD,
+    pszDomainName: LPWSTR,
+    pcchMaxDomainame: ptr DWORD,
+    pszPassword: LPWSTR,
+    pcchMaxPassword: ptr DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "credui", importc: "CredUnPackAuthenticationBufferW"
+  .}
+
+  proc CredUnprotect*(
+    fAsSelf: WINBOOL,
+    pszProtectedCredentials: LPWSTR,
+    cchCredentials: DWORD,
+    pszCredentials: LPWSTR,
+    pcchMaxChars: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredUnprotectW".}
+
 when winimAnsi:
   type
     CREDENTIAL_ATTRIBUTE* = CREDENTIAL_ATTRIBUTEA
@@ -271,25 +671,160 @@ when winimAnsi:
     PCREDENTIAL_TARGET_INFORMATION* = PCREDENTIAL_TARGET_INFORMATIONA
     CREDUI_INFO* = CREDUI_INFOA
     PCREDUI_INFO* = PCREDUI_INFOA
-  proc CredWrite*(Credential: PCREDENTIALA, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredWriteA".}
-  proc CredRead*(TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredReadA".}
-  proc CredEnumerate*(Filter: LPCSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredEnumerateA".}
-  proc CredWriteDomainCredentials*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA, Credential: PCREDENTIALA, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredWriteDomainCredentialsA".}
-  proc CredReadDomainCredentials*(TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredReadDomainCredentialsA".}
-  proc CredDelete*(TargetName: LPCSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredDeleteA".}
-  proc CredRename*(OldTargetName: LPCSTR, NewTargetName: LPCSTR, Type: DWORD, Flags: DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredRenameA".}
-  proc CredGetTargetInfo*(TargetName: LPCSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredGetTargetInfoA".}
-  proc CredMarshalCredential*(CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredMarshalCredentialA".}
-  proc CredUnmarshalCredential*(MarshaledCredential: LPCSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredUnmarshalCredentialA".}
-  proc CredIsMarshaledCredential*(MarshaledCredential: LPCSTR): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredIsMarshaledCredentialA".}
-  proc CredUIPromptForCredentials*(pUiInfo: PCREDUI_INFOA, pszTargetName: PCSTR, pContext: PCtxtHandle, dwAuthError: DWORD, pszUserName: PSTR, ulUserNameBufferSize: ULONG, pszPassword: PSTR, ulPasswordBufferSize: ULONG, save: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForCredentialsA".}
-  proc CredUIParseUserName*(userName: ptr CHAR, user: ptr CHAR, userBufferSize: ULONG, domain: ptr CHAR, domainBufferSize: ULONG): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIParseUserNameA".}
-  proc CredUICmdLinePromptForCredentials*(pszTargetName: PCSTR, pContext: PCtxtHandle, dwAuthError: DWORD, UserName: PSTR, ulUserBufferSize: ULONG, pszPassword: PSTR, ulPasswordBufferSize: ULONG, pfSave: PBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUICmdLinePromptForCredentialsA".}
-  proc CredUIConfirmCredentials*(pszTargetName: PCSTR, bConfirm: WINBOOL): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIConfirmCredentialsA".}
-  proc CredFindBestCredential*(TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredFindBestCredentialA".}
-  proc CredIsProtected*(pszProtectedCredentials: LPSTR, pProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredIsProtectedA".}
-  proc CredPackAuthenticationBuffer*(dwFlags: DWORD, pszUserName: LPSTR, pszPassword: LPSTR, pPackedCredentials: PBYTE, pcbPackedCredentials: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc: "CredPackAuthenticationBufferA".}
-  proc CredProtect*(fAsSelf: WINBOOL, pszCredentials: LPSTR, cchCredentials: DWORD, pszProtectedCredentials: LPSTR, pcchMaxChars: ptr DWORD, ProtectionType: ptr CRED_PROTECTION_TYPE): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredProtectA".}
-  proc CredUIPromptForWindowsCredentials*(pUiInfo: PCREDUI_INFOA, dwAuthError: DWORD, pulAuthPackage: ptr ULONG, pvInAuthBuffer: LPCVOID, ulInAuthBufferSize: ULONG, ppvOutAuthBuffer: ptr LPVOID, pulOutAuthBufferSize: ptr ULONG, pfSave: ptr WINBOOL, dwFlags: DWORD): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForWindowsCredentialsA".}
-  proc CredUnPackAuthenticationBuffer*(dwFlags: DWORD, pAuthBuffer: PVOID, cbAuthBuffer: DWORD, pszUserName: LPSTR, pcchMaxUserName: ptr DWORD, pszDomainName: LPSTR, pcchMaxDomainame: ptr DWORD, pszPassword: LPSTR, pcchMaxPassword: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "credui", importc: "CredUnPackAuthenticationBufferA".}
-  proc CredUnprotect*(fAsSelf: WINBOOL, pszProtectedCredentials: LPSTR, cchCredentials: DWORD, pszCredentials: LPSTR, pcchMaxChars: ptr DWORD): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredUnprotectA".}
+
+  proc CredWrite*(
+    Credential: PCREDENTIALA, Flags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredWriteA".}
+
+  proc CredRead*(
+    TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredReadA".}
+
+  proc CredEnumerate*(
+    Filter: LPCSTR, Flags: DWORD, Count: ptr DWORD, Credential: ptr ptr PCREDENTIALA
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredEnumerateA".}
+
+  proc CredWriteDomainCredentials*(
+    TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA, Credential: PCREDENTIALA, Flags: DWORD
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredWriteDomainCredentialsA"
+  .}
+
+  proc CredReadDomainCredentials*(
+    TargetInfo: PCREDENTIAL_TARGET_INFORMATIONA,
+    Flags: DWORD,
+    Count: ptr DWORD,
+    Credential: ptr ptr PCREDENTIALA,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredReadDomainCredentialsA"
+  .}
+
+  proc CredDelete*(
+    TargetName: LPCSTR, Type: DWORD, Flags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredDeleteA".}
+
+  proc CredRename*(
+    OldTargetName: LPCSTR, NewTargetName: LPCSTR, Type: DWORD, Flags: DWORD
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredRenameA".}
+
+  proc CredGetTargetInfo*(
+    TargetName: LPCSTR, Flags: DWORD, TargetInfo: ptr PCREDENTIAL_TARGET_INFORMATIONA
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredGetTargetInfoA".}
+
+  proc CredMarshalCredential*(
+    CredType: CRED_MARSHAL_TYPE, Credential: PVOID, MarshaledCredential: ptr LPSTR
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredMarshalCredentialA".}
+
+  proc CredUnmarshalCredential*(
+    MarshaledCredential: LPCSTR, CredType: PCRED_MARSHAL_TYPE, Credential: ptr PVOID
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredUnmarshalCredentialA"
+  .}
+
+  proc CredIsMarshaledCredential*(
+    MarshaledCredential: LPCSTR
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "advapi32", importc: "CredIsMarshaledCredentialA"
+  .}
+
+  proc CredUIPromptForCredentials*(
+    pUiInfo: PCREDUI_INFOA,
+    pszTargetName: PCSTR,
+    pContext: PCtxtHandle,
+    dwAuthError: DWORD,
+    pszUserName: PSTR,
+    ulUserNameBufferSize: ULONG,
+    pszPassword: PSTR,
+    ulPasswordBufferSize: ULONG,
+    save: ptr WINBOOL,
+    dwFlags: DWORD,
+  ): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForCredentialsA".}
+
+  proc CredUIParseUserName*(
+    userName: ptr CHAR,
+    user: ptr CHAR,
+    userBufferSize: ULONG,
+    domain: ptr CHAR,
+    domainBufferSize: ULONG,
+  ): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIParseUserNameA".}
+
+  proc CredUICmdLinePromptForCredentials*(
+    pszTargetName: PCSTR,
+    pContext: PCtxtHandle,
+    dwAuthError: DWORD,
+    UserName: PSTR,
+    ulUserBufferSize: ULONG,
+    pszPassword: PSTR,
+    ulPasswordBufferSize: ULONG,
+    pfSave: PBOOL,
+    dwFlags: DWORD,
+  ): DWORD {.
+    winapi, stdcall, dynlib: "credui", importc: "CredUICmdLinePromptForCredentialsA"
+  .}
+
+  proc CredUIConfirmCredentials*(
+    pszTargetName: PCSTR, bConfirm: WINBOOL
+  ): DWORD {.winapi, stdcall, dynlib: "credui", importc: "CredUIConfirmCredentialsA".}
+
+  proc CredFindBestCredential*(
+    TargetName: LPCSTR, Type: DWORD, Flags: DWORD, Credential: ptr PCREDENTIALA
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredFindBestCredentialA".}
+
+  proc CredIsProtected*(
+    pszProtectedCredentials: LPSTR, pProtectionType: ptr CRED_PROTECTION_TYPE
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredIsProtectedA".}
+
+  proc CredPackAuthenticationBuffer*(
+    dwFlags: DWORD,
+    pszUserName: LPSTR,
+    pszPassword: LPSTR,
+    pPackedCredentials: PBYTE,
+    pcbPackedCredentials: ptr DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "credui", importc: "CredPackAuthenticationBufferA"
+  .}
+
+  proc CredProtect*(
+    fAsSelf: WINBOOL,
+    pszCredentials: LPSTR,
+    cchCredentials: DWORD,
+    pszProtectedCredentials: LPSTR,
+    pcchMaxChars: ptr DWORD,
+    ProtectionType: ptr CRED_PROTECTION_TYPE,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredProtectA".}
+
+  proc CredUIPromptForWindowsCredentials*(
+    pUiInfo: PCREDUI_INFOA,
+    dwAuthError: DWORD,
+    pulAuthPackage: ptr ULONG,
+    pvInAuthBuffer: LPCVOID,
+    ulInAuthBufferSize: ULONG,
+    ppvOutAuthBuffer: ptr LPVOID,
+    pulOutAuthBufferSize: ptr ULONG,
+    pfSave: ptr WINBOOL,
+    dwFlags: DWORD,
+  ): DWORD {.
+    winapi, stdcall, dynlib: "credui", importc: "CredUIPromptForWindowsCredentialsA"
+  .}
+
+  proc CredUnPackAuthenticationBuffer*(
+    dwFlags: DWORD,
+    pAuthBuffer: PVOID,
+    cbAuthBuffer: DWORD,
+    pszUserName: LPSTR,
+    pcchMaxUserName: ptr DWORD,
+    pszDomainName: LPSTR,
+    pcchMaxDomainame: ptr DWORD,
+    pszPassword: LPSTR,
+    pcchMaxPassword: ptr DWORD,
+  ): WINBOOL {.
+    winapi, stdcall, dynlib: "credui", importc: "CredUnPackAuthenticationBufferA"
+  .}
+
+  proc CredUnprotect*(
+    fAsSelf: WINBOOL,
+    pszProtectedCredentials: LPSTR,
+    cchCredentials: DWORD,
+    pszCredentials: LPSTR,
+    pcchMaxChars: ptr DWORD,
+  ): WINBOOL {.winapi, stdcall, dynlib: "advapi32", importc: "CredUnprotectA".}

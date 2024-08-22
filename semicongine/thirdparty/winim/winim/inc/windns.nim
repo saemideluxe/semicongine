@@ -21,6 +21,7 @@ type
   IP4_ARRAY* {.pure.} = object
     AddrCount*: DWORD
     AddrArray*: array[1, IP4_ADDRESS]
+
   PIP4_ARRAY* = ptr IP4_ARRAY
   IP6_ADDRESS* {.pure, union.} = object
     IP6Qword*: array[2, QWORD]
@@ -28,40 +29,47 @@ type
     IP6Word*: array[8, WORD]
     IP6Byte*: array[16, BYTE]
     In6*: IN6_ADDR
+
   PIP6_ADDRESS* = ptr IP6_ADDRESS
   DNS_HEADER* {.pure.} = object
     Xid*: WORD
-    RecursionDesired* {.bitsize:1.}: BYTE
-    Truncation* {.bitsize:1.}: BYTE
-    Authoritative* {.bitsize:1.}: BYTE
-    Opcode* {.bitsize:4.}: BYTE
-    IsResponse* {.bitsize:1.}: BYTE
-    ResponseCode* {.bitsize:4.}: BYTE
-    Reserved* {.bitsize:3.}: BYTE
-    RecursionAvailable* {.bitsize:1.}: BYTE
+    RecursionDesired* {.bitsize: 1.}: BYTE
+    Truncation* {.bitsize: 1.}: BYTE
+    Authoritative* {.bitsize: 1.}: BYTE
+    Opcode* {.bitsize: 4.}: BYTE
+    IsResponse* {.bitsize: 1.}: BYTE
+    ResponseCode* {.bitsize: 4.}: BYTE
+    Reserved* {.bitsize: 3.}: BYTE
+    RecursionAvailable* {.bitsize: 1.}: BYTE
     QuestionCount*: WORD
     AnswerCount*: WORD
     NameServerCount*: WORD
     AdditionalCount*: WORD
+
   PDNS_HEADER* = ptr DNS_HEADER
   DNS_WIRE_QUESTION* {.pure.} = object
     QuestionType*: WORD
     QuestionClass*: WORD
+
   PDNS_WIRE_QUESTION* = ptr DNS_WIRE_QUESTION
   DNS_WIRE_RECORD* {.pure, packed.} = object
     RecordType*: WORD
     RecordClass*: WORD
     TimeToLive*: DWORD
     DataLength*: WORD
+
   PDNS_WIRE_RECORD* = ptr DNS_WIRE_RECORD
   DNS_A_DATA* {.pure.} = object
     IpAddress*: IP4_ADDRESS
+
   PDNS_A_DATA* = ptr DNS_A_DATA
   DNS_PTR_DATAW* {.pure.} = object
     pNameHost*: PWSTR
+
   PDNS_PTR_DATAW* = ptr DNS_PTR_DATAW
   DNS_PTR_DATAA* {.pure.} = object
     pNameHost*: PSTR
+
   PDNS_PTR_DATAA* = ptr DNS_PTR_DATAA
   DNS_SOA_DATAW* {.pure.} = object
     pNamePrimaryServer*: PWSTR
@@ -71,6 +79,7 @@ type
     dwRetry*: DWORD
     dwExpire*: DWORD
     dwDefaultTtl*: DWORD
+
   PDNS_SOA_DATAW* = ptr DNS_SOA_DATAW
   DNS_SOA_DATAA* {.pure.} = object
     pNamePrimaryServer*: PSTR
@@ -80,44 +89,54 @@ type
     dwRetry*: DWORD
     dwExpire*: DWORD
     dwDefaultTtl*: DWORD
+
   PDNS_SOA_DATAA* = ptr DNS_SOA_DATAA
   DNS_MINFO_DATAW* {.pure.} = object
     pNameMailbox*: PWSTR
     pNameErrorsMailbox*: PWSTR
+
   PDNS_MINFO_DATAW* = ptr DNS_MINFO_DATAW
   DNS_MINFO_DATAA* {.pure.} = object
     pNameMailbox*: PSTR
     pNameErrorsMailbox*: PSTR
+
   PDNS_MINFO_DATAA* = ptr DNS_MINFO_DATAA
   DNS_MX_DATAW* {.pure.} = object
     pNameExchange*: PWSTR
     wPreference*: WORD
     Pad*: WORD
+
   PDNS_MX_DATAW* = ptr DNS_MX_DATAW
   DNS_MX_DATAA* {.pure.} = object
     pNameExchange*: PSTR
     wPreference*: WORD
     Pad*: WORD
+
   PDNS_MX_DATAA* = ptr DNS_MX_DATAA
   DNS_TXT_DATAW* {.pure.} = object
     dwStringCount*: DWORD
     pStringArray*: array[1, PWSTR]
+
   PDNS_TXT_DATAW* = ptr DNS_TXT_DATAW
   DNS_TXT_DATAA* {.pure.} = object
     dwStringCount*: DWORD
     pStringArray*: array[1, PSTR]
+
   PDNS_TXT_DATAA* = ptr DNS_TXT_DATAA
   DNS_NULL_DATA* {.pure.} = object
     dwByteCount*: DWORD
     Data*: array[1, BYTE]
+
   PDNS_NULL_DATA* = ptr DNS_NULL_DATA
   DNS_WKS_DATA* {.pure.} = object
     IpAddress*: IP4_ADDRESS
     chProtocol*: UCHAR
     BitMask*: array[1, BYTE]
+
   PDNS_WKS_DATA* = ptr DNS_WKS_DATA
   DNS_AAAA_DATA* {.pure.} = object
     Ip6Address*: IP6_ADDRESS
+
   PDNS_AAAA_DATA* = ptr DNS_AAAA_DATA
   DNS_SIG_DATAW* {.pure.} = object
     pNameSigner*: PWSTR
@@ -130,6 +149,7 @@ type
     wKeyTag*: WORD
     Pad*: WORD
     Signature*: array[1, BYTE]
+
   PDNS_SIG_DATAW* = ptr DNS_SIG_DATAW
   DNS_SIG_DATAA* {.pure.} = object
     pNameSigner*: PSTR
@@ -142,12 +162,14 @@ type
     wKeyTag*: WORD
     Pad*: WORD
     Signature*: array[1, BYTE]
+
   PDNS_SIG_DATAA* = ptr DNS_SIG_DATAA
   DNS_KEY_DATA* {.pure.} = object
     wFlags*: WORD
     chProtocol*: BYTE
     chAlgorithm*: BYTE
     Key*: array[1, BYTE]
+
   PDNS_KEY_DATA* = ptr DNS_KEY_DATA
   DNS_LOC_DATA* {.pure.} = object
     wVersion*: WORD
@@ -157,16 +179,19 @@ type
     dwLatitude*: DWORD
     dwLongitude*: DWORD
     dwAltitude*: DWORD
+
   PDNS_LOC_DATA* = ptr DNS_LOC_DATA
   DNS_NXT_DATAW* {.pure.} = object
     pNameNext*: PWSTR
     wNumTypes*: WORD
     wTypes*: array[1, WORD]
+
   PDNS_NXT_DATAW* = ptr DNS_NXT_DATAW
   DNS_NXT_DATAA* {.pure.} = object
     pNameNext*: PSTR
     wNumTypes*: WORD
     wTypes*: array[1, WORD]
+
   PDNS_NXT_DATAA* = ptr DNS_NXT_DATAA
   DNS_SRV_DATAW* {.pure.} = object
     pNameTarget*: PWSTR
@@ -174,6 +199,7 @@ type
     wWeight*: WORD
     wPort*: WORD
     Pad*: WORD
+
   PDNS_SRV_DATAW* = ptr DNS_SRV_DATAW
   DNS_SRV_DATAA* {.pure.} = object
     pNameTarget*: PSTR
@@ -181,13 +207,15 @@ type
     wWeight*: WORD
     wPort*: WORD
     Pad*: WORD
+
   PDNS_SRV_DATAA* = ptr DNS_SRV_DATAA
-const
-  DNS_ATMA_MAX_ADDR_LENGTH* = 20
+
+const DNS_ATMA_MAX_ADDR_LENGTH* = 20
 type
   DNS_ATMA_DATA* {.pure.} = object
     AddressType*: BYTE
-    Address*: array[DNS_ATMA_MAX_ADDR_LENGTH , BYTE]
+    Address*: array[DNS_ATMA_MAX_ADDR_LENGTH, BYTE]
+
   PDNS_ATMA_DATA* = ptr DNS_ATMA_DATA
   DNS_TKEY_DATAW* {.pure.} = object
     pNameAlgorithm*: PWSTR
@@ -202,6 +230,7 @@ type
     wOtherLength*: WORD
     cAlgNameLength*: UCHAR
     bPacketPointers*: WINBOOL
+
   PDNS_TKEY_DATAW* = ptr DNS_TKEY_DATAW
   DNS_TKEY_DATAA* {.pure.} = object
     pNameAlgorithm*: PSTR
@@ -216,6 +245,7 @@ type
     wOtherLength*: WORD
     cAlgNameLength*: UCHAR
     bPacketPointers*: WINBOOL
+
   PDNS_TKEY_DATAA* = ptr DNS_TKEY_DATAA
   DNS_TSIG_DATAW* {.pure.} = object
     pNameAlgorithm*: PWSTR
@@ -230,6 +260,7 @@ type
     wOtherLength*: WORD
     cAlgNameLength*: UCHAR
     bPacketPointers*: WINBOOL
+
   PDNS_TSIG_DATAW* = ptr DNS_TSIG_DATAW
   DNS_TSIG_DATAA* {.pure.} = object
     pNameAlgorithm*: PSTR
@@ -244,6 +275,7 @@ type
     wOtherLength*: WORD
     cAlgNameLength*: UCHAR
     bPacketPointers*: WINBOOL
+
   PDNS_TSIG_DATAA* = ptr DNS_TSIG_DATAA
   DNS_WINS_DATA* {.pure.} = object
     dwMappingFlag*: DWORD
@@ -251,28 +283,33 @@ type
     dwCacheTimeout*: DWORD
     cWinsServerCount*: DWORD
     WinsServers*: array[1, IP4_ADDRESS]
+
   PDNS_WINS_DATA* = ptr DNS_WINS_DATA
   DNS_WINSR_DATAW* {.pure.} = object
     dwMappingFlag*: DWORD
     dwLookupTimeout*: DWORD
     dwCacheTimeout*: DWORD
     pNameResultDomain*: PWSTR
+
   PDNS_WINSR_DATAW* = ptr DNS_WINSR_DATAW
   DNS_WINSR_DATAA* {.pure.} = object
     dwMappingFlag*: DWORD
     dwLookupTimeout*: DWORD
     dwCacheTimeout*: DWORD
     pNameResultDomain*: PSTR
+
   PDNS_WINSR_DATAA* = ptr DNS_WINSR_DATAA
   DNS_RECORD_FLAGS* {.pure.} = object
-    Section* {.bitsize:2.}: DWORD
-    Delete* {.bitsize:1.}: DWORD
-    CharSet* {.bitsize:2.}: DWORD
-    Unused* {.bitsize:3.}: DWORD
-    Reserved* {.bitsize:24.}: DWORD
+    Section* {.bitsize: 2.}: DWORD
+    Delete* {.bitsize: 1.}: DWORD
+    CharSet* {.bitsize: 2.}: DWORD
+    Unused* {.bitsize: 3.}: DWORD
+    Reserved* {.bitsize: 24.}: DWORD
+
   DNS_RECORDW_Flags* {.pure, union.} = object
     DW*: DWORD
     S*: DNS_RECORD_FLAGS
+
   DNS_RECORDW_Data* {.pure, union.} = object
     A*: DNS_A_DATA
     SOA*: DNS_SOA_DATAW
@@ -334,6 +371,7 @@ type
     winsr*: DNS_WINSR_DATAW
     NBSTAT*: DNS_WINSR_DATAW
     nbstat*: DNS_WINSR_DATAW
+
   DNS_RECORDW* {.pure.} = object
     pNext*: ptr DnsRecordW
     pName*: PWSTR
@@ -343,10 +381,12 @@ type
     dwTtl*: DWORD
     dwReserved*: DWORD
     Data*: DNS_RECORDW_Data
+
   PDNS_RECORDW* = ptr DNS_RECORDW
   DNS_RECORDA_Flags* {.pure, union.} = object
     DW*: DWORD
     S*: DNS_RECORD_FLAGS
+
   DNS_RECORDA_Data* {.pure, union.} = object
     A*: DNS_A_DATA
     SOA*: DNS_SOA_DATAA
@@ -408,6 +448,7 @@ type
     winsr*: DNS_WINSR_DATAA
     NBSTAT*: DNS_WINSR_DATAA
     nbstat*: DNS_WINSR_DATAA
+
   DNS_RECORDA* {.pure.} = object
     pNext*: ptr DnsRecordA
     pName*: PSTR
@@ -417,22 +458,25 @@ type
     dwTtl*: DWORD
     dwReserved*: DWORD
     Data*: DNS_RECORDA_Data
+
   PDNS_RECORDA* = ptr DNS_RECORDA
+
 when winimUnicode:
-  type
-    PDNS_RECORD* = ptr DNS_RECORDW
+  type PDNS_RECORD* = ptr DNS_RECORDW
 when winimAnsi:
-  type
-    PDNS_RECORD* = ptr DNS_RECORDA
+  type PDNS_RECORD* = ptr DNS_RECORDA
 type
   DNS_RRSET* {.pure.} = object
     pFirstRR*: PDNS_RECORD
     pLastRR*: PDNS_RECORD
+
   PDNS_RRSET* = ptr DNS_RRSET
   DNS_MESSAGE_BUFFER* {.pure, packed.} = object
     MessageHead*: DNS_HEADER
     MessageBody*: array[1, CHAR]
+
   PDNS_MESSAGE_BUFFER* = ptr DNS_MESSAGE_BUFFER
+
 const
   SIZEOF_IP4_ADDRESS* = 4
   IP4_ADDRESS_STRING_LENGTH* = 15
@@ -448,12 +492,13 @@ const
   DNS_MAX_LABEL_BUFFER_LENGTH* = 64
   DNS_IP4_REVERSE_DOMAIN_STRING_A* = "in-addr.arpa."
   DNS_IP4_REVERSE_DOMAIN_STRING_W* = "in-addr.arpa."
-  DNS_MAX_IP4_REVERSE_NAME_LENGTH* = IP4_ADDRESS_STRING_LENGTH+1+(len(DNS_IP4_REVERSE_DOMAIN_STRING_A)+1)
-  DNS_MAX_IP4_REVERSE_NAME_BUFFER_LENGTH* = DNS_MAX_IP4_REVERSE_NAME_LENGTH+1
+  DNS_MAX_IP4_REVERSE_NAME_LENGTH* =
+    IP4_ADDRESS_STRING_LENGTH + 1 + (len(DNS_IP4_REVERSE_DOMAIN_STRING_A) + 1)
+  DNS_MAX_IP4_REVERSE_NAME_BUFFER_LENGTH* = DNS_MAX_IP4_REVERSE_NAME_LENGTH + 1
   DNS_IP6_REVERSE_DOMAIN_STRING_A* = "ip6.arpa."
   DNS_IP6_REVERSE_DOMAIN_STRING_W* = "ip6.arpa."
-  DNS_MAX_IP6_REVERSE_NAME_LENGTH* = 64+(len(DNS_IP6_REVERSE_DOMAIN_STRING_A)+1)
-  DNS_MAX_IP6_REVERSE_NAME_BUFFER_LENGTH* = DNS_MAX_IP6_REVERSE_NAME_LENGTH+1
+  DNS_MAX_IP6_REVERSE_NAME_LENGTH* = 64 + (len(DNS_IP6_REVERSE_DOMAIN_STRING_A) + 1)
+  DNS_MAX_IP6_REVERSE_NAME_BUFFER_LENGTH* = DNS_MAX_IP6_REVERSE_NAME_LENGTH + 1
   DNS_MAX_REVERSE_NAME_LENGTH* = DNS_MAX_IP6_REVERSE_NAME_LENGTH
   DNS_MAX_REVERSE_NAME_BUFFER_LENGTH* = DNS_MAX_IP6_REVERSE_NAME_BUFFER_LENGTH
   DNS_MAX_TEXT_STRING_LENGTH* = 255
@@ -614,7 +659,7 @@ const
   DNS_ATMA_FORMAT_E164* = 1
   DNS_ATMA_FORMAT_AESA* = 2
   DNS_ATMA_AESA_ADDR_LENGTH* = 20
-  DNS_ATMA_MAX_RECORD_LENGTH* = DNS_ATMA_MAX_ADDR_LENGTH+1
+  DNS_ATMA_MAX_RECORD_LENGTH* = DNS_ATMA_MAX_ADDR_LENGTH + 1
   DNSSEC_ALGORITHM_RSAMD5* = 1
   DNSSEC_ALGORITHM_NULL* = 253
   DNSSEC_ALGORITHM_PRIVATE* = 254
@@ -741,35 +786,182 @@ const
   dnsNameWildcard* = 4
   dnsNameSrvRecord* = 5
   DNS_OFFSET_TO_QUESTION_NAME* = 12
-proc DnsQueryConfig*(Config: DNS_CONFIG_TYPE, Flag: DWORD, pwsAdapterName: PWSTR, pReserved: PVOID, pBuffer: PVOID, pBufferLength: PDWORD): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsRecordCopyEx*(pRecord: PDNS_RECORD, CharSetIn: DNS_CHARSET, CharSetOut: DNS_CHARSET): PDNS_RECORD {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsRecordSetCopyEx*(pRecordSet: PDNS_RECORD, CharSetIn: DNS_CHARSET, CharSetOut: DNS_CHARSET): PDNS_RECORD {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsRecordCompare*(pRecord1: PDNS_RECORD, pRecord2: PDNS_RECORD): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsRecordSetCompare*(pRR1: PDNS_RECORD, pRR2: PDNS_RECORD, ppDiff1: ptr PDNS_RECORD, ppDiff2: ptr PDNS_RECORD): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsRecordSetDetach*(pRecordList: PDNS_RECORD): PDNS_RECORD {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsFree*(pData: PVOID, FreeType: DNS_FREE_TYPE): VOID {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsRecordListFree*(pRecordList: PDNS_RECORD, FreeType: DNS_FREE_TYPE): VOID {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsQuery_A*(pszName: PCSTR, wType: WORD, Options: DWORD, aipServers: PIP4_ARRAY, ppQueryResults: ptr PDNS_RECORD, pReserved: ptr PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsQuery_UTF8*(pszName: PCSTR, wType: WORD, Options: DWORD, aipServers: PIP4_ARRAY, ppQueryResults: ptr PDNS_RECORDA, pReserved: ptr PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsQuery_W*(pszName: PCWSTR, wType: WORD, Options: DWORD, aipServers: PIP4_ARRAY, ppQueryResults: ptr PDNS_RECORD, pReserved: ptr PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsAcquireContextHandle_W*(CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsAcquireContextHandle_A*(CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsReleaseContextHandle*(hContext: HANDLE): VOID {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsModifyRecordsInSet_W*(pAddRecords: PDNS_RECORD, pDeleteRecords: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsModifyRecordsInSet_A*(pAddRecords: PDNS_RECORD, pDeleteRecords: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsModifyRecordsInSet_UTF8*(pAddRecords: PDNS_RECORDA, pDeleteRecords: PDNS_RECORDA, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsReplaceRecordSetW*(pNewSet: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsReplaceRecordSetA*(pNewSet: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsReplaceRecordSetUTF8*(pNewSet: PDNS_RECORDA, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsValidateName_UTF8*(pszName: LPCSTR, Format: DNS_NAME_FORMAT): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsValidateName_W*(pwszName: LPCWSTR, Format: DNS_NAME_FORMAT): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsValidateName_A*(pszName: LPCSTR, Format: DNS_NAME_FORMAT): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsNameCompare_A*(pName1: LPSTR, pName2: LPSTR): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsNameCompare_W*(pName1: LPWSTR, pName2: LPWSTR): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsWriteQuestionToBuffer_W*(pDnsBuffer: PDNS_MESSAGE_BUFFER, pdwBufferSize: PDWORD, pszName: LPWSTR, wType: WORD, Xid: WORD, fRecursionDesired: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsWriteQuestionToBuffer_UTF8*(pDnsBuffer: PDNS_MESSAGE_BUFFER, pdwBufferSize: LPDWORD, pszName: LPSTR, wType: WORD, Xid: WORD, fRecursionDesired: WINBOOL): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsExtractRecordsFromMessage_W*(pDnsBuffer: PDNS_MESSAGE_BUFFER, wMessageLength: WORD, ppRecord: ptr PDNS_RECORD): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
-proc DnsExtractRecordsFromMessage_UTF8*(pDnsBuffer: PDNS_MESSAGE_BUFFER, wMessageLength: WORD, ppRecord: ptr PDNS_RECORDA): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+proc DnsQueryConfig*(
+  Config: DNS_CONFIG_TYPE,
+  Flag: DWORD,
+  pwsAdapterName: PWSTR,
+  pReserved: PVOID,
+  pBuffer: PVOID,
+  pBufferLength: PDWORD,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsRecordCopyEx*(
+  pRecord: PDNS_RECORD, CharSetIn: DNS_CHARSET, CharSetOut: DNS_CHARSET
+): PDNS_RECORD {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsRecordSetCopyEx*(
+  pRecordSet: PDNS_RECORD, CharSetIn: DNS_CHARSET, CharSetOut: DNS_CHARSET
+): PDNS_RECORD {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsRecordCompare*(
+  pRecord1: PDNS_RECORD, pRecord2: PDNS_RECORD
+): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsRecordSetCompare*(
+  pRR1: PDNS_RECORD,
+  pRR2: PDNS_RECORD,
+  ppDiff1: ptr PDNS_RECORD,
+  ppDiff2: ptr PDNS_RECORD,
+): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsRecordSetDetach*(
+  pRecordList: PDNS_RECORD
+): PDNS_RECORD {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsFree*(
+  pData: PVOID, FreeType: DNS_FREE_TYPE
+): VOID {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsRecordListFree*(
+  pRecordList: PDNS_RECORD, FreeType: DNS_FREE_TYPE
+): VOID {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsQuery_A*(
+  pszName: PCSTR,
+  wType: WORD,
+  Options: DWORD,
+  aipServers: PIP4_ARRAY,
+  ppQueryResults: ptr PDNS_RECORD,
+  pReserved: ptr PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsQuery_UTF8*(
+  pszName: PCSTR,
+  wType: WORD,
+  Options: DWORD,
+  aipServers: PIP4_ARRAY,
+  ppQueryResults: ptr PDNS_RECORDA,
+  pReserved: ptr PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsQuery_W*(
+  pszName: PCWSTR,
+  wType: WORD,
+  Options: DWORD,
+  aipServers: PIP4_ARRAY,
+  ppQueryResults: ptr PDNS_RECORD,
+  pReserved: ptr PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsAcquireContextHandle_W*(
+  CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsAcquireContextHandle_A*(
+  CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsReleaseContextHandle*(
+  hContext: HANDLE
+): VOID {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsModifyRecordsInSet_W*(
+  pAddRecords: PDNS_RECORD,
+  pDeleteRecords: PDNS_RECORD,
+  Options: DWORD,
+  hContext: HANDLE,
+  pServerList: PIP4_ARRAY,
+  pReserved: PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsModifyRecordsInSet_A*(
+  pAddRecords: PDNS_RECORD,
+  pDeleteRecords: PDNS_RECORD,
+  Options: DWORD,
+  hContext: HANDLE,
+  pServerList: PIP4_ARRAY,
+  pReserved: PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsModifyRecordsInSet_UTF8*(
+  pAddRecords: PDNS_RECORDA,
+  pDeleteRecords: PDNS_RECORDA,
+  Options: DWORD,
+  hContext: HANDLE,
+  pServerList: PIP4_ARRAY,
+  pReserved: PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsReplaceRecordSetW*(
+  pNewSet: PDNS_RECORD,
+  Options: DWORD,
+  hContext: HANDLE,
+  pServerList: PIP4_ARRAY,
+  pReserved: PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsReplaceRecordSetA*(
+  pNewSet: PDNS_RECORD,
+  Options: DWORD,
+  hContext: HANDLE,
+  pServerList: PIP4_ARRAY,
+  pReserved: PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsReplaceRecordSetUTF8*(
+  pNewSet: PDNS_RECORDA,
+  Options: DWORD,
+  hContext: HANDLE,
+  pServerList: PIP4_ARRAY,
+  pReserved: PVOID,
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsValidateName_UTF8*(
+  pszName: LPCSTR, Format: DNS_NAME_FORMAT
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsValidateName_W*(
+  pwszName: LPCWSTR, Format: DNS_NAME_FORMAT
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsValidateName_A*(
+  pszName: LPCSTR, Format: DNS_NAME_FORMAT
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsNameCompare_A*(
+  pName1: LPSTR, pName2: LPSTR
+): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsNameCompare_W*(
+  pName1: LPWSTR, pName2: LPWSTR
+): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsWriteQuestionToBuffer_W*(
+  pDnsBuffer: PDNS_MESSAGE_BUFFER,
+  pdwBufferSize: PDWORD,
+  pszName: LPWSTR,
+  wType: WORD,
+  Xid: WORD,
+  fRecursionDesired: WINBOOL,
+): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsWriteQuestionToBuffer_UTF8*(
+  pDnsBuffer: PDNS_MESSAGE_BUFFER,
+  pdwBufferSize: LPDWORD,
+  pszName: LPSTR,
+  wType: WORD,
+  Xid: WORD,
+  fRecursionDesired: WINBOOL,
+): WINBOOL {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsExtractRecordsFromMessage_W*(
+  pDnsBuffer: PDNS_MESSAGE_BUFFER, wMessageLength: WORD, ppRecord: ptr PDNS_RECORD
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
+proc DnsExtractRecordsFromMessage_UTF8*(
+  pDnsBuffer: PDNS_MESSAGE_BUFFER, wMessageLength: WORD, ppRecord: ptr PDNS_RECORDA
+): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc.}
+
 when winimUnicode:
   type
     DNS_RECORD* = DNS_RECORDW
@@ -795,13 +987,44 @@ when winimUnicode:
     PDNS_TSIG_DATA* = PDNS_TSIG_DATAW
     DNS_WINSR_DATA* = DNS_WINSR_DATAW
     PDNS_WINSR_DATA* = PDNS_WINSR_DATAW
+
   const
     DNS_IP4_REVERSE_DOMAIN_STRING* = DNS_IP4_REVERSE_DOMAIN_STRING_W
     DNS_IP6_REVERSE_DOMAIN_STRING* = DNS_IP6_REVERSE_DOMAIN_STRING_W
-  proc DnsQuery*(pszName: PCWSTR, wType: WORD, Options: DWORD, aipServers: PIP4_ARRAY, ppQueryResults: ptr PDNS_RECORD, pReserved: ptr PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsQuery_W".}
-  proc DnsAcquireContextHandle*(CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsAcquireContextHandle_W".}
-  proc DnsModifyRecordsInSet*(pAddRecords: PDNS_RECORD, pDeleteRecords: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsModifyRecordsInSet_W".}
-  proc DnsReplaceRecordSet*(pNewSet: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsReplaceRecordSetW".}
+  proc DnsQuery*(
+    pszName: PCWSTR,
+    wType: WORD,
+    Options: DWORD,
+    aipServers: PIP4_ARRAY,
+    ppQueryResults: ptr PDNS_RECORD,
+    pReserved: ptr PVOID,
+  ): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsQuery_W".}
+
+  proc DnsAcquireContextHandle*(
+    CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE
+  ): DNS_STATUS {.
+    winapi, stdcall, dynlib: "dnsapi", importc: "DnsAcquireContextHandle_W"
+  .}
+
+  proc DnsModifyRecordsInSet*(
+    pAddRecords: PDNS_RECORD,
+    pDeleteRecords: PDNS_RECORD,
+    Options: DWORD,
+    hContext: HANDLE,
+    pServerList: PIP4_ARRAY,
+    pReserved: PVOID,
+  ): DNS_STATUS {.
+    winapi, stdcall, dynlib: "dnsapi", importc: "DnsModifyRecordsInSet_W"
+  .}
+
+  proc DnsReplaceRecordSet*(
+    pNewSet: PDNS_RECORD,
+    Options: DWORD,
+    hContext: HANDLE,
+    pServerList: PIP4_ARRAY,
+    pReserved: PVOID,
+  ): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsReplaceRecordSetW".}
+
 when winimAnsi:
   type
     DNS_RECORD* = DNS_RECORDA
@@ -827,10 +1050,40 @@ when winimAnsi:
     PDNS_TSIG_DATA* = PDNS_TSIG_DATAA
     DNS_WINSR_DATA* = DNS_WINSR_DATAA
     PDNS_WINSR_DATA* = PDNS_WINSR_DATAA
+
   const
     DNS_IP4_REVERSE_DOMAIN_STRING* = DNS_IP4_REVERSE_DOMAIN_STRING_A
     DNS_IP6_REVERSE_DOMAIN_STRING* = DNS_IP6_REVERSE_DOMAIN_STRING_A
-  proc DnsQuery*(pszName: PCSTR, wType: WORD, Options: DWORD, aipServers: PIP4_ARRAY, ppQueryResults: ptr PDNS_RECORD, pReserved: ptr PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsQuery_A".}
-  proc DnsAcquireContextHandle*(CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsAcquireContextHandle_A".}
-  proc DnsModifyRecordsInSet*(pAddRecords: PDNS_RECORD, pDeleteRecords: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsModifyRecordsInSet_A".}
-  proc DnsReplaceRecordSet*(pNewSet: PDNS_RECORD, Options: DWORD, hContext: HANDLE, pServerList: PIP4_ARRAY, pReserved: PVOID): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsReplaceRecordSetA".}
+  proc DnsQuery*(
+    pszName: PCSTR,
+    wType: WORD,
+    Options: DWORD,
+    aipServers: PIP4_ARRAY,
+    ppQueryResults: ptr PDNS_RECORD,
+    pReserved: ptr PVOID,
+  ): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsQuery_A".}
+
+  proc DnsAcquireContextHandle*(
+    CredentialFlags: DWORD, pCredentials: PVOID, pContextHandle: PHANDLE
+  ): DNS_STATUS {.
+    winapi, stdcall, dynlib: "dnsapi", importc: "DnsAcquireContextHandle_A"
+  .}
+
+  proc DnsModifyRecordsInSet*(
+    pAddRecords: PDNS_RECORD,
+    pDeleteRecords: PDNS_RECORD,
+    Options: DWORD,
+    hContext: HANDLE,
+    pServerList: PIP4_ARRAY,
+    pReserved: PVOID,
+  ): DNS_STATUS {.
+    winapi, stdcall, dynlib: "dnsapi", importc: "DnsModifyRecordsInSet_A"
+  .}
+
+  proc DnsReplaceRecordSet*(
+    pNewSet: PDNS_RECORD,
+    Options: DWORD,
+    hContext: HANDLE,
+    pServerList: PIP4_ARRAY,
+    pReserved: PVOID,
+  ): DNS_STATUS {.winapi, stdcall, dynlib: "dnsapi", importc: "DnsReplaceRecordSetA".}

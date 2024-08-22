@@ -47,10 +47,11 @@ when not compiles(unsafeaddr GUID_NULL):
     ##    pUk.QueryInterface(&IID_IDispatch, &pDisp)
 
 else:
-  template `&`*(x: object): ptr type(x) = unsafeaddr x
+  template `&`*(x: object): ptr type(x) =
     ## Use `&` to gets pointer for const object. For example:
     ##
     ## .. code-block:: Nim
     ##    # pUk is "ptr IUnknown" for some object
     ##    var pDisp: ptr IDispatch
     ##    pUk.QueryInterface(&IID_IDispatch, &pDisp)
+    unsafeaddr x

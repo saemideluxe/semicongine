@@ -10,12 +10,12 @@ when defined(release):
   {.push checks: off.}
 
 proc encodeFragment(
-  encoding: var seq[uint16],
-  metadata: var BlockMetadata,
-  src: ptr UncheckedArray[uint8],
-  ep: var int,
-  start, bytesToRead: int,
-  compressTable: var array[maxCompressTableSize, uint16]
+    encoding: var seq[uint16],
+    metadata: var BlockMetadata,
+    src: ptr UncheckedArray[uint8],
+    ep: var int,
+    start, bytesToRead: int,
+    compressTable: var array[maxCompressTableSize, uint16],
 ) =
   let ipEnd = start + bytesToRead
   var
@@ -136,11 +136,11 @@ proc encodeFragment(
   emitRemainder()
 
 proc encodeSnappy*(
-  encoding: var seq[uint16],
-  ep: var int,
-  metadata: var BlockMetadata,
-  src: ptr UncheckedArray[uint8],
-  blockStart, blockLen: int
+    encoding: var seq[uint16],
+    ep: var int,
+    metadata: var BlockMetadata,
+    src: ptr UncheckedArray[uint8],
+    blockStart, blockLen: int,
 ) =
   metadata.litLenFreq[256] = 1 # Alway 1 end-of-block symbol
 
@@ -151,15 +151,7 @@ proc encodeSnappy*(
     let
       fragmentSize = blockStart + blockLen - pos
       bytesToRead = min(fragmentSize, maxWindowSize)
-    encodeFragment(
-      encoding,
-      metadata,
-      src,
-      ep,
-      pos,
-      bytesToRead,
-      compressTable
-    )
+    encodeFragment(encoding, metadata, src, ep, pos, bytesToRead, compressTable)
     pos += bytesToRead
 
 when defined(release):
