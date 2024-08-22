@@ -72,7 +72,6 @@ proc readTrueType(
   var
     topOffsets: Table[Rune, int]
     images: seq[Image[Gray]]
-  let empty_image = Image[Gray](width: 1, height: 1, data: @[[0'u8]])
 
   for codePoint in codePoints:
     var
@@ -101,7 +100,7 @@ proc readTrueType(
         bitmap[i] = [data[i].uint8]
       images.add Image[Gray](width: width.uint32, height: height.uint32, data: bitmap)
     else:
-      images.add empty_image
+      images.add Image[Gray](width: 1, height: 1, data: @[[0'u8]])
 
     nativeFree(data)
 
@@ -109,15 +108,14 @@ proc readTrueType(
 
   result.fontAtlas = packed.atlas
 
-  let w = float32(packed.atlas.width)
-  let h = float32(packed.atlas.height)
+  let w = float32(result.fontAtlas.width)
+  let h = float32(result.fontAtlas.height)
   for i in 0 ..< codePoints.len:
     let
       codePoint = codePoints[i]
-      image = images[i]
       coord = (x: float32(packed.coords[i].x), y: float32(packed.coords[i].y))
-      iw = float32(image.width)
-      ih = float32(image.height)
+      iw = float32(images[i].width)
+      ih = float32(images[i].height)
     # horizontal spaces:
     var advance, leftBearing: cint
     stbtt_GetCodepointHMetrics(
@@ -125,7 +123,7 @@ proc readTrueType(
     )
 
     result.glyphs[codePoint] = GlyphInfo(
-      dimension: vec2(float32(image.width), float32(image.height)),
+      dimension: vec2(float32(images[i].width), float32(images[i].height)),
       uvs: [
         vec2((coord.x + 0.5) / w, (coord.y + ih - 0.5) / h),
         vec2((coord.x + 0.5) / w, (coord.y + 0.5) / h),

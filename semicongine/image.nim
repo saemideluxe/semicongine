@@ -49,6 +49,11 @@ template nLayers*(image: Image): untyped =
 
 proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.error.}
 
+func copy*[S, T](img: ImageObject[S, T]): ImageObject[S, T] =
+  for bf, rf in fields(img, result):
+    rf = bf
+
+
 # loads single layer image
 proc loadImageData*[T: PixelType](
     pngData: string | seq[uint8]

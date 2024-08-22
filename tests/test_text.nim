@@ -18,7 +18,7 @@ proc test_01_static_label(time: float32) =
   var pipeline =
     createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
-  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas))
+  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
   initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
@@ -55,15 +55,15 @@ proc test_02_multiple_animated(time: float32) =
   var pipeline =
     createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
-  var ds1 = asDescriptorSetData(FontDS(fontAtlas: font1.fontAtlas))
+  var ds1 = asDescriptorSetData(FontDS(fontAtlas: font1.fontAtlas.copy()))
   uploadImages(renderdata, ds1)
   initDescriptorSet(renderdata, pipeline.layout(0), ds1)
 
-  var ds2 = asDescriptorSetData(FontDS(fontAtlas: font2.fontAtlas))
+  var ds2 = asDescriptorSetData(FontDS(fontAtlas: font2.fontAtlas.copy()))
   uploadImages(renderdata, ds2)
   initDescriptorSet(renderdata, pipeline.layout(0), ds2)
 
-  var ds3 = asDescriptorSetData(FontDS(fontAtlas: font3.fontAtlas))
+  var ds3 = asDescriptorSetData(FontDS(fontAtlas: font3.fontAtlas.copy()))
   uploadImages(renderdata, ds3)
   initDescriptorSet(renderdata, pipeline.layout(0), ds3)
 
@@ -128,7 +128,7 @@ proc test_03_layouting(time: float32) =
   var pipeline =
     createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
-  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas))
+  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
   initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
@@ -201,7 +201,7 @@ proc test_04_lots_of_texts(time: float32) =
   var pipeline =
     createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
-  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas))
+  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
   initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
