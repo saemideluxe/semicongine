@@ -61,7 +61,6 @@ func copy*[S, T](img: ImageObject[S, T]): ImageObject[S, T] =
   for bf, rf in fields(img, result):
     rf = bf
 
-
 # loads single layer image
 proc loadImageData*[T: PixelType](
     pngData: string | seq[uint8]
@@ -93,19 +92,6 @@ proc loadImageData*[T: PixelType](
     for i in 0 ..< result.data.len:
       swap(result.data[i][0], result.data[i][2])
 
-proc addImageLayer*[T: PixelType](
-    image: var ImageArray[T], pngData: string | seq[uint8]
-) =
-  let (w, h, data) = loadImageData[T](pngData)
-
-  assert w == image.width,
-    "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
-  assert h == image.height,
-    "New image layer has dimension {(w, y)} but image has dimension {(image.width, image.height)}"
-
-  inc image.nLayers
-  image.data.add data
-
 proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
   assert path.splitFile().ext.toLowerAscii == ".png",
     "Unsupported image type: " & path.splitFile().ext.toLowerAscii
@@ -132,9 +118,46 @@ proc loadImageArray*[T: PixelType](
 
   let (width, height, data) =
     loadImageData[T](loadResource_intern(paths[0], package = package).readAll())
-  result = ImageArray[T](width: width, height: height, data: data, nLayers: 1)
+  result =
+    ImageArray[T](width: width, height: height, data: data, nLayers: paths.len.uint32)
   for path in paths[1 .. ^1]:
-    result.addImageLayer(loadResource_intern(path, package = package).readAll())
+    let (w, h, data) =
+      loadImageData[T](loadResource_intern(path, package = package).readAll())
+    assert w == result.width,
+      "New image layer has dimension {(w, y)} but image has dimension {(result.width, result.height)}"
+    assert h == result.height,
+      "New image layer has dimension {(w, y)} but image has dimension {(result.width, result.height)}"
+    result.data.add data
+
+proc loadImageArray*[T: PixelType](
+    path: string, tilesize: uint32, package = DEFAULT_PACKAGE
+): ImageArray[T] =
+  assert path.splitFile().ext.toLowerAscii == ".png",
+    "Unsupported image type: " & path.splitFile().ext.toLowerAscii
+  when T is Gray:
+    let pngType = 0.cint
+  elif T is BGRA:
+    let pngType = 6.cint
+
+  let (width, height, data) =
+    loadImageData[T](loadResource_intern(path, package = package).readAll())
+  let
+    tilesX = width div tilesize
+    tilesY = height div tilesize
+  result = ImageArray[T](width: tilesize, height: tilesize)
+  var tile = newSeq[T](tilesize * tilesize)
+  var hasNonTransparent = when T is BGRA: false else: true
+  for ty in 0 ..< tilesY:
+    for tx in 0 ..< tilesY:
+      let baseI = ty * tilesize * width + tx * tilesize
+      for y in 0 ..< tilesize:
+        for x in 0 ..< tilesize:
+          tile[y * tilesize + x] = data[baseI + y * width + x]
+          when T is BGRA:
+            hasNonTransparent = hasNonTransparent or tile[y * tilesize + x].a > 0
+      if hasNonTransparent:
+        result.data.add tile
+        result.nLayers.inc
 
 proc `[]`*(image: Image, x, y: uint32): auto =
   assert x < image.width, &"{x} < {image.width} is not true"
