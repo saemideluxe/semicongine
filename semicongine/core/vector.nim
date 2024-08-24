@@ -137,6 +137,7 @@ const
   G* = vec4(1, 0, 0, 1)
   B* = vec4(1, 0, 0, 1)
 
+  O* = vec3(0, 0, 0)
   X* = vec3(1, 0, 0)
   Y* = vec3(0, 1, 0)
   Z* = vec3(0, 0, 1)
@@ -145,6 +146,7 @@ const
   YZ* = vec3(0, 1, 1)
   XYZ* = vec3(1, 1, 1)
 
+  Oi* = vec3i(0, 0, 0)
   Xi* = vec3i(1, 0, 0)
   Yi* = vec3i(0, 1, 0)
   Zi* = vec3i(0, 0, 1)
@@ -153,6 +155,7 @@ const
   YZi* = vec3i(0, 1, 1)
   XYZi* = vec3i(1, 1, 1)
 
+  Oi8* = vec3i8(0, 0, 0)
   Xi8* = vec3i8(1, 0, 0)
   Yi8* = vec3i8(0, 1, 0)
   Zi8* = vec3i8(0, 0, 1)

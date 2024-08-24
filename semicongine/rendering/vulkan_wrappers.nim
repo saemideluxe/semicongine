@@ -143,11 +143,12 @@ proc svkCreate2DImageView*(
     format: VkFormat,
     aspect = VK_IMAGE_ASPECT_COLOR_BIT,
     nLayers = 1'u32,
+    isArray = false
 ): VkImageView =
   var createInfo = VkImageViewCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
     image: image,
-    viewType: if nLayers == 1: VK_IMAGE_VIEW_TYPE_2D else: VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+    viewType: if isArray: VK_IMAGE_VIEW_TYPE_2D_ARRAY else: VK_IMAGE_VIEW_TYPE_2D,
     format: format,
     components: VkComponentMapping(
       r: VK_COMPONENT_SWIZZLE_IDENTITY,

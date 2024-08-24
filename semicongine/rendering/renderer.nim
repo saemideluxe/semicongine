@@ -554,7 +554,7 @@ proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
   # imageview can only be created after memory is bound
-  image.imageview = svkCreate2DImageView(image.vk, format, nLayers = image.nLayers)
+  image.imageview = svkCreate2DImageView(image.vk, format, nLayers = image.nLayers, isArray = typeof(image) is ImageArray)
   renderData.imageViews.add image.imageview
 
   # data transfer and layout transition
