@@ -554,7 +554,9 @@ proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
   renderData.memory[memoryType][selectedBlockI].offsetNextFree += memoryRequirements.size
 
   # imageview can only be created after memory is bound
-  image.imageview = svkCreate2DImageView(image.vk, format, nLayers = image.nLayers, isArray = typeof(image) is ImageArray)
+  image.imageview = svkCreate2DImageView(
+    image.vk, format, nLayers = image.nLayers, isArray = typeof(image) is ImageArray
+  )
   renderData.imageViews.add image.imageview
 
   # data transfer and layout transition
@@ -618,11 +620,13 @@ proc assertCanRenderMesh(TShader, TMesh, TInstance: typedesc) =
           assert typeof(meshAttrValue) is GPUArray,
             "Mesh attribute '" & attrName & "' must be a GPUArray"
           assert typeof(attrValue) is elementType(meshAttrValue.data),
-            "Type of shader attribute and mesh attribute '" & attrName & "' is not the same (" & typeof(attrValue).name & " and " & elementType(meshAttrValue.data).name & ")"
+            "Type of shader attribute and mesh attribute '" & attrName &
+              "' is not the same (" & typeof(attrValue).name & " and " &
+              elementType(meshAttrValue.data).name & ")"
           foundAttr = true
       assert foundAttr,
         "Attribute '" & attrName & "' is not provided in mesh type '" & name(TMesh) & "'"
-    if hasCustomPragma(attrValue, InstanceAttribute):
+    elif hasCustomPragma(attrValue, InstanceAttribute):
       var foundAttr = false
       for instAttrName, instAttrValue in default(TInstance).fieldPairs:
         when attrName == instAttrName:
