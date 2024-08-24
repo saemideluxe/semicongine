@@ -42,17 +42,21 @@ const ENABLE_TIMELOG {.booldefine.}: bool = not defined(release)
 
 template TimeAndLog*(body: untyped): untyped =
   when ENABLE_TIMELOG:
-    let t0 = getMonoTime()
-    body
-    echo (getMonoTime() - t0).inNanoseconds.float / 1_000_000
+    {.cast(noSideEffect).}:
+      let t0 = getMonoTime()
+      body
+    {.cast(noSideEffect).}:
+      debugecho (getMonoTime() - t0).inNanoseconds.float / 1_000_000
   else:
     body
 
 template TimeAndLog*(name: string, body: untyped): untyped =
   when ENABLE_TIMELOG:
-    let t0 = getMonoTime()
-    body
-    echo name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000, "ms"
+    {.cast(noSideEffect).}:
+      let t0 = getMonoTime()
+      body
+    {.cast(noSideEffect).}:
+      debugecho name, ": ", (getMonoTime() - t0).inNanoseconds.float / 1_000_000, "ms"
   else:
     body
 
