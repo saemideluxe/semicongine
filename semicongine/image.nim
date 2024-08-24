@@ -146,9 +146,9 @@ proc loadImageArray*[T: PixelType](
     tilesY = height div tilesize
   result = ImageArray[T](width: tilesize, height: tilesize)
   var tile = newSeq[T](tilesize * tilesize)
-  var hasNonTransparent = when T is BGRA: false else: true
   for ty in 0 ..< tilesY:
     for tx in 0 ..< tilesY:
+      var hasNonTransparent = when T is BGRA: false else: true
       let baseI = ty * tilesize * width + tx * tilesize
       for y in 0 ..< tilesize:
         for x in 0 ..< tilesize:
