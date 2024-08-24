@@ -618,8 +618,7 @@ proc assertCanRenderMesh(TShader, TMesh, TInstance: typedesc) =
           assert typeof(meshAttrValue) is GPUArray,
             "Mesh attribute '" & attrName & "' must be a GPUArray"
           assert typeof(attrValue) is elementType(meshAttrValue.data),
-            "Type of shader attribute and mesh attribute '" & attrName &
-              "' is not the same"
+            "Type of shader attribute and mesh attribute '" & attrName & "' is not the same (" & typeof(attrValue).name & " and " & elementType(meshAttrValue.data).name & ")"
           foundAttr = true
       assert foundAttr,
         "Attribute '" & attrName & "' is not provided in mesh type '" & name(TMesh) & "'"

@@ -1,4 +1,5 @@
 import std/os
+import std/typetraits
 import std/streams
 import std/strutils
 
@@ -48,6 +49,13 @@ template nLayers*(image: Image): untyped =
   1'u32
 
 proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.error.}
+
+func `$`*[S, IsArray](img: ImageObject[S, IsArray]): string =
+  let pixelTypeName = S.name
+  if IsArray == false:
+    &"{img.width}x{img.height} {pixelTypeName}"
+  else:
+    &"{img.width}x{img.height}[{img.nLayers}] {pixelTypeName}"
 
 func copy*[S, T](img: ImageObject[S, T]): ImageObject[S, T] =
   for bf, rf in fields(img, result):
