@@ -105,6 +105,15 @@ proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T]
     loadImageData[T](loadResource_intern(path, package = package).readAll())
   result = Image[T](width: width, height: height, data: data)
 
+proc addImage*[T: PixelType](imageArray: var ImageArray[T], image: sink Image[T]) =
+  assert image.width == imageArray.width,
+    "Image needs to have same dimension as ImageArray to be added"
+  assert image.height == imageArray.height,
+    "Image needs to have same dimension as ImageArray to be added"
+
+  inc image.nLayers
+  imageArray.data.add image.data
+
 proc loadImageArray*[T: PixelType](
     paths: openArray[string], package = DEFAULT_PACKAGE
 ): ImageArray[T] =
