@@ -111,7 +111,7 @@ proc addImage*[T: PixelType](imageArray: var ImageArray[T], image: sink Image[T]
   assert image.height == imageArray.height,
     "Image needs to have same dimension as ImageArray to be added"
 
-  inc image.nLayers
+  inc imageArray.nLayers
   imageArray.data.add image.data
 
 proc loadImageArray*[T: PixelType](
