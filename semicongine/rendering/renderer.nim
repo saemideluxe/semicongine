@@ -759,7 +759,7 @@ proc renderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
     layout = pipeline.layout,
     stageFlags = VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
     offset = 0,
-    size = sizeof(pushConstant).uint32,
+    size = alignedTo(sizeof(pushConstant).uint32, 4),
     pValues = addr(pushConstant),
   )
   render(commandBuffer, pipeline, mesh, instances, fixedVertexCount)
