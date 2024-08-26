@@ -422,3 +422,16 @@ proc loadMeshes*[TMesh, TMaterial](
     meshAttributesMapping = meshAttributesMapping,
     materialAttributesMapping = materialAttributesMapping,
   )
+
+# static version, for better checks
+proc loadMeshes*[TMesh, TMaterial](
+    path: static string,
+    meshAttributesMapping: static MeshAttributeNames,
+    materialAttributesMapping: static MaterialAttributeNames,
+    package: static string = DEFAULT_PACKAGE,
+): GltfData[TMesh, TMaterial] =
+  ReadglTF[TMesh, TMaterial](
+    stream = loadResource_intern(path, package = package),
+    meshAttributesMapping = meshAttributesMapping,
+    materialAttributesMapping = materialAttributesMapping,
+  )

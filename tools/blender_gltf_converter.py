@@ -17,7 +17,15 @@ def runner():
             quit(1)
 
         bpy.ops.wm.open_mainfile(filepath=inputfile)
-        bpy.ops.export_scene.gltf(filepath=outputfile[:-4], export_apply=True)
+        bpy.ops.export_scene.gltf(
+            filepath=outputfile[:-4],
+            export_apply=True,
+            export_yup=True,
+            check_existing=False,
+            export_image_format="AUTO",
+            export_format="GLB",
+            export_materials="EXPORT",
+        )
 
 
 if __name__ == "__main__":

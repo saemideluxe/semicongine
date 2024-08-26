@@ -128,9 +128,14 @@ elif thebundletype == Exe:
   const bundledResources = loadResources()
 
   proc loadResource_intern*(path: string, package: string): Stream =
-    if not (path in bundledResources[package]):
+    if path notin bundledResources[package]:
       raise newException(Exception, &"Resource {path} not found")
-    newStringStream(bundledResources[package][path])
+    result = newStringStream(bundledResources[package][path])
+
+  proc loadResource_intern*(path: static string, package: static string): Stream =
+    static:
+      assert path in bundledResources[package], "Resource file '" & path & "' not found"
+    result = newStringStream(bundledResources[package][path])
 
   proc modList_intern(): seq[string] =
     result = bundledResources.keys().toSeq()
@@ -163,6 +168,22 @@ proc loadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode =
   path.loadResource_intern(package = package).readAll().parseJson()
 
 proc loadConfig*(path: string, package = DEFAULT_PACKAGE): Config =
+  path.loadResource_intern(package = package).loadConfig(filename = path)
+
+# static versions of the above 3 calls
+proc loadResource*(
+    path: static string, package: static string = DEFAULT_PACKAGE
+): Stream =
+  loadResource_intern(path, package = package)
+
+proc loadJson*(
+    path: static string, package: static string = DEFAULT_PACKAGE
+): JsonNode =
+  path.loadResource_intern(package = package).readAll().parseJson()
+
+proc loadConfig*(
+    path: static string, package: static string = DEFAULT_PACKAGE
+): Config =
   path.loadResource_intern(package = package).loadConfig(filename = path)
 
 proc packages*(): seq[string] =

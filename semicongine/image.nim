@@ -53,9 +53,9 @@ proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.err
 func `$`*[S, IsArray](img: ImageObject[S, IsArray]): string =
   let pixelTypeName = S.name
   if IsArray == false:
-    &"{img.width}x{img.height} {pixelTypeName}"
+    $img.width & "x" & $img.height & " " & pixelTypeName
   else:
-    &"{img.width}x{img.height}[{img.nLayers}] {pixelTypeName}"
+    $img.width & "x" & $img.height & "[" & $img.nLayers & "] " & pixelTypeName
 
 func copy*[S, T](img: ImageObject[S, T]): ImageObject[S, T] =
   for bf, rf in fields(img, result):
@@ -92,6 +92,7 @@ proc loadImageData*[T: PixelType](
     for i in 0 ..< result.data.len:
       swap(result.data[i][0], result.data[i][2])
 
+# TODO: static versions to check for existing of files during compilation
 proc loadImage*[T: PixelType](path: string, package = DEFAULT_PACKAGE): Image[T] =
   assert path.splitFile().ext.toLowerAscii == ".png",
     "Unsupported image type: " & path.splitFile().ext.toLowerAscii

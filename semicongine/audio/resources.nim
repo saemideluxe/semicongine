@@ -121,3 +121,13 @@ proc loadAudio*(path: string, package = DEFAULT_PACKAGE): SoundData =
     loadResource_intern(path, package = package).readVorbis()
   else:
     raise newException(Exception, "Unsupported audio file type: " & path)
+
+proc loadAudio*(
+    path: static string, package: static string = DEFAULT_PACKAGE
+): SoundData =
+  if path.splitFile().ext.toLowerAscii == ".au":
+    loadResource_intern(path, package = package).readAU()
+  elif path.splitFile().ext.toLowerAscii == ".ogg":
+    loadResource_intern(path, package = package).readVorbis()
+  else:
+    raise newException(Exception, "Unsupported audio file type: " & path)
