@@ -597,19 +597,25 @@ proc assertCompatibleDescriptorSet(
           "Incompatible descriptor set types for set number " & $index & " in shader " &
             name(TShader)
 
+proc bindDescriptorSet*[TDescriptorSet](
+    commandBuffer: VkCommandBuffer,
+    descriptorSet: DescriptorSetData[TDescriptorSet],
+    index: static DescriptorSetIndex,
+    layout: VkPipelineLayout,
+) =
+  assert descriptorSet.vk[currentFiF()].Valid,
+    "DescriptorSetData not initialized, maybe forgot to call initDescriptorSet"
+  svkCmdBindDescriptorSet(commandBuffer, descriptorSet.vk[currentFiF()], index, layout)
+
 proc bindDescriptorSet*[TDescriptorSet, TShader](
     commandBuffer: VkCommandBuffer,
     descriptorSet: DescriptorSetData[TDescriptorSet],
     index: static DescriptorSetIndex,
     pipeline: Pipeline[TShader],
 ) =
-  assert descriptorSet.vk[currentFiF()].Valid,
-    "DescriptorSetData not initialized, maybe forgot to call initDescriptorSet"
   static:
     assertCompatibleDescriptorSet(TDescriptorSet, TShader, index)
-  svkCmdBindDescriptorSet(
-    commandBuffer, descriptorSet.vk[currentFiF()], index, pipeline.layout
-  )
+  bindDescriptorSet(commandBuffer, descriptorSet, index, pipeline.layout)
 
 proc assertCanRenderMesh(TShader, TMesh, TInstance: typedesc) =
   for attrName, attrValue in default(TShader).fieldPairs:
