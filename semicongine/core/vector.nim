@@ -269,6 +269,34 @@ func ceil*[T](vec: TVec3[T]): auto =
 func ceil*[T](vec: TVec4[T]): auto =
   TVec4([ceil(vec[0]), ceil(vec[1]), ceil(vec[2]), ceil(vec[3])])
 
+func clamp*[T, S: SomeNumber](vec: TVec1[T], a, b: S): auto =
+  TVec1([clamp(vec[0], a, b)])
+func clamp*[T, S: SomeNumber](vec: TVec2[T], a, b: S): auto =
+  TVec2([clamp(vec[0], a, b), clamp(vec[1], a, b)])
+func clamp*[T, S: SomeNumber](vec: TVec3[T], a, b: S): auto =
+  TVec3([clamp(vec[0], a, b), clamp(vec[1], a, b), clamp(vec[2], a, b)])
+func clamp*[T, S: SomeNumber](vec: TVec4[T], a, b: S): auto =
+  TVec4(
+    [clamp(vec[0], a, b), clamp(vec[1], a, b), clamp(vec[2], a, b), clamp(vec[3], a, b)]
+  )
+func clamp*[T, S: SomeNumber](vec: TVec1[T], a, b: TVec1[S]): auto =
+  TVec1[T]([clamp(vec[0], a[0], b[0])])
+func clamp*[T, S: SomeNumber](vec: TVec2[T], a, b: TVec2[S]): auto =
+  TVec2[T]([clamp(vec[0], a[0], b[0]), clamp(vec[1], a[1], b[1])])
+func clamp*[T, S: SomeNumber](vec: TVec3[T], a, b: TVec3[S]): auto =
+  TVec3[T](
+    [clamp(vec[0], a[0], b[0]), clamp(vec[1], a[1], b[1]), clamp(vec[2], a[2], b[2])]
+  )
+func clamp*[T, S: SomeNumber](vec: TVec4[T], a, b: TVec4[S]): auto =
+  TVec4[T](
+    [
+      clamp(vec[0], a[0], b[0]),
+      clamp(vec[1], a[1], b[1]),
+      clamp(vec[2], a[2], b[2]),
+      clamp(vec[3], a[3], b[3]),
+    ]
+  )
+
 func manhattan*(vec: TVec1): auto =
   abs(vec[0])
 func manhattan*(vec: TVec2): auto =
