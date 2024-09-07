@@ -3,7 +3,7 @@ import std/hashes
 
 import ../../core
 
-proc randomGradient(pos: Vec2f, seed: int32 = 0): Vec2f =
+proc randomGradient(pos: Vec2f, seed: uint64 = 0): Vec2f =
   let randomAngle: float32 =
     TAU * (float32(int(hash((pos.x, pos.y, seed)))) / float32(high(int)))
   return vec2(cos(randomAngle), sin(randomAngle))
@@ -12,7 +12,7 @@ proc interpolate(a: float32, b: float32, weight: float32): float32 =
   # with Smootherstep
   (b - a) * ((weight * (weight * 6.0 - 15.0) + 10.0) * weight * weight * weight) + a
 
-proc perlin*(pos: Vec2f, seed: int32 = 0): float32 =
+proc perlin*(pos: Vec2f, seed: uint64 = 0): float32 =
   let
     # grid coordinates around target point
     topleft = vec2(trunc(pos.x), trunc(pos.y))
