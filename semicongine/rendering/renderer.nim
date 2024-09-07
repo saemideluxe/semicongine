@@ -735,8 +735,9 @@ proc render*[TShader, TMesh](
     pipeline: Pipeline[TShader],
     mesh: TMesh,
     fixedVertexCount = -1,
+    fixedInstanceCount = -1,
 ) =
-  render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount)
+  render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount, fixedInstanceCount)
 
 proc assertValidPushConstantType(TShader, TPushConstant: typedesc) =
   assert sizeof(TPushConstant) <= PUSH_CONSTANT_SIZE,
@@ -757,6 +758,7 @@ proc renderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
     instances: TInstance,
     pushConstant: TPushConstant,
     fixedVertexCount = -1,
+    fixedInstanceCount = -1,
 ) =
   static:
     assertValidPushConstantType(TShader, TPushConstant)
@@ -768,7 +770,7 @@ proc renderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
     size = alignedTo(sizeof(pushConstant).uint32, 4),
     pValues = addr(pushConstant),
   )
-  render(commandBuffer, pipeline, mesh, instances, fixedVertexCount)
+  render(commandBuffer, pipeline, mesh, instances, fixedVertexCount, fixedInstanceCount)
 
 proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
     commandBuffer: VkCommandBuffer,
@@ -776,6 +778,7 @@ proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
     mesh: TMesh,
     pushConstant: TPushConstant,
     fixedVertexCount = -1,
+    fixedInstanceCount = -1,
 ) =
   static:
     assertValidPushConstantType(TShader, TPushConstant)
@@ -787,7 +790,7 @@ proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
     size = sizeof(pushConstant).uint32,
     pValues = addr(pushConstant),
   )
-  render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount)
+  render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount, fixedInstanceCount)
 
 proc asGPUArray*[T](data: sink openArray[T], bufferType: static BufferType): auto =
   GPUArray[T, bufferType](data: @data)
