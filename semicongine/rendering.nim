@@ -146,6 +146,8 @@ type
     memory: VkDeviceMemory
 
   GPUArray*[T: SupportedGPUType, TBuffer: static BufferType] = object
+    # TODO: when using mapped buffer memory, directly write values to mapped location
+    # instead of using data as buffer
     data*: seq[T]
     buffer*: Buffer
     offset*: uint64
