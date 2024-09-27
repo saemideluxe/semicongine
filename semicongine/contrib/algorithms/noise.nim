@@ -27,8 +27,9 @@ proc perlin*(pos: Vec2f, seed: uint64 = 0): float32 =
     xinterpol = pos.x - topleft.x
     yinterpol = pos.y - topleft.y
 
-  return interpolate(
-    interpolate(topleft_dot, bottomleft_dot, yinterpol),
-    interpolate(topright_dot, bottomright_dot, yinterpol),
-    xinterpol,
-  )
+  return
+    interpolate(
+      interpolate(topleft_dot, bottomleft_dot, yinterpol),
+      interpolate(topright_dot, bottomright_dot, yinterpol),
+      xinterpol,
+    ) * 0.5 + 0.5
