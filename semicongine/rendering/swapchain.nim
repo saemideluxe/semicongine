@@ -267,10 +267,23 @@ proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
   swapchain.currentFiF = (uint32(swapchain.currentFiF) + 1) mod INFLIGHTFRAMES
   return true
 
-proc recreate(swapchain: Swapchain): Swapchain =
-  initSwapchain(
-    renderPass = swapchain.renderPass, vSync = swapchain.vSync, oldSwapchain = swapchain
+proc recreateSwapchain*() =
+  let newSwapchain = initSwapchain(
+    renderPass = vulkan.swapchain.renderPass,
+    vSync = vulkan.swapchain.vSync,
+    oldSwapchain = vulkan.swapchain,
   )
+  if newSwapchain != nil:
+    vulkan.swapchain = newSwapchain
+
+proc recreateSwapchain*(vSync: bool) =
+  let newSwapchain = initSwapchain(
+    renderPass = vulkan.swapchain.renderPass,
+    vSync = vSync,
+    oldSwapchain = vulkan.swapchain,
+  )
+  if newSwapchain != nil:
+    vulkan.swapchain = newSwapchain
 
 template withNextFrame*(framebufferName, commandBufferName, body: untyped): untyped =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
@@ -294,6 +307,4 @@ template withNextFrame*(framebufferName, commandBufferName, body: untyped): unty
       checkVkResult vkEndCommandBuffer(`commandBufferName`)
       discard swap(swapchain = vulkan.swapchain, commandBuffer = `commandBufferName`)
   else:
-    let newSwapchain = recreate(vulkan.swapchain)
-    if newSwapchain != nil:
-      vulkan.swapchain = newSwapchain
+    recreateSwapchain()

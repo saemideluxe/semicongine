@@ -84,7 +84,7 @@ type
   Swapchain* = ref object
     # parameters to initSwapchain, required for swapchain recreation
     renderPass*: RenderPass
-    vSync: bool
+    vSync*: bool
     # populated through initSwapchain proc
     vk: VkSwapchainKHR
     width*: uint32
