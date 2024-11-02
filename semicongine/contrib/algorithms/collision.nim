@@ -185,7 +185,7 @@ func getFaceNormals(polytope: seq[Vec3f], faces: seq[int]): (seq[Vec4f], int) =
       normal = normal * -1'f32
       distance = distance * -1'f32
 
-    normals.add normal.ToVec4(distance)
+    normals.add normal.toVec4(distance)
 
     if distance < minDistance:
       minTriangle = i div 3
@@ -237,7 +237,7 @@ func collisionPoint3D(
       var uniqueEdges: seq[(int, int)]
       var i = 0
       while i < normals.len:
-        if sameDirection(normals[i], support):
+        if sameDirection(normals[i].toVec3(), support):
           var f = i * 3
 
           addIfUniqueEdge(uniqueEdges, faces, f + 0, f + 1)
@@ -302,7 +302,7 @@ func collisionPoint2D(
         ij = vertexJ - vertexI
       var
         normal = vec2(ij.y, -ij.x).normalized()
-        distance = normal.dot(vertexI)
+        distance = normal.dot(vertexI.toVec2())
 
       if (distance < 0):
         distance *= -1'f32
@@ -314,8 +314,8 @@ func collisionPoint2D(
         minIndex = j
 
     let
-      support = supportPoint(a, b, minNormal.ToVec3)
-      sDistance = minNormal.dot(support)
+      support = supportPoint(a, b, minNormal.toVec3())
+      sDistance = minNormal.dot(support.toVec2())
 
     if (abs(sDistance - minDistance) > 0.001):
       minDistance = high(float32)

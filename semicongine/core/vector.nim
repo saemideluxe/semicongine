@@ -21,20 +21,20 @@ type
   Vec2i8* = TVec2[int8]
   Vec3i8* = TVec3[int8]
 
-converter ToVec1*[T: SomeNumber](orig: TVec3[T] | TVec4[T]): TVec1[T] =
+func toVec1*[T: SomeNumber](orig: TVec3[T] | TVec4[T]): TVec1[T] =
   TVec1[T]([orig[0]])
 
-converter ToVec2*[T: SomeNumber](orig: TVec3[T] | TVec4[T]): TVec2[T] =
+func toVec2*[T: SomeNumber](orig: TVec3[T] | TVec4[T]): TVec2[T] =
   TVec2[T]([orig[0], orig[1]])
 
-converter ToVec3*[T: SomeNumber](orig: TVec4[T]): TVec3[T] =
+func toVec3*[T: SomeNumber](orig: TVec4[T]): TVec3[T] =
   TVec3[T]([orig[0], orig[1], orig[2]])
 
-func ToVec4*[T: SomeNumber](orig: TVec3[T], value: T = default(T)): TVec4[T] =
+func toVec4*[T: SomeNumber](orig: TVec3[T], value: T = default(T)): TVec4[T] =
   TVec4[T]([orig[0], orig[1], orig[2], value])
-func ToVec3*[T: SomeNumber](orig: TVec2[T], value: T = default(T)): TVec3[T] =
+func toVec3*[T: SomeNumber](orig: TVec2[T], value: T = default(T)): TVec3[T] =
   TVec3[T]([orig[0], orig[1], value])
-func ToVec2*[T: SomeNumber](orig: TVec1[T], value: T = default(T)): TVec2[T] =
+func toVec2*[T: SomeNumber](orig: TVec1[T], value: T = default(T)): TVec2[T] =
   TVec2[T]([orig[0], value])
 
 # shortcuts Vec3f
