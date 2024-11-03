@@ -134,6 +134,7 @@ proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)])
     return
   var meshfiles: seq[(string, string)]
   var audiofiles: seq[(string, string)]
+  var copies: seq[(string, string)]
 
   for (target_rel, source_rel) in resourceMap:
     let target = thisDir().joinPath(target_rel)
@@ -147,12 +148,16 @@ proc semicongine_import_resource_file*(resourceMap: openArray[(string, string)])
       elif source.endsWith("mp3") or source.endsWith("ogg") or source.endsWith("wav"):
         audiofiles.add (source, target)
       else:
-        raise newException(Exception, &"unkown file type: {source}")
+        copies.add (source, target)
       target.parentDir().mkDir()
     else:
       echo &"{target} is up-to-date"
+
   import_meshes meshfiles
   import_audio audiofiles
+  for (src, dst) in copies:
+    echo &"copy {src} -> {dst}"
+    src.cpFile(dst)
 
 # for steam-buildscript docs see https://partner.steamgames.com/doc/sdk/uploading
 proc semicongine_steam_upload*(steamaccount, password, buildscript: string) =
