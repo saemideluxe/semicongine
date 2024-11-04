@@ -1,3 +1,7 @@
+import std/math
+
+import ./mixer_module
+
 proc sinewave(f: float): proc(x: float): float =
   proc ret(x: float): float =
     sin(x * 2 * Pi * f)

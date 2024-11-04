@@ -7,13 +7,14 @@ import std/strformat
 import std/tables
 import std/times
 
+import ../core/globals
+
 const NBUFFERS = 32
 # it seems that some alsa hardware has a problem with smaller buffers than 512
 when defined(linux):
   const BUFFERSAMPLECOUNT = 512
 else:
   const BUFFERSAMPLECOUNT = 256
-const AUDIO_SAMPLE_RATE* = 44100
 
 type
   Level* = 0'f .. 1'f
@@ -347,7 +348,7 @@ when defined(windows):
 when defined(linux):
   import std/posix
 
-proc startMixerThread() =
+proc startMixerThread*() =
   mixer[] = initMixer()
   audiothread.createThread(audioWorker)
   debug "Created audio thread"

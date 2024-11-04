@@ -1,10 +1,13 @@
 import std/endians
 import std/os
 import std/streams
+import std/strformat
 import std/strutils
 
 import ../core
 import ../resources
+
+import ./mixer_module
 
 type
   Encoding {.size: sizeof(uint32).} = enum
@@ -113,21 +116,3 @@ proc readVorbis*(stream: Stream): SoundData =
       "Only support mono and stereo audio at the moment (1 or 2 channels), but found " &
         $channels,
     )
-
-proc loadAudio*(path: string, package = DEFAULT_PACKAGE): SoundData =
-  if path.splitFile().ext.toLowerAscii == ".au":
-    loadResource_intern(path, package = package).readAU()
-  elif path.splitFile().ext.toLowerAscii == ".ogg":
-    loadResource_intern(path, package = package).readVorbis()
-  else:
-    raise newException(Exception, "Unsupported audio file type: " & path)
-
-proc loadAudio*(
-    path: static string, package: static string = DEFAULT_PACKAGE
-): SoundData =
-  if path.splitFile().ext.toLowerAscii == ".au":
-    loadResource_intern(path, package = package).readAU()
-  elif path.splitFile().ext.toLowerAscii == ".ogg":
-    loadResource_intern(path, package = package).readVorbis()
-  else:
-    raise newException(Exception, "Unsupported audio file type: " & path)

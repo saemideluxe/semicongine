@@ -4,6 +4,12 @@ export core
 import ./semicongine/resources
 export resources
 
+import ./semicongine/loaders
+export loaders
+
+import ./semicongine/background_loader
+export background_loader
+
 import ./semicongine/image
 export image
 
