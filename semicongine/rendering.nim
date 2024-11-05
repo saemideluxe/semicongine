@@ -382,8 +382,7 @@ proc setupSwapchain*(renderPass: RenderPass, vSync: bool = false) =
   vulkan.swapchain = initSwapchain(renderPass, vSync = vSync)
 
 proc destroyVulkan*() =
-  if vulkan.swapchain != nil:
-    destroySwapchain(vulkan.swapchain)
+  clearSwapchain()
   vkDestroyDevice(vulkan.device, nil)
   vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
   if vulkan.debugMessenger.Valid:

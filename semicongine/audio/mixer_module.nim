@@ -5,6 +5,7 @@ import std/math
 import std/monotimes
 import std/strformat
 import std/tables
+import std/logging
 import std/times
 
 import ../core/globals
@@ -77,15 +78,13 @@ proc setupDevice(mixer: var Mixer) =
 # mixer.sounds[name] = LoadAudio(resource)
 
 proc addSound*(mixer: var Mixer, name: string, sound: SoundData) =
-  assert not (name in mixer.sounds)
-  mixer.sounds[name] = sound
-
-proc replaceSound*(mixer: var Mixer, name: string, sound: SoundData) =
-  assert (name in mixer.sounds)
+  if name in mixer.sounds:
+    warn "sound with name '", name, "' was already loaded, overwriting"
   mixer.sounds[name] = sound
 
 proc addTrack*(mixer: var Mixer, name: string, level: Level = 1'f) =
-  assert not (name in mixer.tracks)
+  if name in mixer.tracks:
+    warn "track with name '", name, "' was already loaded, overwriting"
   mixer.lock.withLock:
     mixer.tracks[name] = Track(level: level)
 
