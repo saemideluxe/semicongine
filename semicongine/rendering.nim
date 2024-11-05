@@ -85,6 +85,7 @@ type
     # parameters to initSwapchain, required for swapchain recreation
     renderPass*: RenderPass
     vSync*: bool
+    tripleBuffering*: bool
     # populated through initSwapchain proc
     vk: VkSwapchainKHR
     width*: uint32

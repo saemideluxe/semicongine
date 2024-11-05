@@ -1,7 +1,8 @@
-const N_FRAMEBUFFERS = 3'u32
-
 proc initSwapchain(
-    renderPass: RenderPass, vSync: bool = false, oldSwapchain: Swapchain = nil
+    renderPass: RenderPass,
+    vSync: bool = false,
+    tripleBuffering: bool = true,
+    oldSwapchain: Swapchain = nil,
 ): Swapchain =
   assert vulkan.instance.Valid, "Vulkan not initialized"
 
@@ -17,7 +18,7 @@ proc initSwapchain(
     return nil
 
   # following "count" is established according to vulkan specs
-  var minFramebufferCount = N_FRAMEBUFFERS
+  var minFramebufferCount = if tripleBuffering: 3'u32 else: 2'u32
   minFramebufferCount = max(minFramebufferCount, capabilities.minImageCount)
   if capabilities.maxImageCount != 0:
     minFramebufferCount = min(minFramebufferCount, capabilities.maxImageCount)
@@ -56,6 +57,7 @@ proc initSwapchain(
     height: height,
     renderPass: renderPass,
     vSync: vSync,
+    tripleBuffering: tripleBuffering,
     oldSwapchain: oldSwapchain,
   )
 
@@ -267,19 +269,23 @@ proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
   swapchain.currentFiF = (uint32(swapchain.currentFiF) + 1) mod INFLIGHTFRAMES
   return true
 
+# for re-creation with same settings, e.g. window resized
 proc recreateSwapchain*() =
   let newSwapchain = initSwapchain(
     renderPass = vulkan.swapchain.renderPass,
     vSync = vulkan.swapchain.vSync,
+    tripleBuffering = vulkan.swapchain.tripleBuffering,
     oldSwapchain = vulkan.swapchain,
   )
   if newSwapchain != nil:
     vulkan.swapchain = newSwapchain
 
-proc recreateSwapchain*(vSync: bool) =
+# for re-creation with different settings
+proc recreateSwapchain*(vSync: bool, tripleBuffering: bool) =
   let newSwapchain = initSwapchain(
     renderPass = vulkan.swapchain.renderPass,
     vSync = vSync,
+    tripleBuffering = tripleBuffering,
     oldSwapchain = vulkan.swapchain,
   )
   if newSwapchain != nil:
