@@ -377,9 +377,12 @@ proc clearSwapchain*() =
   destroySwapchain(vulkan.swapchain)
   vulkan.swapchain = nil
 
-proc setupSwapchain*(renderPass: RenderPass, vSync: bool = false) =
+proc setupSwapchain*(
+    renderPass: RenderPass, vSync: bool = false, tripleBuffering: bool = true
+) =
   assert vulkan.swapchain == nil, "Swapchain has already been initialized yet"
-  vulkan.swapchain = initSwapchain(renderPass, vSync = vSync)
+  vulkan.swapchain =
+    initSwapchain(renderPass, vSync = vSync, tripleBuffering = tripleBuffering)
 
 proc destroyVulkan*() =
   clearSwapchain()
