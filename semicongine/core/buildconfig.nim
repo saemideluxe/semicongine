@@ -23,6 +23,7 @@ else:
   const LOGLEVEL {.strdefine.}: string = "Warn"
 
 const ENGINE_LOGLEVEL* = parseEnum[Level]("lvl" & LOGLEVEL)
+addHandler(newConsoleLogger())
 setLogFilter(ENGINE_LOGLEVEL)
 
 # resource bundleing settings, need to be configured per project

@@ -657,6 +657,7 @@ proc render*[TShader, TMesh, TInstance](
     fixedVertexCount = -1,
     fixedInstanceCount = -1,
 ) =
+  debug("render ", name(TShader))
   static:
     assertCanRenderMesh(TShader, TMesh, TInstance)
 
@@ -669,12 +670,14 @@ proc render*[TShader, TMesh, TInstance](
     when hasCustomPragma(shaderAttribute, VertexAttribute):
       for meshName, meshValue in mesh.fieldPairs:
         when meshName == shaderAttributeName:
+          debug("  vertex attr: ", shaderAttributeName)
           vertexBuffers.add meshValue.buffer.vk
           vertexBuffersOffsets.add meshValue.offset
           elementCount = meshValue.data.len.uint32
     elif hasCustomPragma(shaderAttribute, InstanceAttribute):
       for instanceName, instanceValue in instances.fieldPairs:
         when instanceName == shaderAttributeName:
+          debug("  instnc attr: ", shaderAttributeName)
           vertexBuffers.add instanceValue.buffer.vk
           vertexBuffersOffsets.add instanceValue.offset
           instanceCount = instanceValue.data.len.uint32
@@ -710,6 +713,7 @@ proc render*[TShader, TMesh, TInstance](
       elementCount = meshValue.data.len.uint32
 
   if indexType != VK_INDEX_TYPE_NONE_KHR:
+    debug "  indexed (", elementCount, ")"
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, indexBufferOffset, indexType)
     vkCmdDrawIndexed(
       commandBuffer = commandBuffer,
@@ -721,6 +725,8 @@ proc render*[TShader, TMesh, TInstance](
       firstInstance = 0,
     )
   else:
+    debug "  non-indexed (",
+      if fixedVertexCount < 0: elementCount else: fixedVertexCount.uint32, ")"
     vkCmdDraw(
       commandBuffer = commandBuffer,
       vertexCount = if fixedVertexCount < 0: elementCount else: fixedVertexCount.uint32,
