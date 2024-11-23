@@ -33,6 +33,15 @@ The engine currently features the following:
   collision detection, noise generation and texture packing, and a simple
   settings API with hot-reloading
 
+## Wishlist
+
+[ ] Macro-based internal DSL to convert Nim code into GLSL/slang at compile time
+[ ] Better memory management
+    - Simple buffer resizing
+    - Mechanism to mark unused buffers
+    - Use mapped GPU buffers without copying (implement seq with pointers to GPU memory)
+    - Do not keep copy of content for un-mapped buffers around (only pass data on creating or update)
+
 ## Hello world example
 
 Attention, this project is not optimized for "hello world"-scenarios, so you
