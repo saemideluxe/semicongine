@@ -1,0 +1,4 @@
+SQLite API (db_connector): The Nim programming language (MIT)
+win32 bindings (winim): Chen Kai-Hung, Ward (MIT)
+X11 bindings (x11): nim-lang (MIT)
+Compression library (zippy): Ryan Oldenburg (MIT)
