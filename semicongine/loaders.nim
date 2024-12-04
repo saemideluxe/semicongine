@@ -1,5 +1,4 @@
 import std/json
-import std/parsecfg
 import std/strutils
 import std/sequtils
 import std/os
@@ -11,6 +10,8 @@ import ./core
 import ./gltf
 import ./image
 import ./resources
+import ./thirdparty/parsetoml
+export parsetoml
 
 proc loadBytes*(path, package: string): seq[byte] {.gcsafe.} =
   cast[seq[byte]](toSeq(path.loadResource_intern(package = package).readAll()))
@@ -18,8 +19,8 @@ proc loadBytes*(path, package: string): seq[byte] {.gcsafe.} =
 proc loadJson*(path: string, package = DEFAULT_PACKAGE): JsonNode {.gcsafe.} =
   path.loadResource_intern(package = package).readAll().parseJson()
 
-proc loadConfig*(path: string, package = DEFAULT_PACKAGE): Config {.gcsafe.} =
-  path.loadResource_intern(package = package).loadConfig(filename = path)
+proc loadConfig*(path: string, package = DEFAULT_PACKAGE): TomlValueRef {.gcsafe.} =
+  path.loadResource_intern(package = package).parseStream(filename = path)
 
 proc loadImage*[T: PixelType](
     path: string, package = DEFAULT_PACKAGE
@@ -113,7 +114,7 @@ proc loadMeshes*[TMesh, TMaterial](
 # background loaders
 
 type ResourceType =
-  seq[byte] | JsonNode | Config | Image[Gray] | Image[BGRA] | SoundData
+  seq[byte] | JsonNode | TomlValueRef | Image[Gray] | Image[BGRA] | SoundData
 
 var rawLoader = initBackgroundLoader(loadBytes)
 var jsonLoader = initBackgroundLoader(loadJson)
@@ -127,7 +128,7 @@ proc loadAsync*[T: ResourceType](path: string, package = DEFAULT_PACKAGE) =
     requestLoading(rawLoader[], path, package)
   elif T is JsonNode:
     requestLoading(jsonLoader[], path, package)
-  elif T is Config:
+  elif T is TomlValueRef:
     requestLoading(configLoader[], path, package)
   elif T is Image[Gray]:
     requestLoading(grayImageLoader[], path, package)
@@ -143,7 +144,7 @@ proc isLoaded*[T: ResourceType](path: string, package = DEFAULT_PACKAGE): bool =
     isLoaded(rawLoader[], path, package)
   elif T is JsonNode:
     isLoaded(jsonLoader[], path, package)
-  elif T is Config:
+  elif T is TomlValueRef:
     isLoaded(configLoader[], path, package)
   elif T is Image[Gray]:
     isLoaded(grayImageLoader[], path, package)
@@ -159,7 +160,7 @@ proc getLoaded*[T: ResourceType](path: string, package = DEFAULT_PACKAGE): T =
     getLoadedData(rawLoader[], path, package)
   elif T is JsonNode:
     getLoadedData(jsonLoader[], path, package)
-  elif T is Config:
+  elif T is TomlValueRef:
     getLoadedData(configLoader[], path, package)
   elif T is Image[Gray]:
     getLoadedData(grayImageLoader[], path, package)
