@@ -12,6 +12,36 @@ import ../semicongine
 type FontDS = object
   fontAtlas: Image[Gray]
 
+proc test_01_static_label_new(time: float32) =
+  var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
+  var renderdata = initRenderData()
+  var pipeline =
+    createPipeline[GlyphShader[200]](renderPass = vulkan.swapchain.renderPass)
+
+  var ds = asDescriptorSetData(GlyphDescriptors[200](fontAtlas: font.fontAtlas.copy()))
+  uploadImages(renderdata, ds)
+  initDescriptorSet(renderdata, pipeline.layout(0), ds)
+
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
+    withNextFrame(framebuffer, commandbuffer):
+      bindDescriptorSet(commandbuffer, ds, 0, pipeline)
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
+        withPipeline(commandbuffer, pipeline):
+          render(commandbuffer, pipeline, label1, vec3(), vec4(1, 1, 1, 1))
+
+        # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
+
 proc test_01_static_label(time: float32) =
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
@@ -39,7 +69,14 @@ proc test_01_static_label(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          render(commandbuffer, pipeline, label1, vec3(), vec4(1, 1, 1, 1))
+          proc render(
+            commandBuffer = commandbuffer,
+            pipeline = pipeline,
+            mesh: TMesh,
+            instances: TInstance,
+            fixedVertexCount = -1,
+            fixedInstanceCount = -1,
+          )
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -250,6 +287,7 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
+    test_01_static_label_new(time)
     test_01_static_label(time)
     test_02_multiple_animated(time)
     test_03_layouting(time)
