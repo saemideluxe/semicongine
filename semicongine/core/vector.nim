@@ -1,8 +1,8 @@
 type
-  TVec1*[T: SomeNumber] = array[1, T]
-  TVec2*[T: SomeNumber] = array[2, T]
-  TVec3*[T: SomeNumber] = array[3, T]
-  TVec4*[T: SomeNumber] = array[4, T]
+  TVec1*[T: SomeNumber] = distinct array[1, T]
+  TVec2*[T: SomeNumber] = distinct array[2, T]
+  TVec3*[T: SomeNumber] = distinct array[3, T]
+  TVec4*[T: SomeNumber] = distinct array[4, T]
   TVec* = TVec1 | TVec2 | TVec3 | TVec4
   Vec1f* = TVec1[float32]
   Vec2f* = TVec2[float32]
@@ -18,8 +18,107 @@ type
   Vec4u* = TVec4[uint32]
 
   # support for shorts
+  Vec1i8* = TVec1[int8]
+  Vec1u8* = TVec1[uint8]
   Vec2i8* = TVec2[int8]
+  Vec2u8* = TVec2[uint8]
   Vec3i8* = TVec3[int8]
+  Vec3u8* = TVec3[uint8]
+
+# stuff to allow working like an array, despite 'distinct'
+
+converter toArray*[T](v: TVec1[T]): array[1, T] =
+  array[1, T](v)
+
+converter toArray*[T](v: TVec2[T]): array[2, T] =
+  array[2, T](v)
+
+converter toArray*[T](v: TVec3[T]): array[3, T] =
+  array[3, T](v)
+
+converter toArray*[T](v: TVec4[T]): array[4, T] =
+  array[4, T](v)
+
+template `[]`*[T](v: TVec1[T], i: Ordinal): T =
+  (array[1, T](v))[i]
+
+template `[]`*[T](v: TVec2[T], i: Ordinal): T =
+  (array[2, T](v))[i]
+
+template `[]`*[T](v: TVec3[T], i: Ordinal): T =
+  (array[3, T](v))[i]
+
+template `[]`*[T](v: TVec4[T], i: Ordinal): T =
+  (array[4, T](v))[i]
+
+template `[]=`*[T](v: TVec1[T], i: Ordinal, a: T) =
+  (array[1, T](v))[i] = a
+
+template `[]=`*[T](v: TVec2[T], i: Ordinal, a: T) =
+  (array[2, T](v))[i] = a
+
+template `[]=`*[T](v: TVec3[T], i: Ordinal, a: T) =
+  (array[3, T](v))[i] = a
+
+template `[]=`*[T](v: TVec4[T], i: Ordinal, a: T) =
+  (array[4, T](v))[i] = a
+
+template `==`*[T](a, b: TVec1[T]): bool =
+  `==`(array[1, T](a), array[1, T](b))
+
+template `==`*[T](a, b: TVec2[T]): bool =
+  `==`(array[2, T](a), array[2, T](b))
+
+template `==`*[T](a, b: TVec3[T]): bool =
+  `==`(array[3, T](a), array[3, T](b))
+
+template `==`*[T](a, b: TVec4[T]): bool =
+  `==`(array[4, T](a), array[4, T](b))
+
+func len*(v: TVec1): int =
+  1
+func len*(v: TVec2): int =
+  2
+func len*(v: TVec3): int =
+  3
+func len*(v: TVec4): int =
+  4
+
+func sum*[T](v: TVec1[T]): T =
+  sum(array[1, T](v))
+func sum*[T](v: TVec2[T]): T =
+  sum(array[2, T](v))
+func sum*[T](v: TVec3[T]): T =
+  sum(array[3, T](v))
+func sum*[T](v: TVec4[T]): T =
+  sum(array[4, T](v))
+
+func hash*[T](v: TVec1[T]): Hash =
+  hash(array[1, T](v))
+func hash*[T](v: TVec2[T]): Hash =
+  hash(array[2, T](v))
+func hash*[T](v: TVec3[T]): Hash =
+  hash(array[3, T](v))
+func hash*[T](v: TVec4[T]): Hash =
+  hash(array[4, T](v))
+
+iterator items*[T](v: TVec1[T]): T =
+  yield v[0]
+
+iterator items*[T](v: TVec2[T]): T =
+  yield v[0]
+  yield v[1]
+
+iterator items*[T](v: TVec3[T]): T =
+  yield v[0]
+  yield v[1]
+  yield v[2]
+
+iterator items*[T](v: TVec4[T]): T =
+  yield v[0]
+  yield v[1]
+  yield v[2]
+  yield v[3]
 
 func toVec1*[T: SomeNumber](orig: TVec3[T] | TVec4[T]): TVec1[T] =
   TVec1[T]([orig[0]])
@@ -94,12 +193,23 @@ func vec4i*(): Vec4i =
   vec4i(0, 0, 0, 0)
 
 # shortcuts Vec3i8
+func vec1i8*[T: SomeInteger](x: T): Vec1i8 =
+  Vec1i8([int8(x)])
+func vec1i8*(): Vec1i8 =
+  vec1i8(0)
+func vec1u8*[T: SomeInteger](x: T): Vec1u8 =
+  Vec1u8([uint8(x)])
+func vec1u8*(): Vec1u8 =
+  vec1u8(0)
+
+# missing: unsigned ones
 func vec2i8*[T, S: SomeInteger](x: T, y: S): Vec2i8 =
   Vec2i8([int8(x), int8(y)])
 func vec2i8*[T: SomeInteger](x: T): Vec2i8 =
   vec2i8(x, 0)
 func vec2i8*(): Vec2i8 =
   vec2i8(0, 0)
+
 func vec3i8*[T, S, U: SomeInteger](x: T, y: S, z: U): Vec3i8 =
   Vec3i8([int8(x), int8(y), int8(z)])
 func vec3i8*[T, S: SomeInteger](x: T, y: S): Vec3i8 =

@@ -131,6 +131,8 @@ type
     IndexBufferMapped
     UniformBuffer
     UniformBufferMapped
+    StorageBuffer
+    StorageBufferMapped
 
   MemoryBlock* = object
     vk: VkDeviceMemory
@@ -198,9 +200,17 @@ template forDescriptorFields(
         const `countname` {.inject.} = 1'u32
         body
         `bindingNumber`.inc
-    elif typeof(`valuename`) is GPUValue:
+    elif typeof(`valuename`) is GPUValue and
+        typeof(`valuename`).TBuffer in [UniformBuffer, UniformBufferMapped]:
       block:
         const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+        const `countname` {.inject.} = 1'u32
+        body
+        `bindingNumber`.inc
+    elif typeof(`valuename`) is GPUValue and
+        typeof(`valuename`).TBuffer in [StorageBuffer, StorageBufferMapped]:
+      block:
+        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
         const `countname` {.inject.} = 1'u32
         body
         `bindingNumber`.inc
@@ -211,9 +221,17 @@ template forDescriptorFields(
           const `countname` {.inject.} = uint32(typeof(`valuename`).len)
           body
           `bindingNumber`.inc
-      elif elementType(`valuename`) is GPUValue:
+      elif elementType(`valuename`) is GPUValue and
+          elementType(`valuename`).TBuffer in [UniformBuffer, UniformBufferMapped]:
         block:
           const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+          const `countname` {.inject.} = len(`valuename`).uint32
+          body
+          `bindingNumber`.inc
+      elif elementType(`valuename`) is GPUValue and
+          elementType(`valuename`).TBuffer in [StorageBuffer, StorageBufferMapped]:
+        block:
+          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
           const `countname` {.inject.} = len(`valuename`).uint32
           body
           `bindingNumber`.inc
@@ -385,7 +403,8 @@ proc setupSwapchain*(
     initSwapchain(renderPass, vSync = vSync, tripleBuffering = tripleBuffering)
 
 proc destroyVulkan*() =
-  clearSwapchain()
+  if vulkan.swapchain != nil:
+    clearSwapchain()
   vkDestroyDevice(vulkan.device, nil)
   vkDestroySurfaceKHR(vulkan.instance, vulkan.surface, nil)
   if vulkan.debugMessenger.Valid:

@@ -1,20 +1,16 @@
 func pointerAddOffset[T: SomeInteger](p: pointer, offset: T): pointer =
   cast[pointer](cast[T](p) + offset)
 
-func usage(bType: BufferType): seq[VkBufferUsageFlagBits] =
-  case bType
-  of VertexBuffer:
-    @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-  of VertexBufferMapped:
-    @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT]
-  of IndexBuffer:
-    @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-  of IndexBufferMapped:
-    @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT]
-  of UniformBuffer:
-    @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-  of UniformBufferMapped:
-    @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT]
+const BUFFER_USAGE: array[BufferType, seq[VkBufferUsageFlagBits]] = [
+  VertexBuffer: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  VertexBufferMapped: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
+  IndexBuffer: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  IndexBufferMapped: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
+  UniformBuffer: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  UniformBufferMapped: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
+  StorageBuffer: @[VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  StorageBufferMapped: @[VK_BUFFER_USAGE_STORAGE_BUFFER_BIT],
+]
 
 proc getVkFormat(grayscale: bool, usage: openArray[VkImageUsageFlagBits]): VkFormat =
   let formats =
@@ -56,7 +52,8 @@ template bufferType(gpuData: GPUData): untyped =
   typeof(gpuData).TBuffer
 
 func needsMapping(bType: BufferType): bool =
-  bType in [VertexBufferMapped, IndexBufferMapped, UniformBufferMapped]
+  bType in
+    [VertexBufferMapped, IndexBufferMapped, UniformBufferMapped, StorageBufferMapped]
 template needsMapping(gpuData: GPUData): untyped =
   gpuData.bufferType.needsMapping
 
@@ -259,7 +256,7 @@ proc allocateNewBuffer(
     renderData: var RenderData, size: uint64, bufferType: BufferType
 ): Buffer =
   result = Buffer(
-    vk: svkCreateBuffer(size, bufferType.usage),
+    vk: svkCreateBuffer(size, BUFFER_USAGE[bufferType]),
     size: size,
     rawPointer: nil,
     offsetNextFree: 0,
@@ -394,6 +391,9 @@ proc initRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
     VkDescriptorPoolSize(
       thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorCount: descriptorPoolLimit
     ),
+    VkDescriptorPoolSize(
+      thetype: VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, descriptorCount: descriptorPoolLimit
+    ),
   ]
   var poolInfo = VkDescriptorPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
@@ -504,13 +504,14 @@ proc createSampler(
 
 proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
   assert image.vk == VkImage(0), "Image has already been created"
-  var usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
+  var imgUsage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
   if image.isRenderTarget:
-    usage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-  let format = getVkFormat(grayscale = elementType(image.data) is Gray, usage = usage)
+    imgUsage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+  let format =
+    getVkFormat(grayscale = elementType(image.data) is Gray, usage = imgUsage)
 
   image.vk = svkCreate2DImage(
-    image.width, image.height, format, usage, image.samples, image.nLayers
+    image.width, image.height, format, imgUsage, image.samples, image.nLayers
   )
   renderData.images.add image.vk
   image.sampler = createSampler(

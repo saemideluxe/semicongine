@@ -79,6 +79,9 @@ func glslType[T: SupportedGPUType | ImageObject](value: T): string =
     const n = typetraits.name(T)
     {.error: "Unsupported data type on GPU: " & n.}
 
+func glslType[T: SupportedGPUType](value: openArray[T]): string =
+  return glslType(default(T)) & "[]"
+
 func vkType[T: SupportedGPUType](value: T): VkFormat =
   when T is float32:
     VK_FORMAT_R32_SFLOAT
@@ -264,12 +267,23 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
             ") uniform " & glslType(descriptorValue) & " " & descriptorName & ";"
           descriptorBinding.inc
         elif typeof(descriptorValue) is GPUValue:
+          let bufferType =
+            if typeof(descriptorValue).TBuffer in [UniformBuffer, UniformBufferMapped]:
+              "uniform"
+            else:
+              "readonly buffer"
           uniforms.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding &
-            ") uniform T" & descriptorName & " {"
+            ") " & bufferType & " T" & descriptorName & " {"
           when typeof(descriptorValue.data) is object:
             for blockFieldName, blockFieldValue in descriptorValue.data.fieldPairs():
-              assert typeof(blockFieldValue) is SupportedGPUType,
-                "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
+              when typeof(blockFieldValue) is array:
+                assert elementType(blockFieldValue) is SupportedGPUType,
+                  bufferType & " block field '" & blockFieldName &
+                    "' is not a SupportedGPUType"
+              else:
+                assert typeof(blockFieldValue) is SupportedGPUType,
+                  bufferType & " block field '" & blockFieldName &
+                    "' is not a SupportedGPUType"
               uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
             uniforms.add "} " & descriptorName & ";"
           else:
@@ -287,13 +301,24 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
               descriptorName & "" & arrayDecl & ";"
             descriptorBinding.inc
           elif elementType(descriptorValue) is GPUValue:
+            let bufferType =
+              if typeof(descriptorValue).TBuffer in [UniformBuffer, UniformBufferMapped]:
+                "uniform"
+              else:
+                "readonly buffer"
             uniforms.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding &
-              ") uniform T" & descriptorName & " {"
+              ") " & bufferType & " T" & descriptorName & " {"
 
             for blockFieldName, blockFieldValue in default(elementType(descriptorValue)).data
             .fieldPairs():
-              assert typeof(blockFieldValue) is SupportedGPUType,
-                "uniform block field '" & blockFieldName & "' is not a SupportedGPUType"
+              when typeof(blockFieldValue) is array:
+                assert elementType(blockFieldValue) is SupportedGPUType,
+                  bufferType & " block field '" & blockFieldName &
+                    "' is not a SupportedGPUType"
+              else:
+                assert typeof(blockFieldValue) is SupportedGPUType,
+                  bufferType & " block field '" & blockFieldName &
+                    "' is not a SupportedGPUType"
               uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
             uniforms.add "} " & descriptorName & "[" & $descriptorValue.len & "];"
             descriptorBinding.inc
