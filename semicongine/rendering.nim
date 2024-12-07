@@ -189,58 +189,58 @@ proc `[]`*[T, S](a: GPUArray[T, S], i: SomeInteger): T =
 proc `[]=`*[T, S](a: var GPUArray[T, S], i: SomeInteger, value: T) =
   a.data[i] = value
 
-template forDescriptorFields(
-    shader: typed, valuename, typename, countname, bindingNumber, body: untyped
-): untyped =
-  var `bindingNumber` {.inject.} = 0'u32
-  for theFieldname, `valuename` in fieldPairs(shader):
-    when typeof(`valuename`) is ImageObject:
-      block:
-        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-        const `countname` {.inject.} = 1'u32
-        body
-        `bindingNumber`.inc
-    elif typeof(`valuename`) is GPUValue and
-        typeof(`valuename`).TBuffer in [UniformBuffer, UniformBufferMapped]:
-      block:
-        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-        const `countname` {.inject.} = 1'u32
-        body
-        `bindingNumber`.inc
-    elif typeof(`valuename`) is GPUValue and
-        typeof(`valuename`).TBuffer in [StorageBuffer, StorageBufferMapped]:
-      block:
-        const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
-        const `countname` {.inject.} = 1'u32
-        body
-        `bindingNumber`.inc
-    elif typeof(`valuename`) is array:
-      when elementType(`valuename`) is ImageObject:
-        block:
-          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-          const `countname` {.inject.} = uint32(typeof(`valuename`).len)
-          body
-          `bindingNumber`.inc
-      elif elementType(`valuename`) is GPUValue and
-          elementType(`valuename`).TBuffer in [UniformBuffer, UniformBufferMapped]:
-        block:
-          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-          const `countname` {.inject.} = len(`valuename`).uint32
-          body
-          `bindingNumber`.inc
-      elif elementType(`valuename`) is GPUValue and
-          elementType(`valuename`).TBuffer in [StorageBuffer, StorageBufferMapped]:
-        block:
-          const `typename` {.inject.} = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
-          const `countname` {.inject.} = len(`valuename`).uint32
-          body
-          `bindingNumber`.inc
-      else:
-        {.
-          error: "Unsupported descriptor type: " & typetraits.name(typeof(`valuename`))
-        .}
+func getBufferType*[A, B](value: GPUValue[A, B]): BufferType {.compileTime.} =
+  B
+
+func getBufferType*[A, B](
+    value: openArray[GPUValue[A, B]]
+): BufferType {.compileTime.} =
+  B
+
+func getDescriptorType[T](): VkDescriptorType {.compileTIme.} =
+  when T is ImageObject:
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+  elif T is GPUValue:
+    when getBufferType(default(T)) in [UniformBuffer, UniformBufferMapped]:
+      VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+    elif getBufferType(default(T)) in [StorageBuffer, StorageBufferMapped]:
+      VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
     else:
-      {.error: "Unsupported descriptor type: " & typetraits.name(typeof(`valuename`)).}
+      {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+  elif T is array:
+    when elementType(default(T)) is ImageObject:
+      VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+    elif elementType(default(T)) is GPUValue:
+      when getBufferType(default(elementType(default(T)))) in
+          [UniformBuffer, UniformBufferMapped]:
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+      elif getBufferType(default(elementType(default(T)))) in
+          [StorageBuffer, StorageBufferMapped]:
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+      else:
+        {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+    else:
+      {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+  else:
+    {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+
+func getDescriptorCount[T](): uint32 {.compileTIme.} =
+  when T is array:
+    len(T)
+  else:
+    1
+
+func getBindingNumber[T](field: static string): uint32 {.compileTime.} =
+  var c = 0'u32
+  var found = false
+  for name, value in fieldPairs(default(T)):
+    when name == field:
+      result = c
+      found = true
+    else:
+      inc c
+  assert found,
+    "Field '" & field & "' of descriptor '" & typetraits.name(T) & "' not found"
 
 proc currentFiF*(): int =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"

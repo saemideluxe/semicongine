@@ -84,6 +84,15 @@ func len*(v: TVec3): int =
 func len*(v: TVec4): int =
   4
 
+func `$`*[T](v: TVec1[T]): string =
+  `$`(array[1, T](v))
+func `$`*[T](v: TVec2[T]): string =
+  `$`(array[2, T](v))
+func `$`*[T](v: TVec3[T]): string =
+  `$`(array[3, T](v))
+func `$`*[T](v: TVec4[T]): string =
+  `$`(array[4, T](v))
+
 func sum*[T](v: TVec1[T]): T =
   sum(array[1, T](v))
 func sum*[T](v: TVec2[T]): T =

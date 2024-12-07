@@ -124,16 +124,17 @@ proc initDescriptorSet*(
   var imageWrites = newSeqOfCap[VkDescriptorImageInfo](1024)
   var bufferWrites = newSeqOfCap[VkDescriptorBufferInfo](1024)
 
-  forDescriptorFields(
-    descriptorSet.data, fieldValue, descriptorType, descriptorCount,
-    descriptorBindingNumber,
-  ):
+  for theFieldname, fieldvalue in fieldPairs(descriptorSet.data):
+    const descriptorType = getDescriptorType[typeof(fieldvalue)]()
+    const descriptorCount = getDescriptorCount[typeof(fieldvalue)]()
+    const descriptorBindingNumber =
+      getBindingNumber[typeof(descriptorSet.data)](theFieldname)
     for i in 0 ..< descriptorSet.vk.len:
-      when typeof(fieldValue) is GPUValue:
+      when typeof(fieldvalue) is GPUValue:
         bufferWrites.add VkDescriptorBufferInfo(
-          buffer: fieldValue.buffer.vk,
-          offset: fieldValue.offset,
-          range: fieldValue.size,
+          buffer: fieldvalue.buffer.vk,
+          offset: fieldvalue.offset,
+          range: fieldvalue.size,
         )
         descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -145,10 +146,10 @@ proc initDescriptorSet*(
           pImageInfo: nil,
           pBufferInfo: addr(bufferWrites[^1]),
         )
-      elif typeof(fieldValue) is ImageObject:
+      elif typeof(fieldvalue) is ImageObject:
         imageWrites.add VkDescriptorImageInfo(
-          sampler: fieldValue.sampler,
-          imageView: fieldValue.imageView,
+          sampler: fieldvalue.sampler,
+          imageView: fieldvalue.imageView,
           imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         )
         descriptorSetWrites.add VkWriteDescriptorSet(
@@ -161,9 +162,9 @@ proc initDescriptorSet*(
           pImageInfo: addr(imageWrites[^1]),
           pBufferInfo: nil,
         )
-      elif typeof(fieldValue) is array:
-        when elementType(fieldValue) is ImageObject:
-          for image in fieldValue.litems:
+      elif typeof(fieldvalue) is array:
+        when elementType(fieldvalue) is ImageObject:
+          for image in fieldvalue.litems:
             imageWrites.add VkDescriptorImageInfo(
               sampler: image.sampler,
               imageView: image.imageView,
@@ -179,8 +180,8 @@ proc initDescriptorSet*(
             pImageInfo: addr(imageWrites[^descriptorCount.int]),
             pBufferInfo: nil,
           )
-        elif elementType(fieldValue) is GPUValue:
-          for entry in fieldValue.litems:
+        elif elementType(fieldvalue) is GPUValue:
+          for entry in fieldvalue.litems:
             bufferWrites.add VkDescriptorBufferInfo(
               buffer: entry.buffer.vk, offset: entry.offset, range: entry.size
             )
@@ -196,11 +197,11 @@ proc initDescriptorSet*(
           )
         else:
           {.
-            error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldValue))
+            error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldvalue))
           .}
       else:
         {.
-          error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldValue))
+          error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldvalue))
         .}
 
   vkUpdateDescriptorSets(

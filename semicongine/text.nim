@@ -84,7 +84,7 @@ type
 
     fragmentUv {.Pass.}: Vec2f
     fragmentColor {.PassFlat.}: Vec4f
-    color {.ShaderOutput.}: Vec4f
+    outColor {.ShaderOutput.}: Vec4f
     glyphData {.DescriptorSet: 0.}: GlyphDescriptors[N]
     vertexCode* =
       """void main() {
@@ -105,7 +105,7 @@ type
     if(v == 0) {
       discard;
     }
-    color = vec4(fragmentColor.rgb, fragmentColor.a * v);
+    outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
 }"""
 
 proc `=copy`(dest: var FontObj, source: FontObj) {.error.}

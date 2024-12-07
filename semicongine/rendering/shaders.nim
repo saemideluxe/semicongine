@@ -207,6 +207,12 @@ func nLocationSlots[T: SupportedGPUType | ImageObject](value: T): uint32 =
   else:
     return 1
 
+func assertGPUType[T](t: T) =
+  assert T is SupportedGPUType, "'" & $(t) & "' is not a supported GPU type"
+
+func assertGPUType[T](t: openArray[T]) =
+  assert T is SupportedGPUType, "'" & $(t) & "' is not a supported GPU type"
+
 proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileTime.} =
   const GLSL_VERSION = "450"
   var vsInput: seq[string]
@@ -268,14 +274,14 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
           descriptorBinding.inc
         elif typeof(descriptorValue) is GPUValue:
           let bufferType =
-            if typeof(descriptorValue).TBuffer in [UniformBuffer, UniformBufferMapped]:
+            if getBufferType(descriptorValue) in [UniformBuffer, UniformBufferMapped]:
               "uniform"
             else:
               "readonly buffer"
           uniforms.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding &
             ") " & bufferType & " T" & descriptorName & " {"
           when typeof(descriptorValue.data) is object:
-            for blockFieldName, blockFieldValue in descriptorValue.data.fieldPairs():
+            for blockFieldName, blockFieldValue in fieldPairs(descriptorValue.data):
               when typeof(blockFieldValue) is array:
                 assert elementType(blockFieldValue) is SupportedGPUType,
                   bufferType & " block field '" & blockFieldName &
@@ -302,23 +308,17 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
             descriptorBinding.inc
           elif elementType(descriptorValue) is GPUValue:
             let bufferType =
-              if typeof(descriptorValue).TBuffer in [UniformBuffer, UniformBufferMapped]:
+              if getBufferType(descriptorValue) in [UniformBuffer, UniformBufferMapped]:
                 "uniform"
               else:
                 "readonly buffer"
             uniforms.add "layout(set=" & $setIndex & ", binding = " & $descriptorBinding &
               ") " & bufferType & " T" & descriptorName & " {"
 
-            for blockFieldName, blockFieldValue in default(elementType(descriptorValue)).data
-            .fieldPairs():
-              when typeof(blockFieldValue) is array:
-                assert elementType(blockFieldValue) is SupportedGPUType,
-                  bufferType & " block field '" & blockFieldName &
-                    "' is not a SupportedGPUType"
-              else:
-                assert typeof(blockFieldValue) is SupportedGPUType,
-                  bufferType & " block field '" & blockFieldName &
-                    "' is not a SupportedGPUType"
+            for blockFieldName, blockFieldValue in fieldPairs(
+              default(elementType(descriptorValue)).data
+            ):
+              assertGPUType(blockFieldValue)
               uniforms.add "  " & glslType(blockFieldValue) & " " & blockFieldName & ";"
             uniforms.add "} " & descriptorName & "[" & $descriptorValue.len & "];"
             descriptorBinding.inc
@@ -331,7 +331,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
       assert value is object, "push constants need to be objects"
       pushConstants.add "layout( push_constant ) uniform constants"
       pushConstants.add "{"
-      for constFieldName, constFieldValue in value.fieldPairs():
+      for constFieldName, constFieldValue in fieldPairs(value):
         assert typeof(constFieldValue) is SupportedGPUType,
           "push constant field '" & constFieldName & "' is not a SupportedGPUType"
         pushConstants.add "  " & glslType(constFieldValue) & " " & constFieldName & ";"
@@ -448,13 +448,11 @@ proc createDescriptorSetLayouts[TShader](): array[
   for _, value in fieldPairs(default(TShader)):
     when hasCustomPragma(value, DescriptorSet):
       var layoutbindings: seq[VkDescriptorSetLayoutBinding]
-      forDescriptorFields(
-        value, fieldValue, descriptorType, descriptorCount, descriptorBindingNumber
-      ):
+      for theFieldname, fieldvalue in fieldPairs(value):
         layoutbindings.add VkDescriptorSetLayoutBinding(
-          binding: descriptorBindingNumber,
-          descriptorType: descriptorType,
-          descriptorCount: descriptorCount,
+          binding: getBindingNumber[typeof(value)](theFieldname),
+          descriptorType: getDescriptorType[typeof(fieldvalue)](),
+          descriptorCount: getDescriptorCount[typeof(fieldvalue)](),
           stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
           pImmutableSamplers: nil,
         )
