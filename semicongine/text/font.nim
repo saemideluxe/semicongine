@@ -97,10 +97,10 @@ proc readTrueType(
     if width > 0 and height > 0:
       var bitmap = newSeq[Gray](width * height)
       for i in 0 ..< width * height:
-        bitmap[i] = [data[i].uint8]
+        bitmap[i] = vec1u8(data[i].uint8)
       images.add Image[Gray](width: width.uint32, height: height.uint32, data: bitmap)
     else:
-      images.add Image[Gray](width: 1, height: 1, data: @[[0'u8]])
+      images.add Image[Gray](width: 1, height: 1, data: @[vec1u8()])
 
     nativeFree(data)
 

@@ -1,3 +1,4 @@
+import std/hashes
 import std/macros
 import std/math
 import std/monotimes

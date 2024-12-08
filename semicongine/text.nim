@@ -69,6 +69,45 @@ type
     color = vec4(textbox.color.rgb, textbox.color.a * v);
 }"""
 
+  GlyphDescriptors[N: static int] = object
+    fontAtlas: Image[Gray]
+    uvs1: array[N, Vec2f]
+    uvs2: array[N, Vec2f]
+    vertexPos1: array[N, Vec2f]
+    vertexPos2: array[N, Vec2f]
+
+  GlyphShader*[N: static int] = object
+    position {.InstanceAttribute.}: Vec3f
+    color {.InstanceAttribute.}: Vec4f
+    scale {.InstanceAttribute.}: float32
+    glyphIndex {.InstanceAttribute.}: uint16
+
+    fragmentUv {.Pass.}: Vec2f
+    fragmentColor {.PassFlat.}: Vec4f
+    outColor {.ShaderOutput.}: Vec4f
+    glyphData {.DescriptorSet: 0.}: GlyphDescriptors[N]
+    vertexCode* =
+      """void main() {
+  vec2 uv1 = uvs1[glyphIndex];
+  vec2 uv2 = uvs2[glyphIndex];
+  vec2 p1 = vertexPos1[glyphIndex];
+  vec2 p2 = vertexPos2[glyphIndex];
+  uv1[gl_VertexIndex % ]
+
+  gl_Position = vec4(position * vec3(textbox.scale, 1) + textbox.position, 1.0);
+  fragmentUv = uv;
+  fragmentColor = color;
+}  """
+    fragmentCode* =
+      """void main() {
+    float v = texture(fontAtlas, fragmentUv).r;
+    // CARFULL: This can lead to rough edges at times
+    if(v == 0) {
+      discard;
+    }
+    outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
+}"""
+
 proc `=copy`(dest: var FontObj, source: FontObj) {.error.}
 
 include ./text/font

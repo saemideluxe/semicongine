@@ -1032,24 +1032,24 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
-    # test_01_triangle(time)
+    test_01_triangle(time)
 
     # tests instanced triangles and quads, mixing meshes and instances
-    # test_02_triangle_quad_instanced(time)
+    test_02_triangle_quad_instanced(time)
 
     # teste descriptor sets
-    # test_03_simple_descriptorset(time)
+    test_03_simple_descriptorset(time)
 
     # tests multiple descriptor sets and arrays
-    # test_04_multiple_descriptorsets(time)
+    test_04_multiple_descriptorsets(time)
 
     # rotating cube
-    # test_05_cube(time)
+    test_05_cube(time)
 
     # different draw modes (lines, points, and topologies)
-    # test_06_different_draw_modes(time)
+    test_06_different_draw_modes(time)
 
-    # test_07_png_texture(time)
+    test_07_png_texture(time)
 
     test_08_texture_array(time)
 
@@ -1058,7 +1058,7 @@ when isMainModule:
     clearSwapchain()
 
   # test multiple render passes
-  # for i, (depthBuffer, samples) in renderPasses:
-  # test_09_triangle_2pass(time, depthBuffer, samples)
+  for i, (depthBuffer, samples) in renderPasses:
+    test_09_triangle_2pass(time, depthBuffer, samples)
 
   destroyVulkan()

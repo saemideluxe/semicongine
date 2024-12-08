@@ -1,20 +1,16 @@
 func pointerAddOffset[T: SomeInteger](p: pointer, offset: T): pointer =
   cast[pointer](cast[T](p) + offset)
 
-func usage(bType: BufferType): seq[VkBufferUsageFlagBits] =
-  case bType
-  of VertexBuffer:
-    @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-  of VertexBufferMapped:
-    @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT]
-  of IndexBuffer:
-    @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-  of IndexBufferMapped:
-    @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT]
-  of UniformBuffer:
-    @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT]
-  of UniformBufferMapped:
-    @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT]
+const BUFFER_USAGE: array[BufferType, seq[VkBufferUsageFlagBits]] = [
+  VertexBuffer: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  VertexBufferMapped: @[VK_BUFFER_USAGE_VERTEX_BUFFER_BIT],
+  IndexBuffer: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  IndexBufferMapped: @[VK_BUFFER_USAGE_INDEX_BUFFER_BIT],
+  UniformBuffer: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  UniformBufferMapped: @[VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT],
+  StorageBuffer: @[VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT],
+  StorageBufferMapped: @[VK_BUFFER_USAGE_STORAGE_BUFFER_BIT],
+]
 
 proc getVkFormat(grayscale: bool, usage: openArray[VkImageUsageFlagBits]): VkFormat =
   let formats =
@@ -56,7 +52,8 @@ template bufferType(gpuData: GPUData): untyped =
   typeof(gpuData).TBuffer
 
 func needsMapping(bType: BufferType): bool =
-  bType in [VertexBufferMapped, IndexBufferMapped, UniformBufferMapped]
+  bType in
+    [VertexBufferMapped, IndexBufferMapped, UniformBufferMapped, StorageBufferMapped]
 template needsMapping(gpuData: GPUData): untyped =
   gpuData.bufferType.needsMapping
 
@@ -127,16 +124,17 @@ proc initDescriptorSet*(
   var imageWrites = newSeqOfCap[VkDescriptorImageInfo](1024)
   var bufferWrites = newSeqOfCap[VkDescriptorBufferInfo](1024)
 
-  forDescriptorFields(
-    descriptorSet.data, fieldValue, descriptorType, descriptorCount,
-    descriptorBindingNumber,
-  ):
+  for theFieldname, fieldvalue in fieldPairs(descriptorSet.data):
+    const descriptorType = getDescriptorType[typeof(fieldvalue)]()
+    const descriptorCount = getDescriptorCount[typeof(fieldvalue)]()
+    const descriptorBindingNumber =
+      getBindingNumber[typeof(descriptorSet.data)](theFieldname)
     for i in 0 ..< descriptorSet.vk.len:
-      when typeof(fieldValue) is GPUValue:
+      when typeof(fieldvalue) is GPUValue:
         bufferWrites.add VkDescriptorBufferInfo(
-          buffer: fieldValue.buffer.vk,
-          offset: fieldValue.offset,
-          range: fieldValue.size,
+          buffer: fieldvalue.buffer.vk,
+          offset: fieldvalue.offset,
+          range: fieldvalue.size,
         )
         descriptorSetWrites.add VkWriteDescriptorSet(
           sType: VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -148,10 +146,10 @@ proc initDescriptorSet*(
           pImageInfo: nil,
           pBufferInfo: addr(bufferWrites[^1]),
         )
-      elif typeof(fieldValue) is ImageObject:
+      elif typeof(fieldvalue) is ImageObject:
         imageWrites.add VkDescriptorImageInfo(
-          sampler: fieldValue.sampler,
-          imageView: fieldValue.imageView,
+          sampler: fieldvalue.sampler,
+          imageView: fieldvalue.imageView,
           imageLayout: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         )
         descriptorSetWrites.add VkWriteDescriptorSet(
@@ -164,9 +162,9 @@ proc initDescriptorSet*(
           pImageInfo: addr(imageWrites[^1]),
           pBufferInfo: nil,
         )
-      elif typeof(fieldValue) is array:
-        when elementType(fieldValue) is ImageObject:
-          for image in fieldValue.litems:
+      elif typeof(fieldvalue) is array:
+        when elementType(fieldvalue) is ImageObject:
+          for image in fieldvalue.litems:
             imageWrites.add VkDescriptorImageInfo(
               sampler: image.sampler,
               imageView: image.imageView,
@@ -182,8 +180,8 @@ proc initDescriptorSet*(
             pImageInfo: addr(imageWrites[^descriptorCount.int]),
             pBufferInfo: nil,
           )
-        elif elementType(fieldValue) is GPUValue:
-          for entry in fieldValue.litems:
+        elif elementType(fieldvalue) is GPUValue:
+          for entry in fieldvalue.litems:
             bufferWrites.add VkDescriptorBufferInfo(
               buffer: entry.buffer.vk, offset: entry.offset, range: entry.size
             )
@@ -199,11 +197,11 @@ proc initDescriptorSet*(
           )
         else:
           {.
-            error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldValue))
+            error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldvalue))
           .}
       else:
         {.
-          error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldValue))
+          error: "Unsupported descriptor type: " & typetraits.name(typeof(fieldvalue))
         .}
 
   vkUpdateDescriptorSets(
@@ -259,7 +257,7 @@ proc allocateNewBuffer(
     renderData: var RenderData, size: uint64, bufferType: BufferType
 ): Buffer =
   result = Buffer(
-    vk: svkCreateBuffer(size, bufferType.usage),
+    vk: svkCreateBuffer(size, BUFFER_USAGE[bufferType]),
     size: size,
     rawPointer: nil,
     offsetNextFree: 0,
@@ -394,6 +392,9 @@ proc initRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
     VkDescriptorPoolSize(
       thetype: VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, descriptorCount: descriptorPoolLimit
     ),
+    VkDescriptorPoolSize(
+      thetype: VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, descriptorCount: descriptorPoolLimit
+    ),
   ]
   var poolInfo = VkDescriptorPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
@@ -504,13 +505,14 @@ proc createSampler(
 
 proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
   assert image.vk == VkImage(0), "Image has already been created"
-  var usage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
+  var imgUsage = @[VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_SAMPLED_BIT]
   if image.isRenderTarget:
-    usage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-  let format = getVkFormat(grayscale = elementType(image.data) is Gray, usage = usage)
+    imgUsage.add VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+  let format =
+    getVkFormat(grayscale = elementType(image.data) is Gray, usage = imgUsage)
 
   image.vk = svkCreate2DImage(
-    image.width, image.height, format, usage, image.samples, image.nLayers
+    image.width, image.height, format, imgUsage, image.samples, image.nLayers
   )
   renderData.images.add image.vk
   image.sampler = createSampler(
