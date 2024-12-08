@@ -12,18 +12,22 @@ import ../semicongine
 type FontDS = object
   fontAtlas: Image[Gray]
 
-proc test_01_static_label_new(time: float32) =
+proc test_01_static_label(time: float32) =
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
   var pipeline =
-    createPipeline[GlyphShader[200]](renderPass = vulkan.swapchain.renderPass)
+    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
 
-  var ds = asDescriptorSetData(GlyphDescriptors[200](fontAtlas: font.fontAtlas.copy()))
+  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
   initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
+  var label1 =
+    initTextbox(renderdata, pipeline.layout(0), font, 0.0005, "Hello semicongine!")
+
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
+    label1.refresh()
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, ds, 0, pipeline)
       withRenderPass(
@@ -42,7 +46,8 @@ proc test_01_static_label_new(time: float32) =
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-proc test_01_static_label(time: float32) =
+#[
+proc test_01_static_label_new(time: float32) =
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
   var pipeline =
@@ -82,6 +87,7 @@ proc test_01_static_label(time: float32) =
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
+  ]#
 
 proc test_02_multiple_animated(time: float32) =
   var font1 = loadFont("Overhaul.ttf", lineHeightPixels = 40)
@@ -287,7 +293,7 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
-    test_01_static_label_new(time)
+    # test_01_static_label_new(time)
     test_01_static_label(time)
     test_02_multiple_animated(time)
     test_03_layouting(time)
