@@ -4,8 +4,10 @@ import std/strutils
 import std/sequtils
 import std/monotimes
 import std/times
+import std/tables
 import std/options
 import std/random
+import std/unicode
 
 import ../semicongine
 
@@ -14,20 +16,21 @@ type FontDS = object
 
 type EMPTY = object
 
+const N_GLYPHS = 200
 proc test_01_static_label_new(time: float32) =
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
   var pipeline =
-    createPipeline[GlyphShader[200]](renderPass = vulkan.swapchain.renderPass)
+    createPipeline[GlyphShader[N_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
+  var (ds, glyphtable) = glyphDescriptorSet(font, N_GLYPHS)
   var glyphs = Glyphs(
-    position: asGPUArray([vec3()], VertexBufferMapped),
-    scale: asGPUArray([1'f32], VertexBufferMapped),
-    color: asGPUArray([vec4(1, 1, 1, 1)], VertexBufferMapped),
-    glyphIndex: asGPUArray([0'u16], VertexBufferMapped),
+    position: asGPUArray([vec3(), vec3()], VertexBufferMapped),
+    scale: asGPUArray([1'f32, 1'f32], VertexBufferMapped),
+    color: asGPUArray([vec4(1, 1, 1, 1), vec4(1, 1, 1, 1)], VertexBufferMapped),
+    glyphIndex:
+      asGPUArray([glyphtable[Rune('Q')], glyphtable[Rune('H')]], VertexBufferMapped),
   )
 
-  var ds =
-    asDescriptorSetData(GlyphDescriptorSet[200](fontAtlas: font.fontAtlas.copy()))
   assignBuffers(renderdata, glyphs)
   assignBuffers(renderdata, ds)
   uploadImages(renderdata, ds)
@@ -282,7 +285,7 @@ proc test_04_lots_of_texts(time: float32) =
   destroyRenderData(renderdata)
 
 when isMainModule:
-  var time = 1'f32
+  var time = 1000'f32
   initVulkan()
 
   for depthBuffer in [true, false]:

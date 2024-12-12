@@ -206,7 +206,7 @@ func getDescriptorType[T](): VkDescriptorType {.compileTIme.} =
     elif getBufferType(default(T)) in [StorageBuffer, StorageBufferMapped]:
       VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
     else:
-      {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+      {.error: "Unsupported descriptor type: " & $T.}
   elif T is array:
     when elementType(default(T)) is ImageObject:
       VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
@@ -218,11 +218,11 @@ func getDescriptorType[T](): VkDescriptorType {.compileTIme.} =
           [StorageBuffer, StorageBufferMapped]:
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
       else:
-        {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+        {.error: "Unsupported descriptor type: " & $T.}
     else:
-      {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+      {.error: "Unsupported descriptor type: " & $T.}
   else:
-    {.error: "Unsupported descriptor type: " & typetraits.name(T).}
+    {.error: "Unsupported descriptor type: " & $T.}
 
 func getDescriptorCount[T](): uint32 {.compileTIme.} =
   when T is array:
@@ -239,8 +239,7 @@ func getBindingNumber[T](field: static string): uint32 {.compileTime.} =
       found = true
     else:
       inc c
-  assert found,
-    "Field '" & field & "' of descriptor '" & typetraits.name(T) & "' not found"
+  assert found, "Field '" & field & "' of descriptor '" & $T & "' not found"
 
 proc currentFiF*(): int =
   assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"

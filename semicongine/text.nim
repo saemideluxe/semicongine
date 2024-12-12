@@ -76,7 +76,7 @@ type
     glyphIndex*: GPUArray[uint16, VertexBufferMapped]
 
   GlyphData[N: static int] = object
-    pos: array[N, Vec2f] # [left, bottom, right, top]
+    pos: array[N, Vec4f] # [left, bottom, right, top]
     uv: array[N, Vec4f] # [left, bottom, right, top]
 
   GlyphDescriptorSet*[N: static int] = object
@@ -101,26 +101,64 @@ const int[4] i_y = int[](1, 3, 3, 1);
 const vec2[4] pp = vec2[](vec2(-0.1, -0.1), vec2(-0.1, 0.1), vec2(0.1, 0.1), vec2(0.1, -0.1));
 
 void main() {
-  // int vertexI = indices[gl_VertexIndex];
-  // vec3 pos = vec3(glyphData.pos[glyphIndex][i_x[vertexI]], glyphData.pos[glyphIndex][i_y[vertexI]], 0);
-  // vec2 uv = vec2(glyphData.uv[glyphIndex][i_x[vertexI]], glyphData.uv[glyphIndex][i_y[vertexI]]);
-  // gl_Position = vec4(pos * scale + position, 1.0);
-  // fragmentUv = uv;
-  // fragmentColor = color;
-  gl_Position = vec4(pp[indices[gl_VertexIndex]] + glyphIndex * 0.1, 0, 1);
+  int vertexI = indices[gl_VertexIndex];
+  vec3 pos = vec3(glyphData.pos[glyphIndex][i_x[vertexI]], glyphData.pos[glyphIndex][i_y[vertexI]], 0);
+  vec2 uv = vec2(glyphData.uv[glyphIndex][i_x[vertexI]], glyphData.uv[glyphIndex][i_y[vertexI]]);
+  gl_Position = vec4(pos * scale + position, 1.0);
+  fragmentUv = uv;
+  fragmentColor = color;
 }  """
     fragmentCode* =
       """void main() {
-    // float v = texture(fontAtlas, fragmentUv).r;
+    float v = texture(fontAtlas, fragmentUv).r;
     // CARFULL: This can lead to rough edges at times
-    // if(v == 0) {
-      // discard;
-    // }
-    // outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
-    outColor = vec4(1, 0, 1, 1);
+    if(v == 0) {
+      discard;
+    }
+    outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
 }"""
 
 proc `=copy`(dest: var FontObj, source: FontObj) {.error.}
 
 include ./text/font
 include ./text/textbox
+
+proc glyphDescriptorSet*(
+    font: Font, maxGlyphs: static int
+): (DescriptorSetData[GlyphDescriptorSet[maxGlyphs]], Table[Rune, uint16]) =
+  assert font.glyphs.len <= maxGlyphs,
+    "font has " & $font.glyphs.len & " glyphs but shader is only configured for " &
+      $maxGlyphs
+
+  var glyphData = GlyphData[maxGlyphs]()
+  var glyphTable: Table[Rune, uint16]
+
+  var i = 0'u16
+  for rune, info in font.glyphs.pairs():
+    let
+      left = -info.leftOffset
+      right = -info.leftOffset + info.dimension.x
+      top = font.lineHeight + info.topOffset
+      bottom = font.lineHeight + info.topOffset - info.dimension.y
+    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.005'f32
+    assert info.uvs[0].x == info.uvs[1].x,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    assert info.uvs[0].y == info.uvs[3].y,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    assert info.uvs[2].x == info.uvs[3].x,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    assert info.uvs[1].y == info.uvs[2].y,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    glyphData.uv[i] = vec4(info.uvs[0].x, info.uvs[0].y, info.uvs[2].x, info.uvs[2].y)
+    glyphTable[rune] = i
+    inc i
+
+  (
+    asDescriptorSetData(
+      GlyphDescriptorSet[maxGlyphs](
+        fontAtlas: font.fontAtlas.copy(),
+        glyphData: asGPUValue(glyphData, StorageBuffer),
+      )
+    ),
+    glyphTable,
+  )
