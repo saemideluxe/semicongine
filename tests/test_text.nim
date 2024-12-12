@@ -12,6 +12,47 @@ import ../semicongine
 type FontDS = object
   fontAtlas: Image[Gray]
 
+type EMPTY = object
+
+proc test_01_static_label_new(time: float32) =
+  var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
+  var renderdata = initRenderData()
+  var pipeline =
+    createPipeline[GlyphShader[200]](renderPass = vulkan.swapchain.renderPass)
+  var glyphs = Glyphs(
+    position: asGPUArray([vec3()], VertexBufferMapped),
+    scale: asGPUArray([1'f32], VertexBufferMapped),
+    color: asGPUArray([vec4(1, 1, 1, 1)], VertexBufferMapped),
+    glyphIndex: asGPUArray([0'u16], VertexBufferMapped),
+  )
+
+  var ds =
+    asDescriptorSetData(GlyphDescriptorSet[200](fontAtlas: font.fontAtlas.copy()))
+  assignBuffers(renderdata, glyphs)
+  assignBuffers(renderdata, ds)
+  uploadImages(renderdata, ds)
+  initDescriptorSet(renderdata, pipeline.layout(0), ds)
+
+  var start = getMonoTime()
+  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
+    withNextFrame(framebuffer, commandbuffer):
+      bindDescriptorSet(commandbuffer, ds, 0, pipeline)
+      withRenderPass(
+        vulkan.swapchain.renderPass,
+        framebuffer,
+        commandbuffer,
+        vulkan.swapchain.width,
+        vulkan.swapchain.height,
+        vec4(0, 0, 0, 0),
+      ):
+        withPipeline(commandbuffer, pipeline):
+          render(commandbuffer, pipeline, EMPTY(), glyphs, fixedVertexCount = 6)
+
+        # cleanup
+  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  destroyPipeline(pipeline)
+  destroyRenderData(renderdata)
+
 proc test_01_static_label(time: float32) =
   var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
@@ -40,54 +81,10 @@ proc test_01_static_label(time: float32) =
       ):
         withPipeline(commandbuffer, pipeline):
           render(commandbuffer, pipeline, label1, vec3(), vec4(1, 1, 1, 1))
-
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
-
-#[
-proc test_01_static_label_new(time: float32) =
-  var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
-  var renderdata = initRenderData()
-  var pipeline =
-    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
-
-  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
-  uploadImages(renderdata, ds)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds)
-
-  var label1 =
-    initTextbox(renderdata, pipeline.layout(0), font, 0.0005, "Hello semicongine!")
-
-  var start = getMonoTime()
-  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-    label1.refresh()
-    withNextFrame(framebuffer, commandbuffer):
-      bindDescriptorSet(commandbuffer, ds, 0, pipeline)
-      withRenderPass(
-        vulkan.swapchain.renderPass,
-        framebuffer,
-        commandbuffer,
-        vulkan.swapchain.width,
-        vulkan.swapchain.height,
-        vec4(0, 0, 0, 0),
-      ):
-        withPipeline(commandbuffer, pipeline):
-          proc render(
-            commandBuffer = commandbuffer,
-            pipeline = pipeline,
-            mesh: TMesh,
-            instances: TInstance,
-            fixedVertexCount = -1,
-            fixedInstanceCount = -1,
-          )
-
-        # cleanup
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
-  destroyPipeline(pipeline)
-  destroyRenderData(renderdata)
-  ]#
 
 proc test_02_multiple_animated(time: float32) =
   var font1 = loadFont("Overhaul.ttf", lineHeightPixels = 40)
@@ -293,11 +290,11 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
-    # test_01_static_label_new(time)
-    test_01_static_label(time)
-    test_02_multiple_animated(time)
-    test_03_layouting(time)
-    test_04_lots_of_texts(time)
+    test_01_static_label_new(time)
+    # test_01_static_label(time)
+    # test_02_multiple_animated(time)
+    # test_03_layouting(time)
+    # test_04_lots_of_texts(time)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)

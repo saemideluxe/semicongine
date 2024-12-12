@@ -69,12 +69,19 @@ type
     color = vec4(textbox.color.rgb, textbox.color.a * v);
 }"""
 
-  GlyphDescriptors[N: static int] = object
-    fontAtlas: Image[Gray]
-    uvs1: array[N, Vec2f]
-    uvs2: array[N, Vec2f]
-    vertexPos1: array[N, Vec2f]
-    vertexPos2: array[N, Vec2f]
+  Glyphs* = object
+    position*: GPUArray[Vec3f, VertexBufferMapped]
+    color*: GPUArray[Vec4f, VertexBufferMapped]
+    scale*: GPUArray[float32, VertexBufferMapped]
+    glyphIndex*: GPUArray[uint16, VertexBufferMapped]
+
+  GlyphData[N: static int] = object
+    pos: array[N, Vec2f] # [left, bottom, right, top]
+    uv: array[N, Vec4f] # [left, bottom, right, top]
+
+  GlyphDescriptorSet*[N: static int] = object
+    fontAtlas*: Image[Gray]
+    glyphData*: GPUValue[GlyphData[N], StorageBuffer]
 
   GlyphShader*[N: static int] = object
     position {.InstanceAttribute.}: Vec3f
@@ -85,27 +92,32 @@ type
     fragmentUv {.Pass.}: Vec2f
     fragmentColor {.PassFlat.}: Vec4f
     outColor {.ShaderOutput.}: Vec4f
-    glyphData {.DescriptorSet: 0.}: GlyphDescriptors[N]
+    glyphData {.DescriptorSet: 0.}: GlyphDescriptorSet[N]
     vertexCode* =
-      """void main() {
-  vec2 uv1 = uvs1[glyphIndex];
-  vec2 uv2 = uvs2[glyphIndex];
-  vec2 p1 = vertexPos1[glyphIndex];
-  vec2 p2 = vertexPos2[glyphIndex];
-  uv1[gl_VertexIndex % ]
+      """
+const int[6] indices = int[](0, 1, 2, 2, 3, 0);
+const int[4] i_x = int[](0, 0, 2, 2);
+const int[4] i_y = int[](1, 3, 3, 1);
+const vec2[4] pp = vec2[](vec2(-0.1, -0.1), vec2(-0.1, 0.1), vec2(0.1, 0.1), vec2(0.1, -0.1));
 
-  gl_Position = vec4(position * vec3(textbox.scale, 1) + textbox.position, 1.0);
-  fragmentUv = uv;
-  fragmentColor = color;
+void main() {
+  // int vertexI = indices[gl_VertexIndex];
+  // vec3 pos = vec3(glyphData.pos[glyphIndex][i_x[vertexI]], glyphData.pos[glyphIndex][i_y[vertexI]], 0);
+  // vec2 uv = vec2(glyphData.uv[glyphIndex][i_x[vertexI]], glyphData.uv[glyphIndex][i_y[vertexI]]);
+  // gl_Position = vec4(pos * scale + position, 1.0);
+  // fragmentUv = uv;
+  // fragmentColor = color;
+  gl_Position = vec4(pp[indices[gl_VertexIndex]] + glyphIndex * 0.1, 0, 1);
 }  """
     fragmentCode* =
       """void main() {
-    float v = texture(fontAtlas, fragmentUv).r;
+    // float v = texture(fontAtlas, fragmentUv).r;
     // CARFULL: This can lead to rough edges at times
-    if(v == 0) {
-      discard;
-    }
-    outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
+    // if(v == 0) {
+      // discard;
+    // }
+    // outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
+    outColor = vec4(1, 0, 1, 1);
 }"""
 
 proc `=copy`(dest: var FontObj, source: FontObj) {.error.}
