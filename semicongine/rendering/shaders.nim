@@ -80,7 +80,7 @@ func glslType[T: SupportedGPUType | ImageObject](value: T): string =
     {.error: "Unsupported data type on GPU: " & n.}
 
 func glslType[T: SupportedGPUType](value: openArray[T]): string =
-  return glslType(default(T)) & "[]"
+  return glslType(default(T)) & "[" & $len(value) & "]"
 
 func vkType[T: SupportedGPUType](value: T): VkFormat =
   when T is float32:
@@ -323,7 +323,11 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
             uniforms.add "} " & descriptorName & "[" & $descriptorValue.len & "];"
             descriptorBinding.inc
           else:
-            {.error: "Unsupported shader descriptor field " & descriptorName.}
+            {.
+              error:
+                "Unsupported shader descriptor field " & descriptorName & ": " &
+                $(typeof(descriptorValue))
+            .}
     elif fieldname in ["vertexCode", "fragmentCode"]:
       discard
     elif hasCustomPragma(value, PushConstant):

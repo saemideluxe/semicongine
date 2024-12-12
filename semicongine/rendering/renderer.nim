@@ -87,7 +87,8 @@ proc initDescriptorSet*(
   # santization checks
   for theName, value in descriptorSet.data.fieldPairs:
     when typeof(value) is GPUValue:
-      assert value.buffer.vk.Valid
+      assert value.buffer.vk.Valid,
+        "Invalid buffer, did you call 'assignBuffers' for this buffer?"
     elif typeof(value) is ImageObject:
       assert value.vk.Valid
       assert value.imageview.Valid
