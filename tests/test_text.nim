@@ -24,11 +24,11 @@ proc test_01_static_label_new(time: float32) =
     createPipeline[GlyphShader[N_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
   var (ds, glyphtable) = glyphDescriptorSet(font, N_GLYPHS)
   var glyphs = Glyphs(
-    position: asGPUArray([vec3(), vec3()], VertexBufferMapped),
+    position: asGPUArray([vec3(0, 0, 0), vec3(0, 0, 0)], VertexBufferMapped),
     scale: asGPUArray([1'f32, 1'f32], VertexBufferMapped),
     color: asGPUArray([vec4(1, 1, 1, 1), vec4(1, 1, 1, 1)], VertexBufferMapped),
     glyphIndex:
-      asGPUArray([glyphtable[Rune('Q')], glyphtable[Rune('H')]], VertexBufferMapped),
+      asGPUArray([glyphtable[Rune('A')], glyphtable[Rune('B')]], VertexBufferMapped),
   )
 
   assignBuffers(renderdata, glyphs)
@@ -49,7 +49,14 @@ proc test_01_static_label_new(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          render(commandbuffer, pipeline, EMPTY(), glyphs, fixedVertexCount = 6)
+          render(
+            commandbuffer,
+            pipeline,
+            EMPTY(),
+            glyphs,
+            fixedVertexCount = 6,
+            fixedInstanceCount = 2,
+          )
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)

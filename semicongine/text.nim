@@ -98,13 +98,14 @@ type
 const int[6] indices = int[](0, 1, 2, 2, 3, 0);
 const int[4] i_x = int[](0, 0, 2, 2);
 const int[4] i_y = int[](1, 3, 3, 1);
-const vec2[4] pp = vec2[](vec2(-0.1, -0.1), vec2(-0.1, 0.1), vec2(0.1, 0.1), vec2(0.1, -0.1));
+// const float epsilon = 0.000000000000001;
+const float epsilon = 0.01;
 
 void main() {
   int vertexI = indices[gl_VertexIndex];
   vec3 pos = vec3(glyphData.pos[glyphIndex][i_x[vertexI]], glyphData.pos[glyphIndex][i_y[vertexI]], 0);
   vec2 uv = vec2(glyphData.uv[glyphIndex][i_x[vertexI]], glyphData.uv[glyphIndex][i_y[vertexI]]);
-  gl_Position = vec4(pos * scale + position, 1.0);
+  gl_Position = vec4(pos * scale + position, 1.0) + vec4(0, 0, 0, gl_VertexIndex * epsilon);
   fragmentUv = uv;
   fragmentColor = color;
 }  """
@@ -112,10 +113,12 @@ void main() {
       """void main() {
     float v = texture(fontAtlas, fragmentUv).r;
     // CARFULL: This can lead to rough edges at times
-    if(v == 0) {
-      discard;
-    }
-    outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
+    // if(v == 0) {
+      // discard;
+    // }
+    // outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
+    // outColor = fragmentColor;
+    outColor = vec4(1, 1, 1, v);
 }"""
 
 proc `=copy`(dest: var FontObj, source: FontObj) {.error.}
