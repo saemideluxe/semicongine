@@ -12,7 +12,7 @@ import ./rendering/vulkan/api
 
 import ./image
 
-# in this file:
+# in this file: 
 # - const defintions for rendering
 # - custom pragma defintions for rendering
 # - type defintions for rendering
