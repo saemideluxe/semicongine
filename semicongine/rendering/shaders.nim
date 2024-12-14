@@ -332,7 +332,8 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
       discard
     elif hasCustomPragma(value, PushConstant):
       assert pushConstants.len == 0, "Only one push constant value allowed"
-      assert value is object, "push constants need to be objects"
+      static:
+        assert value is object, "push constants need to be objects"
       pushConstants.add "layout( push_constant ) uniform constants"
       pushConstants.add "{"
       for constFieldName, constFieldValue in fieldPairs(value):

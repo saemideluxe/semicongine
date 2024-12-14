@@ -2,6 +2,7 @@ import std/os
 import std/typetraits
 import std/streams
 import std/strutils
+import std/strformat
 
 import ./core
 import ./resources

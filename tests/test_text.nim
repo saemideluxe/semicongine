@@ -16,60 +16,28 @@ type FontDS = object
 
 type EMPTY = object
 
-const N_GLYPHS = 200
+const MAX_GLYPHS = 200
 proc test_01_static_label_new(time: float32) =
   # var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
-  var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
+  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
   var pipeline =
-    createPipeline[GlyphShader[N_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
-  var (ds, glyphtable) = glyphDescriptorSet(font, N_GLYPHS)
-  var glyphs = Glyphs(
-    position: asGPUArray(
-      [
-        vec3(-1, 0, 0),
-        vec3(-0.6, 0, 0),
-        vec3(-0.3, 0, 0),
-        vec3(0, 0, 0),
-        vec3(0.3, 0, 0),
-        vec3(0.6, 0, 0),
-      ],
-      VertexBufferMapped,
-    ),
-    scale: asGPUArray([1'f32, 1'f32, 1'f32, 1'f32, 1'f32, 1'f32], VertexBufferMapped),
-    color: asGPUArray(
-      [
-        vec4(1, 1, 0, 1),
-        vec4(0, 0, 1, 1),
-        vec4(1, 1, 1, 1),
-        vec4(1, 1, 0, 1),
-        vec4(0, 0, 1, 1),
-        vec4(1, 1, 1, 1),
-      ],
-      VertexBufferMapped,
-    ),
-    glyphIndex: asGPUArray(
-      [
-        glyphtable[Rune('a')],
-        glyphtable[Rune('l')],
-        glyphtable[Rune('i')],
-        glyphtable[Rune('g')],
-        glyphtable[Rune('x')],
-        glyphtable[Rune('x')],
-      ],
-      VertexBufferMapped,
-    ),
-  )
+    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
+  var glyphs = initGlyphs(1000)
 
   assignBuffers(renderdata, glyphs)
-  assignBuffers(renderdata, ds)
-  uploadImages(renderdata, ds)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds)
+  assignBuffers(renderdata, font.descriptorSet)
+  uploadImages(renderdata, font.descriptorSet)
+  initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
+
+  glyphs.set(font[], "semicongine".toRunes(), vec3())
+
+  glyphs.updateAllGPUBuffers(flush = true)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     withNextFrame(framebuffer, commandbuffer):
-      bindDescriptorSet(commandbuffer, ds, 0, pipeline)
+      bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
       withRenderPass(
         vulkan.swapchain.renderPass,
         framebuffer,
@@ -79,24 +47,19 @@ proc test_01_static_label_new(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          render(
-            commandbuffer,
-            pipeline,
-            EMPTY(),
-            glyphs,
-            fixedVertexCount = 6, # fixedInstanceCount = 2,
-          )
+          renderGlyphs(commandbuffer, pipeline, glyphs)
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
+#[
 proc test_01_static_label(time: float32) =
-  var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
+  var font = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
   var pipeline =
-    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
@@ -126,13 +89,13 @@ proc test_01_static_label(time: float32) =
   destroyRenderData(renderdata)
 
 proc test_02_multiple_animated(time: float32) =
-  var font1 = loadFont("Overhaul.ttf", lineHeightPixels = 40)
-  var font2 = loadFont("Overhaul.ttf", lineHeightPixels = 160)
-  var font3 = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
+  var font1 = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 40)
+  var font2 = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 160)
+  var font3 = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
   var pipeline =
-    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds1 = asDescriptorSetData(FontDS(fontAtlas: font1.fontAtlas.copy()))
   uploadImages(renderdata, ds1)
@@ -201,11 +164,11 @@ proc test_02_multiple_animated(time: float32) =
   destroyRenderData(renderdata)
 
 proc test_03_layouting(time: float32) =
-  var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 40)
+  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 40)
   var renderdata = initRenderData()
 
   var pipeline =
-    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
@@ -274,11 +237,11 @@ It should display with some space above and have a pleasing appearance overall! 
   destroyRenderData(renderdata)
 
 proc test_04_lots_of_texts(time: float32) =
-  var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
+  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
   var pipeline =
-    createPipeline[DefaultFontShader[FontDS]](renderPass = vulkan.swapchain.renderPass)
+    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
@@ -319,6 +282,7 @@ proc test_04_lots_of_texts(time: float32) =
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
+]#
 
 when isMainModule:
   var time = 1000'f32

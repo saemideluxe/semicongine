@@ -44,16 +44,19 @@ proc stbtt_GetFontVMetrics(
   info: ptr stbtt_fontinfo, ascent, descent, lineGap: ptr cint
 ) {.importc, nodecl.}
 
-proc readTrueType(
+proc readTrueType[N: static int](
     stream: Stream, name: string, codePoints: seq[Rune], lineHeightPixels: float32
-): Font =
+): Font[N] =
+  assert codePoints.len <= N,
+    "asked for " & $codePoints.len & " glyphs but shader is only configured for " & $N
+
   var
     indata = stream.readAll()
     fontinfo: stbtt_fontinfo
   if stbtt_InitFont(addr fontinfo, indata.ToCPointer, 0) == 0:
     raise newException(Exception, "An error occured while loading font file")
 
-  result = Font(
+  result = Font[N](
     fontscale:
       float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels)))
   )
@@ -134,7 +137,7 @@ proc readTrueType(
       ],
       offsetX: float32(offsetX[codePoint]),
       offsetY: float32(offsetY[codePoint]),
-      leftBearing: float32(leftBearing),
+      leftBearing: float32(leftBearing) * result.fontscale,
       advance: float32(advance),
     )
 
@@ -146,15 +149,47 @@ proc readTrueType(
           )
         ) * result.fontscale
 
-proc loadFont*(
+proc loadFont*[N: static int](
     path: string,
     lineHeightPixels = 80'f32,
     additional_codepoints: openArray[Rune] = [],
     charset = ASCII_CHARSET,
     package = DEFAULT_PACKAGE,
-): Font =
-  loadResource_intern(path, package = package).readTrueType(
-    path.splitFile().name, charset & additional_codepoints.toSeq, lineHeightPixels
+): Font[N] =
+  result = readTrueType[N](
+    loadResource_intern(path, package = package),
+    path.splitFile().name,
+    charset & additional_codepoints.toSeq,
+    lineHeightPixels,
+  )
+
+  var glyphData = GlyphData[N]()
+
+  var i = 0'u16
+  for rune, info in result.glyphs.pairs():
+    let
+      left = info.leftBearing + info.offsetX
+      right = left + info.dimension.x
+      top = -info.offsetY
+      bottom = top - info.dimension.y
+    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.001'f32
+    assert info.uvs[0].x == info.uvs[1].x,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    assert info.uvs[0].y == info.uvs[3].y,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    assert info.uvs[2].x == info.uvs[3].x,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    assert info.uvs[1].y == info.uvs[2].y,
+      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
+    glyphData.uv[i] = vec4(info.uvs[0].x, info.uvs[0].y, info.uvs[2].x, info.uvs[2].y)
+    result.descriptorGlyphIndex[rune] = i
+    inc i
+
+  result.descriptorSet = asDescriptorSetData(
+    GlyphDescriptorSet[N](
+      fontAtlas: result.fontAtlas.copy(),
+      glyphData: asGPUValue(glyphData, StorageBuffer),
+    )
   )
 
 func textWidth*(theText: seq[Rune] | string, font: FontObj): float32 =

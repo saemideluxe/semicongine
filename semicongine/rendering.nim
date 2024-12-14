@@ -186,6 +186,9 @@ proc `=copy`[T](dest: var DescriptorSetData[T], source: DescriptorSetData[T]) {.
 proc `[]`*[T, S](a: GPUArray[T, S], i: SomeInteger): T =
   a.data[i]
 
+proc len*[T, S](a: GPUArray[T, S]): int =
+  a.data.len
+
 proc `[]=`*[T, S](a: var GPUArray[T, S], i: SomeInteger, value: T) =
   a.data[i] = value
 

@@ -1,4 +1,5 @@
 import std/algorithm
+import std/strformat
 
 import ../../image
 
