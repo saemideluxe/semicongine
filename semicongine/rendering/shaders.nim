@@ -492,6 +492,7 @@ proc createPipeline*[TShader](
     if l.Valid:
       layouts.add l
 
+  # TODO: only add pushConstants if shader actually uses them
   let pushConstant = VkPushConstantRange(
     stageFlags: VkShaderStageFlags(VK_SHADER_STAGE_ALL_GRAPHICS),
     offset: 0,
