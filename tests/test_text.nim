@@ -25,7 +25,7 @@ proc test_01_static_label_new(time: float32) =
   var (ds, glyphtable) = glyphDescriptorSet(font, N_GLYPHS)
   var glyphs = Glyphs(
     position:
-      asGPUArray([vec3(0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0)], VertexBufferMapped),
+      asGPUArray([vec3(0, 0, 0.2), vec3(0, 0, 0.1), vec3(0, 0, 0)], VertexBufferMapped),
     scale: asGPUArray([1'f32, 1'f32, 1'f32], VertexBufferMapped),
     color: asGPUArray(
       [vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), vec4(1, 1, 1, 1)], VertexBufferMapped
