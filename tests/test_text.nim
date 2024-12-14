@@ -59,7 +59,8 @@ proc test_01_static_label_new(time: float32) =
             pipeline,
             EMPTY(),
             glyphs,
-            fixedVertexCount = 6, # fixedInstanceCount = 2,
+            fixedVertexCount = 6,
+            fixedInstanceCount = 2,
           )
 
         # cleanup
