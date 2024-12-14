@@ -18,20 +18,45 @@ type EMPTY = object
 
 const N_GLYPHS = 200
 proc test_01_static_label_new(time: float32) =
-  var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
+  # var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
+  var font = loadFont("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
   var pipeline =
     createPipeline[GlyphShader[N_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
   var (ds, glyphtable) = glyphDescriptorSet(font, N_GLYPHS)
   var glyphs = Glyphs(
-    position:
-      asGPUArray([vec3(0, 0, 0.2), vec3(0, 0, 0.1), vec3(0, 0, 0)], VertexBufferMapped),
-    scale: asGPUArray([1'f32, 1'f32, 1'f32], VertexBufferMapped),
+    position: asGPUArray(
+      [
+        vec3(-1, 0, 0),
+        vec3(-0.6, 0, 0),
+        vec3(-0.3, 0, 0),
+        vec3(0, 0, 0),
+        vec3(0.3, 0, 0),
+        vec3(0.6, 0, 0),
+      ],
+      VertexBufferMapped,
+    ),
+    scale: asGPUArray([1'f32, 1'f32, 1'f32, 1'f32, 1'f32, 1'f32], VertexBufferMapped),
     color: asGPUArray(
-      [vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), vec4(1, 1, 1, 1)], VertexBufferMapped
+      [
+        vec4(1, 1, 0, 1),
+        vec4(0, 0, 1, 1),
+        vec4(1, 1, 1, 1),
+        vec4(1, 1, 0, 1),
+        vec4(0, 0, 1, 1),
+        vec4(1, 1, 1, 1),
+      ],
+      VertexBufferMapped,
     ),
     glyphIndex: asGPUArray(
-      [glyphtable[Rune('A')], glyphtable[Rune('B')], glyphtable[Rune('g')]],
+      [
+        glyphtable[Rune('a')],
+        glyphtable[Rune('l')],
+        glyphtable[Rune('i')],
+        glyphtable[Rune('g')],
+        glyphtable[Rune('x')],
+        glyphtable[Rune('x')],
+      ],
       VertexBufferMapped,
     ),
   )
@@ -59,8 +84,7 @@ proc test_01_static_label_new(time: float32) =
             pipeline,
             EMPTY(),
             glyphs,
-            fixedVertexCount = 6,
-            fixedInstanceCount = 2,
+            fixedVertexCount = 6, # fixedInstanceCount = 2,
           )
 
         # cleanup

@@ -70,8 +70,8 @@ proc readTrueType(
       warn &"Loading font {name}: Codepoint '{codePoint}' ({cint(codePoint)}) has no glyph"
 
   var
-    topOffsets: Table[Rune, int]
-    leftOffsets: Table[Rune, int]
+    offsetY: Table[Rune, int]
+    offsetX: Table[Rune, int]
     images: seq[Image[Gray]]
 
   for codePoint in codePoints:
@@ -88,8 +88,8 @@ proc readTrueType(
       addr offX,
       addr offY,
     )
-    topOffsets[codePoint] = offY
-    leftOffsets[codePoint] = offX
+    offsetX[codePoint] = offX
+    offsetY[codePoint] = offY
 
     if char(codePoint) in UppercaseLetters:
       result.capHeight = float32(height)
@@ -132,10 +132,10 @@ proc readTrueType(
         vec2((coord.x + iw - 0.5) / w, (coord.y + 0.5) / h),
         vec2((coord.x + iw - 0.5) / w, (coord.y + ih - 0.5) / h),
       ],
-      topOffset: float32(topOffsets[codePoint]) * result.fontscale,
-      # leftOffset: float32(leftBearing) * result.fontscale,
-      leftOffset: float32(leftOffsets[codePoint] + leftBearing) * result.fontscale,
-      advance: float32(advance) * result.fontscale,
+      offsetX: float32(offsetX[codePoint]),
+      offsetY: float32(offsetY[codePoint]),
+      leftBearing: float32(leftBearing),
+      advance: float32(advance),
     )
 
     for codePointAfter in codePoints:

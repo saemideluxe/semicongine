@@ -23,8 +23,9 @@ type
   GlyphInfo* = object
     uvs*: array[4, Vec2f]
     dimension*: Vec2f
-    topOffset*: float32
-    leftOffset*: float32
+    offsetX*: float32
+    offsetY*: float32
+    leftBearing*: float32
     advance*: float32
 
   FontObj* = object
@@ -98,15 +99,15 @@ type
 const int[6] indices = int[](0, 1, 2, 2, 3, 0);
 const int[4] i_x = int[](0, 0, 2, 2);
 const int[4] i_y = int[](1, 3, 3, 1);
-const float epsilon = 0.000000000000001;
-// const float epsilon = 0.1;
+// const float epsilon = 0.000000000000001;
+const float epsilon = 0.1;
 
 void main() {
   int vertexI = indices[gl_VertexIndex];
   vec3 pos = vec3(
     glyphData.pos[glyphIndex][i_x[vertexI]] * scale,
     glyphData.pos[glyphIndex][i_y[vertexI]] * scale,
-    gl_VertexIndex * epsilon
+    1 - (gl_InstanceIndex + 1) * epsilon
   );
   vec2 uv = vec2(glyphData.uv[glyphIndex][i_x[vertexI]], glyphData.uv[glyphIndex][i_y[vertexI]]);
   gl_Position = vec4(pos + position, 1.0);
@@ -116,13 +117,13 @@ void main() {
     fragmentCode* =
       """void main() {
     float v = texture(fontAtlas, fragmentUv).r;
-    // CARFULL: This can lead to rough edges at times
     // if(v == 0) {
       // discard;
     // }
-    // outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
-    // outColor = fragmentColor;
-    outColor = vec4(1, 1, 1, v);
+    outColor = vec4(fragmentColor.rgb, fragmentColor.a * v);
+    if (v == 0) {
+      outColor = vec4(1, 0, 1, 1);
+    }
 }"""
 
 proc `=copy`(dest: var FontObj, source: FontObj) {.error.}
@@ -143,11 +144,11 @@ proc glyphDescriptorSet*(
   var i = 0'u16
   for rune, info in font.glyphs.pairs():
     let
-      left = -info.leftOffset
-      right = -info.leftOffset + info.dimension.x
-      top = font.lineHeight + info.topOffset
-      bottom = font.lineHeight + info.topOffset - info.dimension.y
-    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.01'f32
+      left = -info.offsetX
+      right = -info.offsetX + info.dimension.x
+      top = font.lineHeight + info.offsetY
+      bottom = font.lineHeight + info.offsetY - info.dimension.y
+    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.005'f32
     assert info.uvs[0].x == info.uvs[1].x,
       "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
     assert info.uvs[0].y == info.uvs[3].y,

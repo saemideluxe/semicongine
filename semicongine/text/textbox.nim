@@ -86,10 +86,10 @@ proc refreshGeometry(textbox: var Textbox) =
       else:
         let
           glyph = textbox.font.glyphs[textbox.visibleText[i]]
-          left = offsetX + glyph.leftOffset
-          right = offsetX + glyph.leftOffset + glyph.dimension.x
-          top = offsetY - glyph.topOffset
-          bottom = offsetY - glyph.topOffset - glyph.dimension.y
+          left = offsetX + glyph.offsetX
+          right = offsetX + glyph.offsetX + glyph.dimension.x
+          top = offsetY - glyph.offsetY
+          bottom = offsetY - glyph.offsetY - glyph.dimension.y
 
         textbox.position.data[vertexOffset + 0] =
           vec3(left - anchorX, bottom - anchorY, 0)
