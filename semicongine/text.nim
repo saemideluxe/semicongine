@@ -98,14 +98,18 @@ type
 const int[6] indices = int[](0, 1, 2, 2, 3, 0);
 const int[4] i_x = int[](0, 0, 2, 2);
 const int[4] i_y = int[](1, 3, 3, 1);
-// const float epsilon = 0.000000000000001;
-const float epsilon = 0.1;
+const float epsilon = 0.000000000000001;
+// const float epsilon = 0.1;
 
 void main() {
   int vertexI = indices[gl_VertexIndex];
-  vec3 pos = vec3(glyphData.pos[glyphIndex][i_x[vertexI]], glyphData.pos[glyphIndex][i_y[vertexI]], 0);
+  vec3 pos = vec3(
+    glyphData.pos[glyphIndex][i_x[vertexI]] * scale,
+    glyphData.pos[glyphIndex][i_y[vertexI]] * scale,
+    gl_VertexIndex * epsilon
+  );
   vec2 uv = vec2(glyphData.uv[glyphIndex][i_x[vertexI]], glyphData.uv[glyphIndex][i_y[vertexI]]);
-  gl_Position = vec4(pos * scale + position, 1.0) + vec4(0, 0, gl_VertexIndex * epsilon, 0);
+  gl_Position = vec4(pos + position, 1.0);
   fragmentUv = uv;
   fragmentColor = color;
 }  """
