@@ -147,7 +147,7 @@ proc glyphDescriptorSet*(
       right = -info.leftOffset + info.dimension.x
       top = font.lineHeight + info.topOffset
       bottom = font.lineHeight + info.topOffset - info.dimension.y
-    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.005'f32
+    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.01'f32
     assert info.uvs[0].x == info.uvs[1].x,
       "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
     assert info.uvs[0].y == info.uvs[3].y,
