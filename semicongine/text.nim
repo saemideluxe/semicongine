@@ -99,7 +99,7 @@ const int[6] indices = int[](0, 1, 2, 2, 3, 0);
 const int[4] i_x = int[](0, 0, 2, 2);
 const int[4] i_y = int[](1, 3, 3, 1);
 // const float epsilon = 0.000000000000001;
-const float epsilon = 0.01;
+const float epsilon = 0.1;
 
 void main() {
   int vertexI = indices[gl_VertexIndex];
