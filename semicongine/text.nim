@@ -20,38 +20,29 @@ const
   SPACE = Rune(' ')
 
 type
-  GlyphInfo* = object
-    uvs*: array[4, Vec2f]
-    dimension*: Vec2f
-    offsetX*: float32
-    offsetY*: float32
-    leftBearing*: float32
-    advance*: float32
-
-  GlyphData[N: static int] = object
+  GlyphQuad[N: static int] = object
     pos: array[N, Vec4f] # vertex offsets to glyph center: [left, bottom, right, top]
     uv: array[N, Vec4f] # [left, bottom, right, top]
 
   GlyphDescriptorSet*[N: static int] = object
     fontAtlas*: Image[Gray]
-    glyphData*: GPUValue[GlyphData[N], StorageBuffer]
+    glyphquads*: GPUValue[GlyphQuad[N], StorageBuffer]
 
   FontObj*[N: static int] = object
-    glyphs*: Table[Rune, GlyphInfo]
-    fontAtlas*: Image[Gray]
-    maxHeight*: int
+    advance*: Table[Rune, float32]
     kerning*: Table[(Rune, Rune), float32]
-    fontscale*: float32
     lineHeight*: float32
     lineAdvance*: float32
-    capHeight*: float32
-    xHeight*: float32
     descriptorSet*: DescriptorSetData[GlyphDescriptorSet[N]]
     descriptorGlyphIndex: Table[Rune, uint16]
+    fallbackCharacter: Rune
 
   Font*[N: static int] = ref FontObj[N]
 
-  Glyphs* = object
+  Glyphs*[N: static int] = object
+    cursor: int
+    font: Font[N]
+    baseScale*: float32
     position*: GPUArray[Vec3f, VertexBufferMapped]
     color*: GPUArray[Vec4f, VertexBufferMapped]
     scale*: GPUArray[float32, VertexBufferMapped]
@@ -82,12 +73,12 @@ const float epsilon = 0.0000001;
 void main() {
   int vertexI = indices[gl_VertexIndex];
   vec3 pos = vec3(
-    glyphData.pos[glyphIndex][i_x[vertexI]] * scale,
-    glyphData.pos[glyphIndex][i_y[vertexI]] * scale * textRendering.aspectRatio,
+    glyphquads.pos[glyphIndex][i_x[vertexI]] * scale,
+    glyphquads.pos[glyphIndex][i_y[vertexI]] * scale * textRendering.aspectRatio,
     1 - (gl_InstanceIndex + 1) * epsilon // allows overlapping glyphs to make proper depth test
   );
   gl_Position = vec4(pos + position, 1.0);
-  vec2 uv = vec2(glyphData.uv[glyphIndex][i_x[vertexI]], glyphData.uv[glyphIndex][i_y[vertexI]]);
+  vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);
   fragmentUv = uv;
   fragmentColor = color;
 }  """
@@ -97,62 +88,24 @@ void main() {
     outColor = vec4(fragmentColor.rgb, fragmentColor.a * a);
 }"""
 
-proc `=copy`[T: static int](dest: var FontObj[T], source: FontObj[T]) {.error.}
-proc `=copy`(dest: var Glyphs, source: Glyphs) {.error.}
+proc `=copy`[N: static int](dest: var FontObj[N], source: FontObj[N]) {.error.}
+proc `=copy`[N: static int](dest: var Glyphs[N], source: Glyphs[N]) {.error.}
 
 include ./text/font
 
-#[
-proc glyphDescriptorSet*(
-    font: Font, maxGlyphs: static int
-): (DescriptorSetData[GlyphDescriptorSet[maxGlyphs]], Table[Rune, uint16]) =
-  assert font.glyphs.len <= maxGlyphs,
-    "font has " & $font.glyphs.len & " glyphs but shader is only configured for " &
-      $maxGlyphs
-
-  var glyphData = GlyphData[maxGlyphs]()
-  var glyphTable: Table[Rune, uint16]
-
-  var i = 0'u16
-  for rune, info in font.glyphs.pairs():
-    let
-      left = info.leftBearing + info.offsetX
-      right = left + info.dimension.x
-      top = -info.offsetY
-      bottom = top - info.dimension.y
-    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.001'f32
-    assert info.uvs[0].x == info.uvs[1].x,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    assert info.uvs[0].y == info.uvs[3].y,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    assert info.uvs[2].x == info.uvs[3].x,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    assert info.uvs[1].y == info.uvs[2].y,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    glyphData.uv[i] = vec4(info.uvs[0].x, info.uvs[0].y, info.uvs[2].x, info.uvs[2].y)
-    glyphTable[rune] = i
-    inc i
-
-  (
-    asDescriptorSetData(
-      GlyphDescriptorSet[maxGlyphs](
-        fontAtlas: font.fontAtlas.copy(),
-        glyphData: asGPUValue(glyphData, StorageBuffer),
-      )
-    ),
-    glyphTable,
-  )
-]#
-
-func initGlyphs*(count: int): Glyphs =
+func initGlyphs*[N: static int](
+    font: Font[N], count: int, baseScale = 1'f32
+): Glyphs[N] =
+  result.cursor = 0
+  result.font = font
+  result.baseScale = baseScale
   result.position.data.setLen(count)
   result.scale.data.setLen(count)
   result.color.data.setLen(count)
   result.glyphIndex.data.setLen(count)
 
-func set*(
+proc add*(
     glyphs: var Glyphs,
-    font: FontObj,
     text: seq[Rune],
     position: Vec3f,
     scale = 1'f32,
@@ -160,12 +113,33 @@ func set*(
 ) =
   assert text.len <= glyphs.position.len,
     &"Set {text.len} but Glyphs-object only supports {glyphs.position.len}"
-  var cursor = position
+  var cursorPos = position
   for i in 0 ..< text.len:
-    glyphs.position[i] = cursor
-    glyphs.scale[i] = scale
-    glyphs.color[i] = color
-    glyphs.glyphIndex[i] = font.descriptorGlyphIndex[text[i]]
+    if not text[i].isWhitespace():
+      glyphs.position[glyphs.cursor] = cursorPos
+      glyphs.scale[glyphs.cursor] = scale * glyphs.baseScale
+      glyphs.color[glyphs.cursor] = color
+      if text[i] in glyphs.font.descriptorGlyphIndex:
+        glyphs.glyphIndex[glyphs.cursor] = glyphs.font.descriptorGlyphIndex[text[i]]
+      else:
+        glyphs.glyphIndex[glyphs.cursor] =
+          glyphs.font.descriptorGlyphIndex[glyphs.font.fallbackCharacter]
+      inc glyphs.cursor
+
+    if text[i] in glyphs.font.advance:
+      cursorPos.x =
+        cursorPos.x + glyphs.font.advance[text[i]] * scale * glyphs.baseScale
+    else:
+      cursorPos.x =
+        cursorPos.x +
+        glyphs.font.advance[glyphs.font.fallbackCharacter] * scale * glyphs.baseScale
+
+    if i < text.len - 1:
+      cursorPos.x =
+        cursorPos.x + glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * scale
+
+proc reset*(glyphs: var Glyphs) =
+  glyphs.cursor = 0
 
 type EMPTY = object
 const EMPTYOBJECT = EMPTY()
@@ -178,4 +152,5 @@ proc renderGlyphs*(commandBuffer: VkCommandBuffer, pipeline: Pipeline, glyphs: G
     glyphs,
     pushConstant = TextRendering(aspectRatio: getAspectRatio()),
     fixedVertexCount = 6,
+    fixedInstanceCount = glyphs.cursor,
   )

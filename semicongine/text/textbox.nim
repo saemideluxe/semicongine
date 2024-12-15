@@ -34,7 +34,7 @@ proc refreshGeometry(textbox: var Textbox) =
       width = 0'f32
     else:
       if not (i == textbox.visibleText.len - 1 and textbox.visibleText[i].isWhiteSpace):
-        width += textbox.font.glyphs[textbox.visibleText[i]].advance
+        width += textbox.font.glyphdata[textbox.visibleText[i]].advance
       if i < textbox.visibleText.len - 1:
         width +=
           textbox.font.kerning[(textbox.visibleText[i], textbox.visibleText[i + 1])]
@@ -85,7 +85,7 @@ proc refreshGeometry(textbox: var Textbox) =
             lineWidths[lineIndex]
       else:
         let
-          glyph = textbox.font.glyphs[textbox.visibleText[i]]
+          glyph = textbox.font.glyphdata[textbox.visibleText[i]]
           left = offsetX + glyph.offsetX
           right = offsetX + glyph.offsetX + glyph.dimension.x
           top = offsetY - glyph.offsetY

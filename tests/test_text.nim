@@ -18,24 +18,24 @@ type EMPTY = object
 
 const MAX_GLYPHS = 200
 proc test_01_static_label_new(time: float32) =
-  # var font = loadFont("Overhaul.ttf", lineHeightPixels = 160)
-  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 160)
+  var font = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 200)
   var renderdata = initRenderData()
   var pipeline =
     createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
-  var glyphs = initGlyphs(1000)
+  var glyphs = font.initGlyphs(1000, baseScale = 0.3)
 
   assignBuffers(renderdata, glyphs)
   assignBuffers(renderdata, font.descriptorSet)
   uploadImages(renderdata, font.descriptorSet)
   initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
 
-  glyphs.set(font[], "semicongine".toRunes(), vec3())
-
-  glyphs.updateAllGPUBuffers(flush = true)
-
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
+    let t = getMonoTime()
+    glyphs.reset()
+    glyphs.add("semicongine".toRunes())
+    glyphs.updateAllGPUBuffers(flush = true)
+
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
       withRenderPass(
@@ -49,7 +49,7 @@ proc test_01_static_label_new(time: float32) =
         withPipeline(commandbuffer, pipeline):
           renderGlyphs(commandbuffer, pipeline, glyphs)
 
-        # cleanup
+  # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)

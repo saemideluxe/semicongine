@@ -50,104 +50,105 @@ proc readTrueType[N: static int](
   assert codePoints.len <= N,
     "asked for " & $codePoints.len & " glyphs but shader is only configured for " & $N
 
+  result = Font[N]()
+
   var
     indata = stream.readAll()
     fontinfo: stbtt_fontinfo
   if stbtt_InitFont(addr fontinfo, indata.ToCPointer, 0) == 0:
     raise newException(Exception, "An error occured while loading font file")
 
-  result = Font[N](
-    fontscale:
-      float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels)))
-  )
-
   var ascent, descent, lineGap: cint
   stbtt_GetFontVMetrics(addr fontinfo, addr ascent, addr descent, addr lineGap)
 
-  result.lineHeight = float32(ascent - descent) * result.fontscale
-  result.lineAdvance = float32(ascent - descent + lineGap) * result.fontscale
-
+  let fscale =
+    float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels)))
   # ensure all codepoints are available in the font
   for codePoint in codePoints:
     if stbtt_FindGlyphIndex(addr fontinfo, cint(codePoint)) == 0:
       warn &"Loading font {name}: Codepoint '{codePoint}' ({cint(codePoint)}) has no glyph"
 
   var
-    offsetY: Table[Rune, int]
-    offsetX: Table[Rune, int]
-    images: seq[Image[Gray]]
+    offsetY: Table[Rune, cint]
+    offsetX: Table[Rune, cint]
+    bitmaps: seq[Image[Gray]]
 
+  # render all glyphs to bitmaps and store quad geometry info
   for codePoint in codePoints:
-    var
-      width, height: cint
-      offX, offY: cint
+    offsetX[codePoint] = 0
+    offsetY[codePoint] = 0
+    var width, height: cint
     let data = stbtt_GetCodepointBitmap(
       addr fontinfo,
-      result.fontscale,
-      result.fontscale,
+      fscale,
+      fscale,
       cint(codePoint),
       addr width,
       addr height,
-      addr offX,
-      addr offY,
+      addr (offsetX[codePoint]),
+      addr (offsetY[codePoint]),
     )
-    offsetX[codePoint] = offX
-    offsetY[codePoint] = offY
-
-    if char(codePoint) in UppercaseLetters:
-      result.capHeight = float32(height)
-    if codePoint == Rune('x'):
-      result.xHeight = float32(height)
 
     if width > 0 and height > 0:
       var bitmap = newSeq[Gray](width * height)
       for i in 0 ..< width * height:
         bitmap[i] = vec1u8(data[i].uint8)
-      images.add Image[Gray](width: width.uint32, height: height.uint32, data: bitmap)
+      bitmaps.add Image[Gray](width: width.uint32, height: height.uint32, data: bitmap)
     else:
-      images.add Image[Gray](width: 1, height: 1, data: @[vec1u8()])
+      bitmaps.add Image[Gray](width: 1, height: 1, data: @[vec1u8(0)])
 
     nativeFree(data)
 
-  let packed = pack(images)
+  # generate glyph atlas from bitmaps
+  let packed = pack(bitmaps)
+  result.descriptorSet.data.fontAtlas = packed.atlas
 
-  result.fontAtlas = packed.atlas
-
-  let w = float32(result.fontAtlas.width)
-  let h = float32(result.fontAtlas.height)
+  # generate quad-information for use in shader
   for i in 0 ..< codePoints.len:
-    let
-      codePoint = codePoints[i]
-      coord = (x: float32(packed.coords[i].x), y: float32(packed.coords[i].y))
-      iw = float32(images[i].width)
-      ih = float32(images[i].height)
-    # horizontal spaces:
-    var advance, leftBearing: cint
+    let codePoint = codePoints[i]
+    var advance, leftBearing: cint # is in glyph-space, needs to be scaled to pixel-space
     stbtt_GetCodepointHMetrics(
       addr fontinfo, cint(codePoint), addr advance, addr leftBearing
     )
+    result.advance[codePoint] = float32(advance) * fscale * (1 / lineHeightPixels)
 
-    result.glyphs[codePoint] = GlyphInfo(
-      dimension: vec2(float32(images[i].width), float32(images[i].height)),
-      uvs: [
-        vec2((coord.x + 0.5) / w, (coord.y + ih - 0.5) / h),
-        vec2((coord.x + 0.5) / w, (coord.y + 0.5) / h),
-        vec2((coord.x + iw - 0.5) / w, (coord.y + 0.5) / h),
-        vec2((coord.x + iw - 0.5) / w, (coord.y + ih - 0.5) / h),
-      ],
-      offsetX: float32(offsetX[codePoint]),
-      offsetY: float32(offsetY[codePoint]),
-      leftBearing: float32(leftBearing) * result.fontscale,
-      advance: float32(advance),
+    let
+      atlasW = float32(result.descriptorSet.data.fontAtlas.width)
+      atlasH = float32(result.descriptorSet.data.fontAtlas.height)
+      uv = vec2(packed.coords[i].x, packed.coords[i].y)
+      bitmapW = float32(bitmaps[i].width)
+      bitmapH = float32(bitmaps[i].height)
+      left = float32(leftBearing) * fscale + float32(offsetX[codePoint])
+      right = left + bitmapW
+      top = -float32(offsetY[codePoint])
+      bottom = top - bitmapH
+
+    template glyphquads(): untyped =
+      result.descriptorSet.data.glyphquads.data
+
+    glyphquads.pos[i] = vec4(left, bottom, right, top) * (1 / lineHeightPixels)
+    glyphquads.uv[i] = vec4(
+      (uv.x + 0.5) / atlasW, # left
+      (uv.y + bitmapH - 0.5) / atlasH, # bottom
+      (uv.x + bitmapW - 0.5) / atlasW, # right
+      (uv.y + 0.5) / atlasH, # top
     )
+    if i == 0:
+      result.fallbackCharacter = codePoint
+    result.descriptorGlyphIndex[codePoint] = i.uint16
 
+    # kerning
     for codePointAfter in codePoints:
       result.kerning[(codePoint, codePointAfter)] =
         float32(
           stbtt_GetCodepointKernAdvance(
             addr fontinfo, cint(codePoint), cint(codePointAfter)
           )
-        ) * result.fontscale
+        ) * fscale
+
+  # line spacing
+  result.lineHeight = float32(ascent - descent) * fscale
+  result.lineAdvance = float32(ascent - descent + lineGap) * fscale
 
 proc loadFont*[N: static int](
     path: string,
@@ -156,40 +157,11 @@ proc loadFont*[N: static int](
     charset = ASCII_CHARSET,
     package = DEFAULT_PACKAGE,
 ): Font[N] =
-  result = readTrueType[N](
+  readTrueType[N](
     loadResource_intern(path, package = package),
     path.splitFile().name,
     charset & additional_codepoints.toSeq,
     lineHeightPixels,
-  )
-
-  var glyphData = GlyphData[N]()
-
-  var i = 0'u16
-  for rune, info in result.glyphs.pairs():
-    let
-      left = info.leftBearing + info.offsetX
-      right = left + info.dimension.x
-      top = -info.offsetY
-      bottom = top - info.dimension.y
-    glyphData.pos[i] = vec4(left, bottom, right, top) * 0.001'f32
-    assert info.uvs[0].x == info.uvs[1].x,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    assert info.uvs[0].y == info.uvs[3].y,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    assert info.uvs[2].x == info.uvs[3].x,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    assert info.uvs[1].y == info.uvs[2].y,
-      "Currently only axis aligned rectangles are allowed for info boxes in font texture maps"
-    glyphData.uv[i] = vec4(info.uvs[0].x, info.uvs[0].y, info.uvs[2].x, info.uvs[2].y)
-    result.descriptorGlyphIndex[rune] = i
-    inc i
-
-  result.descriptorSet = asDescriptorSetData(
-    GlyphDescriptorSet[N](
-      fontAtlas: result.fontAtlas.copy(),
-      glyphData: asGPUValue(glyphData, StorageBuffer),
-    )
   )
 
 func textWidth*(theText: seq[Rune] | string, font: FontObj): float32 =
@@ -202,7 +174,7 @@ func textWidth*(theText: seq[Rune] | string, font: FontObj): float32 =
       currentWidth = 0'f32
     else:
       if not (i == text.len - 1 and text[i].isWhiteSpace):
-        currentWidth += font.glyphs[text[i]].advance
+        currentWidth += font.advance[text[i]]
       if i < text.len - 1:
         currentWidth += font.kerning[(text[i], text[i + 1])]
   lineWidths.add currentWidth
