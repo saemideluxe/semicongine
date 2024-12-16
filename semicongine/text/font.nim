@@ -54,18 +54,18 @@ proc readTrueType[N: static int](
 
   var
     indata = stream.readAll()
-    fontinfo: stbtt_fontinfo
-  if stbtt_InitFont(addr fontinfo, indata.ToCPointer, 0) == 0:
+    fi: stbtt_fontinfo
+  if stbtt_InitFont(addr fi, indata.ToCPointer, 0) == 0:
     raise newException(Exception, "An error occured while loading font file")
 
-  var ascent, descent, lineGap: cint
-  stbtt_GetFontVMetrics(addr fontinfo, addr ascent, addr descent, addr lineGap)
+  let
+    glyph2bitmapScale =
+      float32(stbtt_ScaleForPixelHeight(addr fi, cfloat(lineHeightPixels)))
+    glyph2QuadScale = glyph2bitmapScale / lineHeightPixels
 
-  let fscale =
-    float32(stbtt_ScaleForPixelHeight(addr fontinfo, cfloat(lineHeightPixels)))
   # ensure all codepoints are available in the font
   for codePoint in codePoints:
-    if stbtt_FindGlyphIndex(addr fontinfo, cint(codePoint)) == 0:
+    if stbtt_FindGlyphIndex(addr fi, cint(codePoint)) == 0:
       warn &"Loading font {name}: Codepoint '{codePoint}' ({cint(codePoint)}) has no glyph"
 
   var
@@ -79,9 +79,9 @@ proc readTrueType[N: static int](
     offsetY[codePoint] = 0
     var width, height: cint
     let data = stbtt_GetCodepointBitmap(
-      addr fontinfo,
-      fscale,
-      fscale,
+      addr fi,
+      glyph2bitmapScale,
+      glyph2bitmapScale,
       cint(codePoint),
       addr width,
       addr height,
@@ -106,11 +106,13 @@ proc readTrueType[N: static int](
   # generate quad-information for use in shader
   for i in 0 ..< codePoints.len:
     let codePoint = codePoints[i]
-    var advance, leftBearing: cint # is in glyph-space, needs to be scaled to pixel-space
+    var advanceUnscaled, leftBearingUnscaled: cint
+      # is in glyph-space, needs to be scaled to pixel-space
     stbtt_GetCodepointHMetrics(
-      addr fontinfo, cint(codePoint), addr advance, addr leftBearing
+      addr fi, cint(codePoint), addr advanceUnscaled, addr leftBearingUnscaled
     )
-    result.advance[codePoint] = float32(advance) * fscale * (1 / lineHeightPixels)
+    var leftBearing = leftBearingUnscaled.float32 * glyph2QuadScale
+    result.advance[codePoint] = advanceUnscaled.float32 * glyph2QuadScale
 
     let
       atlasW = float32(result.descriptorSet.data.fontAtlas.width)
@@ -118,15 +120,16 @@ proc readTrueType[N: static int](
       uv = vec2(packed.coords[i].x, packed.coords[i].y)
       bitmapW = float32(bitmaps[i].width)
       bitmapH = float32(bitmaps[i].height)
-      left = float32(leftBearing) * fscale + float32(offsetX[codePoint])
-      right = left + bitmapW
-      top = -float32(offsetY[codePoint])
-      bottom = top - bitmapH
+      # divide by lineHeightPixels to get from pixel-space to quad-geometry-space
+      left = leftBearing + offsetX[codePoint].float32 / lineHeightPixels
+      right = left + bitmapW / lineHeightPixels
+      top = -offsetY[codePoint].float32 / lineHeightPixels
+      bottom = top - bitmapH / lineHeightPixels
 
     template glyphquads(): untyped =
       result.descriptorSet.data.glyphquads.data
 
-    glyphquads.pos[i] = vec4(left, bottom, right, top) * (1 / lineHeightPixels)
+    glyphquads.pos[i] = vec4(left, bottom, right, top)
     glyphquads.uv[i] = vec4(
       (uv.x + 0.5) / atlasW, # left
       (uv.y + bitmapH - 0.5) / atlasH, # bottom
@@ -141,14 +144,13 @@ proc readTrueType[N: static int](
     for codePointAfter in codePoints:
       result.kerning[(codePoint, codePointAfter)] =
         float32(
-          stbtt_GetCodepointKernAdvance(
-            addr fontinfo, cint(codePoint), cint(codePointAfter)
-          )
-        ) * fscale
+          stbtt_GetCodepointKernAdvance(addr fi, cint(codePoint), cint(codePointAfter))
+        ) * glyph2QuadScale
 
   # line spacing
-  result.lineHeight = float32(ascent - descent) * fscale
-  result.lineAdvance = float32(ascent - descent + lineGap) * fscale
+  var ascent, descent, lineGap: cint
+  stbtt_GetFontVMetrics(addr fi, addr ascent, addr descent, addr lineGap)
+  result.lineAdvance = float32(ascent - descent + lineGap) * glyph2QuadScale
 
 proc loadFont*[N: static int](
     path: string,

@@ -19,10 +19,11 @@ type EMPTY = object
 const MAX_GLYPHS = 200
 proc test_01_static_label_new(time: float32) =
   var font = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 200)
+  # var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 200)
   var renderdata = initRenderData()
   var pipeline =
     createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
-  var glyphs = font.initGlyphs(1000, baseScale = 0.3)
+  var glyphs = font.initGlyphs(1000, baseScale = 0.1)
 
   assignBuffers(renderdata, glyphs)
   assignBuffers(renderdata, font.descriptorSet)
@@ -33,7 +34,12 @@ proc test_01_static_label_new(time: float32) =
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let t = getMonoTime()
     glyphs.reset()
-    glyphs.add("semicongine".toRunes())
+    glyphs.add("semi-\ncon-\nginea".toRunes(), vec3(0.0, 0.0))
+    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(0.5, -0.5))
+    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(-0.5, 0.5))
+    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.5, 0.5))
+    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.9, 0.1))
+    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.1, 0.9))
     glyphs.updateAllGPUBuffers(flush = true)
 
     withNextFrame(framebuffer, commandbuffer):

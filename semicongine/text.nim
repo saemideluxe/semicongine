@@ -31,7 +31,6 @@ type
   FontObj*[N: static int] = object
     advance*: Table[Rune, float32]
     kerning*: Table[(Rune, Rune), float32]
-    lineHeight*: float32
     lineAdvance*: float32
     descriptorSet*: DescriptorSetData[GlyphDescriptorSet[N]]
     descriptorGlyphIndex: Table[Rune, uint16]
@@ -73,11 +72,16 @@ const float epsilon = 0.0000001;
 void main() {
   int vertexI = indices[gl_VertexIndex];
   vec3 pos = vec3(
-    glyphquads.pos[glyphIndex][i_x[vertexI]] * scale,
-    glyphquads.pos[glyphIndex][i_y[vertexI]] * scale * textRendering.aspectRatio,
+    glyphquads.pos[glyphIndex][i_x[vertexI]] * scale / textRendering.aspectRatio,
+    glyphquads.pos[glyphIndex][i_y[vertexI]] * scale,
     1 - (gl_InstanceIndex + 1) * epsilon // allows overlapping glyphs to make proper depth test
   );
-  gl_Position = vec4(pos + position, 1.0);
+  vec3 offset = vec3(
+    (position.x - textRendering.aspectRatio + 1) / textRendering.aspectRatio,
+    position.y,
+    position.z
+  );
+  gl_Position = vec4(pos + offset, 1.0);
   vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);
   fragmentUv = uv;
   fragmentColor = color;
@@ -113,30 +117,35 @@ proc add*(
 ) =
   assert text.len <= glyphs.position.len,
     &"Set {text.len} but Glyphs-object only supports {glyphs.position.len}"
-  var cursorPos = position
+  var origin =
+    vec3(position.x * 2'f32 - 1'f32, -(position.y * 2'f32 - 1'f32), position.z)
+  let s = scale * glyphs.baseScale
+  var cursorPos = origin
   for i in 0 ..< text.len:
-    if not text[i].isWhitespace():
-      glyphs.position[glyphs.cursor] = cursorPos
-      glyphs.scale[glyphs.cursor] = scale * glyphs.baseScale
-      glyphs.color[glyphs.cursor] = color
-      if text[i] in glyphs.font.descriptorGlyphIndex:
-        glyphs.glyphIndex[glyphs.cursor] = glyphs.font.descriptorGlyphIndex[text[i]]
-      else:
-        glyphs.glyphIndex[glyphs.cursor] =
-          glyphs.font.descriptorGlyphIndex[glyphs.font.fallbackCharacter]
-      inc glyphs.cursor
-
-    if text[i] in glyphs.font.advance:
-      cursorPos.x =
-        cursorPos.x + glyphs.font.advance[text[i]] * scale * glyphs.baseScale
+    if text[i] == Rune('\n'):
+      cursorPos.x = origin.x
+      cursorPos.y = cursorPos.y - glyphs.font.lineAdvance * s
     else:
-      cursorPos.x =
-        cursorPos.x +
-        glyphs.font.advance[glyphs.font.fallbackCharacter] * scale * glyphs.baseScale
+      if not text[i].isWhitespace():
+        glyphs.position[glyphs.cursor] = cursorPos
+        glyphs.scale[glyphs.cursor] = s
+        glyphs.color[glyphs.cursor] = color
+        if text[i] in glyphs.font.descriptorGlyphIndex:
+          glyphs.glyphIndex[glyphs.cursor] = glyphs.font.descriptorGlyphIndex[text[i]]
+        else:
+          glyphs.glyphIndex[glyphs.cursor] =
+            glyphs.font.descriptorGlyphIndex[glyphs.font.fallbackCharacter]
+        inc glyphs.cursor
 
-    if i < text.len - 1:
-      cursorPos.x =
-        cursorPos.x + glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * scale
+      if text[i] in glyphs.font.advance:
+        cursorPos.x = cursorPos.x + glyphs.font.advance[text[i]] * s
+      else:
+        cursorPos.x =
+          cursorPos.x + glyphs.font.advance[glyphs.font.fallbackCharacter] * s
+
+      if i < text.len - 1:
+        cursorPos.x =
+          cursorPos.x + glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * s
 
 proc reset*(glyphs: var Glyphs) =
   glyphs.cursor = 0
