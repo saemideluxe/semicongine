@@ -151,6 +151,8 @@ proc readTrueType[N: static int](
   var ascent, descent, lineGap: cint
   stbtt_GetFontVMetrics(addr fi, addr ascent, addr descent, addr lineGap)
   result.lineAdvance = float32(ascent - descent + lineGap) * glyph2QuadScale
+  result.lineHeight = float32(ascent - descent) * glyph2QuadScale
+  result.ascent = float32(ascent) * glyph2QuadScale
 
 proc loadFont*[N: static int](
     path: string,

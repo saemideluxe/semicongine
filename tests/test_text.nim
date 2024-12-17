@@ -34,12 +34,13 @@ proc test_01_static_label_new(time: float32) =
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let t = getMonoTime()
     glyphs.reset()
-    glyphs.add("semi-\ncon-\nginea".toRunes(), vec3(0.0, 0.0))
-    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(0.5, -0.5))
-    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(-0.5, 0.5))
-    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.5, 0.5))
-    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.9, 0.1))
-    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.1, 0.9))
+    glyphs.add("semi-\ncon-\nginea", vec3(0.0, 0.0), vec2(0, 0))
+    # glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(0.5, -0.5))
+    # glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(-0.5, 0.5))
+    # glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.5, 0.5))
+    glyphs.add("semi-\ncon-\ngineb", vec3(0.5, 0.5), vec2(0.5, 0.5))
+    glyphs.add("semi-\ncon-\ngineb", vec3(0.9, 0.9), vec2(0, 0))
+    # glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.1, 0.9))
     glyphs.updateAllGPUBuffers(flush = true)
 
     withNextFrame(framebuffer, commandbuffer):

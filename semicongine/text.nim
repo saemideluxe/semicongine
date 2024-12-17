@@ -32,6 +32,8 @@ type
     advance*: Table[Rune, float32]
     kerning*: Table[(Rune, Rune), float32]
     lineAdvance*: float32
+    lineHeight*: float32 # like lineAdvance - lineGap
+    ascent*: float32 # from baseline to highest glyph
     descriptorSet*: DescriptorSetData[GlyphDescriptorSet[N]]
     descriptorGlyphIndex: Table[Rune, uint16]
     fallbackCharacter: Rune
@@ -115,10 +117,17 @@ proc add*(
     scale = 1'f32,
     color = vec4(1, 1, 1, 1),
 ) =
+  ## Add text for rendering.
+  ## `position` is the display position, where as `(0, 0) is top-left and (1, 1) is bottom right.
+  ## The z-compontent goes from 0 (near plane) to 1 (far plane) and is usually just used for ordering layers
+  ## this should be called again after aspect ratio of window changes 
   assert text.len <= glyphs.position.len,
     &"Set {text.len} but Glyphs-object only supports {glyphs.position.len}"
-  var origin =
-    vec3(position.x * 2'f32 - 1'f32, -(position.y * 2'f32 - 1'f32), position.z)
+  var origin = vec3(
+    position.x * getAspectRatio() * 2'f32 - 1'f32,
+    -(position.y * 2'f32 - 1'f32),
+    position.z,
+  )
   let s = scale * glyphs.baseScale
   var cursorPos = origin
   for i in 0 ..< text.len:
@@ -146,6 +155,61 @@ proc add*(
       if i < text.len - 1:
         cursorPos.x =
           cursorPos.x + glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * s
+
+proc textDimension(glyphs: var Glyphs, text: seq[Rune], scale: float32): Vec2f =
+  let s = scale * glyphs.baseScale
+  let nLines = text.countIt(it == Rune('\n')).float32
+  let height = nLines * glyphs.font.lineAdvance * s + glyphs.font.lineHeight * s
+
+  var width = 0'f32
+  var lineI = 0
+  var currentWidth = 0'f32
+  for i in 0 ..< text.len:
+    if text[i] == NEWLINE:
+      width = max(currentWidth, width)
+      currentWidth = 0'f32
+      inc lineI
+    else:
+      if not (i == text.len - 1 and text[i].isWhiteSpace):
+        if text[i] in glyphs.font.advance:
+          currentWidth += glyphs.font.advance[text[i]] * s
+        else:
+          currentWidth += glyphs.font.advance[glyphs.font.fallbackCharacter] * s
+      if i < text.len - 1:
+        currentWidth += glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * s
+  return vec2(width, height)
+
+proc add*(
+    glyphs: var Glyphs,
+    text: seq[Rune],
+    position: Vec3f,
+    anchor: Vec2f,
+    scale = 1'f32,
+    color = vec4(1, 1, 1, 1),
+) =
+  let s = scale * glyphs.baseScale
+  let baselineStart = vec2(0, glyphs.font.ascent * s)
+  let pos = position.xy + anchor * textDimension(glyphs, text, scale) + baselineStart
+  add(glyphs, text, pos.toVec3(position.z), scale, color)
+
+proc add*(
+    glyphs: var Glyphs,
+    text: string,
+    position: Vec3f,
+    scale = 1'f32,
+    color = vec4(1, 1, 1, 1),
+) =
+  add(glyphs, text.toRunes, position, scale, color)
+
+proc add*(
+    glyphs: var Glyphs,
+    text: string,
+    position: Vec3f,
+    anchor: Vec2f,
+    scale = 1'f32,
+    color = vec4(1, 1, 1, 1),
+) =
+  add(glyphs, text.toRunes, position, anchor, scale, color)
 
 proc reset*(glyphs: var Glyphs) =
   glyphs.cursor = 0
