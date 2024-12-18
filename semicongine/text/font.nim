@@ -153,6 +153,7 @@ proc readTrueType[N: static int](
   result.lineAdvance = float32(ascent - descent + lineGap) * glyph2QuadScale
   result.lineHeight = float32(ascent - descent) * glyph2QuadScale
   result.ascent = float32(ascent) * glyph2QuadScale
+  result.descent = float32(descent) * glyph2QuadScale
 
 proc loadFont*[N: static int](
     path: string,

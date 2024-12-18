@@ -18,8 +18,8 @@ type EMPTY = object
 
 const MAX_GLYPHS = 200
 proc test_01_static_label_new(time: float32) =
-  var font = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 200)
-  # var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 200)
+  # var font = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 200)
+  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 200)
   var renderdata = initRenderData()
   var pipeline =
     createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
@@ -34,13 +34,27 @@ proc test_01_static_label_new(time: float32) =
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let t = getMonoTime()
     glyphs.reset()
-    glyphs.add("semi-\ncon-\nginea", vec3(0.0, 0.0), vec2(0, 0))
-    # glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(0.5, -0.5))
-    # glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(-0.5, 0.5))
-    # glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.5, 0.5))
-    glyphs.add("semi-\ncon-\ngineb", vec3(0.5, 0.5), vec2(0.5, 0.5))
-    glyphs.add("semi-\ncon-\ngineb", vec3(0.9, 0.9), vec2(0, 0))
-    # glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.1, 0.9))
+    glyphs.add("+", vec3(0.0, 0.0), anchor = vec2(0.5, 0.5), color = vec4(0, 0, 0, 1))
+    glyphs.add(
+      "Hello world\nHow are you today?\nWell, I am fine".toRunes(),
+      vec3(0.5, 0.5),
+      alignment = Right,
+      anchor = vec2(1, 0.5),
+      color = vec4(0, 0, 0, 1),
+    )
+    glyphs.add(
+      "Hello world\nHow are you today?\nWell, I am fine".toRunes(),
+      vec3(0.5, 0.5),
+      alignment = Left,
+      anchor = vec2(0, 0.5),
+      color = vec4(0, 0, 0, 1),
+    )
+    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(0.5, -0.5), color = vec4(0, 0, 0, 1))
+    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(-0.5, 0.5), color = vec4(0, 0, 0, 1))
+    # glyphs.add("11111111111111111", vec3(0.5, 0.5), vec2(1, 0))
+    # glyphs.add("22222222222222222", vec3(0.5, 0.5))
+    # glyphs.add("33333333333333333", vec3(0.5, 0.5), vec2(0, 1))
+    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.1, 0.9), color = vec4(0, 0, 0, 1))
     glyphs.updateAllGPUBuffers(flush = true)
 
     withNextFrame(framebuffer, commandbuffer):
@@ -51,7 +65,7 @@ proc test_01_static_label_new(time: float32) =
         commandbuffer,
         vulkan.swapchain.width,
         vulkan.swapchain.height,
-        vec4(0, 0, 0, 0),
+        vec4(1, 1, 1, 1),
       ):
         withPipeline(commandbuffer, pipeline):
           renderGlyphs(commandbuffer, pipeline, glyphs)

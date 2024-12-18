@@ -20,6 +20,11 @@ const
   SPACE = Rune(' ')
 
 type
+  TextAlignment* = enum
+    Left
+    Center
+    Right
+
   GlyphQuad[N: static int] = object
     pos: array[N, Vec4f] # vertex offsets to glyph center: [left, bottom, right, top]
     uv: array[N, Vec4f] # [left, bottom, right, top]
@@ -34,6 +39,7 @@ type
     lineAdvance*: float32
     lineHeight*: float32 # like lineAdvance - lineGap
     ascent*: float32 # from baseline to highest glyph
+    descent*: float32 # from baseline to highest glyph
     descriptorSet*: DescriptorSetData[GlyphDescriptorSet[N]]
     descriptorGlyphIndex: Table[Rune, uint16]
     fallbackCharacter: Rune
@@ -42,7 +48,7 @@ type
 
   Glyphs*[N: static int] = object
     cursor: int
-    font: Font[N]
+    font*: Font[N]
     baseScale*: float32
     position*: GPUArray[Vec3f, VertexBufferMapped]
     color*: GPUArray[Vec4f, VertexBufferMapped]
@@ -110,29 +116,83 @@ func initGlyphs*[N: static int](
   result.color.data.setLen(count)
   result.glyphIndex.data.setLen(count)
 
+iterator splitLines(text: seq[Rune]): seq[Rune] =
+  var current = newSeq[Rune]()
+  for c in text:
+    if c == Rune('\n'):
+      yield current
+      current = newSeq[Rune]()
+    else:
+      current.add c
+  yield current
+
+proc width(font: Font, text: seq[Rune], scale: float32): float32 =
+  for i in 0 ..< text.len:
+    if not (i == text.len - 1 and text[i].isWhiteSpace):
+      if text[i] in font.advance:
+        result += font.advance[text[i]] * scale
+      else:
+        result += font.advance[font.fallbackCharacter] * scale
+    if i < text.len - 1:
+      result += font.kerning.getOrDefault((text[i], text[i + 1]), 0) * scale
+
+proc textDimension*(font: Font, text: seq[Rune], scale: float32): Vec2f =
+  let nLines = text.countIt(it == Rune('\n')).float32
+  let h = nLines * font.lineAdvance * scale + font.lineHeight * scale
+  let w = max(splitLines(text).toSeq.mapIt(width(font, it, scale)))
+
+  return vec2(w, h * 0.5)
+
 proc add*(
     glyphs: var Glyphs,
     text: seq[Rune],
     position: Vec3f,
-    scale = 1'f32,
-    color = vec4(1, 1, 1, 1),
+    alignment: TextAlignment = Left,
+    anchor: Vec2f = vec2(0, 1),
+    scale: float32 = 1'f32,
+    color: Vec4f = vec4(1, 1, 1, 1),
 ) =
   ## Add text for rendering.
   ## `position` is the display position, where as `(0, 0) is top-left and (1, 1) is bottom right.
   ## The z-compontent goes from 0 (near plane) to 1 (far plane) and is usually just used for ordering layers
   ## this should be called again after aspect ratio of window changes 
+  ## Anchor is the anchor to use inside the text
+
   assert text.len <= glyphs.position.len,
     &"Set {text.len} but Glyphs-object only supports {glyphs.position.len}"
-  var origin = vec3(
-    position.x * getAspectRatio() * 2'f32 - 1'f32,
-    -(position.y * 2'f32 - 1'f32),
-    position.z,
-  )
-  let s = scale * glyphs.baseScale
-  var cursorPos = origin
+
+  let
+    s = scale * glyphs.baseScale
+    d = textDimension(glyphs.font, text, s)
+    baselineStart = vec2(0, (glyphs.font.ascent + glyphs.font.descent) * s)
+    pos = position.xy - anchor * d + baselineStart
+    lineWidths = splitLines(text).toSeq.mapIt(width(glyphs.font, it, s))
+
+  var
+    origin = vec3(
+      pos.x * getAspectRatio() * 2'f32 - 1'f32, -(pos.y * 2'f32 - 1'f32), position.z
+    )
+    cursorPos = origin
+    lineI = 0
+
+  case alignment
+  of Left:
+    cursorPos.x = origin.x
+  of Center:
+    cursorPos.x = origin.x - ((lineWidths[lineI] - d.x) / 2)
+  of Right:
+    cursorPos.x = origin.x - (lineWidths[lineI] - d.x)
+
   for i in 0 ..< text.len:
     if text[i] == Rune('\n'):
-      cursorPos.x = origin.x
+      inc lineI
+      case alignment
+      of Left:
+        cursorPos.x = origin.x
+      of Center:
+        cursorPos.x = origin.x - ((lineWidths[lineI] - d.x) / 2)
+      of Right:
+        cursorPos.x = origin.x - (lineWidths[lineI] - d.x)
       cursorPos.y = cursorPos.y - glyphs.font.lineAdvance * s
     else:
       if not text[i].isWhitespace():
@@ -156,60 +216,16 @@ proc add*(
         cursorPos.x =
           cursorPos.x + glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * s
 
-proc textDimension(glyphs: var Glyphs, text: seq[Rune], scale: float32): Vec2f =
-  let s = scale * glyphs.baseScale
-  let nLines = text.countIt(it == Rune('\n')).float32
-  let height = nLines * glyphs.font.lineAdvance * s + glyphs.font.lineHeight * s
-
-  var width = 0'f32
-  var lineI = 0
-  var currentWidth = 0'f32
-  for i in 0 ..< text.len:
-    if text[i] == NEWLINE:
-      width = max(currentWidth, width)
-      currentWidth = 0'f32
-      inc lineI
-    else:
-      if not (i == text.len - 1 and text[i].isWhiteSpace):
-        if text[i] in glyphs.font.advance:
-          currentWidth += glyphs.font.advance[text[i]] * s
-        else:
-          currentWidth += glyphs.font.advance[glyphs.font.fallbackCharacter] * s
-      if i < text.len - 1:
-        currentWidth += glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * s
-  return vec2(width, height)
-
-proc add*(
-    glyphs: var Glyphs,
-    text: seq[Rune],
-    position: Vec3f,
-    anchor: Vec2f,
-    scale = 1'f32,
-    color = vec4(1, 1, 1, 1),
-) =
-  let s = scale * glyphs.baseScale
-  let baselineStart = vec2(0, glyphs.font.ascent * s)
-  let pos = position.xy + anchor * textDimension(glyphs, text, scale) + baselineStart
-  add(glyphs, text, pos.toVec3(position.z), scale, color)
-
 proc add*(
     glyphs: var Glyphs,
     text: string,
     position: Vec3f,
-    scale = 1'f32,
-    color = vec4(1, 1, 1, 1),
+    alignment: TextAlignment = Left,
+    anchor: Vec2f = vec2(0, 1),
+    scale: float32 = 1'f32,
+    color: Vec4f = vec4(1, 1, 1, 1),
 ) =
-  add(glyphs, text.toRunes, position, scale, color)
-
-proc add*(
-    glyphs: var Glyphs,
-    text: string,
-    position: Vec3f,
-    anchor: Vec2f,
-    scale = 1'f32,
-    color = vec4(1, 1, 1, 1),
-) =
-  add(glyphs, text.toRunes, position, anchor, scale, color)
+  add(glyphs, text.toRunes, position, alignment, anchor, scale, color)
 
 proc reset*(glyphs: var Glyphs) =
   glyphs.cursor = 0
