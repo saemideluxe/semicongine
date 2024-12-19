@@ -14,15 +14,16 @@ import ../semicongine
 type FontDS = object
   fontAtlas: Image[Gray]
 
-type EMPTY = object
+const MAX_CODEPOINTS = 200
+const FONTNAME = "Overhaul.ttf"
+# const FONTNAME = "DejaVuSans.ttf"
 
-const MAX_GLYPHS = 200
-proc test_01_static_label_new(time: float32) =
-  # var font = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 200)
-  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 200)
+proc test_01_static_label(time: float32) =
+  var font = loadFont[MAX_CODEPOINTS](FONTNAME, lineHeightPixels = 200)
   var renderdata = initRenderData()
-  var pipeline =
-    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
+    renderPass = vulkan.swapchain.renderPass
+  )
   var glyphs = font.initGlyphs(1000, baseScale = 0.1)
 
   assignBuffers(renderdata, glyphs)
@@ -34,27 +35,7 @@ proc test_01_static_label_new(time: float32) =
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let t = getMonoTime()
     glyphs.reset()
-    glyphs.add("+", vec3(0.0, 0.0), anchor = vec2(0.5, 0.5), color = vec4(0, 0, 0, 1))
-    glyphs.add(
-      "Hello world\nHow are you today?\nWell, I am fine".toRunes(),
-      vec3(0.5, 0.5),
-      alignment = Right,
-      anchor = vec2(1, 0.5),
-      color = vec4(0, 0, 0, 1),
-    )
-    glyphs.add(
-      "Hello world\nHow are you today?\nWell, I am fine".toRunes(),
-      vec3(0.5, 0.5),
-      alignment = Left,
-      anchor = vec2(0, 0.5),
-      color = vec4(0, 0, 0, 1),
-    )
-    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(0.5, -0.5), color = vec4(0, 0, 0, 1))
-    glyphs.add("semi-\ncon-\ngine".toRunes(), vec3(-0.5, 0.5), color = vec4(0, 0, 0, 1))
-    # glyphs.add("11111111111111111", vec3(0.5, 0.5), vec2(1, 0))
-    # glyphs.add("22222222222222222", vec3(0.5, 0.5))
-    # glyphs.add("33333333333333333", vec3(0.5, 0.5), vec2(0, 1))
-    glyphs.add("semi-\ncon-\ngineb".toRunes(), vec3(0.1, 0.9), color = vec4(0, 0, 0, 1))
+    glyphs.add("Hello semicongine!", vec3(0.5, 0.5), anchor = vec2(0.5, 0.5))
     glyphs.updateAllGPUBuffers(flush = true)
 
     withNextFrame(framebuffer, commandbuffer):
@@ -65,7 +46,7 @@ proc test_01_static_label_new(time: float32) =
         commandbuffer,
         vulkan.swapchain.width,
         vulkan.swapchain.height,
-        vec4(1, 1, 1, 1),
+        vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
           renderGlyphs(commandbuffer, pipeline, glyphs)
@@ -75,74 +56,52 @@ proc test_01_static_label_new(time: float32) =
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-#[
-proc test_01_static_label(time: float32) =
-  var font = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 160)
-  var renderdata = initRenderData()
-  var pipeline =
-    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
-
-  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
-  uploadImages(renderdata, ds)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds)
-
-  var label1 =
-    initTextbox(renderdata, pipeline.layout(0), font, 0.0005, "Hello semicongine!")
-
-  var start = getMonoTime()
-  while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-    label1.refresh()
-    withNextFrame(framebuffer, commandbuffer):
-      bindDescriptorSet(commandbuffer, ds, 0, pipeline)
-      withRenderPass(
-        vulkan.swapchain.renderPass,
-        framebuffer,
-        commandbuffer,
-        vulkan.swapchain.width,
-        vulkan.swapchain.height,
-        vec4(0, 0, 0, 0),
-      ):
-        withPipeline(commandbuffer, pipeline):
-          render(commandbuffer, pipeline, label1, vec3(), vec4(1, 1, 1, 1))
-        # cleanup
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
-  destroyPipeline(pipeline)
-  destroyRenderData(renderdata)
-
-proc test_02_multiple_animated(time: float32) =
-  var font1 = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 40)
-  var font2 = loadFont[MAX_GLYPHS]("Overhaul.ttf", lineHeightPixels = 160)
-  var font3 = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 160)
+proc test_02_multi_counter(time: float32) =
+  var font1 = loadFont[MAX_CODEPOINTS]("Overhaul.ttf", lineHeightPixels = 40)
+  var font2 = loadFont[MAX_CODEPOINTS]("Overhaul.ttf", lineHeightPixels = 160)
+  var font3 = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline =
-    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
+    renderPass = vulkan.swapchain.renderPass
+  )
 
-  var ds1 = asDescriptorSetData(FontDS(fontAtlas: font1.fontAtlas.copy()))
-  uploadImages(renderdata, ds1)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds1)
+  assignBuffers(renderdata, font1.descriptorSet)
+  assignBuffers(renderdata, font2.descriptorSet)
+  assignBuffers(renderdata, font3.descriptorSet)
+  uploadImages(renderdata, font1.descriptorSet)
+  uploadImages(renderdata, font2.descriptorSet)
+  uploadImages(renderdata, font3.descriptorSet)
+  initDescriptorSet(renderdata, pipeline.layout(0), font1.descriptorSet)
+  initDescriptorSet(renderdata, pipeline.layout(0), font2.descriptorSet)
+  initDescriptorSet(renderdata, pipeline.layout(0), font3.descriptorSet)
 
-  var ds2 = asDescriptorSetData(FontDS(fontAtlas: font2.fontAtlas.copy()))
-  uploadImages(renderdata, ds2)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds2)
+  var glyphs1 = font1.initGlyphs(10, baseScale = 0.1)
+  var glyphs2 = font2.initGlyphs(10, baseScale = 0.1)
+  var glyphs3 = font3.initGlyphs(10, baseScale = 0.1)
 
-  var ds3 = asDescriptorSetData(FontDS(fontAtlas: font3.fontAtlas.copy()))
-  uploadImages(renderdata, ds3)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds3)
+  assignBuffers(renderdata, glyphs1)
+  assignBuffers(renderdata, glyphs2)
+  assignBuffers(renderdata, glyphs3)
 
-  var labels = [
-    initTextbox(renderdata, pipeline.layout(0), font1, 0.004, "  0"),
-    initTextbox(renderdata, pipeline.layout(0), font2, 0.001, "  1"),
-    initTextbox(renderdata, pipeline.layout(0), font3, 0.001, "  2"),
-  ]
+  var labels = ["  0", "  1", "  2"]
 
   var start = getMonoTime()
   var p = 0
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
-    for i in 0 ..< labels.len:
-      labels[i].text = $(p + i)
-      labels[i].refresh()
+    glyphs1.reset()
+    glyphs2.reset()
+    glyphs3.reset()
+
+    glyphs1.add($(p + 0), vec3(0.3, 0.5))
+    glyphs2.add($(p + 1), vec3(0.5, 0.5))
+    glyphs3.add($(p + 2), vec3(0.7, 0.5))
+
+    glyphs1.updateAllGPUBuffers(flush = true)
+    glyphs2.updateAllGPUBuffers(flush = true)
+    glyphs3.updateAllGPUBuffers(flush = true)
+
     inc p
     withNextFrame(framebuffer, commandbuffer):
       withRenderPass(
@@ -154,42 +113,26 @@ proc test_02_multiple_animated(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          bindDescriptorSet(commandbuffer, ds1, 0, pipeline)
-          render(
-            commandbuffer,
-            pipeline,
-            labels[0],
-            position = vec3(0 / labels.len, 0.1 + progress * 0.5),
-            color = vec4(1, 1, 1, 1),
-          )
-          bindDescriptorSet(commandbuffer, ds2, 0, pipeline)
-          render(
-            commandbuffer,
-            pipeline,
-            labels[1],
-            position = vec3(1 / labels.len, 0.1 + progress * 0.5),
-            color = vec4(1, 1, 1, 1),
-          )
-          bindDescriptorSet(commandbuffer, ds3, 0, pipeline)
-          render(
-            commandbuffer,
-            pipeline,
-            labels[2],
-            position = vec3(2 / labels.len, 0.1 + progress * 0.5),
-            color = vec4(1, 1, 1, 1),
-          )
+          bindDescriptorSet(commandbuffer, font1.descriptorSet, 0, pipeline)
+          renderGlyphs(commandbuffer, pipeline, glyphs1)
+          bindDescriptorSet(commandbuffer, font2.descriptorSet, 0, pipeline)
+          renderGlyphs(commandbuffer, pipeline, glyphs2)
+          bindDescriptorSet(commandbuffer, font3.descriptorSet, 0, pipeline)
+          renderGlyphs(commandbuffer, pipeline, glyphs3)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
+#[
 proc test_03_layouting(time: float32) =
-  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 40)
+  var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 40)
   var renderdata = initRenderData()
 
-  var pipeline =
-    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
+    renderPass = vulkan.swapchain.renderPass
+  )
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
@@ -258,11 +201,12 @@ It should display with some space above and have a pleasing appearance overall! 
   destroyRenderData(renderdata)
 
 proc test_04_lots_of_texts(time: float32) =
-  var font = loadFont[MAX_GLYPHS]("DejaVuSans.ttf", lineHeightPixels = 160)
+  var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline =
-    createPipeline[GlyphShader[MAX_GLYPHS]](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
+    renderPass = vulkan.swapchain.renderPass
+  )
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
   uploadImages(renderdata, ds)
@@ -306,7 +250,7 @@ proc test_04_lots_of_texts(time: float32) =
 ]#
 
 when isMainModule:
-  var time = 1000'f32
+  var time = 1'f32
   initVulkan()
 
   for depthBuffer in [true, false]:
@@ -314,9 +258,8 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
-    test_01_static_label_new(time)
-    # test_01_static_label(time)
-    # test_02_multiple_animated(time)
+    test_01_static_label(time)
+    test_02_multi_counter(time)
     # test_03_layouting(time)
     # test_04_lots_of_texts(time)
 

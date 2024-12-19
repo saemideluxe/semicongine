@@ -135,13 +135,14 @@ proc width(font: Font, text: seq[Rune], scale: float32): float32 =
         result += font.advance[font.fallbackCharacter] * scale
     if i < text.len - 1:
       result += font.kerning.getOrDefault((text[i], text[i + 1]), 0) * scale
+  return result * 0.5 / getAspectRatio()
 
 proc textDimension*(font: Font, text: seq[Rune], scale: float32): Vec2f =
   let nLines = text.countIt(it == Rune('\n')).float32
-  let h = nLines * font.lineAdvance * scale + font.lineHeight * scale
+  let h = (nLines * font.lineAdvance * scale + font.lineHeight * scale) * 0.5
   let w = max(splitLines(text).toSeq.mapIt(width(font, it, scale)))
 
-  return vec2(w, h * 0.5)
+  return vec2(w, h)
 
 proc add*(
     glyphs: var Glyphs,
@@ -162,11 +163,14 @@ proc add*(
     &"Set {text.len} but Glyphs-object only supports {glyphs.position.len}"
 
   let
-    s = scale * glyphs.baseScale
-    d = textDimension(glyphs.font, text, s)
-    baselineStart = vec2(0, (glyphs.font.ascent + glyphs.font.descent) * s)
-    pos = position.xy - anchor * d + baselineStart
-    lineWidths = splitLines(text).toSeq.mapIt(width(glyphs.font, it, s))
+    globalScale = scale * glyphs.baseScale
+    dim = textDimension(glyphs.font, text, globalScale)
+    baselineStart = vec2(0, glyphs.font.ascent * globalScale * 0.5)
+    pos = position.xy - anchor * dim + baselineStart
+    # lineWidths need to be converted to NDC
+    lineWidths = splitLines(text).toSeq.mapIt(width(glyphs.font, it, globalScale))
+    # also dimension must be in NDC
+    maxWidth = dim.x
 
   var
     origin = vec3(
@@ -179,9 +183,9 @@ proc add*(
   of Left:
     cursorPos.x = origin.x
   of Center:
-    cursorPos.x = origin.x - ((lineWidths[lineI] - d.x) / 2)
+    cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / 2)
   of Right:
-    cursorPos.x = origin.x - (lineWidths[lineI] - d.x)
+    cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * getAspectRatio() * 2
 
   for i in 0 ..< text.len:
     if text[i] == Rune('\n'):
@@ -190,14 +194,14 @@ proc add*(
       of Left:
         cursorPos.x = origin.x
       of Center:
-        cursorPos.x = origin.x - ((lineWidths[lineI] - d.x) / 2)
+        cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / 2)
       of Right:
-        cursorPos.x = origin.x - (lineWidths[lineI] - d.x)
-      cursorPos.y = cursorPos.y - glyphs.font.lineAdvance * s
+        cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * getAspectRatio() * 2
+      cursorPos.y = cursorPos.y - glyphs.font.lineAdvance * globalScale
     else:
       if not text[i].isWhitespace():
         glyphs.position[glyphs.cursor] = cursorPos
-        glyphs.scale[glyphs.cursor] = s
+        glyphs.scale[glyphs.cursor] = globalScale
         glyphs.color[glyphs.cursor] = color
         if text[i] in glyphs.font.descriptorGlyphIndex:
           glyphs.glyphIndex[glyphs.cursor] = glyphs.font.descriptorGlyphIndex[text[i]]
@@ -207,14 +211,15 @@ proc add*(
         inc glyphs.cursor
 
       if text[i] in glyphs.font.advance:
-        cursorPos.x = cursorPos.x + glyphs.font.advance[text[i]] * s
+        cursorPos.x = cursorPos.x + glyphs.font.advance[text[i]] * globalScale
       else:
         cursorPos.x =
-          cursorPos.x + glyphs.font.advance[glyphs.font.fallbackCharacter] * s
+          cursorPos.x + glyphs.font.advance[glyphs.font.fallbackCharacter] * globalScale
 
       if i < text.len - 1:
         cursorPos.x =
-          cursorPos.x + glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * s
+          cursorPos.x +
+          glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale
 
 proc add*(
     glyphs: var Glyphs,
