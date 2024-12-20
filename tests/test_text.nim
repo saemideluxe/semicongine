@@ -11,9 +11,6 @@ import std/unicode
 
 import ../semicongine
 
-type FontDS = object
-  fontAtlas: Image[Gray]
-
 const MAX_CODEPOINTS = 200
 const FONTNAME = "Overhaul.ttf"
 # const FONTNAME = "DejaVuSans.ttf"
@@ -125,7 +122,6 @@ proc test_02_multi_counter(time: float32) =
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-#[
 proc test_03_layouting(time: float32) =
   var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 40)
   var renderdata = initRenderData()
@@ -135,39 +131,24 @@ proc test_03_layouting(time: float32) =
   )
 
   var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
-  uploadImages(renderdata, ds)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds)
 
-  var labels: seq[Textbox]
+  assignBuffers(renderdata, font.descriptorSet)
+  uploadImages(renderdata, font.descriptorSet)
+  initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
+
+  var glyphs = font.initGlyphs(1000, baseScale = 0.1)
+  assignBuffers(renderdata, glyphs)
 
   for horizontal in HorizontalAlignment:
-    labels.add initTextbox(
-      renderdata,
-      pipeline.layout(0),
-      font,
-      0.001,
-      $horizontal & " aligned",
-      horizontalAlignment = horizontal,
-    )
+    glyphs.add $horizontal & " aligned"
   for vertical in VerticalAlignment:
-    labels.add initTextbox(
-      renderdata,
-      pipeline.layout(0),
-      font,
-      0.001,
-      $vertical & " aligned",
-      verticalAlignment = vertical,
-    )
-  labels.add initTextbox(
-    renderdata,
-    pipeline.layout(0),
-    font,
-    0.001,
+    glyphs.add $vertical & " aligned"
+
+  glyphs.add(
     """Paragraph
 This is a somewhat longer paragraph with a few newlines and a maximum width of 0.2.
 
 It should display with some space above and have a pleasing appearance overall! :)""",
-    maxWidth = 0.6,
     verticalAlignment = Top,
     horizontalAlignment = Left,
   )
@@ -176,7 +157,7 @@ It should display with some space above and have a pleasing appearance overall! 
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
     withNextFrame(framebuffer, commandbuffer):
-      bindDescriptorSet(commandbuffer, ds, 0, pipeline)
+      bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
       withRenderPass(
         vulkan.swapchain.renderPass,
         framebuffer,
@@ -186,20 +167,14 @@ It should display with some space above and have a pleasing appearance overall! 
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          for i in 0 ..< labels.len:
-            render(
-              commandbuffer,
-              pipeline,
-              labels[i],
-              vec3(0.5 - i.float32 * 0.1, 0.5 - i.float32 * 0.1),
-              vec4(1, 1, 1, 1),
-            )
+          renderGlyphs(commandbuffer, pipeline, glyphs)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
+#[
 proc test_04_lots_of_texts(time: float32) =
   var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
@@ -260,7 +235,7 @@ when isMainModule:
     # tests a simple triangle with minimalistic shader and vertex format
     test_01_static_label(time)
     test_02_multi_counter(time)
-    # test_03_layouting(time)
+    test_03_layouting(time)
     # test_04_lots_of_texts(time)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
