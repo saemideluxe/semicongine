@@ -26,7 +26,9 @@ proc stbtt_GetCodepointBitmap(
   width, height, xoff, yoff: ptr cint,
 ): cstring {.importc, nodecl.}
 
-# proc stbtt_GetCodepointBitmapBox(info: ptr stbtt_fontinfo, codepoint: cint, scale_x, scale_y: cfloat, ix0, iy0, ix1, iy1: ptr cint) {.importc, nodecl.}
+proc stbtt_GetCodepointBox(
+  info: ptr stbtt_fontinfo, codepoint: cint, x0, y0, x1, y1: ptr cint
+): cint {.importc, nodecl.}
 
 proc stbtt_GetCodepointHMetrics(
   info: ptr stbtt_fontinfo, codepoint: cint, advance, leftBearing: ptr cint
@@ -151,9 +153,14 @@ proc readTrueType[N: static int](
   var ascent, descent, lineGap: cint
   stbtt_GetFontVMetrics(addr fi, addr ascent, addr descent, addr lineGap)
   result.lineAdvance = float32(ascent - descent + lineGap) * glyph2QuadScale
-  result.lineHeight = float32(ascent - descent) * glyph2QuadScale
+  result.lineHeight = float32(ascent - descent) * glyph2QuadScale # should be 1
   result.ascent = float32(ascent) * glyph2QuadScale
   result.descent = float32(descent) * glyph2QuadScale
+
+  var x0, y0, x1, y1: cint
+  discard
+    stbtt_GetCodepointBox(addr fi, cint(Rune('x')), addr x0, addr y0, addr x1, addr y1)
+  result.xHeight = float32(y1 - y0) * glyph2QuadScale
 
 proc loadFont*[N: static int](
     path: string,

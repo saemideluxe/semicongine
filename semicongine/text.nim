@@ -25,40 +25,51 @@ type
     Center
     Right
 
-  GlyphQuad[N: static int] = object
-    pos: array[N, Vec4f] # vertex offsets to glyph center: [left, bottom, right, top]
-    uv: array[N, Vec4f] # [left, bottom, right, top]
+  GlyphQuad[MaxGlyphs: static int] = object
+    pos: array[MaxGlyphs, Vec4f]
+      # vertex offsets to glyph center: [left, bottom, right, top]
+    uv: array[MaxGlyphs, Vec4f] # [left, bottom, right, top]
 
-  GlyphDescriptorSet*[N: static int] = object
+  GlyphDescriptorSet*[MaxGlyphs: static int] = object
     fontAtlas*: Image[Gray]
-    glyphquads*: GPUValue[GlyphQuad[N], StorageBuffer]
+    glyphquads*: GPUValue[GlyphQuad[MaxGlyphs], StorageBuffer]
 
-  FontObj*[N: static int] = object
+  FontObj*[MaxGlyphs: static int] = object
     advance*: Table[Rune, float32]
     kerning*: Table[(Rune, Rune), float32]
     lineAdvance*: float32
     lineHeight*: float32 # like lineAdvance - lineGap
     ascent*: float32 # from baseline to highest glyph
     descent*: float32 # from baseline to highest glyph
-    descriptorSet*: DescriptorSetData[GlyphDescriptorSet[N]]
+    xHeight*: float32 # from baseline to height of lowercase x
+    descriptorSet*: DescriptorSetData[GlyphDescriptorSet[MaxGlyphs]]
     descriptorGlyphIndex: Table[Rune, uint16]
     fallbackCharacter: Rune
 
-  Font*[N: static int] = ref FontObj[N]
+  Font*[MaxGlyphs: static int] = ref FontObj[MaxGlyphs]
+  Text = object
+    bufferOffset: int
+    text: seq[Rune]
+    position: Vec3f = vec3()
+    alignment: TextAlignment = Left
+    anchor: Vec2f = vec2()
+    scale: float32 = 0
+    color: Vec4f = vec4(1, 1, 1, 1)
 
-  Glyphs*[N: static int] = object
+  TextBuffer*[MaxGlyphs: static int] = object
     cursor: int
-    font*: Font[N]
+    font*: Font[MaxGlyphs]
     baseScale*: float32
     position*: GPUArray[Vec3f, VertexBufferMapped]
     color*: GPUArray[Vec4f, VertexBufferMapped]
     scale*: GPUArray[float32, VertexBufferMapped]
     glyphIndex*: GPUArray[uint16, VertexBufferMapped]
+    texts: seq[Text]
 
   TextRendering* = object
     aspectRatio*: float32
 
-  GlyphShader*[N: static int] = object
+  GlyphShader*[MaxGlyphs: static int] = object
     position {.InstanceAttribute.}: Vec3f
     color {.InstanceAttribute.}: Vec4f
     scale {.InstanceAttribute.}: float32
@@ -68,7 +79,7 @@ type
     fragmentUv {.Pass.}: Vec2f
     fragmentColor {.PassFlat.}: Vec4f
     outColor {.ShaderOutput.}: Vec4f
-    glyphData {.DescriptorSet: 0.}: GlyphDescriptorSet[N]
+    glyphData {.DescriptorSet: 0.}: GlyphDescriptorSet[MaxGlyphs]
     vertexCode* =
       """
 const int[6] indices = int[](0, 1, 2, 2, 3, 0);
@@ -95,21 +106,27 @@ void main() {
     outColor = vec4(fragmentColor.rgb, fragmentColor.a * a);
 }"""
 
-proc `=copy`[N: static int](dest: var FontObj[N], source: FontObj[N]) {.error.}
-proc `=copy`[N: static int](dest: var Glyphs[N], source: Glyphs[N]) {.error.}
+proc `=copy`[MaxGlyphs: static int](
+  dest: var FontObj[MaxGlyphs], source: FontObj[MaxGlyphs]
+) {.error.}
+
+proc `=copy`[MaxGlyphs: static int](
+  dest: var TextBuffer[MaxGlyphs], source: TextBuffer[MaxGlyphs]
+) {.error.}
 
 include ./text/font
 
-func initGlyphs*[N: static int](
-    font: Font[N], count: int, baseScale = 1'f32
-): Glyphs[N] =
+func initTextBuffer*[MaxGlyphs: static int](
+    font: Font[MaxGlyphs], maxCharacters: int, baseScale = 1'f32
+): TextBuffer[MaxGlyphs] =
   result.cursor = 0
   result.font = font
   result.baseScale = baseScale
-  result.position.data.setLen(count)
-  result.scale.data.setLen(count)
-  result.color.data.setLen(count)
-  result.glyphIndex.data.setLen(count)
+  result.position.data.setLen(maxCharacters)
+  result.scale.data.setLen(maxCharacters)
+  result.color.data.setLen(maxCharacters)
+  result.glyphIndex.data.setLen(maxCharacters)
+  result.texts.setLen(maxCharacters) # waste a lot of memory?
 
 iterator splitLines(text: seq[Rune]): seq[Rune] =
   var current = newSeq[Rune]()
@@ -140,36 +157,45 @@ proc textDimension*(font: Font, text: seq[Rune], scale: float32): Vec2f =
   return vec2(w, h)
 
 proc add*(
-    glyphs: var Glyphs,
+    textbuffer: var TextBuffer,
     text: seq[Rune],
     position: Vec3f,
     alignment: TextAlignment = Left,
-    anchor: Vec2f = vec2(-1, 1),
+    anchor: Vec2f = vec2(0, 0),
     scale: float32 = 1'f32,
     color: Vec4f = vec4(1, 1, 1, 1),
 ) =
-  ## Add text for rendering.
-  ## `position` is the display position, where as `(0, 0) is top-left and (1, 1) is bottom right.
-  ## The z-compontent goes from 0 (near plane) to 1 (far plane) and is usually just used for ordering layers
-  ## this should be called again after aspect ratio of window changes 
-  ## Anchor is the anchor to use inside the text
+  ## This should be called again after aspect ratio of window changes 
 
-  assert text.len <= glyphs.position.len,
-    &"Set {text.len} but Glyphs-object only supports {glyphs.position.len}"
+  assert text.len <= textbuffer.position.len,
+    &"Set {text.len} but TextBuffer-object only supports {textbuffer.position.len}"
+
+  textbuffer.texts.add Text(
+    bufferOffset: textbuffer.cursor,
+    text: text,
+    position: position,
+    alignment: alignment,
+    anchor: anchor,
+    scale: scale,
+    color: color,
+  )
 
   let
-    globalScale = scale * glyphs.baseScale
-    dim = textDimension(glyphs.font, text, globalScale)
-    baselineStart = vec2(0, glyphs.font.ascent * globalScale)
-    pos = position.xy - anchor * dim + baselineStart
-    # lineWidths need to be converted to NDC
-    lineWidths = splitLines(text).toSeq.mapIt(width(glyphs.font, it, globalScale))
-    # also dimension must be in NDC
-    maxWidth = dim.x
+    globalScale = scale * textbuffer.baseScale
+    box = textDimension(textbuffer.font, text, globalScale)
+    xH = textbuffer.font.xHeight * globalScale
+    origin = vec3(
+      position.x - (anchor.x * 0.5 + 0.5) * box.x / getAspectRatio(),
+      position.y + (anchor.y * -0.5 + 0.5) * box.y - xH * 0.5 -
+        textbuffer.font.lineHeight * globalScale * 0.5,
+      position.z,
+    )
+    lineWidths = splitLines(text).toSeq.mapIt(width(textbuffer.font, it, globalScale))
+    maxWidth = box.x
     aratio = getAspectRatio()
+  # echo text, anchor
 
   var
-    origin = vec3(pos.x, pos.y, position.z)
     cursorPos = origin
     lineI = 0
 
@@ -177,9 +203,9 @@ proc add*(
   of Left:
     cursorPos.x = origin.x
   of Center:
-    cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / 2)
+    cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / aratio * 0.5)
   of Right:
-    cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * aratio * 2
+    cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
 
   for i in 0 ..< text.len:
     if text[i] == Rune('\n'):
@@ -188,59 +214,66 @@ proc add*(
       of Left:
         cursorPos.x = origin.x
       of Center:
-        cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / 2)
+        cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / aratio * 0.5)
       of Right:
-        cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * aratio * 2
-      cursorPos.y = cursorPos.y - glyphs.font.lineAdvance * globalScale
+        cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
+      cursorPos.y = cursorPos.y - textbuffer.font.lineAdvance * globalScale
     else:
       if not text[i].isWhitespace():
-        glyphs.position[glyphs.cursor] = cursorPos
-        glyphs.scale[glyphs.cursor] = globalScale
-        glyphs.color[glyphs.cursor] = color
-        if text[i] in glyphs.font.descriptorGlyphIndex:
-          glyphs.glyphIndex[glyphs.cursor] = glyphs.font.descriptorGlyphIndex[text[i]]
+        textbuffer.position[textbuffer.cursor] = cursorPos
+        textbuffer.scale[textbuffer.cursor] = globalScale
+        textbuffer.color[textbuffer.cursor] = color
+        if text[i] in textbuffer.font.descriptorGlyphIndex:
+          textbuffer.glyphIndex[textbuffer.cursor] =
+            textbuffer.font.descriptorGlyphIndex[text[i]]
         else:
-          glyphs.glyphIndex[glyphs.cursor] =
-            glyphs.font.descriptorGlyphIndex[glyphs.font.fallbackCharacter]
-        inc glyphs.cursor
+          textbuffer.glyphIndex[textbuffer.cursor] =
+            textbuffer.font.descriptorGlyphIndex[textbuffer.font.fallbackCharacter]
+        inc textbuffer.cursor
 
-      if text[i] in glyphs.font.advance:
-        cursorPos.x = cursorPos.x + glyphs.font.advance[text[i]] * globalScale / aratio
+      if text[i] in textbuffer.font.advance:
+        cursorPos.x =
+          cursorPos.x + textbuffer.font.advance[text[i]] * globalScale / aratio
       else:
         cursorPos.x =
           cursorPos.x +
-          glyphs.font.advance[glyphs.font.fallbackCharacter] * globalScale / aratio
+          textbuffer.font.advance[textbuffer.font.fallbackCharacter] * globalScale /
+          aratio
 
       if i < text.len - 1:
         cursorPos.x =
           cursorPos.x +
-          glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale /
+          textbuffer.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale /
           aratio
 
 proc add*(
-    glyphs: var Glyphs,
+    textbuffer: var TextBuffer,
     text: string,
     position: Vec3f,
     alignment: TextAlignment = Left,
-    anchor: Vec2f = vec2(0, 1),
+    anchor: Vec2f = vec2(0, 0),
     scale: float32 = 1'f32,
     color: Vec4f = vec4(1, 1, 1, 1),
 ) =
-  add(glyphs, text.toRunes, position, alignment, anchor, scale, color)
+  add(textbuffer, text.toRunes, position, alignment, anchor, scale, color)
 
-proc reset*(glyphs: var Glyphs) =
-  glyphs.cursor = 0
+proc reset*(textbuffer: var TextBuffer) =
+  textbuffer.cursor = 0
+  for i in 0 ..< textbuffer.texts.len:
+    textbuffer.texts[i] = default(Text)
 
 type EMPTY = object
 const EMPTYOBJECT = EMPTY()
 
-proc renderGlyphs*(commandBuffer: VkCommandBuffer, pipeline: Pipeline, glyphs: Glyphs) =
+proc renderTextBuffer*(
+    commandBuffer: VkCommandBuffer, pipeline: Pipeline, textbuffer: TextBuffer
+) =
   renderWithPushConstant(
     commandbuffer,
     pipeline,
     EMPTYOBJECT,
-    glyphs,
+    textbuffer,
     pushConstant = TextRendering(aspectRatio: getAspectRatio()),
     fixedVertexCount = 6,
-    fixedInstanceCount = glyphs.cursor,
+    fixedInstanceCount = textbuffer.cursor,
   )

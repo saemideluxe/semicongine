@@ -21,9 +21,9 @@ proc test_01_static_label(time: float32) =
   var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
     renderPass = vulkan.swapchain.renderPass
   )
-  var glyphs = font.initGlyphs(1000, baseScale = 0.1)
+  var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
 
-  assignBuffers(renderdata, glyphs)
+  assignBuffers(renderdata, textbuffer)
   assignBuffers(renderdata, font.descriptorSet)
   uploadImages(renderdata, font.descriptorSet)
   initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
@@ -31,9 +31,9 @@ proc test_01_static_label(time: float32) =
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let t = getMonoTime()
-    glyphs.reset()
-    glyphs.add("Hello semicongine!", vec3(0.5, 0.5), anchor = vec2(0.5, 0.5))
-    glyphs.updateAllGPUBuffers(flush = true)
+    textbuffer.reset()
+    textbuffer.add("Hello semicongine!", vec3(0.5, 0.5), anchor = vec2(0.5, 0.5))
+    textbuffer.updateAllGPUBuffers(flush = true)
 
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
@@ -46,7 +46,7 @@ proc test_01_static_label(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          renderGlyphs(commandbuffer, pipeline, glyphs)
+          renderTextBuffer(commandbuffer, pipeline, textbuffer)
 
   # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -73,13 +73,13 @@ proc test_02_multi_counter(time: float32) =
   initDescriptorSet(renderdata, pipeline.layout(0), font2.descriptorSet)
   initDescriptorSet(renderdata, pipeline.layout(0), font3.descriptorSet)
 
-  var glyphs1 = font1.initGlyphs(10, baseScale = 0.1)
-  var glyphs2 = font2.initGlyphs(10, baseScale = 0.1)
-  var glyphs3 = font3.initGlyphs(10, baseScale = 0.1)
+  var textbuffer1 = font1.initTextBuffer(10, baseScale = 0.1)
+  var textbuffer2 = font2.initTextBuffer(10, baseScale = 0.1)
+  var textbuffer3 = font3.initTextBuffer(10, baseScale = 0.1)
 
-  assignBuffers(renderdata, glyphs1)
-  assignBuffers(renderdata, glyphs2)
-  assignBuffers(renderdata, glyphs3)
+  assignBuffers(renderdata, textbuffer1)
+  assignBuffers(renderdata, textbuffer2)
+  assignBuffers(renderdata, textbuffer3)
 
   var labels = ["  0", "  1", "  2"]
 
@@ -87,17 +87,17 @@ proc test_02_multi_counter(time: float32) =
   var p = 0
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
-    glyphs1.reset()
-    glyphs2.reset()
-    glyphs3.reset()
+    textbuffer1.reset()
+    textbuffer2.reset()
+    textbuffer3.reset()
 
-    glyphs1.add($(p + 0), vec3(0.3, 0.5))
-    glyphs2.add($(p + 1), vec3(0.5, 0.5))
-    glyphs3.add($(p + 2), vec3(0.7, 0.5))
+    textbuffer1.add($(p + 0), vec3(0.3, 0.5))
+    textbuffer2.add($(p + 1), vec3(0.5, 0.5))
+    textbuffer3.add($(p + 2), vec3(0.7, 0.5))
 
-    glyphs1.updateAllGPUBuffers(flush = true)
-    glyphs2.updateAllGPUBuffers(flush = true)
-    glyphs3.updateAllGPUBuffers(flush = true)
+    textbuffer1.updateAllGPUBuffers(flush = true)
+    textbuffer2.updateAllGPUBuffers(flush = true)
+    textbuffer3.updateAllGPUBuffers(flush = true)
 
     inc p
     withNextFrame(framebuffer, commandbuffer):
@@ -111,11 +111,11 @@ proc test_02_multi_counter(time: float32) =
       ):
         withPipeline(commandbuffer, pipeline):
           bindDescriptorSet(commandbuffer, font1.descriptorSet, 0, pipeline)
-          renderGlyphs(commandbuffer, pipeline, glyphs1)
+          renderTextBuffer(commandbuffer, pipeline, textbuffer1)
           bindDescriptorSet(commandbuffer, font2.descriptorSet, 0, pipeline)
-          renderGlyphs(commandbuffer, pipeline, glyphs2)
+          renderTextBuffer(commandbuffer, pipeline, textbuffer2)
           bindDescriptorSet(commandbuffer, font3.descriptorSet, 0, pipeline)
-          renderGlyphs(commandbuffer, pipeline, glyphs3)
+          renderTextBuffer(commandbuffer, pipeline, textbuffer3)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
@@ -134,30 +134,31 @@ proc test_03_layouting(time: float32) =
   uploadImages(renderdata, font.descriptorSet)
   initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
 
-  var glyphs = font.initGlyphs(1000, baseScale = 0.1)
-  assignBuffers(renderdata, glyphs)
+  var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
+  assignBuffers(renderdata, textbuffer)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
 
-    glyphs.reset()
-    glyphs.add("Anchor Center", vec3(0, 0), anchor = vec2(0, 0))
-    glyphs.add("Anchor top left", vec3(0, 0), anchor = vec2(-1, 1))
-    glyphs.add("Anchor top right", vec3(0, 0), anchor = vec2(1, 1))
-    glyphs.add("Anchor bottom left", vec3(0, 0), anchor = vec2(-1, -1))
-    glyphs.add("Anchor bottom right", vec3(0, 0), anchor = vec2(1, -1))
+    textbuffer.reset()
+    textbuffer.add("Anchor at center", vec3(0, 0), anchor = vec2(0, 0))
+    textbuffer.add("Anchor at top left`", vec3(-1, 1), anchor = vec2(-1, 1))
+    textbuffer.add("Anchor at top right", vec3(1, 1), anchor = vec2(1, 1))
+    textbuffer.add("Anchor at bottom left", vec3(-1, -1), anchor = vec2(-1, -1))
+    textbuffer.add("Anchor at bottom right", vec3(1, -1), anchor = vec2(1, -1))
 
-    glyphs.add(
-      """Paragraph
-  This is a somewhat longer paragraph with a few newlines and a maximum width of 0.2.
-
-  It should display with some space above and have a pleasing appearance overall! :)""",
-      vec3(0.5, 0.5),
-      anchor = vec2(0, 0),
-      alignment = Center,
+    textbuffer.add(
+      "Mutiline text\nLeft aligned\nCool!", vec3(-0.5, -0.5), alignment = Left
     )
-    glyphs.updateAllGPUBuffers(flush = true)
+    textbuffer.add(
+      "Mutiline text\nCenter aligned\nCool!!", vec3(0, -0.5), alignment = Center
+    )
+    textbuffer.add(
+      "Mutiline text\nRight aligned\nCool!!!", vec3(0.5, -0.5), alignment = Right
+    )
+
+    textbuffer.updateAllGPUBuffers(flush = true)
 
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
@@ -170,14 +171,13 @@ proc test_03_layouting(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          renderGlyphs(commandbuffer, pipeline, glyphs)
+          renderTextBuffer(commandbuffer, pipeline, textbuffer)
 
       # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-#[
 proc test_04_lots_of_texts(time: float32) =
   var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
@@ -186,9 +186,12 @@ proc test_04_lots_of_texts(time: float32) =
     renderPass = vulkan.swapchain.renderPass
   )
 
-  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
-  uploadImages(renderdata, ds)
-  initDescriptorSet(renderdata, pipeline.layout(0), ds)
+  assignBuffers(renderdata, font.descriptorSet)
+  uploadImages(renderdata, font.descriptorSet)
+  initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
+
+  var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
+  assignBuffers(renderdata, textbuffer)
 
   var labels: seq[Textbox]
   var positions = newSeq[Vec3f](100)
@@ -203,10 +206,9 @@ proc test_04_lots_of_texts(time: float32) =
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-    for l in labels.mitems:
-      l.refresh()
+    textbuffer.reset()
     withNextFrame(framebuffer, commandbuffer):
-      bindDescriptorSet(commandbuffer, ds, 0, pipeline)
+      bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
       withRenderPass(
         vulkan.swapchain.renderPass,
         framebuffer,
@@ -216,16 +218,12 @@ proc test_04_lots_of_texts(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          for i in 0 ..< labels.len:
-            render(
-              commandbuffer, pipeline, labels[i], positions[i], colors[i], scales[i]
-            )
+          renderTextBuffer(commandbuffer, pipeline, textbuffer)
 
         # cleanup
   checkVkResult vkDeviceWaitIdle(vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
-]#
 
 when isMainModule:
   var time = 100'f32
