@@ -123,14 +123,12 @@ proc test_02_multi_counter(time: float32) =
   destroyRenderData(renderdata)
 
 proc test_03_layouting(time: float32) =
-  var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 40)
+  var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
   var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
     renderPass = vulkan.swapchain.renderPass
   )
-
-  var ds = asDescriptorSetData(FontDS(fontAtlas: font.fontAtlas.copy()))
 
   assignBuffers(renderdata, font.descriptorSet)
   uploadImages(renderdata, font.descriptorSet)
@@ -139,23 +137,28 @@ proc test_03_layouting(time: float32) =
   var glyphs = font.initGlyphs(1000, baseScale = 0.1)
   assignBuffers(renderdata, glyphs)
 
-  for horizontal in HorizontalAlignment:
-    glyphs.add $horizontal & " aligned"
-  for vertical in VerticalAlignment:
-    glyphs.add $vertical & " aligned"
-
-  glyphs.add(
-    """Paragraph
-This is a somewhat longer paragraph with a few newlines and a maximum width of 0.2.
-
-It should display with some space above and have a pleasing appearance overall! :)""",
-    verticalAlignment = Top,
-    horizontalAlignment = Left,
-  )
-
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
+
+    glyphs.reset()
+    glyphs.add("Anchor Center", vec3(0, 0), anchor = vec2(0, 0))
+    glyphs.add("Anchor top left", vec3(0, 0), anchor = vec2(-1, 1))
+    glyphs.add("Anchor top right", vec3(0, 0), anchor = vec2(1, 1))
+    glyphs.add("Anchor bottom left", vec3(0, 0), anchor = vec2(-1, -1))
+    glyphs.add("Anchor bottom right", vec3(0, 0), anchor = vec2(1, -1))
+
+    glyphs.add(
+      """Paragraph
+  This is a somewhat longer paragraph with a few newlines and a maximum width of 0.2.
+
+  It should display with some space above and have a pleasing appearance overall! :)""",
+      vec3(0.5, 0.5),
+      anchor = vec2(0, 0),
+      alignment = Center,
+    )
+    glyphs.updateAllGPUBuffers(flush = true)
+
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
       withRenderPass(
@@ -225,7 +228,7 @@ proc test_04_lots_of_texts(time: float32) =
 ]#
 
 when isMainModule:
-  var time = 1'f32
+  var time = 100'f32
   initVulkan()
 
   for depthBuffer in [true, false]:
@@ -233,8 +236,8 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
-    test_01_static_label(time)
-    test_02_multi_counter(time)
+    # test_01_static_label(time)
+    # test_02_multi_counter(time)
     test_03_layouting(time)
     # test_04_lots_of_texts(time)
 

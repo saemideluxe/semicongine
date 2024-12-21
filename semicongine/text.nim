@@ -79,17 +79,12 @@ const float epsilon = 0.0000001;
 
 void main() {
   int vertexI = indices[gl_VertexIndex];
-  vec3 pos = vec3(
+  vec3 vertexPos = vec3(
     glyphquads.pos[glyphIndex][i_x[vertexI]] * scale / textRendering.aspectRatio,
     glyphquads.pos[glyphIndex][i_y[vertexI]] * scale,
     1 - (gl_InstanceIndex + 1) * epsilon // allows overlapping glyphs to make proper depth test
   );
-  vec3 offset = vec3(
-    (position.x - textRendering.aspectRatio + 1) / textRendering.aspectRatio,
-    position.y,
-    position.z
-  );
-  gl_Position = vec4(pos + offset, 1.0);
+  gl_Position = vec4(vertexPos + position, 1.0);
   vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);
   fragmentUv = uv;
   fragmentColor = color;
@@ -135,11 +130,11 @@ proc width(font: Font, text: seq[Rune], scale: float32): float32 =
         result += font.advance[font.fallbackCharacter] * scale
     if i < text.len - 1:
       result += font.kerning.getOrDefault((text[i], text[i + 1]), 0) * scale
-  return result * 0.5 / getAspectRatio()
+  return result
 
 proc textDimension*(font: Font, text: seq[Rune], scale: float32): Vec2f =
   let nLines = text.countIt(it == Rune('\n')).float32
-  let h = (nLines * font.lineAdvance * scale + font.lineHeight * scale) * 0.5
+  let h = (nLines * font.lineAdvance * scale + font.lineHeight * scale)
   let w = max(splitLines(text).toSeq.mapIt(width(font, it, scale)))
 
   return vec2(w, h)
@@ -149,7 +144,7 @@ proc add*(
     text: seq[Rune],
     position: Vec3f,
     alignment: TextAlignment = Left,
-    anchor: Vec2f = vec2(0, 1),
+    anchor: Vec2f = vec2(-1, 1),
     scale: float32 = 1'f32,
     color: Vec4f = vec4(1, 1, 1, 1),
 ) =
@@ -165,17 +160,16 @@ proc add*(
   let
     globalScale = scale * glyphs.baseScale
     dim = textDimension(glyphs.font, text, globalScale)
-    baselineStart = vec2(0, glyphs.font.ascent * globalScale * 0.5)
+    baselineStart = vec2(0, glyphs.font.ascent * globalScale)
     pos = position.xy - anchor * dim + baselineStart
     # lineWidths need to be converted to NDC
     lineWidths = splitLines(text).toSeq.mapIt(width(glyphs.font, it, globalScale))
     # also dimension must be in NDC
     maxWidth = dim.x
+    aratio = getAspectRatio()
 
   var
-    origin = vec3(
-      pos.x * getAspectRatio() * 2'f32 - 1'f32, -(pos.y * 2'f32 - 1'f32), position.z
-    )
+    origin = vec3(pos.x, pos.y, position.z)
     cursorPos = origin
     lineI = 0
 
@@ -185,7 +179,7 @@ proc add*(
   of Center:
     cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / 2)
   of Right:
-    cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * getAspectRatio() * 2
+    cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * aratio * 2
 
   for i in 0 ..< text.len:
     if text[i] == Rune('\n'):
@@ -196,7 +190,7 @@ proc add*(
       of Center:
         cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / 2)
       of Right:
-        cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * getAspectRatio() * 2
+        cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) * aratio * 2
       cursorPos.y = cursorPos.y - glyphs.font.lineAdvance * globalScale
     else:
       if not text[i].isWhitespace():
@@ -211,15 +205,17 @@ proc add*(
         inc glyphs.cursor
 
       if text[i] in glyphs.font.advance:
-        cursorPos.x = cursorPos.x + glyphs.font.advance[text[i]] * globalScale
+        cursorPos.x = cursorPos.x + glyphs.font.advance[text[i]] * globalScale / aratio
       else:
         cursorPos.x =
-          cursorPos.x + glyphs.font.advance[glyphs.font.fallbackCharacter] * globalScale
+          cursorPos.x +
+          glyphs.font.advance[glyphs.font.fallbackCharacter] * globalScale / aratio
 
       if i < text.len - 1:
         cursorPos.x =
           cursorPos.x +
-          glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale
+          glyphs.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale /
+          aratio
 
 proc add*(
     glyphs: var Glyphs,

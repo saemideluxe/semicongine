@@ -450,30 +450,30 @@ func normalized*[T: SomeFloat](vec: TVec4[T]): auto =
     TVec4[T]([vec[0] / l, vec[1] / l, vec[2] / l, vec[3] / l])
 
 # scalar operations
-func `+`*(a: TVec1, b: SomeNumber): auto =
-  TVec1([a[0] + b])
-func `+`*(a: TVec2, b: SomeNumber): auto =
-  TVec2([a[0] + b, a[1] + b])
-func `+`*(a: TVec3, b: SomeNumber): auto =
-  TVec3([a[0] + b, a[1] + b, a[2] + b])
-func `+`*(a: TVec4, b: SomeNumber): auto =
-  TVec4([a[0] + b, a[1] + b, a[2] + b, a[3] + b])
-func `-`*(a: TVec1, b: SomeNumber): auto =
-  TVec1([a[0] - b])
-func `-`*(a: TVec2, b: SomeNumber): auto =
-  TVec2([a[0] - b, a[1] - b])
-func `-`*(a: TVec3, b: SomeNumber): auto =
-  TVec3([a[0] - b, a[1] - b, a[2] - b])
-func `-`*(a: TVec4, b: SomeNumber): auto =
-  TVec4([a[0] - b, a[1] - b, a[2] - b, a[3] - b])
-func `*`*(a: TVec1, b: SomeNumber): auto =
-  TVec1([a[0] * b])
-func `*`*(a: TVec2, b: SomeNumber): auto =
-  TVec2([a[0] * b, a[1] * b])
-func `*`*(a: TVec3, b: SomeNumber): auto =
-  TVec3([a[0] * b, a[1] * b, a[2] * b])
-func `*`*(a: TVec4, b: SomeNumber): auto =
-  TVec4([a[0] * b, a[1] * b, a[2] * b, a[3] * b])
+func `+`*[T](a: TVec1[T], b: SomeNumber): auto =
+  TVec1([a[0] + T(b)])
+func `+`*[T](a: TVec2[T], b: SomeNumber): auto =
+  TVec2([a[0] + T(b), a[1] + T(b)])
+func `+`*[T](a: TVec3[T], b: SomeNumber): auto =
+  TVec3([a[0] + T(b), a[1] + T(b), a[2] + T(b)])
+func `+`*[T](a: TVec4[T], b: SomeNumber): auto =
+  TVec4([a[0] + T(b), a[1] + T(b), a[2] + T(b), a[3] + T(b)])
+func `-`*[T](a: TVec1[T], b: SomeNumber): auto =
+  TVec1([a[0] - T(b)])
+func `-`*[T](a: TVec2[T], b: SomeNumber): auto =
+  TVec2([a[0] - T(b), a[1] - T(b)])
+func `-`*[T](a: TVec3[T], b: SomeNumber): auto =
+  TVec3([a[0] - T(b), a[1] - T(b), a[2] - T(b)])
+func `-`*[T](a: TVec4[T], b: SomeNumber): auto =
+  TVec4([a[0] - T(b), a[1] - T(b), a[2] - T(b), a[3] - T(b)])
+func `*`*[T](a: TVec1[T], b: SomeNumber): auto =
+  TVec1([a[0] * T(b)])
+func `*`*[T](a: TVec2[T], b: SomeNumber): auto =
+  TVec2([a[0] * T(b), a[1] * T(b)])
+func `*`*[T](a: TVec3[T], b: SomeNumber): auto =
+  TVec3([a[0] * T(b), a[1] * T(b), a[2] * T(b)])
+func `*`*[T](a: TVec4[T], b: SomeNumber): auto =
+  TVec4([a[0] * T(b), a[1] * T(b), a[2] * T(b), a[3] * T(b)])
 func `div`*[T, S: SomeInteger](a: TVec1[T], b: S): auto =
   TVec1[T]([a[0] div T(b)])
 func `/`*[T, S: SomeFloat](a: TVec1[T], b: S): auto =
