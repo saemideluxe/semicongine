@@ -22,11 +22,10 @@ proc test_01_static_label(time: float32) =
     renderPass = vulkan.swapchain.renderPass
   )
   var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
-
   assignBuffers(renderdata, textbuffer)
-  assignBuffers(renderdata, font.descriptorSet)
-  uploadImages(renderdata, font.descriptorSet)
-  initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
+
+  font.upload(renderdata)
+  font.addToPipeline(renderdata, pipeline)
 
   discard textbuffer.add("Hello semicongine!", vec3())
 
@@ -37,7 +36,7 @@ proc test_01_static_label(time: float32) =
       textbuffer.refresh()
 
     withNextFrame(framebuffer, commandbuffer):
-      bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
+      font.bindTo(pipeline, commandbuffer)
       withRenderPass(
         vulkan.swapchain.renderPass,
         framebuffer,
@@ -64,15 +63,12 @@ proc test_02_multi_counter(time: float32) =
     renderPass = vulkan.swapchain.renderPass
   )
 
-  assignBuffers(renderdata, font1.descriptorSet)
-  assignBuffers(renderdata, font2.descriptorSet)
-  assignBuffers(renderdata, font3.descriptorSet)
-  uploadImages(renderdata, font1.descriptorSet)
-  uploadImages(renderdata, font2.descriptorSet)
-  uploadImages(renderdata, font3.descriptorSet)
-  initDescriptorSet(renderdata, pipeline.layout(0), font1.descriptorSet)
-  initDescriptorSet(renderdata, pipeline.layout(0), font2.descriptorSet)
-  initDescriptorSet(renderdata, pipeline.layout(0), font3.descriptorSet)
+  font1.upload(renderdata)
+  font2.upload(renderdata)
+  font3.upload(renderdata)
+  font1.addToPipeline(renderdata, pipeline)
+  font2.addToPipeline(renderdata, pipeline)
+  font3.addToPipeline(renderdata, pipeline)
 
   var textbuffer1 = font1.initTextBuffer(10, baseScale = 0.1)
   var textbuffer2 = font2.initTextBuffer(10, baseScale = 0.1)
@@ -111,11 +107,11 @@ proc test_02_multi_counter(time: float32) =
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
-          bindDescriptorSet(commandbuffer, font1.descriptorSet, 0, pipeline)
+          bindDescriptorSet(commandbuffer, font1.descriptorSet, 3, pipeline)
           renderTextBuffer(commandbuffer, pipeline, textbuffer1)
-          bindDescriptorSet(commandbuffer, font2.descriptorSet, 0, pipeline)
+          bindDescriptorSet(commandbuffer, font2.descriptorSet, 3, pipeline)
           renderTextBuffer(commandbuffer, pipeline, textbuffer2)
-          bindDescriptorSet(commandbuffer, font3.descriptorSet, 0, pipeline)
+          bindDescriptorSet(commandbuffer, font3.descriptorSet, 3, pipeline)
           renderTextBuffer(commandbuffer, pipeline, textbuffer3)
 
       # cleanup
@@ -131,9 +127,8 @@ proc test_03_layouting(time: float32) =
     renderPass = vulkan.swapchain.renderPass
   )
 
-  assignBuffers(renderdata, font.descriptorSet)
-  uploadImages(renderdata, font.descriptorSet)
-  initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
+  font.upload(renderdata)
+  font.addToPipeline(renderdata, pipeline)
 
   var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
   assignBuffers(renderdata, textbuffer)
@@ -161,7 +156,7 @@ proc test_03_layouting(time: float32) =
       textbuffer.refresh()
 
     withNextFrame(framebuffer, commandbuffer):
-      bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
+      bindDescriptorSet(commandbuffer, font.descriptorSet, 3, pipeline)
       withRenderPass(
         vulkan.swapchain.renderPass,
         framebuffer,
@@ -186,9 +181,8 @@ proc test_04_lots_of_texts(time: float32) =
     renderPass = vulkan.swapchain.renderPass
   )
 
-  assignBuffers(renderdata, font.descriptorSet)
-  uploadImages(renderdata, font.descriptorSet)
-  initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
+  font.upload(renderdata)
+  font.addToPipeline(renderdata, pipeline)
 
   var textbuffer = font.initTextBuffer(3000, baseScale = 0.1)
   assignBuffers(renderdata, textbuffer)
@@ -211,7 +205,7 @@ proc test_04_lots_of_texts(time: float32) =
     withNextFrame(framebuffer, commandbuffer):
       if windowWasResized():
         textbuffer.refresh()
-      bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
+      bindDescriptorSet(commandbuffer, font.descriptorSet, 3, pipeline)
       withRenderPass(
         vulkan.swapchain.renderPass,
         framebuffer,

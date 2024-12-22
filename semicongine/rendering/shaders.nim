@@ -472,6 +472,17 @@ proc createDescriptorSetLayouts[TShader](): array[
         nil,
         addr(result[value.getCustomPragmaVal(DescriptorSet)]),
       )
+  # create empty descriptor sets for unused sets
+  for i in 0 ..< result.len:
+    if not result[i].Valid:
+      var layoutCreateInfo = VkDescriptorSetLayoutCreateInfo(
+        sType: VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        bindingCount: 0,
+        pBindings: nil,
+      )
+      checkVkResult vkCreateDescriptorSetLayout(
+        vulkan.device, addr(layoutCreateInfo), nil, addr(result[i])
+      )
 
 proc createPipeline*[TShader](
     renderPass: RenderPass,
@@ -488,10 +499,6 @@ proc createPipeline*[TShader](
   (result.vertexShaderModule, result.fragmentShaderModule) = compileShader(shader)
 
   result.descriptorSetLayouts = createDescriptorSetLayouts[TShader]()
-  var layouts: seq[VkDescriptorSetLayout]
-  for l in result.descriptorSetLayouts:
-    if l.Valid:
-      layouts.add l
 
   # TODO: only add pushConstants if shader actually uses them
   let pushConstant = VkPushConstantRange(
@@ -502,8 +509,8 @@ proc createPipeline*[TShader](
 
   let pipelineLayoutInfo = VkPipelineLayoutCreateInfo(
     sType: VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-    setLayoutCount: layouts.len.uint32,
-    pSetLayouts: layouts.ToCPointer,
+    setLayoutCount: result.descriptorSetLayouts.len.uint32,
+    pSetLayouts: result.descriptorSetLayouts.ToCPointer,
     pushConstantRangeCount: 1,
     pPushConstantRanges: addr(pushConstant),
   )

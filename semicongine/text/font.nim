@@ -176,23 +176,19 @@ proc loadFont*[N: static int](
     lineHeightPixels,
   )
 
-func textWidth*(theText: seq[Rune] | string, font: FontObj): float32 =
-  var text = when theText is string: theText.toRunes else: theText
-  var currentWidth = 0'f32
-  var lineWidths: seq[float32]
-  for i in 0 ..< text.len:
-    if text[i] == NEWLINE:
-      lineWidths.add currentWidth
-      currentWidth = 0'f32
-    else:
-      if not (i == text.len - 1 and text[i].isWhiteSpace):
-        currentWidth += font.advance[text[i]]
-      if i < text.len - 1:
-        currentWidth += font.kerning[(text[i], text[i + 1])]
-  lineWidths.add currentWidth
-  return lineWidths.max
+proc upload*(font: Font, renderdata: var RenderData) =
+  assignBuffers(renderdata, font.descriptorSet)
+  uploadImages(renderdata, font.descriptorSet)
 
-func WordWrapped*(text: seq[Rune], font: FontObj, maxWidth: float32): seq[Rune] =
+proc addToPipeline*(font: Font, renderdata: RenderData, pipeline: Pipeline) =
+  initDescriptorSet(renderdata, pipeline.layout(3), font.descriptorSet)
+
+proc bindTo*(font: Font, pipeline: Pipeline, commandbuffer: VkCommandBuffer) =
+  bindDescriptorSet(commandbuffer, font.descriptorSet, 3, pipeline)
+
+#[
+# needs to be adjusted to work correctly with new metrics code in text.nim
+func wordWrapped*(text: seq[Rune], font: FontObj, maxWidth: float32): seq[Rune] =
   var remaining: seq[seq[Rune]] = @[@[]]
   for c in text:
     if c == SPACE:
@@ -236,3 +232,4 @@ func WordWrapped*(text: seq[Rune], font: FontObj, maxWidth: float32): seq[Rune] 
     result.add currentLine
 
   return result
+  ]#

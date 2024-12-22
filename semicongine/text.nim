@@ -15,62 +15,18 @@ import ./rendering/vulkan/api
 import ./image
 import ./contrib/algorithms/texture_packing
 
-const
-  NEWLINE = Rune('\n')
-  SPACE = Rune(' ')
-
 type
-  TextAlignment* = enum
-    Left
-    Center
-    Right
-
   GlyphQuad[MaxGlyphs: static int] = object
     pos: array[MaxGlyphs, Vec4f]
       # vertex offsets to glyph center: [left, bottom, right, top]
     uv: array[MaxGlyphs, Vec4f] # [left, bottom, right, top]
 
+  TextRendering* = object
+    aspectRatio*: float32
+
   GlyphDescriptorSet*[MaxGlyphs: static int] = object
     fontAtlas*: Image[Gray]
     glyphquads*: GPUValue[GlyphQuad[MaxGlyphs], StorageBuffer]
-
-  FontObj*[MaxGlyphs: static int] = object
-    advance*: Table[Rune, float32]
-    kerning*: Table[(Rune, Rune), float32]
-    lineAdvance*: float32
-    lineHeight*: float32 # like lineAdvance - lineGap
-    ascent*: float32 # from baseline to highest glyph
-    descent*: float32 # from baseline to highest glyph
-    xHeight*: float32 # from baseline to height of lowercase x
-    descriptorSet*: DescriptorSetData[GlyphDescriptorSet[MaxGlyphs]]
-    descriptorGlyphIndex: Table[Rune, uint16]
-    fallbackCharacter: Rune
-
-  Font*[MaxGlyphs: static int] = ref FontObj[MaxGlyphs]
-
-  TextHandle* = distinct int
-  Text = object
-    bufferOffset: int
-    text: seq[Rune]
-    position: Vec3f = vec3()
-    alignment: TextAlignment = Left
-    anchor: Vec2f = vec2()
-    scale: float32 = 0
-    color: Vec4f = vec4(1, 1, 1, 1)
-    capacity: int
-
-  TextBuffer*[MaxGlyphs: static int] = object
-    cursor: int
-    font*: Font[MaxGlyphs]
-    baseScale*: float32
-    position*: GPUArray[Vec3f, VertexBufferMapped]
-    color*: GPUArray[Vec4f, VertexBufferMapped]
-    scale*: GPUArray[float32, VertexBufferMapped]
-    glyphIndex*: GPUArray[uint16, VertexBufferMapped]
-    texts: seq[Text]
-
-  TextRendering* = object
-    aspectRatio*: float32
 
   GlyphShader*[MaxGlyphs: static int] = object
     position {.InstanceAttribute.}: Vec3f
@@ -82,7 +38,7 @@ type
     fragmentUv {.Pass.}: Vec2f
     fragmentColor {.PassFlat.}: Vec4f
     outColor {.ShaderOutput.}: Vec4f
-    glyphData {.DescriptorSet: 0.}: GlyphDescriptorSet[MaxGlyphs]
+    glyphData {.DescriptorSet: 3.}: GlyphDescriptorSet[MaxGlyphs]
     vertexCode* =
       """
 const int[6] indices = int[](0, 1, 2, 2, 3, 0);
@@ -109,6 +65,47 @@ void main() {
     outColor = vec4(fragmentColor.rgb, fragmentColor.a * a);
 }"""
 
+  FontObj*[MaxGlyphs: static int] = object
+    advance*: Table[Rune, float32]
+    kerning*: Table[(Rune, Rune), float32]
+    lineAdvance*: float32
+    lineHeight*: float32 # like lineAdvance - lineGap
+    ascent*: float32 # from baseline to highest glyph
+    descent*: float32 # from baseline to highest glyph
+    xHeight*: float32 # from baseline to height of lowercase x
+    descriptorSet*: DescriptorSetData[GlyphDescriptorSet[MaxGlyphs]]
+    descriptorGlyphIndex: Table[Rune, uint16]
+    fallbackCharacter: Rune
+
+  Font*[MaxGlyphs: static int] = ref FontObj[MaxGlyphs]
+
+  TextHandle* = distinct int
+
+  TextAlignment* = enum
+    Left
+    Center
+    Right
+
+  Text = object
+    bufferOffset: int
+    text: seq[Rune]
+    position: Vec3f = vec3()
+    alignment: TextAlignment = Left
+    anchor: Vec2f = vec2()
+    scale: float32 = 0
+    color: Vec4f = vec4(1, 1, 1, 1)
+    capacity: int
+
+  TextBuffer*[MaxGlyphs: static int] = object
+    cursor: int
+    font*: Font[MaxGlyphs]
+    baseScale*: float32
+    position*: GPUArray[Vec3f, VertexBufferMapped]
+    color*: GPUArray[Vec4f, VertexBufferMapped]
+    scale*: GPUArray[float32, VertexBufferMapped]
+    glyphIndex*: GPUArray[uint16, VertexBufferMapped]
+    texts: seq[Text]
+
 proc `=copy`[MaxGlyphs: static int](
   dest: var FontObj[MaxGlyphs], source: FontObj[MaxGlyphs]
 ) {.error.}
@@ -120,16 +117,16 @@ proc `=copy`[MaxGlyphs: static int](
 include ./text/font
 
 func initTextBuffer*[MaxGlyphs: static int](
-    font: Font[MaxGlyphs], maxCharacters: int, baseScale = 1'f32
+    font: Font[MaxGlyphs], bufferSize: int, baseScale = 1'f32
 ): TextBuffer[MaxGlyphs] =
   result.cursor = 0
   result.font = font
   result.baseScale = baseScale
-  result.position.data.setLen(maxCharacters)
-  result.scale.data.setLen(maxCharacters)
-  result.color.data.setLen(maxCharacters)
-  result.glyphIndex.data.setLen(maxCharacters)
-  result.texts.setLen(maxCharacters) # waste a lot of memory?
+  result.position.data.setLen(bufferSize)
+  result.scale.data.setLen(bufferSize)
+  result.color.data.setLen(bufferSize)
+  result.glyphIndex.data.setLen(bufferSize)
+  result.texts.setLen(bufferSize) # waste a lot of memory?
 
 iterator splitLines(text: seq[Rune]): seq[Rune] =
   var current = newSeq[Rune]()
@@ -141,21 +138,24 @@ iterator splitLines(text: seq[Rune]): seq[Rune] =
       current.add c
   yield current
 
-proc width(font: Font, text: seq[Rune], scale: float32): float32 =
+proc width*(font: Font, text: seq[Rune]): float32 =
   for i in 0 ..< text.len:
     if not (i == text.len - 1 and text[i].isWhiteSpace):
       if text[i] in font.advance:
-        result += font.advance[text[i]] * scale
+        result += font.advance[text[i]]
       else:
-        result += font.advance[font.fallbackCharacter] * scale
+        result += font.advance[font.fallbackCharacter]
     if i < text.len - 1:
-      result += font.kerning.getOrDefault((text[i], text[i + 1]), 0) * scale
+      result += font.kerning.getOrDefault((text[i], text[i + 1]), 0)
   return result
 
-proc textDimension*(font: Font, text: seq[Rune], scale: float32): Vec2f =
+proc width*(font: Font, text: string): float32 =
+  width(font, text.toRunes)
+
+proc textDimension*(font: Font, text: seq[Rune]): Vec2f =
   let nLines = text.countIt(it == Rune('\n')).float32
-  let h = (nLines * font.lineAdvance * scale + font.lineHeight * scale)
-  let w = max(splitLines(text).toSeq.mapIt(width(font, it, scale)))
+  let h = (nLines * font.lineAdvance + font.lineHeight)
+  let w = max(splitLines(text).toSeq.mapIt(width(font, it)))
 
   return vec2(w, h)
 
@@ -172,7 +172,7 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
     capacity = textbuffer.texts[i].capacity
 
     globalScale = scale * textbuffer.baseScale
-    box = textDimension(textbuffer.font, text, globalScale)
+    box = textDimension(textbuffer.font, text) * globalScale
     xH = textbuffer.font.xHeight * globalScale
     aratio = getAspectRatio()
     origin = vec3(
@@ -181,7 +181,7 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
         textbuffer.font.lineHeight * globalScale * 0.5,
       position.z,
     )
-    lineWidths = splitLines(text).toSeq.mapIt(width(textbuffer.font, it, globalScale))
+    lineWidths = splitLines(text).toSeq.mapIt(width(textbuffer.font, it) * globalScale)
     maxWidth = box.x
 
   var
