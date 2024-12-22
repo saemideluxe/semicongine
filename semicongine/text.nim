@@ -47,6 +47,8 @@ type
     fallbackCharacter: Rune
 
   Font*[MaxGlyphs: static int] = ref FontObj[MaxGlyphs]
+
+  TextHandle* = distinct int
   Text = object
     bufferOffset: int
     text: seq[Rune]
@@ -55,6 +57,7 @@ type
     anchor: Vec2f = vec2()
     scale: float32 = 0
     color: Vec4f = vec4(1, 1, 1, 1)
+    capacity: int
 
   TextBuffer*[MaxGlyphs: static int] = object
     cursor: int
@@ -156,44 +159,30 @@ proc textDimension*(font: Font, text: seq[Rune], scale: float32): Vec2f =
 
   return vec2(w, h)
 
-proc add*(
-    textbuffer: var TextBuffer,
-    text: seq[Rune],
-    position: Vec3f,
-    alignment: TextAlignment = Left,
-    anchor: Vec2f = vec2(0, 0),
-    scale: float32 = 1'f32,
-    color: Vec4f = vec4(1, 1, 1, 1),
-) =
-  ## This should be called again after aspect ratio of window changes 
-
-  assert text.len <= textbuffer.position.len,
-    &"Set {text.len} but TextBuffer-object only supports {textbuffer.position.len}"
-
-  textbuffer.texts.add Text(
-    bufferOffset: textbuffer.cursor,
-    text: text,
-    position: position,
-    alignment: alignment,
-    anchor: anchor,
-    scale: scale,
-    color: color,
-  )
-
+proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
   let
+    i = int(textHandle)
+    text = textbuffer.texts[i].text
+    position = textbuffer.texts[i].position
+    alignment = textbuffer.texts[i].alignment
+    anchor = textbuffer.texts[i].anchor
+    scale = textbuffer.texts[i].scale
+    color = textbuffer.texts[i].color
+    offset = textbuffer.texts[i].bufferOffset
+    capacity = textbuffer.texts[i].capacity
+
     globalScale = scale * textbuffer.baseScale
     box = textDimension(textbuffer.font, text, globalScale)
     xH = textbuffer.font.xHeight * globalScale
+    aratio = getAspectRatio()
     origin = vec3(
-      position.x - (anchor.x * 0.5 + 0.5) * box.x / getAspectRatio(),
+      position.x - (anchor.x * 0.5 + 0.5) * box.x / aratio,
       position.y + (anchor.y * -0.5 + 0.5) * box.y - xH * 0.5 -
         textbuffer.font.lineHeight * globalScale * 0.5,
       position.z,
     )
     lineWidths = splitLines(text).toSeq.mapIt(width(textbuffer.font, it, globalScale))
     maxWidth = box.x
-    aratio = getAspectRatio()
-  # echo text, anchor
 
   var
     cursorPos = origin
@@ -207,44 +196,88 @@ proc add*(
   of Right:
     cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
 
-  for i in 0 ..< text.len:
-    if text[i] == Rune('\n'):
-      inc lineI
-      case alignment
-      of Left:
-        cursorPos.x = origin.x
-      of Center:
-        cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / aratio * 0.5)
-      of Right:
-        cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
-      cursorPos.y = cursorPos.y - textbuffer.font.lineAdvance * globalScale
-    else:
-      if not text[i].isWhitespace():
-        textbuffer.position[textbuffer.cursor] = cursorPos
-        textbuffer.scale[textbuffer.cursor] = globalScale
-        textbuffer.color[textbuffer.cursor] = color
-        if text[i] in textbuffer.font.descriptorGlyphIndex:
-          textbuffer.glyphIndex[textbuffer.cursor] =
-            textbuffer.font.descriptorGlyphIndex[text[i]]
-        else:
-          textbuffer.glyphIndex[textbuffer.cursor] =
-            textbuffer.font.descriptorGlyphIndex[textbuffer.font.fallbackCharacter]
-        inc textbuffer.cursor
-
-      if text[i] in textbuffer.font.advance:
-        cursorPos.x =
-          cursorPos.x + textbuffer.font.advance[text[i]] * globalScale / aratio
+  for i in 0 ..< capacity:
+    if i < text.len:
+      if text[i] == Rune('\n'):
+        inc lineI
+        case alignment
+        of Left:
+          cursorPos.x = origin.x
+        of Center:
+          cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / aratio * 0.5)
+        of Right:
+          cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
+        cursorPos.y = cursorPos.y - textbuffer.font.lineAdvance * globalScale
       else:
-        cursorPos.x =
-          cursorPos.x +
-          textbuffer.font.advance[textbuffer.font.fallbackCharacter] * globalScale /
-          aratio
+        if not text[i].isWhitespace():
+          textbuffer.position[offset + i] = cursorPos
+          textbuffer.scale[offset + i] = globalScale
+          textbuffer.color[offset + i] = color
+          if text[i] in textbuffer.font.descriptorGlyphIndex:
+            textbuffer.glyphIndex[offset + i] =
+              textbuffer.font.descriptorGlyphIndex[text[i]]
+          else:
+            textbuffer.glyphIndex[offset + i] =
+              textbuffer.font.descriptorGlyphIndex[textbuffer.font.fallbackCharacter]
 
-      if i < text.len - 1:
-        cursorPos.x =
-          cursorPos.x +
-          textbuffer.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale /
-          aratio
+        if text[i] in textbuffer.font.advance:
+          cursorPos.x =
+            cursorPos.x + textbuffer.font.advance[text[i]] * globalScale / aratio
+        else:
+          cursorPos.x =
+            cursorPos.x +
+            textbuffer.font.advance[textbuffer.font.fallbackCharacter] * globalScale /
+            aratio
+
+        if i < text.len - 1:
+          cursorPos.x =
+            cursorPos.x +
+            textbuffer.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale /
+            aratio
+    else:
+      textbuffer.position[offset + i] = vec3()
+      textbuffer.scale[offset + i] = 0
+      textbuffer.color[offset + i] = vec4()
+      textbuffer.glyphIndex[offset + i] = 0
+
+proc updateGlyphData*(textbuffer: var TextBuffer) =
+  for i in 0 ..< textbuffer.texts.len:
+    textbuffer.updateGlyphData(TextHandle(i))
+
+proc refresh*(textbuffer: var TextBuffer) =
+  textbuffer.updateGlyphData()
+  textbuffer.updateAllGPUBuffers(flush = true)
+
+proc add*(
+    textbuffer: var TextBuffer,
+    text: seq[Rune],
+    position: Vec3f,
+    alignment: TextAlignment = Left,
+    anchor: Vec2f = vec2(0, 0),
+    scale: float32 = 1'f32,
+    color: Vec4f = vec4(1, 1, 1, 1),
+    capacity: int = 0,
+): TextHandle =
+  ## This should be called again after aspect ratio of window changes 
+
+  let cap = if capacity == 0: text.len else: capacity
+  assert textbuffer.cursor + cap <= textbuffer.position.len,
+    &"Text is too big for TextBuffer ({textbuffer.position.len - textbuffer.cursor} left, but need {cap})"
+
+  result = TextHandle(textbuffer.texts.len)
+
+  textbuffer.texts.add Text(
+    bufferOffset: textbuffer.cursor,
+    text: text,
+    position: position,
+    alignment: alignment,
+    anchor: anchor,
+    scale: scale,
+    color: color,
+    capacity: cap,
+  )
+  textbuffer.cursor += cap
+  textbuffer.updateGlyphData(result)
 
 proc add*(
     textbuffer: var TextBuffer,
@@ -254,8 +287,36 @@ proc add*(
     anchor: Vec2f = vec2(0, 0),
     scale: float32 = 1'f32,
     color: Vec4f = vec4(1, 1, 1, 1),
+    capacity: int = 0,
+): TextHandle =
+  add(textbuffer, text.toRunes, position, alignment, anchor, scale, color, capacity)
+
+proc text*(textbuffer: var TextBuffer, textHandle: TextHandle, text: seq[Rune]) =
+  if text.len <= textbuffer.texts[int(textHandle)].capacity:
+    textbuffer.texts[int(textHandle)].text = text
+  else:
+    textbuffer.texts[int(textHandle)].text =
+      text[0 ..< textbuffer.texts[int(textHandle)].capacity]
+
+proc text*(textbuffer: var TextBuffer, textHandle: TextHandle, text: string) =
+  text(textbuffer, textHandle, text.toRunes)
+
+proc position*(textbuffer: var TextBuffer, textHandle: TextHandle, position: Vec3f) =
+  textbuffer.texts[int(textHandle)].position = position
+
+proc alignment*(
+    textbuffer: var TextBuffer, textHandle: TextHandle, alignment: TextAlignment
 ) =
-  add(textbuffer, text.toRunes, position, alignment, anchor, scale, color)
+  textbuffer.texts[int(textHandle)].alignment = alignment
+
+proc anchor*(textbuffer: var TextBuffer, textHandle: TextHandle, anchor: Vec2f) =
+  textbuffer.texts[int(textHandle)].anchor = anchor
+
+proc scale*(textbuffer: var TextBuffer, textHandle: TextHandle, scale: float32) =
+  textbuffer.texts[int(textHandle)].scale = scale
+
+proc color*(textbuffer: var TextBuffer, textHandle: TextHandle, color: Vec4f) =
+  textbuffer.texts[int(textHandle)].color = color
 
 proc reset*(textbuffer: var TextBuffer) =
   textbuffer.cursor = 0

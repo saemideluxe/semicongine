@@ -28,12 +28,13 @@ proc test_01_static_label(time: float32) =
   uploadImages(renderdata, font.descriptorSet)
   initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
 
+  discard textbuffer.add("Hello semicongine!", vec3())
+
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let t = getMonoTime()
-    textbuffer.reset()
-    textbuffer.add("Hello semicongine!", vec3(0.5, 0.5), anchor = vec2(0.5, 0.5))
-    textbuffer.updateAllGPUBuffers(flush = true)
+    if windowWasResized():
+      textbuffer.refresh()
 
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
@@ -81,25 +82,25 @@ proc test_02_multi_counter(time: float32) =
   assignBuffers(renderdata, textbuffer2)
   assignBuffers(renderdata, textbuffer3)
 
-  var labels = ["  0", "  1", "  2"]
+  var p = 0
+  let l1 = textbuffer1.add($(p + 0), vec3(0.3, 0.5), capacity = 5)
+  let l2 = textbuffer2.add($(p + 1), vec3(0.5, 0.5), capacity = 5)
+  let l3 = textbuffer3.add($(p + 2), vec3(0.7, 0.5), capacity = 5)
 
   var start = getMonoTime()
-  var p = 0
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
-    textbuffer1.reset()
-    textbuffer2.reset()
-    textbuffer3.reset()
-
-    textbuffer1.add($(p + 0), vec3(0.3, 0.5))
-    textbuffer2.add($(p + 1), vec3(0.5, 0.5))
-    textbuffer3.add($(p + 2), vec3(0.7, 0.5))
-
-    textbuffer1.updateAllGPUBuffers(flush = true)
-    textbuffer2.updateAllGPUBuffers(flush = true)
-    textbuffer3.updateAllGPUBuffers(flush = true)
 
     inc p
+
+    textbuffer1.text(l1, $(p + 0))
+    textbuffer2.text(l2, $(p + 1))
+    textbuffer3.text(l3, $(p + 2))
+
+    textbuffer1.refresh()
+    textbuffer2.refresh()
+    textbuffer3.refresh()
+
     withNextFrame(framebuffer, commandbuffer):
       withRenderPass(
         vulkan.swapchain.renderPass,
@@ -137,28 +138,27 @@ proc test_03_layouting(time: float32) =
   var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
   assignBuffers(renderdata, textbuffer)
 
+  discard textbuffer.add("Anchor at center", vec3(0, 0), anchor = vec2(0, 0))
+  discard textbuffer.add("Anchor at top left`", vec3(-1, 1), anchor = vec2(-1, 1))
+  discard textbuffer.add("Anchor at top right", vec3(1, 1), anchor = vec2(1, 1))
+  discard textbuffer.add("Anchor at bottom left", vec3(-1, -1), anchor = vec2(-1, -1))
+  discard textbuffer.add("Anchor at bottom right", vec3(1, -1), anchor = vec2(1, -1))
+
+  discard textbuffer.add(
+    "Mutiline text\nLeft aligned\nCool!", vec3(-0.5, -0.5), alignment = Left
+  )
+  discard textbuffer.add(
+    "Mutiline text\nCenter aligned\nCool!!", vec3(0, -0.5), alignment = Center
+  )
+  discard textbuffer.add(
+    "Mutiline text\nRight aligned\nCool!!!", vec3(0.5, -0.5), alignment = Right
+  )
+
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
     let progress = ((getMonoTime() - start).inMilliseconds().int / 1000) / time
-
-    textbuffer.reset()
-    textbuffer.add("Anchor at center", vec3(0, 0), anchor = vec2(0, 0))
-    textbuffer.add("Anchor at top left`", vec3(-1, 1), anchor = vec2(-1, 1))
-    textbuffer.add("Anchor at top right", vec3(1, 1), anchor = vec2(1, 1))
-    textbuffer.add("Anchor at bottom left", vec3(-1, -1), anchor = vec2(-1, -1))
-    textbuffer.add("Anchor at bottom right", vec3(1, -1), anchor = vec2(1, -1))
-
-    textbuffer.add(
-      "Mutiline text\nLeft aligned\nCool!", vec3(-0.5, -0.5), alignment = Left
-    )
-    textbuffer.add(
-      "Mutiline text\nCenter aligned\nCool!!", vec3(0, -0.5), alignment = Center
-    )
-    textbuffer.add(
-      "Mutiline text\nRight aligned\nCool!!!", vec3(0.5, -0.5), alignment = Right
-    )
-
-    textbuffer.updateAllGPUBuffers(flush = true)
+    if windowWasResized():
+      textbuffer.refresh()
 
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
@@ -190,24 +190,27 @@ proc test_04_lots_of_texts(time: float32) =
   uploadImages(renderdata, font.descriptorSet)
   initDescriptorSet(renderdata, pipeline.layout(0), font.descriptorSet)
 
-  var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
+  var textbuffer = font.initTextBuffer(3000, baseScale = 0.1)
   assignBuffers(renderdata, textbuffer)
 
-  var labels: seq[Textbox]
-  var positions = newSeq[Vec3f](100)
-  var colors = newSeq[Vec4f](100)
-  var scales = newSeq[Vec2f](100)
-  for i in 0 ..< 100:
-    positions[i] = vec3(rand(-0.5 .. 0.5), rand(-0.5 .. 0.5), rand(-0.1 .. 0.1))
-    colors[i] =
-      vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0))
-    scales[i] = vec2(rand(0.5'f32 .. 1.5'f32), rand(0.5'f32 .. 1.5'f32))
-    labels.add initTextbox(renderdata, pipeline.layout(0), font, 0.001, $i)
+  for i in 0 ..< 1000:
+    discard textbuffer.add(
+      $i,
+      vec3(rand(-0.8 .. 0.8), rand(-0.8 .. 0.8), rand(-0.1 .. 0.1)),
+      color =
+        vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0)),
+      scale = rand(0.5'f32 .. 1.5'f32),
+    )
 
   var start = getMonoTime()
+  var last = start
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
-    textbuffer.reset()
+    let n = getMonoTime()
+    echo (n - last).inMicroseconds() / 1000
+    last = n
     withNextFrame(framebuffer, commandbuffer):
+      if windowWasResized():
+        textbuffer.refresh()
       bindDescriptorSet(commandbuffer, font.descriptorSet, 0, pipeline)
       withRenderPass(
         vulkan.swapchain.renderPass,
@@ -226,7 +229,7 @@ proc test_04_lots_of_texts(time: float32) =
   destroyRenderData(renderdata)
 
 when isMainModule:
-  var time = 100'f32
+  var time = 1'f32
   initVulkan()
 
   for depthBuffer in [true, false]:
@@ -234,10 +237,10 @@ when isMainModule:
     setupSwapchain(renderpass = renderpass)
 
     # tests a simple triangle with minimalistic shader and vertex format
-    # test_01_static_label(time)
-    # test_02_multi_counter(time)
+    test_01_static_label(time)
+    test_02_multi_counter(time)
     test_03_layouting(time)
-    # test_04_lots_of_texts(time)
+    test_04_lots_of_texts(time)
 
     checkVkResult vkDeviceWaitIdle(vulkan.device)
     vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
