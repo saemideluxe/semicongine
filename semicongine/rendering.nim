@@ -114,7 +114,7 @@ type
   # shader related types
   DescriptorSetData*[T: object] = object
     data*: T
-    vk: array[INFLIGHTFRAMES.int, VkDescriptorSet]
+    vk*: array[INFLIGHTFRAMES.int, VkDescriptorSet]
 
   Pipeline*[TShader] = object
     vk: VkPipeline

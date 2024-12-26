@@ -21,8 +21,7 @@ proc test_01_static_label(time: float32) =
   var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
     renderPass = vulkan.swapchain.renderPass
   )
-  var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
-  assignBuffers(renderdata, textbuffer)
+  var textbuffer = font.initTextBuffer(1000, renderdata, baseScale = 0.1)
 
   font.upload(renderdata)
   font.addToPipeline(renderdata, pipeline)
@@ -70,13 +69,9 @@ proc test_02_multi_counter(time: float32) =
   font2.addToPipeline(renderdata, pipeline)
   font3.addToPipeline(renderdata, pipeline)
 
-  var textbuffer1 = font1.initTextBuffer(10, baseScale = 0.1)
-  var textbuffer2 = font2.initTextBuffer(10, baseScale = 0.1)
-  var textbuffer3 = font3.initTextBuffer(10, baseScale = 0.1)
-
-  assignBuffers(renderdata, textbuffer1)
-  assignBuffers(renderdata, textbuffer2)
-  assignBuffers(renderdata, textbuffer3)
+  var textbuffer1 = font1.initTextBuffer(10, renderdata, baseScale = 0.1)
+  var textbuffer2 = font2.initTextBuffer(10, renderdata, baseScale = 0.1)
+  var textbuffer3 = font3.initTextBuffer(10, renderdata, baseScale = 0.1)
 
   var p = 0
   let l1 = textbuffer1.add($(p + 0), vec3(0.3, 0.5), capacity = 5)
@@ -130,8 +125,7 @@ proc test_03_layouting(time: float32) =
   font.upload(renderdata)
   font.addToPipeline(renderdata, pipeline)
 
-  var textbuffer = font.initTextBuffer(1000, baseScale = 0.1)
-  assignBuffers(renderdata, textbuffer)
+  var textbuffer = font.initTextBuffer(1000, renderdata, baseScale = 0.1)
 
   discard textbuffer.add("Anchor at center", vec3(0, 0), anchor = vec2(0, 0))
   discard textbuffer.add("Anchor at top left`", vec3(-1, 1), anchor = vec2(-1, 1))
@@ -184,8 +178,7 @@ proc test_04_lots_of_texts(time: float32) =
   font.upload(renderdata)
   font.addToPipeline(renderdata, pipeline)
 
-  var textbuffer = font.initTextBuffer(3000, baseScale = 0.1)
-  assignBuffers(renderdata, textbuffer)
+  var textbuffer = font.initTextBuffer(3000, renderdata, baseScale = 0.1)
 
   for i in 0 ..< 1000:
     discard textbuffer.add(

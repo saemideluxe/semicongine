@@ -177,6 +177,7 @@ proc loadFont*[N: static int](
   )
 
 proc upload*(font: Font, renderdata: var RenderData) =
+  assert font.descriptorSet.vk.allIt(not it.Valid), "Font was alread uploaded"
   assignBuffers(renderdata, font.descriptorSet)
   uploadImages(renderdata, font.descriptorSet)
 

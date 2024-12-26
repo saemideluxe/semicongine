@@ -116,8 +116,11 @@ proc `=copy`[MaxGlyphs: static int](
 
 include ./text/font
 
-func initTextBuffer*[MaxGlyphs: static int](
-    font: Font[MaxGlyphs], bufferSize: int, baseScale = 1'f32
+proc initTextBuffer*[MaxGlyphs: static int](
+    font: Font[MaxGlyphs],
+    bufferSize: int,
+    renderdata: var RenderData,
+    baseScale = 1'f32,
 ): TextBuffer[MaxGlyphs] =
   result.cursor = 0
   result.font = font
@@ -127,6 +130,7 @@ func initTextBuffer*[MaxGlyphs: static int](
   result.color.data.setLen(bufferSize)
   result.glyphIndex.data.setLen(bufferSize)
   result.texts.setLen(bufferSize) # waste a lot of memory?
+  assignBuffers(renderdata, result)
 
 iterator splitLines(text: seq[Rune]): seq[Rune] =
   var current = newSeq[Rune]()
