@@ -141,6 +141,7 @@ proc readTrueType[N: static int](
     if i == 0:
       result.fallbackCharacter = codePoint
     result.descriptorGlyphIndex[codePoint] = i.uint16
+    result.descriptorGlyphIndexRev[i.uint16] = codePoint # only used for debugging atm
 
     # kerning
     for codePointAfter in codePoints:
