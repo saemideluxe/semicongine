@@ -202,9 +202,11 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
     cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
 
   var bufferOffset = textbuffer.texts[textI].bufferOffset
-  for i in 0 ..< textbuffer.texts[textI].capacity:
-    assert bufferOffset <
-      textbuffer.texts[textI].bufferOffset + textbuffer.texts[textI].capacity
+  let bufferEnd =
+    textbuffer.texts[textI].bufferOffset + textbuffer.texts[textI].capacity
+  var i = 0
+  while i < textbuffer.texts[textI].capacity and bufferOffset < bufferEnd:
+    # for i in 0 ..< textbuffer.texts[textI].capacity:
     if i < text.len:
       if text[i] == Rune('\n'):
         inc lineI
@@ -244,12 +246,13 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
             cursorPos.x +
             textbuffer.font.kerning.getOrDefault((text[i], text[i + 1]), 0) * globalScale /
             aratio
-    else:
+    if i >= text.len or text[i].isWhiteSpace():
       textbuffer.position[bufferOffset] = vec3()
       textbuffer.scale[bufferOffset] = 0
       textbuffer.color[bufferOffset] = vec4()
       textbuffer.glyphIndex[bufferOffset] = 0
       inc bufferOffset
+    inc i
 
 proc updateGlyphData*(textbuffer: var TextBuffer) =
   for i in 0 ..< textbuffer.texts.len:
@@ -262,9 +265,9 @@ proc reset*(textbuffer: var TextBuffer) =
   textbuffer.cursor = 0
   textbuffer.texts.setLen(0)
 
-proc refresh*(textbuffer: var TextBuffer) =
+proc refresh*(textbuffer: var TextBuffer, flush = false) =
   textbuffer.updateGlyphData()
-  textbuffer.updateAllGPUBuffers(flush = true)
+  textbuffer.updateAllGPUBuffers(flush = flush)
 
 proc add*(
     textbuffer: var TextBuffer,
