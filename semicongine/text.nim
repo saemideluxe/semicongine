@@ -52,7 +52,7 @@ void main() {
   vec3 vertexPos = vec3(
     glyphquads.pos[glyphIndex][i_x[vertexI]] * scale / textRendering.aspectRatio,
     glyphquads.pos[glyphIndex][i_y[vertexI]] * scale,
-    1 - (gl_InstanceIndex + 1) * epsilon // allows overlapping glyphs to make proper depth test
+    0
   );
   gl_Position = vec4(vertexPos + position, 1.0);
   vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);

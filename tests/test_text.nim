@@ -26,7 +26,14 @@ proc test_01_static_label(time: float32) =
   font.upload(renderdata)
   font.addToPipeline(renderdata, pipeline)
 
-  discard textbuffer.add("Hello semicongine!", vec3())
+  # small drop-shadow
+  discard textbuffer.add(
+    "Hello semicongine!",
+    vec3(0.009, -0.009 * getAspectRatio(), 0.002),
+    color = vec4(0.02, 0.02, 0.02, 1),
+    scale = 1.01,
+  )
+  discard textbuffer.add("Hello semicongine!", vec3(0, 0, 0))
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
@@ -216,7 +223,7 @@ proc test_04_lots_of_texts(time: float32) =
   destroyRenderData(renderdata)
 
 when isMainModule:
-  var time = 1'f32
+  var time = 3'f32
   initVulkan()
 
   for depthBuffer in [true, false]:
