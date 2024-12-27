@@ -485,6 +485,7 @@ proc createDescriptorSetLayouts[TShader](): array[
       )
 
 proc createPipeline*[TShader](
+    shader: static TShader,
     renderPass: RenderPass,
     topology: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
     polygonMode: VkPolygonMode = VK_POLYGON_MODE_FILL,
@@ -493,9 +494,6 @@ proc createPipeline*[TShader](
     lineWidth = 1'f32,
     depthClampEnable = false,
 ): Pipeline[TShader] =
-  # create pipeline
-
-  const shader = default(TShader)
   (result.vertexShaderModule, result.fragmentShaderModule) = compileShader(shader)
 
   result.descriptorSetLayouts = createDescriptorSetLayouts[TShader]()

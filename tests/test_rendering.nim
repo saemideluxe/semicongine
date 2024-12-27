@@ -43,7 +43,7 @@ proc test_01_triangle(time: float32) =
   assignBuffers(renderdata, mesh)
   renderdata.flushAllMemory()
 
-  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline(Shader(), renderPass = vulkan.swapchain.renderPass)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
@@ -136,7 +136,7 @@ proc test_02_triangle_quad_instanced(time: float32) =
   assignBuffers(renderdata, instancesB)
   renderdata.flushAllMemory()
 
-  var pipeline = createPipeline[SomeShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline(SomeShader(), renderPass = vulkan.swapchain.renderPass)
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
@@ -251,7 +251,7 @@ proc test_03_simple_descriptorset(time: float32) =
   uploadImages(renderdata, uniforms2)
   renderdata.flushAllMemory()
 
-  var pipeline = createPipeline[QuadShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline(QuadShader(), renderPass = vulkan.swapchain.renderPass)
 
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms2)
@@ -390,7 +390,7 @@ proc test_04_multiple_descriptorsets(time: float32) =
   uploadImages(renderdata, mainset)
   renderdata.flushAllMemory()
 
-  var pipeline = createPipeline[QuadShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline(QuadShader(), renderPass = vulkan.swapchain.renderPass)
 
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], constset)
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[1], mainset)
@@ -535,7 +535,7 @@ proc test_05_cube(time: float32) =
 
   renderdata.flushAllMemory()
 
-  var pipeline = createPipeline[CubeShader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline(CubeShader(), renderPass = vulkan.swapchain.renderPass)
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
 
   var tStart = getMonoTime()
@@ -620,20 +620,25 @@ proc test_06_different_draw_modes(time: float32) =
   assignBuffers(renderdata, lines)
   renderdata.flushAllMemory()
 
-  var pipeline1 = createPipeline[Shader](
+  var pipeline1 = createPipeline(
+    Shader(),
     renderPass = vulkan.swapchain.renderPass,
     polygonMode = VK_POLYGON_MODE_LINE,
     lineWidth = 20'f32,
   )
-  var pipeline2 = createPipeline[Shader](
-    renderPass = vulkan.swapchain.renderPass, polygonMode = VK_POLYGON_MODE_POINT
+  var pipeline2 = createPipeline(
+    Shader(),
+    renderPass = vulkan.swapchain.renderPass,
+    polygonMode = VK_POLYGON_MODE_POINT,
   )
-  var pipeline3 = createPipeline[Shader](
+  var pipeline3 = createPipeline(
+    Shader(),
     renderPass = vulkan.swapchain.renderPass,
     topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
     lineWidth = 5,
   )
-  var pipeline4 = createPipeline[Shader](
+  var pipeline4 = createPipeline(
+    Shader(),
     renderPass = vulkan.swapchain.renderPass,
     topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
   )
@@ -719,7 +724,7 @@ void main() {
   assignBuffers(renderdata, mesh)
   renderdata.flushAllMemory()
 
-  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline(Shader(), renderPass = vulkan.swapchain.renderPass)
   var uniforms1 = asDescriptorSetData(
     Uniforms(textures: loadImageArray[BGRA](["art.png", "art1.png"]))
   )
@@ -796,7 +801,7 @@ void main() {
   assignBuffers(renderdata, mesh)
   renderdata.flushAllMemory()
 
-  var pipeline = createPipeline[Shader](renderPass = vulkan.swapchain.renderPass)
+  var pipeline = createPipeline(Shader(), renderPass = vulkan.swapchain.renderPass)
   var uniforms1 = asDescriptorSetData(Uniforms(texture1: loadImage[BGRA]("art.png")))
   uploadImages(renderdata, uniforms1)
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], uniforms1)
@@ -906,8 +911,8 @@ proc test_09_triangle_2pass(
   renderdata.flushAllMemory()
 
   var
-    drawPipeline = createPipeline[TriangleShader](renderPass = offscreenRP)
-    presentPipeline = createPipeline[PresentShader](renderPass = presentRP)
+    drawPipeline = createPipeline(TriangleShader(), renderPass = offscreenRP)
+    presentPipeline = createPipeline(PresentShader(), renderPass = presentRP)
 
   initDescriptorSet(renderdata, presentPipeline.descriptorSetLayouts[0], uniforms1)
 

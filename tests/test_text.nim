@@ -18,8 +18,8 @@ const FONTNAME = "Overhaul.ttf"
 proc test_01_static_label(time: float32) =
   var font = loadFont[MAX_CODEPOINTS](FONTNAME, lineHeightPixels = 200)
   var renderdata = initRenderData()
-  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
-    renderPass = vulkan.swapchain.renderPass
+  var pipeline = createPipeline(
+    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
   )
   var textbuffer = font.initTextBuffer(1000, renderdata, baseScale = 0.1)
 
@@ -65,8 +65,8 @@ proc test_02_multi_counter(time: float32) =
   var font3 = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
-    renderPass = vulkan.swapchain.renderPass
+  var pipeline = createPipeline(
+    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
   )
 
   font1.upload(renderdata)
@@ -125,8 +125,8 @@ proc test_03_layouting(time: float32) =
   var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
-    renderPass = vulkan.swapchain.renderPass
+  var pipeline = createPipeline(
+    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
   )
 
   font.upload(renderdata)
@@ -178,8 +178,8 @@ proc test_04_lots_of_texts(time: float32) =
   var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline[GlyphShader[MAX_CODEPOINTS]](
-    renderPass = vulkan.swapchain.renderPass
+  var pipeline = createPipeline(
+    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
   )
 
   font.upload(renderdata)

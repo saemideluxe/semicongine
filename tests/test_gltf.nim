@@ -135,7 +135,7 @@ void main() {
   renderdata.assignBuffers(descriptors)
 
   var pipeline =
-    createPipeline[Shader](renderPass = vulkan.swapchain.renderPass, cullMode = [])
+    createPipeline(Shader(), renderPass = vulkan.swapchain.renderPass, cullMode = [])
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
 
   renderdata.flushAllMemory()
