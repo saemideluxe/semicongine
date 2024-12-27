@@ -334,7 +334,7 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
       assert pushConstants.len == 0, "Only one push constant value allowed"
       static:
         assert value is object, "push constants need to be objects"
-      pushConstants.add "layout( push_constant ) uniform constants"
+      pushConstants.add "layout( push_constant ) uniform T" & fieldname
       pushConstants.add "{"
       for constFieldName, constFieldValue in fieldPairs(value):
         assert typeof(constFieldValue) is SupportedGPUType,
