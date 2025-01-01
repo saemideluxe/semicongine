@@ -68,6 +68,7 @@ void main() {
   FontObj*[MaxGlyphs: static int] = object
     advance*: Table[Rune, float32]
     kerning*: Table[(Rune, Rune), float32]
+    leftBearing*: Table[Rune, float32]
     lineAdvance*: float32
     lineHeight*: float32 # like lineAdvance - lineGap
     ascent*: float32 # from baseline to highest glyph
@@ -168,8 +169,12 @@ proc textDimension*(font: Font, text: seq[Rune]): Vec2f =
 proc textDimension*(font: Font, text: string): Vec2f =
   textDimension(font, text.toRunes())
 
+proc textDimension*(textBuffer: TextBuffer, text: string | seq[Rune]): Vec2f =
+  textDimension(textBuffer.font, text) * textBuffer.baseScale
+
 proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
   assert textHandle.generation == textbuffer.generation
+
   let
     textI = textHandle.index
     text = textbuffer.texts[textI].text
@@ -177,7 +182,7 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
     anchor = textbuffer.texts[textI].anchor
 
     globalScale = textbuffer.texts[textI].scale * textbuffer.baseScale
-    box = textDimension(textbuffer.font, text) * globalScale
+    box = textbuffer.textDimension(text) * textbuffer.texts[textI].scale
     xH = textbuffer.font.xHeight * globalScale
     aratio = getAspectRatio()
     origin = vec3(
@@ -188,6 +193,9 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
     )
     lineWidths = splitLines(text).toSeq.mapIt(width(textbuffer.font, it) * globalScale)
     maxWidth = box.x
+
+  template leftBearing(r: Rune): untyped =
+    textbuffer.font.leftBearing.getOrDefault(r, 0) * globalScale
 
   var
     cursorPos = origin
@@ -200,6 +208,10 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
     cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / aratio * 0.5)
   of Right:
     cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
+
+  # add left bearing for first character at line start
+  if text.len > 0:
+    cursorPos.x = cursorPos.x - leftBearing(text[0])
 
   var bufferOffset = textbuffer.texts[textI].bufferOffset
   let bufferEnd =
@@ -217,6 +229,11 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
           cursorPos.x = origin.x + ((maxWidth - lineWidths[lineI]) / aratio * 0.5)
         of Right:
           cursorPos.x = origin.x + (maxWidth - lineWidths[lineI]) / aratio
+
+        # add left bearing for first character at line start
+        if text.len > i + 1:
+          cursorPos.x = cursorPos.x - leftBearing(text[i + 1])
+
         cursorPos.y = cursorPos.y - textbuffer.font.lineAdvance * globalScale
       else:
         if not text[i].isWhitespace():

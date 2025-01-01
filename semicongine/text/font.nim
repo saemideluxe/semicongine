@@ -113,7 +113,7 @@ proc readTrueType[N: static int](
     stbtt_GetCodepointHMetrics(
       addr fi, cint(codePoint), addr advanceUnscaled, addr leftBearingUnscaled
     )
-    var leftBearing = leftBearingUnscaled.float32 * glyph2QuadScale
+    result.leftBearing[codePoint] = leftBearingUnscaled.float32 * glyph2QuadScale
     result.advance[codePoint] = advanceUnscaled.float32 * glyph2QuadScale
 
     let
@@ -123,7 +123,8 @@ proc readTrueType[N: static int](
       bitmapW = float32(bitmaps[i].width)
       bitmapH = float32(bitmaps[i].height)
       # divide by lineHeightPixels to get from pixel-space to quad-geometry-space
-      left = leftBearing + offsetX[codePoint].float32 / lineHeightPixels
+      left =
+        result.leftBearing[codePoint] + offsetX[codePoint].float32 / lineHeightPixels
       right = left + bitmapW / lineHeightPixels
       top = -offsetY[codePoint].float32 / lineHeightPixels
       bottom = top - bitmapH / lineHeightPixels
