@@ -73,7 +73,7 @@ void main() {
     lineAdvance*: float32
     lineHeight*: float32 # like lineAdvance - lineGap
     ascent*: float32 # from baseline to highest glyph
-    descent*: float32 # from baseline to highest glyph
+    descent*: float32 # from baseline to lowest glyph
     xHeight*: float32 # from baseline to height of lowercase x
     descriptorSet*: DescriptorSetData[GlyphDescriptorSet[MaxGlyphs]]
     descriptorGlyphIndex: Table[Rune, uint16]
