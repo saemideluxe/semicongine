@@ -27,10 +27,6 @@ proc loadImage*[T: PixelType](
 ): Image[T] {.gcsafe.} =
   assert path.splitFile().ext.toLowerAscii == ".png",
     "Unsupported image type: " & path.splitFile().ext.toLowerAscii
-  when T is Gray:
-    let pngType = 0.cint
-  elif T is BGRA:
-    let pngType = 6.cint
 
   let (width, height, data) =
     loadImageData[T](loadResource_intern(path, package = package).readAll())
@@ -43,10 +39,6 @@ proc loadImageArray*[T: PixelType](
   for path in paths:
     assert path.splitFile().ext.toLowerAscii == ".png",
       "Unsupported image type: " & path.splitFile().ext.toLowerAscii
-  when T is Gray:
-    let pngType = 0.cint
-  elif T is BGRA:
-    let pngType = 6.cint
 
   let (width, height, data) =
     loadImageData[T](loadResource_intern(paths[0], package = package).readAll())
@@ -66,18 +58,14 @@ proc loadImageArray*[T: PixelType](
 ): ImageArray[T] {.gcsafe.} =
   assert path.splitFile().ext.toLowerAscii == ".png",
     "Unsupported image type: " & path.splitFile().ext.toLowerAscii
-  when T is Gray:
-    let pngType = 0.cint
-  elif T is BGRA:
-    let pngType = 6.cint
 
   let (width, height, data) =
     loadImageData[T](loadResource_intern(path, package = package).readAll())
-  let
-    tilesX = width div tilesize
-    tilesY = height div tilesize
+  let tilesY = height div tilesize
+
   result = ImageArray[T](width: tilesize, height: tilesize)
   var tile = newSeq[T](tilesize * tilesize)
+
   for ty in 0 ..< tilesY:
     for tx in 0 ..< tilesY:
       var hasNonTransparent = when T is BGRA: false else: true

@@ -236,7 +236,7 @@ proc loadMaterial[TMaterial](
 ): TMaterial =
   result = TMaterial()
 
-  let pbr = materialNode["pbrMetallicRoughness"]
+  let pbr {.warning[InheritFromException]: off.} = materialNode["pbrMetallicRoughness"]
   for name, value in fieldPairs(result):
     for gltfAttribute, mappedName in fieldPairs(mapping):
       when gltfAttribute != "" and name == mappedName:
