@@ -54,7 +54,8 @@ void main() {
     glyphquads.pos[glyphIndex][i_y[vertexI]] * scale,
     0
   );
-  gl_Position = vec4(vertexPos + position, 1.0);
+  // the epsilon-offset is necessary, as otherwise characters with the same Z might overlap, despite transparency
+  gl_Position = vec4(vertexPos + position - vec3(0, 0, clamp(0, 1, gl_InstanceIndex * epsilon)), 1.0);
   vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);
   fragmentUv = uv;
   fragmentColor = color;
