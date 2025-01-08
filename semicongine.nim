@@ -13,12 +13,8 @@ export background_loader
 import ./semicongine/image
 export image
 
-import ./semicongine/events
 import ./semicongine/rendering
-import ./semicongine/rendering/vulkan/api
-export events
 export rendering
-export api
 
 import ./semicongine/storage
 import ./semicongine/input
@@ -46,3 +42,15 @@ when not defined(WITHOUT_CONTRIB):
   export texture_packing
   export collision
   export noise
+
+#### Main engine object
+
+proc initEngine*(appName: string) =
+  engine_obj_internal = Engine()
+  engine_obj_internal.vulkan = initVulkan(appName)
+
+  # start audio
+  engine_obj_internal.mixer = createShared(Mixer)
+  engine_obj_internal.mixer[] = initMixer()
+  engine_obj_internal.audiothread.createThread(audioWorker, engine_obj_internal.mixer)
+  engine_obj_internal.initialized = true

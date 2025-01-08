@@ -1,5 +1,3 @@
-import std/logging
-
 const ENGINENAME = "semiconginev2"
 
 # checks required build options:

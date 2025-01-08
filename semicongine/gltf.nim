@@ -7,9 +7,7 @@ import std/typetraits
 
 import ./core
 import ./rendering
-import ./rendering/vulkan/api
 import ./image
-import ./resources
 
 type
   GltfNode* = object

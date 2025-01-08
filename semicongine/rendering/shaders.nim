@@ -1,3 +1,13 @@
+import std/macros
+import std/hashes
+import std/strformat
+import std/strutils
+import std/enumerate
+import std/os
+
+import ../core
+import ./vulkan_wrappers
+
 func glslType[T: SupportedGPUType | ImageObject](value: T): string =
   when T is float32:
     "float"
@@ -419,7 +429,7 @@ proc compileShader[TShader](shader: static TShader): (VkShaderModule, VkShaderMo
     codeSize: csize_t(vertexBinary.len * sizeof(uint32)),
     pCode: vertexBinary.ToCPointer,
   )
-  checkVkResult vulkan.device.vkCreateShaderModule(
+  checkVkResult engine().vulkan.device.vkCreateShaderModule(
     addr(createInfoVertex), nil, addr(result[0])
   )
   var createInfoFragment = VkShaderModuleCreateInfo(
@@ -427,7 +437,7 @@ proc compileShader[TShader](shader: static TShader): (VkShaderModule, VkShaderMo
     codeSize: csize_t(fragmentBinary.len * sizeof(uint32)),
     pCode: fragmentBinary.ToCPointer,
   )
-  checkVkResult vulkan.device.vkCreateShaderModule(
+  checkVkResult engine().vulkan.device.vkCreateShaderModule(
     addr(createInfoFragment), nil, addr(result[1])
   )
 
@@ -467,7 +477,7 @@ proc createDescriptorSetLayouts[TShader](): array[
         pBindings: layoutbindings.ToCPointer,
       )
       checkVkResult vkCreateDescriptorSetLayout(
-        vulkan.device,
+        engine().vulkan.device,
         addr(layoutCreateInfo),
         nil,
         addr(result[value.getCustomPragmaVal(DescriptorSet)]),
@@ -481,7 +491,7 @@ proc createDescriptorSetLayouts[TShader](): array[
         pBindings: nil,
       )
       checkVkResult vkCreateDescriptorSetLayout(
-        vulkan.device, addr(layoutCreateInfo), nil, addr(result[i])
+        engine().vulkan.device, addr(layoutCreateInfo), nil, addr(result[i])
       )
 
 proc createPipeline*[TShader](
@@ -513,7 +523,7 @@ proc createPipeline*[TShader](
     pPushConstantRanges: addr(pushConstant),
   )
   checkVkResult vkCreatePipelineLayout(
-    vulkan.device, addr(pipelineLayoutInfo), nil, addr(result.layout)
+    engine().vulkan.device, addr(pipelineLayoutInfo), nil, addr(result.layout)
   )
 
   let stages = [
@@ -659,7 +669,12 @@ proc createPipeline*[TShader](
     basePipelineIndex: -1,
   )
   checkVkResult vkCreateGraphicsPipelines(
-    vulkan.device, VkPipelineCache(0), 1, addr(createInfo), nil, addr(result.vk)
+    engine().vulkan.device,
+    VkPipelineCache(0),
+    1,
+    addr(createInfo),
+    nil,
+    addr(result.vk),
   )
 
 func layout*(pipeline: Pipeline, level: int): VkDescriptorSetLayout =
@@ -674,9 +689,9 @@ template withPipeline*(
 
 proc destroyPipeline*(pipeline: Pipeline) =
   for descriptorSetLayout in pipeline.descriptorSetLayouts:
-    vkDestroyDescriptorSetLayout(vulkan.device, descriptorSetLayout, nil)
+    vkDestroyDescriptorSetLayout(engine().vulkan.device, descriptorSetLayout, nil)
 
-  vkDestroyShaderModule(vulkan.device, pipeline.vertexShaderModule, nil)
-  vkDestroyShaderModule(vulkan.device, pipeline.fragmentShaderModule, nil)
-  vkDestroyPipelineLayout(vulkan.device, pipeline.layout, nil)
-  vkDestroyPipeline(vulkan.device, pipeline.vk, nil)
+  vkDestroyShaderModule(engine().vulkan.device, pipeline.vertexShaderModule, nil)
+  vkDestroyShaderModule(engine().vulkan.device, pipeline.fragmentShaderModule, nil)
+  vkDestroyPipelineLayout(engine().vulkan.device, pipeline.layout, nil)
+  vkDestroyPipeline(engine().vulkan.device, pipeline.vk, nil)

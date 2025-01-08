@@ -5,10 +5,9 @@ import std/math
 import std/monotimes
 import std/strformat
 import std/tables
-import std/logging
 import std/times
 
-import ../core/globals
+import ../core
 
 const NBUFFERS = 32
 # it seems that some alsa hardware has a problem with smaller buffers than 512
@@ -17,48 +16,12 @@ when defined(linux):
 else:
   const BUFFERSAMPLECOUNT = 256
 
-type
-  Level* = 0'f .. 1'f
-  Sample* = array[2, int16]
-  SoundData* = seq[Sample]
-
-  Playback = object
-    sound: SoundData
-    position: int
-    loop: bool
-    levelLeft: Level
-    levelRight: Level
-    paused: bool
-
-  Track = object
-    playing: Table[uint64, Playback]
-    level: Level
-    targetLevel: Level
-    fadeTime: float
-    fadeStep: float
-
-proc `=copy`(dest: var Playback, source: Playback) {.error.}
-proc `=copy`(dest: var Track, source: Track) {.error.}
-
 when defined(windows):
   include ./platform/windows
 when defined(linux):
   include ./platform/linux
 
-type Mixer* = object
-  playbackCounter: uint64
-  tracks: Table[string, Track]
-  sounds*: Table[string, SoundData]
-  level: Level
-  device: NativeSoundDevice
-  lock: Lock
-  buffers: seq[SoundData]
-  currentBuffer: int
-  lastUpdate: MonoTime
-
-proc `=copy`(dest: var Mixer, source: Mixer) {.error.}
-
-proc initMixer(): Mixer =
+proc initMixer*(): Mixer =
   result = Mixer(tracks: initTable[string, Track](), level: 1'f)
   result.tracks[""] = Track(level: 1)
   result.lock.initLock()
@@ -82,7 +45,7 @@ proc addSound*(mixer: var Mixer, name: string, sound: SoundData) =
     warn "sound with name '", name, "' was already loaded, overwriting"
   mixer.sounds[name] = sound
 
-proc addTrack*(mixer: var Mixer, name: string, level: Level = 1'f) =
+proc addTrack*(mixer: var Mixer, name: string, level: AudioLevel = 1'f) =
   if name in mixer.tracks:
     warn "track with name '", name, "' was already loaded, overwriting"
   mixer.lock.withLock:
@@ -94,7 +57,7 @@ proc play*(
     track = "",
     stopOtherSounds = false,
     loop = false,
-    levelLeft, levelRight: Level,
+    levelLeft, levelRight: AudioLevel,
 ): uint64 =
   assert track in mixer.tracks, &"Track '{track}' does not exists"
   assert soundName in mixer.sounds, soundName & " not loaded"
@@ -118,7 +81,7 @@ proc play*(
     track = "",
     stopOtherSounds = false,
     loop = false,
-    level: Level = 1'f,
+    level: AudioLevel = 1'f,
 ): uint64 =
   play(
     mixer = mixer,
@@ -135,32 +98,34 @@ proc stop*(mixer: var Mixer) =
     for track in mixer.tracks.mvalues:
       track.playing.clear()
 
-proc getLevel*(mixer: var Mixer): Level =
+proc getLevel*(mixer: var Mixer): AudioLevel =
   mixer.level
 
-proc getLevel*(mixer: var Mixer, track: string): Level =
+proc getLevel*(mixer: var Mixer, track: string): AudioLevel =
   mixer.tracks[track].level
 
-proc getLevel*(mixer: var Mixer, playbackId: uint64): (Level, Level) =
+proc getLevel*(mixer: var Mixer, playbackId: uint64): (AudioLevel, AudioLevel) =
   for track in mixer.tracks.mvalues:
     if playbackId in track.playing:
       return (track.playing[playbackId].levelLeft, track.playing[playbackId].levelRight)
 
-proc setLevel*(mixer: var Mixer, level: Level) =
+proc setLevel*(mixer: var Mixer, level: AudioLevel) =
   mixer.level = level
 
-proc setLevel*(mixer: var Mixer, track: string, level: Level) =
+proc setLevel*(mixer: var Mixer, track: string, level: AudioLevel) =
   mixer.lock.withLock:
     mixer.tracks[track].level = level
 
-proc setLevel*(mixer: var Mixer, playbackId: uint64, levelLeft, levelRight: Level) =
+proc setLevel*(
+    mixer: var Mixer, playbackId: uint64, levelLeft, levelRight: AudioLevel
+) =
   mixer.lock.withLock:
     for track in mixer.tracks.mvalues:
       if playbackId in track.playing:
         track.playing[playbackId].levelLeft = levelLeft
         track.playing[playbackId].levelRight = levelRight
 
-proc setLevel*(mixer: var Mixer, playbackId: uint64, level: Level) =
+proc setLevel*(mixer: var Mixer, playbackId: uint64, level: AudioLevel) =
   setLevel(mixer, playbackId, level, level)
 
 proc stop*(mixer: var Mixer, track: string) =
@@ -210,7 +175,7 @@ proc unpause*(mixer: var Mixer, track: string) =
 proc unpause*(mixer: var Mixer, playbackId: uint64) =
   mixer.pause(playbackId, false)
 
-proc fadeTo*(mixer: var Mixer, track: string, level: Level, time: float) =
+proc fadeTo*(mixer: var Mixer, track: string, level: AudioLevel, time: float) =
   mixer.tracks[track].targetLevel = level
   mixer.tracks[track].fadeTime = time
   mixer.tracks[track].fadeStep = level.float - mixer.tracks[track].level.float / time
@@ -231,7 +196,7 @@ proc isPlaying*(mixer: var Mixer, track: string): bool =
           return true
     return false
 
-func applyLevel(sample: Sample, levelLeft, levelRight: Level): Sample =
+func applyLevel(sample: Sample, levelLeft, levelRight: AudioLevel): Sample =
   [int16(float(sample[0]) * levelLeft), int16(float(sample[1]) * levelRight)]
 
 func clip(value: int32): int16 =
@@ -241,7 +206,7 @@ func clip(value: int32): int16 =
 func mix(a, b: Sample): Sample =
   [clip(int32(a[0]) + int32(b[0])), clip(int32(a[1]) + int32(b[1]))]
 
-proc updateSoundBuffer(mixer: var Mixer) =
+proc updateSoundBuffer*(mixer: var Mixer) =
   let t = getMonoTime()
 
   let dt = (t - mixer.lastUpdate).inNanoseconds.float64 / 1_000_000_000'f64
@@ -251,8 +216,9 @@ proc updateSoundBuffer(mixer: var Mixer) =
   for track in mixer.tracks.mvalues:
     if track.fadeTime > 0:
       track.fadeTime -= dt
-      track.level =
-        (track.level.float64 + track.fadeStep.float64 * dt).clamp(Level.low, Level.high)
+      track.level = (track.level.float64 + track.fadeStep.float64 * dt).clamp(
+        AudioLevel.low, AudioLevel.high
+      )
       if track.fadeTime <= 0:
         track.level = track.targetLevel
   # mix
@@ -327,11 +293,7 @@ proc destroy(mixer: var Mixer) =
   mixer.lock.deinitLock()
   mixer.device.CloseSoundDevice()
 
-var
-  mixer* = createShared(Mixer)
-  audiothread: Thread[void]
-
-proc audioWorker() {.thread.} =
+proc audioWorker*(mixer: ptr Mixer) {.thread.} =
   mixer[].setupDevice()
   onThreadDestruction(
     proc() =
@@ -340,14 +302,3 @@ proc audioWorker() {.thread.} =
   )
   while true:
     mixer[].updateSoundBuffer()
-
-# for thread priority (really necessary?)
-when defined(windows):
-  import ../thirdparty/winim/winim/inc/winbase
-when defined(linux):
-  import std/posix
-
-proc startMixerThread*() =
-  mixer[] = initMixer()
-  audiothread.createThread(audioWorker)
-  debug "Created audio thread"

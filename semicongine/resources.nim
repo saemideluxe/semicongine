@@ -1,7 +1,6 @@
 import std/algorithm
 import std/dirs
 import std/json
-import std/parsecfg
 import std/os
 import std/sequtils
 import std/sets

@@ -6,9 +6,6 @@ import ../../thirdparty/x11/xutil
 import ../../thirdparty/x11/x as x11
 import ../../thirdparty/x11/xkblib
 
-import ../../core
-import ../../events
-
 const REQUIRED_PLATFORM_EXTENSIONS = @["VK_KHR_xlib_surface"]
 
 # got values (keycodes) from xev
@@ -108,11 +105,6 @@ const MouseButtonTypeMap = {
 }.toTable
 
 var deleteMessage*: Atom
-
-type NativeWindow* = object
-  display*: ptr xlib.Display
-  window*: x11.Window
-  emptyCursor: Cursor
 
 template checkXlibResult(call: untyped) =
   let value = call
@@ -303,8 +295,8 @@ proc setMousePosition*(window: NativeWindow, pos: Vec2i) =
 proc createNativeSurface(instance: VkInstance, window: NativeWindow): VkSurfaceKHR =
   var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-    dpy: cast[ptr api.Display](window.display),
-    window: cast[api.Window](window.window),
+    dpy: cast[ptr core.Display](window.display),
+    window: cast[core.Window](window.window),
   )
   checkVkResult vkCreateXlibSurfaceKHR(
     instance, addr(surfaceCreateInfo), nil, addr(result)

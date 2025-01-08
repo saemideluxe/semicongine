@@ -1,14 +1,17 @@
-proc initSwapchain(
+import std/options
+
+import ../core
+import ./vulkan_wrappers
+
+proc initSwapchain*(
     renderPass: RenderPass,
     vSync: bool = false,
     tripleBuffering: bool = true,
     oldSwapchain: Swapchain = nil,
 ): Swapchain =
-  assert vulkan.instance.Valid, "Vulkan not initialized"
-
   var capabilities: VkSurfaceCapabilitiesKHR
   checkVkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-    vulkan.physicalDevice, vulkan.surface, addr(capabilities)
+    engine().vulkan.physicalDevice, engine().vulkan.surface, addr(capabilities)
   )
   let
     width = capabilities.currentExtent.width
@@ -28,7 +31,7 @@ proc initSwapchain(
     VK_PRESENT_MODE_MAILBOX_KHR in svkGetPhysicalDeviceSurfacePresentModesKHR()
   var swapchainCreateInfo = VkSwapchainCreateInfoKHR(
     sType: VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-    surface: vulkan.surface,
+    surface: engine().vulkan.surface,
     minImageCount: minFramebufferCount,
     imageFormat: SURFACE_FORMAT,
     imageColorSpace: VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
@@ -62,7 +65,7 @@ proc initSwapchain(
   )
 
   if vkCreateSwapchainKHR(
-    vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)
+    engine().vulkan.device, addr(swapchainCreateInfo), nil, addr(swapchain.vk)
   ) != VK_SUCCESS:
     return nil
 
@@ -83,7 +86,7 @@ proc initSwapchain(
       requirements.size, bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
-      vulkan.device, swapchain.depthImage, swapchain.depthMemory, 0
+      engine().vulkan.device, swapchain.depthImage, swapchain.depthMemory, 0
     )
     swapchain.depthImageView = svkCreate2DImageView(
       image = swapchain.depthImage,
@@ -106,7 +109,7 @@ proc initSwapchain(
       requirements.size, bestMemory(mappable = false, filter = requirements.memoryTypes)
     )
     checkVkResult vkBindImageMemory(
-      vulkan.device, swapchain.msaaImage, swapchain.msaaMemory, 0
+      engine().vulkan.device, swapchain.msaaImage, swapchain.msaaMemory, 0
     )
     swapchain.msaaImageView =
       svkCreate2DImageView(image = swapchain.msaaImage, format = SURFACE_FORMAT)
@@ -114,11 +117,14 @@ proc initSwapchain(
   # create framebuffers
   var actualNFramebuffers: uint32
   checkVkResult vkGetSwapchainImagesKHR(
-    vulkan.device, swapchain.vk, addr(actualNFramebuffers), nil
+    engine().vulkan.device, swapchain.vk, addr(actualNFramebuffers), nil
   )
   var framebuffers = newSeq[VkImage](actualNFramebuffers)
   checkVkResult vkGetSwapchainImagesKHR(
-    vulkan.device, swapchain.vk, addr(actualNFramebuffers), framebuffers.ToCPointer
+    engine().vulkan.device,
+    swapchain.vk,
+    addr(actualNFramebuffers),
+    framebuffers.ToCPointer,
   )
 
   for framebuffer in framebuffers:
@@ -157,10 +163,13 @@ proc initSwapchain(
   var commandPoolCreateInfo = VkCommandPoolCreateInfo(
     sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     flags: toBits [VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT],
-    queueFamilyIndex: vulkan.graphicsQueueFamily,
+    queueFamilyIndex: engine().vulkan.graphicsQueueFamily,
   )
   checkVkResult vkCreateCommandPool(
-    vulkan.device, addr(commandPoolCreateInfo), nil, addr(swapchain.commandBufferPool)
+    engine().vulkan.device,
+    addr(commandPoolCreateInfo),
+    nil,
+    addr(swapchain.commandBufferPool),
   )
   var allocInfo = VkCommandBufferAllocateInfo(
     sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -169,7 +178,7 @@ proc initSwapchain(
     commandBufferCount: INFLIGHTFRAMES,
   )
   checkVkResult vkAllocateCommandBuffers(
-    vulkan.device, addr(allocInfo), swapchain.commandBuffers.ToCPointer
+    engine().vulkan.device, addr(allocInfo), swapchain.commandBuffers.ToCPointer
   )
 
   return swapchain
@@ -179,40 +188,40 @@ proc destroySwapchain*(swapchain: Swapchain) =
     destroySwapchain(swapchain.oldSwapchain)
 
   if swapchain.msaaImage.Valid:
-    vkDestroyImageView(vulkan.device, swapchain.msaaImageView, nil)
-    vkDestroyImage(vulkan.device, swapchain.msaaImage, nil)
-    vkFreeMemory(vulkan.device, swapchain.msaaMemory, nil)
+    vkDestroyImageView(engine().vulkan.device, swapchain.msaaImageView, nil)
+    vkDestroyImage(engine().vulkan.device, swapchain.msaaImage, nil)
+    vkFreeMemory(engine().vulkan.device, swapchain.msaaMemory, nil)
 
   if swapchain.depthImage.Valid:
-    vkDestroyImageView(vulkan.device, swapchain.depthImageView, nil)
-    vkDestroyImage(vulkan.device, swapchain.depthImage, nil)
-    vkFreeMemory(vulkan.device, swapchain.depthMemory, nil)
+    vkDestroyImageView(engine().vulkan.device, swapchain.depthImageView, nil)
+    vkDestroyImage(engine().vulkan.device, swapchain.depthImage, nil)
+    vkFreeMemory(engine().vulkan.device, swapchain.depthMemory, nil)
 
   for fence in swapchain.queueFinishedFence:
-    vkDestroyFence(vulkan.device, fence, nil)
+    vkDestroyFence(engine().vulkan.device, fence, nil)
 
   for semaphore in swapchain.imageAvailableSemaphore:
-    vkDestroySemaphore(vulkan.device, semaphore, nil)
+    vkDestroySemaphore(engine().vulkan.device, semaphore, nil)
 
   for semaphore in swapchain.renderFinishedSemaphore:
-    vkDestroySemaphore(vulkan.device, semaphore, nil)
+    vkDestroySemaphore(engine().vulkan.device, semaphore, nil)
 
   for imageView in swapchain.framebufferViews:
-    vkDestroyImageView(vulkan.device, imageView, nil)
+    vkDestroyImageView(engine().vulkan.device, imageView, nil)
 
   for framebuffer in swapchain.framebuffers:
-    vkDestroyFramebuffer(vulkan.device, framebuffer, nil)
+    vkDestroyFramebuffer(engine().vulkan.device, framebuffer, nil)
 
-  vkDestroyCommandPool(vulkan.device, swapchain.commandBufferPool, nil)
+  vkDestroyCommandPool(engine().vulkan.device, swapchain.commandBufferPool, nil)
 
-  vkDestroySwapchainKHR(vulkan.device, swapchain.vk, nil)
+  vkDestroySwapchainKHR(engine().vulkan.device, swapchain.vk, nil)
 
 proc tryAcquireNextImage(swapchain: Swapchain): Option[VkFramebuffer] =
   if not swapchain.queueFinishedFence[swapchain.currentFiF].await(100_000_000):
     return none(VkFramebuffer)
 
   let nextImageResult = vkAcquireNextImageKHR(
-    vulkan.device,
+    engine().vulkan.device,
     swapchain.vk,
     high(uint64),
     swapchain.imageAvailableSemaphore[swapchain.currentFiF],
@@ -240,7 +249,7 @@ proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
       pSignalSemaphores: addr(swapchain.renderFinishedSemaphore[swapchain.currentFiF]),
     )
   checkVkResult vkQueueSubmit(
-    queue = vulkan.graphicsQueue,
+    queue = engine().vulkan.graphicsQueue,
     submitCount = 1,
     pSubmits = addr(submitInfo),
     fence = swapchain.queueFinishedFence[swapchain.currentFiF],
@@ -255,7 +264,8 @@ proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
     pImageIndices: addr(swapchain.currentFramebufferIndex),
     pResults: nil,
   )
-  let presentResult = vkQueuePresentKHR(vulkan.graphicsQueue, addr(presentInfo))
+  let presentResult =
+    vkQueuePresentKHR(engine().vulkan.graphicsQueue, addr(presentInfo))
 
   if swapchain.oldSwapchain != nil:
     dec swapchain.oldSwapchainCounter
@@ -272,33 +282,32 @@ proc swap(swapchain: Swapchain, commandBuffer: VkCommandBuffer): bool =
 # for re-creation with same settings, e.g. window resized
 proc recreateSwapchain*() =
   let newSwapchain = initSwapchain(
-    renderPass = vulkan.swapchain.renderPass,
-    vSync = vulkan.swapchain.vSync,
-    tripleBuffering = vulkan.swapchain.tripleBuffering,
-    oldSwapchain = vulkan.swapchain,
+    renderPass = engine().vulkan.swapchain.renderPass,
+    vSync = engine().vulkan.swapchain.vSync,
+    tripleBuffering = engine().vulkan.swapchain.tripleBuffering,
+    oldSwapchain = engine().vulkan.swapchain,
   )
   if newSwapchain != nil:
-    vulkan.swapchain = newSwapchain
+    engine().vulkan.swapchain = newSwapchain
 
 # for re-creation with different settings
 proc recreateSwapchain*(vSync: bool, tripleBuffering: bool) =
   let newSwapchain = initSwapchain(
-    renderPass = vulkan.swapchain.renderPass,
+    renderPass = engine().vulkan.swapchain.renderPass,
     vSync = vSync,
     tripleBuffering = tripleBuffering,
-    oldSwapchain = vulkan.swapchain,
+    oldSwapchain = engine().vulkan.swapchain,
   )
   if newSwapchain != nil:
-    vulkan.swapchain = newSwapchain
+    engine().vulkan.swapchain = newSwapchain
 
 template withNextFrame*(framebufferName, commandBufferName, body: untyped): untyped =
-  assert vulkan.swapchain != nil, "Swapchain has not been initialized yet"
-  var maybeFramebuffer = tryAcquireNextImage(vulkan.swapchain)
+  var maybeFramebuffer = tryAcquireNextImage(engine().vulkan.swapchain)
   if maybeFramebuffer.isSome:
     block:
       let `framebufferName` {.inject.} = maybeFramebuffer.get
       let `commandBufferName` {.inject.} =
-        vulkan.swapchain.commandBuffers[vulkan.swapchain.currentFiF]
+        engine().vulkan.swapchain.commandBuffers[engine().vulkan.swapchain.currentFiF]
       let beginInfo = VkCommandBufferBeginInfo(
         sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
@@ -311,6 +320,7 @@ template withNextFrame*(framebufferName, commandBufferName, body: untyped): unty
       body
 
       checkVkResult vkEndCommandBuffer(`commandBufferName`)
-      discard swap(swapchain = vulkan.swapchain, commandBuffer = `commandBufferName`)
+      discard
+        swap(swapchain = engine().vulkan.swapchain, commandBuffer = `commandBufferName`)
   else:
     recreateSwapchain()

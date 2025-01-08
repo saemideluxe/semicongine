@@ -1,3 +1,11 @@
+import std/typetraits
+import std/sequtils
+import std/macros
+import std/logging
+
+import ../core
+import ./vulkan_wrappers
+
 func pointerAddOffset[T: SomeInteger](p: pointer, offset: T): pointer =
   cast[pointer](cast[T](p) + offset)
 
@@ -30,7 +38,7 @@ proc getVkFormat(grayscale: bool, usage: openArray[VkImageUsageFlagBits]): VkFor
       usage: usage.toBits,
     )
     let formatCheck = vkGetPhysicalDeviceImageFormatProperties2(
-      vulkan.physicalDevice, addr formatInfo, addr formatProperties
+      engine().vulkan.physicalDevice, addr formatInfo, addr formatProperties
     )
     if formatCheck == VK_SUCCESS: # found suitable format
       return format
@@ -75,7 +83,9 @@ template rawPointer(gpuValue: GPUValue): pointer =
 
 proc isMappable(memoryTypeIndex: uint32): bool =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
-  vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))
+  vkGetPhysicalDeviceMemoryProperties(
+    engine().vulkan.physicalDevice, addr(physicalProperties)
+  )
   let flags = toEnums(physicalProperties.memoryTypes[memoryTypeIndex].propertyFlags)
   return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in flags
 
@@ -116,7 +126,7 @@ proc initDescriptorSet*(
     pSetLayouts: layouts.ToCPointer,
   )
   checkVkResult vkAllocateDescriptorSets(
-    vulkan.device, addr(allocInfo), descriptorSet.vk.ToCPointer
+    engine().vulkan.device, addr(allocInfo), descriptorSet.vk.ToCPointer
   )
 
   # allocate seq with high cap to prevent realocation while adding to set
@@ -206,7 +216,7 @@ proc initDescriptorSet*(
         .}
 
   vkUpdateDescriptorSets(
-    device = vulkan.device,
+    device = engine().vulkan.device,
     descriptorWriteCount = descriptorSetWrites.len.uint32,
     pDescriptorWrites = descriptorSetWrites.ToCPointer,
     descriptorCopyCount = 0,
@@ -219,7 +229,7 @@ proc allocateNewMemoryBlock(size: uint64, mType: uint32): MemoryBlock =
   )
   if mType.isMappable():
     checkVkResult vkMapMemory(
-      device = vulkan.device,
+      device = engine().vulkan.device,
       memory = result.vk,
       offset = 0'u64,
       size = result.size,
@@ -234,7 +244,7 @@ proc flushBuffer*(buffer: Buffer) =
     offset: buffer.memoryOffset,
     size: buffer.size,
   )
-  checkVkResult vkFlushMappedMemoryRanges(vulkan.device, 1, addr(flushRegion))
+  checkVkResult vkFlushMappedMemoryRanges(engine().vulkan.device, 1, addr(flushRegion))
 
 proc flushAllMemory*(renderData: RenderData) =
   var flushRegions = newSeq[VkMappedMemoryRange]()
@@ -251,7 +261,7 @@ proc flushAllMemory*(renderData: RenderData) =
         )
   if flushRegions.len > 0:
     checkVkResult vkFlushMappedMemoryRanges(
-      vulkan.device, flushRegions.len.uint32, flushRegions.ToCPointer()
+      engine().vulkan.device, flushRegions.len.uint32, flushRegions.ToCPointer()
     )
 
 proc allocateNewBuffer(
@@ -292,7 +302,7 @@ proc allocateNewBuffer(
   renderData.memory[memoryType][selectedBlockI].offsetNextFree =
     alignedTo(selectedBlock.offsetNextFree, memoryRequirements.alignment)
   checkVkResult vkBindBufferMemory(
-    vulkan.device, result.vk, selectedBlock.vk, selectedBlock.offsetNextFree
+    engine().vulkan.device, result.vk, selectedBlock.vk, selectedBlock.offsetNextFree
   )
   result.memory = selectedBlock.vk
   result.memoryOffset = selectedBlock.offsetNextFree
@@ -404,28 +414,28 @@ proc initRenderData*(descriptorPoolLimit = 1024'u32): RenderData =
     maxSets: descriptorPoolLimit,
   )
   checkVkResult vkCreateDescriptorPool(
-    vulkan.device, addr(poolInfo), nil, addr(result.descriptorPool)
+    engine().vulkan.device, addr(poolInfo), nil, addr(result.descriptorPool)
   )
 
 proc destroyRenderData*(renderData: RenderData) =
-  vkDestroyDescriptorPool(vulkan.device, renderData.descriptorPool, nil)
+  vkDestroyDescriptorPool(engine().vulkan.device, renderData.descriptorPool, nil)
 
   for buffers in renderData.buffers:
     for buffer in buffers:
-      vkDestroyBuffer(vulkan.device, buffer.vk, nil)
+      vkDestroyBuffer(engine().vulkan.device, buffer.vk, nil)
 
   for imageView in renderData.imageViews:
-    vkDestroyImageView(vulkan.device, imageView, nil)
+    vkDestroyImageView(engine().vulkan.device, imageView, nil)
 
   for sampler in renderData.samplers:
-    vkDestroySampler(vulkan.device, sampler, nil)
+    vkDestroySampler(engine().vulkan.device, sampler, nil)
 
   for image in renderData.images:
-    vkDestroyImage(vulkan.device, image, nil)
+    vkDestroyImage(engine().vulkan.device, image, nil)
 
   for memoryBlocks in renderData.memory.litems:
     for memory in memoryBlocks:
-      vkFreeMemory(vulkan.device, memory.vk, nil)
+      vkFreeMemory(engine().vulkan.device, memory.vk, nil)
 
 proc transitionImageLayout(
     image: VkImage, oldLayout, newLayout: VkImageLayout, nLayers: uint32
@@ -491,8 +501,8 @@ proc createSampler(
     addressModeU: addressModeU,
     addressModeV: addressModeV,
     addressModeW: VK_SAMPLER_ADDRESS_MODE_REPEAT,
-    anisotropyEnable: vulkan.anisotropy > 0,
-    maxAnisotropy: vulkan.anisotropy,
+    anisotropyEnable: engine().vulkan.anisotropy > 0,
+    maxAnisotropy: engine().vulkan.anisotropy,
     borderColor: VK_BORDER_COLOR_INT_OPAQUE_BLACK,
     unnormalizedCoordinates: VK_FALSE,
     compareEnable: VK_FALSE,
@@ -502,7 +512,9 @@ proc createSampler(
     minLod: 0,
     maxLod: 0,
   )
-  checkVkResult vkCreateSampler(vulkan.device, addr(samplerInfo), nil, addr(result))
+  checkVkResult vkCreateSampler(
+    engine().vulkan.device, addr(samplerInfo), nil, addr(result)
+  )
 
 proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
   assert image.vk == VkImage(0), "Image has already been created"
@@ -549,7 +561,7 @@ proc createVulkanImage(renderData: var RenderData, image: var ImageObject) =
     alignedTo(selectedBlock.offsetNextFree, memoryRequirements.alignment)
 
   checkVkResult vkBindImageMemory(
-    vulkan.device,
+    engine().vulkan.device,
     image.vk,
     selectedBlock.vk,
     renderData.memory[memoryType][selectedBlockI].offsetNextFree,

@@ -1,7 +1,9 @@
+import ../core
+import ./vulkan_wrappers
+
 proc createDirectPresentationRenderPass*(
     depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT
 ): RenderPass =
-  assert vulkan.instance.Valid, "Vulkan not initialized"
   result = RenderPass(depthBuffer: depthBuffer, samples: samples)
 
   var attachments =
@@ -98,8 +100,6 @@ proc createDirectPresentationRenderPass*(
 proc createIndirectPresentationRenderPass*(
     depthBuffer: bool, samples = VK_SAMPLE_COUNT_1_BIT
 ): (RenderPass, RenderPass) =
-  assert vulkan.instance.Valid, "Vulkan not initialized"
-
   result[0] = RenderPass(depthBuffer: depthBuffer, samples: samples)
   result[1] = RenderPass(depthBuffer: false, samples: VK_SAMPLE_COUNT_1_BIT)
 
@@ -300,4 +300,4 @@ template withRenderPass*(
   vkCmdEndRenderPass(commandbuffer)
 
 proc destroyRenderPass*(renderPass: RenderPass) =
-  vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+  vkDestroyRenderPass(engine().vulkan.device, renderpass.vk, nil)

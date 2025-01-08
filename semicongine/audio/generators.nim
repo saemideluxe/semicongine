@@ -1,6 +1,6 @@
 import std/math
 
-import ./mixer_module
+import ../core
 
 proc sinewave(f: float): proc(x: float): float =
   proc ret(x: float): float =

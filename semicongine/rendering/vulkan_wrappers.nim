@@ -1,4 +1,9 @@
-proc getBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
+import std/strformat
+import std/strutils
+
+import ../core
+
+proc getBestPhysicalDevice*(instance: VkInstance): VkPhysicalDevice =
   var nDevices: uint32
   checkVkResult vkEnumeratePhysicalDevices(instance, addr(nDevices), nil)
   var devices = newSeq[VkPhysicalDevice](nDevices)
@@ -29,11 +34,14 @@ proc getBestPhysicalDevice(instance: VkInstance): VkPhysicalDevice =
 proc svkGetPhysicalDeviceSurfaceSupportKHR*(queueFamily: uint32): bool =
   var presentation = VkBool32(false)
   checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(
-    vulkan.physicalDevice, queueFamily, vulkan.surface, addr(presentation)
+    engine().vulkan.physicalDevice,
+    queueFamily,
+    engine().vulkan.surface,
+    addr(presentation),
   )
   return bool(presentation)
 
-proc getQueueFamily(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
+proc getQueueFamily*(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
@@ -59,11 +67,14 @@ func size(format: VkFormat): uint64 =
 proc svkGetPhysicalDeviceSurfacePresentModesKHR*(): seq[VkPresentModeKHR] =
   var n_modes: uint32
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
-    vulkan.physicalDevice, vulkan.surface, addr(n_modes), nil
+    engine().vulkan.physicalDevice, engine().vulkan.surface, addr(n_modes), nil
   )
   result = newSeq[VkPresentModeKHR](n_modes)
   checkVkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
-    vulkan.physicalDevice, vulkan.surface, addr(n_modes), result.ToCPointer
+    engine().vulkan.physicalDevice,
+    engine().vulkan.surface,
+    addr(n_modes),
+    result.ToCPointer,
   )
 
 proc hasValidationLayer*(): bool =
@@ -78,7 +89,7 @@ proc hasValidationLayer*(): bool =
   return false
 
 proc svkGetPhysicalDeviceProperties*(): VkPhysicalDeviceProperties =
-  vkGetPhysicalDeviceProperties(vulkan.physicalDevice, addr(result))
+  vkGetPhysicalDeviceProperties(engine().vulkan.physicalDevice, addr(result))
 
 proc svkCreateBuffer*(size: uint64, usage: openArray[VkBufferUsageFlagBits]): VkBuffer =
   var createInfo = VkBufferCreateInfo(
@@ -89,7 +100,7 @@ proc svkCreateBuffer*(size: uint64, usage: openArray[VkBufferUsageFlagBits]): Vk
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
   )
   checkVkResult vkCreateBuffer(
-    device = vulkan.device,
+    device = engine().vulkan.device,
     pCreateInfo = addr(createInfo),
     pAllocator = nil,
     pBuffer = addr(result),
@@ -102,7 +113,7 @@ proc svkAllocateMemory*(size: uint64, typeIndex: uint32): VkDeviceMemory =
     memoryTypeIndex: typeIndex,
   )
   checkVkResult vkAllocateMemory(
-    vulkan.device, addr(memoryAllocationInfo), nil, addr(result)
+    engine().vulkan.device, addr(memoryAllocationInfo), nil, addr(result)
   )
 
 proc svkCreate2DImage*(
@@ -114,7 +125,7 @@ proc svkCreate2DImage*(
 ): VkImage =
   var imageProps: VkImageFormatProperties
   checkVkResult vkGetPhysicalDeviceImageFormatProperties(
-    vulkan.physicalDevice,
+    engine().vulkan.physicalDevice,
     format,
     VK_IMAGE_TYPE_2D,
     VK_IMAGE_TILING_OPTIMAL,
@@ -136,14 +147,14 @@ proc svkCreate2DImage*(
     sharingMode: VK_SHARING_MODE_EXCLUSIVE,
     samples: samples,
   )
-  checkVkResult vkCreateImage(vulkan.device, addr imageInfo, nil, addr(result))
+  checkVkResult vkCreateImage(engine().vulkan.device, addr imageInfo, nil, addr(result))
 
 proc svkCreate2DImageView*(
     image: VkImage,
     format: VkFormat,
     aspect = VK_IMAGE_ASPECT_COLOR_BIT,
     nLayers = 1'u32,
-    isArray = false
+    isArray = false,
 ): VkImageView =
   var createInfo = VkImageViewCreateInfo(
     sType: VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -164,7 +175,9 @@ proc svkCreate2DImageView*(
       layerCount: nLayers,
     ),
   )
-  checkVkResult vkCreateImageView(vulkan.device, addr(createInfo), nil, addr(result))
+  checkVkResult vkCreateImageView(
+    engine().vulkan.device, addr(createInfo), nil, addr(result)
+  )
 
 proc svkCreateFramebuffer*(
     renderpass: VkRenderPass, width, height: uint32, attachments: openArray[VkImageView]
@@ -179,14 +192,14 @@ proc svkCreateFramebuffer*(
     layers: 1,
   )
   checkVkResult vkCreateFramebuffer(
-    vulkan.device, addr(framebufferInfo), nil, addr(result)
+    engine().vulkan.device, addr(framebufferInfo), nil, addr(result)
   )
 
 proc svkGetBufferMemoryRequirements*(
     buffer: VkBuffer
 ): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
   var reqs: VkMemoryRequirements
-  vkGetBufferMemoryRequirements(vulkan.device, buffer, addr(reqs))
+  vkGetBufferMemoryRequirements(engine().vulkan.device, buffer, addr(reqs))
   result.size = reqs.size
   result.alignment = reqs.alignment
   for i in 0'u32 ..< VK_MAX_MEMORY_TYPES:
@@ -197,7 +210,7 @@ proc svkGetImageMemoryRequirements*(
     image: VkImage
 ): tuple[size: uint64, alignment: uint64, memoryTypes: seq[uint32]] =
   var reqs: VkMemoryRequirements
-  vkGetImageMemoryRequirements(vulkan.device, image, addr(reqs))
+  vkGetImageMemoryRequirements(engine().vulkan.device, image, addr(reqs))
   result.size = reqs.size
   result.alignment = reqs.alignment
   for i in 0'u32 ..< VK_MAX_MEMORY_TYPES:
@@ -213,24 +226,29 @@ proc svkCreateFence*(signaled = false): VkFence =
       else:
         VkFenceCreateFlags(0),
   )
-  checkVkResult vkCreateFence(vulkan.device, addr(fenceInfo), nil, addr(result))
+  checkVkResult vkCreateFence(
+    engine().vulkan.device, addr(fenceInfo), nil, addr(result)
+  )
 
 proc svkCreateSemaphore*(): VkSemaphore =
   var semaphoreInfo =
     VkSemaphoreCreateInfo(sType: VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO)
-  checkVkResult vkCreateSemaphore(vulkan.device, addr(semaphoreInfo), nil, addr(result))
+  checkVkResult vkCreateSemaphore(
+    engine().vulkan.device, addr(semaphoreInfo), nil, addr(result)
+  )
 
 proc await*(fence: VkFence, timeout = high(uint64)): bool =
-  let waitResult = vkWaitForFences(vulkan.device, 1, addr(fence), false, timeout)
+  let waitResult =
+    vkWaitForFences(engine().vulkan.device, 1, addr(fence), false, timeout)
   if waitResult == VK_TIMEOUT:
     return false
   checkVkResult waitResult
   return true
 
 proc svkResetFences*(fence: VkFence) =
-  checkVkResult vkResetFences(vulkan.device, 1, addr(fence))
+  checkVkResult vkResetFences(engine().vulkan.device, 1, addr(fence))
 
-proc svkCmdBindDescriptorSets(
+proc svkCmdBindDescriptorSets*(
     commandBuffer: VkCommandBuffer,
     descriptorSets: openArray[VkDescriptorSet],
     layout: VkPipelineLayout,
@@ -246,7 +264,7 @@ proc svkCmdBindDescriptorSets(
     pDynamicOffsets = nil,
   )
 
-proc svkCmdBindDescriptorSet(
+proc svkCmdBindDescriptorSet*(
     commandBuffer: VkCommandBuffer,
     descriptorSet: VkDescriptorSet,
     index: DescriptorSetIndex,
@@ -263,7 +281,7 @@ proc svkCmdBindDescriptorSet(
     pDynamicOffsets = nil,
   )
 
-proc svkCreateRenderPass(
+proc svkCreateRenderPass*(
     attachments: openArray[VkAttachmentDescription],
     colorAttachments: openArray[VkAttachmentReference],
     depthAttachments: openArray[VkAttachmentReference],
@@ -292,11 +310,15 @@ proc svkCreateRenderPass(
     dependencyCount: uint32(dependencies.len),
     pDependencies: dependencies.ToCPointer,
   )
-  checkVkResult vkCreateRenderPass(vulkan.device, addr(createInfo), nil, addr(result))
+  checkVkResult vkCreateRenderPass(
+    engine().vulkan.device, addr(createInfo), nil, addr(result)
+  )
 
 proc bestMemory*(mappable: bool, filter: seq[uint32] = @[]): uint32 =
   var physicalProperties: VkPhysicalDeviceMemoryProperties
-  vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, addr(physicalProperties))
+  vkGetPhysicalDeviceMemoryProperties(
+    engine().vulkan.physicalDevice, addr(physicalProperties)
+  )
 
   var maxScore: float = -1
   var maxIndex: uint32 = 0
@@ -329,10 +351,10 @@ template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
       createInfo = VkCommandPoolCreateInfo(
         sType: VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
         flags: VkCommandPoolCreateFlags(0),
-        queueFamilyIndex: vulkan.graphicsQueueFamily,
+        queueFamilyIndex: engine().vulkan.graphicsQueueFamily,
       )
     checkVkResult vkCreateCommandPool(
-      vulkan.device, addr createInfo, nil, addr(commandBufferPool)
+      engine().vulkan.device, addr createInfo, nil, addr(commandBufferPool)
     )
     var
       `cmd` {.inject.}: VkCommandBuffer
@@ -342,7 +364,9 @@ template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
         level: VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         commandBufferCount: 1,
       )
-    checkVkResult vulkan.device.vkAllocateCommandBuffers(addr allocInfo, addr(`cmd`))
+    checkVkResult engine().vulkan.device.vkAllocateCommandBuffers(
+      addr allocInfo, addr(`cmd`)
+    )
     var beginInfo = VkCommandBufferBeginInfo(
       sType: VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
       flags: VkCommandBufferUsageFlags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
@@ -359,10 +383,12 @@ template withSingleUseCommandBuffer*(cmd, body: untyped): untyped =
     )
 
     var fence = svkCreateFence()
-    checkVkResult vkQueueSubmit(vulkan.graphicsQueue, 1, addr(submitInfo), fence)
+    checkVkResult vkQueueSubmit(
+      engine().vulkan.graphicsQueue, 1, addr(submitInfo), fence
+    )
     discard fence.await()
-    vkDestroyFence(vulkan.device, fence, nil)
-    vkDestroyCommandPool(vulkan.device, commandBufferPool, nil)
+    vkDestroyFence(engine().vulkan.device, fence, nil)
+    vkDestroyCommandPool(engine().vulkan.device, commandBufferPool, nil)
 
 template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32, uint32)](
     target: T, bufferSize: uint64, dataPointer, body: untyped
@@ -373,14 +399,16 @@ template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32, ui
   let memoryType = bestMemory(mappable = true, filter = memoryRequirements.memoryTypes)
   let stagingMemory = svkAllocateMemory(memoryRequirements.size, memoryType)
   checkVkResult vkMapMemory(
-    device = vulkan.device,
+    device = engine().vulkan.device,
     memory = stagingMemory,
     offset = 0'u64,
     size = VK_WHOLE_SIZE,
     flags = VkMemoryMapFlags(0),
     ppData = addr(`dataPointer`),
   )
-  checkVkResult vkBindBufferMemory(vulkan.device, stagingBuffer, stagingMemory, 0)
+  checkVkResult vkBindBufferMemory(
+    engine().vulkan.device, stagingBuffer, stagingMemory, 0
+  )
 
   block:
     # usually: write data to dataPointer in body
@@ -391,7 +419,7 @@ template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32, ui
     memory: stagingMemory,
     size: VK_WHOLE_SIZE,
   )
-  checkVkResult vkFlushMappedMemoryRanges(vulkan.device, 1, addr(stagingRange))
+  checkVkResult vkFlushMappedMemoryRanges(engine().vulkan.device, 1, addr(stagingRange))
 
   withSingleUseCommandBuffer(commandBuffer):
     when T is (VkBuffer, uint64):
@@ -443,5 +471,53 @@ template withStagingBuffer*[T: (VkBuffer, uint64) | (VkImage, uint32, uint32, ui
         pRegions = addr(region),
       )
 
-  vkDestroyBuffer(vulkan.device, stagingBuffer, nil)
-  vkFreeMemory(vulkan.device, stagingMemory, nil)
+  vkDestroyBuffer(engine().vulkan.device, stagingBuffer, nil)
+  vkFreeMemory(engine().vulkan.device, stagingMemory, nil)
+
+func getDescriptorType*[T](): VkDescriptorType {.compileTIme.} =
+  when T is ImageObject:
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+  elif T is GPUValue:
+    when getBufferType(default(T)) in [UniformBuffer, UniformBufferMapped]:
+      VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+    elif getBufferType(default(T)) in [StorageBuffer, StorageBufferMapped]:
+      VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+    else:
+      {.error: "Unsupported descriptor type: " & $T.}
+  elif T is array:
+    when elementType(default(T)) is ImageObject:
+      VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+    elif elementType(default(T)) is GPUValue:
+      when getBufferType(default(elementType(default(T)))) in
+          [UniformBuffer, UniformBufferMapped]:
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+      elif getBufferType(default(elementType(default(T)))) in
+          [StorageBuffer, StorageBufferMapped]:
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+      else:
+        {.error: "Unsupported descriptor type: " & $T.}
+    else:
+      {.error: "Unsupported descriptor type: " & $T.}
+  else:
+    {.error: "Unsupported descriptor type: " & $T.}
+
+func getDescriptorCount*[T](): uint32 {.compileTIme.} =
+  when T is array:
+    len(T)
+  else:
+    1
+
+func getBindingNumber*[T](field: static string): uint32 {.compileTime.} =
+  var c = 0'u32
+  var found = false
+  for name, value in fieldPairs(default(T)):
+    when name == field:
+      result = c
+      found = true
+    else:
+      inc c
+  assert found, "Field '" & field & "' of descriptor '" & $T & "' not found"
+
+proc currentFiF*(): int =
+  assert engine().vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  engine().vulkan.swapchain.currentFiF

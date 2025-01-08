@@ -2,18 +2,12 @@ import std/os
 
 import ../../thirdparty/winim/winim/inc/[mmsystem, windef]
 
-# import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
-
 template CheckWinMMResult*(call: untyped) =
   let value = call
   if value < 0:
     raise newException(
       Exception, "Windows multimedia error: " & astToStr(call) & " returned " & $value
     )
-
-type NativeSoundDevice* = object
-  handle: HWAVEOUT
-  buffers: seq[WAVEHDR]
 
 proc OpenSoundDevice*(
     sampleRate: uint32, buffers: seq[ptr SoundData]

@@ -6,5 +6,3 @@ export generators
 
 import ./audio/resources
 export resources
-
-startMixerThread()

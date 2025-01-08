@@ -4,7 +4,7 @@ import std/strformat
 import std/os
 import std/strutils
 
-include ./core/globals
+include ./core/constants
 
 const BLENDER_CONVERT_SCRIPT = currentSourcePath().parentDir().parentDir().joinPath(
     "tools/blender_gltf_converter.py"

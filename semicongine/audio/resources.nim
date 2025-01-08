@@ -2,12 +2,8 @@ import std/endians
 import std/os
 import std/streams
 import std/strformat
-import std/strutils
 
 import ../core
-import ../resources
-
-import ./mixer_module
 
 type
   Encoding {.size: sizeof(uint32).} = enum

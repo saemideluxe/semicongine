@@ -1,12 +1,8 @@
 import std/os
 import std/typetraits
-import std/streams
-import std/strutils
 import std/strformat
 
 import ./core
-import ./resources
-import ./rendering/vulkan/api
 
 {.emit: "#define STB_IMAGE_STATIC".}
 {.emit: "#define STB_IMAGE_IMPLEMENTATION".}
@@ -22,34 +18,8 @@ proc stbi_load_from_memory(
   desired_channels: cint,
 ): ptr uint8 {.importc, nodecl.}
 
-type
-  Gray* = TVec1[uint8]
-  BGRA* = TVec4[uint8]
-  PixelType* = Gray | BGRA
-
-  ImageObject*[T: PixelType, IsArray: static bool] = object
-    width*: uint32
-    height*: uint32
-    minInterpolation*: VkFilter = VK_FILTER_LINEAR
-    magInterpolation*: VkFilter = VK_FILTER_LINEAR
-    wrapU*: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
-    wrapV*: VkSamplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT
-    data*: seq[T]
-    vk*: VkImage
-    imageview*: VkImageView
-    sampler*: VkSampler
-    isRenderTarget*: bool = false
-    samples*: VkSampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT
-    when IsArray:
-      nLayers*: uint32
-
-  Image*[T: PixelType] = ImageObject[T, false]
-  ImageArray*[T: PixelType] = ImageObject[T, true]
-
 template nLayers*(image: Image): untyped =
   1'u32
-
-proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.error.}
 
 func `$`*[S, IsArray](img: ImageObject[S, IsArray]): string =
   let pixelTypeName = S.name

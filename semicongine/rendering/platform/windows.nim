@@ -1,12 +1,8 @@
 import std/tables
 import std/options
 
-import ../../core
-
 import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
 import ../../thirdparty/winim/winim/[winstr, utils]
-
-import ../../events
 
 const REQUIRED_PLATFORM_EXTENSIONS = @["VK_KHR_win32_surface"]
 
@@ -97,11 +93,6 @@ const KeyTypeMap* = {
   VK_INSERT: Insert,
   VK_DELETE: Key.Delete,
 }.toTable
-
-type NativeWindow* = object
-  hinstance*: HINSTANCE
-  hwnd*: HWND
-  g_wpPrev: WINDOWPLACEMENT
 
 # sorry, have to use module-global variable to capture windows events
 var currentEvents: seq[Event]

@@ -2,7 +2,6 @@ import std/strutils
 import std/tables
 
 import ./core
-import ./events
 import ./rendering
 import ./storage
 
@@ -34,16 +33,16 @@ proc updateInputs*(): bool =
   input.mouseMove = vec2i(0, 0)
   input.windowWasResized = false
 
-  let newMousePos = getMousePosition(vulkan.window)
+  let newMousePos = getMousePosition(engine().vulkan.window)
   input.mouseMove = newMousePos - input.mousePosition
   if input.lockMouse and input.hasFocus:
-    input.mousePosition = vulkan.window.size div 2
-    setMousePosition(vulkan.window, input.mousePosition)
+    input.mousePosition = engine().vulkan.window.size div 2
+    setMousePosition(engine().vulkan.window, input.mousePosition)
   else:
     input.mousePosition = newMousePos
 
   var killed = false
-  for event in vulkan.window.pendingEvents():
+  for event in engine().vulkan.window.pendingEvents():
     case event.eventType
     of Quit:
       killed = true
@@ -111,7 +110,8 @@ proc mousePositionPixel*(): Vec2i =
   input.mousePosition
 
 proc mousePosition*(): Vec2f =
-  result = input.mousePosition.f32 / vulkan.window.size().f32 * 2.0'f32 - 1.0'f32
+  result =
+    input.mousePosition.f32 / engine().vulkan.window.size().f32 * 2.0'f32 - 1.0'f32
   result.y = result.y * -1
 
 proc mouseMove*(): Vec2i =
