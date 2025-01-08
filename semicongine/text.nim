@@ -1,20 +1,15 @@
 import std/algorithm
-import std/logging
 import std/os
 import std/sequtils
-import std/streams
 import std/strformat
 import std/strutils
 import std/tables
 import std/unicode
 
 import ./core
-import ./resources
 import ./rendering
 import ./image
-import ./contrib/algorithms/texture_packing
 import ./rendering/renderer
-import ./text/font
 
 proc initTextBuffer*[MaxGlyphs: static int](
     font: Font[MaxGlyphs],
