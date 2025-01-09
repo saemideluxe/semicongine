@@ -6,7 +6,6 @@ import std/tables
 import std/typetraits
 
 import ./core
-import ./rendering
 import ./image
 
 type

@@ -5,22 +5,22 @@ import std/times
 import ../semicongine
 
 proc test1() =
-  mixer[].addSound("test1", sineSoundData(1000, 2, 44100))
-  mixer[].addSound("test2", sineSoundData(500, 2, 44100))
+  addSound("test1", sineSoundData(1000, 2, 44100))
+  addSound("test2", sineSoundData(500, 2, 44100))
 
-  let s1 = mixer[].play("test1", loop = true)
-  let s2 = mixer[].play("test2", loop = true)
+  let s1 = play("test1", loop = true)
+  let s2 = play("test2", loop = true)
 
   let t0 = now()
-  mixer[].setLevel(0.5)
+  setLevel(0.5)
   while true:
     let runtime = (now() - t0).inMilliseconds()
     if runtime > 1500:
-      mixer[].setLevel(0.2)
+      setLevel(0.2)
     if runtime > 3000:
-      mixer[].stop(s2)
+      stop(s2)
     if runtime > 6000:
-      mixer[].stop("")
+      stop("")
     if runtime > 8000:
       break
 
@@ -47,32 +47,32 @@ proc test2() =
       bbShort, a, f, c2Short, d2Short, c2Short, bbShort, a, f, f, c, f, f, f, c, f, f,
     )
 
-  mixer[].addSound("frerejaques", frerejaquesData)
-  discard mixer[].play("frerejaques")
+  addSound("frerejaques", frerejaquesData)
+  discard play("frerejaques")
 
-  while mixer[].isPlaying():
+  while isPlaying():
     sleep(1)
 
 proc test3() =
-  mixer[].addSound("toccata et fugue", loadAudio("toccata_et_fugue.ogg"))
-  mixer[].addSound("ping", sineSoundData(500, 0.05, 44100))
-  mixer[].addTrack("effects")
-  discard mixer[].play("toccata et fugue")
+  addSound("toccata et fugue", loadAudio("toccata_et_fugue.ogg"))
+  addSound("ping", sineSoundData(500, 0.05, 44100))
+  addTrack("effects")
+  discard play("toccata et fugue")
 
 when isMainModule:
+  initEngine("Test audio")
   test1()
-  mixer[].stop()
+  stop()
   test2()
-  mixer[].stop()
+  stop()
   test3()
 
-  while mixer[].isPlaying():
+  while isPlaying():
     # on windows we re-open stdin and this will not work
     when defined(linux):
-      discard
-        mixer[].play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
+      discard play("ping", track = "effects", stopOtherSounds = true, level = 0.5)
       echo "Press q and enter to exit"
       if stdin.readLine() == "q":
-        mixer[].stop()
+        stop()
     elif defined(windows):
       sleep(1000)

@@ -20,6 +20,7 @@ proc stressTest(storage: StorageType) =
     assert storage.load(key, 0) == i
 
 proc main() =
+  initEngine("Test storage")
   SystemStorage.purge()
   echo "SystemStorage: Testing simple store/load"
   SystemStorage.testSimple()

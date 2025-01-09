@@ -10,6 +10,7 @@ import ./core
 import ./rendering
 import ./image
 import ./rendering/renderer
+import ./rendering/memory
 
 proc initTextBuffer*[MaxGlyphs: static int](
     font: Font[MaxGlyphs],

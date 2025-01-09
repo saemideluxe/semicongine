@@ -1,4 +1,5 @@
 import std/macros
+import std/typetraits
 import std/hashes
 import std/strformat
 import std/strutils
@@ -268,12 +269,11 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
     elif hasCustomPragma(value, DescriptorSet):
       let setIndex = value.getCustomPragmaVal(DescriptorSet)
       assert not sawDescriptorSets[setIndex],
-        TShader.name & ": Only one DescriptorSet per index is allowed per shader"
+        "{TShader}: Only one DescriptorSet per index is allowed per shader"
       assert typeof(value) is object,
-        TShader.name & "Descriptor field '" & fieldname & "' must be of type object"
+        "{TShader}: Descriptor field '" & fieldname & "' must be of type object"
       assert setIndex < MAX_DESCRIPTORSETS,
-        typetraits.name(TShader) & ": maximum " & $MAX_DESCRIPTORSETS &
-          " descriptor sets allowed"
+        "{TShader}: maximum " & $MAX_DESCRIPTORSETS & " descriptor sets allowed"
       sawDescriptorSets[setIndex] = true
 
       var descriptorBinding = 0

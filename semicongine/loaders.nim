@@ -104,13 +104,6 @@ proc loadMeshes*[TMesh, TMaterial](
 type ResourceType =
   seq[byte] | JsonNode | TomlValueRef | Image[Gray] | Image[BGRA] | SoundData
 
-var rawLoader = initBackgroundLoader(loadBytes)
-var jsonLoader = initBackgroundLoader(loadJson)
-var configLoader = initBackgroundLoader(loadConfig)
-var grayImageLoader = initBackgroundLoader(loadImage[Gray])
-var imageLoader = initBackgroundLoader(loadImage[BGRA])
-var audioLoader = initBackgroundLoader(loadAudio)
-
 proc loadAsync*[T: ResourceType](path: string, package = DEFAULT_PACKAGE) =
   when T is seq[byte]:
     requestLoading(rawLoader[], path, package)

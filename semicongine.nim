@@ -16,6 +16,24 @@ export image
 import ./semicongine/rendering
 export rendering
 
+import ./semicongine/rendering/renderer
+export renderer
+
+import ./semicongine/rendering/swapchain
+export swapchain
+
+import ./semicongine/rendering/renderpasses
+export renderpasses
+
+import ./semicongine/rendering/shaders
+export shaders
+
+import ./semicongine/rendering/memory
+export memory
+
+import ./semicongine/rendering/vulkan_wrappers
+export vulkan_wrappers
+
 import ./semicongine/storage
 import ./semicongine/input
 export storage
@@ -25,6 +43,9 @@ import ./semicongine/audio
 export audio
 
 # texture packing is required for font atlas
+import ./semicongine/text/font
+export font
+
 import ./semicongine/text
 export text
 
@@ -54,3 +75,10 @@ proc initEngine*(appName: string) =
   engine_obj_internal.mixer[] = initMixer()
   engine_obj_internal.audiothread.createThread(audioWorker, engine_obj_internal.mixer)
   engine_obj_internal.initialized = true
+
+  engine_obj_internal.rawLoader = initBackgroundLoader(loadBytes)
+  engine_obj_internal.jsonLoader = initBackgroundLoader(loadJson)
+  engine_obj_internal.configLoader = initBackgroundLoader(loadConfig)
+  engine_obj_internal.grayImageLoader = initBackgroundLoader(loadImage[Gray])
+  engine_obj_internal.imageLoader = initBackgroundLoader(loadImage[BGRA])
+  engine_obj_internal.audioLoader = initBackgroundLoader(loadAudio)

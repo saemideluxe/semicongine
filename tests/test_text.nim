@@ -15,12 +15,10 @@ const MAX_CODEPOINTS = 200
 const FONTNAME = "Overhaul.ttf"
 # const FONTNAME = "DejaVuSans.ttf"
 
-proc test_01_static_label(time: float32) =
+proc test_01_static_label(time: float32, renderPass: RenderPass) =
   var font = loadFont[MAX_CODEPOINTS](FONTNAME, lineHeightPixels = 200)
   var renderdata = initRenderData()
-  var pipeline = createPipeline(
-    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
-  )
+  var pipeline = createPipeline(GlyphShader[MAX_CODEPOINTS](), renderPass = renderPass)
   var textbuffer = font.initTextBuffer(1000, renderdata, baseScale = 0.1)
 
   font.upload(renderdata)
@@ -29,11 +27,11 @@ proc test_01_static_label(time: float32) =
   # small drop-shadow
   discard textbuffer.add(
     "Hello semicongine!",
-    vec3(0.009, -0.009 * getAspectRatio(), 0.002),
+    vec3(0.009, -0.009 * getAspectRatio(), 0.2),
     color = vec4(0.02, 0.02, 0.02, 1),
     scale = 1.01,
   )
-  discard textbuffer.add("Hello semicongine!", vec3(0, 0, 0))
+  discard textbuffer.add("Hello semicongine!", vec3(0, 0, 0.1))
 
   var start = getMonoTime()
   while ((getMonoTime() - start).inMilliseconds().int / 1000) < time:
@@ -44,30 +42,28 @@ proc test_01_static_label(time: float32) =
     withNextFrame(framebuffer, commandbuffer):
       font.bindTo(pipeline, commandbuffer)
       withRenderPass(
-        vulkan.swapchain.renderPass,
+        renderPass,
         framebuffer,
         commandbuffer,
-        vulkan.swapchain.width,
-        vulkan.swapchain.height,
+        frameWidth(),
+        frameHeight(),
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
           renderTextBuffer(commandbuffer, pipeline, textbuffer)
 
   # cleanup
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  checkVkResult vkDeviceWaitIdle(engine().vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-proc test_02_multi_counter(time: float32) =
+proc test_02_multi_counter(time: float32, renderPass: RenderPass) =
   var font1 = loadFont[MAX_CODEPOINTS]("Overhaul.ttf", lineHeightPixels = 40)
   var font2 = loadFont[MAX_CODEPOINTS]("Overhaul.ttf", lineHeightPixels = 160)
   var font3 = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline(
-    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
-  )
+  var pipeline = createPipeline(GlyphShader[MAX_CODEPOINTS](), renderPass = renderPass)
 
   font1.upload(renderdata)
   font2.upload(renderdata)
@@ -101,11 +97,11 @@ proc test_02_multi_counter(time: float32) =
 
     withNextFrame(framebuffer, commandbuffer):
       withRenderPass(
-        vulkan.swapchain.renderPass,
+        renderPass,
         framebuffer,
         commandbuffer,
-        vulkan.swapchain.width,
-        vulkan.swapchain.height,
+        frameWidth(),
+        frameHeight(),
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
@@ -117,17 +113,15 @@ proc test_02_multi_counter(time: float32) =
           renderTextBuffer(commandbuffer, pipeline, textbuffer3)
 
       # cleanup
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  checkVkResult vkDeviceWaitIdle(engine().vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-proc test_03_layouting(time: float32) =
+proc test_03_layouting(time: float32, renderPass: RenderPass) =
   var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline(
-    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
-  )
+  var pipeline = createPipeline(GlyphShader[MAX_CODEPOINTS](), renderPass = renderPass)
 
   font.upload(renderdata)
   font.addToPipeline(renderdata, pipeline)
@@ -159,28 +153,26 @@ proc test_03_layouting(time: float32) =
     withNextFrame(framebuffer, commandbuffer):
       bindDescriptorSet(commandbuffer, font.descriptorSet, 3, pipeline)
       withRenderPass(
-        vulkan.swapchain.renderPass,
+        renderPass,
         framebuffer,
         commandbuffer,
-        vulkan.swapchain.width,
-        vulkan.swapchain.height,
+        frameWidth(),
+        frameHeight(),
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
           renderTextBuffer(commandbuffer, pipeline, textbuffer)
 
       # cleanup
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  checkVkResult vkDeviceWaitIdle(engine().vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
-proc test_04_lots_of_texts(time: float32) =
+proc test_04_lots_of_texts(time: float32, renderPass: RenderPass) =
   var font = loadFont[MAX_CODEPOINTS]("DejaVuSans.ttf", lineHeightPixels = 160)
   var renderdata = initRenderData()
 
-  var pipeline = createPipeline(
-    GlyphShader[MAX_CODEPOINTS](), renderPass = vulkan.swapchain.renderPass
-  )
+  var pipeline = createPipeline(GlyphShader[MAX_CODEPOINTS](), renderPass = renderPass)
 
   font.upload(renderdata)
   font.addToPipeline(renderdata, pipeline)
@@ -190,7 +182,7 @@ proc test_04_lots_of_texts(time: float32) =
   for i in 0 ..< 1000:
     discard textbuffer.add(
       $i,
-      vec3(rand(-0.8 .. 0.8), rand(-0.8 .. 0.8), rand(-0.1 .. 0.1)),
+      vec3(rand(-0.8 .. 0.8), rand(-0.8 .. 0.8), rand(0.1 .. 0.2)),
       color =
         vec4(rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0), rand(0.5 .. 1.0)),
       scale = rand(0.5'f32 .. 1.5'f32),
@@ -207,37 +199,37 @@ proc test_04_lots_of_texts(time: float32) =
         textbuffer.refresh()
       bindDescriptorSet(commandbuffer, font.descriptorSet, 3, pipeline)
       withRenderPass(
-        vulkan.swapchain.renderPass,
+        renderPass,
         framebuffer,
         commandbuffer,
-        vulkan.swapchain.width,
-        vulkan.swapchain.height,
+        frameWidth(),
+        frameHeight(),
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
           renderTextBuffer(commandbuffer, pipeline, textbuffer)
 
         # cleanup
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  checkVkResult vkDeviceWaitIdle(engine().vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
 when isMainModule:
   var time = 3'f32
-  initVulkan()
+  initEngine("Test text")
 
-  for depthBuffer in [true, false]:
-    var renderpass = createDirectPresentationRenderPass(depthBuffer = depthBuffer)
-    setupSwapchain(renderpass = renderpass)
+  # for depthBuffer in [true, false]:
+  var renderpass = createDirectPresentationRenderPass(depthBuffer = true)
+  setupSwapchain(renderpass = renderpass)
 
-    # tests a simple triangle with minimalistic shader and vertex format
-    test_01_static_label(time)
-    test_02_multi_counter(time)
-    test_03_layouting(time)
-    test_04_lots_of_texts(time)
+  # tests a simple triangle with minimalistic shader and vertex format
+  test_01_static_label(time, renderpass)
+  test_02_multi_counter(time, renderpass)
+  test_03_layouting(time, renderpass)
+  test_04_lots_of_texts(time, renderpass)
 
-    checkVkResult vkDeviceWaitIdle(vulkan.device)
-    vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
-    clearSwapchain()
+  checkVkResult vkDeviceWaitIdle(engine().vulkan.device)
+  destroyRenderPass(renderpass)
+  clearSwapchain()
 
   destroyVulkan()

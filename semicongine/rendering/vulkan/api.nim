@@ -1,3 +1,5 @@
+{.hint[GlobalVar]: off.} # just unavoidable
+
 type
   VkHandle* = distinct uint
   VkNonDispatchableHandle* = distinct uint

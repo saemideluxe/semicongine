@@ -1,23 +1,7 @@
 import std/syncio
 import std/tables
 
-type
-  LoaderThreadArgs[T] = (
-    ptr Channel[(string, string)],
-    ptr Channel[LoaderResponse[T]],
-    proc(f, p: string): T {.gcsafe.},
-  )
-  LoaderResponse[T] = object
-    path: string
-    package: string
-    data: T
-    error: string
-
-  BackgroundLoader[T] = object
-    loadRequestCn: Channel[(string, string)] # used for sending load requests
-    responseCn: Channel[LoaderResponse[T]] # used for sending back loaded data
-    worker: Thread[LoaderThreadArgs[T]] # does the actual loading from the disk
-    responseTable: Table[string, LoaderResponse[T]] # stores results
+import ./core
 
 proc loader[T](args: LoaderThreadArgs[T]) {.thread.} =
   while true:

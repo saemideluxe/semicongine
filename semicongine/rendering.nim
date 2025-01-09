@@ -26,23 +26,6 @@ when defined(windows):
 when defined(linux):
   include ./rendering/platform/linux
 
-proc `[]`*[T, S](a: GPUArray[T, S], i: SomeInteger): T =
-  a.data[i]
-
-proc len*[T, S](a: GPUArray[T, S]): int =
-  a.data.len
-
-proc `[]=`*[T, S](a: var GPUArray[T, S], i: SomeInteger, value: T) =
-  a.data[i] = value
-
-func getBufferType*[A, B](value: GPUValue[A, B]): BufferType {.compileTime.} =
-  B
-
-func getBufferType*[A, B](
-    value: openArray[GPUValue[A, B]]
-): BufferType {.compileTime.} =
-  B
-
 import ./rendering/vulkan_wrappers
 import ./rendering/swapchain
 
@@ -149,7 +132,7 @@ proc initVulkan*(appName: string = "semicongine app"): VulkanObject =
   # get physical device and graphics queue family
   result.physicalDevice = getBestPhysicalDevice(result.instance)
   result.graphicsQueueFamily =
-    getQueueFamily(result.physicalDevice, VK_QUEUE_GRAPHICS_BIT)
+    getQueueFamily(result.physicalDevice, result.surface, VK_QUEUE_GRAPHICS_BIT)
 
   let
     priority = cfloat(1)
@@ -183,18 +166,6 @@ proc initVulkan*(appName: string = "semicongine app"): VulkanObject =
   )
   result.graphicsQueue =
     svkGetDeviceQueue(result.device, result.graphicsQueueFamily, VK_QUEUE_GRAPHICS_BIT)
-
-proc clearSwapchain*() =
-  assert engine().vulkan.swapchain != nil, "Swapchain has not been initialized yet"
-  destroySwapchain(engine().vulkan.swapchain)
-  engine().vulkan.swapchain = nil
-
-proc setupSwapchain*(
-    renderPass: RenderPass, vSync: bool = false, tripleBuffering: bool = true
-) =
-  assert engine().vulkan.swapchain == nil, "Swapchain has already been initialized yet"
-  engine().vulkan.swapchain =
-    initSwapchain(renderPass, vSync = vSync, tripleBuffering = tripleBuffering)
 
 proc destroyVulkan*() =
   if engine().vulkan.swapchain != nil:

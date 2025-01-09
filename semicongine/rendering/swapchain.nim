@@ -3,7 +3,7 @@ import std/options
 import ../core
 import ./vulkan_wrappers
 
-proc initSwapchain*(
+proc initSwapchain(
     renderPass: RenderPass,
     vSync: bool = false,
     tripleBuffering: bool = true,
@@ -324,3 +324,21 @@ template withNextFrame*(framebufferName, commandBufferName, body: untyped): unty
         swap(swapchain = engine().vulkan.swapchain, commandBuffer = `commandBufferName`)
   else:
     recreateSwapchain()
+
+proc clearSwapchain*() =
+  assert engine().vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  destroySwapchain(engine().vulkan.swapchain)
+  engine().vulkan.swapchain = nil
+
+proc setupSwapchain*(
+    renderPass: RenderPass, vSync: bool = false, tripleBuffering: bool = true
+) =
+  assert engine().vulkan.swapchain == nil, "Swapchain has already been initialized yet"
+  engine().vulkan.swapchain =
+    initSwapchain(renderPass, vSync = vSync, tripleBuffering = tripleBuffering)
+
+proc frameWidth*(): uint32 =
+  engine().vulkan.swapchain.width
+
+proc frameHeight*(): uint32 =
+  engine().vulkan.swapchain.height

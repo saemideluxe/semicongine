@@ -1,3 +1,8 @@
+import std/json
+
+import ../thirdparty/parsetoml
+import ../thirdparty/db_connector/db_sqlite
+
 const
   INFLIGHTFRAMES* = 2'u32
   MAX_DESCRIPTORSETS* = 4
@@ -360,7 +365,6 @@ const int[6] indices = int[](0, 1, 2, 2, 3, 0);
 const int[4] i_x = int[](0, 0, 2, 2);
 const int[4] i_y = int[](1, 3, 3, 1);
 const float epsilon = 0.0000001;
-// const float epsilon = 0.1;
 
 void main() {
   int vertexI = indices[gl_VertexIndex];
@@ -370,7 +374,9 @@ void main() {
     0
   );
   // the epsilon-offset is necessary, as otherwise characters with the same Z might overlap, despite transparency
-  gl_Position = vec4(vertexPos + position - vec3(0, 0, clamp(0, 1, gl_InstanceIndex * epsilon)), 1.0);
+  gl_Position = vec4(vertexPos + position, 1.0);
+  gl_Position.z -= gl_InstanceIndex * epsilon;
+  gl_Position.z = fract(abs(gl_Position.z));
   vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);
   fragmentUv = uv;
   fragmentColor = color;
@@ -427,12 +433,70 @@ void main() {
     glyphIndex*: GPUArray[uint16, VertexBufferMapped]
     texts*: seq[Text]
 
+  # === background loader thread ===
+  LoaderThreadArgs*[T] = (
+    ptr Channel[(string, string)],
+    ptr Channel[LoaderResponse[T]],
+    proc(f, p: string): T {.gcsafe.},
+  )
+  LoaderResponse*[T] = object
+    path*: string
+    package*: string
+    data*: T
+    error*: string
+
+  BackgroundLoader*[T] = object
+    loadRequestCn*: Channel[(string, string)] # used for sending load requests
+    responseCn*: Channel[LoaderResponse[T]] # used for sending back loaded data
+    worker*: Thread[LoaderThreadArgs[T]] # does the actual loading from the disk
+    responseTable*: Table[string, LoaderResponse[T]] # stores results
+
+  # === input ===
+  Input* = object
+    keyIsDown*: set[Key]
+    keyWasPressed*: set[Key]
+    keyWasReleased*: set[Key]
+    mouseIsDown*: set[MouseButton]
+    mouseWasPressed*: set[MouseButton]
+    mouseWasReleased*: set[MouseButton]
+    mousePosition*: Vec2i
+    mouseMove*: Vec2i
+    mouseWheel*: float32
+    windowWasResized*: bool = true
+    windowIsMinimized*: bool = false
+    lockMouse*: bool = false
+    hasFocus*: bool = false
+
+  ActionMap* = object
+    keyActions*: Table[string, set[Key]]
+    mouseActions*: Table[string, set[MouseButton]]
+
+  # === storage ===
+  StorageType* = enum
+    SystemStorage
+    UserStorage # ? level storage type ?
+
+  # === steam ===
+  SteamUserStatsRef* = ptr object
+
   # === global engine object ===
   EngineObj = object
     initialized*: bool
     vulkan*: VulkanObject
     mixer*: ptr Mixer
     audiothread*: Thread[ptr Mixer]
+    input*: Input
+    actionMap*: ActionMap
+    db*: Table[StorageType, DbConn]
+    rawLoader*: ptr BackgroundLoader[seq[byte]]
+    jsonLoader*: ptr BackgroundLoader[JsonNode]
+    configLoader*: ptr BackgroundLoader[TomlValueRef]
+    grayImageLoader*: ptr BackgroundLoader[Image[Gray]]
+    imageLoader*: ptr BackgroundLoader[Image[BGRA]]
+    audioLoader*: ptr BackgroundLoader[SoundData]
+    userStats*: SteamUserStatsRef
+    steam_api*: LibHandle
+    steam_is_loaded*: bool
 
   Engine* = ref EngineObj
 
@@ -449,6 +513,7 @@ proc `=copy`(dest: var Playback, source: Playback) {.error.}
 proc `=copy`(dest: var Track, source: Track) {.error.}
 proc `=copy`(dest: var Mixer, source: Mixer) {.error.}
 proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.error.}
+proc `=copy`(dest: var Input, source: Input) {.error.}
 proc `=copy`(dest: var EngineObj, source: EngineObj) {.error.}
 proc `=copy`[MaxGlyphs: static int](
   dest: var FontObj[MaxGlyphs], source: FontObj[MaxGlyphs]

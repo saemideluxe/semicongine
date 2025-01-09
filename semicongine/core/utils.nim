@@ -70,3 +70,11 @@ iterator litems*[IX, T](a: array[IX, T]): lent T {.inline.} =
       if i >= high(IX):
         break
       inc(i)
+
+# usefull to calculate next position for correct memory alignment
+func alignedTo*[T: SomeInteger](value: T, alignment: T): T =
+  let remainder = value mod alignment
+  if remainder == 0:
+    return value
+  else:
+    return value + alignment - remainder

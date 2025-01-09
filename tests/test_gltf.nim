@@ -6,7 +6,7 @@ import std/options
 
 import ../semicongine
 
-proc test_gltf(time: float32) =
+proc test_gltf(time: float32, renderPass: RenderPass) =
   var renderdata = initRenderData()
 
   type
@@ -134,8 +134,7 @@ void main() {
       renderdata.assignBuffers(primitive[0])
   renderdata.assignBuffers(descriptors)
 
-  var pipeline =
-    createPipeline(Shader(), renderPass = vulkan.swapchain.renderPass, cullMode = [])
+  var pipeline = createPipeline(Shader(), renderPass = renderPass, cullMode = [])
   initDescriptorSet(renderdata, pipeline.descriptorSetLayouts[0], descriptors)
 
   renderdata.flushAllMemory()
@@ -202,11 +201,11 @@ void main() {
 
     withNextFrame(framebuffer, commandbuffer):
       withRenderPass(
-        vulkan.swapchain.renderPass,
+        renderPass,
         framebuffer,
         commandbuffer,
-        vulkan.swapchain.width,
-        vulkan.swapchain.height,
+        frameWidth(),
+        frameHeight(),
         vec4(0, 0, 0, 0),
       ):
         withPipeline(commandbuffer, pipeline):
@@ -220,13 +219,13 @@ void main() {
             )
 
   # cleanup
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
+  checkVkResult vkDeviceWaitIdle(engine().vulkan.device)
   destroyPipeline(pipeline)
   destroyRenderData(renderdata)
 
 when isMainModule:
   var time = 1000'f32
-  initVulkan()
+  initEngine("Test glTF")
 
   var renderpass = createDirectPresentationRenderPass(
     depthBuffer = true, samples = VK_SAMPLE_COUNT_4_BIT
@@ -236,10 +235,10 @@ when isMainModule:
   # showSystemCursor(false)
 
   # tests a simple triangle with minimalistic shader and vertex format
-  test_gltf(time)
+  test_gltf(time, renderpass)
 
-  checkVkResult vkDeviceWaitIdle(vulkan.device)
-  vkDestroyRenderPass(vulkan.device, renderpass.vk, nil)
+  checkVkResult vkDeviceWaitIdle(engine().vulkan.device)
+  destroyRenderPass(renderpass)
   clearSwapchain()
 
   destroyVulkan()

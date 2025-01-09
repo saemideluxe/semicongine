@@ -26,57 +26,46 @@ proc initMixer*(): Mixer =
   result.tracks[""] = Track(level: 1)
   result.lock.initLock()
 
-proc setupDevice(mixer: var Mixer) =
-  # call this inside audio thread
-  var bufferaddresses: seq[ptr SoundData]
-  for i in 0 ..< NBUFFERS:
-    mixer.buffers.add newSeq[Sample](BUFFERSAMPLECOUNT)
-  for i in 0 ..< mixer.buffers.len:
-    bufferaddresses.add (addr mixer.buffers[i])
-  mixer.device = OpenSoundDevice(AUDIO_SAMPLE_RATE, bufferaddresses)
-
 # TODO: this should probably be in the load-code-stuff
 # proc LoadSound*(mixer: var Mixer, name: string, resource: string) =
 # assert not (name in mixer.sounds)
 # mixer.sounds[name] = LoadAudio(resource)
 
-proc addSound*(mixer: var Mixer, name: string, sound: SoundData) =
-  if name in mixer.sounds:
+proc addSound*(name: string, sound: SoundData) =
+  if name in engine().mixer.sounds:
     warn "sound with name '", name, "' was already loaded, overwriting"
-  mixer.sounds[name] = sound
+  engine().mixer.sounds[name] = sound
 
-proc addTrack*(mixer: var Mixer, name: string, level: AudioLevel = 1'f) =
-  if name in mixer.tracks:
+proc addTrack*(name: string, level: AudioLevel = 1'f) =
+  if name in engine().mixer.tracks:
     warn "track with name '", name, "' was already loaded, overwriting"
-  mixer.lock.withLock:
-    mixer.tracks[name] = Track(level: level)
+  engine().mixer.lock.withLock:
+    engine().mixer.tracks[name] = Track(level: level)
 
 proc play*(
-    mixer: var Mixer,
     soundName: string,
     track = "",
     stopOtherSounds = false,
     loop = false,
     levelLeft, levelRight: AudioLevel,
 ): uint64 =
-  assert track in mixer.tracks, &"Track '{track}' does not exists"
-  assert soundName in mixer.sounds, soundName & " not loaded"
-  mixer.lock.withLock:
+  assert track in engine().mixer.tracks, &"Track '{track}' does not exists"
+  assert soundName in engine().mixer.sounds, soundName & " not loaded"
+  engine().mixer.lock.withLock:
     if stopOtherSounds:
-      mixer.tracks[track].playing.clear()
-    mixer.tracks[track].playing[mixer.playbackCounter] = Playback(
-      sound: mixer.sounds[soundName],
+      engine().mixer.tracks[track].playing.clear()
+    engine().mixer.tracks[track].playing[engine().mixer.playbackCounter] = Playback(
+      sound: engine().mixer.sounds[soundName],
       position: 0,
       loop: loop,
       levelLeft: levelLeft,
       levelRight: levelRight,
       paused: false,
     )
-  result = mixer.playbackCounter
-  inc mixer.playbackCounter
+  result = engine().mixer.playbackCounter
+  inc engine().mixer.playbackCounter
 
 proc play*(
-    mixer: var Mixer,
     soundName: string,
     track = "",
     stopOtherSounds = false,
@@ -84,7 +73,6 @@ proc play*(
     level: AudioLevel = 1'f,
 ): uint64 =
   play(
-    mixer = mixer,
     soundName = soundName,
     track = track,
     stopOtherSounds = stopOtherSounds,
@@ -93,105 +81,104 @@ proc play*(
     levelRight = level,
   )
 
-proc stop*(mixer: var Mixer) =
-  mixer.lock.withLock:
-    for track in mixer.tracks.mvalues:
+proc stop*() =
+  engine().mixer.lock.withLock:
+    for track in engine().mixer.tracks.mvalues:
       track.playing.clear()
 
-proc getLevel*(mixer: var Mixer): AudioLevel =
-  mixer.level
+proc getLevel*(): AudioLevel =
+  engine().mixer.level
 
-proc getLevel*(mixer: var Mixer, track: string): AudioLevel =
-  mixer.tracks[track].level
+proc getLevel*(track: string): AudioLevel =
+  engine().mixer.tracks[track].level
 
-proc getLevel*(mixer: var Mixer, playbackId: uint64): (AudioLevel, AudioLevel) =
-  for track in mixer.tracks.mvalues:
+proc getLevel*(playbackId: uint64): (AudioLevel, AudioLevel) =
+  for track in engine().mixer.tracks.mvalues:
     if playbackId in track.playing:
       return (track.playing[playbackId].levelLeft, track.playing[playbackId].levelRight)
 
-proc setLevel*(mixer: var Mixer, level: AudioLevel) =
-  mixer.level = level
+proc setLevel*(level: AudioLevel) =
+  engine().mixer.level = level
 
-proc setLevel*(mixer: var Mixer, track: string, level: AudioLevel) =
-  mixer.lock.withLock:
-    mixer.tracks[track].level = level
+proc setLevel*(track: string, level: AudioLevel) =
+  engine().mixer.lock.withLock:
+    engine().mixer.tracks[track].level = level
 
-proc setLevel*(
-    mixer: var Mixer, playbackId: uint64, levelLeft, levelRight: AudioLevel
-) =
-  mixer.lock.withLock:
-    for track in mixer.tracks.mvalues:
+proc setLevel*(playbackId: uint64, levelLeft, levelRight: AudioLevel) =
+  engine().mixer.lock.withLock:
+    for track in engine().mixer.tracks.mvalues:
       if playbackId in track.playing:
         track.playing[playbackId].levelLeft = levelLeft
         track.playing[playbackId].levelRight = levelRight
 
-proc setLevel*(mixer: var Mixer, playbackId: uint64, level: AudioLevel) =
-  setLevel(mixer, playbackId, level, level)
+proc setLevel*(playbackId: uint64, level: AudioLevel) =
+  setLevel(playbackId, level, level)
 
-proc stop*(mixer: var Mixer, track: string) =
-  assert track in mixer.tracks
-  mixer.lock.withLock:
-    mixer.tracks[track].playing.clear()
+proc stop*(track: string) =
+  assert track in engine().mixer.tracks
+  engine().mixer.lock.withLock:
+    engine().mixer.tracks[track].playing.clear()
 
-proc stop*(mixer: var Mixer, playbackId: uint64) =
-  mixer.lock.withLock:
-    for track in mixer.tracks.mvalues:
+proc stop*(playbackId: uint64) =
+  engine().mixer.lock.withLock:
+    for track in engine().mixer.tracks.mvalues:
       if playbackId in track.playing:
         track.playing.del(playbackId)
         break
 
-proc pause*(mixer: var Mixer, value: bool) =
-  mixer.lock.withLock:
-    for track in mixer.tracks.mvalues:
+proc pause*(value: bool) =
+  engine().mixer.lock.withLock:
+    for track in engine().mixer.tracks.mvalues:
       for playback in track.playing.mvalues:
         playback.paused = value
 
-proc pause*(mixer: var Mixer, track: string, value: bool) =
-  mixer.lock.withLock:
-    for playback in mixer.tracks[track].playing.mvalues:
+proc pause*(track: string, value: bool) =
+  engine().mixer.lock.withLock:
+    for playback in engine().mixer.tracks[track].playing.mvalues:
       playback.paused = value
 
-proc pause*(mixer: var Mixer, playbackId: uint64, value: bool) =
-  mixer.lock.withLock:
-    for track in mixer.tracks.mvalues:
+proc pause*(playbackId: uint64, value: bool) =
+  engine().mixer.lock.withLock:
+    for track in engine().mixer.tracks.mvalues:
       if playbackId in track.playing:
         track.playing[playbackId].paused = value
 
-proc pause*(mixer: var Mixer) =
-  mixer.pause(true)
+proc pause*() =
+  pause(true)
 
-proc pause*(mixer: var Mixer, track: string) =
-  mixer.pause(track, true)
+proc pause*(track: string) =
+  pause(track, true)
 
-proc pause*(mixer: var Mixer, playbackId: uint64) =
-  mixer.pause(playbackId, true)
+proc pause*(playbackId: uint64) =
+  pause(playbackId, true)
 
-proc unpause*(mixer: var Mixer) =
-  mixer.pause(false)
+proc unpause*() =
+  pause(false)
 
-proc unpause*(mixer: var Mixer, track: string) =
-  mixer.pause(track, false)
+proc unpause*(track: string) =
+  pause(track, false)
 
-proc unpause*(mixer: var Mixer, playbackId: uint64) =
-  mixer.pause(playbackId, false)
+proc unpause*(playbackId: uint64) =
+  pause(playbackId, false)
 
-proc fadeTo*(mixer: var Mixer, track: string, level: AudioLevel, time: float) =
-  mixer.tracks[track].targetLevel = level
-  mixer.tracks[track].fadeTime = time
-  mixer.tracks[track].fadeStep = level.float - mixer.tracks[track].level.float / time
+proc fadeTo*(track: string, level: AudioLevel, time: float) =
+  engine().mixer.tracks[track].targetLevel = level
+  engine().mixer.tracks[track].fadeTime = time
+  engine().mixer.tracks[track].fadeStep =
+    level.float - engine().mixer.tracks[track].level.float / time
 
-proc isPlaying*(mixer: var Mixer): bool =
-  mixer.lock.withLock:
-    for track in mixer.tracks.mvalues:
+proc isPlaying*(): bool =
+  engine().mixer.lock.withLock:
+    for track in engine().mixer.tracks.mvalues:
       for playback in track.playing.values:
         if not playback.paused:
           return true
   return false
 
-proc isPlaying*(mixer: var Mixer, track: string): bool =
-  mixer.lock.withLock:
-    if mixer.tracks.contains(track):
-      for playback in mixer.tracks[track].playing.values:
+proc isPlaying*(track: string): bool =
+  engine().mixer.lock.withLock:
+    if engine().mixer.tracks.contains(track):
+      for playback in engine().mixer.tracks[track].playing.values:
         if not playback.paused:
           return true
     return false
@@ -288,6 +275,15 @@ proc lowPassFilter(data: var SoundData, cutoff: int) =
       data.downsample(n)
 
     ]#
+
+proc setupDevice(mixer: var Mixer) =
+  # call this inside audio thread
+  var bufferaddresses: seq[ptr SoundData]
+  for i in 0 ..< NBUFFERS:
+    mixer.buffers.add newSeq[Sample](BUFFERSAMPLECOUNT)
+  for i in 0 ..< mixer.buffers.len:
+    bufferaddresses.add (addr mixer.buffers[i])
+  mixer.device = OpenSoundDevice(AUDIO_SAMPLE_RATE, bufferaddresses)
 
 proc destroy(mixer: var Mixer) =
   mixer.lock.deinitLock()

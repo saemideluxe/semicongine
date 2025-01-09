@@ -1,5 +1,6 @@
 import std/os
 import std/strutils
+import std/strformat
 import std/sequtils
 import std/unicode
 import std/streams
@@ -9,6 +10,7 @@ import std/tables
 import ../core
 import ../resources
 import ../rendering/renderer
+import ../rendering/memory
 import ../contrib/algorithms/texture_packing
 
 {.emit: "#define STBTT_STATIC".}

@@ -1,5 +1,6 @@
 import std/strformat
 import std/strutils
+import std/typetraits
 
 import ../core
 
@@ -31,17 +32,18 @@ proc getBestPhysicalDevice*(instance: VkInstance): VkPhysicalDevice =
 
   assert score > 0, "Unable to find integrated or discrete GPU"
 
-proc svkGetPhysicalDeviceSurfaceSupportKHR*(queueFamily: uint32): bool =
+proc svkGetPhysicalDeviceSurfaceSupportKHR*(
+    pDevice: VkPhysicalDevice, surface: VkSurfaceKHR, queueFamily: uint32
+): bool =
   var presentation = VkBool32(false)
   checkVkResult vkGetPhysicalDeviceSurfaceSupportKHR(
-    engine().vulkan.physicalDevice,
-    queueFamily,
-    engine().vulkan.surface,
-    addr(presentation),
+    pDevice, queueFamily, surface, addr(presentation)
   )
   return bool(presentation)
 
-proc getQueueFamily*(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 =
+proc getQueueFamily*(
+    pDevice: VkPhysicalDevice, surface: VkSurfaceKHR, qType: VkQueueFlagBits
+): uint32 =
   var nQueuefamilies: uint32
   vkGetPhysicalDeviceQueueFamilyProperties(pDevice, addr nQueuefamilies, nil)
   var queuFamilies = newSeq[VkQueueFamilyProperties](nQueuefamilies)
@@ -51,7 +53,8 @@ proc getQueueFamily*(pDevice: VkPhysicalDevice, qType: VkQueueFlagBits): uint32 
   for i in 0'u32 ..< nQueuefamilies:
     if qType in toEnums(queuFamilies[i].queueFlags):
       # for graphics queues we always also want prsentation, they seem never to be separated in practice
-      if svkGetPhysicalDeviceSurfaceSupportKHR(i) or qType != VK_QUEUE_GRAPHICS_BIT:
+      if pDevice.svkGetPhysicalDeviceSurfaceSupportKHR(surface, i) or
+          qType != VK_QUEUE_GRAPHICS_BIT:
         return i
   assert false, &"Queue of type {qType} not found"
 

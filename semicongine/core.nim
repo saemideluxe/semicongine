@@ -27,5 +27,6 @@ include ./core/types
 var engine_obj_internal*: Engine
 
 proc engine*(): Engine =
+  assert engine_obj_internal != nil, "Engine has not been initialized yet"
   assert engine_obj_internal.initialized, "Engine has not been initialized yet"
   return engine_obj_internal

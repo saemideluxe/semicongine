@@ -104,7 +104,7 @@ const MouseButtonTypeMap = {
   x11.Button3: MouseButton.Mouse3,
 }.toTable
 
-var deleteMessage*: Atom
+var deleteMessage* {.hint[GlobalVar]: off.}: Atom # one internal use, not serious
 
 template checkXlibResult(call: untyped) =
   let value = call

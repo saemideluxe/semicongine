@@ -11,12 +11,6 @@ import ./thirdparty/db_connector/db_sqlite
 const STORAGE_NAME = Path("storage.db")
 const DEFAULT_KEY_VALUE_TABLE_NAME = "shelf"
 
-type StorageType* = enum
-  SystemStorage
-  UserStorage # ? level storage type ?
-
-var db: Table[StorageType, DbConn]
-
 proc path(storageType: StorageType): Path =
   case storageType
   of SystemStorage:
@@ -26,13 +20,13 @@ proc path(storageType: StorageType): Path =
     Path(getDataDir()) / Path(AppName()) / STORAGE_NAME
 
 proc ensureExists(storageType: StorageType) =
-  if storageType in db:
+  if storageType in engine().db:
     return
-  db[storageType] = open(string(storageType.path), "", "", "")
+  engine().db[storageType] = open(string(storageType.path), "", "", "")
 
 proc ensureExists(storageType: StorageType, table: string) =
   storageType.ensureExists()
-  db[storageType].exec(
+  engine().db[storageType].exec(
     sql(
       &"""CREATE TABLE IF NOT EXISTS {table} (
     key TEXT NOT NULL UNIQUE,
@@ -48,7 +42,7 @@ proc store*[T](
     table = DEFAULT_KEY_VALUE_TABLE_NAME,
 ) =
   storageType.ensureExists(table)
-  db[storageType].exec(
+  engine().db[storageType].exec(
     sql(
       &"""INSERT INTO {table} VALUES(?, ?)
   ON CONFLICT(key) DO UPDATE SET value=excluded.value
@@ -65,8 +59,9 @@ proc load*[T](
     table = DEFAULT_KEY_VALUE_TABLE_NAME,
 ): T =
   storageType.ensureExists(table)
-  let dbResult =
-    db[storageType].getValue(sql(&"""SELECT value FROM {table} WHERE key = ? """), key)
+  let dbResult = engine().db[storageType].getValue(
+    sql(&"""SELECT value FROM {table} WHERE key = ? """), key
+  )
   if dbResult == "":
     return default
   return to[T](dbResult)
@@ -75,7 +70,7 @@ proc list*[T](
     storageType: StorageType, table = DEFAULT_KEY_VALUE_TABLE_NAME
 ): seq[string] =
   storageType.ensureExists(table)
-  for row in db[storageType].fastRows(sql(&"""SELECT key FROM {table}""")):
+  for row in engine().db[storageType].fastRows(sql(&"""SELECT key FROM {table}""")):
     result.add row[0]
 
 proc purge*(storageType: StorageType) =
