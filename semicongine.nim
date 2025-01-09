@@ -82,3 +82,6 @@ proc initEngine*(appName: string) =
   engine_obj_internal.grayImageLoader = initBackgroundLoader(loadImage[Gray])
   engine_obj_internal.imageLoader = initBackgroundLoader(loadImage[BGRA])
   engine_obj_internal.audioLoader = initBackgroundLoader(loadAudio)
+
+proc setEngine*(e: Engine) =
+  engine_obj_internal = e
