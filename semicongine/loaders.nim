@@ -106,48 +106,48 @@ type ResourceType =
 
 proc loadAsync*[T: ResourceType](path: string, package = DEFAULT_PACKAGE) =
   when T is seq[byte]:
-    requestLoading(rawLoader[], path, package)
+    requestLoading(engine().rawLoader[], path, package)
   elif T is JsonNode:
-    requestLoading(jsonLoader[], path, package)
+    requestLoading(engine().jsonLoader[], path, package)
   elif T is TomlValueRef:
-    requestLoading(configLoader[], path, package)
+    requestLoading(engine().configLoader[], path, package)
   elif T is Image[Gray]:
-    requestLoading(grayImageLoader[], path, package)
+    requestLoading(engine().grayImageLoader[], path, package)
   elif T is Image[BGRA]:
-    requestLoading(imageLoader[], path, package)
+    requestLoading(engine().imageLoader[], path, package)
   elif T is SoundData:
-    requestLoading(audioLoader[], path, package)
+    requestLoading(engine().audioLoader[], path, package)
   else:
     {.error: "Unknown type".}
 
 proc isLoaded*[T: ResourceType](path: string, package = DEFAULT_PACKAGE): bool =
   when T is seq[byte]:
-    isLoaded(rawLoader[], path, package)
+    isLoaded(engine().rawLoader[], path, package)
   elif T is JsonNode:
-    isLoaded(jsonLoader[], path, package)
+    isLoaded(engine().jsonLoader[], path, package)
   elif T is TomlValueRef:
-    isLoaded(configLoader[], path, package)
+    isLoaded(engine().configLoader[], path, package)
   elif T is Image[Gray]:
-    isLoaded(grayImageLoader[], path, package)
+    isLoaded(engine().grayImageLoader[], path, package)
   elif T is Image[BGRA]:
-    isLoaded(imageLoader[], path, package)
+    isLoaded(engine().imageLoader[], path, package)
   elif T is SoundData:
-    isLoaded(audioLoader[], path, package)
+    isLoaded(engine().audioLoader[], path, package)
   else:
     {.error: "Unknown type".}
 
 proc getLoaded*[T: ResourceType](path: string, package = DEFAULT_PACKAGE): T =
   when T is seq[byte]:
-    getLoadedData(rawLoader[], path, package)
+    getLoadedData(engine().rawLoader[], path, package)
   elif T is JsonNode:
-    getLoadedData(jsonLoader[], path, package)
+    getLoadedData(engine().jsonLoader[], path, package)
   elif T is TomlValueRef:
-    getLoadedData(configLoader[], path, package)
+    getLoadedData(engine().configLoader[], path, package)
   elif T is Image[Gray]:
-    getLoadedData(grayImageLoader[], path, package)
+    getLoadedData(engine().grayImageLoader[], path, package)
   elif T is Image[BGRA]:
-    getLoadedData(imageLoader[], path, package)
+    getLoadedData(engine().imageLoader[], path, package)
   elif T is SoundData:
-    getLoadedData(audioLoader[], path, package)
+    getLoadedData(engine().audioLoader[], path, package)
   else:
     {.error: "Unknown type".}
