@@ -2,7 +2,7 @@ import std/algorithm
 import std/strformat
 
 import ../../core
-import ../../image
+import ../../images
 
 type Rect = tuple[i: int, x, y, w, h: uint32]
 

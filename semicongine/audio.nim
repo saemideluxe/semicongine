@@ -5,11 +5,13 @@ import std/math
 import std/monotimes
 import std/os
 import std/strformat
+import std/streams
+import std/strutils
 import std/tables
 import std/times
-import std/streams
 
 import ./core
+import ./resources
 
 const NBUFFERS = 32
 # it seems that some alsa hardware has a problem with smaller buffers than 512
@@ -422,3 +424,11 @@ proc readVorbis*(stream: Stream): SoundData =
       "Only support mono and stereo audio at the moment (1 or 2 channels), but found " &
         $channels,
     )
+
+proc loadAudio*(path: string, package = DEFAULT_PACKAGE): SoundData {.gcsafe.} =
+  if path.splitFile().ext.toLowerAscii == ".au":
+    loadResource_intern(path, package = package).readAU()
+  elif path.splitFile().ext.toLowerAscii == ".ogg":
+    loadResource_intern(path, package = package).readVorbis()
+  else:
+    raise newException(Exception, "Unsupported audio file type: " & path)

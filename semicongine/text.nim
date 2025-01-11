@@ -8,7 +8,7 @@ import std/unicode
 
 import ./core
 import ./rendering
-import ./image
+import ./images
 import ./rendering/renderer
 import ./rendering/memory
 
@@ -190,8 +190,9 @@ proc add*(
   ## This should be called again after aspect ratio of window changes 
 
   let cap = if capacity == 0: text.len else: capacity
-  assert textbuffer.cursor + cap <= textbuffer.position.len,
-    &"Text is too big for TextBuffer ({textbuffer.position.len - textbuffer.cursor} left, but need {cap})"
+  let l = textbuffer.position.len
+  assert textbuffer.cursor + cap <= l,
+    &"Text is too big for TextBuffer ({l - textbuffer.cursor} left, but need {cap})"
 
   result =
     TextHandle(generation: textbuffer.generation, index: textbuffer.texts.len.uint32)

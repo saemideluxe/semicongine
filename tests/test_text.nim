@@ -13,7 +13,7 @@ import ../semicongine
 import ../semicongine/rendering
 import ../semicongine/text
 import ../semicongine/input
-import ../semicongine/font
+import ../semicongine/fonts
 
 const MAX_CODEPOINTS = 200
 const FONTNAME = "Overhaul.ttf"

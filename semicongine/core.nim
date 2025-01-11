@@ -30,3 +30,7 @@ proc engine*(): Engine =
   assert engine_obj_internal != nil, "Engine has not been initialized yet"
   assert engine_obj_internal.initialized, "Engine has not been initialized yet"
   return engine_obj_internal
+
+proc getAspectRatio*(): float32 =
+  assert engine().vulkan.swapchain != nil, "Swapchain has not been initialized yet"
+  engine().vulkan.swapchain.width.float32 / engine().vulkan.swapchain.height.float32

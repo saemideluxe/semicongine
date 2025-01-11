@@ -8,6 +8,8 @@ from ./semicongine/rendering import initVulkan
 from ./semicongine/audio import audioWorker
 from ./semicongine/background_loaders import initBackgroundLoader
 import ./semicongine/loaders
+import ./semicongine/images
+import ./semicongine/audio
 
 proc initEngine*(appName: string) =
   ## Required to be called before most features of the engine can be used

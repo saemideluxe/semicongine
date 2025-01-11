@@ -6,7 +6,8 @@ import std/tables
 import std/typetraits
 
 import ./core
-import ./image
+import ./images
+import ./resources
 
 type
   glTFHeader = object
@@ -190,7 +191,7 @@ proc loadMaterial[TMaterial](
 ): TMaterial =
   result = TMaterial()
 
-  let pbr {.warning[InheritFromException]: off.} = materialNode["pbrMetallicRoughness"]
+  let pbr {.hint[XDeclaredButNotUsed]: off.} = materialNode["pbrMetallicRoughness"]
   for name, value in fieldPairs(result):
     for gltfAttribute, mappedName in fieldPairs(mapping):
       when gltfAttribute != "" and name == mappedName:
@@ -364,3 +365,15 @@ proc ReadglTF*[TMesh, TMaterial](
         for nodeId in items(scene["nodes"]):
           nodes.add nodeId.getInt()
         result.scenes.add nodes
+
+proc loadMeshes*[TMesh, TMaterial](
+    path: string,
+    meshAttributesMapping: static MeshAttributeNames,
+    materialAttributesMapping: static MaterialAttributeNames,
+    package = DEFAULT_PACKAGE,
+): GltfData[TMesh, TMaterial] {.gcsafe.} =
+  ReadglTF[TMesh, TMaterial](
+    stream = loadResource_intern(path, package = package),
+    meshAttributesMapping = meshAttributesMapping,
+    materialAttributesMapping = materialAttributesMapping,
+  )

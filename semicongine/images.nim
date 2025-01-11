@@ -1,8 +1,11 @@
 import std/os
 import std/typetraits
 import std/strformat
+import std/strutils
+import std/streams
 
 import ./core
+import ./resources
 
 {.emit: "#define STB_IMAGE_STATIC".}
 {.emit: "#define STB_IMAGE_IMPLEMENTATION".}
@@ -140,3 +143,60 @@ proc WritePNG*(image: Image, filename: string) =
   assert written == data.len, &"There was an error while saving '{filename}': only {written} of {data.len} bytes were written"
   f.close()
 ]#
+
+proc loadImage*[T: PixelType](
+    path: string, package = DEFAULT_PACKAGE
+): Image[T] {.gcsafe.} =
+  assert path.splitFile().ext.toLowerAscii == ".png",
+    "Unsupported image type: " & path.splitFile().ext.toLowerAscii
+
+  let (width, height, data) =
+    loadImageData[T](loadResource_intern(path, package = package).readAll())
+  result = Image[T](width: width, height: height, data: data)
+
+proc loadImageArray*[T: PixelType](
+    paths: openArray[string], package = DEFAULT_PACKAGE
+): ImageArray[T] {.gcsafe.} =
+  assert paths.len > 0, "Image array cannot contain 0 images"
+  for path in paths:
+    assert path.splitFile().ext.toLowerAscii == ".png",
+      "Unsupported image type: " & path.splitFile().ext.toLowerAscii
+
+  let (width, height, data) =
+    loadImageData[T](loadResource_intern(paths[0], package = package).readAll())
+  result =
+    ImageArray[T](width: width, height: height, data: data, nLayers: paths.len.uint32)
+  for path in paths[1 .. ^1]:
+    let (w, h, data) =
+      loadImageData[T](loadResource_intern(path, package = package).readAll())
+    assert w == result.width,
+      "New image layer has dimension {(w, y)} but image has dimension {(result.width, result.height)}"
+    assert h == result.height,
+      "New image layer has dimension {(w, y)} but image has dimension {(result.width, result.height)}"
+    result.data.add data
+
+proc loadImageArray*[T: PixelType](
+    path: string, tilesize: uint32, package = DEFAULT_PACKAGE
+): ImageArray[T] {.gcsafe.} =
+  assert path.splitFile().ext.toLowerAscii == ".png",
+    "Unsupported image type: " & path.splitFile().ext.toLowerAscii
+
+  let (width, height, data) =
+    loadImageData[T](loadResource_intern(path, package = package).readAll())
+  let tilesY = height div tilesize
+
+  result = ImageArray[T](width: tilesize, height: tilesize)
+  var tile = newSeq[T](tilesize * tilesize)
+
+  for ty in 0 ..< tilesY:
+    for tx in 0 ..< tilesY:
+      var hasNonTransparent = when T is BGRA: false else: true
+      let baseI = ty * tilesize * width + tx * tilesize
+      for y in 0 ..< tilesize:
+        for x in 0 ..< tilesize:
+          tile[y * tilesize + x] = data[baseI + y * width + x]
+          when T is BGRA:
+            hasNonTransparent = hasNonTransparent or tile[y * tilesize + x].a > 0
+      if hasNonTransparent:
+        result.data.add tile
+        result.nLayers.inc

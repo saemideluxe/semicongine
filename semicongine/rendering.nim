@@ -9,7 +9,7 @@ import std/typetraits
 
 import ./core
 
-import ./image
+import ./images
 
 # in this file:
 # - const defintions for rendering
@@ -199,10 +199,6 @@ proc setFullscreen*(enable: bool) =
   if enable != engine().vulkan.fullscreen_internal:
     engine().vulkan.fullscreen_internal = enable
     engine().vulkan.window.setFullscreen(engine().vulkan.fullscreen_internal)
-
-proc getAspectRatio*(): float32 =
-  assert engine().vulkan.swapchain != nil, "Swapchain has not been initialized yet"
-  engine().vulkan.swapchain.width.float32 / engine().vulkan.swapchain.height.float32
 
 proc maxFramebufferSampleCount*(
     maxSamples = VK_SAMPLE_COUNT_8_BIT
