@@ -9,9 +9,8 @@ from ./semicongine/audio import audioWorker
 from ./semicongine/background_loaders import initBackgroundLoader
 import ./semicongine/loaders
 
-#### Main engine object
-
 proc initEngine*(appName: string) =
+  ## Required to be called before most features of the engine can be used
   engine_obj_internal = Engine()
   engine_obj_internal.vulkan = initVulkan(appName)
 
@@ -22,6 +21,7 @@ proc initEngine*(appName: string) =
   engine_obj_internal.mixer[].lock.initLock()
   engine_obj_internal.audiothread.createThread(audioWorker, engine_obj_internal.mixer)
 
+  # start background resource loaders
   engine_obj_internal.rawLoader = initBackgroundLoader(loadBytes)
   engine_obj_internal.jsonLoader = initBackgroundLoader(loadJson)
   engine_obj_internal.configLoader = initBackgroundLoader(loadConfig)
