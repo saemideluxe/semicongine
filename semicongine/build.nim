@@ -36,20 +36,14 @@ proc semicongine_builddir*(buildname: string, builddir = "./build"): string =
   return builddir / buildname / platformDir / projectName()
 
 proc semicongine_build_switches*(buildname: string, builddir = "./build") =
-  switch("experimental", "strictEffects")
   switch("experimental", "strictFuncs")
-  switch("define", "nimPreviewHashRef")
-  if defined(linux):
-    switch("define", "VK_USE_PLATFORM_XLIB_KHR")
-  elif defined(windows):
-    switch("define", "VK_USE_PLATFORM_WIN32_KHR")
+  # switch("define", "nimPreviewHashRef")
+  if defined(windows):
     switch("app", "gui")
-  else:
-    raise newException(Exception, "Unsupported platform")
 
   switch("outdir", semicongine_builddir(buildname, builddir = builddir))
+  # adds directory of executable to dynlib search path
   switch("passL", "-Wl,-rpath,'$ORIGIN'")
-    # adds directory of executable to dynlib search path
 
 proc semicongine_pack*(
     outdir: string, bundleType: string, resourceRoot: string, withSteam: bool

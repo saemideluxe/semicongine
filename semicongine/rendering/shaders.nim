@@ -506,6 +506,22 @@ proc createPipeline*[TShader](
 ): Pipeline[TShader] =
   (result.vertexShaderModule, result.fragmentShaderModule) = compileShader(shader)
 
+  when not defined(release):
+    let vertName = VkDebugUtilsObjectNameInfoEXT(
+      sType: VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+      objectType: VK_OBJECT_TYPE_SHADER_MODULE,
+      objectHandle: result.vertexShaderModule.uint64,
+      pObjectName: $(TShader) & "-vert",
+    )
+    checkVkResult engine().vulkan.device.vkSetDebugUtilsObjectNameEXT(addr vertName)
+    let fragName = VkDebugUtilsObjectNameInfoEXT(
+      sType: VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+      objectType: VK_OBJECT_TYPE_SHADER_MODULE,
+      objectHandle: result.fragmentShaderModule.uint64,
+      pObjectName: $(TShader) & "-frag",
+    )
+    checkVkResult engine().vulkan.device.vkSetDebugUtilsObjectNameEXT(addr fragName)
+
   result.descriptorSetLayouts = createDescriptorSetLayouts[TShader]()
 
   # TODO: only add pushConstants if shader actually uses them

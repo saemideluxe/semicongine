@@ -18585,10 +18585,12 @@ var EXTENSION_LOADERS = {
   "VK_NV_compute_shader_derivatives": loadVK_NV_compute_shader_derivatives,
   "VK_QCOM_fragment_density_map_offset": loadVK_QCOM_fragment_density_map_offset,
 }.toTable
-when defined(VK_USE_PLATFORM_XLIB_KHR):
+
+# we only support xlib on linux atm
+when defined(linux):
   include ./platform/xlib
   EXTENSION_LOADERS["VK_KHR_xlib_surface"] = loadVK_KHR_xlib_surface
-when defined(VK_USE_PLATFORM_WIN32_KHR):
+when defined(windows):
   include ./platform/win32
   EXTENSION_LOADERS["VK_KHR_external_semaphore_win32"] =
     loadVK_KHR_external_semaphore_win32
