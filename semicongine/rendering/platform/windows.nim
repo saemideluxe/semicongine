@@ -220,6 +220,9 @@ proc createWindow*(title: string): NativeWindow =
   discard result.hwnd.SetForegroundWindow()
   discard result.hwnd.SetFocus()
 
+proc destroyWindow*(window: NativeWindow) =
+  DestroyWindow(window.hwnd)
+
 proc setTitle*(window: NativeWindow, title: string) =
   window.hwnd.SetWindowText(T(title))
 

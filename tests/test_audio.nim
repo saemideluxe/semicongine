@@ -3,6 +3,8 @@ import std/sequtils
 import std/times
 
 import ../semicongine
+import ../semicongine/audio
+import ../semicongine/loaders
 
 proc test1() =
   addSound("test1", sineSoundData(1000, 2, 44100))

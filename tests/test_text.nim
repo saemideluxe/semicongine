@@ -10,6 +10,10 @@ import std/random
 import std/unicode
 
 import ../semicongine
+import ../semicongine/rendering
+import ../semicongine/text
+import ../semicongine/input
+import ../semicongine/font
 
 const MAX_CODEPOINTS = 200
 const FONTNAME = "Overhaul.ttf"

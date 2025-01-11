@@ -18,9 +18,6 @@ proc stbi_load_from_memory(
   desired_channels: cint,
 ): ptr uint8 {.importc, nodecl.}
 
-template nLayers*(image: Image): untyped =
-  1'u32
-
 func `$`*[S, IsArray](img: ImageObject[S, IsArray]): string =
   let pixelTypeName = S.name
   if IsArray == false:

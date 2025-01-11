@@ -9,18 +9,6 @@ import ./core
 import ./image
 
 type
-  GltfNode* = object
-    children*: seq[int]
-    mesh*: int = -1
-    transform*: Mat4 = Unit4
-
-  GltfData*[TMesh, TMaterial] = object
-    scenes*: seq[seq[int]] # each scene has a seq of node indices
-    nodes*: seq[GltfNode] # each node has a seq of mesh indices
-    meshes*: seq[seq[(TMesh, VkPrimitiveTopology)]]
-    materials*: seq[TMaterial]
-    textures*: seq[Image[BGRA]]
-
   glTFHeader = object
     magic: uint32
     version: uint32
@@ -30,39 +18,8 @@ type
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
 
-  MaterialAttributeNames* = object # pbr
-    baseColorTexture*: string
-    baseColorTextureUv*: string
-    baseColorFactor*: string
-    metallicRoughnessTexture*: string
-    metallicRoughnessTextureUv*: string
-    metallicFactor*: string
-    roughnessFactor*: string
-
-    # other
-    normalTexture*: string
-    normalTextureUv*: string
-    occlusionTexture*: string
-    occlusionTextureUv*: string
-    emissiveTexture*: string
-    emissiveTextureUv*: string
-    emissiveFactor*: string
-
-  MeshAttributeNames* = object
-    POSITION*: string
-    NORMAL*: string
-    TANGENT*: string
-    TEXCOORD*: seq[string]
-    COLOR*: seq[string]
-    JOINTS*: seq[string]
-    WEIGHTS*: seq[string]
-    indices*: string
-    material*: string
-
-proc `=copy`(dest: var GltfNode, source: GltfNode) {.error.}
 proc `=copy`(dest: var glTFHeader, source: glTFHeader) {.error.}
 proc `=copy`(dest: var glTFData, source: glTFData) {.error.}
-proc `=copy`[S, T](dest: var GltfData[S, T], source: GltfData[S, T]) {.error.}
 
 const
   HEADER_MAGIC = 0x46546C67

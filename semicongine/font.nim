@@ -7,18 +7,17 @@ import std/streams
 import std/logging
 import std/tables
 
-import ../core
-import ../resources
-import ../rendering/renderer
-import ../rendering/memory
-import ../contrib/algorithms/texture_packing
+import ./core
+import ./resources
+import ./rendering/renderer
+import ./rendering/memory
+import ./contrib/algorithms/texture_packing
 
 {.emit: "#define STBTT_STATIC".}
 {.emit: "#define STB_TRUETYPE_IMPLEMENTATION".}
 {.
   emit:
-    "#include \"" & currentSourcePath.parentDir().parentDir() &
-    "/thirdparty/stb/stb_truetype.h\""
+    "#include \"" & currentSourcePath.parentDir() & "/thirdparty/stb/stb_truetype.h\""
 .}
 
 const ASCII_CHARSET = PrintableChars.toSeq.toRunes

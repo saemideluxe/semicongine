@@ -167,6 +167,9 @@ proc createWindow*(title: string): NativeWindow =
   checkXlibResult display.XFreePixmap(pixmap)
   return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
 
+proc destroyWindow*(window: NativeWindow) =
+  checkXlibResult XDestroyWindow(window.display, window.window)
+
 proc setTitle*(window: NativeWindow, title: string) =
   discard XSetStandardProperties(
     window.display, window.window, title, "window", 0, nil, 0, nil

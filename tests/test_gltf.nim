@@ -5,6 +5,9 @@ import std/times
 import std/options
 
 import ../semicongine
+import ../semicongine/rendering
+import ../semicongine/loaders
+import ../semicongine/input
 
 proc test_gltf(time: float32, renderPass: RenderPass) =
   var renderdata = initRenderData()

@@ -1,6 +1,7 @@
 import std/strformat
 
 import ../semicongine
+import ../semicongine/storage
 
 proc testSimple(storage: StorageType) =
   const TEST_VALUE = 42

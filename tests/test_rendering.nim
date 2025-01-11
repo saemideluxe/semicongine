@@ -7,6 +7,9 @@ import std/options
 import std/random
 
 import ../semicongine
+import ../semicongine/rendering
+import ../semicongine/input
+import ../semicongine/loaders
 
 proc test_01_triangle(time: float32, renderPass: RenderPass) =
   var renderdata = initRenderData()

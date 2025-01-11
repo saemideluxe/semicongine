@@ -5,13 +5,12 @@ import std/os
 import std/streams
 
 import ./audio
-import ./background_loader
+import ./background_loaders
 import ./core
 import ./gltf
 import ./image
 import ./resources
 import ./thirdparty/parsetoml
-export parsetoml
 
 proc loadBytes*(path, package: string): seq[byte] {.gcsafe.} =
   cast[seq[byte]](toSeq(path.loadResource_intern(package = package).readAll()))

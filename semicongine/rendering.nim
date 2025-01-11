@@ -26,8 +26,18 @@ when defined(windows):
 when defined(linux):
   include ./rendering/platform/linux
 
-import ./rendering/vulkan_wrappers
-import ./rendering/swapchain
+import ../semicongine/rendering/memory
+import ../semicongine/rendering/renderer
+import ../semicongine/rendering/swapchain
+import ../semicongine/rendering/shaders
+import ../semicongine/rendering/renderpasses
+import ../semicongine/rendering/vulkan_wrappers
+export memory
+export renderer
+export swapchain
+export shaders
+export renderpasses
+export vulkan_wrappers
 
 proc debugCallback(
     messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT,
@@ -177,6 +187,7 @@ proc destroyVulkan*() =
       engine().vulkan.instance, engine().vulkan.debugMessenger, nil
     )
   vkDestroyInstance(engine().vulkan.instance, nil)
+  destroyWindow(engine().vulkan.window)
 
 proc showSystemCursor*(value: bool) =
   engine().vulkan.window.showSystemCursor(value)
