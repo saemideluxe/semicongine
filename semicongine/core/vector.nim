@@ -801,5 +801,5 @@ createVectorAttribAccessorFuncs()
 func angleBetween*(a, b: Vec3f): float32 =
   arccos(a.dot(b) / (a.length * b.length))
 
-func lerp*[T](a, b: T, value: SomeFloat): value =
+func lerp*[T](a, b: T, value: SomeFloat): T =
   value * a + (1 - value) * b
