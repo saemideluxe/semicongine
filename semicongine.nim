@@ -5,7 +5,6 @@ import ./semicongine/core
 export core
 
 from ./semicongine/rendering import initVulkan
-from ./semicongine/audio import audioWorker
 from ./semicongine/background_loaders import initBackgroundLoader
 import ./semicongine/loaders
 import ./semicongine/images
