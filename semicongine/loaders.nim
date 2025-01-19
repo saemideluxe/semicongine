@@ -1,6 +1,5 @@
 import std/json
 import std/sequtils
-import std/os
 import std/streams
 
 import ./audio
