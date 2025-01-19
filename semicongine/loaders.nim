@@ -1,5 +1,4 @@
 import std/json
-import std/strutils
 import std/sequtils
 import std/os
 import std/streams
@@ -7,7 +6,6 @@ import std/streams
 import ./audio
 import ./background_loaders
 import ./core
-import ./gltf
 import ./images
 import ./resources
 import ./thirdparty/parsetoml
