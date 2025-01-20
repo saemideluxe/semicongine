@@ -3,6 +3,21 @@ import std/hashes
 
 import ../../core
 
+# nice hash function, from a GDC talk
+proc squirrel3(position: uint32, seed: uint32 = 0'u32): uint32 =
+  const
+    NOISE1 = 0xB5297A4D'u32
+    NOISE2 = 0x68E31DA4'u32
+    NOISE3 = 0x1B56C4E9'u32
+  result = position
+  result += seed
+  result *= NOISE1
+  result = result xor (result shr 8'u32)
+  result += NOISE2
+  result = result xor (result shl 8'u32)
+  result *= NOISE3
+  result = result xor (result shr 8'u32)
+
 proc randomGradient(pos: Vec2f, seed: uint64 = 0): Vec2f =
   let randomAngle: float32 =
     TAU * (float32(int(hash((pos.x, pos.y, seed)))) / float32(high(int)))
