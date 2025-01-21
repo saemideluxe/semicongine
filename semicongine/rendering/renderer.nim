@@ -1,4 +1,5 @@
 import std/typetraits
+import std/strformat
 import std/macros
 import std/logging
 
@@ -284,16 +285,30 @@ proc render*[TShader, TMesh, TInstance](
       for meshName, meshValue in mesh.fieldPairs:
         when meshName == shaderAttributeName:
           debug("  vertex attr: ", shaderAttributeName)
+          assert meshValue.buffer.vk.Valid,
+            "Mesh vertex-attribute '{TMesh}.{shaderAttributeName}' has no valid buffer (encountered while rendering with '{TShader}')"
           vertexBuffers.add meshValue.buffer.vk
           vertexBuffersOffsets.add meshValue.offset
-          elementCount = meshValue.data.len.uint32
+          if elementCount == 0:
+            elementCount = meshValue.data.len.uint32
+          else:
+            assert meshValue.data.len.uint32 == elementCount,
+              "Mesh attribute '" & $(TMesh) & "." & meshName & "' has length " &
+                $(meshValue.data.len) & " but previous attributes had length " &
+                $elementCount
     elif hasCustomPragma(shaderAttribute, InstanceAttribute):
       for instanceName, instanceValue in instances.fieldPairs:
         when instanceName == shaderAttributeName:
           debug("  instnc attr: ", shaderAttributeName)
           vertexBuffers.add instanceValue.buffer.vk
           vertexBuffersOffsets.add instanceValue.offset
-          instanceCount = instanceValue.data.len.uint32
+          if instanceCount == 1:
+            instanceCount = meshValue.data.len.uint32
+          else:
+            assert instanceValue.data.len.uint32 == instanceCount,
+            "Mesh instance attribute '" & $(TMesh) & "." & instanceName & "' has length " &
+              $(instanceValue.data.len) & " but previous attributes had length " &
+              $instanceCount
 
   if vertexBuffers.len > 0:
     vkCmdBindVertexBuffers(
