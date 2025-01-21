@@ -303,12 +303,12 @@ proc render*[TShader, TMesh, TInstance](
           vertexBuffers.add instanceValue.buffer.vk
           vertexBuffersOffsets.add instanceValue.offset
           if instanceCount == 1:
-            instanceCount = meshValue.data.len.uint32
+            instanceCount = instanceValue.data.len.uint32
           else:
             assert instanceValue.data.len.uint32 == instanceCount,
-            "Mesh instance attribute '" & $(TMesh) & "." & instanceName & "' has length " &
-              $(instanceValue.data.len) & " but previous attributes had length " &
-              $instanceCount
+              "Mesh instance attribute '" & $(TMesh) & "." & instanceName &
+                "' has length " & $(instanceValue.data.len) &
+                " but previous attributes had length " & $instanceCount
 
   if vertexBuffers.len > 0:
     vkCmdBindVertexBuffers(
