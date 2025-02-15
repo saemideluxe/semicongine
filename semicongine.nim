@@ -18,6 +18,7 @@ proc initEngine*(appName: string) =
   # start audio
   engine_obj_internal.mixer = createShared(Mixer)
   engine_obj_internal.mixer[] = Mixer()
+  engine_obj_internal.mixer[].level = 1
   engine_obj_internal.mixer[].tracks[""] = Track(level: 1)
   engine_obj_internal.mixer[].lock.initLock()
   engine_obj_internal.audiothread.createThread(audioWorker, engine_obj_internal.mixer)
