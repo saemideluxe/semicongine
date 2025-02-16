@@ -18,7 +18,7 @@ const NBUFFERS = 32
 # TODO: actually, above statment is not true as we did not handle buffer capacity correctly
 # initially, needs testing
 when defined(linux):
-  const BUFFERSAMPLECOUNT = 256
+  const BUFFERSAMPLECOUNT = 512
 else:
   const BUFFERSAMPLECOUNT = 256
 
