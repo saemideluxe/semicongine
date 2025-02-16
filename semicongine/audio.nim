@@ -15,8 +15,10 @@ import ./resources
 
 const NBUFFERS = 32
 # it seems that some alsa hardware has a problem with smaller buffers than 512
+# TODO: actually, above statment is not true as we did not handle buffer capacity correctly
+# initially, needs testing
 when defined(linux):
-  const BUFFERSAMPLECOUNT = 512
+  const BUFFERSAMPLECOUNT = 256
 else:
   const BUFFERSAMPLECOUNT = 256
 

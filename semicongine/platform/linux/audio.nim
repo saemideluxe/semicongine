@@ -39,6 +39,7 @@ proc snd_pcm_writei*(
 ): snd_pcm_sframes_t {.alsafunc.}
 
 proc snd_pcm_recover*(pcm: snd_pcm_p, err: cint, silent: cint): cint {.alsafunc.}
+proc snd_pcm_avail(pcm: snd_pcm_p): snd_pcm_sframes_t {.alsafunc.}
 
 template checkAlsaResult(call: untyped) =
   let value = call
@@ -75,13 +76,19 @@ proc OpenSoundDevice*(
   result.buffers = buffers
 
 proc WriteSoundData*(soundDevice: NativeSoundDevice, buffer: int) =
-  var ret = snd_pcm_writei(
-    soundDevice.handle,
-    addr soundDevice.buffers[buffer][][0],
-    snd_pcm_uframes_t(soundDevice.buffers[buffer][].len),
-  )
-  if ret < 0:
-    checkAlsaResult snd_pcm_recover(soundDevice.handle, cint(ret), 0)
+  var i = 0
+  let buflen = soundDevice.buffers[buffer][].len
+  while i < buflen:
+    var availFrames = snd_pcm_avail(soundDevice.handle)
+    let nFrames = min(availFrames, buflen - i)
+    var ret = snd_pcm_writei(
+      soundDevice.handle,
+      addr soundDevice.buffers[buffer][][i],
+      snd_pcm_uframes_t(nFrames),
+    )
+    if ret < 0:
+      checkAlsaResult snd_pcm_recover(soundDevice.handle, cint(ret), 0)
+    i += nFrames
 
 proc CloseSoundDevice*(soundDevice: NativeSoundDevice) =
   discard snd_pcm_close(soundDevice.handle)
