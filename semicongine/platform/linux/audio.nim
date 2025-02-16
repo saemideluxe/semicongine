@@ -40,12 +40,16 @@ proc snd_pcm_writei*(
 
 proc snd_pcm_recover*(pcm: snd_pcm_p, err: cint, silent: cint): cint {.alsafunc.}
 proc snd_pcm_avail(pcm: snd_pcm_p): snd_pcm_sframes_t {.alsafunc.}
+proc snd_strerror(errnum: cint): cstring {.alsafunc.}
 
 template checkAlsaResult(call: untyped) =
   let value = call
   if value < 0:
-    raise
-      newException(Exception, "Alsa error: " & astToStr(call) & " returned " & $value)
+    raise newException(
+      Exception,
+      "Alsa error: " & astToStr(call) & " returned " & $value & " " &
+        $(snd_strerror(cint(value))),
+    )
 
 # required for engine:
 
@@ -79,15 +83,20 @@ proc WriteSoundData*(soundDevice: NativeSoundDevice, buffer: int) =
   var i = 0
   let buflen = soundDevice.buffers[buffer][].len
   while i < buflen:
-    var availFrames = snd_pcm_avail(soundDevice.handle)
+    let availFrames = snd_pcm_avail(soundDevice.handle)
+    if availFrames < 0:
+      checkAlsaResult snd_pcm_recover(soundDevice.handle, cint(availFrames), 0)
+      continue
+    checkAlsaResult availFrames
     let nFrames = min(availFrames, buflen - i)
-    var ret = snd_pcm_writei(
+    let ret = snd_pcm_writei(
       soundDevice.handle,
       addr soundDevice.buffers[buffer][][i],
       snd_pcm_uframes_t(nFrames),
     )
     if ret < 0:
       checkAlsaResult snd_pcm_recover(soundDevice.handle, cint(ret), 0)
+      continue
     i += nFrames
 
 proc CloseSoundDevice*(soundDevice: NativeSoundDevice) =
