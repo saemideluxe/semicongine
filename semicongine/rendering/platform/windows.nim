@@ -128,7 +128,7 @@ proc windowHandler(
 ): LRESULT {.stdcall.} =
   case uMsg
   of WM_DESTROY:
-    currentEvents.add(Event(eventType: events.EventType.Quit))
+    currentEvents.add(Event(eventType: Quit))
   of WM_KEYDOWN, WM_SYSKEYDOWN:
     let key = mapLeftRightKeys(INT(wParam), lParam)
     currentEvents.add(
