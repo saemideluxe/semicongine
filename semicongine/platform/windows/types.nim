@@ -1,4 +1,4 @@
-import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
+import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase, mmsystem]
 
 type NativeWindow* = object
   hinstance*: HINSTANCE
