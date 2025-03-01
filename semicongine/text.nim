@@ -268,5 +268,5 @@ proc renderTextBuffer*(
     textbuffer,
     pushConstant = TextRendering(aspectRatio: getAspectRatio()),
     fixedVertexCount = 6,
-    fixedInstanceCount = textbuffer.cursor,
+    fixedInstanceCount = textbuffer.cursor.uint32,
   )

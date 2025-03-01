@@ -268,8 +268,8 @@ proc render*[TShader, TMesh, TInstance](
     pipeline: Pipeline[TShader],
     mesh: TMesh,
     instances: TInstance,
-    fixedVertexCount = -1,
-    fixedInstanceCount = -1,
+    fixedVertexCount = high(uint32),
+    fixedInstanceCount = high(uint32),
 ) =
   debug("render ", name(TShader))
   static:
@@ -343,23 +343,30 @@ proc render*[TShader, TMesh, TInstance](
   if indexType != VK_INDEX_TYPE_NONE_KHR:
     debug "  indexed (", elementCount, ")"
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, indexBufferOffset, indexType)
+    let instanceCount =
+      if fixedInstanceCount == high(uint32): instanceCount else: fixedInstanceCount
+    if instanceCount > 1:
+      debug "  ", instanceCount, " instances"
     vkCmdDrawIndexed(
       commandBuffer = commandBuffer,
       indexCount = elementCount,
-      instanceCount =
-        if fixedInstanceCount == -1: instanceCount else: fixedInstanceCount.uint32,
+      instanceCount = instanceCount,
       firstIndex = 0,
       vertexOffset = 0,
       firstInstance = 0,
     )
   else:
     debug "  non-indexed (",
-      if fixedVertexCount < 0: elementCount else: fixedVertexCount.uint32, ")"
+      if fixedVertexCount == high(uint32): elementCount else: fixedVertexCount, ")"
+    let instanceCount =
+      if fixedInstanceCount == high(uint32): instanceCount else: fixedInstanceCount
+    if instanceCount > 1:
+      debug "  ", instanceCount, " instances"
     vkCmdDraw(
       commandBuffer = commandBuffer,
-      vertexCount = if fixedVertexCount < 0: elementCount else: fixedVertexCount.uint32,
-      instanceCount =
-        if fixedInstanceCount == -1: instanceCount else: fixedInstanceCount.uint32,
+      vertexCount =
+        if fixedVertexCount == high(uint32): elementCount else: fixedVertexCount,
+      instanceCount = instanceCount,
       firstVertex = 0,
       firstInstance = 0,
     )
@@ -368,8 +375,8 @@ proc render*[TShader, TMesh](
     commandBuffer: VkCommandBuffer,
     pipeline: Pipeline[TShader],
     mesh: TMesh,
-    fixedVertexCount = -1,
-    fixedInstanceCount = -1,
+    fixedVertexCount = high(uint32),
+    fixedInstanceCount = high(uint32),
 ) =
   render(commandBuffer, pipeline, mesh, EMPTY(), fixedVertexCount, fixedInstanceCount)
 
@@ -391,8 +398,8 @@ proc renderWithPushConstant*[TShader, TMesh, TInstance, TPushConstant](
     mesh: TMesh,
     instances: TInstance,
     pushConstant: TPushConstant,
-    fixedVertexCount = -1,
-    fixedInstanceCount = -1,
+    fixedVertexCount = high(uint32),
+    fixedInstanceCount = high(uint32),
 ) =
   static:
     assertValidPushConstantType(TShader, TPushConstant)
@@ -411,8 +418,8 @@ proc renderWithPushConstant*[TShader, TMesh, TPushConstant](
     pipeline: Pipeline[TShader],
     mesh: TMesh,
     pushConstant: TPushConstant,
-    fixedVertexCount = -1,
-    fixedInstanceCount = -1,
+    fixedVertexCount = high(uint32),
+    fixedInstanceCount = high(uint32),
 ) =
   static:
     assertValidPushConstantType(TShader, TPushConstant)
