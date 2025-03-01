@@ -22,9 +22,9 @@ import ./images
 # believe me, this makes everything much, much easier
 
 when defined(windows):
-  include ./rendering/platform/windows
+  include ./platform/windows/rendering
 when defined(linux):
-  include ./rendering/platform/linux
+  include ./platform/linux/rendering
 
 import ../semicongine/rendering/memory
 import ../semicongine/rendering/renderer
