@@ -10,6 +10,59 @@ import ./images
 import ./resources
 
 type
+  # === public ===
+  GltfData*[TMesh, TMaterial] = object
+    scenes*: seq[seq[int]] # each scene has a seq of node indices
+    nodes*: seq[GltfNode] # each node has a seq of mesh indices
+    meshes*: seq[GltfMesh[TMesh]]
+    materials*: seq[TMaterial]
+    textures*: seq[Image[BGRA]]
+
+  GltfNode* = object
+    name*: string
+    properties*: JsonNode
+    children*: seq[int]
+    mesh*: int = -1
+    transform*: Mat4 = Unit4
+
+  GltfMesh*[TMesh] = object
+    primitives*: seq[GltfPrimitive[TMesh]]
+
+  GltfPrimitive*[TMesh] = object
+    data*: TMesh
+    topology*: VkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+    material*: int
+
+  MaterialAttributeNames* = object # pbr
+    baseColorTexture*: string
+    baseColorTextureUv*: string
+    baseColorFactor*: string
+    metallicRoughnessTexture*: string
+    metallicRoughnessTextureUv*: string
+    metallicFactor*: string
+    roughnessFactor*: string
+
+    # other
+    normalTexture*: string
+    normalTextureUv*: string
+    occlusionTexture*: string
+    occlusionTextureUv*: string
+    emissiveTexture*: string
+    emissiveTextureUv*: string
+    emissiveFactor*: string
+
+  MeshAttributeNames* = object
+    POSITION*: string
+    NORMAL*: string
+    TANGENT*: string
+    TEXCOORD*: seq[string]
+    COLOR*: seq[string]
+    JOINTS*: seq[string]
+    WEIGHTS*: seq[string]
+    indices*: string
+    material*: string
+
+  # === internal ===
   glTFHeader = object
     magic: uint32
     version: uint32
@@ -18,6 +71,11 @@ type
   glTFData = object
     structuredContent: JsonNode
     binaryBufferData: seq[uint8]
+
+proc `=copy`[M](dest: var GltfPrimitive[M], source: GltfPrimitive[M]) {.error.}
+proc `=copy`[M](dest: var GltfMesh[M], source: GltfMesh[M]) {.error.}
+proc `=copy`(dest: var GltfNode, source: GltfNode) {.error.}
+proc `=copy`[S, T](dest: var GltfData[S, T], source: GltfData[S, T]) {.error.}
 
 proc `=copy`(dest: var glTFHeader, source: glTFHeader) {.error.}
 proc `=copy`(dest: var glTFData, source: glTFData) {.error.}
@@ -212,16 +270,19 @@ proc loadPrimitive[TMesh](
     primitive: JsonNode,
     mapping: static MeshAttributeNames,
     mainBuffer: seq[uint8],
-): (TMesh, VkPrimitiveTopology) =
-  result[0] = TMesh()
-  result[1] = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+): GltfPrimitive[TMesh] =
+  result.data = TMesh()
+
   if primitive.hasKey("mode"):
-    result[1] = PRIMITIVE_MODE_MAP[primitive["mode"].getInt()]
+    result.topology = PRIMITIVE_MODE_MAP[primitive["mode"].getInt()]
+
+  if primitive.hasKey("material"):
+    result.material = primitive["material"].getInt()
 
   if primitive.hasKey("indices"):
-    assert mapping.indices != "", "Mesh requires indices"
+    doAssert mapping.indices != "", "Mesh requires indices"
 
-  for resultFieldName, resultValue in fieldPairs(result[0]):
+  for resultFieldName, resultValue in fieldPairs(result.data):
     for gltfAttribute, mappedName in fieldPairs(mapping):
       when typeof(mappedName) is seq:
         when resultFieldName in mappedName:
@@ -260,6 +321,10 @@ proc loadPrimitive[TMesh](
 
 proc loadNode(node: JsonNode): GltfNode =
   result = GltfNode()
+  if "name" in node:
+    result.name = node["name"].getStr()
+  if "properties" in node:
+    result.properties = node["properties"]
   if "mesh" in node:
     result.mesh = node["mesh"].getInt()
   if "children" in node:
@@ -346,13 +411,13 @@ proc ReadglTF*[TMesh, TMaterial](
 
   if "meshes" in data.structuredContent:
     for mesh in items(data.structuredContent["meshes"]):
-      var primitives: seq[(TMesh, VkPrimitiveTopology)]
+      var meshObj: GltfMesh[TMesh]
       for primitive in items(mesh["primitives"]):
-        primitives.add loadPrimitive[TMesh](
+        meshObj.primitives.add loadPrimitive[TMesh](
           data.structuredContent, primitive, meshAttributesMapping,
           data.binaryBufferData,
         )
-      result.meshes.add primitives
+      result.meshes.add meshObj
 
   if "nodes" in data.structuredContent:
     for node in items(data.structuredContent["nodes"]):

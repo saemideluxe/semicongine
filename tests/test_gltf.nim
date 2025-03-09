@@ -8,6 +8,7 @@ import ../semicongine
 import ../semicongine/rendering
 import ../semicongine/loaders
 import ../semicongine/input
+import ../semicongine/gltf
 
 proc test_gltf(time: float32, renderPass: RenderPass) =
   var renderdata = initRenderData()
@@ -96,17 +97,12 @@ void main() {
       color: GPUArray[Vec4f, VertexBuffer]
       normal: GPUArray[Vec3f, VertexBuffer]
       indices: GPUArray[uint32, IndexBuffer]
-      material: int32
 
   var gltfData = loadMeshes[Mesh, Material](
     "town.glb",
     # "forest.glb",
     MeshAttributeNames(
-      POSITION: "position",
-      COLOR: @["color"],
-      NORMAL: "normal",
-      indices: "indices",
-      material: "material",
+      POSITION: "position", COLOR: @["color"], NORMAL: "normal", indices: "indices"
     ),
     MaterialAttributeNames(
       baseColorFactor: "color",
@@ -130,11 +126,11 @@ void main() {
   for i in 0 ..< gltfData.materials.len:
     descriptors.data.materials[i] = asGPUValue(gltfData.materials[i], UniformBuffer)
   for mesh in mitems(gltfData.meshes):
-    for primitive in mitems(mesh):
-      primitive[0].color = asGPUArray(
-        newSeqWith(primitive[0].position.data.len, vec4(1, 1, 1, 1)), VertexBuffer
+    for primitive in mitems(mesh.primitives):
+      primitive.data.color = asGPUArray(
+        newSeqWith(primitive.data.position.data.len, vec4(1, 1, 1, 1)), VertexBuffer
       )
-      renderdata.assignBuffers(primitive[0])
+      renderdata.assignBuffers(primitive.data)
   renderdata.assignBuffers(descriptors)
 
   var pipeline = createPipeline(Shader(), renderPass = renderPass, cullMode = [])
@@ -147,13 +143,13 @@ void main() {
   ) =
     let nodeTransform = gltfData.nodes[nodeId].transform * transform
     if gltfData.nodes[nodeId].mesh >= 0:
-      for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh].mitems:
+      for primitive in gltfData.meshes[gltfData.nodes[nodeId].mesh].primitives:
         renderWithPushConstant(
           commandbuffer = commandbuffer,
           pipeline = pipeline,
-          mesh = primitive[0],
+          mesh = primitive.data,
           pushConstant =
-            ObjectData(transform: nodeTransform, materialId: primitive[0].material),
+            ObjectData(transform: nodeTransform, materialId: primitive.material.int32),
         )
     for childNode in gltfData.nodes[nodeId].children:
       drawNode(
