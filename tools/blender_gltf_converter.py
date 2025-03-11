@@ -25,6 +25,8 @@ def runner():
             export_image_format="AUTO",
             export_format="GLB",
             export_materials="EXPORT",
+            export_extras=True,
+            export_hierarchy_full_collections=True,
         )
 
 
