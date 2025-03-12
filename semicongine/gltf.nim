@@ -271,7 +271,7 @@ proc loadPrimitive[TMesh](
     mapping: static MeshAttributeNames,
     mainBuffer: seq[uint8],
 ): GltfPrimitive[TMesh] =
-  result.data = TMesh()
+  result = GltfPrimitive[TMesh](data: TMesh())
 
   if primitive.hasKey("mode"):
     result.topology = PRIMITIVE_MODE_MAP[primitive["mode"].getInt()]
