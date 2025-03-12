@@ -323,8 +323,8 @@ proc loadNode(node: JsonNode): GltfNode =
   result = GltfNode()
   if "name" in node:
     result.name = node["name"].getStr()
-  if "properties" in node:
-    result.properties = node["properties"]
+  if "extras" in node:
+    result.properties = node["extras"]
   if "mesh" in node:
     result.mesh = node["mesh"].getInt()
   if "children" in node:
