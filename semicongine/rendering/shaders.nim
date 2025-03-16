@@ -349,6 +349,9 @@ proc generateShaderSource[TShader](shader: TShader): (string, string) {.compileT
       for constFieldName, constFieldValue in fieldPairs(value):
         assert typeof(constFieldValue) is SupportedGPUType,
           "push constant field '" & constFieldName & "' is not a SupportedGPUType"
+        assert not (
+          typeof(constFieldValue) is uint16 or typeof(constFieldValue) is int16
+        ), "16-bit members are not supported for push constants"
         pushConstants.add "  " & glslType(constFieldValue) & " " & constFieldName & ";"
       pushConstants.add "} " & fieldname & ";"
     else:

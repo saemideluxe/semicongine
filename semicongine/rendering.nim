@@ -158,6 +158,14 @@ proc initVulkan*(appName: string = "semicongine app"): VulkanObject =
   let enabledFeatures = VkPhysicalDeviceFeatures(
     fillModeNonSolid: true, depthClamp: true, wideLines: true, largePoints: true
   )
+
+  var vk16bitExt = VkPhysicalDevice16BitStorageFeatures(
+    sType: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES,
+    storageBuffer16BitAccess: true,
+    uniformAndStorageBuffer16BitAccess: true,
+    storagePushConstant16: false,
+    storageInputOutput16: false,
+  )
   var createDeviceInfo = VkDeviceCreateInfo(
     sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     queueCreateInfoCount: 1,
@@ -167,6 +175,7 @@ proc initVulkan*(appName: string = "semicongine app"): VulkanObject =
     enabledExtensionCount: uint32(deviceExtensions.len),
     ppEnabledExtensionNames: deviceExtensionsC,
     pEnabledFeatures: addr(enabledFeatures),
+    pNext: addr(vk16bitExt),
   )
   checkVkResult vkCreateDevice(
     physicalDevice = result.physicalDevice,
