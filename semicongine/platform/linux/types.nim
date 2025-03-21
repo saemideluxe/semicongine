@@ -5,6 +5,7 @@ type NativeWindow* = object
   display*: ptr xlib.Display
   window*: x11.Window
   emptyCursor*: Cursor
+  ic*: XIC
 
 # alsa API
 type

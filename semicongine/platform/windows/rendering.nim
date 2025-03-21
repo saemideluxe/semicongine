@@ -134,6 +134,17 @@ proc windowHandler(
     currentEvents.add(
       Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(key, Key.UNKNOWN))
     )
+    #[
+    proc ToUnicodeEx*(
+      wVirtKey: UINT,
+      wScanCode: UINT,
+      lpKeyState: ptr BYTE,
+      pwszBuff: LPWSTR,
+      cchBuff: int32,
+      wFlags: UINT,
+      dwhkl: HKL,
+    ): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+    ]#
   of WM_KEYUP, WM_SYSKEYUP:
     let key = mapLeftRightKeys(INT(wParam), lParam)
     currentEvents.add(

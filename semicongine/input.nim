@@ -1,4 +1,5 @@
 import std/strutils
+import std/unicode
 import std/tables
 
 import ./core
@@ -14,6 +15,7 @@ proc updateInputs*(): bool =
   engine().input.mouseWheel = 0
   engine().input.mouseMove = vec2i(0, 0)
   engine().input.windowWasResized = false
+  engine().input.characterInput = default(Rune)
 
   let newMousePos = getMousePosition(engine().vulkan.window)
   engine().input.mouseMove = newMousePos - engine().input.mousePosition
@@ -33,6 +35,9 @@ proc updateInputs*(): bool =
     of KeyPressed:
       engine().input.keyWasPressed.incl event.key
       engine().input.keyIsDown.incl event.key
+      # exclude control characters for text input
+      if not (0x00'i32 <= int32(event.char) and int32(event.char) <= 0x1F'i32):
+        engine().input.characterInput = event.char
     of KeyReleased:
       engine().input.keyWasReleased.incl event.key
       engine().input.keyIsDown.excl event.key
@@ -66,6 +71,9 @@ proc keyWasPressed*(): bool =
 
 proc keyWasReleased*(key: Key): bool =
   key in engine().input.keyWasReleased
+
+proc characterInput*(): Rune =
+  engine().input.characterInput
 
 proc mouseIsDown*(button: MouseButton): bool =
   button in engine().input.mouseIsDown

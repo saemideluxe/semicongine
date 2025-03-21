@@ -1,4 +1,5 @@
 import std/options
+import std/unicode
 import std/tables
 
 import ../../thirdparty/x11/xlib
@@ -165,7 +166,14 @@ proc createWindow*(title: string): NativeWindow =
   var empty_cursor =
     display.XCreatePixmapCursor(pixmap, pixmap, addr(color), addr(color), 0, 0)
   checkXlibResult display.XFreePixmap(pixmap)
-  return NativeWindow(display: display, window: window, emptyCursor: empty_cursor)
+
+  # get an input context, to allow encoding of key-events to characters
+  let im = XOpenIM(display, nil, nil, nil)
+  let ic = XCreateIC(
+    im, XNInputStyle, XIMPreeditNothing or XIMStatusNothing, XNClientWindow, window, nil
+  )
+  return
+    NativeWindow(display: display, window: window, emptyCursor: empty_cursor, ic: ic)
 
 proc destroyWindow*(window: NativeWindow) =
   checkXlibResult XDestroyWindow(window.display, window.window)
@@ -214,6 +222,9 @@ proc size*(window: NativeWindow): Vec2i =
   discard XGetWindowAttributes(window.display, window.window, addr(attribs))
   vec2i(attribs.width, attribs.height)
 
+# buffer to save utf8-data from keyboard events
+var unicodeData = newString(16)
+
 proc pendingEvents*(window: NativeWindow): seq[Event] =
   var event: XEvent
   while window.display.XPending() > 0:
@@ -225,9 +236,17 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
     of KeyPress:
       let keyevent = cast[PXKeyEvent](addr(event))
       let xkey = int(keyevent.keycode)
-      result.add Event(
-        eventType: KeyPressed, key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN)
+      var e =
+        Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN))
+      let len = Xutf8LookupString(
+        window.ic, keyevent, unicodeData, unicodeData.len.cint, nil, nil
       )
+      if len > 0:
+        unicodeData.setLen(len)
+        for r in unicodeData.runes():
+          e.char = r
+          break
+      result.add e
     of KeyRelease:
       let keyevent = cast[PXKeyEvent](addr(event))
       let xkey = int(keyevent.keycode)

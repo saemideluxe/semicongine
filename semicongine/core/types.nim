@@ -300,6 +300,7 @@ type
     case eventType*: EventType
     of KeyPressed, KeyReleased:
       key*: Key
+      char*: Rune
     of MousePressed, MouseReleased:
       button*: MouseButton
     of MouseWheel:
@@ -466,6 +467,7 @@ void main() {
     windowIsMinimized*: bool = false
     lockMouse*: bool = false
     hasFocus*: bool = false
+    characterInput*: Rune
 
   ActionMap* = object
     keyActions*: Table[string, set[Key]]
