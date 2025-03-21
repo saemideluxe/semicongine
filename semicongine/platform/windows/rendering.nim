@@ -123,6 +123,8 @@ proc mapLeftRightKeys(key: INT, lparam: LPARAM): INT =
   else:
     key
 
+var unicodeData: array[WCHAR, 16]
+
 proc windowHandler(
     hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 ): LRESULT {.stdcall.} =
@@ -131,19 +133,25 @@ proc windowHandler(
     currentEvents.add(Event(eventType: Quit))
   of WM_KEYDOWN, WM_SYSKEYDOWN:
     let key = mapLeftRightKeys(INT(wParam), lParam)
-    currentEvents.add(
+    var event =
       Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(key, Key.UNKNOWN))
+    let len = ToUnicode(
+      wParam, (lParam shr 16) and 0xff, nil, addr(unicodeData[0]), unicodeData.len, 0
     )
+    # if len > 0:
+    # TODO: convert to utf32
+    # newWideCString() --> stuff
+    # event.char = unicodeData
+    currentEvents.add(event)
     #[
-    proc ToUnicodeEx*(
-      wVirtKey: UINT,
-      wScanCode: UINT,
-      lpKeyState: ptr BYTE,
-      pwszBuff: LPWSTR,
-      cchBuff: int32,
-      wFlags: UINT,
-      dwhkl: HKL,
-    ): int32 {.winapi, stdcall, dynlib: "user32", importc.}
+      proc ToUnicode*(
+        wVirtKey: UINT,
+        wScanCode: UINT,
+        lpKeyState: ptr BYTE,
+        pwszBuff: LPWSTR,
+        cchBuff: int32,
+        wFlags: UINT,
+      ): int32
     ]#
   of WM_KEYUP, WM_SYSKEYUP:
     let key = mapLeftRightKeys(INT(wParam), lParam)
