@@ -37,9 +37,9 @@ iterator splitLines(text: seq[Rune]): seq[Rune] =
       current.add c
   yield current
 
-proc width*(font: Font, text: seq[Rune]): float32 =
+proc width*(font: Font, text: seq[Rune], withTrailingWhiteSpace = false): float32 =
   for i in 0 ..< text.len:
-    if not (i == text.len - 1 and text[i].isWhiteSpace):
+    if i < text.len - 1 or not text[i].isWhiteSpace or withTrailingWhiteSpace:
       if text[i] in font.advance:
         result += font.advance[text[i]]
       else:
@@ -48,20 +48,29 @@ proc width*(font: Font, text: seq[Rune]): float32 =
       result += font.kerning.getOrDefault((text[i], text[i + 1]), 0)
   return result
 
-proc width*(font: Font, text: string): float32 =
-  width(font, text.toRunes)
+proc width*(font: Font, text: string, withTrailingWhiteSpace = false): float32 =
+  width(font, text.toRunes, withTrailingWhiteSpace = withTrailingWhiteSpace)
 
-proc textDimension*(font: Font, text: seq[Rune]): Vec2f =
+proc textDimension*(
+    font: Font, text: seq[Rune], withTrailingWhiteSpace = false
+): Vec2f =
   let nLines = text.countIt(it == Rune('\n')).float32
   let h = (nLines * font.lineAdvance + font.lineHeight)
-  let w = max(splitLines(text).toSeq.mapIt(width(font, it)))
+  let w = max(
+    splitLines(text).toSeq.mapIt(
+      width(font, it, withTrailingWhiteSpace = withTrailingWhiteSpace)
+    )
+  )
   return vec2(w, h)
 
-proc textDimension*(font: Font, text: string): Vec2f =
-  textDimension(font, text.toRunes())
+proc textDimension*(font: Font, text: string, withTrailingWhiteSpace = false): Vec2f =
+  textDimension(font, text.toRunes(), withTrailingWhiteSpace = withTrailingWhiteSpace)
 
-proc textDimension*(textBuffer: TextBuffer, text: string | seq[Rune]): Vec2f =
-  textDimension(textBuffer.font, text) * textBuffer.baseScale
+proc textDimension*(
+    textBuffer: TextBuffer, text: string | seq[Rune], withTrailingWhiteSpace = false
+): Vec2f =
+  textDimension(textBuffer.font, text, withTrailingWhiteSpace = withTrailingWhiteSpace) *
+    textBuffer.baseScale
 
 proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
   assert textHandle.generation == textbuffer.generation

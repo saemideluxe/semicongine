@@ -6,7 +6,10 @@ import ./core
 import ./rendering
 import ./storage
 
-proc updateInputs*(): bool =
+proc updateInputs*(readChars: bool = false): bool =
+  # in order to prevent key-events to generate while the program
+  # is reading text-input from the keyboard, set `readChars` to true
+
   # reset input states
   engine().input.keyWasPressed = {}
   engine().input.keyWasReleased = {}
@@ -25,6 +28,9 @@ proc updateInputs*(): bool =
   else:
     engine().input.mousePosition = newMousePos
 
+  proc isControlChar(r: Rune): bool =
+    (0x00'i32 <= int32(r) and int32(r) <= 0x1F'i32) or int(r) == 0x7f
+
   var killed = false
   for event in engine().vulkan.window.pendingEvents():
     case event.eventType
@@ -33,14 +39,16 @@ proc updateInputs*(): bool =
     of ResizedWindow:
       engine().input.windowWasResized = true
     of KeyPressed:
-      engine().input.keyWasPressed.incl event.key
-      engine().input.keyIsDown.incl event.key
       # exclude control characters for text input
-      if not (0x00'i32 <= int32(event.char) and int32(event.char) <= 0x1F'i32):
+      if readChars and not event.char.isControlChar():
         engine().input.characterInput = event.char
+      else:
+        engine().input.keyWasPressed.incl event.key
+        engine().input.keyIsDown.incl event.key
     of KeyReleased:
-      engine().input.keyWasReleased.incl event.key
-      engine().input.keyIsDown.excl event.key
+      if not readChars or event.char.isControlChar():
+        engine().input.keyWasReleased.incl event.key
+        engine().input.keyIsDown.excl event.key
     of MousePressed:
       engine().input.mouseWasPressed.incl event.button
       engine().input.mouseIsDown.incl event.button
