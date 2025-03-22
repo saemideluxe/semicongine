@@ -43,7 +43,8 @@ proc semicongine_build_switches*(buildname: string, builddir = "./build") =
 
   switch("outdir", semicongine_builddir(buildname, builddir = builddir))
   # adds directory of executable to dynlib search path
-  switch("passL", "-Wl,-rpath,'$ORIGIN'")
+  when defined(linux):
+    switch("passL", "-Wl,-rpath,'$ORIGIN'")
 
 proc semicongine_pack*(
     outdir: string, bundleType: string, resourceRoot: string, withSteam: bool
