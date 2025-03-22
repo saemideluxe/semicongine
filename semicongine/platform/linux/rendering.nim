@@ -123,7 +123,9 @@ proc createWindow*(title: string): NativeWindow =
     quit "Failed to open display"
   discard XSetErrorHandler(XErrorLogger)
 
-  let rootWindow = display.XDefaultRootWindow()
+  let screen = display.XDefaultScreen()
+  let rootWindow = display.XRootWindow(screen)
+  let vis = display.XDefaultVisual(screen)
   discard display.XkbSetDetectableAutoRepeat(true, nil)
   var
     attribs: XWindowAttributes
@@ -131,34 +133,39 @@ proc createWindow*(title: string): NativeWindow =
     height = cuint(600)
   checkXlibResult display.XGetWindowAttributes(rootWindow, addr(attribs))
 
-  var attrs = XSetWindowAttributes()
-  let window = XCreateWindow(
-    display,
+  var attrs = XSetWindowAttributes(
+    event_mask:
+      FocusChangeMask or KeyPressMask or KeyReleaseMask or ExposureMask or
+      VisibilityChangeMask or StructureNotifyMask or ButtonMotionMask or ButtonPressMask or
+      ButtonReleaseMask
+  )
+  let window = display.XCreateWindow(
     rootWindow,
     (attribs.width - cint(width)) div 2,
     (attribs.height - cint(height)) div 2,
     width,
     height,
     0,
-    CopyFromParent,
+    display.XDefaultDepth(screen),
     InputOutput,
-    cast[PVisual](CopyFromParent),
-    0, # CWOverrideRedirect,
-    addr attrs, # foregroundColor, backgroundColor
+    vis,
+    CWEventMask,
+    addr(attrs),
   )
-  checkXlibResult XSetStandardProperties(
-    display, window, title, "window", 0, nil, 0, nil
+  checkXlibResult display.XSetStandardProperties(
+    window, title, "window", 0, nil, 0, nil
   )
-  checkXlibResult XSelectInput(
-    display,
-    window,
-    ButtonPressMask or ButtonReleaseMask or KeyPressMask or KeyReleaseMask or
-      ExposureMask or FocusChangeMask,
-  )
-  checkXlibResult XMapWindow(display, window)
+  # get an input context, to allow encoding of key-events to characters
 
-  deleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", XBool(false))
-  checkXlibResult XSetWMProtocols(display, window, addr(deleteMessage), 1)
+  let im = XOpenIM(display, nil, nil, nil)
+  assert im != nil
+  let ic = im.XCreateIC(XNInputStyle, XIMPreeditNothing or XIMStatusNothing, nil)
+  assert ic != nil
+
+  checkXlibResult display.XMapWindow(window)
+
+  deleteMessage = display.XInternAtom("WM_DELETE_WINDOW", XBool(false))
+  checkXlibResult display.XSetWMProtocols(window, addr(deleteMessage), 1)
 
   var data = "\0".cstring
   var pixmap = display.XCreateBitmapFromData(window, data, 1, 1)
@@ -167,11 +174,13 @@ proc createWindow*(title: string): NativeWindow =
     display.XCreatePixmapCursor(pixmap, pixmap, addr(color), addr(color), 0, 0)
   checkXlibResult display.XFreePixmap(pixmap)
 
-  # get an input context, to allow encoding of key-events to characters
-  let im = XOpenIM(display, nil, nil, nil)
-  let ic = XCreateIC(
-    im, XNInputStyle, XIMPreeditNothing or XIMStatusNothing, XNClientWindow, window, nil
-  )
+  discard display.XSync(0)
+
+  # wait until window is shown
+  var ev: XEvent
+  while ev.theType != MapNotify:
+    discard display.XNextEvent(addr(ev))
+
   return
     NativeWindow(display: display, window: window, emptyCursor: empty_cursor, ic: ic)
 
@@ -223,38 +232,44 @@ proc size*(window: NativeWindow): Vec2i =
   vec2i(attribs.width, attribs.height)
 
 # buffer to save utf8-data from keyboard events
-var unicodeData = newString(16)
+var unicodeData: array[64, char]
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
   var event: XEvent
+
   while window.display.XPending() > 0:
     discard window.display.XNextEvent(addr(event))
+
+    if XFilterEvent(addr(event), None) != 0:
+      continue
+
     case event.theType
     of ClientMessage:
       if cast[Atom](event.xclient.data.l[0]) == deleteMessage:
         result.add(Event(eventType: Quit))
     of KeyPress:
-      let keyevent = cast[PXKeyEvent](addr(event))
-      let xkey = int(keyevent.keycode)
-      var e =
-        Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN))
-      let len = Xutf8LookupString(
-        window.ic, keyevent, unicodeData, unicodeData.len.cint, nil, nil
+      var e = Event(
+        eventType: KeyPressed,
+        key: KeyTypeMap.getOrDefault(int(event.xkey.keycode), Key.UNKNOWN),
       )
-      if len > 0:
-        unicodeData.setLen(len)
+      var status: Status
+      var ksym: KeySym = NoSymbol
+      let len = window.ic.Xutf8LookupString(
+        addr(event.xkey), addr(unicodeData[0]), unicodeData.len.cint, nil, addr(status)
+      )
+      if len > 0 and status != XBufferOverflow:
+        unicodeData[len] = '\0'
         for r in unicodeData.runes():
           e.char = r
           break
       result.add e
     of KeyRelease:
-      let keyevent = cast[PXKeyEvent](addr(event))
-      let xkey = int(keyevent.keycode)
       result.add Event(
-        eventType: KeyReleased, key: KeyTypeMap.getOrDefault(xkey, Key.UNKNOWN)
+        eventType: KeyReleased,
+        key: KeyTypeMap.getOrDefault(int(event.xkey.keycode), Key.UNKNOWN),
       )
     of ButtonPress:
-      let button = int(cast[PXButtonEvent](addr(event)).button)
+      let button = int(event.xbutton.button)
       if button == Button4:
         result.add Event(eventType: MouseWheel, amount: 1'f32)
       elif button == Button5:
@@ -265,19 +280,23 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
           button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN),
         )
     of ButtonRelease:
-      let button = int(cast[PXButtonEvent](addr(event)).button)
+      let button = int(event.xbutton.button)
       result.add Event(
         eventType: MouseReleased,
         button: MouseButtonTypeMap.getOrDefault(button, MouseButton.UNKNOWN),
       )
     of FocusIn:
+      window.ic.XSetICFocus()
       result.add Event(eventType: GotFocus)
     of FocusOut:
+      window.ic.XUnsetICFocus()
       result.add Event(eventType: LostFocus)
     of ConfigureNotify, Expose:
       result.add Event(eventType: ResizedWindow)
     else:
       discard
+
+  discard window.display.XFlush()
 
 proc getMousePosition*(window: NativeWindow): Vec2i =
   var
