@@ -299,8 +299,8 @@ type
   Event* = object
     case eventType*: EventType
     of KeyPressed, KeyReleased:
-      key*: Key
-      char*: Rune
+      key*: Key = Key.UNKNOWN
+      char*: Rune = Rune(-1)
     of MousePressed, MouseReleased:
       button*: MouseButton
     of MouseWheel:

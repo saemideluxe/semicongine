@@ -131,14 +131,15 @@ proc windowHandler(
   of WM_DESTROY:
     currentEvents.add(Event(eventType: Quit))
   of WM_CHAR:
-    var event = Event(eventType: KeyPressed, key: Key.UNKNOWN)
+    let key = mapLeftRightKeys(INT(wParam), lParam)
     var ws = newWideCString(1)
     ws[0] = Utf16Char(wParam)
     var s = $ws
     for r in s.runes():
-      event.char = r
+      currentEvents.add(
+        Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(key, Key.UNKNOWN), char: r)
+      )
       break
-    currentEvents.add(event)
   of WM_KEYDOWN, WM_SYSKEYDOWN:
     let key = mapLeftRightKeys(INT(wParam), lParam)
     currentEvents.add(
