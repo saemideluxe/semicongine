@@ -1,4 +1,5 @@
 import std/tables
+import std/unicode
 import std/options
 
 import ../../thirdparty/winim/winim/inc/[windef, winuser, wincon, winbase]
@@ -123,36 +124,26 @@ proc mapLeftRightKeys(key: INT, lparam: LPARAM): INT =
   else:
     key
 
-var unicodeData: array[WCHAR, 16]
-
 proc windowHandler(
     hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 ): LRESULT {.stdcall.} =
   case uMsg
   of WM_DESTROY:
     currentEvents.add(Event(eventType: Quit))
+  of WM_CHAR:
+    var event = Event(eventType: KeyPressed, key: Key.UNKNOWN)
+    var ws = newWideCString(1)
+    ws[0] = Utf16Char(wParam)
+    var s = $ws
+    for r in s.runes():
+      event.char = r
+      break
+    currentEvents.add(event)
   of WM_KEYDOWN, WM_SYSKEYDOWN:
     let key = mapLeftRightKeys(INT(wParam), lParam)
-    var event =
+    currentEvents.add(
       Event(eventType: KeyPressed, key: KeyTypeMap.getOrDefault(key, Key.UNKNOWN))
-    let len = ToUnicode(
-      wParam, (lParam shr 16) and 0xff, nil, addr(unicodeData[0]), unicodeData.len, 0
     )
-    # if len > 0:
-    # TODO: convert to utf32
-    # newWideCString() --> stuff
-    # event.char = unicodeData
-    currentEvents.add(event)
-    #[
-      proc ToUnicode*(
-        wVirtKey: UINT,
-        wScanCode: UINT,
-        lpKeyState: ptr BYTE,
-        pwszBuff: LPWSTR,
-        cchBuff: int32,
-        wFlags: UINT,
-      ): int32
-    ]#
   of WM_KEYUP, WM_SYSKEYUP:
     let key = mapLeftRightKeys(INT(wParam), lParam)
     currentEvents.add(
