@@ -40,11 +40,11 @@ proc updateInputs*(readChars: bool = false): bool =
       engine().input.windowWasResized = true
     of KeyPressed:
       # exclude control characters for text input
-      if readChars and not event.char.isControlChar():
-        engine().input.characterInput = event.char
-      else:
+      if not readChars or event.char.isControlChar():
         engine().input.keyWasPressed.incl event.key
         engine().input.keyIsDown.incl event.key
+      else:
+        engine().input.characterInput = event.char
     of KeyReleased:
       if not readChars or event.char.isControlChar():
         engine().input.keyWasReleased.incl event.key
