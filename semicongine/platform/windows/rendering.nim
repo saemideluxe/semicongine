@@ -189,12 +189,6 @@ proc windowHandler(
     return DefWindowProc(hwnd, uMsg, wParam, lParam)
 
 proc createWindow*(title: string): NativeWindow =
-  when not defined(release):
-    AllocConsole()
-    discard stdin.reopen("conIN$", fmRead)
-    discard stdout.reopen("conOUT$", fmWrite)
-    discard stderr.reopen("conOUT$", fmWrite)
-
   result.hInstance = HINSTANCE(GetModuleHandle(nil))
   var
     windowClassName = T"EngineWindowClass"
