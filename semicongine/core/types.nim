@@ -475,8 +475,8 @@ void main() {
 
   # === storage ===
   StorageType* = enum
-    SystemStorage
-    UserStorage # ? level storage type ?
+    SystemStorage # usually device-specific settings
+    UserStorage # usually user specific settings (should be synced)
 
   # === steam ===
   SteamUserStatsRef* = ptr object

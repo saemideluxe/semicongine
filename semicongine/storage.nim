@@ -1,8 +1,11 @@
 import std/marshal
 import std/os
+import std/dirs
 import std/paths
 import std/strformat
+import std/strutils
 import std/tables
+import std/times
 
 import ./core
 
@@ -10,6 +13,12 @@ import ./thirdparty/db_connector/db_sqlite
 
 const STORAGE_NAME = Path("storage.db")
 const DEFAULT_KEY_VALUE_TABLE_NAME = "shelf"
+
+# ==============================================================
+#
+# API to store key/value pairs
+#
+# ==============================================================
 
 proc path(storageType: StorageType): Path =
   case storageType
@@ -75,3 +84,62 @@ proc list*[T](
 
 proc purge*(storageType: StorageType) =
   storageType.path().string.removeFile()
+
+# ==============================================================
+#
+# API to store "worlds", which is one database per "world"
+#
+# ==============================================================
+
+const DEFAULT_WORLD_TABLE_NAME = "world"
+const WORLD_DIR = "worlds"
+
+proc path(worldName: string): Path =
+  let dir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)
+  string(dir).createDir()
+  dir / Path(worldName & ".db")
+
+proc ensureExists(worldName: string): DbConn =
+  open(string(worldName.path), "", "", "")
+
+proc ensureExists(worldName: string, table: string): DbConn =
+  result = worldName.ensureExists()
+  result.exec(
+    sql(
+      &"""CREATE TABLE IF NOT EXISTS {table} (
+    key INT NOT NULL UNIQUE,
+    value TEXT NOT NULL
+  )"""
+    )
+  )
+
+proc storeWorld*[T](
+    worldName: string, world: T, table = DEFAULT_WORLD_TABLE_NAME, deleteOld = false
+) =
+  let db = worldName.ensureExists(table)
+  defer:
+    db.close()
+  let key = $(int(now().toTime().toUnixFloat() * 1000))
+  db.exec(sql(&"""INSERT INTO {table} VALUES(?, ?)"""), key, $$world)
+  db.exec(sql(&"""DELETE FROM {table} WHERE key <> ?"""), key)
+
+proc loadWorld*[T](worldName: string, table = DEFAULT_WORLD_TABLE_NAME): T =
+  let db = worldName.ensureExists(table)
+  defer:
+    db.close()
+  let dbResult =
+    db.getValue(sql(&"""SELECT value FROM {table} ORDER BY key DESC LIMIT 1"""))
+  return to[T](dbResult)
+
+proc listWorlds*(): seq[string] =
+  let dir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)
+
+  if dir.dirExists():
+    for (kind, path) in walkDir(
+      dir = string(dir), relative = true, checkDir = true, skipSpecial = true
+    ):
+      if kind in [pcFile, pcLinkToFile] and path.endsWith(".db"):
+        result.add path[0 .. ^4]
+
+proc purgeWorld*(worldName: string) =
+  worldName.path().string.removeFile()

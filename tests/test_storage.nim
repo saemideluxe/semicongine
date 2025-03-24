@@ -14,6 +14,28 @@ proc testSimple(storage: StorageType) =
   store(storage, KEY, TEST_VALUE)
   assert storage.load(KEY, 0) == TEST_VALUE
 
+proc testWorldAPI() =
+  assert listWorlds().len == 0
+
+  "testWorld".storeWorld(42)
+  assert listWorlds() == @["testWorld"]
+  assert loadWorld[int]("testWorld") == 42
+
+  "testWorld".storeWorld("hello")
+  assert listWorlds() == @["testWorld"]
+  assert loadWorld[string]("testWorld") == "hello"
+
+  "earth".storeWorld("hello")
+  assert "earth" in listWorlds()
+  assert "testWorld" in listWorlds()
+  assert loadWorld[string]("earth") == "hello"
+
+  "earth".purgeWorld()
+  assert listWorlds() == @["testWorld"]
+
+  "testWorld".purgeWorld()
+  assert listWorlds().len == 0
+
 proc stressTest(storage: StorageType) =
   for i in 1 .. 10000:
     let key = &"key-{i}"
@@ -29,6 +51,9 @@ proc main() =
   UserStorage.purge()
   echo "UserStorage: Testing simple store/load"
   UserStorage.testSimple()
+
+  echo "Testing world-storage API"
+  testWorldAPI()
 
   echo "Stress test with 10'000 saves/loads"
   SystemStorage.stressTest()
