@@ -10,6 +10,7 @@ import std/times
 import ./core
 
 import ./thirdparty/db_connector/db_sqlite
+import ./thirdparty/vsbf/vsbf
 
 const STORAGE_NAME = Path("storage.db")
 const DEFAULT_KEY_VALUE_TABLE_NAME = "shelf"
@@ -108,28 +109,40 @@ proc ensureExists(worldName: string, table: string): DbConn =
     sql(
       &"""CREATE TABLE IF NOT EXISTS {table} (
     key INT NOT NULL UNIQUE,
-    value TEXT NOT NULL
+    value BLOB NOT NULL
   )"""
     )
   )
 
-proc storeWorld*[T](
+proc storeWorld*[T: object | tuple](
     worldName: string, world: T, table = DEFAULT_WORLD_TABLE_NAME, deleteOld = false
 ) =
   let db = worldName.ensureExists(table)
   defer:
     db.close()
   let key = $(int(now().toTime().toUnixFloat() * 1000))
-  db.exec(sql(&"""INSERT INTO {table} VALUES(?, ?)"""), key, $$world)
+
+  var encoder = Encoder.init()
+  encoder.serializeRoot(world)
+
+  let s = db.prepare(&"""INSERT INTO {table} VALUES(?, ?)""")
+  s.bindParam(1, key)
+  s.bindParam(2, encoder.data)
+  db.exec(s)
+  s.finalize()
   db.exec(sql(&"""DELETE FROM {table} WHERE key <> ?"""), key)
 
-proc loadWorld*[T](worldName: string, table = DEFAULT_WORLD_TABLE_NAME): T =
+proc loadWorld*[T: object | tuple](
+    worldName: string, table = DEFAULT_WORLD_TABLE_NAME
+): T =
   let db = worldName.ensureExists(table)
   defer:
     db.close()
   let dbResult =
     db.getValue(sql(&"""SELECT value FROM {table} ORDER BY key DESC LIMIT 1"""))
-  return to[T](dbResult)
+
+  var decoder = Decoder.init(cast[seq[byte]](dbResult))
+  decoder.deserialize(T)
 
 proc listWorlds*(): seq[string] =
   let dir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)

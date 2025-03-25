@@ -15,20 +15,28 @@ proc testSimple(storage: StorageType) =
   assert storage.load(KEY, 0) == TEST_VALUE
 
 proc testWorldAPI() =
+  type Obj1 = object
+    value: int
+
+  type Obj2 = object
+    value: string
+
   assert listWorlds().len == 0
 
-  "testWorld".storeWorld(42)
+  const obj1 = Obj1(value: 42)
+  "testWorld".storeWorld(obj1)
   assert listWorlds() == @["testWorld"]
-  assert loadWorld[int]("testWorld") == 42
+  assert loadWorld[Obj1]("testWorld") == obj1
 
-  "testWorld".storeWorld("hello")
+  const obj2 = Obj2(value: "Hello world")
+  "testWorld".storeWorld(obj2)
   assert listWorlds() == @["testWorld"]
-  assert loadWorld[string]("testWorld") == "hello"
+  assert loadWorld[Obj2]("testWorld") == obj2
 
-  "earth".storeWorld("hello")
+  "earth".storeWorld(obj2)
   assert "earth" in listWorlds()
   assert "testWorld" in listWorlds()
-  assert loadWorld[string]("earth") == "hello"
+  assert loadWorld[Obj2]("earth") == obj2
 
   "earth".purgeWorld()
   assert listWorlds() == @["testWorld"]

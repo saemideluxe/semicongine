@@ -232,7 +232,7 @@ proc size*(window: NativeWindow): Vec2i =
   vec2i(attribs.width, attribs.height)
 
 # buffer to save utf8-data from keyboard events
-var unicodeData: array[64, char]
+var unicodeData = newStringOfCap(64)
 
 proc pendingEvents*(window: NativeWindow): seq[Event] =
   var event: XEvent
@@ -253,9 +253,8 @@ proc pendingEvents*(window: NativeWindow): seq[Event] =
         key: KeyTypeMap.getOrDefault(int(event.xkey.keycode), Key.UNKNOWN),
       )
       var status: Status
-      var ksym: KeySym = NoSymbol
       let len = window.ic.Xutf8LookupString(
-        addr(event.xkey), addr(unicodeData[0]), unicodeData.len.cint, nil, addr(status)
+        addr(event.xkey), unicodeData.cstring, unicodeData.len.cint, nil, addr(status)
       )
       if len > 0 and status != XBufferOverflow:
         unicodeData[len] = '\0'
