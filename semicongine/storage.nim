@@ -2,10 +2,12 @@ import std/marshal
 import std/os
 import std/dirs
 import std/paths
+import std/streams
 import std/strformat
 import std/strutils
 import std/tables
 import std/times
+import std/typetraits
 
 import ./core
 
@@ -113,20 +115,88 @@ proc ensureExists(worldName: string, table: string): DbConn =
     )
   )
 
+proc writeValue[T: object | tuple](s: Stream, data: T)
+proc writeValue[T](s: Stream, value: openArray[T])
+
+proc writeValue[T: SomeOrdinal | SomeFloat](s: Stream, value: T) =
+  s.write(value)
+
+proc writeValue(s: Stream, value: string) =
+  s.write(value.len.int32)
+  s.write(value)
+
+proc writeValue[T](s: Stream, value: openArray[T]) =
+  s.write(value.len.int32)
+  for v in value:
+    writeValue(s, v)
+
+proc writeValue[T: object | tuple](s: Stream, data: T) =
+  for field, value in data.fieldPairs():
+    writeValue(s, value)
+
 proc storeWorld*[T](
-    worldName: string, world: T, table = DEFAULT_WORLD_TABLE_NAME, deleteOld = false
+    worldName: string, data: T, table = DEFAULT_WORLD_TABLE_NAME, deleteOld = false
 ) =
+  var s = newStringStream()
+  writeValue(s, data)
+  let data = newSeq[byte](s.getPosition())
+  s.setPosition(0)
+  discard s.readData(addr(data[0]), data.len)
+
   let db = worldName.ensureExists(table)
   defer:
     db.close()
   let key = $(int(now().toTime().toUnixFloat() * 1000))
   let stm = db.prepare(&"""INSERT INTO {table} VALUES(?, ?)""")
   stm.bindParam(1, key)
-  stm.bindParam(2, $$world)
+  stm.bindParam(2, data)
   db.exec(stm)
   stm.finalize()
   if deleteOld:
     db.exec(sql(&"""DELETE FROM {table} WHERE key <> ?"""), key)
+
+proc loadNumericValue[T: SomeOrdinal | SomeFloat](s: Stream): T =
+  read(s, result)
+
+proc loadSeqValue[T: seq](s: Stream): T =
+  var len: int32
+  read(s, len)
+  for i in 0 ..< len:
+    var v: elementType(result)
+    read(s, v)
+    result.add v
+
+proc loadArrayValue[T: array](s: Stream): T =
+  var len: int32
+  read(s, len)
+  doAssert len == len(result)
+  for i in 0 ..< len:
+    read(s, result[i])
+
+proc loadStringValue(s: Stream): string =
+  var len: int32
+  read(s, len)
+  readStr(s, len)
+
+proc loadValue[T](s: Stream): T
+
+proc loadObjectValue[T: object | tuple](s: Stream): T =
+  for field, value in result.fieldPairs():
+    value = loadValue[typeof(value)](s)
+
+proc loadValue[T](s: Stream): T =
+  when T is SomeOrdinal or T is SomeFloat:
+    loadNumericValue[T](s)
+  elif T is seq:
+    loadSeqValue[T](s)
+  elif T is array:
+    loadArrayValue[T](s)
+  elif T is string:
+    loadStringValue(s)
+  elif T is object or T is tuple:
+    loadObjectValue[T](s)
+  else:
+    {.error: "Cannot load type " & $T.}
 
 proc loadWorld*[T](worldName: string, table = DEFAULT_WORLD_TABLE_NAME): T =
   let db = worldName.ensureExists(table)
@@ -135,7 +205,8 @@ proc loadWorld*[T](worldName: string, table = DEFAULT_WORLD_TABLE_NAME): T =
   let dbResult =
     db.getValue(sql(&"""SELECT value FROM {table} ORDER BY key DESC LIMIT 1"""))
 
-  to[T](dbResult)
+  var s = newStringStream(dbResult)
+  loadValue[T](s)
 
 proc listWorlds*(): seq[string] =
   let dir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)

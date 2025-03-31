@@ -19,7 +19,11 @@ proc testWorldAPI() =
     value: int
 
   type Obj2 = object
-    value: string
+    a: string
+    b: Obj1
+    c: seq[int]
+    d: array[3, Obj1]
+    e: bool
 
   assert listWorlds().len == 0
 
@@ -28,7 +32,13 @@ proc testWorldAPI() =
   assert listWorlds() == @["testWorld"]
   assert loadWorld[Obj1]("testWorld") == obj1
 
-  const obj2 = Obj2(value: "Hello world")
+  const obj2 = Obj2(
+    a: "Hello world",
+    b: Obj1(value: 20),
+    c: @[1, 2, 3, 4],
+    d: [Obj1(value: 1), Obj1(value: 2), Obj1(value: 3)],
+    e: true,
+  )
   "testWorld".storeWorld(obj2)
   assert listWorlds() == @["testWorld"]
   assert loadWorld[Obj2]("testWorld") == obj2
