@@ -115,24 +115,42 @@ proc ensureExists(worldName: string, table: string): DbConn =
     )
   )
 
-proc writeValue[T: object | tuple](s: Stream, data: T)
-proc writeValue[T](s: Stream, value: openArray[T])
+proc writeValue[T](s: Stream, value: T)
 
-proc writeValue[T: SomeOrdinal | SomeFloat](s: Stream, value: T) =
+proc writeNumericValue[T](s: Stream, value: T) =
   s.write(value)
 
-proc writeValue(s: Stream, value: string) =
+proc writeStringValue(s: Stream, value: string) =
   s.write(value.len.int32)
   s.write(value)
 
-proc writeValue[T](s: Stream, value: openArray[T]) =
+proc writeSeqValue[T](s: Stream, value: T) =
   s.write(value.len.int32)
-  for v in value:
-    writeValue(s, v)
+  for i in 0 ..< value.len:
+    writeValue(s, value[i])
 
-proc writeValue[T: object | tuple](s: Stream, data: T) =
+proc writeArrayValue[T](s: Stream, value: T) =
+  s.write(value.len.int32)
+  for i in 0 ..< value.len:
+    writeValue(s, value[genericParams(distinctBase(T)).get(0)(i)])
+
+proc writeObjectValue[T](s: Stream, data: T) =
   for field, value in data.fieldPairs():
     writeValue(s, value)
+
+proc writeValue[T](s: Stream, value: T) =
+  when distinctBase(T) is SomeOrdinal or T is SomeFloat:
+    writeNumericValue[T](s, value)
+  elif distinctBase(T) is seq:
+    writeSeqValue[T](s, value)
+  elif distinctBase(T) is array:
+    writeArrayValue[T](s, value)
+  elif distinctBase(T) is string:
+    writeStringValue(s, value)
+  elif distinctBase(T) is object or T is tuple:
+    writeObjectValue[T](s, value)
+  else:
+    {.error: "Cannot load type " & $T.}
 
 proc storeWorld*[T](
     worldName: string, data: T, table = DEFAULT_WORLD_TABLE_NAME, deleteOld = false
@@ -155,45 +173,47 @@ proc storeWorld*[T](
   if deleteOld:
     db.exec(sql(&"""DELETE FROM {table} WHERE key <> ?"""), key)
 
-proc loadNumericValue[T: SomeOrdinal | SomeFloat](s: Stream): T =
+proc loadValue[T](s: Stream): T
+
+proc loadNumericValue[T](s: Stream): T =
   read(s, result)
 
-proc loadSeqValue[T: seq](s: Stream): T =
+proc loadSeqValue[T](s: Stream): T =
   var len: int32
   read(s, len)
-  for i in 0 ..< len:
-    var v: elementType(result)
-    read(s, v)
-    result.add v
+  result.setLen(len)
+  for i in 0 ..< int(len):
+    # var v: elementType(result)
+    # read(s, v)
+    result[i] = loadValue[elementType(result)](s)
 
-proc loadArrayValue[T: array](s: Stream): T =
+proc loadArrayValue[T](s: Stream): T =
   var len: int32
   read(s, len)
   doAssert len == len(result)
-  for i in 0 ..< len:
-    read(s, result[i])
+  for i in 0 .. high(distinctBase(T)):
+    read(s, result[genericParams(distinctBase(T)).get(0)(i)])
 
 proc loadStringValue(s: Stream): string =
   var len: int32
   read(s, len)
   readStr(s, len)
 
-proc loadValue[T](s: Stream): T
-
-proc loadObjectValue[T: object | tuple](s: Stream): T =
+proc loadObjectValue[T](s: Stream): T =
   for field, value in result.fieldPairs():
-    value = loadValue[typeof(value)](s)
+    {.cast(uncheckedAssign).}:
+      value = loadValue[typeof(value)](s)
 
 proc loadValue[T](s: Stream): T =
-  when T is SomeOrdinal or T is SomeFloat:
+  when distinctBase(T) is SomeOrdinal or distinctBase(T) is SomeFloat:
     loadNumericValue[T](s)
-  elif T is seq:
+  elif distinctBase(T) is seq:
     loadSeqValue[T](s)
-  elif T is array:
+  elif distinctBase(T) is array:
     loadArrayValue[T](s)
-  elif T is string:
+  elif distinctBase(T) is string:
     loadStringValue(s)
-  elif T is object or T is tuple:
+  elif distinctBase(T) is object or distinctBase(T) is tuple:
     loadObjectValue[T](s)
   else:
     {.error: "Cannot load type " & $T.}

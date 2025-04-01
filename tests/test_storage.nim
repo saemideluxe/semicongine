@@ -14,9 +14,14 @@ proc testSimple(storage: StorageType) =
   store(storage, KEY, TEST_VALUE)
   assert storage.load(KEY, 0) == TEST_VALUE
 
+type ID = distinct int
+proc `==`(a, b: ID): bool =
+  `==`(int(a), int(b))
+
 proc testWorldAPI() =
   type Obj1 = object
     value: int
+    id: ID
 
   type Obj2 = object
     a: string
@@ -27,16 +32,18 @@ proc testWorldAPI() =
 
   assert listWorlds().len == 0
 
-  const obj1 = Obj1(value: 42)
+  const obj1 = Obj1(value: 42, id: ID(1))
   "testWorld".storeWorld(obj1)
   assert listWorlds() == @["testWorld"]
   assert loadWorld[Obj1]("testWorld") == obj1
 
   const obj2 = Obj2(
     a: "Hello world",
-    b: Obj1(value: 20),
+    b: Obj1(value: 20, id: ID(20)),
     c: @[1, 2, 3, 4],
-    d: [Obj1(value: 1), Obj1(value: 2), Obj1(value: 3)],
+    d: [
+      Obj1(value: 1, id: ID(11)), Obj1(value: 2, id: ID(22)), Obj1(value: 3, id: ID(33))
+    ],
     e: true,
   )
   "testWorld".storeWorld(obj2)
