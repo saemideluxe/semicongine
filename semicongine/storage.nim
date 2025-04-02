@@ -117,6 +117,9 @@ proc ensureExists(worldName: string, table: string): DbConn =
 
 proc writeValue[T](s: Stream, value: T)
 
+proc writeTimeValue[T](s: Stream, value: T) =
+  s.write(value.toTime().toUnixFloat().float64)
+
 proc writeNumericValue[T](s: Stream, value: T) =
   s.write(value)
 
@@ -139,7 +142,9 @@ proc writeObjectValue[T](s: Stream, data: T) =
     writeValue(s, value)
 
 proc writeValue[T](s: Stream, value: T) =
-  when distinctBase(T) is SomeOrdinal or T is SomeFloat:
+  when distinctBase(T) is DateTime:
+    writeTimeValue[T](s, value)
+  elif distinctBase(T) is SomeOrdinal or T is SomeFloat:
     writeNumericValue[T](s, value)
   elif distinctBase(T) is seq:
     writeSeqValue[T](s, value)
@@ -175,6 +180,11 @@ proc storeWorld*[T](
 
 proc loadValue[T](s: Stream): T
 
+proc loadTimeValue[T](s: Stream): T =
+  var t: float64
+  read(s, t)
+  fromUnixFloat(t).utc()
+
 proc loadNumericValue[T](s: Stream): T =
   read(s, result)
 
@@ -205,7 +215,9 @@ proc loadObjectValue[T](s: Stream): T =
       value = loadValue[typeof(value)](s)
 
 proc loadValue[T](s: Stream): T =
-  when distinctBase(T) is SomeOrdinal or distinctBase(T) is SomeFloat:
+  when distinctBase(T) is DateTime:
+    loadTimeValue[T](s)
+  elif distinctBase(T) is SomeOrdinal or distinctBase(T) is SomeFloat:
     loadNumericValue[T](s)
   elif distinctBase(T) is seq:
     loadSeqValue[T](s)
