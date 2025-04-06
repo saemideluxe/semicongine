@@ -782,13 +782,60 @@ proc vectorAttributeAccessor(accessor: string): seq[NimNode] =
     setterCode,
   )
 
+template x*[T: TVec](v: T): untyped =
+  v[0]
+
+template y*[T: TVec](v: T): untyped =
+  v[1]
+
+template z*[T: TVec](v: T): untyped =
+  v[2]
+
+template w*[T: TVec](v: T): untyped =
+  v[3]
+
+template r*[T: TVec](v: T): untyped =
+  v[0]
+
+template g*[T: TVec](v: T): untyped =
+  v[1]
+
+template b*[T: TVec](v: T): untyped =
+  v[2]
+
+template a*[T: TVec](v: T): untyped =
+  v[3]
+
+template `x=`*[T: TVec, S](v: T, a: S): untyped =
+  v[0] = a
+
+template `y=`*[T: TVec, S](v: T, a: S): untyped =
+  v[1] = a
+
+template `z=`*[T: TVec, S](v: T, a: S): untyped =
+  v[2] = a
+
+template `w=`*[T: TVec, S](v: T, a: S): untyped =
+  v[3] = a
+
+template `r=`*[T: TVec, S](v: T, a: S): untyped =
+  v[0] = a
+
+template `g=`*[T: TVec, S](v: T, a: S): untyped =
+  v[1] = a
+
+template `b=`*[T: TVec, S](v: T, a: S): untyped =
+  v[2] = a
+
+template `a=`*[T: TVec, S](v: T, a: S): untyped =
+  v[3] = a
+
 macro createVectorAttribAccessorFuncs() =
   const COORD_ATTRS = ["x", "y", "z", "w"]
   const COLOR_ATTRS = ["r", "g", "b", "a"]
   result = nnkStmtList.newTree()
   for attlist in [COORD_ATTRS, COLOR_ATTRS]:
     for i in attlist:
-      result.add(vectorAttributeAccessor(i))
       for j in attlist:
         result.add(vectorAttributeAccessor(i & j))
         for k in attlist:
