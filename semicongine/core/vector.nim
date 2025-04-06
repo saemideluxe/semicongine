@@ -51,16 +51,16 @@ template `[]`*[T](v: TVec3[T], i: Ordinal): T =
 template `[]`*[T](v: TVec4[T], i: Ordinal): T =
   (array[4, T](v))[i]
 
-template `[]=`*[T](v: TVec1[T], i: Ordinal, a: T) =
+template `[]=`*[T](v: TVec1[T], i: Ordinal, a: SomeNumber) =
   (array[1, T](v))[i] = a
 
-template `[]=`*[T](v: TVec2[T], i: Ordinal, a: T) =
+template `[]=`*[T](v: TVec2[T], i: Ordinal, a: SomeNumber) =
   (array[2, T](v))[i] = a
 
-template `[]=`*[T](v: TVec3[T], i: Ordinal, a: T) =
+template `[]=`*[T](v: TVec3[T], i: Ordinal, a: SomeNumber) =
   (array[3, T](v))[i] = a
 
-template `[]=`*[T](v: TVec4[T], i: Ordinal, a: T) =
+template `[]=`*[T](v: TVec4[T], i: Ordinal, a: SomeNumber) =
   (array[4, T](v))[i] = a
 
 template `==`*[T](a, b: TVec1[T]): bool =
