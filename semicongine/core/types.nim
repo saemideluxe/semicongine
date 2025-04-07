@@ -337,73 +337,6 @@ type
   ImageArray*[T: PixelType] = ImageObject[T, true]
 
   # === fonts ===
-  GlyphQuad*[MaxGlyphs: static int] = object
-    # vertex offsets to glyph center: [left, bottom, right, top]
-    pos*: array[MaxGlyphs, Vec4f]
-    uv*: array[MaxGlyphs, Vec4f] # [left, bottom, right, top]
-
-  TextRendering* = object
-    aspectRatio*: float32
-
-  GlyphDescriptorSet*[MaxGlyphs: static int] = object
-    fontAtlas*: Image[Gray]
-    glyphquads*: GPUValue[GlyphQuad[MaxGlyphs], StorageBuffer]
-
-  GlyphShader*[MaxGlyphs: static int] = object
-    position {.InstanceAttribute.}: Vec3f
-    color {.InstanceAttribute.}: Vec4f
-    scale {.InstanceAttribute.}: float32
-    glyphIndex {.InstanceAttribute.}: uint16
-    textRendering {.PushConstant.}: TextRendering
-
-    fragmentUv {.Pass.}: Vec2f
-    fragmentColor {.PassFlat.}: Vec4f
-    outColor {.ShaderOutput.}: Vec4f
-    glyphData {.DescriptorSet: 3.}: GlyphDescriptorSet[MaxGlyphs]
-    vertexCode* =
-      """
-const int[6] indices = int[](0, 1, 2, 2, 3, 0);
-const int[4] i_x = int[](0, 0, 2, 2);
-const int[4] i_y = int[](1, 3, 3, 1);
-const float epsilon = 0.0000001;
-
-void main() {
-  int vertexI = indices[gl_VertexIndex];
-  vec3 vertexPos = vec3(
-    glyphquads.pos[glyphIndex][i_x[vertexI]] * scale / textRendering.aspectRatio,
-    glyphquads.pos[glyphIndex][i_y[vertexI]] * scale,
-    0
-  );
-  // the epsilon-offset is necessary, as otherwise characters with the same Z might overlap, despite transparency
-  gl_Position = vec4(vertexPos + position, 1.0);
-  gl_Position.z -= gl_InstanceIndex * epsilon;
-  gl_Position.z = fract(abs(gl_Position.z));
-  vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);
-  fragmentUv = uv;
-  fragmentColor = color;
-}  """
-    fragmentCode* =
-      """void main() {
-    float a = texture(fontAtlas, fragmentUv).r;
-    outColor = vec4(fragmentColor.rgb, fragmentColor.a * a);
-}"""
-
-  FontObj*[MaxGlyphs: static int] = object
-    advance*: Table[Rune, float32]
-    kerning*: Table[(Rune, Rune), float32]
-    leftBearing*: Table[Rune, float32]
-    lineAdvance*: float32
-    lineHeight*: float32 # like lineAdvance - lineGap
-    ascent*: float32 # from baseline to highest glyph
-    descent*: float32 # from baseline to lowest glyph
-    xHeight*: float32 # from baseline to height of lowercase x
-    descriptorSet*: DescriptorSetData[GlyphDescriptorSet[MaxGlyphs]]
-    descriptorGlyphIndex*: Table[Rune, uint16]
-    descriptorGlyphIndexRev*: Table[uint16, Rune] # only used for debugging atm
-    fallbackCharacter*: Rune
-
-  Font*[MaxGlyphs: static int] = ref FontObj[MaxGlyphs]
-
   TextHandle* = object
     index*: uint32
     generation*: uint32
@@ -422,17 +355,6 @@ void main() {
     scale*: float32 = 0
     color*: Vec4f = vec4(1, 1, 1, 1)
     capacity*: int
-
-  TextBuffer*[MaxGlyphs: static int] = object
-    cursor*: int
-    generation*: uint32
-    font*: Font[MaxGlyphs]
-    baseScale*: float32
-    position*: GPUArray[Vec3f, VertexBufferMapped]
-    color*: GPUArray[Vec4f, VertexBufferMapped]
-    scale*: GPUArray[float32, VertexBufferMapped]
-    glyphIndex*: GPUArray[uint16, VertexBufferMapped]
-    texts*: seq[Text]
 
   # === background loader thread ===
   LoaderThreadArgs*[T] = (
@@ -521,10 +443,3 @@ proc `=copy`(dest: var Mixer, source: Mixer) {.error.}
 proc `=copy`[S, T](dest: var ImageObject[S, T], source: ImageObject[S, T]) {.error.}
 proc `=copy`(dest: var Input, source: Input) {.error.}
 proc `=copy`(dest: var EngineObj, source: EngineObj) {.error.}
-proc `=copy`[MaxGlyphs: static int](
-  dest: var FontObj[MaxGlyphs], source: FontObj[MaxGlyphs]
-) {.error.}
-
-proc `=copy`[MaxGlyphs: static int](
-  dest: var TextBuffer[MaxGlyphs], source: TextBuffer[MaxGlyphs]
-) {.error.}

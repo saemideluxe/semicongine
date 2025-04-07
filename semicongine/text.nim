@@ -11,6 +11,65 @@ import ./rendering
 import ./images
 import ./rendering/renderer
 import ./rendering/memory
+import ./fonts
+
+type
+  TextRendering* = object
+    aspectRatio*: float32
+
+  GlyphShader*[MaxGlyphs: static int] = object
+    position {.InstanceAttribute.}: Vec3f
+    color {.InstanceAttribute.}: Vec4f
+    scale {.InstanceAttribute.}: float32
+    glyphIndex {.InstanceAttribute.}: uint16
+    textRendering {.PushConstant.}: TextRendering
+
+    fragmentUv {.Pass.}: Vec2f
+    fragmentColor {.PassFlat.}: Vec4f
+    outColor {.ShaderOutput.}: Vec4f
+    glyphData {.DescriptorSet: 3.}: GlyphDescriptorSet[MaxGlyphs]
+    vertexCode* =
+      """
+  const int[6] indices = int[](0, 1, 2, 2, 3, 0);
+  const int[4] i_x = int[](0, 0, 2, 2);
+  const int[4] i_y = int[](1, 3, 3, 1);
+  const float epsilon = 0.0000001;
+
+  void main() {
+    int vertexI = indices[gl_VertexIndex];
+    vec3 vertexPos = vec3(
+      glyphquads.pos[glyphIndex][i_x[vertexI]] * scale / textRendering.aspectRatio,
+      glyphquads.pos[glyphIndex][i_y[vertexI]] * scale,
+      0
+    );
+    // the epsilon-offset is necessary, as otherwise characters with the same Z might overlap, despite transparency
+    gl_Position = vec4(vertexPos + position, 1.0);
+    gl_Position.z -= gl_InstanceIndex * epsilon;
+    gl_Position.z = fract(abs(gl_Position.z));
+    vec2 uv = vec2(glyphquads.uv[glyphIndex][i_x[vertexI]], glyphquads.uv[glyphIndex][i_y[vertexI]]);
+    fragmentUv = uv;
+    fragmentColor = color;
+  }  """
+    fragmentCode* =
+      """void main() {
+      float a = texture(fontAtlas, fragmentUv).r;
+      outColor = vec4(fragmentColor.rgb, fragmentColor.a * a);
+  }"""
+
+  TextBuffer*[MaxGlyphs: static int] = object
+    cursor*: int
+    generation*: uint32
+    font*: Font[MaxGlyphs]
+    baseScale*: float32
+    position*: GPUArray[Vec3f, VertexBufferMapped]
+    color*: GPUArray[Vec4f, VertexBufferMapped]
+    scale*: GPUArray[float32, VertexBufferMapped]
+    glyphIndex*: GPUArray[uint16, VertexBufferMapped]
+    texts*: seq[Text]
+
+proc `=copy`[MaxGlyphs: static int](
+  dest: var TextBuffer[MaxGlyphs], source: TextBuffer[MaxGlyphs]
+) {.error.}
 
 proc initTextBuffer*[MaxGlyphs: static int](
     font: Font[MaxGlyphs],

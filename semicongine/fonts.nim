@@ -22,6 +22,36 @@ import ./contrib/algorithms/texture_packing
 
 const ASCII_CHARSET = PrintableChars.toSeq.toRunes
 
+type
+  GlyphQuad*[MaxGlyphs: static int] = object
+    # vertex offsets to glyph center: [left, bottom, right, top]
+    pos*: array[MaxGlyphs, Vec4f]
+    uv*: array[MaxGlyphs, Vec4f] # [left, bottom, right, top]
+
+  GlyphDescriptorSet*[MaxGlyphs: static int] = object
+    fontAtlas*: Image[Gray]
+    glyphquads*: GPUValue[GlyphQuad[MaxGlyphs], StorageBuffer]
+
+  FontObj*[MaxGlyphs: static int] = object
+    advance*: Table[Rune, float32]
+    kerning*: Table[(Rune, Rune), float32]
+    leftBearing*: Table[Rune, float32]
+    lineAdvance*: float32
+    lineHeight*: float32 # like lineAdvance - lineGap
+    ascent*: float32 # from baseline to highest glyph
+    descent*: float32 # from baseline to lowest glyph
+    xHeight*: float32 # from baseline to height of lowercase x
+    descriptorSet*: DescriptorSetData[GlyphDescriptorSet[MaxGlyphs]]
+    descriptorGlyphIndex*: Table[Rune, uint16]
+    descriptorGlyphIndexRev*: Table[uint16, Rune] # only used for debugging atm
+    fallbackCharacter*: Rune
+
+  Font*[MaxGlyphs: static int] = ref FontObj[MaxGlyphs]
+
+proc `=copy`[MaxGlyphs: static int](
+  dest: var FontObj[MaxGlyphs], source: FontObj[MaxGlyphs]
+) {.error.}
+
 type stbtt_fontinfo {.importc, incompleteStruct.} = object
 
 proc stbtt_InitFont(
