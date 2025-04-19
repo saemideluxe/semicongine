@@ -178,7 +178,6 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
     textbuffer.texts[textI].bufferOffset + textbuffer.texts[textI].capacity
   var i = 0
   while i < textbuffer.texts[textI].capacity and bufferOffset < bufferEnd:
-    # for i in 0 ..< textbuffer.texts[textI].capacity:
     if i < text.len:
       if text[i] == Rune('\n'):
         inc lineI
