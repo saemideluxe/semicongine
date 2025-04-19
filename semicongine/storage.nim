@@ -1,4 +1,5 @@
 import std/marshal
+import std/logging
 import std/algorithm
 import std/os
 import std/dirs
@@ -111,7 +112,6 @@ proc ensureExists(worldName: string, table: string): DbConn =
     sql(
       &"""CREATE TABLE IF NOT EXISTS {table} (
     key INT NOT NULL UNIQUE,
-    time INT NOT NULL,
     value BLOB NOT NULL
   )"""
     )
@@ -171,11 +171,10 @@ proc storeWorld*[T](
   let db = worldName.ensureExists(table)
   defer:
     db.close()
-  let key = $(int(now().toTime().toUnixFloat() * 1000))
-  let stm = db.prepare(&"""INSERT INTO {table} VALUES(?, ?, ?)""")
+  let key = int(now().utc.toTime.toUnixFloat * 1000)
+  let stm = db.prepare(&"""INSERT INTO {table} VALUES(?, ?)""")
   stm.bindParam(1, key)
-  stm.bindParam(2, int(now().utc.toTime.toUnixFloat * 1000))
-  stm.bindParam(3, data)
+  stm.bindParam(2, data)
   db.exec(stm)
   stm.finalize()
   if deleteOld:
@@ -214,6 +213,7 @@ proc loadStringValue(s: Stream): string =
 
 proc loadObjectValue[T](s: Stream): T =
   for field, value in result.fieldPairs():
+    debug "Load field " & field & " of object " & $T
     {.cast(uncheckedAssign).}:
       value = loadValue[typeof(value)](s)
 
@@ -251,15 +251,21 @@ proc listWorlds*(): seq[(DateTime, string)] =
       dir = string(dir), relative = true, checkDir = true, skipSpecial = true
     ):
       if kind in [pcFile, pcLinkToFile] and path.endsWith(".db"):
-        let db = path[0 .. ^4].ensureExists(DEFAULT_WORLD_TABLE_NAME)
-        defer:
-          db.close()
-        let dbResult = db.getValue(
-          sql(
-            &"""SELECT time FROM {DEFAULT_WORLD_TABLE_NAME} ORDER BY time DESC LIMIT 1"""
+        try:
+          let db = path[0 .. ^4].ensureExists(DEFAULT_WORLD_TABLE_NAME)
+          defer:
+            db.close()
+          let dbResult = db.getValue(
+            sql(
+              &"""SELECT key FROM {DEFAULT_WORLD_TABLE_NAME} ORDER BY key DESC LIMIT 1"""
+            )
           )
-        )
-        result.add ((parseInt(dbResult) / 1000).fromUnixFloat().local(), path[0 .. ^4])
+          result.add (
+            (parseInt(dbResult) / 1000).fromUnixFloat().local(), path[0 .. ^4]
+          )
+        except CatchableError:
+          discard
+
   result.sort(Descending)
 
 proc purgeWorld*(worldName: string) =
