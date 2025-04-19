@@ -142,11 +142,12 @@ proc updateGlyphData*(textbuffer: var TextBuffer, textHandle: TextHandle) =
 
     globalScale = textbuffer.texts[textI].scale * textbuffer.baseScale
     box = textbuffer.textDimension(text) * textbuffer.texts[textI].scale
-    xH = textbuffer.font.xHeight * globalScale
+    xH = textbuffer.font.xHeight * 0.8 * globalScale
+      # the 0.8 is just an approximation to get a good vertical center
     aratio = getAspectRatio()
     origin = vec3(
       position.x - (anchor.x * 0.5 + 0.5) * box.x / aratio,
-      position.y + (anchor.y * -0.5 + 0.5) * box.y - xH * 0.5 -
+      position.y + (anchor.y * -0.5 + 0.5) * box.y - xH -
         textbuffer.font.lineHeight * globalScale * 0.5,
       position.z,
     )

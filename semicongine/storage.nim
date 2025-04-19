@@ -1,4 +1,5 @@
 import std/marshal
+import std/algorithm
 import std/os
 import std/dirs
 import std/paths
@@ -110,6 +111,7 @@ proc ensureExists(worldName: string, table: string): DbConn =
     sql(
       &"""CREATE TABLE IF NOT EXISTS {table} (
     key INT NOT NULL UNIQUE,
+    time INT NOT NULL,
     value BLOB NOT NULL
   )"""
     )
@@ -170,9 +172,10 @@ proc storeWorld*[T](
   defer:
     db.close()
   let key = $(int(now().toTime().toUnixFloat() * 1000))
-  let stm = db.prepare(&"""INSERT INTO {table} VALUES(?, ?)""")
+  let stm = db.prepare(&"""INSERT INTO {table} VALUES(?, ?, ?)""")
   stm.bindParam(1, key)
-  stm.bindParam(2, data)
+  stm.bindParam(2, int(now().utc.toTime.toUnixFloat * 1000))
+  stm.bindParam(3, data)
   db.exec(stm)
   stm.finalize()
   if deleteOld:
@@ -240,7 +243,7 @@ proc loadWorld*[T](worldName: string, table = DEFAULT_WORLD_TABLE_NAME): T =
   var s = newStringStream(dbResult)
   loadValue[T](s)
 
-proc listWorlds*(): seq[string] =
+proc listWorlds*(): seq[(DateTime, string)] =
   let dir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)
 
   if dir.dirExists():
@@ -248,7 +251,16 @@ proc listWorlds*(): seq[string] =
       dir = string(dir), relative = true, checkDir = true, skipSpecial = true
     ):
       if kind in [pcFile, pcLinkToFile] and path.endsWith(".db"):
-        result.add path[0 .. ^4]
+        let db = path[0 .. ^4].ensureExists(DEFAULT_WORLD_TABLE_NAME)
+        defer:
+          db.close()
+        let dbResult = db.getValue(
+          sql(
+            &"""SELECT time FROM {DEFAULT_WORLD_TABLE_NAME} ORDER BY time DESC LIMIT 1"""
+          )
+        )
+        result.add ((parseInt(dbResult) / 1000).fromUnixFloat().local(), path[0 .. ^4])
+  result.sort(Descending)
 
 proc purgeWorld*(worldName: string) =
   worldName.path().string.removeFile()
