@@ -1,4 +1,5 @@
 import std/strtabs
+import std/syncio
 import std/xmltree
 import std/tables
 import std/options
@@ -7,6 +8,7 @@ import std/strutils
 import std/strformat
 import std/xmlparser
 import std/os
+import std/osproc
 import std/paths
 
 # helpers
@@ -93,6 +95,32 @@ func addValue(edef: var EnumDef, n: XmlNode) =
 
     edef.values.add EnumEntry(name: n.attr("name"), value: value)
 
+func memberDecl(n: XmlNode): string =
+  for i in 0 ..< n.len:
+    if n[i].kind == xnElement and n[i].tag == "comment":
+      n.delete(i)
+      break
+  assert n.tag == "member"
+  debugecho n.toSeq, " ", n.len
+  if n.len == 2:
+    return &"{n[1][0].text}: {n[0][0]}"
+  elif n.len == 3:
+    if n[1].kind == xnElement and n[1].tag == "name":
+      return
+        &"{n[1][0].text}: array[{n[2].text[1 ..< ^1]}, {TYPEMAP.getOrDefault(n[0][0].text, n[0][0].text)}]]"
+    else:
+      assert n[1].text.strip() == "*"
+      return &"{n[2][0].text}: ptr {n[0][0].text}"
+  elif n.len == 4:
+    if n[0].text.strip() in ["struct", "const struct"]:
+      return &"{n[3][0].text}: ptr {n[1][0].text}"
+    else:
+      assert n[2].text.strip() in ["*", "* const *", "* const*"]
+      return &"?"
+  elif n.len in [5, 6]:
+    return &"{n[1][0].text}: array[{n[3][0].text}, {n[0][0].text}]"
+  assert false
+
 for e in xmlenums:
   if e.attr("type") == "constants":
     for c in e.findAll("enum"):
@@ -124,32 +152,61 @@ for extension in extensions.findAll("extension"):
         extendenum.attrs["extnumber"] = extNum
       enums[extendenum.attr("extends")].addValue(extendenum)
 
+let outPath = (system.currentSourcePath.parentDir() / "api.nim")
+let outFile = open(outPath, fmWrite)
+
 # generate core types ===============================================================================
 # preamble, much easier to hardcode than to generate from xml
-echo """
-when defined(linux):
-  include ./platform/xlib
-when defined(windows):
-  include ./platform/win32
-
+outFile.writeLine """
 func VK_MAKE_API_VERSION*(
     variant: uint32, major: uint32, minor: uint32, patch: uint32
 ): uint32 {.compileTime.} =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
-
-
 """
 
-echo "type"
+outFile.writeLine "type"
+outFile.writeLine """
+  VkSampleMask = distinct uint32 
+  VkBool32 = distinct uint32 
+  VkFlags = distinct uint32 
+  VkFlags64 = distinct uint64 
+  VkDeviceSize = distinct uint64 
+  VkDeviceAddress = distinct uint64 
+  VkRemoteAddressNV = pointer
+"""
 
 for t in types:
+  if t.attr("api") == "vulkansc":
+    continue
+  if t.attr("alias") != "":
+    continue
   if t.attr("deprecated") == "true":
     continue
-  echo t
-echo ""
+  if t.attr("category") == "include":
+    continue
+  if t.attr("category") == "define":
+    continue
+  if t.attr("category") == "bitmask":
+    if t.len > 0 and t[0].text.startsWith("typedef"):
+      outFile.writeLine &"  {t[2][0].text} = distinct {t[1][0].text}"
+  elif t.attr("category") == "union":
+    let n = t.attr("name")
+    outFile.writeLine &"  {n}* {{.union.}} = object"
+    for member in t.findAll("member"):
+      outFile.writeLine &"    {member.memberDecl()}"
+  elif t.attr("category") == "handle":
+    outFile.writeLine &"  {t[2][0].text} = distinct pointer"
+  elif t.attr("category") == "struct":
+    let n = t.attr("name")
+    outFile.writeLine &"  {n}* = object"
+    for member in t.findAll("member"):
+      outFile.writeLine &"    {member.memberDecl()}"
+  # TODO: funcpointer
+
+outFile.writeLine ""
 
 # generate consts ===============================================================================
-echo "const"
+outFile.writeLine "const"
 for c in consts:
   var value = c.value
   if value.endsWith("U"):
@@ -158,14 +215,25 @@ for c in consts:
     value = value[0 ..^ 4] & "'u64"
   if value[0] == '~':
     value = "not " & value[1 ..^ 1]
-  echo &"  {c.name}*: {c.datatype} = {value}"
-echo ""
+  outFile.writeLine &"  {c.name}*: {c.datatype} = {value}"
+outFile.writeLine ""
 
 # generate enums ===============================================================================
-echo "type"
+outFile.writeLine "type"
 for edef in enums.values():
   if edef.values.len > 0:
-    echo &"  {edef.name}* {{.size: 4.}} = enum"
+    outFile.writeLine &"  {edef.name}* {{.size: 4.}} = enum"
     for ee in edef.values:
-      echo &"    {ee.name} = {ee.value}"
-echo ""
+      outFile.writeLine &"    {ee.name} = {ee.value}"
+outFile.writeLine ""
+
+outFile.writeLine """
+when defined(linux):
+  include ../semicongine/rendering/vulkan/platform/xlib
+when defined(windows):
+  include ../semicongine/rendering/vulkan/platform/win32
+"""
+
+outFile.close()
+
+assert execCmd("nim c " & outPath) == 0
