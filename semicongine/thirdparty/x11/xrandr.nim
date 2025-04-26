@@ -202,7 +202,7 @@ proc XRRChangeOutputProperty*(
   output: RROutput,
   property, kind: Atom,
   format, mode: cint,
-  data: ptr cuchar,
+  data: ptr char,
   nelements: cint,
 ) {.cdecl, dynlib: libXrandr, importc.}
 

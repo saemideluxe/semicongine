@@ -33,12 +33,6 @@ const TYPEMAP = {
   "int64_t": "int64",
   "size_t": "csize_t",
   "int": "cint",
-  "void*": "pointer",
-  "char*": "cstring",
-  "ptr char": "cstring",
-  "ptr void": "pointer",
-    # "VK_DEFINE_HANDLE": "VkHandle", # not required, can directly defined as a distinct pointer, (in C is a pointer to an empty struct type)
-    # "VK_DEFINE_NON_DISPATCHABLE_HANDLE": "VkNonDispatchableHandle", # same here
 }.toTable
 
 # load xml
@@ -95,30 +89,95 @@ func addValue(edef: var EnumDef, n: XmlNode) =
 
     edef.values.add EnumEntry(name: n.attr("name"), value: value)
 
+func doTypename(typename: string, isPointer: bool): string =
+  result = TYPEMAP.getOrDefault(typename.strip(), typename.strip()).strip(chars = {'_'})
+
+  if typename == "void":
+    assert isPointer
+
+  if isPointer:
+    if typename == "void":
+      result = "pointer"
+    elif typename == "char":
+      result = "cstring"
+    else:
+      result = "ptr " & result
+
+func doIdentifier(typename: string): string =
+  if typename in ["type", "object"]:
+    return &"`{typename}`"
+  return typename.strip()
+
+func doMember(typename, theType: string, isPointer: bool, value: string): string =
+  if value == "":
+    &"{doIdentifier(typename)}: {doTypename(theType, isPointer)}"
+  else:
+    &"{doIdentifier(typename)}: {doTypename(theType, isPointer)} = {value}"
+
 func memberDecl(n: XmlNode): string =
   for i in 0 ..< n.len:
     if n[i].kind == xnElement and n[i].tag == "comment":
       n.delete(i)
       break
   assert n.tag == "member"
-  debugecho n.toSeq, " ", n.len
   if n.len == 2:
-    return &"{n[1][0].text}: {n[0][0]}"
+    return doMember(n[1][0].text, n[0][0].text, false, n.attr("values"))
   elif n.len == 3:
+    assert "*" notin n[0][0].text.strip()
     if n[1].kind == xnElement and n[1].tag == "name":
-      return
-        &"{n[1][0].text}: array[{n[2].text[1 ..< ^1]}, {TYPEMAP.getOrDefault(n[0][0].text, n[0][0].text)}]]"
+      # bitfield
+      if n[2].text.strip().startsWith(":"):
+        return
+          &"{doIdentifier(n[1][0].text)} {{.bitsize:{n[2].text.strip()[1 .. ^1]}.}}: {doTypename(n[0][0].text, false)}"
+      # array definition
+      elif n[2].text.strip().startsWith("["):
+        let arrayDim = n[2].text[1 ..< ^1]
+        if "][" in arrayDim:
+          let dims = arrayDim.split("][", 1)
+          let (dim1, dim2) = (dims[0], dims[1])
+          return doMember(
+            n[1][0].text,
+            &"array[{dim1}, array[{dim2}, {doTypename(n[0][0].text, false)}]]",
+            false,
+            n.attr("values"),
+          )
+        else:
+          return doMember(
+            n[1][0].text,
+            &"array[{arrayDim}, {doTypename(n[0][0].text, false)}]",
+            false,
+            n.attr("values"),
+          )
+      else:
+        debugecho n.toSeq
+        doAssert false, "This should not happen"
     else:
+      # pointer definition
       assert n[1].text.strip() == "*"
-      return &"{n[2][0].text}: ptr {n[0][0].text}"
+      return doMember(n[2][0].text, n[0][0].text, true, n.attr("values"))
   elif n.len == 4:
     if n[0].text.strip() in ["struct", "const struct"]:
-      return &"{n[3][0].text}: ptr {n[1][0].text}"
+      return doMember(n[3][0].text, n[1][0].text, true, n.attr("values"))
     else:
+      assert n[0].text.strip() == "const" # can be ignored
+      assert n[1].tag == "type"
       assert n[2].text.strip() in ["*", "* const *", "* const*"]
-      return &"?"
+        # can be ignored, basically every type is a pointer
+      assert n[3].tag == "name"
+      assert n[1].len == 1
+      assert n[3].len == 1
+      return doMember(n[3][0].text, n[1][0].text, true, n.attr("values"))
   elif n.len in [5, 6]:
-    return &"{n[1][0].text}: array[{n[3][0].text}, {n[0][0].text}]"
+    # array definition, using const-value for array length
+    # <type>uint8_t</type>,<name>pipelineCacheUUID</name>[<enum>VK_UUID_SIZE</enum>]
+    assert n[2].text.strip() == "["
+    assert n[4].text.strip() == "]"
+    return doMember(
+      n[1][0].text,
+      &"array[{n[3][0].text}, {doTypename(n[0][0].text, false)}]",
+      false,
+      n.attr("values"),
+    )
   assert false
 
 for e in xmlenums:
@@ -152,12 +211,19 @@ for extension in extensions.findAll("extension"):
         extendenum.attrs["extnumber"] = extNum
       enums[extendenum.attr("extends")].addValue(extendenum)
 
-let outPath = (system.currentSourcePath.parentDir() / "api.nim")
+let outPath = (system.currentSourcePath.parentDir() / "vkapi.nim")
 let outFile = open(outPath, fmWrite)
 
 # generate core types ===============================================================================
 # preamble, much easier to hardcode than to generate from xml
 outFile.writeLine """
+
+import ../semicongine/thirdparty/winim/winim/inc/winbase
+import ../semicongine/thirdparty/winim/winim/inc/windef
+import ../semicongine/thirdparty/x11/xlib
+import ../semicongine/thirdparty/x11/x
+import ../semicongine/thirdparty/x11/xrandr
+
 func VK_MAKE_API_VERSION*(
     variant: uint32, major: uint32, minor: uint32, patch: uint32
 ): uint32 {.compileTime.} =
@@ -166,6 +232,54 @@ func VK_MAKE_API_VERSION*(
 
 outFile.writeLine "type"
 outFile.writeLine """
+  # some unused native types
+  #
+  # android
+  ANativeWindow = object
+  AHardwareBuffer = object
+
+  # apple
+  CAMetalLayer = object
+  MTLDevice = object
+  MTLCommandQueue = object
+  MTLBuffer = object
+  MTLTexture = object
+  MTLSharedEvent = object
+  MTLSharedEvent_id = object
+
+  # wayland
+  wl_display = object
+  wl_surface = object
+
+  # XCB
+  xcb_connection_t = object
+  xcb_window_t = object
+  xcb_visualid_t = object
+
+  # directfb
+  IDirectFB = object
+  IDirectFBSurface = object
+
+  # Zircon
+  zx_handle_t = object
+
+  # GGP C
+  GgpStreamDescriptor = object
+  GgpFrameToken = object
+
+  # Screen (nintendo switch?)
+  screen_context = object
+  screen_window = object
+  screen_buffer = object
+
+  # Nvidia
+  NvSciSyncAttrList = object
+  NvSciSyncObj = object
+  NvSciSyncFence = object
+  NvSciBufAttrList = object
+  NvSciBufObj = object
+
+  # some base vulkan base types
   VkSampleMask = distinct uint32 
   VkBool32 = distinct uint32 
   VkFlags = distinct uint32 
@@ -174,36 +288,6 @@ outFile.writeLine """
   VkDeviceAddress = distinct uint64 
   VkRemoteAddressNV = pointer
 """
-
-for t in types:
-  if t.attr("api") == "vulkansc":
-    continue
-  if t.attr("alias") != "":
-    continue
-  if t.attr("deprecated") == "true":
-    continue
-  if t.attr("category") == "include":
-    continue
-  if t.attr("category") == "define":
-    continue
-  if t.attr("category") == "bitmask":
-    if t.len > 0 and t[0].text.startsWith("typedef"):
-      outFile.writeLine &"  {t[2][0].text} = distinct {t[1][0].text}"
-  elif t.attr("category") == "union":
-    let n = t.attr("name")
-    outFile.writeLine &"  {n}* {{.union.}} = object"
-    for member in t.findAll("member"):
-      outFile.writeLine &"    {member.memberDecl()}"
-  elif t.attr("category") == "handle":
-    outFile.writeLine &"  {t[2][0].text} = distinct pointer"
-  elif t.attr("category") == "struct":
-    let n = t.attr("name")
-    outFile.writeLine &"  {n}* = object"
-    for member in t.findAll("member"):
-      outFile.writeLine &"    {member.memberDecl()}"
-  # TODO: funcpointer
-
-outFile.writeLine ""
 
 # generate consts ===============================================================================
 outFile.writeLine "const"
@@ -219,12 +303,77 @@ for c in consts:
 outFile.writeLine ""
 
 # generate enums ===============================================================================
+const nameCollisions = [
+  "VK_PIPELINE_CACHE_HEADER_VERSION_ONE",
+  "VK_PIPELINE_CACHE_HEADER_VERSION_SAFETY_CRITICAL_ONE",
+  "VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_EXT",
+]
 outFile.writeLine "type"
 for edef in enums.values():
   if edef.values.len > 0:
     outFile.writeLine &"  {edef.name}* {{.size: 4.}} = enum"
     for ee in edef.values:
-      outFile.writeLine &"    {ee.name} = {ee.value}"
+      # due to the nim identifier-system, there might be collisions between typenames and enum-member names
+      if ee.name in nameCollisions:
+        outFile.writeLine &"    {ee.name}_VALUE = {ee.value}"
+      else:
+        outFile.writeLine &"    {ee.name} = {ee.value}"
+
+outFile.writeLine ""
+
+# generate types ===============================================================================
+for t in types:
+  let category = t.attr("category")
+  if t.attr("api") == "vulkansc":
+    continue
+  elif t.attr("deprecated") == "true":
+    continue
+  elif category == "include":
+    continue
+  elif category == "define":
+    continue
+  elif t.attr("requires").startsWith("vk_video"):
+    continue
+  elif t.attr("alias") != "":
+    let a = t.attr("alias")
+    let n = t.attr("name")
+    outFile.writeLine &"  {n} = {a}"
+  elif category == "bitmask":
+    if t.len > 0 and t[0].text.startsWith("typedef"):
+      outFile.writeLine &"  {t[2][0].text} = distinct {t[1][0].text}"
+  elif category == "union":
+    let n = t.attr("name")
+    outFile.writeLine &"  {n}* {{.union.}} = object"
+    for member in t.findAll("member"):
+      outFile.writeLine &"    {member.memberDecl()}"
+  elif category == "handle":
+    outFile.writeLine &"  {t[2][0].text} = distinct pointer"
+  elif category == "struct":
+    let n = t.attr("name")
+    outFile.writeLine &"  {n}* = object"
+    for member in t.findAll("member"):
+      if member.attr("api") == "vulkansc":
+        continue
+      outFile.writeLine &"    {member.memberDecl()}"
+  elif category == "funcpointer":
+    #[
+    <type category="funcpointer">typedef void* (VKAPI_PTR *<name>PFN_vkAllocationFunction</name>)(
+      <type>void</type>*                                       pUserData,
+      <type>size_t</type>                                      size,
+      <type>size_t</type>                                      alignment,
+      <type>VkSystemAllocationScope</type>                     allocationScope);
+    </type>
+    PFN_vkAllocationFunction* = proc(
+      pUserData: pointer,
+      size: csize_t,
+      alignment: csize_t,
+      allocationScope: VkSystemAllocationScope,
+    ): pointer {.cdecl.}
+    ]#
+    assert t[0].text.startsWith("typedef ")
+    outFile.writeLine &"  {t[1][0].text}* = proc()"
+  else:
+    doAssert category in ["", "basetype", "enum"], "unknown type category: " & category
 outFile.writeLine ""
 
 outFile.writeLine """
