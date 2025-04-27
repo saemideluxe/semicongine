@@ -34,7 +34,6 @@ const TYPEMAP = {
   "size_t": "csize_t",
   "int": "cint",
 }.toTable
-
 # load xml
 let xml = (system.currentSourcePath.parentDir() / "vk.xml").loadXml()
 let platforms = xml.findAll("platforms")[0]
@@ -69,9 +68,6 @@ func addValue(edef: var EnumDef, n: XmlNode) =
   if n.attr("deprecated") != "aliased" and n.attr("alias") == "":
     if n.attr("name") in edef.values.mapIt(it.name):
       return
-    if n.attr("name").endsWith("_EXT") and
-        n.attr("name")[0 ..< ^4] in edef.values.mapIt(it.name):
-      return
 
     var value = ""
     if n.attr("value") != "":
@@ -87,7 +83,8 @@ func addValue(edef: var EnumDef, n: XmlNode) =
         v = -v
       value = $(v)
 
-    edef.values.add EnumEntry(name: n.attr("name"), value: value)
+    if value notin edef.values.mapIt(it.value):
+      edef.values.add EnumEntry(name: n.attr("name"), value: value)
 
 func doTypename(typename: string, isPointer: bool): string =
   result = TYPEMAP.getOrDefault(typename.strip(), typename.strip()).strip(chars = {'_'})
@@ -309,7 +306,10 @@ const nameCollisions = [
   "VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_EXT",
 ]
 outFile.writeLine "type"
+
+echo "#########################"
 for edef in enums.values():
+  echo edef.values
   if edef.values.len > 0:
     outFile.writeLine &"  {edef.name}* {{.size: 4.}} = enum"
     for ee in edef.values:
