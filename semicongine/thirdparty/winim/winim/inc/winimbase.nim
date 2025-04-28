@@ -8,12 +8,13 @@
 import macros
 
 when not defined(noRes):
-  when defined(vcc):
-    {.link: "../lib/winimvcc.res".}
-  elif defined(cpu64):
-    {.link: "../lib/winim64.res".}
-  else:
-    {.link: "../lib/winim32.res".}
+  when defined(windows):
+    when defined(vcc):
+      {.link: "../lib/winimvcc.res".}
+    elif defined(cpu64):
+      {.link: "../lib/winim64.res".}
+    else:
+      {.link: "../lib/winim32.res".}
 
 macro winapi*(x: untyped): untyped =
   when not defined(noDiscardableApi):

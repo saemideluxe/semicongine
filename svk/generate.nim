@@ -235,14 +235,14 @@ outFile.writeLine """
   ANativeWindow = object
   AHardwareBuffer = object
 
-  # apple
+  # apple/metal
   CAMetalLayer = object
-  MTLDevice = object
-  MTLCommandQueue = object
-  MTLBuffer = object
-  MTLTexture = object
-  MTLSharedEvent = object
   MTLSharedEvent_id = object
+  MTLDevice_id = object
+  MTLCommandQueue_id = object
+  MTLBuffer_id = object
+  MTLTexture_id = object
+  IOSurfaceRef = object
 
   # wayland
   wl_display = object
@@ -277,13 +277,13 @@ outFile.writeLine """
   NvSciBufObj = object
 
   # some base vulkan base types
-  VkSampleMask = distinct uint32 
-  VkBool32 = distinct uint32 
-  VkFlags = distinct uint32 
-  VkFlags64 = distinct uint64 
-  VkDeviceSize = distinct uint64 
-  VkDeviceAddress = distinct uint64 
-  VkRemoteAddressNV = pointer
+  VkSampleMask* = distinct uint32 
+  VkBool32* = distinct uint32 
+  VkFlags* = distinct uint32 
+  VkFlags64* = distinct uint64 
+  VkDeviceSize* = distinct uint64 
+  VkDeviceAddress* = distinct uint64 
+  VkRemoteAddressNV* = pointer
 """
 
 # generate consts ===============================================================================
@@ -307,9 +307,7 @@ const nameCollisions = [
 ]
 outFile.writeLine "type"
 
-echo "#########################"
 for edef in enums.values():
-  echo edef.values
   if edef.values.len > 0:
     outFile.writeLine &"  {edef.name}* {{.size: 4.}} = enum"
     for ee in edef.values:
@@ -324,6 +322,11 @@ outFile.writeLine ""
 # generate types ===============================================================================
 for t in types:
   let category = t.attr("category")
+  let tName = t.attr("name")
+  if tName.startsWith("VkVideo"): # we are not doing the video API, sorry
+    continue
+  if tName.startsWith("VkPhysicalDeviceVideo"): # we are not doing the video API, sorry
+    continue
   if t.attr("api") == "vulkansc":
     continue
   elif t.attr("deprecated") == "true":
@@ -336,21 +339,18 @@ for t in types:
     continue
   elif t.attr("alias") != "":
     let a = t.attr("alias")
-    let n = t.attr("name")
-    outFile.writeLine &"  {n} = {a}"
+    outFile.writeLine &"  {tName}* = {a}"
   elif category == "bitmask":
     if t.len > 0 and t[0].text.startsWith("typedef"):
-      outFile.writeLine &"  {t[2][0].text} = distinct {t[1][0].text}"
+      outFile.writeLine &"  {t[2][0].text}* = distinct {t[1][0].text}"
   elif category == "union":
-    let n = t.attr("name")
-    outFile.writeLine &"  {n}* {{.union.}} = object"
+    outFile.writeLine &"  {tName}* {{.union.}} = object"
     for member in t.findAll("member"):
       outFile.writeLine &"    {member.memberDecl()}"
   elif category == "handle":
-    outFile.writeLine &"  {t[2][0].text} = distinct pointer"
+    outFile.writeLine &"  {t[2][0].text}* = distinct pointer"
   elif category == "struct":
-    let n = t.attr("name")
-    outFile.writeLine &"  {n}* = object"
+    outFile.writeLine &"  {tName}* = object"
     for member in t.findAll("member"):
       if member.attr("api") == "vulkansc":
         continue
@@ -363,25 +363,73 @@ for t in types:
       <type>size_t</type>                                      alignment,
       <type>VkSystemAllocationScope</type>                     allocationScope);
     </type>
-    PFN_vkAllocationFunction* = proc(
-      pUserData: pointer,
-      size: csize_t,
-      alignment: csize_t,
-      allocationScope: VkSystemAllocationScope,
-    ): pointer {.cdecl.}
     ]#
     assert t[0].text.startsWith("typedef ")
-    outFile.writeLine &"  {t[1][0].text}* = proc()"
+    let retName = t[0].text[8 ..< ^13].strip()
+    let funcName = t.findAll("name")[0][0].text
+
+    outFile.write &"  {funcname}* = proc("
+    for i in 3 ..< t.len:
+    # TODO: params
+
+    if retName == "void"
+      outFile.writeLine &") {{.cdecl.}}"
+    elif retName == "void*"
+      outFile.writeLine &"): pointer {{.cdecl.}}"
+    else:
+      outFile.writeLine &"): {doTypename(retName, false)} {{.cdecl.}}"
+
   else:
     doAssert category in ["", "basetype", "enum"], "unknown type category: " & category
 outFile.writeLine ""
 
-outFile.writeLine """
-when defined(linux):
-  include ../semicongine/rendering/vulkan/platform/xlib
-when defined(windows):
-  include ../semicongine/rendering/vulkan/platform/win32
-"""
+for command in commands:
+  #[
+    <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY,VK_ERROR_INITIALIZATION_FAILED,VK_ERROR_LAYER_NOT_PRESENT,VK_ERROR_EXTENSION_NOT_PRESENT,VK_ERROR_INCOMPATIBLE_DRIVER">
+      <proto>
+        <type>VkResult</type>
+        <name>vkCreateInstance</name>
+      </proto>
+      <param>const <type>VkInstanceCreateInfo</type>* <name>pCreateInfo</name></param>
+      <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+      <param><type>VkInstance</type>* <name>pInstance</name></param>
+    </command>
+  ]#
+  if command.attr("api") == "vulkansc":
+    continue
+  if command.attr("alias") != "":
+    let funcName = command.attr("name")
+    let funcAlias = command.attr("alias")
+    outFile.write &"var {funcName}* = {funcAlias}\n"
+    continue
+
+  let proto = command.findAll("proto")[0]
+  let retType = proto.findAll("type")[0][0].text.strip()
+  let funcName = proto.findAll("name")[0][0].text.strip()
+
+  if "Video" in funcName: # Video API not supported at this time
+    continue
+
+  outFile.write &"var {funcName}*: proc("
+  for param in command:
+    if param.tag != "param":
+      continue
+    if param.attr("api") == "vulkansc":
+      continue
+    assert param.len in [2, 3, 4]
+    let paramType = param.findAll("type")[0][0].text
+    let paramName = param.findAll("name")[0][0].text
+    assert "*" notin paramType, $param
+    if paramType == "void":
+      outFile.write &"{doIdentifier(paramName)}: {doTypename(paramType, true)}, "
+    else:
+      outFile.write &"{doIdentifier(paramName)}: {doTypename(paramType, false)}, "
+
+  outFile.write &")"
+  if retType != "void":
+    assert "*" notin retType
+    outFile.write &": {doTypename(retType, false)}"
+  outFile.write " {.stdcall.}\n"
 
 outFile.close()
 
