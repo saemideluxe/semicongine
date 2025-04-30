@@ -86,30 +86,36 @@ func addValue(edef: var EnumDef, n: XmlNode) =
     if value notin edef.values.mapIt(it.value):
       edef.values.add EnumEntry(name: n.attr("name"), value: value)
 
-func doTypename(typename: string, isPointer: bool): string =
+func doTypename(typename: string, pointerType: int): string =
+  ## pointerType == 0: no pointer
+  ## pointerType == 1: normal pointer (e.g. char *)
+  ## pointerType == 2: double pointer (e.g. void **)
+  assert pointerType in [0, 1, 2]
   result = TYPEMAP.getOrDefault(typename.strip(), typename.strip()).strip(chars = {'_'})
 
   if typename == "void":
-    assert isPointer
+    assert pointerType > 0
 
-  if isPointer:
+  if pointerType > 0:
     if typename == "void":
       result = "pointer"
     elif typename == "char":
       result = "cstring"
     else:
       result = "ptr " & result
+  if pointerType == 2:
+    result = "ptr " & result
 
 func doIdentifier(typename: string): string =
   if typename in ["type", "object"]:
     return &"`{typename}`"
   return typename.strip()
 
-func doMember(typename, theType: string, isPointer: bool, value: string): string =
+func doMember(typename, theType: string, pointerType: int, value: string): string =
   if value == "":
-    &"{doIdentifier(typename)}: {doTypename(theType, isPointer)}"
+    &"{doIdentifier(typename)}: {doTypename(theType, pointerType)}"
   else:
-    &"{doIdentifier(typename)}: {doTypename(theType, isPointer)} = {value}"
+    &"{doIdentifier(typename)}: {doTypename(theType, pointerType)} = {value}"
 
 func memberDecl(n: XmlNode): string =
   for i in 0 ..< n.len:
@@ -118,14 +124,14 @@ func memberDecl(n: XmlNode): string =
       break
   assert n.tag == "member"
   if n.len == 2:
-    return doMember(n[1][0].text, n[0][0].text, false, n.attr("values"))
+    return doMember(n[1][0].text, n[0][0].text, 0, n.attr("values"))
   elif n.len == 3:
     assert "*" notin n[0][0].text.strip()
     if n[1].kind == xnElement and n[1].tag == "name":
       # bitfield
       if n[2].text.strip().startsWith(":"):
         return
-          &"{doIdentifier(n[1][0].text)} {{.bitsize:{n[2].text.strip()[1 .. ^1]}.}}: {doTypename(n[0][0].text, false)}"
+          &"{doIdentifier(n[1][0].text)} {{.bitsize:{n[2].text.strip()[1 .. ^1]}.}}: {doTypename(n[0][0].text, 0)}"
       # array definition
       elif n[2].text.strip().startsWith("["):
         let arrayDim = n[2].text[1 ..< ^1]
@@ -134,15 +140,15 @@ func memberDecl(n: XmlNode): string =
           let (dim1, dim2) = (dims[0], dims[1])
           return doMember(
             n[1][0].text,
-            &"array[{dim1}, array[{dim2}, {doTypename(n[0][0].text, false)}]]",
-            false,
+            &"array[{dim1}, array[{dim2}, {doTypename(n[0][0].text, 0)}]]",
+            0,
             n.attr("values"),
           )
         else:
           return doMember(
             n[1][0].text,
-            &"array[{arrayDim}, {doTypename(n[0][0].text, false)}]",
-            false,
+            &"array[{arrayDim}, {doTypename(n[0][0].text, 0)}]",
+            0,
             n.attr("values"),
           )
       else:
@@ -151,10 +157,10 @@ func memberDecl(n: XmlNode): string =
     else:
       # pointer definition
       assert n[1].text.strip() == "*"
-      return doMember(n[2][0].text, n[0][0].text, true, n.attr("values"))
+      return doMember(n[2][0].text, n[0][0].text, 1, n.attr("values"))
   elif n.len == 4:
     if n[0].text.strip() in ["struct", "const struct"]:
-      return doMember(n[3][0].text, n[1][0].text, true, n.attr("values"))
+      return doMember(n[3][0].text, n[1][0].text, 1, n.attr("values"))
     else:
       assert n[0].text.strip() == "const" # can be ignored
       assert n[1].tag == "type"
@@ -163,7 +169,7 @@ func memberDecl(n: XmlNode): string =
       assert n[3].tag == "name"
       assert n[1].len == 1
       assert n[3].len == 1
-      return doMember(n[3][0].text, n[1][0].text, true, n.attr("values"))
+      return doMember(n[3][0].text, n[1][0].text, 1, n.attr("values"))
   elif n.len in [5, 6]:
     # array definition, using const-value for array length
     # <type>uint8_t</type>,<name>pipelineCacheUUID</name>[<enum>VK_UUID_SIZE</enum>]
@@ -171,8 +177,8 @@ func memberDecl(n: XmlNode): string =
     assert n[4].text.strip() == "]"
     return doMember(
       n[1][0].text,
-      &"array[{n[3][0].text}, {doTypename(n[0][0].text, false)}]",
-      false,
+      &"array[{n[3][0].text}, {doTypename(n[0][0].text, 0)}]",
+      0,
       n.attr("values"),
     )
   assert false
@@ -214,6 +220,8 @@ let outFile = open(outPath, fmWrite)
 # generate core types ===============================================================================
 # preamble, much easier to hardcode than to generate from xml
 outFile.writeLine """
+
+import std/dynlib
 
 import ../semicongine/thirdparty/winim/winim/inc/winbase
 import ../semicongine/thirdparty/winim/winim/inc/windef
@@ -348,7 +356,7 @@ for t in types:
     for member in t.findAll("member"):
       outFile.writeLine &"    {member.memberDecl()}"
   elif category == "handle":
-    outFile.writeLine &"  {t[2][0].text}* = distinct pointer"
+    outFile.writeLine &"  {t[2][0].text} = distinct pointer"
   elif category == "struct":
     outFile.writeLine &"  {tName}* = object"
     for member in t.findAll("member"):
@@ -356,51 +364,42 @@ for t in types:
         continue
       outFile.writeLine &"    {member.memberDecl()}"
   elif category == "funcpointer":
-    #[
-    <type category="funcpointer">typedef void* (VKAPI_PTR *<name>PFN_vkAllocationFunction</name>)(
-      <type>void</type>*                                       pUserData,
-      <type>size_t</type>                                      size,
-      <type>size_t</type>                                      alignment,
-      <type>VkSystemAllocationScope</type>                     allocationScope);
-    </type>
-    ]#
     assert t[0].text.startsWith("typedef ")
     let retName = t[0].text[8 ..< ^13].strip()
     let funcName = t.findAll("name")[0][0].text
 
     outFile.write &"  {funcname}* = proc("
-    for i in 3 ..< t.len:
-    # TODO: params
+    let nParams = (t.len - 3) div 2
+    for i in 0 ..< nParams:
+      assert t[i * 2 + 3].tag == "type"
+      let typename = t[i * 2 + 3][0].text.strip()
+      var identifier = t[i * 2 + 4].text.strip(chars = {' ', ')', ';', ',', '\n'})
+      var pointerType = if identifier.startsWith("*"): 1 else: 0
+      if pointerType > 0:
+        identifier = identifier[1 .. ^1].strip(chars = {' ', ')', ';', ',', '\n'})
+      if identifier.endsWith("const"):
+        identifier = identifier[0 .. ^6].strip(chars = {' ', ')', ';', ',', '\n'})
+      identifier = identifier.strip(chars = {','})
+      outFile.write &"{doIdentifier(identifier)}: {doTypename(typename, pointerType)}, "
 
-    if retName == "void"
+    if retName == "void":
       outFile.writeLine &") {{.cdecl.}}"
-    elif retName == "void*"
+    elif retName == "void*":
       outFile.writeLine &"): pointer {{.cdecl.}}"
     else:
-      outFile.writeLine &"): {doTypename(retName, false)} {{.cdecl.}}"
-
+      outFile.writeLine &"): {doTypename(retName, 0)} {{.cdecl.}}"
   else:
     doAssert category in ["", "basetype", "enum"], "unknown type category: " & category
 outFile.writeLine ""
 
+outFile.write &"var\n"
 for command in commands:
-  #[
-    <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY,VK_ERROR_INITIALIZATION_FAILED,VK_ERROR_LAYER_NOT_PRESENT,VK_ERROR_EXTENSION_NOT_PRESENT,VK_ERROR_INCOMPATIBLE_DRIVER">
-      <proto>
-        <type>VkResult</type>
-        <name>vkCreateInstance</name>
-      </proto>
-      <param>const <type>VkInstanceCreateInfo</type>* <name>pCreateInfo</name></param>
-      <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
-      <param><type>VkInstance</type>* <name>pInstance</name></param>
-    </command>
-  ]#
   if command.attr("api") == "vulkansc":
     continue
   if command.attr("alias") != "":
     let funcName = command.attr("name")
     let funcAlias = command.attr("alias")
-    outFile.write &"var {funcName}* = {funcAlias}\n"
+    outFile.write &"  {funcName}* = {funcAlias}\n"
     continue
 
   let proto = command.findAll("proto")[0]
@@ -410,7 +409,7 @@ for command in commands:
   if "Video" in funcName: # Video API not supported at this time
     continue
 
-  outFile.write &"var {funcName}*: proc("
+  outFile.write &"  {funcName}*: proc("
   for param in command:
     if param.tag != "param":
       continue
@@ -420,16 +419,41 @@ for command in commands:
     let paramType = param.findAll("type")[0][0].text
     let paramName = param.findAll("name")[0][0].text
     assert "*" notin paramType, $param
-    if paramType == "void":
-      outFile.write &"{doIdentifier(paramName)}: {doTypename(paramType, true)}, "
-    else:
-      outFile.write &"{doIdentifier(paramName)}: {doTypename(paramType, false)}, "
+
+    if param.len == 4:
+      param.delete(0)
+
+    var pointerType = 0
+
+    if param.len == 3:
+      if param[param.len - 1].kind == xnText:
+        assert param[param.len - 1].text[^1] == ']'
+      else:
+        assert param[0].tag == "type"
+        assert param[param.len - 1].tag == "name"
+        if param[1].text.strip() == "*":
+          pointerType = 1
+        elif param[1].text.strip() == "**":
+          pointerType = 2
+        # echo "3: ", param[1].text, " ", paramType, " ", paramName
+    outFile.write &"{doIdentifier(paramName)}: {doTypename(paramType, pointerType)}, "
 
   outFile.write &")"
   if retType != "void":
     assert "*" notin retType
-    outFile.write &": {doTypename(retType, false)}"
+    outFile.write &": {doTypename(retType, 0)}"
   outFile.write " {.stdcall.}\n"
+
+outFile.write """
+when defined(linux):
+  let vulkanLib = loadLib("libvulkan.so.1")
+when defined(windows):
+  let vulkanLib = loadLib("vulkan-1.dll")
+if vulkanLib == nil:
+  raise newException(Exception, "Unable to load vulkan library")
+
+vkGetInstanceProcAddr = cast[proc(instance: VkInstance, pName: cstring, ): PFN_vkVoidFunction {.stdcall.}](checkedSymAddr(vulkanLib, "vkGetInstanceProcAddr"))
+  """
 
 outFile.close()
 
