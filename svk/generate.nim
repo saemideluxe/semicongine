@@ -100,10 +100,16 @@ func doTypename(typename: string, pointerType: int): string =
     if typename == "void":
       result = "pointer"
     elif typename == "char":
-      result = "cstring"
+      if pointerType == 1:
+        result = "cstring"
+      elif pointerType == 2:
+        result = "cstringArray"
+      else:
+        assert false, "Unsupported char pointer type"
     else:
       result = "ptr " & result
-  if pointerType == 2:
+
+  if pointerType == 2 and typename != "char":
     result = "ptr " & result
 
 func doIdentifier(typename: string): string =
@@ -165,11 +171,12 @@ func memberDecl(n: XmlNode): string =
       assert n[0].text.strip() == "const" # can be ignored
       assert n[1].tag == "type"
       assert n[2].text.strip() in ["*", "* const *", "* const*"]
-        # can be ignored, basically every type is a pointer
       assert n[3].tag == "name"
       assert n[1].len == 1
       assert n[3].len == 1
-      return doMember(n[3][0].text, n[1][0].text, 1, n.attr("values"))
+      return doMember(
+        n[3][0].text, n[1][0].text, n[2].text.strip().count("*"), n.attr("values")
+      )
   elif n.len in [5, 6]:
     # array definition, using const-value for array length
     # <type>uint8_t</type>,<name>pipelineCacheUUID</name>[<enum>VK_UUID_SIZE</enum>]
@@ -231,7 +238,7 @@ import ../semicongine/thirdparty/x11/xrandr
 
 func VK_MAKE_API_VERSION*(
     variant: uint32, major: uint32, minor: uint32, patch: uint32
-): uint32 {.compileTime.} =
+): uint32 =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
 """
 
@@ -392,14 +399,13 @@ for t in types:
     doAssert category in ["", "basetype", "enum"], "unknown type category: " & category
 outFile.writeLine ""
 
-outFile.write &"var\n"
 for command in commands:
   if command.attr("api") == "vulkansc":
     continue
   if command.attr("alias") != "":
     let funcName = command.attr("name")
     let funcAlias = command.attr("alias")
-    outFile.write &"  {funcName}* = {funcAlias}\n"
+    outFile.write &"var {funcName}* = {funcAlias}\n"
     continue
 
   let proto = command.findAll("proto")[0]
@@ -409,7 +415,7 @@ for command in commands:
   if "Video" in funcName: # Video API not supported at this time
     continue
 
-  outFile.write &"  {funcName}*: proc("
+  outFile.write &"var {funcName}*: proc("
   for param in command:
     if param.tag != "param":
       continue
@@ -453,7 +459,25 @@ if vulkanLib == nil:
   raise newException(Exception, "Unable to load vulkan library")
 
 vkGetInstanceProcAddr = cast[proc(instance: VkInstance, pName: cstring, ): PFN_vkVoidFunction {.stdcall.}](checkedSymAddr(vulkanLib, "vkGetInstanceProcAddr"))
-  """
+
+proc loadFunc[T](instance: VkInstance, f: var T, name: string) =
+  f = cast[T](vkGetInstanceProcAddr(instance, name))
+
+"""
+
+for f in features:
+  let name = f.attr("name").replace(",", "_")
+  if f.attr("struct") != "":
+    continue
+  outFile.writeLine &"proc loadFeature_{name}(instance: VkInstance) ="
+  var hasEntries = false
+  for cmd in f.findAll("command"):
+    hasEntries = true
+    let cName = cmd.attr("name")
+    outFile.writeLine &"  loadFunc(instance, {cName}, \"{cName}\")"
+  if not hasEntries:
+    outFile.writeLine "  discard"
+  outFile.writeLine ""
 
 outFile.close()
 
