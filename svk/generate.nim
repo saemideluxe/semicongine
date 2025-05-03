@@ -213,8 +213,15 @@ for f in features:
     if extendenum.attr("extends") != "":
       enums[extendenum.attr("extends")].addValue(extendenum)
 
+var extensionLoaders: seq[(string, seq[string])]
+
 for extension in extensions.findAll("extension"):
   let extNum = extension.attr("number")
+  extensionLoaders.add (extension.attr("name"), newSeq[string]())
+  for c in extension.findAll("command"):
+    if "Video" notin c.attr("name"):
+      extensionLoaders[^1][1].add c.attr("name")
+
   for extendenum in extension.findAll("enum"):
     if extendenum.attr("extends") != "":
       if extendenum.attr("extnumber") == "":
@@ -229,6 +236,8 @@ let outFile = open(outPath, fmWrite)
 outFile.writeLine """
 
 import std/dynlib
+import std/strutils
+import std/tables
 
 import ../semicongine/thirdparty/winim/winim/inc/winbase
 import ../semicongine/thirdparty/winim/winim/inc/windef
@@ -311,7 +320,10 @@ for c in consts:
     value = value[0 ..^ 4] & "'u64"
   if value[0] == '~':
     value = "not " & value[1 ..^ 1]
-  outFile.writeLine &"  {c.name}*: {c.datatype} = {value}"
+  if c.name in ["VK_TRUE", "VK_FALSE"]:
+    outFile.writeLine &"  {c.name}*: VkBool32 = VkBool32({value})"
+  else:
+    outFile.writeLine &"  {c.name}*: {c.datatype} = {value}"
 outFile.writeLine ""
 
 # generate enums ===============================================================================
@@ -335,6 +347,7 @@ for edef in enums.values():
 outFile.writeLine ""
 
 # generate types ===============================================================================
+var stringConverters: seq[string]
 for t in types:
   let category = t.attr("category")
   let tName = t.attr("name")
@@ -357,13 +370,14 @@ for t in types:
     outFile.writeLine &"  {tName}* = {a}"
   elif category == "bitmask":
     if t.len > 0 and t[0].text.startsWith("typedef"):
-      outFile.writeLine &"  {t[2][0].text}* = distinct {t[1][0].text}"
+      outFile.writeLine &"  {t[2][0].text.strip()}* = distinct {t[1][0].text.strip()}"
   elif category == "union":
     outFile.writeLine &"  {tName}* {{.union.}} = object"
     for member in t.findAll("member"):
       outFile.writeLine &"    {member.memberDecl()}"
   elif category == "handle":
-    outFile.writeLine &"  {t[2][0].text} = distinct pointer"
+    outFile.writeLine &"  {t[2][0].text.strip()} = distinct pointer"
+    stringConverters.add t[2][0].text.strip()
   elif category == "struct":
     outFile.writeLine &"  {tName}* = object"
     for member in t.findAll("member"):
@@ -451,17 +465,25 @@ for command in commands:
   outFile.write " {.stdcall.}\n"
 
 outFile.write """
-when defined(linux):
-  let vulkanLib = loadLib("libvulkan.so.1")
-when defined(windows):
-  let vulkanLib = loadLib("vulkan-1.dll")
-if vulkanLib == nil:
-  raise newException(Exception, "Unable to load vulkan library")
-
-vkGetInstanceProcAddr = cast[proc(instance: VkInstance, pName: cstring, ): PFN_vkVoidFunction {.stdcall.}](checkedSymAddr(vulkanLib, "vkGetInstanceProcAddr"))
 
 proc loadFunc[T](instance: VkInstance, f: var T, name: string) =
   f = cast[T](vkGetInstanceProcAddr(instance, name))
+
+proc initVulkanLoader*() =
+  if vkGetInstanceProcAddr != nil:
+    return
+
+  when defined(linux):
+    let vulkanLib = loadLib("libvulkan.so.1")
+  when defined(windows):
+    let vulkanLib = loadLib("vulkan-1.dll")
+  if vulkanLib == nil:
+    raise newException(Exception, "Unable to load vulkan library")
+
+  # init two global functions
+  vkGetInstanceProcAddr = cast[proc(instance: VkInstance, pName: cstring, ): PFN_vkVoidFunction {.stdcall.}](checkedSymAddr(vulkanLib, "vkGetInstanceProcAddr"))
+
+  loadFunc(VkInstance(nil), vkCreateInstance, "vkCreateInstance")
 
 """
 
@@ -469,15 +491,43 @@ for f in features:
   let name = f.attr("name").replace(",", "_")
   if f.attr("struct") != "":
     continue
-  outFile.writeLine &"proc loadFeature_{name}(instance: VkInstance) ="
+  outFile.writeLine &"proc load_{name}(instance: VkInstance) ="
   var hasEntries = false
   for cmd in f.findAll("command"):
+    if cmd.attr("name") == "vkCreateInstance":
+      continue
     hasEntries = true
     let cName = cmd.attr("name")
     outFile.writeLine &"  loadFunc(instance, {cName}, \"{cName}\")"
   if not hasEntries:
     outFile.writeLine "  discard"
   outFile.writeLine ""
+
+for (extName, commands) in extensionLoaders:
+  outFile.writeLine &"proc load_{extName}(instance: VkInstance) ="
+  for c in commands:
+    outFile.writeLine &"  loadFunc(instance, {c}, \"{c}\")"
+  if commands.len == 0:
+    outFile.writeLine &"  discard"
+outFile.writeLine ""
+
+outFile.writeLine "const EXTENSION_LOADERS = {"
+for (extName, commands) in extensionLoaders:
+  outFile.writeLine &"  \"{extName}\": load_{extName},"
+outFile.writeLine "}.toTable"
+outFile.writeLine ""
+
+outFile.writeLine "proc loadExtension*(instance: VkInstance, name: string) ="
+outFile.writeLine "  assert name in EXTENSION_LOADERS"
+outFile.writeLine "  EXTENSION_LOADERS[name](instance)"
+outFile.writeLine ""
+
+for strCon in stringConverters:
+  outFile.writeLine &"""proc `$`*(v: {strCon}): string = "0x" & cast[uint](v).toHex()"""
+outFile.writeLine ""
+
+# we preload the vkCreateInstance function, so we can create an instance
+outFile.writeLine ""
 
 outFile.close()
 
