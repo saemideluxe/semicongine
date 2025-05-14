@@ -1,3 +1,4 @@
+import std/tables
 import std/strutils
 import std/logging
 import std/os
@@ -87,7 +88,6 @@ proc svkCreateInstance*(
       enabledExtensionCount: enabledExtensions.len.uint32,
       ppEnabledExtensionNames: enabledExtensionsC,
     )
-  # this one we will load manually
   checkVkResult vkCreateInstance(addr createinfo, nil, addr result.vkInstance)
 
   enabledLayersC.deallocCStringArray()

@@ -238,6 +238,8 @@ outFile.writeLine """
 import std/dynlib
 import std/strutils
 import std/tables
+import std/macros
+import std/typetraits
 
 import ../semicongine/thirdparty/winim/winim/inc/winbase
 import ../semicongine/thirdparty/winim/winim/inc/windef
@@ -249,10 +251,25 @@ func VK_MAKE_API_VERSION*(
     variant: uint32, major: uint32, minor: uint32, patch: uint32
 ): uint32 =
   (variant shl 29) or (major shl 22) or (minor shl 12) or patch
+
+macro enumFullRange(a: typed): untyped =
+  newNimNode(nnkBracket).add(a.getType[1][1 ..^ 1])
+
+func asBits[T, S](flags: openArray[T]): S =
+  for flag in flags:
+    let a = distinctBase(S)(result)
+    let b = distinctBase(S)(flag)
+    result = S(a or b)
+
+func toEnums[T, S](number: T): seq[S] =
+  for value in enumFullRange(T):
+    if (value.ord and cint(number)) > 0:
+      result.add value
 """
 
 outFile.writeLine "type"
 outFile.writeLine """
+
   # some unused native types
   #
   # android
@@ -332,19 +349,18 @@ const nameCollisions = [
   "VK_PIPELINE_CACHE_HEADER_VERSION_SAFETY_CRITICAL_ONE",
   "VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_EXT",
 ]
-outFile.writeLine "type"
 
 for edef in enums.values():
   if edef.values.len > 0:
-    outFile.writeLine &"  {edef.name}* {{.size: 4.}} = enum"
+    outFile.writeLine &"type {edef.name}* {{.size: 4.}} = enum"
     for ee in edef.values:
       # due to the nim identifier-system, there might be collisions between typenames and enum-member names
       if ee.name in nameCollisions:
-        outFile.writeLine &"    {ee.name}_VALUE = {ee.value}"
+        outFile.writeLine &"  {ee.name}_VALUE = {ee.value}"
       else:
-        outFile.writeLine &"    {ee.name} = {ee.value}"
+        outFile.writeLine &"  {ee.name} = {ee.value}"
 
-outFile.writeLine ""
+outFile.writeLine "type"
 
 # generate types ===============================================================================
 var stringConverters: seq[string]
@@ -411,6 +427,19 @@ for t in types:
       outFile.writeLine &"): {doTypename(retName, 0)} {{.cdecl.}}"
   else:
     doAssert category in ["", "basetype", "enum"], "unknown type category: " & category
+outFile.writeLine ""
+
+for edef in enums.values():
+  if edef.values.len > 0:
+    if edef.isBitmask:
+      let bitsName = edef.name
+      let p = bitsName.rfind("Flag")
+      let flagsName = bitsName[0 ..< p] & "Flags"
+
+      outFile.writeLine &"converter {bitsName}ToBits*(flags: openArray[{bitsName}]): {flagsName} ="
+      outFile.writeLine &"  asBits[{bitsName}, {flagsName}](flags)"
+      outFile.writeLine &"func `$`*(bits: {flagsName}): string ="
+      outFile.writeLine &"  $toEnums[{flagsName}, {bitsName}](bits)"
 outFile.writeLine ""
 
 for command in commands:
@@ -526,7 +555,6 @@ for strCon in stringConverters:
   outFile.writeLine &"""proc `$`*(v: {strCon}): string = "0x" & cast[uint](v).toHex()"""
 outFile.writeLine ""
 
-# we preload the vkCreateInstance function, so we can create an instance
 outFile.writeLine ""
 
 outFile.close()
