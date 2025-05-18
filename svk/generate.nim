@@ -55,6 +55,7 @@ type
     name: string
     values: seq[EnumEntry]
     isBitmask: bool
+    nBytes: int = 4
 
   ConstantDef = object
     name: string
@@ -203,7 +204,8 @@ for e in xmlenums:
       edef.addValue(ee)
     enums[edef.name] = edef
   elif e.attr("type") == "bitmask":
-    var edef = EnumDef(name: e.attr("name"), isBitmask: true)
+    let nBytes = if e.attr("bitwidth") == "": 4 else: parseInt(e.attr("bitwidth")) div 8
+    var edef = EnumDef(name: e.attr("name"), isBitmask: true, nBytes: nBytes)
     for ee in e.findAll("enum"):
       edef.addValue(ee)
     enums[edef.name] = edef
@@ -236,8 +238,6 @@ let outFile = open(outPath, fmWrite)
 outFile.writeLine """
 
 import std/dynlib
-import std/strutils
-import std/tables
 import std/macros
 import std/typetraits
 
@@ -255,16 +255,6 @@ func VK_MAKE_API_VERSION*(
 macro enumFullRange(a: typed): untyped =
   newNimNode(nnkBracket).add(a.getType[1][1 ..^ 1])
 
-func asBits[T, S](flags: openArray[T]): S =
-  for flag in flags:
-    let a = distinctBase(S)(result)
-    let b = distinctBase(S)(flag)
-    result = S(a or b)
-
-func toEnums*[T, S](number: T): seq[S] =
-  for value in enumFullRange(S):
-    if (value.ord and cint(number)) > 0:
-      result.add value
 """
 
 outFile.writeLine "type"
@@ -352,7 +342,7 @@ const nameCollisions = [
 
 for edef in enums.values():
   if edef.values.len > 0:
-    outFile.writeLine &"type {edef.name}* {{.size: 4.}} = enum"
+    outFile.writeLine &"type {edef.name}* {{.size: {edef.nBytes}.}} = enum"
     for ee in edef.values:
       # due to the nim identifier-system, there might be collisions between typenames and enum-member names
       if ee.name in nameCollisions:
@@ -432,14 +422,25 @@ outFile.writeLine ""
 for edef in enums.values():
   if edef.values.len > 0:
     if edef.isBitmask:
-      let bitsName = edef.name
-      let p = bitsName.rfind("FlagBits")
-      let flagsName = bitsName[0 ..< p] & "Flags" & bitsName[p + 8 .. ^1]
+      let enumName = edef.name
+      let p = enumName.rfind("FlagBits")
+      let flagSetType = enumName[0 ..< p] & "Flags" & enumName[p + 8 .. ^1]
 
-      outFile.writeLine &"converter {bitsName}ToBits*(flags: openArray[{bitsName}]): {flagsName} ="
-      outFile.writeLine &"  asBits[{bitsName}, {flagsName}](flags)"
-      outFile.writeLine &"func `$`*(bits: {flagsName}): string ="
-      outFile.writeLine &"  $toEnums[{flagsName}, {bitsName}](bits)"
+      outFile.writeLine &"""
+func `or`(a: {flagSetType}, b: {enumName}): {flagSetType} {{.hint[XDeclaredButNotUsed]: off.}} =
+  {flagSetType}(distinctBase({flagSetType})(a) or distinctBase({flagSetType})(b))
+func `or`(a, b: {enumName}): {flagSetType} {{.hint[XDeclaredButNotUsed]: off.}} =
+  {flagSetType}(distinctBase({flagSetType})(a) or distinctBase({flagSetType})(b))
+func contains(flags: {flagSetType}, flag: {enumName}): bool {{.hint[XDeclaredButNotUsed]: off.}} =
+  (distinctBase({flagSetType})(flags) and distinctBase({flagSetType})(flag)) > 0
+"""
+      outFile.writeLine &"func `$`*(bits: {flagSetType}): string ="
+      outFile.writeLine &"""
+  for value in enumFullRange({enumName}):
+    if (value.ord and cint(bits)) > 0:
+      result &= $value & "|"
+  result.setLen(max(0, result.len - 1))
+"""
 outFile.writeLine ""
 
 for command in commands:
