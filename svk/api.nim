@@ -1,3 +1,5 @@
+import std/sequtils
+import std/enumutils
 import std/tables
 import std/strutils
 import std/logging
@@ -6,6 +8,10 @@ import std/os
 include ./vkapi
 
 const VULKAN_VERSION = VK_MAKE_API_VERSION(0, 1, 3, 0)
+
+iterator items*[T: HoleyEnum](E: typedesc[T]): T =
+  for a in enumFullRange(E):
+    yield a
 
 template checkVkResult*(call: untyped) =
   when defined(release):
@@ -105,8 +111,8 @@ proc svkCreateInstance*(
 
   when not defined(release):
     var debugMessengerCreateInfo = VkDebugUtilsMessengerCreateInfoEXT(
-      messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT.items.toSeq.toBits,
-      messageType: VkDebugUtilsMessageTypeFlagBitsEXT.items.toSeq.toBits,
+      messageSeverity: VkDebugUtilsMessageSeverityFlagBitsEXT.items.toSeq,
+      messageType: VkDebugUtilsMessageTypeFlagBitsEXT.items.toSeq,
       pfnUserCallback: debugCallback,
     )
     checkVkResult vkCreateDebugUtilsMessengerEXT(

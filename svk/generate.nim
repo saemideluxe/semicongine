@@ -261,8 +261,8 @@ func asBits[T, S](flags: openArray[T]): S =
     let b = distinctBase(S)(flag)
     result = S(a or b)
 
-func toEnums[T, S](number: T): seq[S] =
-  for value in enumFullRange(T):
+func toEnums*[T, S](number: T): seq[S] =
+  for value in enumFullRange(S):
     if (value.ord and cint(number)) > 0:
       result.add value
 """
@@ -433,8 +433,8 @@ for edef in enums.values():
   if edef.values.len > 0:
     if edef.isBitmask:
       let bitsName = edef.name
-      let p = bitsName.rfind("Flag")
-      let flagsName = bitsName[0 ..< p] & "Flags"
+      let p = bitsName.rfind("FlagBits")
+      let flagsName = bitsName[0 ..< p] & "Flags" & bitsName[p + 8 .. ^1]
 
       outFile.writeLine &"converter {bitsName}ToBits*(flags: openArray[{bitsName}]): {flagsName} ="
       outFile.writeLine &"  asBits[{bitsName}, {flagsName}](flags)"
