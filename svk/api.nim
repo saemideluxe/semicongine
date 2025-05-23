@@ -58,15 +58,13 @@ when defined(windows):
     hinstance*: HINSTANCE
     hwnd*: HWND
     g_wpPrev*: WINDOWPLACEMENT
+
 else:
   type NativeWindow* = object
     display*: ptr Display
     window*: Window
     emptyCursor*: Cursor
     ic*: XIC
-
-
-
 
 # =============================================================================
 # VULKAN INSTANCE =============================================================
@@ -176,24 +174,35 @@ proc svkCreateInstance*(
     allTypes = allTypes or t
   when not defined(release):
     var debugMessengerCreateInfo = VkDebugUtilsMessengerCreateInfoEXT(
-      messageSeverity: VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT or VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT or VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT or VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-      messageType: VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT or VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT or VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+      messageSeverity:
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT or
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT or
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT or
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+      messageType:
+        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT or
+        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT or
+        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
       pfnUserCallback: debugCallback,
     )
     checkVkResult vkCreateDebugUtilsMessengerEXT(
       result.vkInstance, addr debugMessengerCreateInfo, nil, addr result.debugMessenger
     )
 
-
   result.window = createWindow(applicationName)
   when defined(windows):
-    var surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR(hinstance: window.hinstance, hwnd: window.hwnd)
-    checkVkResult vkCreateWin32SurfaceKHR(instance, addr surfaceCreateInfo, nil, addr result.vkSurface)
+    var surfaceCreateInfo =
+      VkWin32SurfaceCreateInfoKHR(hinstance: window.hinstance, hwnd: window.hwnd)
+    checkVkResult vkCreateWin32SurfaceKHR(
+      instance, addr surfaceCreateInfo, nil, addr result.vkSurface
+    )
   else:
-    var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(dpy: result.window.display, window: result.window.window)
-    checkVkResult result.vkInstance.vkCreateXlibSurfaceKHR(addr surfaceCreateInfo, nil, addr result.vkSurface)
-
-
+    var surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR(
+      dpy: result.window.display, window: result.window.window
+    )
+    checkVkResult result.vkInstance.vkCreateXlibSurfaceKHR(
+      addr surfaceCreateInfo, nil, addr result.vkSurface
+    )
 
 # =============================================================================
 # PHYSICAL DEVICES ============================================================
@@ -205,7 +214,9 @@ type
     deviceLocal: bool # fast for gpu access
     hostCached: bool # fast for host access
     hostVisible: bool # can use vkMapMemory
-    hostCohorent: bool # does *not* require vkFlushMappedMemoryRanges and vkInvalidateMappedMemoryRanges 
+    hostCohorent: bool
+      # does *not* require vkFlushMappedMemoryRanges and vkInvalidateMappedMemoryRanges 
+
   SVkQueueFamilies* = object
     count: int
     hasGraphics: bool # implies "hasTransfer"
@@ -213,6 +224,7 @@ type
 
   SVkPhysicalDevice* = object
     name*: string
+    discreteGPU*: bool
     vkPhysicalDevice*: VkPhysicalDevice
     vkPhysicalDeviceFeatures*: VkPhysicalDeviceFeatures
     vkPhysicalDeviceProperties*: VkPhysicalDeviceProperties
@@ -223,15 +235,20 @@ proc getUsablePhysicalDevices*(instance: SVkInstance): seq[SVkPhysicalDevice] =
   var nDevices: uint32
   checkVkResult instance.vkInstance.vkEnumeratePhysicalDevices(addr nDevices, nil)
   var devices = newSeq[VkPhysicalDevice](nDevices)
-  checkVkResult instance.vkInstance.vkEnumeratePhysicalDevices(addr nDevices, addr devices[0])
+  checkVkResult instance.vkInstance.vkEnumeratePhysicalDevices(
+    addr nDevices, addr devices[0]
+  )
   for d in devices:
     var dev = SVkPhysicalDevice(vkPhysicalDevice: d)
     d.vkGetPhysicalDeviceFeatures(addr dev.vkPhysicalDeviceFeatures)
     d.vkGetPhysicalDeviceProperties(addr dev.vkPhysicalDeviceProperties)
 
-    if dev.vkPhysicalDeviceProperties.deviceType notin [VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU, VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU]:
+    if dev.vkPhysicalDeviceProperties.deviceType notin
+        [VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU, VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU]:
       continue
     dev.name = $cast[cstring](addr dev.vkPhysicalDeviceProperties.deviceName[0])
+    dev.discreteGPU =
+      dev.vkPhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
 
     var memoryProperties: VkPhysicalDeviceMemoryProperties
     d.vkGetPhysicalDeviceMemoryProperties(addr memoryProperties)
@@ -239,32 +256,119 @@ proc getUsablePhysicalDevices*(instance: SVkInstance): seq[SVkPhysicalDevice] =
       let heapI = memoryProperties.memoryTypes[i].heapIndex
       dev.memoryTypes.add SVkMemoryType(
         size: memoryProperties.memoryHeaps[heapI].size.uint64,
-        deviceLocal: VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT in memoryProperties.memoryTypes[i].propertyFlags,
-        hostCached: VK_MEMORY_PROPERTY_HOST_CACHED_BIT in memoryProperties.memoryTypes[i].propertyFlags,
-        hostVisible: VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in memoryProperties.memoryTypes[i].propertyFlags,
-        hostCohorent: VK_MEMORY_PROPERTY_HOST_COHERENT_BIT  in memoryProperties.memoryTypes[i].propertyFlags,
+        deviceLocal:
+          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT in
+          memoryProperties.memoryTypes[i].propertyFlags,
+        hostCached:
+          VK_MEMORY_PROPERTY_HOST_CACHED_BIT in
+          memoryProperties.memoryTypes[i].propertyFlags,
+        hostVisible:
+          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT in
+          memoryProperties.memoryTypes[i].propertyFlags,
+        hostCohorent:
+          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT in
+          memoryProperties.memoryTypes[i].propertyFlags,
       )
-      
 
     var familyQueueCount: uint32
     var vkQueueFamilyProperties: seq[VkQueueFamilyProperties]
     d.vkGetPhysicalDeviceQueueFamilyProperties(addr familyQueueCount, nil)
     vkQueueFamilyProperties.setLen(familyQueueCount)
-    d.vkGetPhysicalDeviceQueueFamilyProperties(addr familyQueueCount, addr vkQueueFamilyProperties[0])
+    d.vkGetPhysicalDeviceQueueFamilyProperties(
+      addr familyQueueCount, addr vkQueueFamilyProperties[0]
+    )
     dev.queueFamily = high(uint32)
     for i in 0 ..< familyQueueCount:
       let hasGraphics = VK_QUEUE_GRAPHICS_BIT in vkQueueFamilyProperties[i].queueFlags
       let hasCompute = VK_QUEUE_COMPUTE_BIT in vkQueueFamilyProperties[i].queueFlags
       let hasPresentation = VK_FALSE
-      checkVkResult dev.vkPhysicalDevice.vkGetPhysicalDeviceSurfaceSupportKHR(i, instance.vkSurface, addr hasPresentation)
+      checkVkResult dev.vkPhysicalDevice.vkGetPhysicalDeviceSurfaceSupportKHR(
+        i, instance.vkSurface, addr hasPresentation
+      )
 
       if hasGraphics and hasCompute and bool(hasPresentation):
         dev.queueFamily = i
         break
     if dev.queueFamily == high(uint32):
-      raise newException(Exception, "Did not find queue family with graphics and compute support!")
+      raise newException(
+        Exception,
+        "Did not find queue family with graphics, compute and presentation support!",
+      )
 
     result.add dev
+
+# =============================================================================
+# DEVICES =====================================================================
+# =============================================================================
+
+type SVkDevice* = object
+  vkDevice: VkDevice
+  vkQueue: VkQueue
+
+proc `=copy`(a: var SVkDevice, b: SVkDevice) {.error.}
+
+proc `=destroy`(a: SVkDevice) =
+  debugAssert a.vkDevice.pointer == nil
+  debugAssert a.vkQueue.pointer == nil
+
+proc destroy*(a: var SVkDevice) =
+  if a.vkDevice.pointer != nil:
+    vkDestroyDevice(a.vkDevice, nil)
+    a.vkDevice = VkDevice(nil)
+    a.vkQueue = VkQueue(nil)
+
+proc svkCreateDevice*(
+    instance: SVkInstance, physicalDevice: SVkPhysicalDevice
+): SVkDevice =
+  let
+    priority = cfloat(1)
+    queueInfo = VkDeviceQueueCreateInfo(
+      queueFamilyIndex: physicalDevice.queueFamily,
+      queueCount: 1,
+      pQueuePriorities: addr priority,
+    )
+    deviceExtensions = @["VK_KHR_swapchain"]
+    deviceExtensionsC = allocCStringArray(deviceExtensions)
+    enabledFeatures = VkPhysicalDeviceFeatures(
+      fillModeNonSolid: VK_TRUE,
+      depthClamp: VK_TRUE,
+      wideLines: VK_TRUE,
+      largePoints: VK_TRUE,
+    )
+    vk8bitExt = VkPhysicalDevice8BitStorageFeatures(
+      storageBuffer8BitAccess: VK_TRUE,
+      uniformAndStorageBuffer8BitAccess: VK_TRUE,
+      storagePushConstant8: VK_TRUE,
+    )
+    vk16bitExt = VkPhysicalDevice16BitStorageFeatures(
+      storageBuffer16BitAccess: VK_TRUE,
+      uniformAndStorageBuffer16BitAccess: VK_TRUE,
+      storagePushConstant16: VK_TRUE,
+      storageInputOutput16: VK_FALSE,
+      pNext: addr vk8bitExt,
+    )
+    createDeviceInfo = VkDeviceCreateInfo(
+      queueCreateInfoCount: 1,
+      pQueueCreateInfos: addr queueInfo,
+      enabledLayerCount: 0,
+      ppEnabledLayerNames: nil,
+      enabledExtensionCount: 1,
+      ppEnabledExtensionNames: deviceExtensionsC,
+      pEnabledFeatures: addr enabledFeatures,
+      pNext: addr vk16bitExt,
+    )
+  checkVkResult vkCreateDevice(
+    physicalDevice = physicalDevice.vkPhysicalDevice,
+    pCreateInfo = addr createDeviceInfo,
+    pAllocator = nil,
+    pDevice = addr result.vkDevice,
+  )
+  deviceExtensionsC.deallocCStringArray()
+  result.vkDevice.vkGetDeviceQueue(physicalDevice.queueFamily, 0, addr result.vkQueue)
+
+# =============================================================================
+# PLATFORM UTILS ==============================================================
+# =============================================================================
 
 when defined(windows):
   proc createWindow(title: string): NativeWindow =
@@ -335,8 +439,8 @@ else:
     var attrs = XSetWindowAttributes(
       event_mask:
         FocusChangeMask or KeyPressMask or KeyReleaseMask or ExposureMask or
-        VisibilityChangeMask or StructureNotifyMask or ButtonMotionMask or ButtonPressMask or
-        ButtonReleaseMask
+        VisibilityChangeMask or StructureNotifyMask or ButtonMotionMask or
+        ButtonPressMask or ButtonReleaseMask
     )
     let window = display.XCreateWindow(
       rootWindow,
@@ -378,8 +482,8 @@ else:
     while ev.theType != MapNotify:
       discard display.XNextEvent(addr(ev))
 
-    result = NativeWindow(display: display, window: window, emptyCursor: empty_cursor, ic: ic)
+    result =
+      NativeWindow(display: display, window: window, emptyCursor: empty_cursor, ic: ic)
 
   proc destroyWindow*(window: NativeWindow) =
     doAssert XDestroyWindow(window.display, window.window) != 0
-
