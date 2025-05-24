@@ -5,8 +5,8 @@ import ./vulkan_wrappers
 
 proc initSwapchain(
     renderPass: RenderPass,
-    vSync: bool = false,
-    tripleBuffering: bool = true,
+    vSync: bool,
+    tripleBuffering: bool,
     oldSwapchain: Swapchain = nil,
 ): Swapchain =
   var capabilities: VkSurfaceCapabilitiesKHR
@@ -42,7 +42,6 @@ proc initSwapchain(
     imageSharingMode: VK_SHARING_MODE_EXCLUSIVE,
     preTransform: capabilities.currentTransform,
     compositeAlpha: VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-      # only used for blending with other windows, can be opaque
     presentMode:
       if (vSync or not hasTripleBuffering):
         VK_PRESENT_MODE_FIFO_KHR
@@ -331,9 +330,7 @@ proc clearSwapchain*() =
   destroySwapchain(engine().vulkan.swapchain)
   engine().vulkan.swapchain = nil
 
-proc setupSwapchain*(
-    renderPass: RenderPass, vSync: bool = false, tripleBuffering: bool = true
-) =
+proc setupSwapchain*(renderPass: RenderPass, vSync: bool, tripleBuffering: bool) =
   assert engine().vulkan.swapchain == nil, "Swapchain has already been initialized yet"
   engine().vulkan.swapchain =
     initSwapchain(renderPass, vSync = vSync, tripleBuffering = tripleBuffering)

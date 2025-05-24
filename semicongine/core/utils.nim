@@ -78,3 +78,8 @@ func alignedTo*[T: SomeInteger](value: T, alignment: T): T =
     return value
   else:
     return value + alignment - remainder
+
+template debugAssert*(expr: untyped, msg = ""): untyped =
+  when not defined(release):
+    assert expr, msg
+
