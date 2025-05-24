@@ -223,7 +223,8 @@ proc tryAcquireNextImage(swapchain: Swapchain): Option[VkFramebuffer] =
   let nextImageResult = vkAcquireNextImageKHR(
     engine().vulkan.device,
     swapchain.vk,
-    high(uint64),
+    # high(uint64),
+    10_000_000'u64, # wait max 10ms
     swapchain.imageAvailableSemaphore[swapchain.currentFiF],
     VkFence(0),
     addr(swapchain.currentFramebufferIndex),
