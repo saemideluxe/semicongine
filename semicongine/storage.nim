@@ -24,21 +24,21 @@ const DEFAULT_KEY_VALUE_TABLE_NAME = "shelf"
 #
 # ==============================================================
 
-proc path(storageType: StorageType): Path =
+proc getPath(storageType: StorageType): Path =
   case storageType
   of SystemStorage:
     Path(getAppDir()) / STORAGE_NAME
   of UserStorage:
-    string(Path(getDataDir()) / Path(AppName())).createDir()
+    (Path(getDataDir()) / Path(AppName())).createDir()
     Path(getDataDir()) / Path(AppName()) / STORAGE_NAME
 
-proc ensureExists(storageType: StorageType) =
+proc ensureStorageExists(storageType: StorageType) =
   if storageType in engine().db:
     return
-  engine().db[storageType] = open(string(storageType.path), "", "", "")
+  engine().db[storageType] = open(string(storageType.getPath), "", "", "")
 
-proc ensureExists(storageType: StorageType, table: string) =
-  storageType.ensureExists()
+proc ensureStorageExists(storageType: StorageType, table: string) =
+  storageType.ensureStorageExists()
   engine().db[storageType].exec(
     sql(
       &"""CREATE TABLE IF NOT EXISTS {table} (
@@ -54,7 +54,7 @@ proc store*[T](
     value: T,
     table = DEFAULT_KEY_VALUE_TABLE_NAME,
 ) =
-  storageType.ensureExists(table)
+  storageType.ensureStorageExists(table)
   engine().db[storageType].exec(
     sql(
       &"""INSERT INTO {table} VALUES(?, ?)
@@ -71,7 +71,7 @@ proc load*[T](
     default: T,
     table = DEFAULT_KEY_VALUE_TABLE_NAME,
 ): T =
-  storageType.ensureExists(table)
+  storageType.ensureStorageExists(table)
   let dbResult = engine().db[storageType].getValue(
     sql(&"""SELECT value FROM {table} WHERE key = ? """), key
   )
@@ -82,12 +82,12 @@ proc load*[T](
 proc list*[T](
     storageType: StorageType, table = DEFAULT_KEY_VALUE_TABLE_NAME
 ): seq[string] =
-  storageType.ensureExists(table)
+  storageType.ensureStorageExists(table)
   for row in engine().db[storageType].fastRows(sql(&"""SELECT key FROM {table}""")):
     result.add row[0]
 
 proc purge*(storageType: StorageType) =
-  storageType.path().string.removeFile()
+  storageType.getPath().string.removeFile()
 
 # ==============================================================
 #
@@ -97,17 +97,14 @@ proc purge*(storageType: StorageType) =
 
 const DEFAULT_WORLD_TABLE_NAME = "world"
 const WORLD_DIR = "worlds"
+let worldDir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)
+worldDir.createDir()
 
-proc path(worldName: string): Path =
-  let dir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)
-  string(dir).createDir()
-  dir / Path(worldName & ".db")
+proc getPath(worldName: string): Path =
+  worldDir / Path(worldName & ".db")
 
-proc ensureExists(worldName: string): DbConn =
-  open(string(worldName.path), "", "", "")
-
-proc ensureExists(worldName: string, table: string): DbConn =
-  result = worldName.ensureExists()
+proc openWorldFile(worldName: string, table: string): DbConn =
+  result = open(string(worldName.getPath), "", "", "")
   result.exec(
     sql(
       &"""CREATE TABLE IF NOT EXISTS {table} (
@@ -135,7 +132,6 @@ proc writeSeqValue[T](s: Stream, value: T) =
     writeValue(s, value[i])
 
 proc writeArrayValue[T](s: Stream, value: T) =
-  s.write(value.len.int32)
   for i in 0 ..< value.len:
     writeValue(s, value[genericParams(distinctBase(T)).get(0)(i)])
 
@@ -168,7 +164,7 @@ proc storeWorld*[T](
   s.setPosition(0)
   discard s.readData(addr(data[0]), data.len)
 
-  let db = worldName.ensureExists(table)
+  let db = worldName.openWorldFile(table)
   defer:
     db.close()
   let key = int(now().utc.toTime.toUnixFloat * 1000)
@@ -180,68 +176,61 @@ proc storeWorld*[T](
   if deleteOld:
     db.exec(sql(&"""DELETE FROM {table} WHERE key <> ?"""), key)
 
-proc loadValue[T](s: Stream): T
+proc loadValue[T](s: Stream, value: var T)
 
-proc loadTimeValue[T](s: Stream): T =
+proc loadTimeValue[T](s: Stream, value: var T) =
   var t: float64
   read(s, t)
-  fromUnixFloat(t).utc()
+  value = fromUnixFloat(t).utc()
 
-proc loadNumericValue[T](s: Stream): T =
-  read(s, result)
+proc loadNumericValue[T](s: Stream, value: var T) =
+  read(s, value)
 
-proc loadSeqValue[T](s: Stream): T =
-  var len: int32
-  read(s, len)
-  result.setLen(len)
-  for i in 0 ..< int(len):
-    # var v: elementType(result)
-    # read(s, v)
-    result[i] = loadValue[elementType(result)](s)
+proc loadSeqValue[T](s: Stream, value: var T) =
+  let ll = s.readInt32()
+  value.setLen(ll)
+  for i in 0 ..< value.len:
+    loadValue[elementType(value)](s, value[i])
 
-proc loadArrayValue[T](s: Stream): T =
-  var len: int32
-  read(s, len)
-  doAssert len == len(result)
+proc loadArrayValue[T](s: Stream, value: var T) =
   for i in 0 .. high(distinctBase(T)):
-    read(s, result[genericParams(distinctBase(T)).get(0)(i)])
+    loadValue[elementType(value)](s, value[genericParams(distinctBase(T)).get(0)(i)])
 
-proc loadStringValue(s: Stream): string =
-  var len: int32
-  read(s, len)
-  readStr(s, len)
+proc loadStringValue(s: Stream, value: var string) =
+  let len = s.readInt32()
+  value = readStr(s, len)
 
-proc loadObjectValue[T](s: Stream): T =
-  for field, value in result.fieldPairs():
+proc loadObjectValue[T](s: Stream, value: var T) =
+  for field, v in value.fieldPairs():
     debug "Load field " & field & " of object " & $T
     {.cast(uncheckedAssign).}:
-      value = loadValue[typeof(value)](s)
+      loadValue[typeof(v)](s, v)
 
-proc loadValue[T](s: Stream): T =
+proc loadValue[T](s: Stream, value: var T) =
   when distinctBase(T) is DateTime:
-    loadTimeValue[T](s)
+    loadTimeValue[T](s, value)
   elif distinctBase(T) is SomeOrdinal or distinctBase(T) is SomeFloat:
-    loadNumericValue[T](s)
+    loadNumericValue[T](s, value)
   elif distinctBase(T) is seq:
-    loadSeqValue[T](s)
+    loadSeqValue[T](s, value)
   elif distinctBase(T) is array:
-    loadArrayValue[T](s)
+    loadArrayValue[T](s, value)
   elif distinctBase(T) is string:
-    loadStringValue(s)
+    loadStringValue(s, value)
   elif distinctBase(T) is object or distinctBase(T) is tuple:
-    loadObjectValue[T](s)
+    loadObjectValue[T](s, value)
   else:
     {.error: "Cannot load type " & $T.}
 
-proc loadWorld*[T](worldName: string, table = DEFAULT_WORLD_TABLE_NAME): T =
-  let db = worldName.ensureExists(table)
+proc loadWorld*[T](worldName: string, world: var T, table = DEFAULT_WORLD_TABLE_NAME) =
+  let db = worldName.openWorldFile(table)
   defer:
     db.close()
   let dbResult =
     db.getValue(sql(&"""SELECT value FROM {table} ORDER BY key DESC LIMIT 1"""))
 
   var s = newStringStream(dbResult)
-  loadValue[T](s)
+  loadValue[T](s, world)
 
 proc listWorlds*(): seq[(DateTime, string)] =
   let dir = Path(getDataDir()) / Path(AppName()) / Path(WORLD_DIR)
@@ -252,7 +241,7 @@ proc listWorlds*(): seq[(DateTime, string)] =
     ):
       if kind in [pcFile, pcLinkToFile] and path.endsWith(".db"):
         try:
-          let db = path[0 .. ^4].ensureExists(DEFAULT_WORLD_TABLE_NAME)
+          let db = path[0 .. ^4].openWorldFile(DEFAULT_WORLD_TABLE_NAME)
           defer:
             db.close()
           let dbResult = db.getValue(
@@ -269,4 +258,4 @@ proc listWorlds*(): seq[(DateTime, string)] =
   result.sort(Descending)
 
 proc purgeWorld*(worldName: string) =
-  worldName.path().string.removeFile()
+  worldName.getPath().string.removeFile()
